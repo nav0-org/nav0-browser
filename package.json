@@ -1,0 +1,27 @@
+{
+  "name": "nav0-browser",
+  "version": "0.1.0",
+  "description": "A minimal, privacy-focused web browser built on Electron",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "devDependencies": {
+    "vitepress": "^1.5.0"
+  },
+  "keywords": [
+    "browser",
+    "electron",
+    "privacy",
+    "minimal",
+    "open-source"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nav0-org/nav0-browser"
+  }
+}
