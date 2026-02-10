@@ -5,6 +5,9 @@ hero:
   name: nav0
   text: Browse. Nothing More.
   tagline: A minimal, privacy-focused web browser. No data collection. No bloat. No AI gimmicks. Just clean, safe browsing.
+  image:
+    src: /browser-mockup.svg
+    alt: nav0 browser mockup
   actions:
     - theme: brand
       text: Get Started
@@ -38,6 +41,8 @@ features:
     title: Modern Engine
     details: Powered by Electron and Chromium, giving you compatibility with the modern web while respecting your privacy.
 ---
+
+<HomeContent />
 
 ## Why nav0?
 
