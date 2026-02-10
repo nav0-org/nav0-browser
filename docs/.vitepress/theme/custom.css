@@ -69,9 +69,9 @@
 
 /* ========== Feature Capsules ========== */
 .feature-capsules-section {
-  max-width: 1152px;
+  max-width: 1392px;
   margin: 0 auto;
-  padding: 3rem 1.5rem 4rem;
+  padding: 3rem 2rem 4rem;
 }
 
 .feature-capsules-section h2 {
@@ -90,11 +90,6 @@
 
 .capsules-wrapper {
   overflow: hidden;
-  --mask-size: 148px;
-  --fade-size: 64px;
-  --fade-offset: 48px;
-  margin: 0 calc(-1 * var(--mask-size));
-  padding: 0 var(--mask-size);
 }
 
 .capsules-grid {
@@ -104,16 +99,6 @@
   justify-content: center;
   gap: 12px;
   padding: 0;
-  mask: linear-gradient(to right,
-    transparent calc(var(--mask-size) - var(--fade-offset)),
-    black calc(var(--mask-size) + var(--fade-size)),
-    black calc(100% - var(--mask-size) - var(--fade-size)),
-    transparent calc(100% - var(--mask-size) + var(--fade-offset)));
-  -webkit-mask: linear-gradient(to right,
-    transparent calc(var(--mask-size) - var(--fade-offset)),
-    black calc(var(--mask-size) + var(--fade-size)),
-    black calc(100% - var(--mask-size) - var(--fade-size)),
-    transparent calc(100% - var(--mask-size) + var(--fade-offset)));
 }
 
 .capsule {
@@ -136,9 +121,9 @@
 
 /* ========== Blog Section ========== */
 .blog-section {
-  max-width: 1152px;
+  max-width: 1392px;
   margin: 0 auto;
-  padding: 2rem 1.5rem 4rem;
+  padding: 2rem 2rem 4rem;
 }
 
 .blog-section h2 {
@@ -270,9 +255,9 @@
 
 /* ========== Divider ========== */
 .home-section-divider {
-  max-width: 1152px;
+  max-width: 1392px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 2rem;
 }
 
 .home-section-divider hr {
@@ -288,12 +273,6 @@
 
 /* ========== Responsive ========== */
 @media (max-width: 768px) {
-  .capsules-wrapper {
-    --mask-size: 32px;
-    --fade-size: 24px;
-    --fade-offset: 16px;
-  }
-
   .capsules-grid {
     gap: 8px;
   }
@@ -311,5 +290,9 @@
   .feature-capsules-section h2,
   .blog-section h2 {
     font-size: 1.5rem;
+  }
+
+  .feature-capsules-section {
+    padding: 3rem 1rem 4rem;
   }
 }

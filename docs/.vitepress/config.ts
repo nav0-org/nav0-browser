@@ -56,7 +56,10 @@ export default defineConfig({
           text: 'Blog',
           items: [
             { text: 'All Posts', link: '/blog/' },
-            { text: 'Your Browser Is Watching You', link: '/blog/your-browser-is-watching-you' }
+            { text: 'Your Browser Is Watching You', link: '/blog/your-browser-is-watching-you' },
+            { text: 'Stop Forcing AI Into My Browser', link: '/blog/stop-forcing-ai-into-browsers' },
+            { text: 'Your Browser Doesn\'t Need a VPN', link: '/blog/your-browser-doesnt-need-a-vpn' },
+            { text: 'Big Tech Owns Your Browser', link: '/blog/big-tech-owns-your-browser' }
           ]
         }
       ]
