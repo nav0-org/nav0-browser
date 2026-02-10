@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 380" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="520" y2="380" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#16213e"/>
+    </linearGradient>
+    <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a2a4a"/>
+      <stop offset="100%" stop-color="#1e1e3a"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4fc08d"/>
+      <stop offset="100%" stop-color="#42b883"/>
+    </linearGradient>
+    <clipPath id="browserClip">
+      <rect x="10" y="10" width="500" height="360" rx="12"/>
+    </clipPath>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Browser window frame -->
+  <rect x="10" y="10" width="500" height="360" rx="12" fill="url(#bgGrad)" stroke="#333355" stroke-width="1.5"/>
+
+  <!-- Title bar -->
+  <rect x="10" y="10" width="500" height="40" rx="12" fill="url(#barGrad)"/>
+  <rect x="10" y="38" width="500" height="12" fill="url(#barGrad)"/>
+
+  <!-- Window controls -->
+  <circle cx="34" cy="30" r="6" fill="#ff5f57"/>
+  <circle cx="54" cy="30" r="6" fill="#febc2e"/>
+  <circle cx="74" cy="30" r="6" fill="#28c840"/>
+
+  <!-- Tab bar -->
+  <rect x="96" y="18" width="120" height="28" rx="6" fill="#2a2a4a" stroke="#4fc08d" stroke-width="1"/>
+  <text x="118" y="36" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#4fc08d" font-weight="600">nav0</text>
+  <rect x="220" y="18" width="100" height="28" rx="6" fill="#1e1e3a" stroke="#333355" stroke-width="0.5"/>
+  <text x="240" y="36" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#666688">New Tab</text>
+
+  <!-- URL bar -->
+  <rect x="24" y="56" width="472" height="30" rx="8" fill="#12122a" stroke="#333355" stroke-width="1"/>
+  <!-- Lock icon -->
+  <rect x="38" y="65" width="8" height="7" rx="1.5" fill="none" stroke="#4fc08d" stroke-width="1.2"/>
+  <path d="M40 65 L40 62" stroke="#4fc08d" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M44 65 L44 62" stroke="#4fc08d" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M40 62 Q40 59 42 59 Q44 59 44 62" fill="none" stroke="#4fc08d" stroke-width="1.2"/>
+  <text x="56" y="75" font-family="monospace" font-size="11" fill="#666688">https://example.com</text>
+
+  <!-- Content area -->
+  <rect x="24" y="96" width="472" height="260" rx="4" fill="#0d0d20"/>
+
+  <!-- Simulated page content -->
+  <!-- Header area -->
+  <rect x="44" y="116" width="180" height="12" rx="3" fill="#2a2a4a"/>
+  <rect x="44" y="136" width="280" height="8" rx="2" fill="#1e1e3a"/>
+  <rect x="44" y="150" width="240" height="8" rx="2" fill="#1e1e3a"/>
+
+  <!-- Hero block -->
+  <rect x="44" y="172" width="432" height="80" rx="8" fill="#141430"/>
+  <rect x="64" y="192" width="140" height="10" rx="3" fill="#4fc08d" opacity="0.7"/>
+  <rect x="64" y="210" width="200" height="6" rx="2" fill="#2a2a4a"/>
+  <rect x="64" y="222" width="160" height="6" rx="2" fill="#2a2a4a"/>
+  <!-- CTA button -->
+  <rect x="64" y="236" width="70" height="22" rx="4" fill="url(#accentGrad)" opacity="0.9"/>
+  <text x="79" y="251" font-family="system-ui, sans-serif" font-size="9" fill="#fff" font-weight="600">Get Started</text>
+
+  <!-- Card grid -->
+  <rect x="44" y="268" width="136" height="72" rx="6" fill="#141430" stroke="#1e1e3a" stroke-width="1"/>
+  <rect x="56" y="280" width="60" height="6" rx="2" fill="#4fc08d" opacity="0.5"/>
+  <rect x="56" y="292" width="110" height="4" rx="1.5" fill="#1e1e3a"/>
+  <rect x="56" y="300" width="90" height="4" rx="1.5" fill="#1e1e3a"/>
+  <rect x="56" y="308" width="100" height="4" rx="1.5" fill="#1e1e3a"/>
+
+  <rect x="192" y="268" width="136" height="72" rx="6" fill="#141430" stroke="#1e1e3a" stroke-width="1"/>
+  <rect x="204" y="280" width="60" height="6" rx="2" fill="#4fc08d" opacity="0.5"/>
+  <rect x="204" y="292" width="110" height="4" rx="1.5" fill="#1e1e3a"/>
+  <rect x="204" y="300" width="90" height="4" rx="1.5" fill="#1e1e3a"/>
+  <rect x="204" y="308" width="100" height="4" rx="1.5" fill="#1e1e3a"/>
+
+  <rect x="340" y="268" width="136" height="72" rx="6" fill="#141430" stroke="#1e1e3a" stroke-width="1"/>
+  <rect x="352" y="280" width="60" height="6" rx="2" fill="#4fc08d" opacity="0.5"/>
+  <rect x="352" y="292" width="110" height="4" rx="1.5" fill="#1e1e3a"/>
+  <rect x="352" y="300" width="90" height="4" rx="1.5" fill="#1e1e3a"/>
+  <rect x="352" y="308" width="100" height="4" rx="1.5" fill="#1e1e3a"/>
+
+  <!-- Privacy shield badge -->
+  <g transform="translate(420, 110)" filter="url(#glow)">
+    <circle cx="16" cy="16" r="16" fill="#4fc08d" opacity="0.15"/>
+    <path d="M16 4 L16 4 Q26 8 26 18 Q26 26 16 30 Q6 26 6 18 Q6 8 16 4Z" fill="none" stroke="#4fc08d" stroke-width="1.5"/>
+    <path d="M12 17 L15 20 L21 13" fill="none" stroke="#4fc08d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

@@ -17,6 +17,7 @@ export default defineConfig({
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Guide', link: '/guide/getting-started' },
+      { text: 'Blog', link: '/blog/' },
       { text: 'Privacy', link: '/guide/privacy' },
       {
         text: 'Links',
@@ -47,6 +48,15 @@ export default defineConfig({
           text: 'Community',
           items: [
             { text: 'Contributing', link: '/guide/contributing' }
+          ]
+        }
+      ],
+      '/blog/': [
+        {
+          text: 'Blog',
+          items: [
+            { text: 'All Posts', link: '/blog/' },
+            { text: 'Your Browser Is Watching You', link: '/blog/your-browser-is-watching-you' }
           ]
         }
       ]
