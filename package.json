@@ -3,14 +3,19 @@
   "version": "0.1.0",
   "description": "A minimal, privacy-focused web browser built on Electron",
   "private": true,
+  "main": ".webpack/main",
   "type": "module",
   "scripts": {
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
-  },
-  "devDependencies": {
-    "vitepress": "^1.5.0"
+    "docs:preview": "vitepress preview docs",
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "eslint --ext .ts,.tsx .",
+    "postinstall": "electron-rebuild -f -w better-sqlite3",
+    "rebuild": "electron-rebuild -f -w better-sqlite3"
   },
   "keywords": [
     "browser",
@@ -19,9 +24,58 @@
     "minimal",
     "open-source"
   ],
+  "author": {
+    "name": "Ketan Patil",
+    "email": "100.percent.ketan@gmail.com"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/nav0-org/nav0-browser"
-  }
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.8.0",
+    "@electron-forge/maker-deb": "^7.8.0",
+    "@electron-forge/maker-dmg": "^7.8.0",
+    "@electron-forge/maker-rpm": "^7.8.0",
+    "@electron-forge/maker-squirrel": "^7.8.0",
+    "@electron-forge/maker-zip": "^7.8.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.8.0",
+    "@electron-forge/plugin-fuses": "^7.8.0",
+    "@electron-forge/plugin-webpack": "^7.8.0",
+    "@electron/fuses": "^1.8.0",
+    "@electron/rebuild": "^4.0.1",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/bluebird": "^3.5.42",
+    "@types/pdf-parse": "^1.1.5",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "@vercel/webpack-asset-relocator-loader": "^1.7.3",
+    "copy-webpack-plugin": "^13.0.0",
+    "css-loader": "^6.11.0",
+    "electron": "35.2.1",
+    "eslint": "^8.57.1",
+    "eslint-plugin-import": "^2.31.0",
+    "fork-ts-checker-webpack-plugin": "^7.3.0",
+    "html-loader": "^5.1.0",
+    "node-loader": "^2.1.0",
+    "style-loader": "^3.3.4",
+    "ts-loader": "^9.5.2",
+    "ts-node": "10.9.2",
+    "typescript": "5.8.3",
+    "vitepress": "^1.5.0"
+  },
+  "dependencies": {
+    "better-sqlite3": "11.9.1",
+    "bluebird": "3.7.2",
+    "electron-squirrel-startup": "1.0.1",
+    "electron-store": "8.2.0",
+    "lucide": "0.503.0",
+    "marked": "15.0.11",
+    "pdf-parse": "1.1.1",
+    "uuid": "11.1.0"
+  },
+  "electronDependencies": [
+    "better-sqlite3"
+  ]
 }

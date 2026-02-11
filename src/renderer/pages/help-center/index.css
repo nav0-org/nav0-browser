@@ -1,0 +1,206 @@
+@import url("../../styles/global.css");
+
+.hero-section {
+  background-color: var(--primary-light);
+  padding: var(--spacing-xl) 0;
+  margin-bottom: var(--spacing-xl);
+}
+
+.help-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.help-section h2 {
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 2px solid var(--primary-light);
+}
+
+.help-section h3 {
+  margin-top: var(--spacing-lg);
+  margin-bottom: var(--spacing-sm);
+  color: var(--text-color);
+}
+
+.help-section p {
+  margin-bottom: var(--spacing-md);
+  line-height: 1.6;
+}
+
+.help-section ul, .help-section ol {
+  margin-bottom: var(--spacing-md);
+  padding-left: var(--spacing-lg);
+}
+
+.help-section li {
+  margin-bottom: var(--spacing-sm);
+  line-height: 1.6;
+}
+
+.help-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+.help-card {
+  background-color: var(--bg-light);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-medium);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+}
+
+.help-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-light);
+}
+
+.help-card-icon {
+  font-size: 2rem;
+  margin-bottom: var(--spacing-sm);
+  color: var(--primary-color);
+}
+
+.help-card h3 {
+  margin-top: 0;
+}
+
+.search-bar {
+  display: flex;
+  margin-bottom: var(--spacing-xl);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.search-input {
+  flex: 1;
+  padding: var(--spacing-md);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  font-size: var(--font-lg);
+}
+
+.search-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0 var(--spacing-md);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  cursor: pointer;
+}
+
+.faq-item {
+  margin-bottom: var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.faq-question {
+  padding: var(--spacing-md);
+  background-color: var(--bg-light);
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.faq-question:hover {
+  background-color: var(--primary-light);
+}
+
+.faq-answer {
+  padding: var(--spacing-md);
+  border-top: 1px solid var(--border-color);
+  display: none;
+}
+
+.faq-answer.active {
+  display: block;
+}
+
+.quick-tips {
+  background-color: var(--primary-light);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.quick-tips h3 {
+  margin-top: 0;
+  color: var(--primary-color);
+}
+
+.screenshot {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  max-width: 100%;
+  margin: var(--spacing-md) 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.step-list {
+  list-style: none;
+  counter-reset: step-counter;
+  padding-left: 0;
+}
+
+.step-list li {
+  position: relative;
+  padding-left: 40px;
+  margin-bottom: var(--spacing-md);
+  counter-increment: step-counter;
+}
+
+.step-list li::before {
+  content: counter(step-counter);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 28px;
+  height: 28px;
+  background-color: var(--primary-light);
+  color: var(--primary-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.contact-support {
+  text-align: center;
+  margin-top: var(--spacing-xl);
+  padding: var(--spacing-lg);
+  background-color: var(--bg-light);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+  .help-grid {
+      grid-template-columns: 1fr;
+  }
+  
+  .search-bar {
+      flex-direction: column;
+  }
+  
+  .search-input {
+      border-radius: var(--radius-md);
+      margin-bottom: var(--spacing-sm);
+  }
+  
+  .search-button {
+      border-radius: var(--radius-md);
+      padding: var(--spacing-sm);
+  }
+}

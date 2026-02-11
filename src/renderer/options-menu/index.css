@@ -1,0 +1,116 @@
+@import url("../styles/global.css");
+
+body {
+  background-color: transparent !important;
+}
+
+/* options Dropdown */
+.options-dropdown {
+  position: absolute;
+  top: 80px;
+  right: 0;
+  width: 280px;
+  background-color: var(--bg-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 9999;
+  padding: var(--spacing-xs) 0;
+  margin-top: var(--spacing-xs);
+  display: block;
+  border: 1px solid var(--border-color);
+  text-align: left;
+  margin-right: 10px;
+}
+
+.options-dropdown.show {
+  display: block;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+  padding-left: 16px;
+  padding-right: 10px;
+  /* padding: var(--spacing-sm) var(--spacing-md); */
+  /* font-size: var(--font-md); */
+  /* color: var(--text-color); */
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  position: relative;
+  text-align: left;
+
+}
+
+.divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+.dropdown-item:hover {
+  background-color: var(--bg-hover);
+}
+
+.dropdown-item i {
+
+  display: flex;
+  align-items: center;
+  /* padding: 10px 16px; */
+  /* font-size: 14px; */
+  /* color: #333; */
+  cursor: pointer;
+  transition: background-color 0.2s;
+  position: relative;
+  text-align: left; /* Ensure text is left-aligned */
+}
+
+.dropdown-item-text {
+  padding-left: 16px;
+  padding-right: 10px;
+  flex: 1;
+  text-align: left;
+  /* padding-left: 20px; */
+}
+
+.submenu-indicator {
+  margin-left: var(--spacing-xs);
+  color: var(--text-light);
+  flex-shrink: 0;
+}
+
+/* Submenu styling */
+.has-submenu {
+  position: relative;
+}
+
+.submenu {
+  position: absolute;
+  top: 0;
+  right: 100%;
+  width: 250px;
+  background-color: var(--bg-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-dropdown);
+  padding: var(--spacing-xs) 0;
+  display: none;
+  border: 1px solid var(--border-color);
+}
+
+.has-submenu:hover .submenu,
+.has-submenu.submenu-active .submenu {
+  display: block;
+}
+
+
+.keyboard-shortcut{
+  padding-right: 6px;
+  flex: 1;
+  text-align: right;
+  font-size: xx-small;
+  max-width: 50px;
+  /* display: none; */
+}

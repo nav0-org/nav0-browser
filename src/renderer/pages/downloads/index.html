@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:;">
+  <link rel="stylesheet" src="index.css">
+  <title>Downloads</title>
+</head>
+<body>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container text-center">
+        <h1 class="mb-sm">Downloads</h1>
+        <p>View and manage your downloaded files</p>
+    </div>
+</section>
+
+<!-- Main Content -->
+<main class="container">
+    <!-- Search Bar -->
+    <div class="search-container">
+        <input type="text" id="search-input" class="search-input" placeholder="Search downloads...">
+        <i data-lucide="search" class="search-icon"></i>
+    </div>
+    
+    <!-- Downloads Container -->
+    <div class="downloads-container">
+        <div id="downloads-list" class="downloads-list">
+            <!-- Download items will be dynamically inserted here -->
+        </div>
+        <div id="no-downloads" class="no-downloads">
+					No downloads yet.
+				</div>
+    </div>
+    
+    <!-- Downloads Stats -->
+    <div class="downloads-stats">
+      <div class="text-center">
+				<button id="delete-all" class="btn clear-all-button">Clear All</button>
+			</div>
+    </div>
+</main>
+
+</body>
+</html>

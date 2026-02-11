@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:;">
+  <link rel="stylesheet" src="index.css">
+</head>
+<body>
+  <div>
+    <div class="options-dropdown" id="options-dropdown">
+      <div class="dropdown-item" id="new-tab-option">
+        <i data-lucide="file-plus-2" width="16" height="16"></i>
+        <span class="dropdown-item-text">New Tab</span>
+        <span id="new-tab-shortcut" class="keyboard-shortcut"></span>
+      </div>
+    
+      <div class="dropdown-item" id="new-window-option">
+        <i data-lucide="app-window" width="16" height="16"></i>
+        <span class="dropdown-item-text">New Window</span>
+        <span id="new-window-shortcut"  class="keyboard-shortcut"></span>
+      </div>
+    
+      <div class="dropdown-item" id="new-private-window-option">
+        <i data-lucide="eye-off" width="16" height="16"></i>
+        <span class="dropdown-item-text">New Private Window</span>
+        <span id="new-private-window-shortcut" class="keyboard-shortcut">Ctrl + Shift + N</span>
+      </div>
+    
+      <div class="divider"></div>
+    
+      <div class="dropdown-item " style="display: none;" id="find-in-page-option">
+        <i data-lucide="text-search" width="16" height="16"></i>
+        <span class="dropdown-item-text">Find in Page</span>
+        <span id="find-in-page-shortcut" class="keyboard-shortcut">Ctrl + Shift + N</span>
+      </div>
+    
+    
+      <div class="divider" style="display: none;"></div>
+      
+      <div class="dropdown-item" id="downloads-option">
+        <i data-lucide="download" width="16" height="16"></i>
+        <span class="dropdown-item-text">Downloads</span>
+        <span id="downloads-shortcut"  class="keyboard-shortcut"></span>
+      </div>
+      
+      <div class="dropdown-item" id="history-option">
+        <i data-lucide="clock" width="16" height="16"></i>
+        <span class="dropdown-item-text">History</span>
+        <span id="history-shortcut"  class="keyboard-shortcut"></span>
+      </div>
+    
+      <div class="dropdown-item" id="bookmarks-option">
+        <i data-lucide="album" width="16" height="16"></i>
+        <span class="dropdown-item-text">Bookmarks</span>
+        <span id="bookmarks-shortcut"  class="keyboard-shortcut"></span>
+      </div>
+    
+      <div class="divider"></div>
+      
+      <div class="dropdown-item has-submenu">
+        <i data-lucide="circle-help" width="16" height="16"></i>
+        <span class="dropdown-item-text">Help</span>
+        <i data-lucide="chevron-right" class="submenu-indicator" width="14" height="14"></i>
+        
+        <!-- options Submenu -->
+        <div class="submenu">
+          <div class="dropdown-item" id="about-option">
+            <i data-lucide="badge-info" width="16" height="16"></i>
+            <span class="dropdown-item-text">About</span>
+          </div>
+          <div class="dropdown-item" id="privacy-policy-option">
+            <i data-lucide="cookie" width="16" height="16"></i>
+            <span class="dropdown-item-text">Privacy Policy</span>
+          </div>
+          <div class="dropdown-item" id="terms-of-service-option">
+            <i data-lucide="asterisk" width="16" height="16"></i>
+            <span class="dropdown-item-text">EULA</span>
+          </div>
+          <div class="dropdown-item" id="help-center-option">
+            <i data-lucide="circle-help" width="16" height="16"></i>
+            <span class="dropdown-item-text">Help Center</span>
+          </div>
+          <div class="dropdown-item" id="report-issue-option">
+            <i data-lucide="bug" width="16" height="16"></i>
+            <span class="dropdown-item-text">Report an Issue</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="dropdown-item" style="display: none;" id="settings-option">
+        <i data-lucide="settings" width="16" height="16"></i>
+        <span class="dropdown-item-text">Browser Settings</span>
+        <span id="browser-settings-shortcut"  class="keyboard-shortcut"></span>
+      </div>
+      
+    </div>
+  </div>
+</body>
+</html>
