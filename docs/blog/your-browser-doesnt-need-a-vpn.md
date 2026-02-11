@@ -4,6 +4,39 @@ description: "Browsers are shipping with built-in VPN services and calling it a 
 date: 2026-02-06
 author: nav0 team
 tags: [vpn, privacy, browsers, security]
+head:
+  - - meta
+    - property: og:type
+      content: article
+  - - meta
+    - property: article:published_time
+      content: "2026-02-06"
+  - - meta
+    - property: article:author
+      content: nav0 team
+  - - meta
+    - property: article:tag
+      content: vpn
+  - - meta
+    - property: article:tag
+      content: security
+  - - meta
+    - property: article:tag
+      content: privacy
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Your Browser Doesn't Need a Built-In VPN",
+        "description": "Browsers are shipping with built-in VPN services and calling it a privacy feature. It's not. Here's why browser VPNs are security theater and what you should use instead.",
+        "datePublished": "2026-02-06",
+        "author": { "@type": "Organization", "name": "nav0 team", "url": "https://nav0.org" },
+        "publisher": { "@type": "Organization", "name": "nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
+        "mainEntityOfPage": "https://nav0.org/blog/your-browser-doesnt-need-a-vpn",
+        "keywords": ["browser VPN", "VPN security", "Opera VPN", "Edge VPN", "privacy", "security theater"]
+      }
 ---
 
 # Your Browser Doesn't Need a Built-In VPN

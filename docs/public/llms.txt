@@ -1,0 +1,89 @@
+# nav0
+
+> A minimal, privacy-focused web browser. No data collection. No bloat. No AI gimmicks. Just clean, safe browsing.
+
+nav0 is a free, open-source desktop web browser built on Electron and Chromium. It is designed for users who want a fast, lightweight browser that respects their privacy. nav0 collects zero telemetry, requires no accounts, and stores all data locally on the user's device.
+
+## Key Facts
+
+- **Type**: Desktop web browser application
+- **Platforms**: Windows, macOS, Linux
+- **Engine**: Chromium (via Electron)
+- **License**: MIT (fully open source)
+- **Price**: Free
+- **Telemetry**: None. Zero data collection.
+- **Source Code**: https://github.com/nav0-org/nav0-browser
+- **Website**: https://nav0.org
+- **Downloads**: https://github.com/nav0-org/nav0-browser/releases
+
+## Core Principles
+
+1. **Zero Data Collection**: nav0 does not collect, store, transmit, or process any user data. No telemetry, no analytics, no crash reports.
+2. **Local-Only Storage**: Bookmarks, history, settings, and downloads stay on the user's device. No cloud sync. No account required.
+3. **Minimal by Design**: Only essential browsing features. No AI assistants, no news feeds, no crypto wallets, no built-in VPNs, no shopping tools.
+4. **Open Source Transparency**: Full source code is public and auditable. Users can build from source for maximum trust.
+5. **Privacy as Default**: Privacy is not a toggle or a premium feature. It is the architecture. There are no privacy settings because there is nothing to configure—no data leaves the browser.
+
+## Features
+
+### Privacy & Security
+- Zero telemetry
+- Tracker blocking
+- Third-party cookie blocking
+- HTTPS auto-upgrade
+- Fingerprint protection
+- Private browsing mode
+- Referrer trimming
+- Local-only blocklists for malicious sites
+- Process sandboxing
+
+### Browsing
+- Tab management
+- Local bookmarks with folders
+- Bookmark import/export (HTML format)
+- Local browsing history
+- Download manager
+- Configurable search engine
+- Configurable start page
+- Chrome DevTools for developers
+
+### Performance
+- Fast startup (no account checks, no sync, no feed loading)
+- Low memory usage
+- No background processes
+- No idle network requests
+- No pre-loading of suggested content
+
+## What nav0 Does NOT Include (By Design)
+
+- No AI assistant or chatbot
+- No news feed or content recommendations
+- No cloud sync service
+- No cryptocurrency wallet or rewards
+- No built-in VPN
+- No forced account creation
+- No telemetry or analytics
+- No advertising-related features
+
+## Comparison with Other Browsers
+
+Unlike Chrome, Edge, Opera, and other mainstream browsers, nav0:
+- Does not send browsing data to any server
+- Does not require or encourage sign-in
+- Does not include advertising or monetization features
+- Does not bundle AI features
+- Does not phone home for any reason
+
+## Documentation
+
+- Getting Started: https://nav0.org/guide/getting-started
+- Features: https://nav0.org/guide/features
+- Privacy Policy: https://nav0.org/guide/privacy
+- Philosophy: https://nav0.org/guide/philosophy
+- Contributing: https://nav0.org/guide/contributing
+- Blog: https://nav0.org/blog/
+- FAQ: https://nav0.org/faq
+
+## Full Content
+
+For comprehensive documentation, see: https://nav0.org/llms-full.txt

@@ -4,6 +4,39 @@ description: "Google, Microsoft, and Apple control how billions of people access
 date: 2026-02-04
 author: nav0 team
 tags: [big-tech, browsers, open-web, privacy]
+head:
+  - - meta
+    - property: og:type
+      content: article
+  - - meta
+    - property: article:published_time
+      content: "2026-02-04"
+  - - meta
+    - property: article:author
+      content: nav0 team
+  - - meta
+    - property: article:tag
+      content: big-tech
+  - - meta
+    - property: article:tag
+      content: open-web
+  - - meta
+    - property: article:tag
+      content: privacy
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Big Tech Owns Your Browser",
+        "description": "Google, Microsoft, and Apple control how billions of people access the web. When your browser is made by an ad company or a platform gatekeeper, whose interests does it really serve?",
+        "datePublished": "2026-02-04",
+        "author": { "@type": "Organization", "name": "nav0 team", "url": "https://nav0.org" },
+        "publisher": { "@type": "Organization", "name": "nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
+        "mainEntityOfPage": "https://nav0.org/blog/big-tech-owns-your-browser",
+        "keywords": ["big tech", "browser monopoly", "Chrome", "Edge", "Safari", "open web", "Chromium"]
+      }
 ---
 
 # Big Tech Owns Your Browser

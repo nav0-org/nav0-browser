@@ -4,6 +4,39 @@ description: "Every major browser is cramming AI features into their product. No
 date: 2026-02-08
 author: nav0 team
 tags: [ai, browsers, bloat, privacy]
+head:
+  - - meta
+    - property: og:type
+      content: article
+  - - meta
+    - property: article:published_time
+      content: "2026-02-08"
+  - - meta
+    - property: article:author
+      content: nav0 team
+  - - meta
+    - property: article:tag
+      content: ai
+  - - meta
+    - property: article:tag
+      content: browsers
+  - - meta
+    - property: article:tag
+      content: privacy
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Stop Forcing AI Into My Browser",
+        "description": "Every major browser is cramming AI features into their product. Nobody asked for this. Here's why forced AI integration is bad for users, bad for privacy, and bad for the web.",
+        "datePublished": "2026-02-08",
+        "author": { "@type": "Organization", "name": "nav0 team", "url": "https://nav0.org" },
+        "publisher": { "@type": "Organization", "name": "nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
+        "mainEntityOfPage": "https://nav0.org/blog/stop-forcing-ai-into-browsers",
+        "keywords": ["AI in browsers", "browser bloat", "privacy", "browser AI features", "Copilot"]
+      }
 ---
 
 # Stop Forcing AI Into My Browser
