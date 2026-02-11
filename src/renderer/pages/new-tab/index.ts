@@ -1,5 +1,4 @@
 
-import { InAppUrls } from '../../../constants/app-constants';
 import './index.css';
 
 import { createIcons, icons } from 'lucide';
@@ -16,21 +15,3 @@ if (searchBar) {
     }
   });
 }
-
-// Handle shortcut clicks
-document.getElementById('llm-chat')?.addEventListener('click', (e: Event) => {
-  e.preventDefault();
-  window.BrowserAPI.navigate(window.BrowserAPI.appWindowId, window.BrowserAPI.tabId, InAppUrls.LLM_CHAT + '#/new-conversation?conversationType=llm-chat');
-});
-document.getElementById('rag-chat')?.addEventListener('click', (e: Event) => {
-  e.preventDefault();
-  window.BrowserAPI.navigate(window.BrowserAPI.appWindowId, window.BrowserAPI.tabId, InAppUrls.LLM_CHAT + '#/new-conversation?conversationType=rag');
-});
-document.getElementById('web-research')?.addEventListener('click', (e: Event) => {
-  e.preventDefault();
-  window.BrowserAPI.navigate(window.BrowserAPI.appWindowId, window.BrowserAPI.tabId, InAppUrls.LLM_CHAT + '#/new-conversation?conversationType=web-research');
-});
-document.getElementById('browser-agent')?.addEventListener('click', (e: Event) => {
-  e.preventDefault();
-  window.BrowserAPI.navigate(window.BrowserAPI.appWindowId, window.BrowserAPI.tabId, InAppUrls.LLM_CHAT + '#/new-conversation?conversationType=browser-agent');
-});

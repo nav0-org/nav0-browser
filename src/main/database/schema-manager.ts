@@ -1,24 +1,15 @@
 import Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
-import * as path from 'path';
-import * as fs from 'fs';
 import { BookmarksSchema } from './schema/bookmark-schema';
 import { BrowsingHistorySchema } from './schema/browsing-history-schema';
-import { ConversationSchema } from './schema/conversation-schema';
-import { DocumentSchema } from './schema/document-schema';
-import { DocumentChunkSchema } from './schema/document-chunk-schema';
 import { DownloadsSchema } from './schema/download-schema';
-import { MessageSchema } from './schema/message-schema';
-import { ProjectSchema } from './schema/project-schema';
-import { calculateVectorCosineSimilarity, calculateVectorL2Distance } from '../common-functions';
 
 
 // Define types for our schema
 export type ColumnType = 'TEXT' | 'INTEGER' | 'REAL' | 'BLOB' | 'NULL';
 
-export type SpecialColumnType = 
+export type SpecialColumnType =
   | { type: 'uuid'; }
-  | { type: 'vector'; dimensions: number; }
   | { type: 'timestamp'; defaultNow?: boolean; }
   | { type: 'json'; }
   | { type: 'standard'; sqlType: ColumnType; };
@@ -74,7 +65,7 @@ export interface SchemaResult {
 
 /**
  * Schema manager for SQLite that ensures tables exist and have required columns.
- * Handles special column types like UUIDs and vector embeddings.
+ * Handles special column types like UUIDs.
  */
 export class SchemaManager {
   private db: Database.Database;
@@ -94,9 +85,6 @@ export class SchemaManager {
     
     // Create the functions needed for UUIDs if they don't exist
     this.setupUuidFunctions();
-    
-    // Create functions for vector operations
-    this.setupVectorFunctions();
   }
   
   /**
@@ -138,25 +126,12 @@ export class SchemaManager {
   }
   
   /**
-   * Set up vector embedding functions in SQLite
-   */
-  private setupVectorFunctions = (): void => {
-    // Function to calculate L2 distance (Euclidean distance) between two vectors
-    this.db.function('vector_l2_distance', calculateVectorL2Distance);
-    
-    // Function to calculate cosine similarity between two vectors
-    this.db.function('vector_cosine_similarity', calculateVectorCosineSimilarity);
-  }
-  
-  /**
    * Get the SQLite type for a special column type
    */
   private getSqliteType = (columnType: SpecialColumnType): string => {
     switch (columnType.type) {
       case 'uuid':
         return 'TEXT';
-      case 'vector':
-        return 'TEXT'; // Store as JSON string
       case 'timestamp':
         return 'TEXT';
       case 'json':
@@ -182,10 +157,6 @@ export class SchemaManager {
     
     if (columnType.type === 'timestamp' && columnType.defaultNow) {
       return "CURRENT_TIMESTAMP";
-    }
-    
-    if (columnType.type === 'vector' && Array.isArray(value)) {
-      return `'${JSON.stringify(value).replace(/'/g, "''")}'`;
     }
     
     if (columnType.type === 'json') {
@@ -369,16 +340,6 @@ export class SchemaManager {
     sql += '\n)';
     
     this.db.prepare(sql).run();
-    
-    // Add special indices for vector columns
-    for (const column of schema.columns) {
-      if (column.columnType.type === 'vector') {
-        const indexName = `idx_${schema.name}_${column.name}`;
-        this.db.prepare(
-          `CREATE INDEX IF NOT EXISTS ${indexName} ON ${schema.name}(${column.name})`
-        ).run();
-      }
-    }
   }
   
   /**
@@ -397,8 +358,6 @@ export class SchemaManager {
       } else if (column.columnType.type === 'timestamp' && 
                 (column.columnType as any).defaultNow) {
         sql += ` NOT NULL DEFAULT CURRENT_TIMESTAMP`;
-      } else if (column.columnType.type === 'vector') {
-        sql += ` NOT NULL DEFAULT '[]'`;
       } else if (column.columnType.type === 'json') {
         sql += ` NOT NULL DEFAULT '{}'`;
       } else {
@@ -426,16 +385,8 @@ export class SchemaManager {
     }
     
     this.db.prepare(sql).run();
-    
-    // Add index for vector column if needed
-    if (column.columnType.type === 'vector') {
-      const indexName = `idx_${tableName}_${column.name}`;
-      this.db.prepare(
-        `CREATE INDEX IF NOT EXISTS ${indexName} ON ${tableName}(${column.name})`
-      ).run();
-    }
   }
-  
+
   /**
    * Create an index on a table
    */
@@ -449,45 +400,6 @@ export class SchemaManager {
     
     const sql = `CREATE ${uniqueStr}INDEX IF NOT EXISTS ${index.name} ON ${tableName} (${columnStr})`;
     this.db.prepare(sql).run();
-  }
-  
-  /**
-   * Execute a vector similarity search
-   */
-  findSimilarVectors = (
-    tableName: string, 
-    columnName: string, 
-    vector: number[], 
-    limit = 10,
-    similarityThreshold = 0.8,
-    method: 'cosine' | 'l2' = 'cosine'
-  ): any[] => {
-    const vectorStr = JSON.stringify(vector);
-    let query: string;
-    
-    if (method === 'cosine') {
-      query = `
-        SELECT *, vector_cosine_similarity(${columnName}, ?) as similarity
-        FROM ${tableName}
-        WHERE vector_cosine_similarity(${columnName}, ?) >= ?
-        ORDER BY similarity DESC
-        LIMIT ?
-      `;
-    } else {
-      query = `
-        SELECT *, vector_l2_distance(${columnName}, ?) as distance
-        FROM ${tableName}
-        WHERE vector_l2_distance(${columnName}, ?) <= ?
-        ORDER BY distance ASC
-        LIMIT ?
-      `;
-    }
-    
-    const params = method === 'cosine' 
-      ? [vectorStr, vectorStr, similarityThreshold, limit]
-      : [vectorStr, vectorStr, similarityThreshold, limit];
-      
-    return this.db.prepare(query).all(...params);
   }
   
   /**
@@ -508,46 +420,6 @@ export class SchemaManager {
   private loadSchemas = (): void =>{
       this.registerSchema(BookmarksSchema);
       this.registerSchema(BrowsingHistorySchema);
-      this.registerSchema(ConversationSchema);
-      this.registerSchema(DocumentSchema);
-      this.registerSchema(DocumentChunkSchema);
       this.registerSchema(DownloadsSchema);
-      this.registerSchema(MessageSchema);
-      this.registerSchema(ProjectSchema);
   }
-
-  // private loadSchemasFromDirectory = (): void => {
-  //   const schemaDirectoryPath = path.join(__dirname, './schema');
-  //   try {
-  //     if (!fs.existsSync(schemaDirectoryPath)) {
-  //       console.error(`Schema directory not found: ${schemaDirectoryPath}`);
-  //       return;
-  //     }
-      
-  //     const files = fs.readdirSync(schemaDirectoryPath).filter(file => file.endsWith('.ts') || file.endsWith('.js'));
-  //     for (const file of files) {
-  //       const filePath = path.join(schemaDirectoryPath, file);
-  //       try {
-  //         delete require.cache[require.resolve(filePath)];
-  //         // eslint-disable-next-line @typescript-eslint/no-var-requires
-  //         const schemaModule = require(filePath);
-  //         const schemas = Object.values(schemaModule)
-  //           .filter(value => 
-  //             value && 
-  //             typeof value === 'object' && 
-  //             'name' in value && 
-  //             'columns' in value
-  //           ) as TableSchema[];
-          
-  //         schemas.forEach(schema => {
-  //           this.registerSchema(schema);
-  //         });
-  //       } catch (error) {
-  //         console.error(`Error loading schema file: ${filePath}`, error);
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.error(`Error loading schemas from directory: ${schemaDirectoryPath}`, error);
-  //   }
-  // };
 }

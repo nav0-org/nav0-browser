@@ -14,8 +14,6 @@ export class BrowserTabManager {
   private optionsButton: HTMLButtonElement;
   private bookmarkButton: HTMLButtonElement;
   private unbookmarkButton: HTMLButtonElement;
-  private aiSummaryButton: HTMLButtonElement;
-  private addToKnowledgeHubButton: HTMLButtonElement;
 
   // State
   private tabs: Tab[] = [];
@@ -59,8 +57,6 @@ export class BrowserTabManager {
     this.optionsButton = document.getElementById('options-button') as HTMLButtonElement;
     this.bookmarkButton = document.getElementById('bookmark-button') as HTMLButtonElement;
     this.unbookmarkButton = document.getElementById('unbookmark-button') as HTMLButtonElement;
-    this.aiSummaryButton = document.getElementById('ai-summary-button') as HTMLButtonElement;
-    this.addToKnowledgeHubButton = document.getElementById('add-to-knowledge-hub-button') as HTMLButtonElement;
   }
 
   private setupEventListeners(): void {
@@ -102,13 +98,6 @@ export class BrowserTabManager {
       activeTab.bookmarkId = null;
       this.handleBookmark();
     });
-    this.aiSummaryButton.addEventListener('click', async () => {
-      await window.BrowserAPI.generateAISummary(this.appWindowId, this.activeTabId, '');
-    });
-    this.addToKnowledgeHubButton.addEventListener('click', async () => {
-      await window.BrowserAPI.addToKnowledgeHub(this.appWindowId, this.activeTabId);
-    });
-    
     // URL input - navigate on Enter key
     this.urlInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {

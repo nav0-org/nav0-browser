@@ -116,8 +116,6 @@ export abstract class RendererToMainEventsForBrowserIPC {
 
   public static readonly HANDLE_FILE_SELECTION = "browser:handle-file-selection";
 
-  public static readonly GENERATE_AI_SUMMARY = "browser:generate-ai-summary";
-  public static readonly ADD_TO_KNOWLEDGE_HUB = "browser:add-to-knowledge-hub";
   public static readonly UPDATE_BROWSER_VIEW_BOUNDS = "browser:update-browser-view-bounds";
   public static readonly CLOSE_WINDOW = "browser:close-window";
   public static readonly SHOW_OPTIONS_MENU = "browser:show-options-menu";
@@ -127,8 +125,6 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly CREATE_NEW_APP_WINDOW = "browser:create-new-app-window";
   public static readonly CREATE_NEW_PRIVATE_APP_WINDOW = "browser:create-new-private-app-window";
   public static readonly EXECUTE_JAVASCRIPT = "browser:execute-javascript";
-  public static readonly HIDE_AI_SUMMARY_OVERLAY = "browser:hide-ai-summary-overlay";
-  public static readonly ASSIGN_TASK_TO_BROWSER_AGENT = "browser:assign-task-to-browser-agent";
   // public static readonly CAPTURE_SCREENSHOT = "browser:capture-screenshot";
   // public static readonly SAVE_SCREENSHOT = "browser:save-screenshot";
   // public static readonly SET_DIALOG_VISIBILITY = "browser:set-dialog-visibility";
@@ -145,33 +141,8 @@ export abstract class MainToRendererEventsForBrowserIPC {
   // public static readonly SET_DIALOG_VISIBILITY = "browser:set-dialog-visibility";
 }
 
-export abstract class RendererToMainEventsForLLMIPC {
-  public static readonly GET_MODEL_INFO = "lmm:get-model-info";
-  public static readonly DOWNLOAD_MODEL = "lmm:download-model";
-  public static readonly DELETE_MODEL = "lmm:delete-model";
-
-  public static readonly GENERATE_AI_SUMMARY = "lmm:generate-ai-summary";
-
-  public static readonly FETCH_ALL_PROJECT_LIST = "browser:fetch-all-project-list";
-  public static readonly CREATE_NEW_PROJECT = "browser:create-new-project";
-  public static readonly DELETE_PROJECT = "browser:delete-project";
-  public static readonly UPDATE_PROJECT = "browser:update-project";
-  public static readonly FETCH_PROJECT = "browser:fetch-project";
-  public static readonly FETCH_ALL_CONVERSATION_LIST = "browser:fetch-all-conversation-list";
-  public static readonly CREATE_NEW_CONVERSATION = "browser:create-new-conversation";
-  public static readonly DELETE_CONVERSATION = "browser:delete-conversation";
-  public static readonly FETCH_CONVERSATION = "browser:fetch-conversation";
-  public static readonly BRANCH_OUT_CONVERSATION = "browser:branch-out-conversation";
-  public static readonly SEND_MESSAGE = "browser:send-message";
-  public static readonly PROCESS_MESSAGE = "browser:process-message";
-  public static readonly RESEND_MESSAGE = "browser:resend-message";
-  public static readonly DELETE_MESSAGE = "browser:delete-message";
-}
-
 export abstract class DataStoreConstants {
   public static readonly DEFAULT_KEY = 'default';
-  public static readonly DOWNLOADED_LLM_MODELS = "downloaded-llm-models-list";
-  public static readonly LLM_CONFIGURATION = "lmm-configuration";
   public static readonly BROWSER_SETTINGS = "browser-settings";
 }
 
@@ -183,30 +154,18 @@ export abstract class RendererToMainEventsForDataStoreIPC {
 }
 
 
-export abstract class MainToRendererEventsForLLMIPC {
-  public static readonly DOWNLOAD_MODEL_PROGRESS = "lmm:download-model-progress";
-  public static readonly AI_SUMMARY_GENERATION_CHUNK = "lmm:ai-summary-generation-chunk";
-  public static readonly AI_SUMMARY_GENERATION_COMPLETE = "lmm:ai-summary-generation-complete";
-  public static readonly AI_SUMMARY_GENERATION_ERROR = "lmm:ai-summary-generation-error";
-
-  public static readonly AI_CONVERSATION_RESPONSE_CHUNK = "lmm:ai-conversation-response-chunk";
-}
-
 export abstract class InAppUrls {
-  public static readonly PREFIX = "ai-browser://";
-  public static readonly DOWNLOADS = "ai-browser://downloads";
-  public static readonly HISTORY = "ai-browser://history";
-  public static readonly BOOKMARKS = "ai-browser://bookmarks";
-  public static readonly ABOUT = "ai-browser://about";
-  public static readonly PRIVACY_POLICY = "ai-browser://privacy-policy";
-  public static readonly EULA = "ai-browser://eula";
-  public static readonly HELP_CENTER = "ai-browser://help-center";
-  public static readonly REPORT_ISSUE = "ai-browser://report-issue";
-  public static readonly BROWSER_SETTINGS = "ai-browser://browser-settings";
-  public static readonly AI_SETTINGS = "ai-browser://ai-settings";
-  public static readonly NEW_TAB = "ai-browser://new-tab";
-  public static readonly KNOWLEDGE_HUB = "ai-browser://knowledge-hub";
-  public static readonly LLM_CHAT = "ai-browser://llm-chat";
+  public static readonly PREFIX = "nav0://";
+  public static readonly DOWNLOADS = "nav0://downloads";
+  public static readonly HISTORY = "nav0://history";
+  public static readonly BOOKMARKS = "nav0://bookmarks";
+  public static readonly ABOUT = "nav0://about";
+  public static readonly PRIVACY_POLICY = "nav0://privacy-policy";
+  public static readonly EULA = "nav0://eula";
+  public static readonly HELP_CENTER = "nav0://help-center";
+  public static readonly REPORT_ISSUE = "nav0://report-issue";
+  public static readonly BROWSER_SETTINGS = "nav0://browser-settings";
+  public static readonly NEW_TAB = "nav0://new-tab";
 }
 
 export abstract class ImageBase64Strings {
@@ -214,95 +173,5 @@ export abstract class ImageBase64Strings {
 }
 
 export abstract class AppConstants {
-  public static readonly APP_NAME = "My Electron App";
+  public static readonly APP_NAME = "Nav0 Browser";
 }
-
-export abstract class EmbeddingConstants {
-  public static readonly EMBEDDING_MODEL = "bge-small-en-v1.5-q8_0.gguf";
-  public static readonly EMBEDDING_MODEL_URL = "hf:CompendiumLabs/bge-small-en-v1.5-gguf:Q8_0";
-  public static readonly POST_DOWNLOAD_MODEL_NAME = "hf_CompendiumLabs_bge-small-en-v1.5.Q8_0.gguf";
-  public static readonly EMBEDDING_DIMENSIONS = 384;
-}
-
-export abstract class SystemPrompts {
-  public static readonly CONVERSE_WITH_AI_NON_RAG = `You are a helpful, knowledgeable, and honest AI assistant. Your primary goal is to provide accurate, useful, and thoughtful responses to user queries while maintaining high ethical standards.
-    ## Core Principles
-    - Prioritize accuracy and truthfulness in all responses
-    - Be transparent about limitations and uncertainty when you don't know something
-    - Maintain a respectful, professional, and empathetic tone
-    - Refuse requests that could cause harm or violate ethical guidelines
-
-    ## Response Guidelines
-    - Give clear, well-structured answers that directly address the user's question
-    - Provide relevant context and explanations when helpful
-    - Use examples, analogies, or step-by-step breakdowns for complex topics
-    - Acknowledge multiple perspectives on subjective or controversial topics
-    - Adjust your communication style to match the complexity and formality appropriate for the query
-
-    ## Handling Uncertainty
-    - Clearly state when you're uncertain or when information may be outdated
-    - Distinguish between established facts and your best estimates or reasoning
-    - Admit mistakes if corrected and provide accurate information
-
-    ## Safety and Ethics
-    - Decline requests for harmful, illegal, or unethical content
-  `;
-  public static readonly CONVERSE_WITH_AI_RAG = `You are an AI assistant that strictly answers questions using retrieved document context chunks provided in the prompt itself.
-    Large part of the first prompt contains the retrieved context chunks from the knowledge base.
-    Query is added towards the end of the prompt.
-    The prompt follows XML format, only for structuring purposes.
-    You are not allowed to use any other information outside of the retrieved document context provided in the prompt.
-    You are not allowed to use any information from the retrieved documents that is not directly related to the query.
-    Be specific and concise in your responses.
-    Your primary goal is to provide accurate, well-sourced / well-cited responses to user queries while maintaining high ethical standards.
-    Do not provide citations or references
-    Do not mention to user that context chunks are provided in the prompt.
-  `;
-  public static readonly CONVERSE_WITH_AI_WEB_RESEARCH = `You are an AI assistant that strictly answers questions using web-search results given in the prompt itself. 
-    Large part of the first prompt is the web search results. 
-    Query is added towards the end of the prompt. 
-    The prompt follows XML format, only for structuring purposes.
-    You are not allowed to use any other information outside of the web search results provided in the prompt.
-    You are not allowed to use any information from the web search results that is not directly related to the query. 
-    Be specific and concise in your responses.
-    Do not provide citations or references to the web search results.
-    If the query is not related to the web search results, respond with "I could not find any relevant information on the web for this query."
-    Your primary goal is to provide accurate responses to user queries while maintaining high ethical standards.
-    Do not mention to user that web search results are provided in the prompt.
-  `;
-}
-
-// export static const APP_NAME = "My Electron App";
-// export static const APP_VERSION = "1.0.0";
-// export static const APP_AUTHOR = "Your Name";
-// export static const APP_DESCRIPTION = "A simple Electron application.";
-// export static const APP_COPYRIGHT = "© 2023 Your Name";
-// export static const APP_LICENSE = "MIT";
-// export static const APP_URL = "https://example.com";
-// export static const APP_ICON = "assets/icon.png";
-// export static const APP_WINDOW_WIDTH = 1200;
-// export static const APP_WINDOW_HEIGHT = 800;
-// export static const APP_WINDOW_MIN_WIDTH = 800;
-// export static const APP_WINDOW_MIN_HEIGHT = 600;
-// export static const APP_WINDOW_MAX_WIDTH = 1920;
-// export static const APP_WINDOW_MAX_HEIGHT = 1080;
-// export static const APP_WINDOW_RESIZABLE = true;
-// export static const APP_WINDOW_FULLSCREEN = false;
-// export static const APP_WINDOW_FULLSCREENABLE = true;
-// export static const APP_WINDOW_CLOSEABLE = true;
-// export static const APP_WINDOW_MAXIMIZABLE = true;
-// export static const APP_WINDOW_MINIMIZABLE = true;
-// export static const APP_WINDOW_ALWAYS_ON_TOP = false;
-// export static const APP_WINDOW_FRAMELESS = false;
-// export static const APP_WINDOW_TITLE_BAR_STYLE = "default";
-// export static const APP_WINDOW_TITLE = APP_NAME;
-// export static const APP_WINDOW_BACKGROUND_COLOR = "#FFFFFF";
-// export static const APP_WINDOW_TITLE_BAR_COLOR = "#000000";
-// export static const APP_WINDOW_TITLE_BAR_TEXT_COLOR = "#FFFFFF";
-// export static const APP_WINDOW_CONTENT_COLOR = "#FFFFFF";
-// export static const APP_WINDOW_CONTENT_TEXT_COLOR = "#000000";
-// export static const APP_WINDOW_CONTENT_LINK_COLOR = "#0000FF";
-// export static const APP_WINDOW_CONTENT_LINK_HOVER_COLOR = "#FF0000";
-// export static const APP_WINDOW_CONTENT_LINK_ACTIVE_COLOR = "#00FF00";
-// export static const APP_WINDOW_CONTENT_LINK_VISITED_COLOR = "#800080";
-// export static const APP_WINDOW_CONTENT_LINK_UNDERLINE = true;

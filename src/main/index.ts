@@ -1,9 +1,6 @@
 import { app, ipcMain } from 'electron';
 import { AppWindowManager } from './browser/app-window-manager';
-import { LLMModelSelector } from './llm/llm-model-selector';
 import { DataStoreManager } from './database/data-store-manager';
-import { LLMInferenceManager } from './llm/llm-inference-manager';
-import { LLMConversationAndProjectManager } from './llm/llm-conversation-and-project-manager';
 
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling

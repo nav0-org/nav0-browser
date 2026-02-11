@@ -17,20 +17,4 @@ export const mainConfig: Configuration = {
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json', '.html'],
   },
-  // externals: [/^@node-llama-cpp\/.*/, /^@reflink\/.*/],
-  // externals: {
-  //   'node-llama-cpp': 'commonjs2 node-llama-cpp',
-  //   'better-sqlite3': 'commonjs2 better-sqlite3',
-  // },
-  // target: 'electron-main',
-  // node: false,
-  // experiments: {
-  //   // Enable top-level await for ESM modules
-  //   topLevelAwait: true,
-  //   outputModule: true,
-  // },
-  // output: {
-  //   module: true, // Enable ES module output
-  //   chunkFormat: 'module',
-  // },
 };

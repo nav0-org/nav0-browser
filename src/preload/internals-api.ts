@@ -1,9 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { MainToRendererEventsForBrowserIPC, MainToRendererEventsForLLMIPC, RendererToMainEventsForBrowserIPC, RendererToMainEventsForDataStoreIPC, RendererToMainEventsForLLMIPC } from '../constants/app-constants';
-import { ModelRecommendation } from '../types/llm';
-import { ProjectRecord } from '../types/project-record';
-import { ConversationRecord } from '../types/conversation-record';
-import { MessageRecord } from '../types/message-record';
+import { MainToRendererEventsForBrowserIPC, RendererToMainEventsForBrowserIPC, RendererToMainEventsForDataStoreIPC } from '../constants/app-constants';
 
 export function init(){
   const appWindowId = process.argv.find(arg => arg.startsWith('--app-window-id='))?.split('=')[1];
@@ -85,16 +81,6 @@ export function init(){
     handleFileSelection: async (appWindowId: string, tabId: string, extensions: string[]) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.HANDLE_FILE_SELECTION, appWindowId, tabId, extensions);
     },
-    generateAISummary: async (appWindowId: string | null, tabId: string | null, text: string) => {  
-      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GENERATE_AI_SUMMARY, appWindowId, tabId, text);
-    },
-    hideAISummaryOverlay: async (appWindowId: string | null, tabId: string | null) => {  
-      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.HIDE_AI_SUMMARY_OVERLAY, appWindowId, tabId);
-    },
-    addToKnowledgeHub: async (appWindowId: string, tabId: string) => {
-      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.ADD_TO_KNOWLEDGE_HUB, appWindowId, tabId);
-    },
-
     updateBrowserViewBounds: async (appWindowId: string, bounds: { x: number, y: number, width: number, height: number }) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.UPDATE_BROWSER_VIEW_BOUNDS, appWindowId, bounds);
     },
@@ -118,9 +104,6 @@ export function init(){
     },
     createNewPrivateAppWindow: async () => { 
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.CREATE_NEW_PRIVATE_APP_WINDOW, {});
-    },
-    assignTaskToBrowserAgent: async (appWindowId: string, task: string) => { 
-      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.ASSIGN_TASK_TO_BROWSER_AGENT, appWindowId, task);
     },
     // executeJavaScript: (code: string) => ipcRenderer.invoke('execute-javascript', code),
     // captureScreenshot: () => ipcRenderer.invoke('capture-screenshot'),
@@ -147,9 +130,6 @@ export function init(){
     },
     onNavigationFailed: (callback: (data: { id: string }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.NAVIGATION_FAILED, (_event, data) => callback(data));
-    },
-    onAISummaryGenerationChunk: (callback: (data: { responseChunk: string }) => void) => {
-      ipcRenderer.on(MainToRendererEventsForLLMIPC.AI_SUMMARY_GENERATION_CHUNK, (_event, data) => callback(data));
     },
   });
 }

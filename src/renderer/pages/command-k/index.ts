@@ -2,7 +2,7 @@
 import './index.css';
 import { createIcons, icons } from 'lucide';
 
-let selectedAction: 'search' | 'deepResearch' | 'talkToGPT' | 'browserAgent' = 'search';
+let selectedAction: 'search' = 'search';
 const init = () => {
   document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.querySelector('.search-input') as HTMLInputElement;
@@ -39,7 +39,7 @@ const init = () => {
       });
 
       button.classList.add('primary');
-      selectedAction = button.getAttribute('selected-action') as 'search' | 'deepResearch' | 'talkToGPT' | 'browserAgent';
+      selectedAction = button.getAttribute('selected-action') as 'search';
     };
     
     // Handle action button click
@@ -87,22 +87,8 @@ const init = () => {
           e.preventDefault();
           const searchInputElement = document.getElementById('search-input') as HTMLInputElement;
           if(searchInputElement?.value){
-            switch (selectedAction) {
-              case 'search':
-                window.BrowserAPI.createTab(window.BrowserAPI.appWindowId, searchInputElement.value, true);
-                window.BrowserAPI.hideCommandKOverlay(window.BrowserAPI.appWindowId);
-                break;
-              case 'deepResearch':
-                window.BrowserAPI.hideCommandKOverlay(window.BrowserAPI.appWindowId);
-                break;
-              case 'talkToGPT':
-                window.BrowserAPI.hideCommandKOverlay(window.BrowserAPI.appWindowId);
-                break;
-              case 'browserAgent':
-                window.BrowserAPI.assignTaskToBrowserAgent(window.BrowserAPI.appWindowId, searchInputElement.value);
-                window.BrowserAPI.hideCommandKOverlay(window.BrowserAPI.appWindowId);
-                break;
-            }
+            window.BrowserAPI.createTab(window.BrowserAPI.appWindowId, searchInputElement.value, true);
+            window.BrowserAPI.hideCommandKOverlay(window.BrowserAPI.appWindowId);
           }
           // const activeItem = document.querySelector<HTMLElement>('.result-item.active');
           // if (activeItem) {

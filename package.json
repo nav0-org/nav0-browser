@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "A minimal, privacy-focused web browser built on Electron",
   "private": true,
+  "main": ".webpack/main",
   "type": "module",
   "scripts": {
     "docs:dev": "vitepress dev docs",
@@ -13,19 +14,27 @@
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx .",
-    "postinstall": "electron-rebuild -f -w better-sqlite3 && electron-rebuild -f -w node-llama-cpp && node patch-scripts/patch-compileLLamaCpp.js",
-    "rebuild": "electron-rebuild -f -w better-sqlite3 && electron-rebuild -f -w node-llama-cpp && node patch-scripts/patch-compileLLamaCpp.js",
-    "build-node-llama-cpp": "npm rebuild node-llama-cpp --build-from-source && node patch-scripts/patch-compileLLamaCpp.js "
+    "postinstall": "electron-rebuild -f -w better-sqlite3",
+    "rebuild": "electron-rebuild -f -w better-sqlite3"
   },
-  "keywords": [],
+  "keywords": [
+    "browser",
+    "electron",
+    "privacy",
+    "minimal",
+    "open-source"
+  ],
   "author": {
     "name": "Ketan Patil",
     "email": "100.percent.ketan@gmail.com"
   },
-  "license": "UNLICENSED",
-  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nav0-org/nav0-browser"
+  },
   "devDependencies": {
-  
+    "@electron-forge/cli": "^7.8.0",
     "@electron-forge/maker-deb": "^7.8.0",
     "@electron-forge/maker-dmg": "^7.8.0",
     "@electron-forge/maker-rpm": "^7.8.0",
@@ -56,18 +65,6 @@
     "typescript": "5.8.3",
     "vitepress": "^1.5.0"
   },
-  "keywords": [
-    "browser",
-    "electron",
-    "privacy",
-    "minimal",
-    "open-source"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/nav0-org/nav0-browser"
-  },
   "dependencies": {
     "better-sqlite3": "11.9.1",
     "bluebird": "3.7.2",
@@ -75,12 +72,10 @@
     "electron-store": "8.2.0",
     "lucide": "0.503.0",
     "marked": "15.0.11",
-    "node-llama-cpp": "3.12.4",
     "pdf-parse": "1.1.1",
     "uuid": "11.1.0"
   },
   "electronDependencies": [
-    "node-llama-cpp",
     "better-sqlite3"
   ]
 }

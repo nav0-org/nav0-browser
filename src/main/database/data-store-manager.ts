@@ -1,7 +1,6 @@
 import { ipcMain, webContents, BrowserWindow } from 'electron';
 import Store from 'electron-store';
 import { DataStoreConstants, RendererToMainEventsForDataStoreIPC } from '../../constants/app-constants';
-import { LLMInferenceManager } from '../llm/llm-inference-manager';
 
 // Define interface for watcher data
 interface WatcherData {
@@ -22,9 +21,7 @@ export abstract class DataStoreManager {
   }
 
   private static initStores(): void {
-    DataStoreManager.stores.set(DataStoreConstants.DOWNLOADED_LLM_MODELS, new Store({ name: DataStoreConstants.DOWNLOADED_LLM_MODELS, defaults: { 'default' : DataStoreManager.getDefaultValue(DataStoreConstants.DOWNLOADED_LLM_MODELS)} as Record<string, any> }));
     DataStoreManager.stores.set(DataStoreConstants.BROWSER_SETTINGS, new Store({ name: DataStoreConstants.BROWSER_SETTINGS, defaults: {'default' : DataStoreManager.getDefaultValue(DataStoreConstants.BROWSER_SETTINGS)}  as Record<string, any>}));
-    DataStoreManager.stores.set(DataStoreConstants.LLM_CONFIGURATION, new Store({ name: DataStoreConstants.LLM_CONFIGURATION, defaults: { 'default' : DataStoreManager.getDefaultValue(DataStoreConstants.LLM_CONFIGURATION)}  as Record<string, any> }));
   }
 
 
@@ -36,10 +33,7 @@ export abstract class DataStoreManager {
     // Set store handler
     ipcMain.handle(RendererToMainEventsForDataStoreIPC.STORE_SET, (event, storeName, value) => {
       DataStoreManager.stores.get(storeName)?.set(DataStoreManager.UNIVERSAL_KEY, value);
-      if(storeName === DataStoreConstants.LLM_CONFIGURATION){
-        LLMInferenceManager.init();
-      }
-      
+
       // // Notify all watchers except sender
       // for (const [watcherId, watchData] of DataStore.watchers.entries()) {
       //   if (watcherId !== event.sender.id && 
@@ -127,20 +121,6 @@ export abstract class DataStoreManager {
   private static getDefaultValue(storeName: string): any{
     let returnValue;
     switch (storeName) {
-      case DataStoreConstants.DOWNLOADED_LLM_MODELS:
-        returnValue = [];
-        break;
-      case DataStoreConstants.LLM_CONFIGURATION:
-        returnValue = {
-          minP: 0.05,
-          topP: 0.9,
-          topK: 40,
-          randomSeed : 1742883981,
-          temperature: 0.7,
-          primarySearchEngine: 'Google',
-          maxTokens: 4 * 1024
-        };
-        break;
       case DataStoreConstants.BROWSER_SETTINGS:
         returnValue = {};
         break;

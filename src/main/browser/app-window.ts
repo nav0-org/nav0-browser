@@ -5,7 +5,6 @@ import { AppConstants, InAppUrls, MainToRendererEventsForBrowserIPC } from "../.
 import { OptionsMenuManager } from "./options-menu-manager";
 import { CommandKOverlayManager } from "./command-k-overlay-manager";
 import type { Database as DB } from 'better-sqlite3';
-import { WebLLMInteractionManager } from "../llm/web-llm-interaction-manager";
 
 export class AppWindow {
   public readonly id: string = uuid();
@@ -222,7 +221,4 @@ export class AppWindow {
     }
   }
   
-  executeAssignedTaskByBrowserAgent(task: string): void {
-    WebLLMInteractionManager.excecuteTaskByBrowserAgent(this, task);
-  }
 }

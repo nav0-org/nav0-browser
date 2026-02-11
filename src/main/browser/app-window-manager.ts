@@ -271,8 +271,5 @@ export abstract class AppWindowManager {
       AppWindowManager.createWindow(true);
     });
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.ASSIGN_TASK_TO_BROWSER_AGENT, async (event, appWindowId: string, task: string) => {
-      this.getWindowById(appWindowId)?.executeAssignedTaskByBrowserAgent(task);
-    });
   }
 }

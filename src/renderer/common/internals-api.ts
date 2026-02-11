@@ -1,4 +1,4 @@
-
+export {};
 
 declare global {
   interface Window {
@@ -37,11 +37,6 @@ declare global {
       handleFileSelection: (appWindowId: string, tabId: string, extensions: string[]) => Promise<string[] | null>;
       
 
-      generateAISummary: (appWindowId: string | null, tabId: string | null, text: string) => Promise<any>;
-      hideAISummaryOverlay: (appWindowId: string | null, tabId: string | null) => Promise<any>;
-      addToKnowledgeHub: (appWindowId: string, tabId: string) => Promise<any>;
-      assignTaskToBrowserAgent: (appWindowId: string, task: string) => Promise<any>;
-      
       updateBrowserViewBounds: (appWindowId: string, bounds: { x: number, y: number, width: number, height: number }) => Promise<any>;
       closeAppWindow: (appWindowId: string) => Promise<any>;
       createNewAppWindow: () => Promise<any>;
@@ -61,7 +56,6 @@ declare global {
       onTabUrlUpdated: (callback: (data: { id: string, url: string, isBookmark: boolean, bookmarkId: string | null, canGoBack: boolean, canGoForward: boolean }) => void) => void;
       onTabFaviconUpdated: (callback: (data: { id: string, faviconUrl: string }) => void) => void;
       onNavigationFailed: (callback: (data: { id: string }) => void) => void;
-      onAISummaryGenerationChunk: (callback: (data: { responseChunk: string }) => void) => void;
     };
   }
 }

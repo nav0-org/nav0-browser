@@ -2,15 +2,12 @@ import type { ForgeConfig } from '@electron-forge/shared-types';
 import { MakerZIP } from '@electron-forge/maker-zip';
 import { MakerDeb } from '@electron-forge/maker-deb';
 import { MakerRpm } from '@electron-forge/maker-rpm';
-import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-natives';
 import { WebpackPlugin } from '@electron-forge/plugin-webpack';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
 
 import { mainConfig } from './webpack.main.config';
 import { rendererConfig } from './webpack.renderer.config';
-import path from 'path';
-import fs from 'fs';
 
 const config: ForgeConfig = {
   packagerConfig: {
@@ -22,12 +19,6 @@ const config: ForgeConfig = {
   rebuildConfig: {
     force: true
   },
-  // Specify which files should not be bundled into asar
-  // asarUnpack: [
-  //   '**/node_modules/node-llama-cpp/bins/**',
-  //   '**/node_modules/node-llama-cpp/llama/localBuilds/**',
-  //   '**/node_modules/@node-llama-cpp/**'
-  // ],
   makers: [
     new MakerZIP({}, ['win32']),
     new MakerZIP({}, ['darwin']), 
@@ -48,26 +39,8 @@ const config: ForgeConfig = {
       }
     }
   ],
-  hooks: {
-    packageAfterCopy: async (config, buildPath, electronVersion, platform, arch) => {
-      const targetDir = path.join(buildPath, '../node_modules');
-      try {
-        fs.mkdirSync(targetDir, { recursive: true });
-        fs.cpSync(path.join(process.cwd(), 'node_modules/@node-llama-cpp'), path.join(targetDir, '@node-llama-cpp'), { recursive: true });
-        fs.cpSync(path.join(process.cwd(), 'node_modules/@reflink'), path.join(targetDir, '@reflink'), { recursive: true });
-      } catch (error) {
-        console.error('Error in packageAfterCopy :', error);
-      }
-    }
-  },
+  hooks: {},
   plugins: [
-    // new AutoUnpackNativesPlugin({
-    //   unpackGlob: [
-    //     "./node_modules/node-llama-cpp/bins",
-    //     "./node_modules/node-llama-cpp/llama/localBuilds",
-    //     "./node_modules/@node-llama-cpp/**/*.*"
-    //   ]
-    // }),
     new WebpackPlugin({
       mainConfig,
       devContentSecurityPolicy: "connect-src 'self' * 'unsafe-eval'",
@@ -94,14 +67,6 @@ const config: ForgeConfig = {
             html: './src/renderer/pages/about/index.html',
             js: './src/renderer/pages/about/index.ts',
             name: 'about',
-          },
-          {
-            html: './src/renderer/pages/ai-settings/index.html',
-            js: './src/renderer/pages/ai-settings/index.ts',
-            name: 'ai_settings',
-            preload: {
-              js: './src/preload/internals-api.ts',
-            },
           },
           {
             html: './src/renderer/pages/bookmarks/index.html',
@@ -154,22 +119,6 @@ const config: ForgeConfig = {
             },
           },
           {
-            html: './src/renderer/pages/knowledge-hub/index.html',
-            js: './src/renderer/pages/knowledge-hub/index.ts',
-            name: 'knowledge_hub',
-            preload: {
-              js: './src/preload/internals-api.ts',
-            },
-          },
-          {
-            html: './src/renderer/pages/llm-chat/index.html',
-            js: './src/renderer/pages/llm-chat/index.ts',
-            name: 'llm_chat',
-            preload: {
-              js: './src/preload/internals-api.ts',
-            },
-          },
-          {
             html: './src/renderer/pages/new-tab/index.html',
             js: './src/renderer/pages/new-tab/index.ts',
             name: 'new_tab',
@@ -186,14 +135,6 @@ const config: ForgeConfig = {
             html: './src/renderer/pages/report-issue/index.html',
             js: './src/renderer/pages/report-issue/index.ts',
             name: 'report_issue',
-          },
-          {
-            html: './src/renderer/pages/ai-summary/index.html',
-            js: './src/renderer/pages/ai-summary/index.ts',
-            name: 'ai_summary',
-            preload: {
-              js: './src/preload/internals-api.ts',
-            },
           },
         ],
       },

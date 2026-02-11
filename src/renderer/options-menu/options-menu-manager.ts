@@ -21,26 +21,20 @@ export class OptionsMenuManager {
       document.getElementById('new-tab-shortcut').textContent = '⌘+T';
       document.getElementById('new-window-shortcut').textContent = '⌘+N';
       document.getElementById('new-private-window-shortcut').textContent = '⌘+⇧+T';
-      document.getElementById('ai-summary-shortcut').textContent = '⌘+⇧+A+I';
-      document.getElementById('add-to-knowledge-hub-shortcut').textContent = '⌘+⇧+=';
       document.getElementById('find-in-page-shortcut').textContent = '⌘+F';
       document.getElementById('downloads-shortcut').textContent = '⌘+⇧+D';
       document.getElementById('history-shortcut').textContent = '⌘+⇧+H';
       document.getElementById('bookmarks-shortcut').textContent = '⌘+⇧+B';
       document.getElementById('browser-settings-shortcut').textContent = '⌘+⇧+,';
-      document.getElementById('ai-settings-shortcut').textContent = '⌘+⇧+.';
     } else {
       document.getElementById('new-tab-shortcut').textContent = 'Ctrl+T';
       document.getElementById('new-window-shortcut').textContent = 'Ctrl+N';
       document.getElementById('new-private-window-shortcut').textContent = 'Ctrl+⇧+T';
-      document.getElementById('ai-summary-shortcut').textContent = 'Ctrl+⇧+A+I';
-      document.getElementById('add-to-knowledge-hub-shortcut').textContent = 'Ctrl+⇧+=';
       document.getElementById('find-in-page-shortcut').textContent = 'Ctrl+F';
       document.getElementById('downloads-shortcut').textContent = 'Ctrl+⇧+D';
       document.getElementById('history-shortcut').textContent = 'Ctrl+⇧+H';
       document.getElementById('bookmarks-shortcut').textContent = 'Ctrl+⇧+B';
       document.getElementById('browser-settings-shortcut').textContent = 'Ctrl+⇧+,';
-      document.getElementById('ai-settings-shortcut').textContent = 'Ctrl+⇧+.';
     }
   }
 
@@ -59,14 +53,6 @@ export class OptionsMenuManager {
 
     this.optionsElement?.querySelector('#new-private-window-option')?.addEventListener('click', async () => {
       await window.BrowserAPI.createNewPrivateAppWindow();
-    });
-
-    this.optionsElement?.querySelector('#ai-summary-option')?.addEventListener('click', async () => {
-      await window.BrowserAPI.generateAISummary(this.appWindowId, this.activeTabId, '');
-    });
-
-    this.optionsElement?.querySelector('#add-to-knowledge-hub-option')?.addEventListener('click', async () => {
-      await window.BrowserAPI.addToKnowledgeHub(this.appWindowId, this.activeTabId);
     });
 
     this.optionsElement?.querySelector('#find-in-page-option')?.addEventListener('click', async () => {
@@ -109,9 +95,6 @@ export class OptionsMenuManager {
       await window.BrowserAPI.createTab(this.appWindowId, InAppUrls.BROWSER_SETTINGS, true);
     });
 
-    this.optionsElement?.querySelector('#ai-settings-option')?.addEventListener('click', async () => {
-      await window.BrowserAPI.createTab(this.appWindowId, InAppUrls.AI_SETTINGS, true);
-    });
   }
   public toggleOptionsVisibility(): void {
     this.optionsElement?.classList.toggle('show');

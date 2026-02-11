@@ -42,11 +42,6 @@ export abstract class AppMenuManager {
           {label: 'Downloads', accelerator: 'CmdOrCtrl+Shift+D',click: async() => { AppWindowManager.getActiveWindow().createTab(InAppUrls.DOWNLOADS, true) }},
           {type: 'separator' as const},
           {label: 'Command K Interface', accelerator: 'CmdOrCtrl+K', click: async() => { AppWindowManager.getActiveWindow().showCommandKOverlay() }},
-          // {label: 'Knowledge Hub', click: async() => { AppWindowManager.getActiveWindow().createTab(InAppUrls.KNOWLEDGE_HUB, true) }},
-          {label: 'LLM Chat', click: async() => { AppWindowManager.getActiveWindow().createTab(InAppUrls.LLM_CHAT, true) }},
-          {type: 'separator' as const},
-          // {label: 'Browser Settings',  accelerator: 'CmdOrCtrl+Shift+,', click: async() => { AppWindowManager.getActiveWindow().createTab(InAppUrls.BROWSER_SETTINGS, true) }},
-          {label: 'AI Settings',  accelerator: 'CmdOrCtrl+Shift+.', click: async() => { AppWindowManager.getActiveWindow().createTab(InAppUrls.AI_SETTINGS, true) }},
         ]
       },
       {

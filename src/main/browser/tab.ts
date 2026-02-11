@@ -2,8 +2,6 @@ import { app, BrowserWindow, dialog, Menu, MenuItem, WebContentsView } from "ele
 import { InAppUrls, MainToRendererEventsForBrowserIPC, WebContentsEvents } from "../../constants/app-constants";
 import { v4 as uuid } from "uuid";
 import { AppWindow } from "./app-window";
-import { LLMInferenceManager } from "../llm/llm-inference-manager";
-import { WebLLMInteractionManager } from "../llm/web-llm-interaction-manager";
 import { BookmarkManager } from "./bookmark-manager";
 import { BookmarkRecord } from "../../types/bookmark-record";
 import { BrowsingHistoryManager } from "./browsing-history-manager";
@@ -41,9 +39,6 @@ export class Tab {
     if (this.url.startsWith(InAppUrls.ABOUT)){
       urlToLoad = ABOUT_WEBPACK_ENTRY;
       preloadScriptToLoad = ABOUT_PRELOAD_WEBPACK_ENTRY;
-    } else if (this.url.startsWith(InAppUrls.AI_SETTINGS)){
-      urlToLoad = AI_SETTINGS_WEBPACK_ENTRY;
-      preloadScriptToLoad = AI_SETTINGS_PRELOAD_WEBPACK_ENTRY;
     } else if (this.url.startsWith(InAppUrls.BOOKMARKS)){
       urlToLoad = BOOKMARKS_WEBPACK_ENTRY;
       preloadScriptToLoad = BOOKMARKS_PRELOAD_WEBPACK_ENTRY;
@@ -62,12 +57,6 @@ export class Tab {
     } else if (this.url.startsWith(InAppUrls.HISTORY)){
       urlToLoad = HISTORY_WEBPACK_ENTRY;
       preloadScriptToLoad = HISTORY_PRELOAD_WEBPACK_ENTRY;
-    } else if (this.url.startsWith(InAppUrls.KNOWLEDGE_HUB)){
-      urlToLoad = KNOWLEDGE_HUB_WEBPACK_ENTRY;
-      preloadScriptToLoad = KNOWLEDGE_HUB_PRELOAD_WEBPACK_ENTRY;
-    } else if (this.url.startsWith(InAppUrls.LLM_CHAT)){
-      urlToLoad = this.url.replace(InAppUrls.LLM_CHAT, LLM_CHAT_WEBPACK_ENTRY);
-      preloadScriptToLoad = LLM_CHAT_PRELOAD_WEBPACK_ENTRY;
     } else if (this.url.startsWith(InAppUrls.NEW_TAB)){
       urlToLoad = NEW_TAB_WEBPACK_ENTRY;
       preloadScriptToLoad = NEW_TAB_PRELOAD_WEBPACK_ENTRY;
@@ -199,9 +188,6 @@ export class Tab {
     if(!this.url.startsWith(InAppUrls.PREFIX) && this.url !== '') {
       this.url = url;
     }
-    if(url.indexOf(LLM_CHAT_WEBPACK_ENTRY)=== 0){
-      this.url = url.replace(LLM_CHAT_WEBPACK_ENTRY, InAppUrls.LLM_CHAT);
-    }
     let urlObject: URL | null = null;
     try {
       urlObject = new URL(this.url);
@@ -322,18 +308,7 @@ export class Tab {
       //     }
       //   );
       // }
-      if (template.length > 0) {
-        template.push({ type: 'separator' });
-      }
-      template.push(
-        { label: 'Use AI to write', 
-          click: async (data) => {
-            WebLLMInteractionManager.generateAITextForWriting(this.webContentsViewInstance);
-          }
-        },
-        { type:  'separator'}
-      );
-    } 
+    }
     if (linkURL) { //for clicking on hyperlinks
       template.push(
         { label: 'Open link in new tab', click: () => {
@@ -370,13 +345,6 @@ export class Tab {
           this.parentAppWindow.createTab(selectionText, true);
         }}
       );
-      if(selectionText.length > 50){
-        template.push(
-          { label: 'Generate AI summary', click: (data) => {
-            LLMInferenceManager.generateAISummary('', selectionText);
-          }}
-        );
-      }
       template.push(
         { type:  'separator'}
       );

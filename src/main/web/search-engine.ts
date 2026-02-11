@@ -1,25 +1,29 @@
-import { LLMConfiguration } from "../../types/llm";
 import { DataStoreConstants } from "../../constants/app-constants";
 import { DataStoreManager } from "../database/data-store-manager";
 import { WebContentsView } from "electron";
 import Bluebird from "bluebird";
 
 export abstract class SearchEngine {
+  private static getSearchEngine(): string {
+    const browserSettings = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as any;
+    return browserSettings?.primarySearchEngine || 'Google';
+  }
+
   public static async getSearchUrl(searchTerm: string): Promise<string> {
-    const llmConfiguration = DataStoreManager.get(DataStoreConstants.LLM_CONFIGURATION) as LLMConfiguration;
-    if(llmConfiguration.primarySearchEngine === 'Google'){
+    const searchEngine = SearchEngine.getSearchEngine();
+    if(searchEngine === 'Google'){
       return `https://www.google.com/search?q=${searchTerm}`;
-    } else if(llmConfiguration.primarySearchEngine === 'Bing'){
+    } else if(searchEngine === 'Bing'){
       return `https://www.bing.com/search?q=${searchTerm}`;
-    } else if(llmConfiguration.primarySearchEngine === 'DuckDuckGo'){
+    } else if(searchEngine === 'DuckDuckGo'){
       return `https://duckduckgo.com/?q=${searchTerm}`;
     } else {
-      throw new Error('Unsupported search engine');
+      return `https://www.google.com/search?q=${searchTerm}`;
     }
   }
 
   public static async getTopResults(searchTerm: string): Promise<Array<string>> {
-    const llmConfiguration = DataStoreManager.get(DataStoreConstants.LLM_CONFIGURATION) as LLMConfiguration;
+    const searchEngine = SearchEngine.getSearchEngine();
     const searchUrl = await SearchEngine.getSearchUrl(searchTerm);
     const webContentsView = new WebContentsView({
       webPreferences: {
@@ -35,14 +39,14 @@ export abstract class SearchEngine {
     await webContentsView.webContents.loadURL(searchUrl).catch((error) => {console.error(error);});
     // await new Promise(resolve => setTimeout(resolve, 3000));
     let results: Array<string> = [];
-    if(llmConfiguration.primarySearchEngine === 'Google'){
+    if(searchEngine === 'Google'){
       results = await SearchEngine.extractTopSearchResultsForGoogle(webContentsView);
-    } else if(llmConfiguration.primarySearchEngine === 'Bing'){
+    } else if(searchEngine === 'Bing'){
       results = await SearchEngine.extractTopSearchResultsForBing(webContentsView);
-    } else if(llmConfiguration.primarySearchEngine === 'DuckDuckGo'){
+    } else if(searchEngine === 'DuckDuckGo'){
       results = await SearchEngine.extractTopSearchResultsForDuckDuckGo(webContentsView);
     } else {
-      throw new Error('Unsupported search engine');
+      results = await SearchEngine.extractTopSearchResultsForGoogle(webContentsView);
     }
     webContentsView.webContents.close();
     return results;
