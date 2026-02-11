@@ -1,0 +1,54 @@
+@import url("../../styles/global.css");
+
+.hero-section {
+  background-color: var(--primary-light);
+  padding: var(--spacing-xl) 0;
+  margin-bottom: var(--spacing-xl);
+}
+
+.policy-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.policy-section h2 {
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 2px solid var(--primary-light);
+}
+
+.policy-section h3 {
+  margin-top: var(--spacing-lg);
+  margin-bottom: var(--spacing-sm);
+}
+
+.policy-section p {
+  margin-bottom: var(--spacing-md);
+  line-height: 1.6;
+}
+
+.policy-section ul {
+  margin-bottom: var(--spacing-md);
+  padding-left: var(--spacing-lg);
+}
+
+.policy-section li {
+  margin-bottom: var(--spacing-sm);
+  line-height: 1.6;
+}
+
+.highlight-box {
+  background-color: var(--primary-light);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  margin: var(--spacing-lg) 0;
+  border-left: 4px solid var(--primary-color);
+}
+
+.last-updated {
+  font-style: italic;
+  color: var(--text-secondary);
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-color);
+}

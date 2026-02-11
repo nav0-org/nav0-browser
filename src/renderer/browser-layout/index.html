@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:;">
+  <title>AI Browser</title>
+  <link rel="stylesheet" src="styles/index.css">
+</head>
+<body>
+  <div id="browser-layout-container" class="browser-layout-container">
+    <div id="browser-control-panel" class="controls">
+      <!-- Tab Bar -->
+      <div class="tab-bar">
+        <div class="private-window-identifier" title="This is a private window."  id="private-window-identifier">
+          <i data-lucide="shield-check" width="18" height="18" style="margin-right: 6px;"></i>
+          <span>Private!</span>
+        </div>
+        <div class="tabs-container" id="tabs-container">
+          <!-- Tabs will be dynamically inserted here -->
+        </div>
+        
+        <div id="controls-wrapper">
+          <button class="btn-icon btn-ghost rounded-circle p-0" id="new-tab-button" style="width: 28px; height: 28px;">
+            <i data-lucide="plus" width="16" height="16"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Navigation Bar -->
+    <div class="nav-bar">
+      <div class="nav-controls">
+        <button id="back-button" title="Go back" disabled="true" class="btn-icon btn-ghost rounded-circle p-0" style="width: 32px; height: 32px;">
+          <i data-lucide="arrow-left" width="18" height="18"></i>
+        </button>
+        <button id="forward-button" title="Go forward" disabled="true" class="btn-icon btn-ghost rounded-circle p-0" style="width: 32px; height: 32px;">
+          <i data-lucide="arrow-right" width="18" height="18"></i>
+        </button>
+        <button id="refresh-button" title="Refresh" class="btn-icon btn-ghost rounded-circle p-0" style="width: 32px; height: 32px;">
+          <i data-lucide="refresh-cw" width="18" height="18"></i>
+        </button>
+        <button id="command-k-button" title="Super search with Command K" class="btn-icon btn-ghost rounded-circle p-0" style="width: 32px; height: 32px;">
+          <i data-lucide="terminal" width="18" height="18"></i>
+        </button>
+      </div>
+      
+      <div class="address-bar">
+        <button class="btn-icon btn-ghost rounded-circle p-0 search-icon" style="width: 32px; height: 32px;">
+          <i data-lucide="search" width="16" height="16"></i>
+        </button>
+        <input type="text" class="url-input" id="url-input">
+        <button id="bookmark-button"  title="Bookmark this page" class="btn-icon btn-ghost rounded-circle p-0" style="width: 32px; height: 32px;">
+          <i data-lucide="bookmark" width="16" height="16"></i>
+        </button>
+        <button id="unbookmark-button"  title="Remove bookmark" class="btn-icon btn-ghost rounded-circle p-0" style="width: 32px; height: 32px;">
+          <i data-lucide="bookmark-check" width="16" height="16"></i>
+        </button>
+        <button style="display: none;" id="ai-summary-button" title="Generate AI summary for this page" class="btn-icon btn-ghost rounded-circle p-0" style="width: 32px; height: 32px;">
+          <i data-lucide="atom" width="16" height="16"></i>
+        </button>
+        <button style="display: none;" id="add-to-knowledge-hub-button" title="Add this page to Knowledge Hub" class="btn-icon btn-ghost rounded-circle p-0" style="width: 32px; height: 32px;">
+          <i data-lucide="book-plus" width="16" height="16"></i>
+        </button>
+      </div>
+      
+      <button class="btn-icon btn-ghost rounded-circle p-0 position-relative" title="Menu options"  id="options-button" style="width: 32px; height: 32px; margin-left: var(--spacing-xs);">
+        <i data-lucide="ellipsis-vertical" width="18" height="18"></i>
+      </button>
+      <div id="options-container"></div>
+    </div>
+    </div>
+    <div id="browser-view-container">
+      <!-- This is where the BrowserView will be displayed -->
+    </div>
+  </div>
+  
+</body>
+</html>

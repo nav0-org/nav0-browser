@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:;">
+  <link rel="stylesheet" src="index.css">
+  <title>Bookmarks</title>
+</head>
+<body>
+  <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="container text-center">
+          <h1 class="mb-sm">Bookmarks</h1>
+          <p>Your favorite sites organized in one place</p>
+      </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="container">
+      <!-- Bookmarks Container -->
+      <div class="bookmarks-container">
+          <div id="bookmarks-list" class="bookmarks-list">
+              <!-- Bookmark items will be dynamically inserted here -->
+          </div>
+          <div id="no-bookmarks" class="no-bookmarks">
+            No bookmarks saved yet.
+          </div>
+      </div>
+
+      <div style="text-align: center;">
+        <button class="btn delete-all-button" id="delete-all">
+          Clear all bookmarks?
+        </button>
+      </div>
+      
+      
+      <!-- <div class="info-box">
+          <p><strong>Privacy Note:</strong> Your bookmarks are stored locally on your device and are never transmitted to any server. Only you have access to this information.</p>
+      </div> -->
+  </main>
+</body>
+</html>

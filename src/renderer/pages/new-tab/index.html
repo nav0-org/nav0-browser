@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:;">
+  <link rel="stylesheet" src="index.css">
+  <title>New Tab</title>
+</head>
+<body>
+  <h1 class="greeting">Hello</h1>
+  
+  <div class="bento-container">
+      <div class="bento-item search-item">
+          <input type="text" id="search-bar" class="search-bar" placeholder="Enter a search term or an URL">
+      </div>
+      
+      <a href="#" class="shortcut-link" id="llm-chat">
+          <div class="bento-item">
+              <div class="shortcut-header">
+                  <div class="icon-container">
+                      <i data-lucide="message-circle" class="icon"></i>
+                  </div>
+                  <h2 class="shortcut-title">LLM Chats</h2>
+              </div>
+              <p class="shortcut-description">
+                  Engage with advanced AI models for creative writing, problem-solving, and general conversation. Experience seamless interactions with multiple AI personalities.
+              </p>
+          </div>
+      </a>
+      
+      <a href="#" class="shortcut-link" id="rag-chat">
+          <div class="bento-item">
+              <div class="shortcut-header">
+                  <div class="icon-container">
+                      <i data-lucide="file-text" class="icon"></i>
+                  </div>
+                  <h2 class="shortcut-title">Document Q&A</h2>
+              </div>
+              <p class="shortcut-description">
+                  Upload documents and get intelligent answers using Retrieval Augmented Generation (RAG). Ask questions about your PDFs, research papers, and text files with precision.
+              </p>
+          </div>
+      </a>
+      
+      <a href="#" class="shortcut-link" id="web-research">
+          <div class="bento-item">
+              <div class="shortcut-header">
+                  <div class="icon-container">
+                      <i data-lucide="search" class="icon"></i>
+                  </div>
+                  <h2 class="shortcut-title">Web Research</h2>
+              </div>
+              <p class="shortcut-description">
+                  Get real-time information from the web with AI-powered research. Access current events, latest data, and up-to-date information for comprehensive answers.
+              </p>
+          </div>
+      </a>
+      
+      <a href="#" class="shortcut-link" id="browser-agent">
+          <div class="bento-item">
+              <div class="shortcut-header">
+                  <div class="icon-container">
+                      <i data-lucide="bot" class="icon"></i>
+                  </div>
+                  <h2 class="shortcut-title">Browser Agent</h2>
+              </div>
+              <p class="shortcut-description">
+                  Autonomous web navigation and task automation. Let AI browse websites, fill forms, extract data, and perform complex web-based tasks on your behalf.
+              </p>
+          </div>
+      </a>
+      
+      <!-- <a href="#" class="shortcut-link" id="knowledge-hub">
+          <div class="bento-item">
+              <div class="shortcut-header">
+                  <div class="icon-container">
+                      <i data-lucide="book-open" class="icon"></i>
+                  </div>
+                  <h2 class="shortcut-title">Knowledge Hub</h2>
+              </div>
+              <p class="shortcut-description">
+                  Access your personal library of saved articles, notes, and documentation. Organize, search, and discover insights from your curated knowledge base.
+              </p>
+          </div>
+      </a> -->
+  </div>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:;">
+  <link rel="stylesheet" src="index.css">
+  <title>Browsing History</title>
+</head>
+<body>
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container text-center">
+        <h1 class="mb-sm">Browsing History</h1>
+        <p>View and manage your local browsing history</p>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="container">
+    <!-- Search Bar -->
+    <div class="search-container">
+        <input type="text" id="search-input" class="search-input" placeholder="Search history...">
+        <i data-lucide="search" class="search-icon"></i>
+    </div>
+    
+    <!-- History Container -->
+    <div class="history-container">
+        <div id="history-list" class="history-list">
+            <!-- History items will be dynamically inserted here -->
+        </div>
+				<div id="no-history" class="no-history">
+					No browsing history saved yet.
+				</div>
+    </div>
+    
+    <!-- History Stats and Clear Button -->
+    <div class="history-stats">
+			<div class="text-center">
+				<button id="delete-all" class="btn clear-all-button">Clear All History</button>
+			</div>
+    </div>
+</main>
+</body>
+</html>
