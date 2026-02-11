@@ -1,4 +1,5 @@
 import type { ForgeConfig } from '@electron-forge/shared-types';
+import { MakerSquirrel } from '@electron-forge/maker-squirrel';
 import { MakerZIP } from '@electron-forge/maker-zip';
 import { MakerDeb } from '@electron-forge/maker-deb';
 import { MakerRpm } from '@electron-forge/maker-rpm';
@@ -20,24 +21,22 @@ const config: ForgeConfig = {
     force: true
   },
   makers: [
-    new MakerZIP({}, ['win32']),
-    new MakerZIP({}, ['darwin']), 
-    new MakerRpm({}), 
-    new MakerDeb({}),
-    {
-      name: '@electron-forge/maker-deb',
-        config: {
-          options: {
-            icon: 'src/renderer/assets/logo.png'
-          }
-      }
-    },
+    new MakerSquirrel({
+      name: 'nav0-browser',
+    }),
+    new MakerZIP({}, ['darwin']),
+    new MakerDeb({
+      options: {
+        icon: 'src/renderer/assets/logo.png',
+      },
+    }),
+    new MakerRpm({}),
     {
       name: '@electron-forge/maker-dmg',
       config: {
-        format: 'ULFO'
-      }
-    }
+        format: 'ULFO',
+      },
+    },
   ],
   hooks: {},
   plugins: [

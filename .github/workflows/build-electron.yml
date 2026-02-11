@@ -1,6 +1,14 @@
 name: Build Electron App for All Platforms
 
 on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
   workflow_dispatch:
     inputs:
       version:
@@ -21,57 +29,32 @@ permissions:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-    
+
     strategy:
+      fail-fast: false
       matrix:
         include:
-          # macOS builds - use native architecture of the runner
-          - os: macos-13  # Intel runner for x64
+          # macOS builds
+          - os: macos-13        # Intel runner for x64
             platform: mac
             arch: x64
-            variant: cpu
             artifact_name: macOS-x64
-            target_arch: x64
-          - os: macos-latest  # ARM64 runner 
+          - os: macos-latest    # ARM64 runner
             platform: mac
             arch: arm64
-            variant: metal
-            artifact_name: macOS-arm64-metal
-            target_arch: arm64
-          
-          # Linux builds - x64 only
+            artifact_name: macOS-arm64
+
+          # Linux build
           - os: ubuntu-latest
             platform: linux
             arch: x64
-            variant: cuda
-            artifact_name: Linux-x64-cuda
-            target_arch: x64
-          - os: ubuntu-latest
-            platform: linux
-            arch: x64
-            variant: vulkan
-            artifact_name: Linux-x64-vulkan
-            target_arch: x64
-          - os: ubuntu-latest
-            platform: linux
-            arch: x64
-            variant: cpu
             artifact_name: Linux-x64
-            target_arch: x64
-          
-          # Windows builds - x64 only
+
+          # Windows build
           - os: windows-latest
             platform: win
             arch: x64
-            variant: cuda
-            artifact_name: Windows-x64-cuda
-            target_arch: x64
-          - os: windows-latest
-            platform: win
-            arch: x64
-            variant: vulkan
-            artifact_name: Windows-x64-vulkan
-            target_arch: x64
+            artifact_name: Windows-x64
 
     steps:
       - name: Checkout repository
@@ -80,7 +63,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'  # Required by node-llama-cpp
+          node-version: '22'
           cache: 'npm'
 
       # Windows dependencies for electron-forge
@@ -88,7 +71,6 @@ jobs:
         if: matrix.platform == 'win'
         shell: powershell
         run: |
-          # Install 7zip for any zip operations
           choco install 7zip -y
           echo "Windows build tools installed"
 
@@ -97,11 +79,7 @@ jobs:
         if: matrix.platform == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libnss3-dev libatk-bridge2.0-dev libdrm2 libgtk-3-dev libgbm-dev
-
-      # Install dependencies without running postinstall scripts
-      - name: Install dependencies
-        run: npm ci --ignore-scripts
+          sudo apt-get install -y dpkg fakeroot rpm libnss3-dev libatk-bridge2.0-dev libdrm2 libgtk-3-dev libgbm-dev
 
       # Set up Python for native module compilation
       - name: Setup Python
@@ -109,93 +87,54 @@ jobs:
         with:
           python-version: '3.11'
 
-      # Rebuild native modules for DMG creation (macOS only)
+      # Install dependencies
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      # Rebuild DMG native modules (macOS only)
       - name: Rebuild DMG native modules (macOS only)
         if: matrix.platform == 'mac'
         shell: bash
         run: |
           echo "Rebuilding DMG-related native modules for macOS"
-          
-          # Get the current Node.js version
+
           NODE_VERSION=$(node -v | sed 's/v//')
           echo "Using Node.js version: $NODE_VERSION"
-          
-          # List of DMG-related packages with native modules
+
           DMG_PACKAGES=("macos-alias" "fs-xattr")
-          
+
           for package in "${DMG_PACKAGES[@]}"; do
             echo "Building $package..."
             if [ -d "node_modules/$package" ]; then
               cd "node_modules/$package"
-              
-              # Clean any existing build
               rm -rf build || true
-              
-              # Install regular node-gyp if not present
               npm install node-gyp --no-save || true
-              
-              # Try to rebuild the native module
               echo "Rebuilding $package with node-gyp..."
-              npx node-gyp rebuild --target=$NODE_VERSION --arch=${{ matrix.target_arch }} || \
+              npx node-gyp rebuild --target=$NODE_VERSION --arch=${{ matrix.arch }} || \
               npm rebuild --build-from-source || \
               echo "Warning: Failed to rebuild $package"
-              
-              # Verify build success
+
               if [ -d "build/Release" ] && [ "$(ls -A build/Release 2>/dev/null)" ]; then
                 echo "✅ $package built successfully"
                 ls -la build/Release/
               else
                 echo "❌ $package build failed or no output"
               fi
-              
+
               cd ../..
             else
-              echo "Package $package not found"
+              echo "Package $package not found, skipping"
             fi
           done
-          
-          # Final verification
-          echo "Final verification of DMG native modules:"
-          [ -f "node_modules/macos-alias/build/Release/volume.node" ] && echo "✅ volume.node found" || echo "❌ volume.node missing"
-          [ -f "node_modules/fs-xattr/build/Release/xattr.node" ] && echo "✅ xattr.node found" || echo "❌ xattr.node missing"
 
-      # Rebuild native modules using npm rebuild (simpler approach)
+      # Rebuild native modules for Electron
       - name: Rebuild native modules
         shell: bash
         run: |
-          echo "Rebuilding native modules for ${{ matrix.target_arch }} on ${{ runner.os }}"
-          
-          # Use npm rebuild with proper Electron configuration
+          echo "Rebuilding native modules for ${{ matrix.arch }} on ${{ runner.os }}"
           npm rebuild better-sqlite3 --build-from-source
-          npm rebuild node-llama-cpp --build-from-source
-          
-          # Clean up node-llama-cpp binaries for other architectures (Linux only)
-          if [ "${{ matrix.platform }}" = "linux" ]; then
-            echo "Cleaning up node-llama-cpp binaries for other architectures..."
-            
-            # Keep only the target architecture binaries
-            if [ "${{ matrix.target_arch }}" = "x64" ]; then
-              # Remove ARM64 and other architecture binaries
-              find node_modules/@node-llama-cpp/ -name "*arm64*" -type d -exec rm -rf {} + 2>/dev/null || true
-              find node_modules/@node-llama-cpp/ -name "*armv7l*" -type d -exec rm -rf {} + 2>/dev/null || true
-              find node_modules/@node-llama-cpp/ -name "*darwin*" -type d -exec rm -rf {} + 2>/dev/null || true
-              find node_modules/@node-llama-cpp/ -name "*win*" -type d -exec rm -rf {} + 2>/dev/null || true
-              echo "Cleaned up non-x64 binaries"
-            fi
-            
-            # List remaining binaries
-            echo "Remaining node-llama-cpp binaries:"
-            find node_modules/@node-llama-cpp/ -name "*.node" -o -name "*.so" | head -10
-          fi
-          
-          # Run the patch script if it exists
-          if [ -f "patch-scripts/patch-compileLLamaCpp.js" ]; then
-            node patch-scripts/patch-compileLLamaCpp.js
-          else
-            echo "Patch script not found, skipping..."
-          fi
         env:
-          npm_config_target_arch: ${{ matrix.target_arch }}
+          npm_config_target_arch: ${{ matrix.arch }}
           npm_config_target: 35.2.1
           npm_config_runtime: electron
           npm_config_disturl: https://electronjs.org/headers
@@ -204,37 +143,17 @@ jobs:
 
       # Build using electron-forge
       - name: Make Electron app
-        run: npm run make -- --arch=${{ matrix.target_arch }}
+        run: npm run make -- --arch=${{ matrix.arch }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-      # Rename artifacts to include variant for non-CPU builds
-      - name: Rename artifacts with variant
-        shell: bash
-        run: |
-          cd out/make
-          find . -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.deb" -o -name "*.rpm" -o -name "*.zip" \) | while read file; do
-            if [[ "${{ matrix.variant }}" != "cpu" ]]; then
-              dir=$(dirname "$file")
-              name=$(basename "$file")
-              # Extract name and extension
-              if [[ "$name" == *.* ]]; then
-                base="${name%.*}"
-                ext="${name##*.}"
-                new_name="${base}-${{ matrix.variant }}.${ext}"
-              else
-                new_name="${name}-${{ matrix.variant }}"
-              fi
-              mv "$file" "$dir/$new_name" 2>/dev/null || true
-            fi
-          done
-          
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
           path: |
             out/make/**/*.exe
+            out/make/**/*.nupkg
             out/make/**/*.dmg
             out/make/**/*.deb
             out/make/**/*.rpm
@@ -245,11 +164,12 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
-    
+    if: github.event_name == 'workflow_dispatch'
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+
       - name: Get version from package.json
         id: get_version
         run: |
@@ -260,55 +180,46 @@ jobs:
             echo "version=v${VERSION}" >> $GITHUB_OUTPUT
           fi
           echo "Using version: $(cat $GITHUB_OUTPUT | grep version | cut -d'=' -f2)"
-        
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: ./artifacts
-          
+
       - name: Display structure of downloaded files
-        run: ls -la ./artifacts/
+        run: ls -laR ./artifacts/
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.get_version.outputs.version }}
-          name: minP ${{ steps.get_version.outputs.version }}
+          name: Nav0 Browser ${{ steps.get_version.outputs.version }}
           body: |
-            ## minP Release ${{ steps.get_version.outputs.version }}
-            
-            AI browser shell with local LLM inferences - Multi-platform builds
-            
-            ### Downloads by Platform & Optimization
-            
+            ## Nav0 Browser ${{ steps.get_version.outputs.version }}
+
+            A minimal, privacy-focused web browser built on Electron.
+
+            ### Downloads by Platform
+
             #### macOS
-            - **Apple Silicon (ARM64) Metal**: `*-metal.*` - Optimized for Metal GPU acceleration
-            - **Intel (x64)**: Standard Intel Mac build
-            
-            #### Windows  
-            - **x64 CUDA**: `*-cuda.*` - For NVIDIA GPU acceleration
-            - **x64 Vulkan**: `*-vulkan.*` - For cross-platform GPU acceleration
-            
+            - **Apple Silicon (ARM64)**: `.dmg` / `.zip`
+            - **Intel (x64)**: `.dmg` / `.zip`
+
+            #### Windows
+            - **x64**: `.exe` installer
+
             #### Linux
-            - **x64 CUDA**: `*-cuda.*` - For NVIDIA GPU acceleration  
-            - **x64 Vulkan**: `*-vulkan.*` - For cross-platform GPU acceleration
-            - **x64 Standard**: CPU-optimized build
-            
+            - **x64**: `.deb` (Debian/Ubuntu), `.rpm` (Fedora/RHEL)
+
             ### Installation
-            - **Windows**: Extract ZIP file and run the executable
-            - **macOS**: Mount the `.dmg` and drag to Applications, or extract ZIP
-            - **Linux**: Install the `.deb`, `.rpm`, or use `.AppImage`
-            
-            ### Requirements
-            - GPU variants require appropriate drivers (NVIDIA for CUDA, Vulkan-compatible for Vulkan)
-            - Standard builds work on all compatible hardware
-            
-            ---
-            
-            Built with electron-forge and GitHub Actions 🚀
+            - **Windows**: Run the `.exe` installer
+            - **macOS**: Mount the `.dmg` and drag to Applications, or extract the `.zip`
+            - **Linux**: Install the `.deb` or `.rpm` package
           draft: false
           prerelease: ${{ github.event.inputs.prerelease == 'true' }}
           files: |
             ./artifacts/**/*.exe
+            ./artifacts/**/*.nupkg
             ./artifacts/**/*.dmg
             ./artifacts/**/*.deb
             ./artifacts/**/*.rpm
@@ -321,16 +232,13 @@ jobs:
     needs: [build, release]
     runs-on: ubuntu-latest
     if: always()
-    
+
     steps:
       - name: Delete artifacts
         uses: geekyeggo/delete-artifact@v4
         with:
           name: |
             macOS-x64
-            macOS-arm64-metal
-            Linux-x64-cuda
-            Linux-x64-vulkan
+            macOS-arm64
             Linux-x64
-            Windows-x64-cuda
-            Windows-x64-vulkan
+            Windows-x64
