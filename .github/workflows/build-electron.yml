@@ -83,6 +83,13 @@ jobs:
       - name: Install dependencies
         run: npm ci --ignore-scripts
 
+      # Rebuild electron-winstaller to download Squirrel vendor binaries
+      # (skipped by --ignore-scripts but required for Windows installer creation)
+      - name: Setup electron-winstaller
+        if: matrix.platform == 'win'
+        shell: bash
+        run: npm rebuild electron-winstaller
+
       # Rebuild DMG native modules (macOS only)
       - name: Rebuild DMG native modules (macOS only)
         if: matrix.platform == 'mac'
