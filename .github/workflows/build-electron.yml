@@ -102,14 +102,26 @@ jobs:
 
           DMG_PACKAGES=("macos-alias" "fs-xattr")
 
+          # DMG native modules (macos-alias, fs-xattr) are used by appdmg on the HOST
+          # machine to create the .dmg file. They must be compiled for the host architecture,
+          # not the target architecture, to avoid architecture mismatch errors when
+          # cross-compiling (e.g. building x64 on an arm64 runner).
+          HOST_ARCH=$(uname -m)
+          if [ "$HOST_ARCH" = "arm64" ] || [ "$HOST_ARCH" = "aarch64" ]; then
+            HOST_ARCH="arm64"
+          else
+            HOST_ARCH="x64"
+          fi
+          echo "Host architecture: $HOST_ARCH (target: ${{ matrix.arch }})"
+
           for package in "${DMG_PACKAGES[@]}"; do
-            echo "Building $package..."
+            echo "Building $package for host arch ($HOST_ARCH)..."
             if [ -d "node_modules/$package" ]; then
               cd "node_modules/$package"
               rm -rf build || true
               npm install node-gyp --no-save || true
-              echo "Rebuilding $package with node-gyp..."
-              npx node-gyp rebuild --target=$NODE_VERSION --arch=${{ matrix.arch }} || \
+              echo "Rebuilding $package with node-gyp for host arch..."
+              npx node-gyp rebuild --target=$NODE_VERSION --arch=$HOST_ARCH || \
               npm rebuild --build-from-source || \
               echo "Warning: Failed to rebuild $package"
 
