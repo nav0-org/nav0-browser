@@ -71,25 +71,6 @@ export class OptionsMenuManager {
       await window.BrowserAPI.createTab(this.appWindowId, InAppUrls.BOOKMARKS, true);
     });
 
-    this.optionsElement?.querySelector('#about-option')?.addEventListener('click', async () => {
-      await window.BrowserAPI.createTab(this.appWindowId, InAppUrls.ABOUT, true);
-    });
-
-    this.optionsElement?.querySelector('#privacy-policy-option')?.addEventListener('click', async () => {
-      await window.BrowserAPI.createTab(this.appWindowId, InAppUrls.PRIVACY_POLICY, true);
-    });
-
-    this.optionsElement?.querySelector('#terms-of-service-option')?.addEventListener('click', async () => {
-      await window.BrowserAPI.createTab(this.appWindowId, InAppUrls.EULA, true);
-    });
-
-    this.optionsElement?.querySelector('#help-center-option')?.addEventListener('click', async () => {
-      await window.BrowserAPI.createTab(this.appWindowId, InAppUrls.HELP_CENTER, true);
-    });
-
-    this.optionsElement?.querySelector('#report-issue-option')?.addEventListener('click', async () => {
-      await window.BrowserAPI.createTab(this.appWindowId, InAppUrls.REPORT_ISSUE, true);
-    });
 
     this.optionsElement?.querySelector('#settings-option')?.addEventListener('click', async () => {
       await window.BrowserAPI.createTab(this.appWindowId, InAppUrls.BROWSER_SETTINGS, true);

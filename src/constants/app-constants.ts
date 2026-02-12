@@ -159,11 +159,6 @@ export abstract class InAppUrls {
   public static readonly DOWNLOADS = "nav0://downloads";
   public static readonly HISTORY = "nav0://history";
   public static readonly BOOKMARKS = "nav0://bookmarks";
-  public static readonly ABOUT = "nav0://about";
-  public static readonly PRIVACY_POLICY = "nav0://privacy-policy";
-  public static readonly EULA = "nav0://eula";
-  public static readonly HELP_CENTER = "nav0://help-center";
-  public static readonly REPORT_ISSUE = "nav0://report-issue";
   public static readonly BROWSER_SETTINGS = "nav0://browser-settings";
   public static readonly NEW_TAB = "nav0://new-tab";
 }

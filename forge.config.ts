@@ -63,11 +63,6 @@ const config: ForgeConfig = {
             },
           },
           {
-            html: './src/renderer/pages/about/index.html',
-            js: './src/renderer/pages/about/index.ts',
-            name: 'about',
-          },
-          {
             html: './src/renderer/pages/bookmarks/index.html',
             js: './src/renderer/pages/bookmarks/index.ts',
             name: 'bookmarks',
@@ -100,16 +95,6 @@ const config: ForgeConfig = {
             },
           },
           {
-            html: './src/renderer/pages/eula/index.html',
-            js: './src/renderer/pages/eula/index.ts',
-            name: 'eula',
-          },
-          {
-            html: './src/renderer/pages/help-center/index.html',
-            js: './src/renderer/pages/help-center/index.ts',
-            name: 'help_center',
-          },
-          {
             html: './src/renderer/pages/history/index.html',
             js: './src/renderer/pages/history/index.ts',
             name: 'history',
@@ -124,16 +109,6 @@ const config: ForgeConfig = {
             preload: {
               js: './src/preload/internals-api.ts',
             },
-          },
-          {
-            html: './src/renderer/pages/privacy-policy/index.html',
-            js: './src/renderer/pages/privacy-policy/index.ts',
-            name: 'privacy_policy',
-          },
-          {
-            html: './src/renderer/pages/report-issue/index.html',
-            js: './src/renderer/pages/report-issue/index.ts',
-            name: 'report_issue',
           },
         ],
       },

@@ -39,10 +39,7 @@ export class Tab {
     let preloadScriptToLoad;
     this.url = url ?? this.url;
     this.url = this.url.trim();
-    if (this.url.startsWith(InAppUrls.ABOUT)){
-      urlToLoad = ABOUT_WEBPACK_ENTRY;
-      preloadScriptToLoad = ABOUT_PRELOAD_WEBPACK_ENTRY;
-    } else if (this.url.startsWith(InAppUrls.BOOKMARKS)){
+    if (this.url.startsWith(InAppUrls.BOOKMARKS)){
       urlToLoad = BOOKMARKS_WEBPACK_ENTRY;
       preloadScriptToLoad = BOOKMARKS_PRELOAD_WEBPACK_ENTRY;
     } else if (this.url.startsWith(InAppUrls.BROWSER_SETTINGS)){
@@ -51,12 +48,6 @@ export class Tab {
     } else if (this.url.startsWith(InAppUrls.DOWNLOADS)){
       urlToLoad = DOWNLOADS_WEBPACK_ENTRY;
       preloadScriptToLoad = DOWNLOADS_PRELOAD_WEBPACK_ENTRY;
-    } else if (this.url.startsWith(InAppUrls.EULA)){
-      urlToLoad = EULA_WEBPACK_ENTRY;
-      preloadScriptToLoad = EULA_PRELOAD_WEBPACK_ENTRY;
-    } else if (this.url.startsWith(InAppUrls.HELP_CENTER)){
-      urlToLoad = HELP_CENTER_WEBPACK_ENTRY;
-      preloadScriptToLoad = HELP_CENTER_PRELOAD_WEBPACK_ENTRY;
     } else if (this.url.startsWith(InAppUrls.HISTORY)){
       urlToLoad = HISTORY_WEBPACK_ENTRY;
       preloadScriptToLoad = HISTORY_PRELOAD_WEBPACK_ENTRY;
@@ -64,12 +55,6 @@ export class Tab {
       urlToLoad = NEW_TAB_WEBPACK_ENTRY;
       preloadScriptToLoad = NEW_TAB_PRELOAD_WEBPACK_ENTRY;
       this.url = '';
-    } else if (this.url.startsWith(InAppUrls.PRIVACY_POLICY)){
-      urlToLoad = PRIVACY_POLICY_WEBPACK_ENTRY;
-      preloadScriptToLoad = PRIVACY_POLICY_PRELOAD_WEBPACK_ENTRY;
-    } else if (this.url.startsWith(InAppUrls.REPORT_ISSUE)){
-      urlToLoad = REPORT_ISSUE_WEBPACK_ENTRY;
-      preloadScriptToLoad = REPORT_ISSUE_PRELOAD_WEBPACK_ENTRY;
     } else if (this.url.startsWith('http://') || this.url.startsWith('https://')) {
       urlToLoad = this.url;
       preloadScriptToLoad = null;
