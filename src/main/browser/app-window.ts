@@ -202,10 +202,11 @@ export class AppWindow {
     }
   }
 
-  showCommandKOverlay(): void { 
+  showCommandKOverlay(): void {
     this.hideOptionsMenuOverlay();
     if(this.commandKOverlayManager && this.browserWindowInstance.contentView.children.indexOf(this.commandKOverlayManager.getWebContentsViewInstance()) > -1){
-      //already open
+      // Already open — toggle it closed
+      this.hideCommandKOverlay();
       return;
     }
     this.commandKOverlayManager = new CommandKOverlayManager(this.id, this.isPrivate, this.partitionSetting);

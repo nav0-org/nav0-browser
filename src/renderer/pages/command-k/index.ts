@@ -354,10 +354,6 @@ const init = () => {
     };
 
     const handleKeydown = (e: KeyboardEvent) => {
-      if (e.metaKey) {
-        window.BrowserAPI.hideCommandKOverlay(window.BrowserAPI.appWindowId);
-        return;
-      }
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
@@ -366,6 +362,14 @@ const init = () => {
         case 'ArrowUp':
           e.preventDefault();
           navigateResults(-1);
+          break;
+        case 'Tab':
+          e.preventDefault();
+          if (e.shiftKey) {
+            navigateResults(-1);
+          } else {
+            navigateResults(1);
+          }
           break;
         case 'Enter': {
           e.preventDefault();
@@ -388,19 +392,23 @@ const init = () => {
           window.BrowserAPI.hideCommandKOverlay(window.BrowserAPI.appWindowId);
           break;
         default:
-          // For number keys 1-9, select the corresponding result
-          if (e.key >= '1' && e.key <= '9' && !e.ctrlKey && !e.altKey && !e.shiftKey) {
-            const index = parseInt(e.key) - 1;
-            if (index < currentResults.length) {
-              e.preventDefault();
-              openResult(currentResults[index]);
+          // For number keys 1-9, select the corresponding result (only when not typing in input)
+          if (e.key >= '1' && e.key <= '9' && !e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey) {
+            const target = e.target as HTMLElement;
+            if (target !== searchInput) {
+              const index = parseInt(e.key) - 1;
+              if (index < currentResults.length) {
+                e.preventDefault();
+                openResult(currentResults[index]);
+              }
             }
           }
           break;
       }
     };
 
-    searchInput?.addEventListener('keydown', handleKeydown);
+    // Listen at document level so Escape/Tab/arrows work regardless of focus
+    document.addEventListener('keydown', handleKeydown);
 
     // Live search with debounce
     const handleInput = () => {
