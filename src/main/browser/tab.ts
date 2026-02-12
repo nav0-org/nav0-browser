@@ -248,6 +248,10 @@ export class Tab {
     return this.title;
   }
 
+  getFaviconUrl(): string | null {
+    return this.faviconUrl;
+  }
+
   setTitle(title: string): void {
     this.title = title;
   }

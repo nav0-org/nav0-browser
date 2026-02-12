@@ -125,6 +125,8 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly CREATE_NEW_APP_WINDOW = "browser:create-new-app-window";
   public static readonly CREATE_NEW_PRIVATE_APP_WINDOW = "browser:create-new-private-app-window";
   public static readonly EXECUTE_JAVASCRIPT = "browser:execute-javascript";
+  public static readonly GET_SEARCH_URL = "browser:get-search-url";
+  public static readonly FETCH_OPEN_TABS = "browser:fetch-open-tabs";
   // public static readonly CAPTURE_SCREENSHOT = "browser:capture-screenshot";
   // public static readonly SAVE_SCREENSHOT = "browser:save-screenshot";
   // public static readonly SET_DIALOG_VISIBILITY = "browser:set-dialog-visibility";

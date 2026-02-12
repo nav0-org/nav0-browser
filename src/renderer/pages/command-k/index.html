@@ -9,104 +9,51 @@
     <!-- Search input area -->
     <div class="search-area">
       <i data-lucide="search" class="search-icon" width="18" height="18"></i>
-      <input type="text" id="search-input" class="search-input" placeholder="Search the web..." autofocus>
+      <input type="text" id="search-input" class="search-input" placeholder="Search tabs, bookmarks, history, downloads or the web..." autofocus>
       <div class="keyboard-hint">
+        <span class="key">Tab</span>
         <span class="key">↑</span>
         <span class="key">↓</span>
         <span class="key">Enter</span>
       </div>
     </div>
-    
+
     <!-- Action buttons -->
     <div class="action-buttons">
-      <button class="action-btn primary" selected-action="search">
-        <i data-lucide="search" width="18" height="18" style="margin-right: 6px;"></i>
-        Search
+      <button class="action-btn primary" data-filter="all">
+        <i data-lucide="layers" width="16" height="16"></i>
+        All
+      </button>
+      <button class="action-btn" data-filter="bookmarks">
+        <i data-lucide="bookmark" width="16" height="16"></i>
+        Bookmarks
+      </button>
+      <button class="action-btn" data-filter="history">
+        <i data-lucide="history" width="16" height="16"></i>
+        History
+      </button>
+      <button class="action-btn" data-filter="tabs">
+        <i data-lucide="app-window" width="16" height="16"></i>
+        Tabs
+      </button>
+      <button class="action-btn" data-filter="downloads">
+        <i data-lucide="download" width="16" height="16"></i>
+        Downloads
       </button>
     </div>
-    
+
     <!-- Results section -->
-    <div class="results-container">
-      <!-- Browsing History section -->
-      <div class="section-title">Browsing History</div>
-      
-      <div class="result-item active">
-        <div class="result-favicon">A</div>
-        <div class="result-content">
-          <div class="result-title">Amazon - Modern Desk Lamps</div>
-          <div class="result-url">www.amazon.com/home-office/desk-lamps</div>
-          <div class="result-meta">
-            <span><i data-lucide="clock" width="14" height="14"></i>Today, 3:15 PM</span>
-          </div>
-        </div>
-        <div class="keyboard-shortcut">
-          <span class="key">1</span>
-        </div>
+    <div class="results-container" id="results-container">
+      <!-- Dynamic results will be rendered here -->
+
+      <!-- Empty state -->
+      <div class="empty-state" id="empty-state">
+        <i data-lucide="search" width="32" height="32"></i>
+        <div>Type to search your bookmarks, history, and downloads</div>
       </div>
-      
-      <div class="result-item">
-        <div class="result-favicon">G</div>
-        <div class="result-content">
-          <div class="result-title">GitHub - Command Palette Implementation</div>
-          <div class="result-url">github.com/command-palette-examples</div>
-          <div class="result-meta">
-            <span><i data-lucide="clock" width="14" height="14"></i>Today, 1:45 PM</span>
-          </div>
-        </div>
-        <div class="keyboard-shortcut">
-          <span class="key">2</span>
-        </div>
-      </div>
-      
-      <div class="result-item">
-        <div class="result-favicon">M</div>
-        <div class="result-content">
-          <div class="result-title">MDN Web Docs - Keyboard Events</div>
-          <div class="result-url">developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent</div>
-          <div class="result-meta">
-            <span><i data-lucide="clock" width="14" height="14"></i>Yesterday, 4:20 PM</span>
-          </div>
-        </div>
-        <div class="keyboard-shortcut">
-          <span class="key">3</span>
-        </div>
-      </div>
-      
-      <!-- Previous Searches section -->
-      <div class="section-title">Previous Searches</div>
-      
-      <div class="result-item">
-        <div class="result-icon">
-          <i data-lucide="history" width="16" height="16"></i>
-        </div>
-        <div class="result-content">
-          <div class="result-title">react command palette examples</div>
-          <div class="result-meta">
-            <span><i data-lucide="clock" width="14" height="14"></i>2 days ago</span>
-          </div>
-        </div>
-        <div class="keyboard-shortcut">
-          <span class="key">4</span>
-        </div>
-      </div>
-      
-      <div class="result-item">
-        <div class="result-icon">
-          <i data-lucide="history" width="16" height="16"></i>
-        </div>
-        <div class="result-content">
-          <div class="result-title">best keyboard shortcuts for productivity</div>
-          <div class="result-meta">
-            <span><i data-lucide="clock" width="14" height="14"></i>3 days ago</span>
-          </div>
-        </div>
-        <div class="keyboard-shortcut">
-          <span class="key">5</span>
-        </div>
-      </div>
-      
+
       <!-- Loading indicator -->
-      <div class="loading">
+      <div class="loading" id="loading-indicator">
         <div class="loader"></div>
         <div>Searching...</div>
       </div>

@@ -26,8 +26,8 @@ export abstract class DownloadManager {
     limit = limit || 50;
     offset = offset || 0;
     const db = DatabaseManager.getDatabase(AppWindowManager.getWindowById(appWindowId).isPrivate);
-    const stmt = db.prepare("SELECT * FROM download WHERE url LIKE ? ORDER BY createdDate DESC LIMIT ? OFFSET ? ; ");
-    const records = stmt.all(`%${searchTerm}%`, limit, offset) as Array<DownloadRecord>;
+    const stmt = db.prepare("SELECT * FROM download WHERE (url LIKE ? OR fileName LIKE ?) ORDER BY createdDate DESC LIMIT ? OFFSET ? ; ");
+    const records = stmt.all(`%${searchTerm}%`, `%${searchTerm}%`, limit, offset) as Array<DownloadRecord>;
     return records;
   }
 
