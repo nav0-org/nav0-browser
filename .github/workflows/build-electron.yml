@@ -27,7 +27,7 @@ jobs:
       matrix:
         include:
           # macOS builds
-          - os: macos-13        # Intel runner for x64
+          - os: macos-15        # Cross-compile for x64
             platform: mac
             arch: x64
             artifact_name: macOS-x64
