@@ -108,6 +108,9 @@ export function init(){
     getSearchUrl: async (searchTerm: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GET_SEARCH_URL, searchTerm);
     },
+    fetchOpenTabs: async (appWindowId: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.FETCH_OPEN_TABS, appWindowId);
+    },
     // executeJavaScript: (code: string) => ipcRenderer.invoke('execute-javascript', code),
     // captureScreenshot: () => ipcRenderer.invoke('capture-screenshot'),
     // saveScreenshot: (dataUrl: string) => ipcRenderer.invoke('save-screenshot', dataUrl),

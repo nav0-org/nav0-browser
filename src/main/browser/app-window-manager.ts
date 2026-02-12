@@ -276,5 +276,23 @@ export abstract class AppWindowManager {
       return await SearchEngine.getSearchUrl(searchTerm);
     });
 
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_OPEN_TABS, async (event, appWindowId: string) => {
+      let window: AppWindow | null = null;
+      if (appWindowId) {
+        window = AppWindowManager.getWindowById(appWindowId);
+      } else {
+        window = AppWindowManager.getActiveWindow();
+      }
+      if (window) {
+        return window.getTabs().map(tab => ({
+          id: tab.getId(),
+          title: tab.getTitle(),
+          url: tab.getUrl(),
+          faviconUrl: tab.getFaviconUrl(),
+        }));
+      }
+      return [];
+    });
+
   }
 }

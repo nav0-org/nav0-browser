@@ -3,14 +3,15 @@ import './index.css';
 import { createIcons, icons } from 'lucide';
 
 type ResultItem = {
-  type: 'bookmark' | 'history' | 'download' | 'search';
+  type: 'tab' | 'bookmark' | 'history' | 'download' | 'search';
   title: string;
   url: string;
   faviconUrl?: string;
   meta?: string;
+  tabId?: string;
 };
 
-let activeFilter: 'all' | 'bookmarks' | 'history' | 'downloads' = 'all';
+let activeFilter: 'all' | 'tabs' | 'bookmarks' | 'history' | 'downloads' = 'all';
 let activeIndex = -1;
 let currentResults: ResultItem[] = [];
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -47,6 +48,12 @@ const init = () => {
       return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
     };
 
+    const escapeHtml = (str: string): string => {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    };
+
     const getFaviconLetter = (url: string): string => {
       try {
         const hostname = new URL(url).hostname;
@@ -66,26 +73,32 @@ const init = () => {
         iconHtml = `<div class="result-icon"><i data-lucide="search" width="16" height="16"></i></div>`;
       } else if (item.type === 'download') {
         iconHtml = `<div class="result-icon"><i data-lucide="download" width="16" height="16"></i></div>`;
+      } else if (item.type === 'tab') {
+        if (item.faviconUrl) {
+          iconHtml = `<div class="result-favicon"><img src="${escapeHtml(item.faviconUrl)}" onerror="this.parentElement.textContent='${getFaviconLetter(item.url)}'"></div>`;
+        } else {
+          iconHtml = `<div class="result-icon"><i data-lucide="app-window" width="16" height="16"></i></div>`;
+        }
       } else if (item.faviconUrl) {
-        iconHtml = `<div class="result-favicon"><img src="${item.faviconUrl}" onerror="this.parentElement.textContent='${getFaviconLetter(item.url)}'"></div>`;
+        iconHtml = `<div class="result-favicon"><img src="${escapeHtml(item.faviconUrl)}" onerror="this.parentElement.textContent='${getFaviconLetter(item.url)}'"></div>`;
       } else {
         iconHtml = `<div class="result-favicon">${getFaviconLetter(item.url)}</div>`;
       }
 
       let metaHtml = '';
       if (item.meta) {
-        metaHtml = `<div class="result-meta"><span>${item.meta}</span></div>`;
+        metaHtml = `<div class="result-meta"><span>${escapeHtml(item.meta)}</span></div>`;
       }
 
       let urlHtml = '';
       if (item.type !== 'search') {
-        urlHtml = `<div class="result-url">${item.url}</div>`;
+        urlHtml = `<div class="result-url">${escapeHtml(item.url)}</div>`;
       }
 
       el.innerHTML = `
         ${iconHtml}
         <div class="result-content">
-          <div class="result-title">${item.title}</div>
+          <div class="result-title">${escapeHtml(item.title)}</div>
           ${urlHtml}
           ${metaHtml}
         </div>
@@ -102,7 +115,11 @@ const init = () => {
     };
 
     const openResult = (item: ResultItem) => {
-      if (item.type === 'search') {
+      if (item.type === 'tab' && item.tabId) {
+        // Switch to the existing tab
+        window.BrowserAPI.activateTab(window.BrowserAPI.appWindowId, item.tabId, true);
+        window.BrowserAPI.hideCommandKOverlay(window.BrowserAPI.appWindowId);
+      } else if (item.type === 'search') {
         window.BrowserAPI.getSearchUrl(item.title).then((searchUrl: string) => {
           window.BrowserAPI.createTab(window.BrowserAPI.appWindowId, searchUrl, true);
           window.BrowserAPI.hideCommandKOverlay(window.BrowserAPI.appWindowId);
@@ -131,13 +148,13 @@ const init = () => {
       loadingIndicator.style.display = 'none';
 
       // Group results by type
+      const tabs = results.filter(r => r.type === 'tab');
       const bookmarks = results.filter(r => r.type === 'bookmark');
       const history = results.filter(r => r.type === 'history');
       const downloads = results.filter(r => r.type === 'download');
       const searchItems = results.filter(r => r.type === 'search');
 
       const fragment = document.createDocumentFragment();
-      let globalIndex = 0;
 
       const addSection = (title: string, items: ResultItem[]) => {
         if (items.length === 0) return;
@@ -149,10 +166,10 @@ const init = () => {
         items.forEach(item => {
           const idx = results.indexOf(item);
           fragment.appendChild(createResultItemElement(item, idx));
-          globalIndex++;
         });
       };
 
+      addSection('Open Tabs', tabs);
       addSection('Bookmarks', bookmarks);
       addSection('Browsing History', history);
       addSection('Downloads', downloads);
@@ -171,16 +188,35 @@ const init = () => {
 
     const performSearch = async (query: string) => {
       if (!query.trim()) {
-        // Show recent history when no query
+        // Show open tabs + recent history when no query
         try {
-          const history = await window.BrowserAPI.fetchBrowsingHistory(window.BrowserAPI.appWindowId, '', 10, 0);
-          const results: ResultItem[] = history.map((record: any) => ({
-            type: 'history' as const,
-            title: record.title || record.url,
-            url: record.url,
-            faviconUrl: record.faviconUrl,
-            meta: formatDate(record.createdDate),
-          }));
+          const [openTabs, history] = await Promise.all([
+            window.BrowserAPI.fetchOpenTabs(window.BrowserAPI.appWindowId),
+            window.BrowserAPI.fetchBrowsingHistory(window.BrowserAPI.appWindowId, '', 10, 0),
+          ]);
+          const results: ResultItem[] = [];
+
+          openTabs.forEach((tab: any) => {
+            results.push({
+              type: 'tab',
+              title: tab.title || tab.url || 'New Tab',
+              url: tab.url || '',
+              faviconUrl: tab.faviconUrl,
+              meta: 'Switch to tab',
+              tabId: tab.id,
+            });
+          });
+
+          history.forEach((record: any) => {
+            results.push({
+              type: 'history',
+              title: record.title || record.url,
+              url: record.url,
+              faviconUrl: record.faviconUrl,
+              meta: formatDate(record.createdDate),
+            });
+          });
+
           renderResults(results, '');
         } catch {
           renderResults([], '');
@@ -193,6 +229,12 @@ const init = () => {
 
       try {
         const results: ResultItem[] = [];
+        const lowerQuery = query.toLowerCase();
+
+        // Fetch open tabs (filtered client-side)
+        const fetchTabs = (activeFilter === 'all' || activeFilter === 'tabs')
+          ? window.BrowserAPI.fetchOpenTabs(window.BrowserAPI.appWindowId)
+          : Promise.resolve([]);
 
         // Fetch data based on active filter
         const fetchBookmarks = (activeFilter === 'all' || activeFilter === 'bookmarks')
@@ -207,11 +249,30 @@ const init = () => {
           ? window.BrowserAPI.fetchDownloads(window.BrowserAPI.appWindowId, query, 5, 0)
           : Promise.resolve([]);
 
-        const [bookmarks, history, downloads] = await Promise.all([
+        const [openTabs, bookmarks, history, downloads] = await Promise.all([
+          fetchTabs,
           fetchBookmarks,
           fetchHistory,
           fetchDownloads,
         ]);
+
+        // Filter tabs client-side by title and URL
+        openTabs
+          .filter((tab: any) => {
+            const title = (tab.title || '').toLowerCase();
+            const url = (tab.url || '').toLowerCase();
+            return title.includes(lowerQuery) || url.includes(lowerQuery);
+          })
+          .forEach((tab: any) => {
+            results.push({
+              type: 'tab',
+              title: tab.title || tab.url || 'New Tab',
+              url: tab.url || '',
+              faviconUrl: tab.faviconUrl,
+              meta: 'Switch to tab',
+              tabId: tab.id,
+            });
+          });
 
         bookmarks.forEach((record: any) => {
           results.push({
@@ -362,7 +423,7 @@ const init = () => {
 
     document.addEventListener('click', handleDocumentClick);
 
-    // Load initial results (recent history)
+    // Load initial results (open tabs + recent history)
     performSearch('');
   });
 };
