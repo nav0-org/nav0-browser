@@ -21,6 +21,9 @@ export class Tab {
   private preloadScript: string | null = null;
   private parentAppWindow: AppWindow | null = null;
   private bookmark: BookmarkRecord | null = null;
+  private lastHistoryRecordId: string | null = null;
+  private navigationDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+  private static readonly NAVIGATION_DEBOUNCE_MS = 500;
 
   constructor(parentAppWindow: AppWindow, url: string , partitionSetting: string) {
     this.parentAppWindow = parentAppWindow;
@@ -113,34 +116,40 @@ export class Tab {
   }
 
   private initEventHandlers() {
-    //@todo - implement a debouncer for this.
-    //for hard navigation
+    //for hard navigation (debounced)
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE, async (event, url: string) => {
-      this.handleNavigationCompletion(url);
+      this.debouncedHandleNavigationCompletion(url);
     });
-    //for soft navigation
+    //for soft navigation (debounced)
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE_IN_PAGE, async (event, url: string) => {
-      this.handleNavigationCompletion(url);
+      this.debouncedHandleNavigationCompletion(url);
     });
 
     this.webContentsViewInstance.webContents.session.on('will-download', async (event, item, webContents) => {
       await this.handleDownload(item);
     });
-    this.webContentsViewInstance.webContents.on(WebContentsEvents.PAGE_TITLE_UPDATED, (event, title: string) => {
+    this.webContentsViewInstance.webContents.on(WebContentsEvents.PAGE_TITLE_UPDATED, async (event, title: string) => {
       this.title = title;
       this.parentAppWindow.getBrowserWindowInstance().webContents.send(MainToRendererEventsForBrowserIPC.TAB_TITLE_UPDATED, {
         id: this.id,
         title: this.title
       });
+      // Update the history record with the actual title
+      if(this.lastHistoryRecordId) {
+        await BrowsingHistoryManager.updateRecordTitle(this.parentAppWindow.id, this.lastHistoryRecordId, title);
+      }
     });
-    // @todo - revisit this.
-    this.webContentsViewInstance.webContents.on(WebContentsEvents.PAGE_FAVICON_UPDATED, (event, faviconUrls: string[]) => {
+    this.webContentsViewInstance.webContents.on(WebContentsEvents.PAGE_FAVICON_UPDATED, async (event, faviconUrls: string[]) => {
       if(!this.url.startsWith(InAppUrls.PREFIX) && this.url !== '') {
         this.faviconUrl = faviconUrls[faviconUrls.length - 1];
         this.parentAppWindow.getBrowserWindowInstance().webContents.send(MainToRendererEventsForBrowserIPC.TAB_FAVICON_UPDATED, {
           id: this.id,
           faviconUrl: this.faviconUrl
         });
+        // Update the history record with the actual favicon
+        if(this.lastHistoryRecordId) {
+          await BrowsingHistoryManager.updateRecordFavicon(this.parentAppWindow.id, this.lastHistoryRecordId, this.faviconUrl);
+        }
       }
     });
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_FAIL_LOAD, (event) => {
@@ -184,16 +193,22 @@ export class Tab {
     console.log('Download started:', downloadPath);
   } 
 
-  async handleNavigationCompletion(url: string): Promise<void> {
+  private debouncedHandleNavigationCompletion(url: string): void {
+    if(this.navigationDebounceTimer) {
+      clearTimeout(this.navigationDebounceTimer);
+    }
+    // Update URL and send tab update immediately for responsive UI
     if(!this.url.startsWith(InAppUrls.PREFIX) && this.url !== '') {
       this.url = url;
     }
-    let urlObject: URL | null = null;
-    try {
-      urlObject = new URL(this.url);
-    } catch (error) {
-      //do nothing
-    }
+    this.sendTabUrlUpdate(url);
+    // Debounce the history recording to avoid bursts from rapid navigation
+    this.navigationDebounceTimer = setTimeout(() => {
+      this.recordHistory(url);
+    }, Tab.NAVIGATION_DEBOUNCE_MS);
+  }
+
+  private async sendTabUrlUpdate(url: string): Promise<void> {
     const foundBookmarkRecord = await BookmarkManager.isBookmark(this.parentAppWindow.id, url);
     this.bookmark = foundBookmarkRecord;
     this.parentAppWindow.getBrowserWindowInstance().webContents.send(MainToRendererEventsForBrowserIPC.TAB_URL_UPDATED, {
@@ -204,10 +219,32 @@ export class Tab {
       canGoBack: this.webContentsViewInstance.webContents.navigationHistory.canGoBack(),
       canGoForward: this.webContentsViewInstance.webContents.navigationHistory.canGoForward()
     });
+  }
 
-    if(!this.url.startsWith(InAppUrls.PREFIX) && this.url !== '') {
-      BrowsingHistoryManager.addRecord(this.parentAppWindow.id, url, this.title, urlObject ? urlObject.hostname: '', urlObject ? `${urlObject.protocol}//${urlObject.hostname}/favicon.ico` : '');
+  private async recordHistory(url: string): Promise<void> {
+    if(this.url.startsWith(InAppUrls.PREFIX) || this.url === '') {
+      this.lastHistoryRecordId = null;
+      return;
     }
+    let urlObject: URL | null = null;
+    try {
+      urlObject = new URL(this.url);
+    } catch (error) {
+      //do nothing
+    }
+    // Duplicate prevention: if the most recent history entry has the same URL, update its timestamp instead
+    const existingRecord = await BrowsingHistoryManager.findLastRecordByUrl(this.parentAppWindow.id, url);
+    if(existingRecord) {
+      await BrowsingHistoryManager.updateRecordTimestamp(this.parentAppWindow.id, existingRecord.id);
+      this.lastHistoryRecordId = existingRecord.id;
+      return;
+    }
+    const record = await BrowsingHistoryManager.addRecord(
+      this.parentAppWindow.id, url, this.title,
+      urlObject ? urlObject.hostname : '',
+      urlObject ? `${urlObject.protocol}//${urlObject.hostname}/favicon.ico` : ''
+    );
+    this.lastHistoryRecordId = record.id;
   }
 
   getId(): string {
