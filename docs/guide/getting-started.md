@@ -1,3 +1,8 @@
+---
+title: "Getting Started with nav0 Browser — Installation & Setup"
+description: "Download and install nav0 browser for Windows, macOS, or Linux. Learn keyboard shortcuts, configuration, and basic usage of the privacy-focused browser."
+---
+
 # Getting Started
 
 nav0 is a minimal web browser built on Electron that prioritizes your privacy and system resources.

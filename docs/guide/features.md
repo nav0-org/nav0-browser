@@ -1,3 +1,8 @@
+---
+title: "nav0 Browser Features — Privacy, Security & Performance"
+description: "Explore nav0's features: tracker blocking, fingerprint protection, HTTPS upgrades, tab management, local bookmarks, sandboxing, and more. Only essential browsing features, nothing more."
+---
+
 # Features
 
 nav0 includes only the features essential for a clean browsing experience. Nothing more.

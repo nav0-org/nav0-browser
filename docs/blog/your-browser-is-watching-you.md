@@ -4,6 +4,39 @@ description: "Modern browsers collect an astonishing amount of data about you. W
 date: 2026-02-10
 author: nav0 team
 tags: [privacy, browsers, data-collection]
+head:
+  - - meta
+    - property: og:type
+      content: article
+  - - meta
+    - property: article:published_time
+      content: "2026-02-10"
+  - - meta
+    - property: article:author
+      content: nav0 team
+  - - meta
+    - property: article:tag
+      content: privacy
+  - - meta
+    - property: article:tag
+      content: browsers
+  - - meta
+    - property: article:tag
+      content: data-collection
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Your Browser Is Watching You: The Hidden Cost of Free Browsing",
+        "description": "Modern browsers collect an astonishing amount of data about you. We break down exactly what they track, why it matters, and what you can do about it.",
+        "datePublished": "2026-02-10",
+        "author": { "@type": "Organization", "name": "nav0 team", "url": "https://nav0.org" },
+        "publisher": { "@type": "Organization", "name": "nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
+        "mainEntityOfPage": "https://nav0.org/blog/your-browser-is-watching-you",
+        "keywords": ["privacy", "browsers", "data collection", "browser tracking", "web privacy"]
+      }
 ---
 
 # Your Browser Is Watching You: The Hidden Cost of "Free" Browsing

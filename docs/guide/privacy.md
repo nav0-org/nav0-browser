@@ -1,3 +1,8 @@
+---
+title: "nav0 Privacy Policy — Zero Data Collection"
+description: "nav0 collects nothing. No telemetry, no personal information, no browsing data, no device info, no network data. Privacy is not a feature — it is the foundation."
+---
+
 # Privacy
 
 Privacy isn't a feature in nav0—it's the foundation.

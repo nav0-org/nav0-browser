@@ -1,6 +1,6 @@
 ---
-title: Blog
-description: Thoughts on privacy, browsers, and the open web from the nav0 team.
+title: "nav0 Blog — Privacy, Browsers & the Open Web"
+description: "Thoughts on privacy, browsers, and the open web from the nav0 team. Articles about browser tracking, AI bloat, VPN security theater, and big tech browser control."
 ---
 
 # Blog
