@@ -100,11 +100,6 @@ export abstract class AppMenuManager {
       {
         label: 'Help and More',
         submenu: [
-          {label: 'About', click: async() => { AppWindowManager.getActiveWindow().createTab(InAppUrls.ABOUT, true) }},
-          {label: 'Privacy Policy', click: async() => { AppWindowManager.getActiveWindow().createTab(InAppUrls.PRIVACY_POLICY, true) }},
-          {label: 'EULA', click: async() => { AppWindowManager.getActiveWindow().createTab(InAppUrls.EULA, true) }},
-          {label: 'Help Center', click: async() => { AppWindowManager.getActiveWindow().createTab(InAppUrls.HELP_CENTER, true) }},
-          {label: 'Report an Issue', click: async() => { AppWindowManager.getActiveWindow().createTab(InAppUrls.REPORT_ISSUE, true) }},
         ]
       }
     ];
