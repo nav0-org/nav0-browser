@@ -47,6 +47,7 @@ declare global {
 
       showCommandKOverlay: (appWindowId: string) => Promise<any>;
       hideCommandKOverlay: (appWindowId: string) => Promise<any>;
+      getSearchUrl: (searchTerm: string) => Promise<string>;
       
       // Event listeners
       onNewTabCreated: (callback: (tab: {id: string, url: string, title: string}) => void) => void;

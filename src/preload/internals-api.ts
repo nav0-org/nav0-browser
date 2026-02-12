@@ -102,8 +102,11 @@ export function init(){
     createNewAppWindow: async () => { 
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.CREATE_NEW_APP_WINDOW, {});
     },
-    createNewPrivateAppWindow: async () => { 
+    createNewPrivateAppWindow: async () => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.CREATE_NEW_PRIVATE_APP_WINDOW, {});
+    },
+    getSearchUrl: async (searchTerm: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GET_SEARCH_URL, searchTerm);
     },
     // executeJavaScript: (code: string) => ipcRenderer.invoke('execute-javascript', code),
     // captureScreenshot: () => ipcRenderer.invoke('capture-screenshot'),

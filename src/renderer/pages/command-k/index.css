@@ -265,6 +265,35 @@ body {
   color: #ccc;
 }
 
+/* Empty state */
+.empty-state {
+  padding: 32px 24px;
+  text-align: center;
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.empty-state i {
+  color: #ccc;
+}
+
+/* Search engine result item */
+.result-item.search-engine-item {
+  border-top: 1px solid #eaeaea;
+  margin-top: 4px;
+  padding-top: 12px;
+}
+
+/* Result favicon image */
+.result-favicon img {
+  width: 20px;
+  height: 20px;
+  border-radius: 2px;
+}
+
 /* Loading indicator */
 .loading {
   display: none;

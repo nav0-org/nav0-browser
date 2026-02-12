@@ -30,8 +30,8 @@ export abstract class BookmarkManager {
     limit = limit || 50;
     offset = offset || 0;
     const db = DatabaseManager.getDatabase(AppWindowManager.getWindowById(appWindowId).isPrivate);
-    const stmt = db.prepare("SELECT * FROM bookmark WHERE url LIKE ? ORDER BY createdDate DESC LIMIT ? OFFSET ? ; ");
-    const records = stmt.all(`%${searchTerm}%`, limit, offset) as Array<BookmarkRecord>;
+    const stmt = db.prepare("SELECT * FROM bookmark WHERE (url LIKE ? OR title LIKE ?) ORDER BY createdDate DESC LIMIT ? OFFSET ? ; ");
+    const records = stmt.all(`%${searchTerm}%`, `%${searchTerm}%`, limit, offset) as Array<BookmarkRecord>;
     return records;
   }
 

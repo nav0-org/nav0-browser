@@ -4,6 +4,7 @@ import { AppWindow } from "./app-window";
 import { ipcMain, Menu } from "electron";
 import { Tab } from "./tab";
 import { DatabaseManager } from "../database/database-manager";
+import { SearchEngine } from "../web/search-engine";
 
 export abstract class AppWindowManager {
   private static windows: Map<string, AppWindow>;
@@ -269,6 +270,10 @@ export abstract class AppWindowManager {
 
     ipcMain.on(RendererToMainEventsForBrowserIPC.CREATE_NEW_PRIVATE_APP_WINDOW, async (event) => {
       AppWindowManager.createWindow(true);
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.GET_SEARCH_URL, async (event, searchTerm: string) => {
+      return await SearchEngine.getSearchUrl(searchTerm);
     });
 
   }
