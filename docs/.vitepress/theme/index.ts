@@ -4,6 +4,7 @@ import HeroImage from './components/HeroImage.vue'
 import FeatureCapsules from './components/FeatureCapsules.vue'
 import BlogList from './components/BlogList.vue'
 import HomeContent from './components/HomeContent.vue'
+import DownloadsPage from './components/DownloadsPage.vue'
 import './custom.css'
 
 export default {
@@ -13,5 +14,6 @@ export default {
     app.component('FeatureCapsules', FeatureCapsules)
     app.component('BlogList', BlogList)
     app.component('HomeContent', HomeContent)
+    app.component('DownloadsPage', DownloadsPage)
   }
 } satisfies Theme

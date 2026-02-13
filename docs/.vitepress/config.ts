@@ -118,6 +118,7 @@ export default defineConfig({
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Guide', link: '/guide/getting-started' },
+      { text: 'Downloads', link: '/downloads' },
       { text: 'Blog', link: '/blog/' },
       { text: 'FAQ', link: '/faq' },
       { text: 'Privacy', link: '/guide/privacy' },
