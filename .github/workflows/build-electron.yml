@@ -76,7 +76,7 @@ jobs:
 
       # Set up Python for native module compilation
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -165,7 +165,6 @@ jobs:
           name: ${{ matrix.artifact_name }}
           path: |
             out/make/**/*.exe
-            out/make/**/*.nupkg
             out/make/**/*.dmg
             out/make/**/*.deb
             out/make/**/*.rpm
@@ -182,14 +181,16 @@ jobs:
 
       - name: Get version from package.json
         id: get_version
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
         run: |
-          if [ -n "${{ github.event.inputs.version }}" ]; then
-            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          if [ -n "$INPUT_VERSION" ]; then
+            echo "version=$INPUT_VERSION" >> $GITHUB_OUTPUT
           else
             VERSION=$(node -p "require('./package.json').version")
             echo "version=v${VERSION}" >> $GITHUB_OUTPUT
           fi
-          echo "Using version: $(cat $GITHUB_OUTPUT | grep version | cut -d'=' -f2)"
+          echo "Using version: $(grep version "$GITHUB_OUTPUT" | cut -d'=' -f2)"
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -247,7 +248,6 @@ jobs:
           prerelease: ${{ github.event.inputs.prerelease == 'true' }}
           files: |
             ./artifacts/**/*.exe
-            ./artifacts/**/*.nupkg
             ./artifacts/**/*.dmg
             ./artifacts/**/*.deb
             ./artifacts/**/*.rpm
