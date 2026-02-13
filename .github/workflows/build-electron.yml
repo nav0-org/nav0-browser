@@ -76,7 +76,7 @@ jobs:
 
       # Set up Python for native module compilation
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -165,12 +165,10 @@ jobs:
           name: ${{ matrix.artifact_name }}
           path: |
             out/make/**/*.exe
-            out/make/**/*.nupkg
             out/make/**/*.dmg
             out/make/**/*.deb
             out/make/**/*.rpm
             out/make/**/*.zip
-            out/make/**/*.AppImage
           retention-days: 5
 
   release:
@@ -183,14 +181,16 @@ jobs:
 
       - name: Get version from package.json
         id: get_version
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
         run: |
-          if [ -n "${{ github.event.inputs.version }}" ]; then
-            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          if [ -n "$INPUT_VERSION" ]; then
+            echo "version=$INPUT_VERSION" >> $GITHUB_OUTPUT
           else
             VERSION=$(node -p "require('./package.json').version")
             echo "version=v${VERSION}" >> $GITHUB_OUTPUT
           fi
-          echo "Using version: $(cat $GITHUB_OUTPUT | grep version | cut -d'=' -f2)"
+          echo "Using version: $(grep version "$GITHUB_OUTPUT" | cut -d'=' -f2)"
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -199,6 +199,24 @@ jobs:
 
       - name: Display structure of downloaded files
         run: ls -laR ./artifacts/
+
+      - name: Delete existing release assets
+        run: |
+          TAG="${{ steps.get_version.outputs.version }}"
+          echo "Checking for existing release with tag: $TAG"
+          RELEASE_ID=$(gh api "repos/${{ github.repository }}/releases/tags/$TAG" --jq '.id' 2>/dev/null || echo "")
+          if [ -n "$RELEASE_ID" ]; then
+            echo "Found existing release (ID: $RELEASE_ID). Deleting all assets..."
+            gh api "repos/${{ github.repository }}/releases/$RELEASE_ID/assets" --jq '.[].id' | while read ASSET_ID; do
+              echo "Deleting asset ID: $ASSET_ID"
+              gh api -X DELETE "repos/${{ github.repository }}/releases/assets/$ASSET_ID"
+            done
+            echo "All existing assets deleted."
+          else
+            echo "No existing release found for tag $TAG. Skipping asset cleanup."
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -230,12 +248,10 @@ jobs:
           prerelease: ${{ github.event.inputs.prerelease == 'true' }}
           files: |
             ./artifacts/**/*.exe
-            ./artifacts/**/*.nupkg
             ./artifacts/**/*.dmg
             ./artifacts/**/*.deb
             ./artifacts/**/*.rpm
             ./artifacts/**/*.zip
-            ./artifacts/**/*.AppImage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
