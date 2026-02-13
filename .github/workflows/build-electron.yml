@@ -170,7 +170,6 @@ jobs:
             out/make/**/*.deb
             out/make/**/*.rpm
             out/make/**/*.zip
-            out/make/**/*.AppImage
           retention-days: 5
 
   release:
@@ -199,6 +198,24 @@ jobs:
 
       - name: Display structure of downloaded files
         run: ls -laR ./artifacts/
+
+      - name: Delete existing release assets
+        run: |
+          TAG="${{ steps.get_version.outputs.version }}"
+          echo "Checking for existing release with tag: $TAG"
+          RELEASE_ID=$(gh api "repos/${{ github.repository }}/releases/tags/$TAG" --jq '.id' 2>/dev/null || echo "")
+          if [ -n "$RELEASE_ID" ]; then
+            echo "Found existing release (ID: $RELEASE_ID). Deleting all assets..."
+            gh api "repos/${{ github.repository }}/releases/$RELEASE_ID/assets" --jq '.[].id' | while read ASSET_ID; do
+              echo "Deleting asset ID: $ASSET_ID"
+              gh api -X DELETE "repos/${{ github.repository }}/releases/assets/$ASSET_ID"
+            done
+            echo "All existing assets deleted."
+          else
+            echo "No existing release found for tag $TAG. Skipping asset cleanup."
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -235,7 +252,6 @@ jobs:
             ./artifacts/**/*.deb
             ./artifacts/**/*.rpm
             ./artifacts/**/*.zip
-            ./artifacts/**/*.AppImage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
