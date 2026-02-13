@@ -15,6 +15,7 @@ on:
 
 # Add proper permissions for creating releases
 permissions:
+  actions: write
   contents: write
   packages: write
 
