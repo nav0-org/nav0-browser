@@ -17,6 +17,7 @@ const config: ForgeConfig = {
     extraResource: [
     ],
     osxSign: {
+      identity: process.env.CSC_LINK ? undefined : '-',
       optionsForFile: () => ({
         entitlements: 'build-config/entitlements.mac.plist',
         entitlementsInherit: 'build-config/entitlements.mac.inherit.plist',
