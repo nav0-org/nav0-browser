@@ -1,6 +1,6 @@
 ---
 title: "nav0 Blog — Privacy, Browsers & the Open Web"
-description: "Thoughts on privacy, browsers, and the open web from the nav0 team. Articles about browser tracking, AI bloat, VPN security theater, and big tech browser control."
+description: "Thoughts on privacy, browsers, and the open web from the nav0 team. Articles about browser tracking, AI bloat, VPN security theater, extension risks, and big tech browser control."
 ---
 
 # Blog
@@ -8,6 +8,14 @@ description: "Thoughts on privacy, browsers, and the open web from the nav0 team
 Thoughts on privacy, browsers, and the open web.
 
 ---
+
+<div class="blog-post-item">
+  <a href="/blog/browser-extensions-wont-save-your-privacy">
+    <h2>Browser Extensions Won't Save Your Privacy</h2>
+  </a>
+  <div class="post-meta">February 15, 2026 &middot; 8 min read &middot; Security</div>
+  <p class="post-excerpt">Privacy-focused extensions are the most common advice for staying safe online. But extensions themselves are a privacy and security risk most people overlook. Here's why bolting on privacy doesn't work.</p>
+</div>
 
 <div class="blog-post-item">
   <a href="/blog/your-browser-is-watching-you">
