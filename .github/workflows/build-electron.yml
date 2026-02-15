@@ -278,9 +278,9 @@ jobs:
             - **x64**: `.deb` (Debian/Ubuntu), `.rpm` (Fedora/RHEL)
 
             ### Installation
+            - **macOS (recommended)**: `brew install --cask nav0-browser`
+              - Downloading the `.dmg` directly may trigger *"nav0-browser is damaged"* — use Homebrew to avoid this.
             - **Windows**: Run the `.exe` installer
-            - **macOS**: Mount the `.dmg` and drag to Applications, or extract the `.zip`
-              - If you see *"nav0-browser is damaged and can't be opened"*, run: `xattr -cr /Applications/nav0-browser.app`
             - **Linux**: Install the `.deb` or `.rpm` package
           draft: false
           prerelease: ${{ github.event.inputs.prerelease == 'true' }}

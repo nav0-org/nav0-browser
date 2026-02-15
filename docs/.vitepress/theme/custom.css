@@ -617,6 +617,31 @@
   margin-bottom: 1.5rem;
 }
 
+/* Brew install block */
+.brew-install {
+  margin-bottom: 0.25rem;
+}
+
+.brew-recommended {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--vp-c-brand-1);
+  margin-bottom: 0.35rem;
+}
+
+.brew-install .notice-code {
+  margin: 0;
+}
+
+.dmg-divider {
+  font-size: 0.78rem;
+  color: var(--vp-c-text-3);
+  margin: 0.5rem 0 0.25rem;
+  text-align: center;
+}
+
 /* macOS notice */
 .macos-notice {
   margin-top: 1.5rem;

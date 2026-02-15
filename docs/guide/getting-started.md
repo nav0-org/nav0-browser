@@ -13,21 +13,22 @@ nav0 is a minimal web browser built on Electron that prioritizes your privacy an
 
 Download the latest release for your platform from our [GitHub Releases](https://github.com/nav0-org/nav0-browser/releases) page.
 
-| Platform | Download |
-|----------|----------|
-| Windows  | `nav0-win-x64.exe` |
-| macOS    | `nav0-mac-arm64.dmg` / `nav0-mac-x64.dmg` |
-| Linux    | `nav0-linux-x64.AppImage` / `.deb` / `.rpm` |
+| Platform | Install |
+|----------|---------|
+| macOS    | `brew install --cask nav0-browser` |
+| Windows  | Download `.exe` from [Releases](https://github.com/nav0-org/nav0-browser/releases) |
+| Linux    | Download `.deb` / `.rpm` from [Releases](https://github.com/nav0-org/nav0-browser/releases) |
 
-### macOS: Fixing "app is damaged" error
+### macOS
 
-macOS blocks apps downloaded from the internet that aren't notarized by Apple. After downloading and moving nav0 to your Applications folder, open **Terminal** and run:
+The recommended way to install on macOS is via [Homebrew](https://brew.sh):
 
 ```bash
-xattr -cr /Applications/nav0-browser.app
+brew install --cask nav0-browser
 ```
 
-Then open the app normally. You only need to do this once.
+This handles everything automatically. Downloading the `.dmg` directly may trigger a macOS error
+(*"nav0-browser is damaged and can't be opened"*) because the app is not yet notarized with Apple.
 
 ### Build from Source
 

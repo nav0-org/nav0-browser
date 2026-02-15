@@ -42,6 +42,13 @@
             <div class="platform-icon">🍎</div>
             <h3>macOS</h3>
             <div class="platform-downloads">
+              <div class="brew-install">
+                <p class="brew-recommended">Recommended</p>
+                <div class="notice-code">
+                  <code>brew install --cask nav0-browser</code>
+                </div>
+              </div>
+              <p class="dmg-divider">or download manually:</p>
               <a
                 v-for="asset in filterAssets(latestRelease.assets, 'mac')"
                 :key="asset.id"
@@ -102,17 +109,19 @@
         <div v-if="detectedPlatform === 'mac' || filterAssets(latestRelease.assets, 'mac').length > 0" class="macos-notice">
           <div class="notice-header">
             <span class="notice-icon">&#9888;&#65039;</span>
-            <strong>macOS: "app is damaged" error</strong>
+            <strong>macOS users: Install with Homebrew to avoid errors</strong>
           </div>
           <p>
-            macOS may block the app because it is not notarized with Apple.
-            After installing, open Terminal and run:
+            Downloading the .dmg directly may show <em>"nav0-browser is damaged"</em> because the app is not yet notarized with Apple.
+            <strong>Installing via Homebrew avoids this entirely:</strong>
           </p>
           <div class="notice-code">
-            <code>xattr -cr /Applications/nav0-browser.app</code>
+            <code>brew install --cask nav0-browser</code>
           </div>
           <p class="notice-detail">
-            Then open the app normally. You only need to do this once.
+            If you already downloaded the .dmg, run
+            <code>xattr -cr /Applications/nav0-browser.app</code>
+            in Terminal to fix it.
           </p>
         </div>
 
