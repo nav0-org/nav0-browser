@@ -19,6 +19,16 @@ Download the latest release for your platform from our [GitHub Releases](https:/
 | macOS    | `nav0-mac-arm64.dmg` / `nav0-mac-x64.dmg` |
 | Linux    | `nav0-linux-x64.AppImage` / `.deb` / `.rpm` |
 
+### macOS: Fixing "app is damaged" error
+
+macOS blocks apps downloaded from the internet that aren't notarized by Apple. After downloading and moving nav0 to your Applications folder, open **Terminal** and run:
+
+```bash
+xattr -cr /Applications/nav0-browser.app
+```
+
+Then open the app normally. You only need to do this once.
+
 ### Build from Source
 
 If you prefer to build nav0 yourself (recommended for maximum trust):

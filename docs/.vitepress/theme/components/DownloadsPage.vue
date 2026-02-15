@@ -98,6 +98,24 @@
           </div>
         </div>
 
+        <!-- macOS Gatekeeper notice -->
+        <div v-if="detectedPlatform === 'mac' || filterAssets(latestRelease.assets, 'mac').length > 0" class="macos-notice">
+          <div class="notice-header">
+            <span class="notice-icon">&#9888;&#65039;</span>
+            <strong>macOS: "app is damaged" error</strong>
+          </div>
+          <p>
+            macOS may block the app because it is not notarized with Apple.
+            After installing, open Terminal and run:
+          </p>
+          <div class="notice-code">
+            <code>xattr -cr /Applications/nav0-browser.app</code>
+          </div>
+          <p class="notice-detail">
+            Then open the app normally. You only need to do this once.
+          </p>
+        </div>
+
         <div class="release-links">
           <a :href="latestRelease.html_url" target="_blank" rel="noopener">
             View full release notes on GitHub →

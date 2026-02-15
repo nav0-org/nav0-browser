@@ -617,6 +617,54 @@
   margin-bottom: 1.5rem;
 }
 
+/* macOS notice */
+.macos-notice {
+  margin-top: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--vp-c-warning-soft, rgba(226, 167, 46, 0.08));
+  border: 1px solid var(--vp-c-warning-1, #e2a72e);
+  border-radius: 10px;
+}
+
+.notice-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.notice-icon {
+  font-size: 1.1rem;
+}
+
+.macos-notice p {
+  color: var(--vp-c-text-2);
+  font-size: 0.88rem;
+  margin: 0.4rem 0;
+  line-height: 1.5;
+}
+
+.macos-notice .notice-detail {
+  font-size: 0.82rem;
+  color: var(--vp-c-text-3);
+}
+
+.notice-code {
+  background: var(--vp-c-bg);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  margin: 0.5rem 0;
+}
+
+.notice-code code {
+  font-size: 0.85rem;
+  color: var(--vp-c-text-1);
+  font-family: var(--vp-font-family-mono);
+  user-select: all;
+}
+
 /* Footer */
 .downloads-footer {
   margin-top: 3rem;
