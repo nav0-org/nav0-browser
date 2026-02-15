@@ -18,10 +18,8 @@ const config: ForgeConfig = {
     ],
     osxSign: {
       identity: process.env.CSC_LINK ? undefined : '-',
-      optionsForFile: () => ({
-        entitlements: 'build-config/entitlements.mac.plist',
-        entitlementsInherit: 'build-config/entitlements.mac.inherit.plist',
-      }),
+      entitlements: 'build-config/entitlements.mac.plist',
+      entitlementsInherit: 'build-config/entitlements.mac.inherit.plist',
     },
     ...(process.env.APPLE_ID && process.env.APPLE_ID_PASSWORD && process.env.APPLE_TEAM_ID
       ? {
