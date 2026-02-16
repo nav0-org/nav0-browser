@@ -16,20 +16,6 @@ const config: ForgeConfig = {
     icon: 'src/renderer/assets/logo',
     extraResource: [
     ],
-    osxSign: {
-      identity: process.env.CSC_LINK ? undefined : '-',
-      entitlements: 'build-config/entitlements.mac.plist',
-      entitlementsInherit: 'build-config/entitlements.mac.inherit.plist',
-    },
-    ...(process.env.APPLE_ID && process.env.APPLE_ID_PASSWORD && process.env.APPLE_TEAM_ID
-      ? {
-          osxNotarize: {
-            appleId: process.env.APPLE_ID,
-            appleIdPassword: process.env.APPLE_ID_PASSWORD,
-            teamId: process.env.APPLE_TEAM_ID,
-          },
-        }
-      : {}),
   },
   rebuildConfig: {
     force: true
