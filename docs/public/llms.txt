@@ -14,7 +14,7 @@ nav0 is a free, open-source desktop web browser built on Electron and Chromium. 
 - **Telemetry**: None. Zero data collection.
 - **Source Code**: https://github.com/nav0-org/nav0-browser
 - **Website**: https://nav0.org
-- **Downloads**: https://github.com/nav0-org/nav0-browser/releases
+- **Install**: https://nav0.org/install
 
 ## Core Principles
 

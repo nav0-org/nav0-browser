@@ -6,7 +6,7 @@ nav0 is a free, open-source desktop web browser built on Electron and Chromium. 
 
 Website: https://nav0.org
 Source Code: https://github.com/nav0-org/nav0-browser
-Downloads: https://github.com/nav0-org/nav0-browser/releases
+Install: https://nav0.org/install
 License: MIT
 
 ---
@@ -15,14 +15,11 @@ License: MIT
 
 nav0 is a minimal web browser built on Electron that prioritizes your privacy and system resources.
 
-### Download
+### macOS (Homebrew)
 
-Download the latest release for your platform from the GitHub Releases page: https://github.com/nav0-org/nav0-browser/releases
-
-Available platforms:
-- Windows: nav0-win-x64.exe
-- macOS: nav0-mac-arm64.dmg (Apple Silicon) / nav0-mac-x64.dmg (Intel)
-- Linux: nav0-linux-x64.AppImage / .deb / .rpm
+```bash
+brew install --cask nav0-org/nav0/nav0-browser
+```
 
 ### Build from Source
 
@@ -30,9 +27,10 @@ Available platforms:
 git clone https://github.com/nav0-org/nav0-browser.git
 cd nav0-browser
 npm install
-npm run dev        # Development mode
-npm run build      # Production build
+npm run make
 ```
+
+Requires Node.js 22+ and npm. The built app will be in the out/ directory.
 
 ### First Launch
 
@@ -198,7 +196,7 @@ nav0 exists because modern browsers have lost their way. What was once a tool to
 nav0 is a free, open-source, privacy-focused desktop web browser built on Electron and Chromium. The name comes from "navigate + zero (bloat)."
 
 ### What platforms does nav0 support?
-Windows (x64), macOS (Intel x64 and Apple Silicon ARM64), and Linux (x64) via .AppImage, .deb, and .rpm packages.
+Windows (x64), macOS (Intel x64 and Apple Silicon ARM64), and Linux (x64). On macOS, install via Homebrew: brew install --cask nav0-org/nav0/nav0-browser. On all platforms, you can build from source.
 
 ### Does nav0 collect any data?
 No. Zero. nav0 collects no telemetry, no usage statistics, no crash reports, no browsing data, no personal information, and no device information.

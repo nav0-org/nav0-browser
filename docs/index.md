@@ -1,14 +1,14 @@
 ---
 layout: home
 title: "nav0 — Minimal Privacy Browser | No Data Collection, No Bloat"
-description: "nav0 is a free, open-source, privacy-focused web browser. Zero telemetry, no AI gimmicks, no bloat. Download for Windows, macOS, and Linux."
+description: "nav0 is a free, open-source, privacy-focused web browser. Zero telemetry, no AI gimmicks, no bloat. Available for Windows, macOS, and Linux."
 head:
   - - meta
     - property: og:title
       content: "nav0 — Minimal Privacy Browser | No Data Collection, No Bloat"
   - - meta
     - property: og:description
-      content: "nav0 is a free, open-source, privacy-focused web browser. Zero telemetry, no AI gimmicks, no bloat. Download for Windows, macOS, and Linux."
+      content: "nav0 is a free, open-source, privacy-focused web browser. Zero telemetry, no AI gimmicks, no bloat. Available for Windows, macOS, and Linux."
 
 hero:
   name: nav0

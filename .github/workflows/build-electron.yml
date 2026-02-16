@@ -228,23 +228,20 @@ jobs:
 
             A minimal, privacy-focused web browser built on Electron.
 
-            ### Downloads by Platform
+            ### Install via Homebrew (macOS)
 
-            #### macOS
-            - **Apple Silicon (ARM64)**: `.dmg` / `.zip`
-            - **Intel (x64)**: `.dmg` / `.zip`
+            ```
+            brew install --cask nav0-org/nav0/nav0-browser
+            ```
 
-            #### Windows
-            - **x64**: `.exe` installer
+            To update: `brew upgrade --cask nav0-browser`
 
-            #### Linux
-            - **x64**: `.deb` (Debian/Ubuntu), `.rpm` (Fedora/RHEL)
+            ### Build from Source
 
-            ### Installation
-            - **Windows**: Run the `.exe` installer
-            - **macOS**: Mount the `.dmg` and drag to Applications, or extract the `.zip`
-              - If you see *"nav0-browser is damaged and can't be opened"*, run: `xattr -cr /Applications/nav0-browser.app`
-            - **Linux**: Install the `.deb` or `.rpm` package
+            ```
+            git clone https://github.com/nav0-org/nav0-browser.git
+            cd nav0-browser && npm install && npm run make
+            ```
           draft: false
           prerelease: ${{ github.event.inputs.prerelease == 'true' }}
           files: |
@@ -256,8 +253,105 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  update-homebrew:
+    needs: release
+    runs-on: ubuntu-latest
+    if: github.event.inputs.prerelease != 'true'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get version from package.json
+        id: get_version
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          if [ -n "$INPUT_VERSION" ]; then
+            VERSION="${INPUT_VERSION#v}"
+          else
+            VERSION=$(node -p "require('./package.json').version")
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Download macOS release assets and compute SHA256
+        id: sha256
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.get_version.outputs.version }}"
+          TAG="v${VERSION}"
+          mkdir -p tmp
+
+          gh release download "$TAG" --pattern "*darwin-arm64*.zip" --dir ./tmp
+          gh release download "$TAG" --pattern "*darwin-x64*.zip" --dir ./tmp
+
+          ARM64_SHA=$(sha256sum ./tmp/*arm64*.zip | awk '{print $1}')
+          X64_SHA=$(sha256sum ./tmp/*x64*.zip | awk '{print $1}')
+
+          echo "arm64=${ARM64_SHA}" >> $GITHUB_OUTPUT
+          echo "x64=${X64_SHA}" >> $GITHUB_OUTPUT
+
+          ARM64_FILE=$(ls ./tmp/*arm64*.zip | xargs -I{} basename {})
+          X64_FILE=$(ls ./tmp/*x64*.zip | xargs -I{} basename {})
+
+          echo "arm64_file=${ARM64_FILE}" >> $GITHUB_OUTPUT
+          echo "x64_file=${X64_FILE}" >> $GITHUB_OUTPUT
+
+      - name: Update Homebrew tap
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          VERSION="${{ steps.get_version.outputs.version }}"
+          ARM64_SHA="${{ steps.sha256.outputs.arm64 }}"
+          X64_SHA="${{ steps.sha256.outputs.x64 }}"
+          ARM64_FILE="${{ steps.sha256.outputs.arm64_file }}"
+          X64_FILE="${{ steps.sha256.outputs.x64_file }}"
+
+          git clone "https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/nav0-org/homebrew-nav0.git" tap
+          cd tap
+          mkdir -p Casks
+
+          cat > Casks/nav0-browser.rb << CASK
+          cask "nav0-browser" do
+            version "${VERSION}"
+
+            on_arm do
+              sha256 "${ARM64_SHA}"
+              url "https://github.com/nav0-org/nav0-browser/releases/download/v#{version}/${ARM64_FILE}",
+                  verified: "github.com/nav0-org/nav0-browser/"
+            end
+
+            on_intel do
+              sha256 "${X64_SHA}"
+              url "https://github.com/nav0-org/nav0-browser/releases/download/v#{version}/${X64_FILE}",
+                  verified: "github.com/nav0-org/nav0-browser/"
+            end
+
+            name "nav0"
+            desc "Minimal, privacy-focused web browser"
+            homepage "https://nav0.org"
+
+            livecheck do
+              url :url
+              strategy :github_latest
+            end
+
+            app "nav0-browser.app"
+          end
+          CASK
+
+          # Remove leading whitespace from heredoc
+          sed -i 's/^          //' Casks/nav0-browser.rb
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/nav0-browser.rb
+          git commit -m "Update nav0-browser to ${VERSION}"
+          git push
+
   cleanup:
-    needs: [build, release]
+    needs: [build, release, update-homebrew]
     runs-on: ubuntu-latest
     if: always()
 

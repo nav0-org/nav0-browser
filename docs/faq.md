@@ -25,7 +25,7 @@ head:
             "name": "What platforms does nav0 support?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "nav0 supports Windows (x64), macOS (Intel x64 and Apple Silicon ARM64), and Linux (x64) via .AppImage, .deb, and .rpm packages."
+              "text": "nav0 supports Windows (x64), macOS (Intel x64 and Apple Silicon ARM64), and Linux (x64). On macOS, install via Homebrew: brew install --cask nav0-org/nav0/nav0-browser. On all platforms, you can build from source."
             }
           },
           {
@@ -150,12 +150,9 @@ nav0 is a free, open-source, privacy-focused desktop web browser built on Electr
 
 ### What platforms does nav0 support?
 
-nav0 supports:
-- **Windows** (x64) — `.exe` installer
-- **macOS** — Intel x64 (`.dmg`) and Apple Silicon ARM64 (`.dmg`)
-- **Linux** (x64) — `.AppImage`, `.deb`, and `.rpm` packages
+nav0 supports **Windows** (x64), **macOS** (Intel x64 and Apple Silicon ARM64), and **Linux** (x64).
 
-Download the latest release from [GitHub Releases](https://github.com/nav0-org/nav0-browser/releases).
+On macOS, install via [Homebrew](https://brew.sh): `brew install --cask nav0-org/nav0/nav0-browser`. On all platforms, you can [build from source](/guide/getting-started).
 
 ### What browser engine does nav0 use?
 
