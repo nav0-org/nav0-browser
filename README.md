@@ -20,6 +20,12 @@ nav0 is a minimal, privacy-focused web browser built on Electron. No data collec
 brew install --cask nav0-org/nav0/nav0-browser
 ```
 
+### Windows / Linux
+
+Download from [GitHub Releases](https://github.com/nav0-org/nav0-browser/releases):
+- **Windows**: `.exe` installer
+- **Linux**: `.deb` (Debian/Ubuntu) or `.rpm` (Fedora/RHEL)
+
 ### Build from Source
 
 ```bash

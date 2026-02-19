@@ -23,9 +23,17 @@ To update:
 brew upgrade --cask nav0-browser
 ```
 
+### Windows
+
+Download the `.exe` installer from [GitHub Releases](https://github.com/nav0-org/nav0-browser/releases).
+
+### Linux
+
+Download `.deb` (Debian/Ubuntu) or `.rpm` (Fedora/RHEL) packages from [GitHub Releases](https://github.com/nav0-org/nav0-browser/releases).
+
 ### Build from Source
 
-On any platform (Windows, macOS, Linux), you can build nav0 from source:
+On any platform, you can also build nav0 from source:
 
 ```bash
 # Clone the repository

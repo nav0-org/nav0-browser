@@ -236,6 +236,14 @@ jobs:
 
             To update: `brew upgrade --cask nav0-browser`
 
+            ### Windows
+
+            Download the `.exe` installer from the assets below.
+
+            ### Linux
+
+            Download `.deb` (Debian/Ubuntu) or `.rpm` (Fedora/RHEL) from the assets below.
+
             ### Build from Source
 
             ```

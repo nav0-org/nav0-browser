@@ -3,7 +3,7 @@
     <div class="install-hero">
       <h1>Install nav0</h1>
       <p class="install-subtitle">
-        Install nav0 using Homebrew on macOS, or build from source on any platform.
+        Install nav0 on macOS, Windows, or Linux.
       </p>
     </div>
 
@@ -15,6 +15,22 @@
       </div>
       <p class="install-note">
         Requires Homebrew. To update nav0, run <code>brew upgrade --cask nav0-browser</code>.
+      </p>
+    </div>
+
+    <div class="install-section">
+      <h2>Windows</h2>
+      <p>
+        Download the <code>.exe</code> installer from
+        <a href="https://github.com/nav0-org/nav0-browser/releases" target="_blank" rel="noopener">GitHub Releases</a>.
+      </p>
+    </div>
+
+    <div class="install-section">
+      <h2>Linux</h2>
+      <p>
+        Download <code>.deb</code> (Debian/Ubuntu) or <code>.rpm</code> (Fedora/RHEL) packages from
+        <a href="https://github.com/nav0-org/nav0-browser/releases" target="_blank" rel="noopener">GitHub Releases</a>.
       </p>
     </div>
 
