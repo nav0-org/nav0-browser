@@ -10,6 +10,14 @@ Thoughts on privacy, browsers, and the open web.
 ---
 
 <div class="blog-post-item">
+  <a href="/blog/why-your-browser-wants-you-to-sign-in">
+    <h2>Why Your Browser Wants You to Sign In</h2>
+  </a>
+  <div class="post-meta">February 21, 2026 &middot; 7 min read &middot; Privacy</div>
+  <p class="post-excerpt">Every time you open your browser, it nudges you to create an account and sign in. That's not about convenience — it's about tying every click, search, and keystroke to your real identity.</p>
+</div>
+
+<div class="blog-post-item">
   <a href="/blog/browser-extensions-wont-save-your-privacy">
     <h2>Browser Extensions Won't Save Your Privacy</h2>
   </a>
