@@ -43,6 +43,8 @@ head:
 
 <p style="color: var(--vp-c-text-2); font-size: 0.9rem;">February 21, 2026 &middot; 7 min read</p>
 
+<img src="/blog-sign-in.svg" alt="Illustration showing a browser sign-in dialog with data flowing from the user's browsing history, passwords, bookmarks, and open tabs to a remote server" style="width: 100%; max-width: 720px; margin: 1.5rem auto; display: block; border-radius: 12px;" />
+
 You've seen it a hundred times.  You open Chrome, and there's that little avatar icon in the top right corner, quietly  judging you for not signing in. You install Edge on a fresh Windows machine and before you've even loaded a single webpage, Microsoft is begging you to "complete your browser setup" by connecting a Microsoft account.
 
 It feels like every browser nowadays really, really wants to know who you are.  They'll dress it up as convience — sync your bookmarks! Access your passwords anywhere! Pick up where you left off on your phone! — but the real reason goes  a lot deeper than making your life easier.
