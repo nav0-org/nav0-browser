@@ -25,11 +25,16 @@ brew upgrade --cask nav0-browser
 
 ### Windows
 
-Download the `.exe` installer from [GitHub Releases](https://github.com/nav0-org/nav0-browser/releases).
+Download the `.exe` installer directly:
+
+- [nav0 Windows x64 (.exe)](https://github.com/nav0-org/nav0-browser/releases/download/v0.1.0/nav0-browser-0.1.0%20Setup.exe)
 
 ### Linux
 
-Download `.deb` (Debian/Ubuntu) or `.rpm` (Fedora/RHEL) packages from [GitHub Releases](https://github.com/nav0-org/nav0-browser/releases).
+Download `.deb` (Debian/Ubuntu) or `.rpm` (Fedora/RHEL) packages directly:
+
+- [nav0 Debian/Ubuntu x64 (.deb)](https://github.com/nav0-org/nav0-browser/releases/download/v0.1.0/nav0-browser_0.1.0_amd64.deb)
+- [nav0 Fedora/RHEL x64 (.rpm)](https://github.com/nav0-org/nav0-browser/releases/download/v0.1.0/nav0-browser-0.1.0-1.x86_64.rpm)
 
 ### Build from Source
 

@@ -152,7 +152,7 @@ nav0 is a free, open-source, privacy-focused desktop web browser built on Electr
 
 nav0 supports **Windows** (x64), **macOS** (Intel x64 and Apple Silicon ARM64), and **Linux** (x64).
 
-On macOS, install via [Homebrew](https://brew.sh): `brew install --cask nav0-org/nav0/nav0-browser`. On Windows and Linux, download installers from [GitHub Releases](https://github.com/nav0-org/nav0-browser/releases). On all platforms, you can [build from source](/guide/getting-started).
+On macOS, install via [Homebrew](https://brew.sh): `brew install --cask nav0-org/nav0/nav0-browser`. On Windows, download the [.exe installer](https://github.com/nav0-org/nav0-browser/releases/download/v0.1.0/nav0-browser-0.1.0%20Setup.exe). On Linux, download the [.deb package](https://github.com/nav0-org/nav0-browser/releases/download/v0.1.0/nav0-browser_0.1.0_amd64.deb) (Debian/Ubuntu) or [.rpm package](https://github.com/nav0-org/nav0-browser/releases/download/v0.1.0/nav0-browser-0.1.0-1.x86_64.rpm) (Fedora/RHEL). On all platforms, you can [build from source](/guide/getting-started).
 
 ### What browser engine does nav0 use?
 
