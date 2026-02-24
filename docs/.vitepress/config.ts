@@ -71,7 +71,7 @@ export default defineConfig({
       },
       license: 'https://opensource.org/licenses/MIT',
       isAccessibleForFree: true,
-      downloadUrl: 'https://github.com/nav0-org/nav0-browser/releases',
+      downloadUrl: 'https://nav0.org/install',
       softwareVersion: '0.1.0',
       author: {
         '@type': 'Organization',
@@ -118,15 +118,14 @@ export default defineConfig({
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Guide', link: '/guide/getting-started' },
-      { text: 'Downloads', link: '/downloads' },
+      { text: 'Install', link: '/install' },
       { text: 'Blog', link: '/blog/' },
       { text: 'FAQ', link: '/faq' },
       { text: 'Privacy', link: '/guide/privacy' },
       {
         text: 'Links',
         items: [
-          { text: 'GitHub', link: 'https://github.com/nav0-org/nav0-browser' },
-          { text: 'Releases', link: 'https://github.com/nav0-org/nav0-browser/releases' }
+          { text: 'GitHub', link: 'https://github.com/nav0-org/nav0-browser' }
         ]
       }
     ],

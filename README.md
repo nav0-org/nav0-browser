@@ -14,13 +14,25 @@ nav0 is a minimal, privacy-focused web browser built on Electron. No data collec
 
 ## Installation
 
-Download the latest release from [Releases](https://github.com/nav0-org/nav0-browser/releases) or build from source:
+### macOS (Homebrew)
+
+```bash
+brew install --cask nav0-org/nav0/nav0-browser
+```
+
+### Windows / Linux
+
+Download from [GitHub Releases](https://github.com/nav0-org/nav0-browser/releases):
+- **Windows**: `.exe` installer
+- **Linux**: `.deb` (Debian/Ubuntu) or `.rpm` (Fedora/RHEL)
+
+### Build from Source
 
 ```bash
 git clone https://github.com/nav0-org/nav0-browser.git
 cd nav0-browser
 npm install
-npm run dev
+npm run make
 ```
 
 ## Documentation

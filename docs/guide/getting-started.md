@@ -9,19 +9,31 @@ nav0 is a minimal web browser built on Electron that prioritizes your privacy an
 
 ## Installation
 
-### Download
+### macOS (Homebrew)
 
-Download the latest release for your platform from our [GitHub Releases](https://github.com/nav0-org/nav0-browser/releases) page.
+The recommended way to install nav0 on macOS is via [Homebrew](https://brew.sh):
 
-| Platform | Download |
-|----------|----------|
-| Windows  | `nav0-win-x64.exe` |
-| macOS    | `nav0-mac-arm64.dmg` / `nav0-mac-x64.dmg` |
-| Linux    | `nav0-linux-x64.AppImage` / `.deb` / `.rpm` |
+```bash
+brew install --cask nav0-org/nav0/nav0-browser
+```
+
+To update:
+
+```bash
+brew upgrade --cask nav0-browser
+```
+
+### Windows
+
+Download the `.exe` installer from [GitHub Releases](https://github.com/nav0-org/nav0-browser/releases).
+
+### Linux
+
+Download `.deb` (Debian/Ubuntu) or `.rpm` (Fedora/RHEL) packages from [GitHub Releases](https://github.com/nav0-org/nav0-browser/releases).
 
 ### Build from Source
 
-If you prefer to build nav0 yourself (recommended for maximum trust):
+On any platform, you can also build nav0 from source:
 
 ```bash
 # Clone the repository
@@ -31,12 +43,11 @@ cd nav0-browser
 # Install dependencies
 npm install
 
-# Run in development mode
-npm run dev
-
-# Build for production
-npm run build
+# Build the app
+npm run make
 ```
+
+The built app will be in the `out/` directory. Requires [Node.js](https://nodejs.org) 22+ and npm.
 
 ## First Launch
 
