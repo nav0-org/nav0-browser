@@ -1,3 +1,7 @@
+<script setup>
+const version = '0.1.0'
+</script>
+
 <template>
   <div class="install-page">
     <div class="install-hero">
@@ -20,18 +24,26 @@
 
     <div class="install-section">
       <h2>Windows</h2>
-      <p>
-        Download the <code>.exe</code> installer from
-        <a href="https://github.com/nav0-org/nav0-browser/releases" target="_blank" rel="noopener">GitHub Releases</a>.
-      </p>
+      <div class="download-links">
+        <a class="download-btn" :href="`https://github.com/nav0-org/nav0-browser/releases/download/v${version}/nav0-browser-${version}%20Setup.exe`">
+          <span class="download-label">Windows x64</span>
+          <span class="download-format">.exe installer</span>
+        </a>
+      </div>
     </div>
 
     <div class="install-section">
       <h2>Linux</h2>
-      <p>
-        Download <code>.deb</code> (Debian/Ubuntu) or <code>.rpm</code> (Fedora/RHEL) packages from
-        <a href="https://github.com/nav0-org/nav0-browser/releases" target="_blank" rel="noopener">GitHub Releases</a>.
-      </p>
+      <div class="download-links">
+        <a class="download-btn" :href="`https://github.com/nav0-org/nav0-browser/releases/download/v${version}/nav0-browser_${version}_amd64.deb`">
+          <span class="download-label">Debian / Ubuntu</span>
+          <span class="download-format">.deb package</span>
+        </a>
+        <a class="download-btn" :href="`https://github.com/nav0-org/nav0-browser/releases/download/v${version}/nav0-browser-${version}-1.x86_64.rpm`">
+          <span class="download-label">Fedora / RHEL</span>
+          <span class="download-format">.rpm package</span>
+        </a>
+      </div>
     </div>
 
     <div class="install-section">
@@ -121,6 +133,43 @@
   background: var(--vp-c-bg-soft);
   padding: 0.15rem 0.4rem;
   border-radius: 4px;
+}
+
+.download-links {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+
+.download-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--vp-c-text-1);
+  transition: border-color 0.25s, background-color 0.25s;
+  min-width: 180px;
+}
+
+.download-btn:hover {
+  border-color: var(--vp-c-brand-1);
+  background: var(--vp-c-bg-mute);
+}
+
+.download-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.download-format {
+  font-size: 0.8rem;
+  color: var(--vp-c-text-2);
+  margin-top: 0.25rem;
 }
 
 .install-footer {
