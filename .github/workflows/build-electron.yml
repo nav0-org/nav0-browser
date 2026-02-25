@@ -59,6 +59,21 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
+      - name: Set version in package.json
+        if: github.event.inputs.version != ''
+        shell: bash
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          VERSION="${INPUT_VERSION#v}"
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            pkg.version = '${VERSION}';
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+          echo "Updated package.json version to ${VERSION}"
+
       # Windows dependencies for electron-forge
       - name: Install Windows dependencies
         if: matrix.platform == 'win'
