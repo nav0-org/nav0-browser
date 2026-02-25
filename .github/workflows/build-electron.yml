@@ -185,7 +185,9 @@ jobs:
           INPUT_VERSION: ${{ github.event.inputs.version }}
         run: |
           if [ -n "$INPUT_VERSION" ]; then
-            echo "version=$INPUT_VERSION" >> $GITHUB_OUTPUT
+            # Strip v prefix if present, then always add it back for consistency
+            VERSION="${INPUT_VERSION#v}"
+            echo "version=v${VERSION}" >> $GITHUB_OUTPUT
           else
             VERSION=$(node -p "require('./package.json').version")
             echo "version=v${VERSION}" >> $GITHUB_OUTPUT
