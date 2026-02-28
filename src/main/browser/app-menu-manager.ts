@@ -1,4 +1,4 @@
-import { Menu } from "electron";
+import { app, Menu } from "electron";
 import { AppConstants, InAppUrls } from "../../constants/app-constants";
 import { AppWindowManager } from "./app-window-manager";
 
@@ -7,6 +7,12 @@ export abstract class AppMenuManager {
   private static menu: Electron.Menu;
 
   public static async init() {
+    app.setAboutPanelOptions({
+      applicationName: AppConstants.APP_NAME,
+      applicationVersion: app.getVersion(),
+      copyright: 'MIT License',
+    });
+
     const isMac = process.platform === 'darwin';
     const template = [
       ...(isMac ? [{
@@ -100,6 +106,7 @@ export abstract class AppMenuManager {
       {
         label: 'Help and More',
         submenu: [
+          {label: 'About Nav0 Browser', click: () => { app.showAboutPanel(); }},
         ]
       }
     ];

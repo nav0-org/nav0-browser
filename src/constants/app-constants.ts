@@ -127,6 +127,7 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly EXECUTE_JAVASCRIPT = "browser:execute-javascript";
   public static readonly GET_SEARCH_URL = "browser:get-search-url";
   public static readonly FETCH_OPEN_TABS = "browser:fetch-open-tabs";
+  public static readonly SHOW_ABOUT_PANEL = "browser:show-about-panel";
   // public static readonly CAPTURE_SCREENSHOT = "browser:capture-screenshot";
   // public static readonly SAVE_SCREENSHOT = "browser:save-screenshot";
   // public static readonly SET_DIALOG_VISIBILITY = "browser:set-dialog-visibility";

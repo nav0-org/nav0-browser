@@ -76,6 +76,10 @@ export class OptionsMenuManager {
       await window.BrowserAPI.createTab(this.appWindowId, InAppUrls.BROWSER_SETTINGS, true);
     });
 
+    this.optionsElement?.querySelector('#about-option')?.addEventListener('click', async () => {
+      await window.BrowserAPI.showAboutPanel();
+    });
+
   }
   public toggleOptionsVisibility(): void {
     this.optionsElement?.classList.toggle('show');

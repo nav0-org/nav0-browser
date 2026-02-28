@@ -105,6 +105,9 @@ export function init(){
     createNewPrivateAppWindow: async () => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.CREATE_NEW_PRIVATE_APP_WINDOW, {});
     },
+    showAboutPanel: async () => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_ABOUT_PANEL);
+    },
     getSearchUrl: async (searchTerm: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GET_SEARCH_URL, searchTerm);
     },

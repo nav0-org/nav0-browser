@@ -1,7 +1,7 @@
 import { RendererToMainEventsForBrowserIPC } from "../../constants/app-constants";
 import { AppMenuManager } from "./app-menu-manager";
 import { AppWindow } from "./app-window";
-import { ipcMain, Menu } from "electron";
+import { app, ipcMain, Menu } from "electron";
 import { Tab } from "./tab";
 import { DatabaseManager } from "../database/database-manager";
 import { SearchEngine } from "../web/search-engine";
@@ -262,6 +262,10 @@ export abstract class AppWindowManager {
       if (window) {
         return window.hideCommandKOverlay();
       }
+    });
+
+    ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_ABOUT_PANEL, async () => {
+      app.showAboutPanel();
     });
 
     ipcMain.on(RendererToMainEventsForBrowserIPC.CREATE_NEW_APP_WINDOW, async (event) => {

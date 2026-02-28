@@ -1,10 +1,9 @@
 {
   "name": "nav0-browser",
-  "version": "0.1.0",
+  "version": "0.0.4",
   "description": "A minimal, privacy-focused web browser built on Electron",
   "private": true,
   "main": ".webpack/main",
-  "type": "module",
   "scripts": {
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
