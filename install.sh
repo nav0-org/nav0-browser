@@ -61,13 +61,17 @@ if [ -z "$APP_PATH" ]; then
   exit 1
 fi
 
-# Copy to Applications (remove old version if exists)
+# Copy to Applications (remove old version if exists), fall back to ~/Desktop
 if [ -d "$INSTALL_DIR/$APP_NAME.app" ]; then
-  echo "Removing previous installation..."
-  rm -rf "$INSTALL_DIR/$APP_NAME.app"
+  rm -rf "$INSTALL_DIR/$APP_NAME.app" 2>/dev/null || true
 fi
 
-cp -R "$APP_PATH" "$INSTALL_DIR/"
+if ! cp -R "$APP_PATH" "$INSTALL_DIR/" 2>/dev/null; then
+  INSTALL_DIR="$HOME/Desktop"
+  echo "No write access to /Applications, installing to $INSTALL_DIR instead..."
+  rm -rf "$INSTALL_DIR/$APP_NAME.app" 2>/dev/null || true
+  cp -R "$APP_PATH" "$INSTALL_DIR/"
+fi
 
 # Unmount DMG
 hdiutil detach "$MOUNT_POINT" -quiet 2>/dev/null || true
@@ -77,5 +81,5 @@ xattr -cr "$INSTALL_DIR/$APP_NAME.app"
 
 echo ""
 echo "nav0 browser $VERSION ($ARCH_SUFFIX) installed to $INSTALL_DIR"
-echo "You can now open it from your Applications folder or run:"
-echo "  open -a $APP_NAME"
+echo "You can now launch it with:"
+echo "  open \"$INSTALL_DIR/$APP_NAME.app\""
