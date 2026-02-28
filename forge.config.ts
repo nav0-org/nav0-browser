@@ -1,3 +1,5 @@
+import path from 'path';
+import fs from 'fs';
 import type { ForgeConfig } from '@electron-forge/shared-types';
 import { MakerSquirrel } from '@electron-forge/maker-squirrel';
 import { MakerZIP } from '@electron-forge/maker-zip';
@@ -38,7 +40,22 @@ const config: ForgeConfig = {
       },
     },
   ],
-  hooks: {},
+  hooks: {
+    packageAfterPrune: async (_config, buildPath) => {
+      // Electron 35+ uses ESM resolution for the main entry point.
+      // ESM does not support directory imports like ".webpack/main" —
+      // it requires the full file path ".webpack/main/index.js".
+      // The webpack plugin hardcodes ".webpack/main", so we patch it here
+      // in packageAfterPrune (not packageAfterCopy) because the config hooks
+      // run before plugin hooks, and the package.json isn't written yet during afterCopy.
+      const packageJsonPath = path.join(buildPath, 'package.json');
+      const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+      if (pkg.main === '.webpack/main') {
+        pkg.main = '.webpack/main/index.js';
+        fs.writeFileSync(packageJsonPath, JSON.stringify(pkg, null, 2));
+      }
+    },
+  },
   plugins: [
     new WebpackPlugin({
       mainConfig,
