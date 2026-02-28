@@ -13,13 +13,22 @@ const version = '0.1.0'
 
     <div class="install-section">
       <h2>macOS</h2>
-      <p>Install nav0 with <a href="https://brew.sh" target="_blank" rel="noopener">Homebrew</a>:</p>
+      <p>Run this command in Terminal to install nav0:</p>
+      <div class="code-block">
+        <code>curl -fsSL https://raw.githubusercontent.com/nav0-org/nav0-browser/main/install.sh | bash</code>
+      </div>
+      <p class="install-note">
+        Downloads the latest release, installs to /Applications, and handles macOS Gatekeeper automatically.
+      </p>
+      <!-- Homebrew option temporarily hidden
+      <p>Or install with <a href="https://brew.sh" target="_blank" rel="noopener">Homebrew</a>:</p>
       <div class="code-block">
         <code>brew install --cask nav0-org/nav0/nav0-browser</code>
       </div>
       <p class="install-note">
         Requires Homebrew. To update nav0, run <code>brew upgrade --cask nav0-browser</code>.
       </p>
+      -->
     </div>
 
     <div class="install-section">

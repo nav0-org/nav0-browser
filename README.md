@@ -14,10 +14,10 @@ nav0 is a minimal, privacy-focused web browser built on Electron. No data collec
 
 ## Installation
 
-### macOS (Homebrew)
+### macOS
 
 ```bash
-brew install --cask nav0-org/nav0/nav0-browser
+curl -fsSL https://raw.githubusercontent.com/nav0-org/nav0-browser/main/install.sh | bash
 ```
 
 ### Windows / Linux
