@@ -9,9 +9,18 @@ nav0 is a minimal web browser built on Electron that prioritizes your privacy an
 
 ## Installation
 
+### macOS
+
+Run this command in Terminal to install nav0:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/nav0-org/nav0-browser/main/install.sh | bash
+```
+
+<!-- Homebrew option temporarily hidden
 ### macOS (Homebrew)
 
-The recommended way to install nav0 on macOS is via [Homebrew](https://brew.sh):
+Alternatively, install via [Homebrew](https://brew.sh):
 
 ```bash
 brew install --cask nav0-org/nav0/nav0-browser
@@ -22,6 +31,7 @@ To update:
 ```bash
 brew upgrade --cask nav0-browser
 ```
+-->
 
 ### Windows
 
