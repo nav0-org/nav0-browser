@@ -10,6 +10,14 @@ Thoughts on privacy, browsers, and the open web.
 ---
 
 <div class="blog-post-item">
+  <a href="/blog/the-enshittification-of-chrome">
+    <h2>The Enshittification of Chrome: How the World's Most Popular Browser Turned Against Its Users</h2>
+  </a>
+  <div class="post-meta">February 28, 2026 &middot; 9 min read &middot; Privacy</div>
+  <p class="post-excerpt">Chrome used to be the fast, clean browser that saved us from Internet Explorer. Now it's a bloated, data-hungry machine that serves Google's ad business first and users second. Here's how it happened.</p>
+</div>
+
+<div class="blog-post-item">
   <a href="/blog/why-your-browser-wants-you-to-sign-in">
     <h2>Why Your Browser Wants You to Sign In</h2>
   </a>
