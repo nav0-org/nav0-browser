@@ -81,5 +81,5 @@ xattr -cr "$INSTALL_DIR/$APP_NAME.app"
 
 echo ""
 echo "nav0 browser $VERSION ($ARCH_SUFFIX) installed to $INSTALL_DIR"
-echo "You can now launch it with:"
-echo "  open \"$INSTALL_DIR/$APP_NAME.app\""
+echo "Launching nav0..."
+open "$INSTALL_DIR/$APP_NAME.app"
