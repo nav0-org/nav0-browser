@@ -384,11 +384,13 @@ export class Tab {
       );
     } 
     if (selectionText) { //for selected text
+      const engineName = SearchEngine.getSearchEngineName();
+      const truncatedText = selectionText.length > 30 ? selectionText.substring(0, 30) + '...' : selectionText;
       template.push(
         { label: 'Copy', click: () => {
           this.webContentsViewInstance.webContents.copy();
         }},
-        { label: 'Search', click: () => {
+        { label: `Search ${engineName} for "${truncatedText}"`, click: () => {
           this.parentAppWindow.createTab(selectionText, true);
         }}
       );

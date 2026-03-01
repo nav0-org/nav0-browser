@@ -114,6 +114,18 @@ export function init(){
     fetchOpenTabs: async (appWindowId: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.FETCH_OPEN_TABS, appWindowId);
     },
+    applySettings: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.APPLY_SETTINGS);
+    },
+    clearBrowsingData: async (options: any) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.CLEAR_BROWSING_DATA, options);
+    },
+    getCookieCount: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GET_COOKIE_COUNT);
+    },
+    getStorageEstimate: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GET_STORAGE_ESTIMATE);
+    },
     // executeJavaScript: (code: string) => ipcRenderer.invoke('execute-javascript', code),
     // captureScreenshot: () => ipcRenderer.invoke('capture-screenshot'),
     // saveScreenshot: (dataUrl: string) => ipcRenderer.invoke('save-screenshot', dataUrl),
