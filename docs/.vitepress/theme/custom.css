@@ -79,7 +79,8 @@
   }
 
   .VPHero .VPImage.image-src {
-    position: static !important;
+    position: relative !important;
+    z-index: 1;
     transform: none !important;
     border-radius: 16px;
     width: 100% !important;
@@ -104,7 +105,8 @@
   }
 
   .VPHero .VPImage {
-    position: static !important;
+    position: relative !important;
+    z-index: 1;
     transform: none !important;
     width: 100% !important;
     max-width: 100% !important;
