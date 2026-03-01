@@ -31,6 +31,9 @@
 }
 
 .dark {
+  --nav0-color-1: #ffffff;
+  --nav0-color-2: #e0e0e0;
+
   --vp-c-brand-1: #ffffff;
   --vp-c-brand-2: #e0e0e0;
   --vp-c-brand-3: #cccccc;
