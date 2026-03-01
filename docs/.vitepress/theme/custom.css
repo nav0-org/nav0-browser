@@ -79,9 +79,13 @@
   }
 
   .VPHero .VPImage.image-src {
+    position: static !important;
+    transform: none !important;
     border-radius: 16px;
     width: 100% !important;
     max-width: 100% !important;
+    max-height: none !important;
+    height: auto !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
   }
 
@@ -95,10 +99,17 @@
   .VPHero .image-container {
     max-width: 440px !important;
     width: 100% !important;
+    height: auto !important;
     margin: 0 auto !important;
   }
 
   .VPHero .VPImage {
+    position: static !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    height: auto !important;
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
   }
