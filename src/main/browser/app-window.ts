@@ -61,6 +61,11 @@ export class AppWindow {
       this.browserWindowInstance.on('closed', () => {
         this.browserWindowInstance = null;
       });
+
+      // Prevent Escape from exiting fullscreen
+      this.browserWindowInstance.on('leave-full-screen', () => {
+        this.browserWindowInstance?.setFullScreen(true);
+      });
     
       this.browserWindowInstance.webContents.on('did-finish-load', () => {
         const firstTab = this.createTab(InAppUrls.NEW_TAB);
