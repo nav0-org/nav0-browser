@@ -187,12 +187,13 @@ export class AppWindow {
     this.getBrowserWindowInstance().setBounds(bounds);
   }
 
-  showOptionsMenuOverlay(): void {
+  async showOptionsMenuOverlay(): Promise<void> {
     this.hideCommandKOverlay();
     if(this.browserWindowInstance.contentView.children.indexOf(this.optionsMenuManager.getWebContentsViewInstance()) > -1){
       //already open
       return;
     }
+    await this.optionsMenuManager.whenReady();
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
     this.optionsMenuManager.getWebContentsViewInstance().setBounds(parentBounds);
     this.browserWindowInstance.contentView.addChildView(this.optionsMenuManager.getWebContentsViewInstance());
