@@ -15,7 +15,8 @@ hero:
   text: Browse. Nothing More.
   tagline: A minimal, privacy-focused web browser. No data collection. No bloat. No AI gimmicks. Just clean, safe browsing.
   image:
-    src: /browser-mockup.svg
+    light: /hero-light.webp
+    dark: /hero-dark.webp
     alt: nav0 browser mockup
   actions:
     - theme: brand
