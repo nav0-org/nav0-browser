@@ -56,7 +56,7 @@ export class CommandKOverlayManager {
       }
       document.querySelectorAll('.action-btn').forEach(b => b.classList.remove('primary'));
       document.querySelector('.action-btn[data-filter="all"]')?.classList.add('primary');
-    `);
+    `).catch(() => {});
   }
 
   getWebContentsViewInstance(): WebContentsView {
