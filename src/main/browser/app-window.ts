@@ -4,6 +4,7 @@ import { Tab } from "./tab";
 import { AppConstants, InAppUrls, MainToRendererEventsForBrowserIPC } from "../../constants/app-constants";
 import { OptionsMenuManager } from "./options-menu-manager";
 import { CommandKOverlayManager } from "./command-k-overlay-manager";
+import { PermissionManager } from "./permission-manager";
 import type { Database as DB } from 'better-sqlite3';
 
 export class AppWindow {
@@ -31,6 +32,7 @@ export class AppWindow {
     } else {
       this.partitionSetting = 'persist:browsertabs';
     }
+    PermissionManager.setupSession(this.partitionSetting);
     this.browserWindowInstance = new BrowserWindow({
       width: 1200,
       height: 800,
@@ -85,6 +87,7 @@ export class AppWindow {
 
   public closeWindow(clearSession: boolean) {
     if(clearSession){
+      PermissionManager.clearMemoryPermissions();
       const currentSession = session.fromPartition('persist:private')
       currentSession?.clearAuthCache();
       currentSession?.clearStorageData();
