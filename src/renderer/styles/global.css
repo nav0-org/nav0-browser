@@ -9,9 +9,9 @@
    -------------------------------------------------------------------------- */
 :root {
   /* Color palette */
-  --primary-color: #1e4d33;
-  --primary-light: #e6f0eb;
-  --primary-dark: #163b27;
+  --primary-color: #000000;
+  --primary-light: #f5f5f5;
+  --primary-dark: #171717;
   --text-color: #333;
   --text-secondary: #777;
   --text-light: #999;
@@ -20,7 +20,7 @@
   --bg-color: #f5f5f5;
   --bg-light: #fff;
   --bg-hover: #D3D3D3;
-  --bg-active: #e6f0eb;
+  --bg-active: #f5f5f5;
   
   /* Border colors */
   --border-color: #e0e0e0;
@@ -510,7 +510,7 @@ img {
 .form-control:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(30, 77, 51, 0.1);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
 .form-group {
