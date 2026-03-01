@@ -1,11 +1,14 @@
 <template>
   <div class="feature-capsules-section">
-    <h2>A complete package</h2>
-    <p class="section-subtitle">Everything you need for private, fast browsing</p>
+    <div class="feature-capsules-bg"></div>
+    <div class="feature-capsules-inner">
+      <h2>A complete package</h2>
+      <p class="section-subtitle">Everything you need for private, fast browsing</p>
 
-    <div class="capsules-wrapper">
-      <div class="capsules-grid">
-        <span class="capsule" v-for="item in allFeatures" :key="item">{{ item }}</span>
+      <div class="capsules-wrapper">
+        <div class="capsules-grid">
+          <span class="capsule" v-for="item in allFeatures" :key="item">{{ item }}</span>
+        </div>
       </div>
     </div>
   </div>

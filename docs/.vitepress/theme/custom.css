@@ -71,20 +71,52 @@
 
 /* ========== Feature Capsules ========== */
 .feature-capsules-section {
+  position: relative;
+  isolation: isolate;
+  margin: 0;
+  padding: 0;
+}
+
+.feature-capsules-bg {
+  content: "";
+  position: absolute;
+  inset: -128px calc(-1 * (100vw - 100%) / 2);
+  display: block;
+  z-index: -1;
+  pointer-events: none;
+  --gradient-size: 128px;
+  background-image: linear-gradient(
+    to bottom,
+    transparent,
+    var(--vp-c-bg-soft) var(--gradient-size),
+    var(--vp-c-bg-soft) calc(100% - var(--gradient-size)),
+    transparent
+  );
+}
+
+.feature-capsules-inner {
   max-width: 1392px;
   margin: 0 auto;
   padding: 3rem 2rem 4rem;
 }
 
 .feature-capsules-section h2 {
-  text-align: center;
-  font-size: 2rem;
+  letter-spacing: -0.02em;
+  line-height: 40px;
+  font-size: 28px;
   font-weight: 700;
-  margin-bottom: 0.25rem;
+  margin: 16px 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+@media (min-width: 768px) {
+  .feature-capsules-section h2 {
+    font-size: 32px;
+  }
 }
 
 .feature-capsules-section .section-subtitle {
-  text-align: center;
   color: var(--vp-c-text-2);
   font-size: 1.05rem;
   margin-bottom: 1.5rem;
@@ -92,6 +124,18 @@
 
 .capsules-wrapper {
   overflow: hidden;
+  --mask-size: 148px;
+  --fade-size: 64px;
+  --fade-offset: 48px;
+  margin: 24px calc(-1 * var(--mask-size));
+  padding: 0 var(--mask-size);
+}
+
+@media (min-width: 1280px) {
+  .capsules-wrapper {
+    --fade-size: 96px;
+    --fade-offset: 48px;
+  }
 }
 
 .capsules-grid {
@@ -101,13 +145,21 @@
   justify-content: center;
   gap: 12px;
   padding: 0;
+  margin: 0 calc(-1 * var(--mask-size, 0px));
+  mask: linear-gradient(
+    to right,
+    transparent calc(var(--mask-size) - var(--fade-offset)),
+    black calc(var(--mask-size) + var(--fade-size)),
+    black calc(100% - var(--mask-size) - var(--fade-size)),
+    transparent calc(100% - var(--mask-size) + var(--fade-offset))
+  );
 }
 
 .capsule {
   display: block;
   padding: 12px 16px;
   border-radius: 12px;
-  background-color: var(--vp-c-bg-soft);
+  background-color: var(--vp-c-bg);
   border: 1px solid transparent;
   font-size: 0.9rem;
   font-weight: 500;
@@ -115,6 +167,7 @@
   white-space: pre;
   transition: border-color 0.25s;
   cursor: default;
+  margin: 0;
 }
 
 .capsule:hover {
@@ -686,12 +739,11 @@
     grid-template-columns: 1fr;
   }
 
-  .feature-capsules-section h2,
   .blog-section h2 {
     font-size: 1.5rem;
   }
 
-  .feature-capsules-section {
+  .feature-capsules-inner {
     padding: 3rem 1rem 4rem;
   }
 }
