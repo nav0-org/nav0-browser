@@ -9,6 +9,7 @@ import { DownloadManager } from "./download-manager";
 import path from "path";
 import { Utils } from "../browser/utils";
 import { SearchEngine } from "../web/search-engine";
+import { PermissionManager } from "./permission-manager";
 const domainPattern = /^[^\s]+\.[^\s]+$/;
 
 export class Tab {
@@ -25,6 +26,7 @@ export class Tab {
   private navigationDebounceTimer: ReturnType<typeof setTimeout> | null = null;
   private static readonly NAVIGATION_DEBOUNCE_MS = 500;
   private readyPromise: Promise<void> = Promise.resolve();
+  private currentOrigin: string | null = null;
 
   constructor(parentAppWindow: AppWindow, url: string , partitionSetting: string) {
     this.parentAppWindow = parentAppWindow;
@@ -98,6 +100,7 @@ export class Tab {
 
   private async initWebContentsView(){
     if(this.webContentsViewInstance) {
+      PermissionManager.clearUserInteraction(this.webContentsViewInstance.webContents.id);
       this.webContentsViewInstance.webContents.close();
     }
     this.webContentsViewInstance = new WebContentsView({
@@ -118,8 +121,14 @@ export class Tab {
   }
 
   private initEventHandlers() {
+    // User gesture tracking for permission manager
+    this.webContentsViewInstance.webContents.on('before-input-event', () => {
+      PermissionManager.markUserInteraction(this.webContentsViewInstance.webContents.id);
+    });
+
     //for hard navigation (debounced)
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE, async (event, url: string) => {
+      this.handleOriginChange(url);
       this.debouncedHandleNavigationCompletion(url);
     });
     //for soft navigation (debounced)
@@ -194,6 +203,18 @@ export class Tab {
     });
     console.log('Download started:', downloadPath);
   } 
+
+  private handleOriginChange(url: string): void {
+    try {
+      const newOrigin = new URL(url).origin;
+      if (this.currentOrigin && this.currentOrigin !== newOrigin) {
+        PermissionManager.clearSessionPermissionsForTabOrigin(this.id, this.currentOrigin);
+      }
+      this.currentOrigin = newOrigin;
+    } catch {
+      // Invalid URL, ignore
+    }
+  }
 
   private debouncedHandleNavigationCompletion(url: string): void {
     if(this.navigationDebounceTimer) {

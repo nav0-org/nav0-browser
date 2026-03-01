@@ -5,6 +5,8 @@ import { app, ipcMain, Menu } from "electron";
 import { Tab } from "./tab";
 import { DatabaseManager } from "../database/database-manager";
 import { SearchEngine } from "../web/search-engine";
+import { PermissionManager, PermissionRequest } from "./permission-manager";
+import { PermissionPromptData } from "./permission-prompt-overlay-manager";
 
 export abstract class AppWindowManager {
   private static windows: Map<string, AppWindow>;
@@ -14,6 +16,40 @@ export abstract class AppWindowManager {
     AppWindowManager.windows = new Map();
     AppWindowManager.activeWindowId = null;
     DatabaseManager.init();
+    PermissionManager.init(DatabaseManager.getDatabase(false));
+    PermissionManager.setCallbacks(
+      (appWindowId: string, request: PermissionRequest) => {
+        const window = AppWindowManager.getWindowById(appWindowId);
+        if (window) {
+          const promptData: PermissionPromptData = {
+            requestId: request.id,
+            origin: request.origin,
+            permissions: request.permissions,
+            isSecure: request.isSecure,
+            isPrivate: request.isPrivate,
+            faviconUrl: request.faviconUrl,
+            isInsecureBlocked: request.isInsecureBlocked,
+            isFloodBlocked: request.isFloodBlocked,
+          };
+          window.showPermissionPromptOverlay(promptData);
+        }
+      },
+      (appWindowId: string) => {
+        const window = AppWindowManager.getWindowById(appWindowId);
+        if (window) {
+          window.hidePermissionPromptOverlay();
+        }
+      },
+      (webContentsId: number) => {
+        for (const window of AppWindowManager.windows.values()) {
+          const tab = window.findTabByWebContentsId(webContentsId);
+          if (tab) {
+            return { appWindowId: window.id, tabId: tab.id, isPrivate: window.isPrivate };
+          }
+        }
+        return null;
+      }
+    );
     AppWindowManager.createWindow();
     AppWindowManager.initIPCHandlers();
     AppMenuManager.init();

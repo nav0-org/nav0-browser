@@ -1,0 +1,259 @@
+@import url("../styles/global.css");
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+}
+
+/* Overlay container - full screen */
+.permission-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  z-index: var(--z-modal);
+}
+
+/* Semi-transparent scrim */
+.permission-scrim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+
+/* Permission prompt card */
+.permission-prompt {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  width: 400px;
+  min-width: 320px;
+  max-width: 420px;
+  background-color: var(--bg-light);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  z-index: 1;
+  animation: permissionSlideIn 0.2s ease-out;
+}
+
+@keyframes permissionSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .permission-prompt {
+    animation: none;
+  }
+}
+
+/* Header with site identity */
+.permission-header {
+  padding: 14px 16px 10px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.permission-site-identity {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-sm);
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+.permission-lock {
+  color: var(--success-color);
+  flex-shrink: 0;
+}
+
+.permission-warning {
+  color: var(--warning-color);
+  flex-shrink: 0;
+}
+
+.permission-origin {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", monospace;
+}
+
+/* Body with permission description */
+.permission-body {
+  padding: 14px 16px;
+}
+
+.permission-request-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.permission-request-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.permission-request-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-color);
+  border-radius: var(--radius-md);
+  color: var(--text-color);
+}
+
+.permission-request-text {
+  flex: 1;
+  font-size: var(--font-md);
+  color: var(--text-color);
+  line-height: 1.45;
+  padding-top: 4px;
+}
+
+.permission-request-text strong {
+  font-weight: 600;
+}
+
+/* Action buttons */
+.permission-actions {
+  padding: 0 16px 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.permission-actions-row {
+  display: flex;
+  gap: 6px;
+}
+
+.permission-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: 1px solid transparent;
+  text-align: center;
+  line-height: 1.4;
+  outline: none;
+}
+
+.permission-btn:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Allow Once - primary weight (filled) */
+.permission-btn-allow-once {
+  background-color: var(--primary-color);
+  color: #fff;
+  border-color: var(--primary-color);
+}
+
+.permission-btn-allow-once:hover {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+/* Always Allow - secondary weight (outlined, muted) */
+.permission-btn-always-allow {
+  background-color: transparent;
+  color: var(--text-color);
+  border-color: var(--border-color-dark);
+  font-size: var(--font-xs);
+  font-weight: 400;
+}
+
+.permission-btn-always-allow:hover {
+  background-color: var(--bg-color);
+  border-color: var(--primary-color);
+}
+
+/* Deny Once - primary weight (filled, muted) */
+.permission-btn-deny-once {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  border-color: var(--border-color);
+}
+
+.permission-btn-deny-once:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--border-color-dark);
+}
+
+/* Always Deny - secondary weight (outlined, small) */
+.permission-btn-always-deny {
+  background-color: transparent;
+  color: var(--text-secondary);
+  border-color: var(--border-color);
+  font-size: var(--font-xs);
+  font-weight: 400;
+}
+
+.permission-btn-always-deny:hover {
+  background-color: var(--error-light);
+  color: var(--error-color);
+  border-color: var(--error-color);
+}
+
+/* Disabled state for buttons (insecure origin) */
+.permission-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Private browsing note */
+.permission-private-note {
+  padding: 8px 16px 12px 16px;
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border-color);
+  background-color: var(--bg-color);
+  text-align: center;
+}
+
+/* Insecure origin message */
+.permission-insecure-message {
+  padding: 10px 16px;
+  font-size: var(--font-sm);
+  color: var(--error-color);
+  background-color: var(--error-light);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--border-color);
+}
+
+.permission-insecure-message span {
+  flex: 1;
+  line-height: 1.4;
+}

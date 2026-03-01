@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:;">
+</head>
+<body>
+  <div class="permission-overlay" id="permission-overlay">
+    <div class="permission-scrim" id="permission-scrim"></div>
+    <div class="permission-prompt" id="permission-prompt" role="dialog" aria-modal="true" aria-labelledby="permission-message">
+      <!-- Site identity bar -->
+      <div class="permission-header">
+        <div class="permission-site-identity">
+          <i id="permission-lock-icon" data-lucide="lock" width="14" height="14" class="permission-lock"></i>
+          <i id="permission-warning-icon" data-lucide="triangle-alert" width="14" height="14" class="permission-warning" style="display:none;"></i>
+          <span class="permission-origin" id="permission-origin"></span>
+        </div>
+      </div>
+
+      <!-- Permission description -->
+      <div class="permission-body">
+        <div class="permission-request-list" id="permission-request-list">
+          <!-- Dynamically filled with permission items -->
+        </div>
+      </div>
+
+      <!-- Action buttons (2x2 grid) -->
+      <div class="permission-actions">
+        <div class="permission-actions-row">
+          <button id="allow-once-btn" class="permission-btn permission-btn-allow-once" aria-label="Allow access for this session only">
+            Allow Once
+          </button>
+          <button id="always-allow-btn" class="permission-btn permission-btn-always-allow" aria-label="Always allow access from this site">
+            Always Allow
+          </button>
+        </div>
+        <div class="permission-actions-row">
+          <button id="deny-once-btn" class="permission-btn permission-btn-deny-once" aria-label="Deny access for this session only">
+            Deny Once
+          </button>
+          <button id="always-deny-btn" class="permission-btn permission-btn-always-deny" aria-label="Always deny access from this site">
+            Always Deny
+          </button>
+        </div>
+      </div>
+
+      <!-- Private browsing note -->
+      <div class="permission-private-note" id="permission-private-note" style="display:none;">
+        In private browsing, permission choices are not saved.
+      </div>
+
+      <!-- Insecure origin message -->
+      <div class="permission-insecure-message" id="permission-insecure-message" style="display:none;">
+        <i data-lucide="shield-alert" width="14" height="14"></i>
+        <span>This site is not secure. nav0 cannot grant device permissions to insecure sites.</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

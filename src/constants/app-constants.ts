@@ -128,9 +128,13 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly GET_SEARCH_URL = "browser:get-search-url";
   public static readonly FETCH_OPEN_TABS = "browser:fetch-open-tabs";
   public static readonly SHOW_ABOUT_PANEL = "browser:show-about-panel";
-  // public static readonly CAPTURE_SCREENSHOT = "browser:capture-screenshot";
-  // public static readonly SAVE_SCREENSHOT = "browser:save-screenshot";
-  // public static readonly SET_DIALOG_VISIBILITY = "browser:set-dialog-visibility";
+
+  // Permission system
+  public static readonly PERMISSION_PROMPT_RESPONSE = "browser:permission-prompt-response";
+  public static readonly FETCH_PERMISSIONS = "browser:fetch-permissions";
+  public static readonly REMOVE_PERMISSION = "browser:remove-permission";
+  public static readonly REMOVE_ALL_PERMISSIONS_FOR_ORIGIN = "browser:remove-all-permissions-for-origin";
+  public static readonly CLEAR_ALL_PERMISSIONS = "browser:clear-all-permissions";
 }
 
 export abstract class MainToRendererEventsForBrowserIPC {
@@ -141,7 +145,8 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly TAB_FAVICON_UPDATED = "browser:tab-favicon-updated";
   public static readonly TAB_URL_UPDATED =  "browser:tab-url-updated";
   public static readonly NAVIGATION_FAILED = "browser:navigation-failed";
-  // public static readonly SET_DIALOG_VISIBILITY = "browser:set-dialog-visibility";
+  public static readonly SHOW_PERMISSION_PROMPT = "browser:show-permission-prompt";
+  public static readonly HIDE_PERMISSION_PROMPT = "browser:hide-permission-prompt";
 }
 
 export abstract class DataStoreConstants {
