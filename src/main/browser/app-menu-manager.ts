@@ -32,7 +32,7 @@ export abstract class AppMenuManager {
       {
         label: 'File',
         submenu: [
-          {label: 'New Tab', accelerator: 'CmdOrCtrl+T', click: async() => { AppWindowManager.getActiveWindow().createTab(InAppUrls.NEW_TAB, true) }},
+          {label: 'New Tab', accelerator: 'CmdOrCtrl+T', click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.NEW_TAB, true) }},
           {label: 'New Window', accelerator: 'CmdOrCtrl+N', click: async() => { AppWindowManager.createWindow(false); }},
           {label: 'New Private Window', accelerator: 'CmdOrCtrl+Shift+N', click: async() => { AppWindowManager.createWindow(true); }},
           {type: 'separator' as const},
@@ -43,9 +43,9 @@ export abstract class AppMenuManager {
       {
         label: 'Go To',
         submenu: [
-          {label: 'Bookmarks', accelerator: 'CmdOrCtrl+Shift+B', click: async() => { AppWindowManager.getActiveWindow().createTab(InAppUrls.BOOKMARKS, true) }},
-          {label: 'History', accelerator: 'CmdOrCtrl+Shift+H', click: async() => { AppWindowManager.getActiveWindow().createTab(InAppUrls.HISTORY, true) }},
-          {label: 'Downloads', accelerator: 'CmdOrCtrl+Shift+D',click: async() => { AppWindowManager.getActiveWindow().createTab(InAppUrls.DOWNLOADS, true) }},
+          {label: 'Bookmarks', accelerator: 'CmdOrCtrl+Shift+B', click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.BOOKMARKS, true) }},
+          {label: 'History', accelerator: 'CmdOrCtrl+Shift+H', click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.HISTORY, true) }},
+          {label: 'Downloads', accelerator: 'CmdOrCtrl+Shift+D',click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.DOWNLOADS, true) }},
           {type: 'separator' as const},
           {label: 'Command K Interface', accelerator: 'CmdOrCtrl+K', click: async() => { AppWindowManager.getActiveWindow().showCommandKOverlay() }},
         ]
