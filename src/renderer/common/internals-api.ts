@@ -50,6 +50,7 @@ declare global {
       showAboutPanel: () => Promise<any>;
       getSearchUrl: (searchTerm: string) => Promise<string>;
       fetchOpenTabs: (appWindowId: string) => Promise<Array<{id: string, title: string, url: string, faviconUrl: string | null}>>;
+      toggleReaderMode: (appWindowId: string, tabId: string) => Promise<any>;
 
       // Event listeners
       onNewTabCreated: (callback: (tab: {id: string, url: string, title: string}) => void) => void;
@@ -59,6 +60,8 @@ declare global {
       onTabUrlUpdated: (callback: (data: { id: string, url: string, isBookmark: boolean, bookmarkId: string | null, canGoBack: boolean, canGoForward: boolean }) => void) => void;
       onTabFaviconUpdated: (callback: (data: { id: string, faviconUrl: string }) => void) => void;
       onNavigationFailed: (callback: (data: { id: string }) => void) => void;
+      onReaderModeAvailabilityChanged: (callback: (data: { id: string, isEligible: boolean }) => void) => void;
+      onReaderModeStateChanged: (callback: (data: { id: string, isActive: boolean }) => void) => void;
     };
   }
 }

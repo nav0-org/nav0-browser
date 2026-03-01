@@ -85,7 +85,17 @@ export abstract class AppMenuManager {
           { role: 'zoomIn' as const, accelerator: 'CmdOrCtrl+Shift+=',},
           { role: 'zoomOut' as const, accelerator: 'CmdOrCtrl+Shift+-',},
           { type: 'separator' as const},
-          { role: 'togglefullscreen' as const}
+          { role: 'togglefullscreen' as const},
+          { type: 'separator' as const},
+          {label: 'Toggle Reader Mode', accelerator: 'CmdOrCtrl+Shift+R', click: async() => {
+            const activeWindow = AppWindowManager.getActiveWindow();
+            if (activeWindow) {
+              const activeTab = activeWindow.getActiveTab();
+              if (activeTab) {
+                await activeTab.toggleReaderMode();
+              }
+            }
+          }},
         ]
       },
       {

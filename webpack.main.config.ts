@@ -11,7 +11,14 @@ export const mainConfig: Configuration = {
   entry: './src/main/index.ts',
   // Put your normal webpack config below here
   module: {
-    rules,
+    rules: [
+      ...rules,
+      {
+        test: /\.js$/,
+        include: [/node_modules[\\/]@mozilla[\\/]readability/],
+        type: 'asset/source',
+      },
+    ],
   },
   plugins,
   resolve: {

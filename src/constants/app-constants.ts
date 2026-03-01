@@ -128,6 +128,7 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly GET_SEARCH_URL = "browser:get-search-url";
   public static readonly FETCH_OPEN_TABS = "browser:fetch-open-tabs";
   public static readonly SHOW_ABOUT_PANEL = "browser:show-about-panel";
+  public static readonly TOGGLE_READER_MODE = "browser:toggle-reader-mode";
   // public static readonly CAPTURE_SCREENSHOT = "browser:capture-screenshot";
   // public static readonly SAVE_SCREENSHOT = "browser:save-screenshot";
   // public static readonly SET_DIALOG_VISIBILITY = "browser:set-dialog-visibility";
@@ -141,6 +142,8 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly TAB_FAVICON_UPDATED = "browser:tab-favicon-updated";
   public static readonly TAB_URL_UPDATED =  "browser:tab-url-updated";
   public static readonly NAVIGATION_FAILED = "browser:navigation-failed";
+  public static readonly READER_MODE_AVAILABILITY_CHANGED = "browser:reader-mode-availability-changed";
+  public static readonly READER_MODE_STATE_CHANGED = "browser:reader-mode-state-changed";
   // public static readonly SET_DIALOG_VISIBILITY = "browser:set-dialog-visibility";
 }
 

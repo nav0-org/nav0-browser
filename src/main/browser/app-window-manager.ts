@@ -280,6 +280,16 @@ export abstract class AppWindowManager {
       return await SearchEngine.getSearchUrl(searchTerm);
     });
 
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.TOGGLE_READER_MODE, async (event, appWindowId: string, tabId: string) => {
+      const window = AppWindowManager.getWindowById(appWindowId);
+      if (window) {
+        const tab = tabId ? window.getTabById(tabId) : window.getActiveTab();
+        if (tab) {
+          await tab.toggleReaderMode();
+        }
+      }
+    });
+
     ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_OPEN_TABS, async (event, appWindowId: string) => {
       let window: AppWindow | null = null;
       if (appWindowId) {
