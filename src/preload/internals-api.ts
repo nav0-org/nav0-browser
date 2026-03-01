@@ -93,11 +93,29 @@ export function init(){
     hideOptionsMenu: async (appWindowId: string) => { 
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.HIDE_OPTIONS_MENU, appWindowId);
     },
-    showCommandKOverlay: async (appWindowId: string) => { 
+    showCommandKOverlay: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_COMMAND_K_OVERLAY, appWindowId);
     },
-    hideCommandKOverlay: async (appWindowId: string) => { 
+    hideCommandKOverlay: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.HIDE_COMMAND_K_OVERLAY, appWindowId);
+    },
+    showFindInPage: async (appWindowId: string) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_FIND_IN_PAGE, appWindowId);
+    },
+    hideFindInPage: async (appWindowId: string) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.HIDE_FIND_IN_PAGE, appWindowId);
+    },
+    findInPage: async (appWindowId: string, text: string, options?: { matchCase?: boolean }) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.FIND_IN_PAGE, appWindowId, text, options);
+    },
+    findInPageNext: async (appWindowId: string, text: string, options?: { matchCase?: boolean }) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.FIND_IN_PAGE_NEXT, appWindowId, text, options);
+    },
+    findInPagePrevious: async (appWindowId: string, text: string, options?: { matchCase?: boolean }) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.FIND_IN_PAGE_PREVIOUS, appWindowId, text, options);
+    },
+    stopFindInPage: async (appWindowId: string) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.STOP_FIND_IN_PAGE, appWindowId);
     },
     createNewAppWindow: async () => { 
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.CREATE_NEW_APP_WINDOW, {});
@@ -139,6 +157,9 @@ export function init(){
     },
     onNavigationFailed: (callback: (data: { id: string }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.NAVIGATION_FAILED, (_event, data) => callback(data));
+    },
+    onFindInPageResult: (callback: (data: { activeMatchOrdinal: number, matches: number, finalUpdate: boolean }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.FIND_IN_PAGE_RESULT, (_event, data) => callback(data));
     },
   });
 }
