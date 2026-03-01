@@ -112,12 +112,12 @@ body {
 
 .action-btn.primary {
   background-color: var(--primary-light);
-  border-color: #c5e0d3;
+  border-color: #d4d4d4;
   color: var(--primary-color);
 }
 
 .action-btn.primary:hover {
-  background-color: #d5e6de;
+  background-color: #e5e5e5;
 }
 
 /* Results section */

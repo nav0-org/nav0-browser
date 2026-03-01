@@ -1,0 +1,20 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="needleTop" x1="240" y1="32" x2="256" y2="260" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#171717" />
+      <stop offset="100%" stop-color="#262626" />
+    </linearGradient>
+    <linearGradient id="needleBot" x1="270" y1="256" x2="256" y2="480" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#c4c4c4" />
+      <stop offset="100%" stop-color="#d4d4d4" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="64" fill="#ffffff" />
+  <ellipse cx="256" cy="256" rx="148" ry="218" stroke="#171717" stroke-width="10" fill="none" opacity="0.62" />
+  <g transform="rotate(-15 256 256)">
+    <path d="M256 56 L282 248 L256 234 L230 248 Z" fill="url(#needleTop)" />
+    <path d="M256 456 L282 264 L256 278 L230 264 Z" fill="url(#needleBot)" />
+  </g>
+  <circle cx="256" cy="256" r="11" fill="#171717" />
+  <circle cx="256" cy="256" r="4.5" fill="#ffffff" />
+</svg>

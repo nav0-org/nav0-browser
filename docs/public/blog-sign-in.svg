@@ -9,8 +9,8 @@
       <stop offset="100%" stop-color="#1e1e3a"/>
     </linearGradient>
     <linearGradient id="accentGrad" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#4fc08d"/>
-      <stop offset="100%" stop-color="#42b883"/>
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#cccccc"/>
     </linearGradient>
     <linearGradient id="dangerGrad" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-color="#e74c3c"/>

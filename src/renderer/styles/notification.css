@@ -40,7 +40,7 @@
 
 /* Notification Types - Border Colors */
 .notification.success {
-  border-left-color: #10b981;
+  border-left-color: #000000;
 }
 
 .notification.info {
