@@ -5,6 +5,7 @@ export class CommandKOverlayManager {
   private appWindowId: string;
   private isPrivate: boolean;
   private partitionSetting: string;
+  private readyPromise: Promise<void>;
 
   constructor(appWindowId: string, isPrivate: boolean, partitionSetting: string) {
     this.appWindowId = appWindowId;
@@ -13,7 +14,7 @@ export class CommandKOverlayManager {
     this.init();
   }
 
-  private async init(){
+  private init(){
     this.webContentsViewInstance = new WebContentsView({
       webPreferences: {
         preload: COMMAND_K_PRELOAD_WEBPACK_ENTRY,
@@ -27,7 +28,11 @@ export class CommandKOverlayManager {
         transparent: true,
       }
     });
-    // this.webContentsViewInstance.webContents.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36');
+
+    this.readyPromise = new Promise<void>((resolve) => {
+      this.webContentsViewInstance.webContents.once('did-finish-load', () => resolve());
+    });
+
     this.webContentsViewInstance.webContents.loadURL(COMMAND_K_WEBPACK_ENTRY);
 
     this.webContentsViewInstance.webContents.setWindowOpenHandler(({ url }) => {
@@ -35,6 +40,23 @@ export class CommandKOverlayManager {
     });
 
     // this.webContentsViewInstance.webContents.openDevTools({ mode: 'detach' });
+  }
+
+  whenReady(): Promise<void> {
+    return this.readyPromise;
+  }
+
+  resetState(): void {
+    this.webContentsViewInstance.webContents.executeJavaScript(`
+      const input = document.getElementById('search-input');
+      if (input) {
+        input.value = '';
+        input.focus();
+        input.dispatchEvent(new Event('input'));
+      }
+      document.querySelectorAll('.action-btn').forEach(b => b.classList.remove('primary'));
+      document.querySelector('.action-btn[data-filter="all"]')?.classList.add('primary');
+    `);
   }
 
   getWebContentsViewInstance(): WebContentsView {

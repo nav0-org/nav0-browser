@@ -50,6 +50,7 @@ export class AppWindow {
     });
 
     this.optionsMenuManager = new OptionsMenuManager(this.id, this.isPrivate, this.partitionSetting);
+    this.commandKOverlayManager = new CommandKOverlayManager(this.id, this.isPrivate, this.partitionSetting);
 
     this.browserWindowInstance.loadURL(BROWSER_LAYOUT_WEBPACK_ENTRY);
 
@@ -202,23 +203,22 @@ export class AppWindow {
     }
   }
 
-  showCommandKOverlay(): void {
+  async showCommandKOverlay(): Promise<void> {
     this.hideOptionsMenuOverlay();
-    if(this.commandKOverlayManager && this.browserWindowInstance.contentView.children.indexOf(this.commandKOverlayManager.getWebContentsViewInstance()) > -1){
+    if(this.browserWindowInstance.contentView.children.indexOf(this.commandKOverlayManager.getWebContentsViewInstance()) > -1){
       // Already open — toggle it closed
       this.hideCommandKOverlay();
       return;
     }
-    this.commandKOverlayManager = new CommandKOverlayManager(this.id, this.isPrivate, this.partitionSetting);
+    await this.commandKOverlayManager.whenReady();
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
     this.commandKOverlayManager.getWebContentsViewInstance().setBounds(parentBounds);
     this.browserWindowInstance.contentView.addChildView(this.commandKOverlayManager.getWebContentsViewInstance());
+    this.commandKOverlayManager.resetState();
   }
   hideCommandKOverlay(): void {
     if(this.commandKOverlayManager){
       this.browserWindowInstance.contentView.removeChildView(this.commandKOverlayManager.getWebContentsViewInstance());
-      this.commandKOverlayManager.getWebContentsViewInstance().webContents.close();
-      this.commandKOverlayManager = null;
     }
   }
   
