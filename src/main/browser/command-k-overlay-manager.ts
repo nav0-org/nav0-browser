@@ -47,7 +47,7 @@ export class CommandKOverlayManager {
   }
 
   resetState(): void {
-    this.webContentsViewInstance.webContents.executeJavaScript(`
+    this.webContentsViewInstance.webContents.executeJavaScript(`(() => {
       const input = document.getElementById('search-input');
       if (input) {
         input.value = '';
@@ -56,7 +56,7 @@ export class CommandKOverlayManager {
       }
       document.querySelectorAll('.action-btn').forEach(b => b.classList.remove('primary'));
       document.querySelector('.action-btn[data-filter="all"]')?.classList.add('primary');
-    `).catch(() => {});
+    })()`).catch(() => {});
   }
 
   getWebContentsViewInstance(): WebContentsView {
