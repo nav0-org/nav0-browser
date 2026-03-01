@@ -18,7 +18,7 @@ export default defineConfig({
 
   head: [
     // Favicon
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
+    ['link', { rel: 'icon', type: 'image/webp', href: '/logo.webp' }],
 
     // Theme
     ['meta', { name: 'theme-color', content: '#1a1a1a' }],
@@ -48,7 +48,7 @@ export default defineConfig({
       '@type': 'Organization',
       name: 'nav0',
       url: siteUrl,
-      logo: `${siteUrl}/logo.svg`,
+      logo: `${siteUrl}/logo.webp`,
       description: 'An open-source, privacy-focused web browser project.',
       sameAs: [
         'https://github.com/nav0-org/nav0-browser'
@@ -112,7 +112,7 @@ export default defineConfig({
   ],
 
   themeConfig: {
-    logo: '/logo.svg',
+    logo: '/logo.webp',
     siteTitle: 'nav0',
 
     nav: [
