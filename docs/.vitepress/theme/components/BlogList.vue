@@ -21,6 +21,30 @@
 <script setup>
 const posts = [
   {
+    title: 'The Enshittification of Chrome',
+    excerpt: 'Chrome used to be the fast, clean browser that saved us from Internet Explorer. Now it\'s a bloated, data-hungry machine that serves Google\'s ad business first and users second. Here\'s how it happened.',
+    tag: 'Privacy',
+    date: 'Feb 28, 2026',
+    readTime: '9 min read',
+    url: '/blog/the-enshittification-of-chrome'
+  },
+  {
+    title: 'Why Your Browser Wants You to Sign In',
+    excerpt: 'Every time you open your browser, it nudges you to create an account and sign in. That\'s not about convenience — it\'s about tying every click, search, and keystroke to your real identity.',
+    tag: 'Privacy',
+    date: 'Feb 21, 2026',
+    readTime: '7 min read',
+    url: '/blog/why-your-browser-wants-you-to-sign-in'
+  },
+  {
+    title: 'Browser Extensions Won\'t Save Your Privacy',
+    excerpt: 'Privacy-focused extensions are the most common advice for staying safe online. But extensions themselves are a privacy and security risk most people overlook. Here\'s why bolting on privacy doesn\'t work.',
+    tag: 'Security',
+    date: 'Feb 15, 2026',
+    readTime: '8 min read',
+    url: '/blog/browser-extensions-wont-save-your-privacy'
+  },
+  {
     title: 'Your Browser Is Watching You: The Hidden Cost of "Free" Browsing',
     excerpt: 'Modern browsers collect an astonishing amount of data about you. We break down exactly what they track, why it matters, and what you can do about it.',
     tag: 'Privacy',
@@ -43,14 +67,6 @@ const posts = [
     date: 'Feb 6, 2026',
     readTime: '7 min read',
     url: '/blog/your-browser-doesnt-need-a-vpn'
-  },
-  {
-    title: 'Big Tech Owns Your Browser',
-    excerpt: 'Google, Microsoft, and Apple control how billions of people access the web. When your browser is made by an ad company or a platform gatekeeper, whose interests does it really serve?',
-    tag: 'Open Web',
-    date: 'Feb 4, 2026',
-    readTime: '8 min read',
-    url: '/blog/big-tech-owns-your-browser'
   },
 ]
 </script>

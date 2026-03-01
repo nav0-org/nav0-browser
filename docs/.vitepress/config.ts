@@ -158,6 +158,9 @@ export default defineConfig({
           text: 'Blog',
           items: [
             { text: 'All Posts', link: '/blog/' },
+            { text: 'The Enshittification of Chrome', link: '/blog/the-enshittification-of-chrome' },
+            { text: 'Why Your Browser Wants You to Sign In', link: '/blog/why-your-browser-wants-you-to-sign-in' },
+            { text: 'Browser Extensions Won\'t Save Your Privacy', link: '/blog/browser-extensions-wont-save-your-privacy' },
             { text: 'Your Browser Is Watching You', link: '/blog/your-browser-is-watching-you' },
             { text: 'Stop Forcing AI Into My Browser', link: '/blog/stop-forcing-ai-into-browsers' },
             { text: 'Your Browser Doesn\'t Need a VPN', link: '/blog/your-browser-doesnt-need-a-vpn' },
