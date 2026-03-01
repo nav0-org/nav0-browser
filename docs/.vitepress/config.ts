@@ -1,4 +1,40 @@
 import { defineConfig } from 'vitepress'
+import { readdirSync, readFileSync } from 'node:fs'
+import { resolve, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+function getBlogSidebar() {
+  const blogDir = resolve(dirname(fileURLToPath(import.meta.url)), '../blog')
+  const files = readdirSync(blogDir).filter(f => f.endsWith('.md') && f !== 'index.md')
+
+  const posts = files.map(file => {
+    const content = readFileSync(resolve(blogDir, file), 'utf-8')
+    const match = content.match(/^---\n([\s\S]*?)\n---/)
+    if (!match) return null
+
+    const frontmatter = match[1]
+    const titleMatch = frontmatter.match(/title:\s*["'](.+?)["']/)
+    const dateMatch = frontmatter.match(/date:\s*(\S+)/)
+
+    return {
+      text: titleMatch?.[1] || file.replace('.md', ''),
+      date: dateMatch?.[1] || '',
+      link: `/blog/${file.replace('.md', '')}`
+    }
+  }).filter((p): p is { text: string; date: string; link: string } => p !== null)
+
+  posts.sort((a, b) => +new Date(b.date) - +new Date(a.date))
+
+  return [
+    {
+      text: 'Blog',
+      items: [
+        { text: 'All Posts', link: '/blog/' },
+        ...posts.map(({ text, link }) => ({ text, link }))
+      ]
+    }
+  ]
+}
 
 const siteUrl = 'https://nav0.org'
 const siteName = 'nav0'
@@ -153,21 +189,7 @@ export default defineConfig({
           ]
         }
       ],
-      '/blog/': [
-        {
-          text: 'Blog',
-          items: [
-            { text: 'All Posts', link: '/blog/' },
-            { text: 'The Enshittification of Chrome', link: '/blog/the-enshittification-of-chrome' },
-            { text: 'Why Your Browser Wants You to Sign In', link: '/blog/why-your-browser-wants-you-to-sign-in' },
-            { text: 'Browser Extensions Won\'t Save Your Privacy', link: '/blog/browser-extensions-wont-save-your-privacy' },
-            { text: 'Your Browser Is Watching You', link: '/blog/your-browser-is-watching-you' },
-            { text: 'Stop Forcing AI Into My Browser', link: '/blog/stop-forcing-ai-into-browsers' },
-            { text: 'Your Browser Doesn\'t Need a VPN', link: '/blog/your-browser-doesnt-need-a-vpn' },
-            { text: 'Big Tech Owns Your Browser', link: '/blog/big-tech-owns-your-browser' }
-          ]
-        }
-      ]
+      '/blog/': getBlogSidebar()
     },
 
     socialLinks: [
