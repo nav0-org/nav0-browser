@@ -9,6 +9,7 @@
       <stop offset="100%" stop-color="#d4d4d4" />
     </linearGradient>
   </defs>
+  <rect width="512" height="512" rx="64" fill="#ffffff" />
   <ellipse cx="256" cy="256" rx="148" ry="218" stroke="#171717" stroke-width="10" fill="none" opacity="0.62" />
   <g transform="rotate(-15 256 256)">
     <path d="M256 56 L282 248 L256 234 L230 248 Z" fill="url(#needleTop)" />
