@@ -80,7 +80,7 @@
 
   .VPHero .VPImage.image-src {
     border-radius: 16px;
-    width: 100% !important;
+    /* width: 100% !important; */
     max-width: 100% !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
   }
