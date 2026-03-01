@@ -1,20 +1,35 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="needleTop" x1="240" y1="32" x2="256" y2="260" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#171717" />
-      <stop offset="100%" stop-color="#262626" />
+    <linearGradient id="redL" x1="234" y1="6" x2="256" y2="240" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ef4444" />
+      <stop offset="100%" stop-color="#dc2626" />
     </linearGradient>
-    <linearGradient id="needleBot" x1="270" y1="256" x2="256" y2="480" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#c4c4c4" />
-      <stop offset="100%" stop-color="#d4d4d4" />
+    <linearGradient id="redR" x1="256" y1="6" x2="278" y2="240" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#b91c1c" />
+      <stop offset="100%" stop-color="#991b1b" />
+    </linearGradient>
+    <linearGradient id="blueL" x1="234" y1="272" x2="256" y2="506" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#2563eb" />
+    </linearGradient>
+    <linearGradient id="blueR" x1="256" y1="272" x2="278" y2="506" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1d4ed8" />
+      <stop offset="100%" stop-color="#1e40af" />
     </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="64" fill="#ffffff" />
-  <ellipse cx="256" cy="256" rx="148" ry="218" stroke="#171717" stroke-width="10" fill="none" opacity="0.62" />
-  <g transform="rotate(-15 256 256)">
-    <path d="M256 56 L282 248 L256 234 L230 248 Z" fill="url(#needleTop)" />
-    <path d="M256 456 L282 264 L256 278 L230 264 Z" fill="url(#needleBot)" />
+  <rect width="512" height="512" rx="112" fill="#000000" />
+  <!-- White 0 ring -->
+  <ellipse cx="256" cy="256" rx="140" ry="210" stroke="#ffffff" stroke-width="28" fill="none" />
+  <!-- Needle group — tilted left -->
+  <g transform="rotate(-22 256 256)">
+    <!-- Red north needle — sleek, ends before center -->
+    <path d="M256 6 L256 226 L228 240 Z" fill="url(#redL)" />
+    <path d="M256 6 L284 240 L256 226 Z" fill="url(#redR)" />
+    <!-- Blue south needle — sleek, starts after center -->
+    <path d="M256 506 L256 286 L228 272 Z" fill="url(#blueL)" />
+    <path d="M256 506 L284 272 L256 286 Z" fill="url(#blueR)" />
   </g>
-  <circle cx="256" cy="256" r="11" fill="#171717" />
-  <circle cx="256" cy="256" r="4.5" fill="#ffffff" />
+  <!-- Center pivot -->
+  <circle cx="256" cy="256" r="12" fill="#ffffff" />
+  <circle cx="256" cy="256" r="5" fill="#000000" />
 </svg>
