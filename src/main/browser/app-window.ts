@@ -199,7 +199,7 @@ export class AppWindow {
     this.browserWindowInstance.contentView.addChildView(this.optionsMenuManager.getWebContentsViewInstance());
   }
   hideOptionsMenuOverlay(): void {
-    if(this.optionsMenuManager.getWebContentsViewInstance()){
+    if(this.optionsMenuManager && this.browserWindowInstance.contentView.children.indexOf(this.optionsMenuManager.getWebContentsViewInstance()) > -1){
       this.browserWindowInstance.contentView.removeChildView(this.optionsMenuManager.getWebContentsViewInstance());
     }
   }
@@ -218,7 +218,7 @@ export class AppWindow {
     this.commandKOverlayManager.resetState();
   }
   hideCommandKOverlay(): void {
-    if(this.commandKOverlayManager){
+    if(this.commandKOverlayManager && this.browserWindowInstance.contentView.children.indexOf(this.commandKOverlayManager.getWebContentsViewInstance()) > -1){
       this.browserWindowInstance.contentView.removeChildView(this.commandKOverlayManager.getWebContentsViewInstance());
     }
   }
