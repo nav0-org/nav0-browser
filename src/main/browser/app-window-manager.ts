@@ -86,7 +86,7 @@ export abstract class AppWindowManager {
         window = AppWindowManager.getActiveWindow();
       }
       if (window) {
-        const newTab = window.createTab(url, activateNewTab);
+        const newTab = await window.createTab(url, activateNewTab);
         return { id : newTab.id, title: newTab.getTitle(), url: newTab.getUrl() };
       }
     });

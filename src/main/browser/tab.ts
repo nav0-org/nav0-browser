@@ -24,6 +24,7 @@ export class Tab {
   private lastHistoryRecordId: string | null = null;
   private navigationDebounceTimer: ReturnType<typeof setTimeout> | null = null;
   private static readonly NAVIGATION_DEBOUNCE_MS = 500;
+  private readyPromise: Promise<void> = Promise.resolve();
 
   constructor(parentAppWindow: AppWindow, url: string , partitionSetting: string) {
     this.parentAppWindow = parentAppWindow;
@@ -37,24 +38,30 @@ export class Tab {
   private async loadURL(url?: string){
     let urlToLoad;
     let preloadScriptToLoad;
+    let isInternalPage = false;
     this.url = url ?? this.url;
     this.url = this.url.trim();
     if (this.url.startsWith(InAppUrls.BOOKMARKS)){
       urlToLoad = BOOKMARKS_WEBPACK_ENTRY;
       preloadScriptToLoad = BOOKMARKS_PRELOAD_WEBPACK_ENTRY;
+      isInternalPage = true;
     } else if (this.url.startsWith(InAppUrls.BROWSER_SETTINGS)){
       urlToLoad = BROWSER_SETTINGS_WEBPACK_ENTRY;
       preloadScriptToLoad = BROWSER_SETTINGS_PRELOAD_WEBPACK_ENTRY;
+      isInternalPage = true;
     } else if (this.url.startsWith(InAppUrls.DOWNLOADS)){
       urlToLoad = DOWNLOADS_WEBPACK_ENTRY;
       preloadScriptToLoad = DOWNLOADS_PRELOAD_WEBPACK_ENTRY;
+      isInternalPage = true;
     } else if (this.url.startsWith(InAppUrls.HISTORY)){
       urlToLoad = HISTORY_WEBPACK_ENTRY;
       preloadScriptToLoad = HISTORY_PRELOAD_WEBPACK_ENTRY;
+      isInternalPage = true;
     } else if (this.url.startsWith(InAppUrls.NEW_TAB)){
       urlToLoad = NEW_TAB_WEBPACK_ENTRY;
       preloadScriptToLoad = NEW_TAB_PRELOAD_WEBPACK_ENTRY;
       this.url = '';
+      isInternalPage = true;
     } else if (this.url.startsWith('http://') || this.url.startsWith('https://')) {
       urlToLoad = this.url;
       preloadScriptToLoad = null;
@@ -67,12 +74,25 @@ export class Tab {
       urlToLoad = this.url;
       preloadScriptToLoad = null;
     }
-    if(this.preloadScript !== preloadScriptToLoad || !this.webContentsViewInstance){
+    const needsNewView = this.preloadScript !== preloadScriptToLoad || !this.webContentsViewInstance;
+    if(needsNewView){
       this.preloadScript = preloadScriptToLoad;
       this.initWebContentsView();
     }
+    if (isInternalPage) {
+      this.readyPromise = new Promise<void>((resolve) => {
+        this.webContentsViewInstance.webContents.once('did-finish-load', () => resolve());
+      });
+    } else {
+      this.readyPromise = Promise.resolve();
+    }
     if(urlToLoad){
       this.webContentsViewInstance.webContents.loadURL(urlToLoad);
+    }
+    // If this tab is already active and the view was recreated, re-activate after content loads
+    if (needsNewView && this.parentAppWindow.getActiveTabId() === this.id) {
+      await this.readyPromise;
+      this.parentAppWindow.activateTab(this.id);
     }
   }
 
@@ -94,9 +114,6 @@ export class Tab {
     });
     // this.webContentsViewInstance.webContents.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36');
     // this.webContentsViewInstance.webContents.openDevTools({mode : 'detach'});
-    if(this.parentAppWindow.getActiveTabId() === this.id){
-      this.parentAppWindow.activateTab(this.id);
-    }
     this.initEventHandlers();
   }
 
@@ -230,6 +247,10 @@ export class Tab {
       urlObject ? `${urlObject.protocol}//${urlObject.hostname}/favicon.ico` : ''
     );
     this.lastHistoryRecordId = record.id;
+  }
+
+  whenReady(): Promise<void> {
+    return this.readyPromise;
   }
 
   getId(): string {

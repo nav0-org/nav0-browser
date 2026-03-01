@@ -67,10 +67,10 @@ export class AppWindow {
         this.browserWindowInstance?.setFullScreen(true);
       });
     
-      this.browserWindowInstance.webContents.on('did-finish-load', () => {
-        const firstTab = this.createTab(InAppUrls.NEW_TAB);
+      this.browserWindowInstance.webContents.on('did-finish-load', async () => {
+        const firstTab = await this.createTab(InAppUrls.NEW_TAB);
         this.activateTab(firstTab.getId());
-        
+
         // Tell the renderer about the new tab
         this.browserWindowInstance.webContents.send(MainToRendererEventsForBrowserIPC.NEW_TAB_CREATED, {
           id: firstTab.id,
@@ -112,7 +112,7 @@ export class AppWindow {
     }
   }
 
-  createTab(url: string, activateNewTab = true): Tab {
+  async createTab(url: string, activateNewTab = true): Promise<Tab> {
     const tab = new Tab(this, url, this.partitionSetting);
     this.tabs.set(tab.getId(), tab);
 
@@ -123,6 +123,7 @@ export class AppWindow {
     });
 
     if(activateNewTab){
+      await tab.whenReady();
       this.activateTab(tab.getId(), true);
     }
 
