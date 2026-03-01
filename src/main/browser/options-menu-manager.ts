@@ -5,6 +5,7 @@ export class OptionsMenuManager {
   private appWindowId: string;
   private isPrivate: boolean;
   private partitionSetting: string;
+  private readyPromise: Promise<void>;
 
   constructor(appWindowId: string, isPrivate: boolean, partitionSetting: string) {
     this.appWindowId = appWindowId;
@@ -13,7 +14,7 @@ export class OptionsMenuManager {
     this.init();
   }
 
-  private async init(){
+  private init(){
     this.webContentsViewInstance = new WebContentsView({
       webPreferences: {
         preload: OPTIONS_MENU_PRELOAD_WEBPACK_ENTRY,
@@ -28,14 +29,21 @@ export class OptionsMenuManager {
       }
     });
 
+    this.readyPromise = new Promise<void>((resolve) => {
+      this.webContentsViewInstance.webContents.once('did-finish-load', () => resolve());
+    });
+
     this.webContentsViewInstance.webContents.setWindowOpenHandler(({ url }) => {
       return { action: 'deny' };
     });
 
-    // this.webContentsViewInstance.webContents.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36');
     this.webContentsViewInstance.webContents.loadURL(OPTIONS_MENU_WEBPACK_ENTRY);
 
     // this.webContentsViewInstance.webContents.openDevTools({ mode: 'detach' });
+  }
+
+  whenReady(): Promise<void> {
+    return this.readyPromise;
   }
 
   getWebContentsViewInstance(): WebContentsView {
