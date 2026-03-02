@@ -31,6 +31,7 @@ declare global {
       removeDownload: (appWindowId: string, downloadId: string) => Promise<any>;
       removeAllDownloads: (appWindowId: string) => Promise<any>;
       fetchDownloads: (appWindowId: string, searchTerm: string, limit: number, offset: number) => Promise<any>;
+      openDownloadedFile: (filePath: string) => Promise<string>;
       removeBrowsingHistory: (appWindowId: string, historyId: string) => Promise<any>;
       removeAllBrowsingHistory: (appWindowId: string) => Promise<any>;
       fetchBrowsingHistory: (appWindowId: string, searchTerm: string, limit: number, offset: number) => Promise<any>;
