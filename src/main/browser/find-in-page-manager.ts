@@ -53,6 +53,8 @@ export class FindInPageManager {
   }
 
   setActiveTabWebContents(webContents: Electron.WebContents | null): void {
+    // Skip if already attached to the same webContents
+    if (this.currentTabWebContents === webContents && this.foundInPageHandler) return;
     this.detachFoundInPageListener();
     this.currentTabWebContents = webContents;
     if (webContents) {
@@ -112,6 +114,8 @@ export class FindInPageManager {
     if (this.currentTabWebContents) {
       this.currentTabWebContents.stopFindInPage('clearSelection');
     }
+    this.detachFoundInPageListener();
+    this.currentTabWebContents = null;
     this.lastSearchText = '';
   }
 

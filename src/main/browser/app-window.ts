@@ -241,8 +241,8 @@ export class AppWindow {
     this.hideCommandKOverlay();
 
     if (this.isFindInPageVisible()) {
-      // Already open — just focus the input
-      this.findInPageManager.focusInput();
+      // Already open — toggle it closed
+      this.hideFindInPage();
       return;
     }
 
@@ -276,10 +276,6 @@ export class AppWindow {
 
   findInPage(text: string, options?: { matchCase?: boolean }): void {
     if (!this.isFindInPageVisible()) return;
-    const activeTab = this.getActiveTab();
-    if (activeTab) {
-      this.findInPageManager.setActiveTabWebContents(activeTab.getWebContentsViewInstance().webContents);
-    }
     this.findInPageManager.find(text, options);
   }
 
