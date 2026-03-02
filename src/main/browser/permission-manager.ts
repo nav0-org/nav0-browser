@@ -175,35 +175,12 @@ export class PermissionManager {
       PermissionManager.enqueueRequest(request);
     });
 
-    ses.setPermissionCheckHandler((
-      webContents: WebContents | null,
-      permission: string,
-      requestingOrigin: string
-    ) => {
-      if (PermissionManager.AUTO_GRANT_PERMISSIONS.has(permission)) {
-        return true;
-      }
-
-      // Check persistent decisions
-      if (!isPrivate) {
-        const persistent = PermissionManager.getPersistentDecision(requestingOrigin, permission);
-        if (persistent === 'allowed_persistent') return true;
-        if (persistent === 'denied_persistent') return false;
-      }
-
-      // Check session decisions
-      if (webContents) {
-        const tabInfo = PermissionManager.findTabCallback?.(webContents.id);
-        if (tabInfo) {
-          const sessionKey = PermissionManager.sessionKey(tabInfo.tabId, requestingOrigin, permission);
-          const sessionDecision = PermissionManager.sessionPermissions.get(sessionKey);
-          if (sessionDecision === 'allowed_session') return true;
-          if (sessionDecision === 'denied_session') return false;
-        }
-      }
-
-      return false;
-    });
+    // Note: setPermissionCheckHandler is intentionally not used. Electron's boolean
+    // return can't express "undecided — please prompt". Returning false maps to
+    // PermissionStatus::DENIED in Chromium, which prevents setPermissionRequestHandler
+    // from being called for some permissions (notably geolocation). Without a check
+    // handler, Electron defaults all permissions to "ask", ensuring every request
+    // flows through our prompt UI above.
   }
 
   // ─── Request Queue ───────────────────────────────────────────────

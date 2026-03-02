@@ -175,4 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
   (window as any).BrowserAPI.onPermissionPromptShow((data: PermissionPromptData) => {
     updatePrompt(data);
   });
+
+  // Signal to main process that IPC listeners are registered
+  (window as any).BrowserAPI.signalPermissionPromptReady();
 });

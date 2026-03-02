@@ -148,6 +148,9 @@ export function init(){
     onPermissionPromptShow: (callback: (data: any) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.SHOW_PERMISSION_PROMPT, (_event, data) => callback(data));
     },
+    signalPermissionPromptReady: () => {
+      ipcRenderer.send(RendererToMainEventsForBrowserIPC.PERMISSION_PROMPT_READY);
+    },
     onPermissionPromptHide: (callback: () => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.HIDE_PERMISSION_PROMPT, () => callback());
     },

@@ -1,5 +1,5 @@
-import { WebContentsView } from "electron";
-import { MainToRendererEventsForBrowserIPC } from "../../constants/app-constants";
+import { ipcMain, WebContentsView } from "electron";
+import { MainToRendererEventsForBrowserIPC, RendererToMainEventsForBrowserIPC } from "../../constants/app-constants";
 
 export interface PermissionPromptData {
   requestId: string;
@@ -18,6 +18,8 @@ export class PermissionPromptOverlayManager {
   private isPrivate: boolean;
   private partitionSetting: string;
   private readyPromise: Promise<void>;
+  private pendingPromptData: PermissionPromptData | null = null;
+  private rendererReady = false;
 
   constructor(appWindowId: string, isPrivate: boolean, partitionSetting: string) {
     this.appWindowId = appWindowId;
@@ -41,8 +43,23 @@ export class PermissionPromptOverlayManager {
       }
     });
 
+    // Wait for the renderer to signal that its IPC listeners are registered,
+    // rather than relying on did-finish-load which may fire before the
+    // webpack bundle has finished executing.
     this.readyPromise = new Promise<void>((resolve) => {
-      this.webContentsViewInstance.webContents.once('did-finish-load', () => resolve());
+      const handler = (event: Electron.IpcMainEvent) => {
+        if (event.sender.id === this.webContentsViewInstance.webContents.id) {
+          this.rendererReady = true;
+          ipcMain.removeListener(RendererToMainEventsForBrowserIPC.PERMISSION_PROMPT_READY, handler);
+          resolve();
+          // Flush any buffered prompt data
+          if (this.pendingPromptData) {
+            this.sendPrompt(this.pendingPromptData);
+            this.pendingPromptData = null;
+          }
+        }
+      };
+      ipcMain.on(RendererToMainEventsForBrowserIPC.PERMISSION_PROMPT_READY, handler);
     });
 
     this.webContentsViewInstance.webContents.setWindowOpenHandler(() => {
@@ -57,6 +74,15 @@ export class PermissionPromptOverlayManager {
   }
 
   showPrompt(data: PermissionPromptData): void {
+    if (this.rendererReady) {
+      this.sendPrompt(data);
+    } else {
+      // Buffer until the renderer signals ready
+      this.pendingPromptData = data;
+    }
+  }
+
+  private sendPrompt(data: PermissionPromptData): void {
     this.webContentsViewInstance.webContents.send(
       MainToRendererEventsForBrowserIPC.SHOW_PERMISSION_PROMPT,
       data
