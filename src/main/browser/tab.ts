@@ -209,8 +209,10 @@ export class Tab {
       lastProgressSent = now;
 
       if (state === 'progressing') {
+        const browserWindow = this.parentAppWindow.getBrowserWindowInstance();
+        if (!browserWindow?.webContents) return;
         const progressData = { downloadId, receivedBytes: item.getReceivedBytes(), totalBytes: item.getTotalBytes() };
-        this.parentAppWindow.getBrowserWindowInstance().webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_PROGRESS, progressData);
+        browserWindow.webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_PROGRESS, progressData);
         this.parentAppWindow.broadcastToTabs(MainToRendererEventsForBrowserIPC.DOWNLOAD_PROGRESS, progressData);
       }
     });
@@ -220,9 +222,11 @@ export class Tab {
       if (state !== 'completed') {
         console.error(`Download failed: ${state}`);
       }
+      const browserWindow = this.parentAppWindow.getBrowserWindowInstance();
+      if (!browserWindow?.webContents) return;
       // Notify renderer (browser chrome + all tabs) that this download is done
       const completedData = { downloadId, state, fileName: item.getFilename() };
-      this.parentAppWindow.getBrowserWindowInstance().webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED, completedData);
+      browserWindow.webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED, completedData);
       this.parentAppWindow.broadcastToTabs(MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED, completedData);
     });
     console.log('Download started:', downloadPath);
