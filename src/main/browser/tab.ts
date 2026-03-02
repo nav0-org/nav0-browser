@@ -25,6 +25,7 @@ export class Tab {
   private navigationDebounceTimer: ReturnType<typeof setTimeout> | null = null;
   private static readonly NAVIGATION_DEBOUNCE_MS = 500;
   private readyPromise: Promise<void> = Promise.resolve();
+  private static handledDownloads: Set<string> = new Set();
 
   constructor(parentAppWindow: AppWindow, url: string , partitionSetting: string) {
     this.parentAppWindow = parentAppWindow;
@@ -184,9 +185,16 @@ export class Tab {
 
   async handleDownload(item: Electron.DownloadItem): Promise<void> {
     const downloadPath = app.getPath('downloads') + '/' + item.getFilename();
+    const downloadId = item.getStartTime().toString() + '_' + item.getFilename();
+
+    // Prevent duplicate handling when multiple tabs share the same session
+    if (Tab.handledDownloads.has(downloadId)) return;
+    Tab.handledDownloads.add(downloadId);
+
     item.setSavePath(downloadPath);
 
-    const downloadId = item.getStartTime().toString() + '_' + item.getFilename();
+    // Add the record to the database immediately so it appears on the Downloads page
+    await DownloadManager.addRecord(this.parentAppWindow.id, item.getURL(), item.getFilename(), path.extname(item.getFilename()), Utils.getFileType(path.extname(item.getFilename())), item.getTotalBytes(), downloadPath);
 
     // Notify renderer that a download has started
     this.parentAppWindow.getBrowserWindowInstance().webContents.send(
@@ -210,9 +218,8 @@ export class Tab {
     });
 
     item.once('done', async (event, state) => {
-      if (state === 'completed') {
-        await DownloadManager.addRecord(this.parentAppWindow.id, item.getURL(), item.getFilename(), path.extname(item.getFilename()), Utils.getFileType(path.extname(item.getFilename())), item.getTotalBytes(), downloadPath);
-      } else {
+      Tab.handledDownloads.delete(downloadId);
+      if (state !== 'completed') {
         console.error(`Download failed: ${state}`);
       }
       // Always notify renderer that this download is done

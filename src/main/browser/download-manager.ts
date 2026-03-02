@@ -33,9 +33,11 @@ export abstract class DownloadManager {
 
   public static async addRecord(appWindowId: string, url: string, fileName: string,  fileExtension: string, fileType: 'document' | 'image' | 'archive' | 'audio' | 'file' | 'executable' | 'other', fileSize: number, fileLocation: string): Promise<DownloadRecord>{
     const db = DatabaseManager.getDatabase(AppWindowManager.getWindowById(appWindowId).isPrivate);
+    const id = uuid();
+    const createdDate = new Date().toISOString();
     const stmt = db.prepare("INSERT INTO download (id, url, createdDate, fileName, fileExtension, fileType, fileSize, fileLocation) VALUES (?, ?, ?, ?, ?, ?, ?, ?);");
-    const result = await stmt.run(uuid(), url, new Date().toISOString(), fileName, fileExtension, fileType, fileSize, fileLocation);
-    const newlyCreatedRecord: DownloadRecord = { id: uuid(), url, createdDate: new Date(), fileName, fileExtension, fileType, fileSize, fileLocation };
+    await stmt.run(id, url, createdDate, fileName, fileExtension, fileType, fileSize, fileLocation);
+    const newlyCreatedRecord: DownloadRecord = { id, url, createdDate: new Date(createdDate), fileName, fileExtension, fileType, fileSize, fileLocation };
     return newlyCreatedRecord;
   }
 
