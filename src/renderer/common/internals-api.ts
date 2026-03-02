@@ -59,6 +59,9 @@ declare global {
       onTabUrlUpdated: (callback: (data: { id: string, url: string, isBookmark: boolean, bookmarkId: string | null, canGoBack: boolean, canGoForward: boolean }) => void) => void;
       onTabFaviconUpdated: (callback: (data: { id: string, faviconUrl: string }) => void) => void;
       onNavigationFailed: (callback: (data: { id: string }) => void) => void;
+      onDownloadStarted: (callback: (data: { downloadId: string, fileName: string, totalBytes: number }) => void) => void;
+      onDownloadProgress: (callback: (data: { downloadId: string, receivedBytes: number, totalBytes: number }) => void) => void;
+      onDownloadCompleted: (callback: (data: { downloadId: string, state: string, fileName: string }) => void) => void;
     };
   }
 }
