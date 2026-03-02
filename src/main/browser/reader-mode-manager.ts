@@ -38,7 +38,7 @@ export class ReaderModeManager {
         "var module = { exports: {} };" +
         readabilityReadableSource +
         "var isProbablyReaderable = module.exports;" +
-        "return isProbablyReaderable(document);" +
+        "return isProbablyReaderable(document, {minContentLength: 1000, minScore: 75});" +
         "})()";
       return await webContents.executeJavaScript(script);
     } catch {
