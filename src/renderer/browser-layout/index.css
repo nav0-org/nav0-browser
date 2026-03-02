@@ -226,3 +226,25 @@
   margin-top: var(--spacing-xs);
   color: var(--text-light);
 }
+
+/* Download Progress Ring */
+.download-progress-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  transform: rotate(-90deg);
+}
+
+.download-progress-ring-bg {
+  stroke: var(--border-color);
+  opacity: 0.3;
+}
+
+.download-progress-ring-fill {
+  stroke: var(--primary-color);
+  stroke-linecap: round;
+  stroke-dasharray: 87.96;
+  stroke-dashoffset: 87.96;
+  transition: stroke-dashoffset 0.25s ease;
+}

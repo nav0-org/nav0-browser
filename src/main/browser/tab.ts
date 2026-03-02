@@ -185,12 +185,41 @@ export class Tab {
   async handleDownload(item: Electron.DownloadItem): Promise<void> {
     const downloadPath = app.getPath('downloads') + '/' + item.getFilename();
     item.setSavePath(downloadPath);
+
+    const downloadId = item.getStartTime().toString() + '_' + item.getFilename();
+
+    // Notify renderer that a download has started
+    this.parentAppWindow.getBrowserWindowInstance().webContents.send(
+      MainToRendererEventsForBrowserIPC.DOWNLOAD_STARTED,
+      { downloadId, fileName: item.getFilename(), totalBytes: item.getTotalBytes() }
+    );
+
+    // Track progress updates (throttled to every 250ms)
+    let lastProgressSent = 0;
+    item.on('updated', (_event, state) => {
+      const now = Date.now();
+      if (now - lastProgressSent < 250) return;
+      lastProgressSent = now;
+
+      if (state === 'progressing') {
+        this.parentAppWindow.getBrowserWindowInstance().webContents.send(
+          MainToRendererEventsForBrowserIPC.DOWNLOAD_PROGRESS,
+          { downloadId, receivedBytes: item.getReceivedBytes(), totalBytes: item.getTotalBytes() }
+        );
+      }
+    });
+
     item.once('done', async (event, state) => {
       if (state === 'completed') {
         await DownloadManager.addRecord(this.parentAppWindow.id, item.getURL(), item.getFilename(), path.extname(item.getFilename()), Utils.getFileType(path.extname(item.getFilename())), item.getTotalBytes(), downloadPath);
       } else {
         console.error(`Download failed: ${state}`);
       }
+      // Always notify renderer that this download is done
+      this.parentAppWindow.getBrowserWindowInstance().webContents.send(
+        MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED,
+        { downloadId, state, fileName: item.getFilename() }
+      );
     });
     console.log('Download started:', downloadPath);
   } 

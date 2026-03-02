@@ -140,6 +140,15 @@ export function init(){
     onNavigationFailed: (callback: (data: { id: string }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.NAVIGATION_FAILED, (_event, data) => callback(data));
     },
+    onDownloadStarted: (callback: (data: { downloadId: string, fileName: string, totalBytes: number }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.DOWNLOAD_STARTED, (_event, data) => callback(data));
+    },
+    onDownloadProgress: (callback: (data: { downloadId: string, receivedBytes: number, totalBytes: number }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.DOWNLOAD_PROGRESS, (_event, data) => callback(data));
+    },
+    onDownloadCompleted: (callback: (data: { downloadId: string, state: string, fileName: string }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED, (_event, data) => callback(data));
+    },
   });
 }
 

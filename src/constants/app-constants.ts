@@ -141,6 +141,9 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly TAB_FAVICON_UPDATED = "browser:tab-favicon-updated";
   public static readonly TAB_URL_UPDATED =  "browser:tab-url-updated";
   public static readonly NAVIGATION_FAILED = "browser:navigation-failed";
+  public static readonly DOWNLOAD_STARTED = "browser:download-started";
+  public static readonly DOWNLOAD_PROGRESS = "browser:download-progress";
+  public static readonly DOWNLOAD_COMPLETED = "browser:download-completed";
   // public static readonly SET_DIALOG_VISIBILITY = "browser:set-dialog-visibility";
 }
 

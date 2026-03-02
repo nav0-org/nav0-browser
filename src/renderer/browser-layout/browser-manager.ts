@@ -14,9 +14,13 @@ export class BrowserTabManager {
   private optionsButton: HTMLButtonElement;
   private bookmarkButton: HTMLButtonElement;
   private unbookmarkButton: HTMLButtonElement;
+  private downloadsButton: HTMLButtonElement;
+  private downloadProgressRing: SVGElement;
+  private downloadProgressFill: SVGCircleElement;
 
   // State
   private tabs: Tab[] = [];
+  private activeDownloads: Map<string, { receivedBytes: number, totalBytes: number }> = new Map();
   private activeTabId: string | null = null;
   private appWindowId: string | null = null;
   private isPrivate = false;
@@ -57,6 +61,9 @@ export class BrowserTabManager {
     this.optionsButton = document.getElementById('options-button') as HTMLButtonElement;
     this.bookmarkButton = document.getElementById('bookmark-button') as HTMLButtonElement;
     this.unbookmarkButton = document.getElementById('unbookmark-button') as HTMLButtonElement;
+    this.downloadsButton = document.getElementById('downloads-button') as HTMLButtonElement;
+    this.downloadProgressRing = document.getElementById('download-progress-ring') as unknown as SVGElement;
+    this.downloadProgressFill = document.querySelector('.download-progress-ring-fill') as unknown as SVGCircleElement;
   }
 
   private setupEventListeners(): void {
@@ -103,6 +110,10 @@ export class BrowserTabManager {
       if (e.key === 'Enter') {
         this.navigateToURL();
       }
+    });
+
+    this.downloadsButton.addEventListener('click', () => {
+      window.BrowserAPI.createTab(this.appWindowId, InAppUrls.DOWNLOADS, true);
     });
 
     this.optionsButton.addEventListener('click', async() => {
@@ -169,6 +180,26 @@ export class BrowserTabManager {
     window.BrowserAPI.onTabFaviconUpdated((data: { id: string, faviconUrl: string }) => {
       this.getTabById(data.id)?.updateTabFavicon(data.faviconUrl);
     });
+
+    // Download progress tracking
+    window.BrowserAPI.onDownloadStarted((data: { downloadId: string, fileName: string, totalBytes: number }) => {
+      this.activeDownloads.set(data.downloadId, { receivedBytes: 0, totalBytes: data.totalBytes });
+      this.updateDownloadProgress();
+    });
+
+    window.BrowserAPI.onDownloadProgress((data: { downloadId: string, receivedBytes: number, totalBytes: number }) => {
+      const download = this.activeDownloads.get(data.downloadId);
+      if (download) {
+        download.receivedBytes = data.receivedBytes;
+        download.totalBytes = data.totalBytes;
+      }
+      this.updateDownloadProgress();
+    });
+
+    window.BrowserAPI.onDownloadCompleted((data: { downloadId: string }) => {
+      this.activeDownloads.delete(data.downloadId);
+      this.updateDownloadProgress();
+    });
   }
 
   private handleBookmark(): void {
@@ -223,6 +254,27 @@ export class BrowserTabManager {
     if (url) {
       window.BrowserAPI.navigate(this.appWindowId, this.activeTabId, url);
     }
+  }
+
+  private updateDownloadProgress(): void {
+    if (this.activeDownloads.size === 0) {
+      this.downloadProgressRing.style.display = 'none';
+      return;
+    }
+
+    this.downloadProgressRing.style.display = 'block';
+
+    let totalReceived = 0;
+    let totalSize = 0;
+    this.activeDownloads.forEach((dl) => {
+      totalReceived += dl.receivedBytes;
+      totalSize += dl.totalBytes;
+    });
+
+    const progress = totalSize > 0 ? totalReceived / totalSize : 0.5;
+    const circumference = 2 * Math.PI * 14; // 87.9646
+    const offset = circumference * (1 - progress);
+    this.downloadProgressFill.style.strokeDashoffset = offset.toString();
   }
 
   private updateBrowserViewBounds(): void {
