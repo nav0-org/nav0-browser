@@ -98,7 +98,7 @@ export class PermissionManager {
       webContents: WebContents,
       permission: string,
       callback: (granted: boolean) => void,
-      details: Electron.PermissionRequestHandlerHandlerDetails
+      details: Electron.PermissionRequest | Electron.MediaAccessPermissionRequest | Electron.FilesystemPermissionRequest | Electron.OpenExternalPermissionRequest
     ) => {
       // Auto-grant certain permissions
       if (PermissionManager.AUTO_GRANT_PERMISSIONS.has(permission)) {
@@ -528,10 +528,11 @@ export class PermissionManager {
 
   static getPermissionInfo(
     permission: string,
-    details?: Electron.PermissionRequestHandlerHandlerDetails
+    details?: Electron.PermissionRequest | Electron.MediaAccessPermissionRequest
   ): { type: string; label: string; icon: string } {
-    if (permission === 'media' && details?.mediaTypes) {
-      const types = details.mediaTypes;
+    const mediaDetails = details as Electron.MediaAccessPermissionRequest | undefined;
+    if (permission === 'media' && mediaDetails?.mediaTypes) {
+      const types = mediaDetails.mediaTypes;
       if (types.includes('video') && types.includes('audio')) {
         return { type: 'media', label: 'camera and microphone', icon: 'camera' };
       }
