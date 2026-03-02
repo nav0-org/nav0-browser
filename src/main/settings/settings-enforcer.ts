@@ -415,7 +415,7 @@ export abstract class SettingsEnforcer {
   private static async clearAllCookies() {
     try {
       const ses = session.fromPartition('persist:browsertabs');
-      await ses.clearStorageData({ storages: ['cookies', 'localstorage', 'sessionstorage'] });
+      await ses.clearStorageData({ storages: ['cookies', 'localstorage'] });
     } catch (e) { console.error('Failed to clear cookies:', e); }
   }
 
