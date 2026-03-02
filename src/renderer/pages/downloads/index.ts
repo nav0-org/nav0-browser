@@ -117,9 +117,9 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
     downloadItem.dataset.fileName = item.fileName;
 
     const isActive = activeDownloads.has(item.fileName);
-    const progressHtml = isActive
-      ? `<div class="download-progress-bar"><div class="download-progress-bar-fill" style="width: 0%"></div></div>`
-      : '';
+    if (isActive) {
+      downloadItem.classList.add('downloading');
+    }
 
     downloadItem.innerHTML = `
       <div class="download-time">${FormatUtils.getFriendlyDateString(item.createdDate)}</div>
@@ -133,7 +133,7 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
           <i data-lucide="x" width="14" height="14"></i>
         </button>
       </div>
-      ${progressHtml}
+      ${isActive ? '<div class="download-progress-bar"><div class="download-progress-bar-fill" style="width: 0%"></div></div>' : ''}
     `;
 
     downloadItem.addEventListener('click', () => {
@@ -162,6 +162,7 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
 const updateProgressBar = (fileName: string, receivedBytes: number, totalBytes: number): void => {
   const row = downloadsListElement.querySelector(`[data-file-name="${CSS.escape(fileName)}"]`);
   if (!row) return;
+  row.classList.add('downloading');
   let bar = row.querySelector('.download-progress-bar-fill') as HTMLElement;
   if (!bar) {
     const progressEl = document.createElement('div');
@@ -177,6 +178,7 @@ const updateProgressBar = (fileName: string, receivedBytes: number, totalBytes: 
 const removeProgressBar = (fileName: string): void => {
   const row = downloadsListElement.querySelector(`[data-file-name="${CSS.escape(fileName)}"]`);
   if (!row) return;
+  row.classList.remove('downloading');
   row.querySelector('.download-progress-bar')?.remove();
 };
 
