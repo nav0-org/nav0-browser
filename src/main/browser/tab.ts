@@ -100,7 +100,6 @@ export class Tab {
 
   private async initWebContentsView(){
     if(this.webContentsViewInstance) {
-      PermissionManager.clearUserInteraction(this.webContentsViewInstance.webContents.id);
       this.webContentsViewInstance.webContents.close();
     }
     this.webContentsViewInstance = new WebContentsView({
@@ -121,11 +120,6 @@ export class Tab {
   }
 
   private initEventHandlers() {
-    // User gesture tracking for permission manager
-    this.webContentsViewInstance.webContents.on('before-input-event', () => {
-      PermissionManager.markUserInteraction(this.webContentsViewInstance.webContents.id);
-    });
-
     //for hard navigation (debounced)
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE, async (event, url: string) => {
       this.handleOriginChange(url);

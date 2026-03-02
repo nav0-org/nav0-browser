@@ -47,7 +47,6 @@ export class PermissionManager {
   private static pendingQueue: PermissionRequest[] = [];
   private static activePrompt: PermissionRequest | null = null;
   private static requestTimestamps = new Map<string, number[]>();
-  private static userInteracted = new Set<number>();
 
   // Callbacks set by the integration layer
   private static showPromptCallback: ShowPromptCallback | null = null;
@@ -172,18 +171,6 @@ export class PermissionManager {
 
       // Track request timestamp for flood detection
       PermissionManager.trackRequestTimestamp(origin);
-
-      // If flood blocked, auto-deny after showing brief message
-      if (isFloodBlocked) {
-        PermissionManager.enqueueRequest(request);
-        return;
-      }
-
-      // Check user gesture requirement: queue until user interaction
-      if (!PermissionManager.userInteracted.has(webContents.id)) {
-        PermissionManager.pendingQueue.push(request);
-        return;
-      }
 
       PermissionManager.enqueueRequest(request);
     });
@@ -315,31 +302,6 @@ export class PermissionManager {
     const cutoff = Date.now() - PermissionManager.FLOOD_WINDOW_MS;
     const recent = timestamps.filter((t: number) => t > cutoff);
     return recent.length >= PermissionManager.FLOOD_LIMIT;
-  }
-
-  // ─── User Gesture Tracking ───────────────────────────────────────
-
-  static markUserInteraction(webContentsId: number): void {
-    if (PermissionManager.userInteracted.has(webContentsId)) return;
-    PermissionManager.userInteracted.add(webContentsId);
-
-    // Process any queued requests for this webContents
-    const toProcess: PermissionRequest[] = [];
-    PermissionManager.pendingQueue = PermissionManager.pendingQueue.filter((req: PermissionRequest) => {
-      if (req.webContentsId === webContentsId) {
-        toProcess.push(req);
-        return false;
-      }
-      return true;
-    });
-
-    for (const req of toProcess) {
-      PermissionManager.enqueueRequest(req);
-    }
-  }
-
-  static clearUserInteraction(webContentsId: number): void {
-    PermissionManager.userInteracted.delete(webContentsId);
   }
 
   // ─── Session Permission Management ───────────────────────────────

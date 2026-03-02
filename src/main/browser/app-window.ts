@@ -139,9 +139,7 @@ export class AppWindow {
   closeTab(id: string, isUserInitiated = true): void {
     const tab = this.tabs.get(id);
     if (tab) {
-      const webContentsId = tab.getWebContentsViewInstance().webContents.id;
       PermissionManager.clearSessionPermissionsForTab(id);
-      PermissionManager.clearUserInteraction(webContentsId);
       tab.getWebContentsViewInstance().removeAllListeners();
       tab.getWebContentsViewInstance().webContents.close();
     }
