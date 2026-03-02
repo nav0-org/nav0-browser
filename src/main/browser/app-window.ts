@@ -1,4 +1,4 @@
-import { BrowserWindow, session, shell } from "electron";
+import { BrowserWindow, session } from "electron";
 import { v4 as uuid } from "uuid";
 import { Tab } from "./tab";
 import { AppConstants, InAppUrls, MainToRendererEventsForBrowserIPC } from "../../constants/app-constants";
@@ -228,5 +228,13 @@ export class AppWindow {
       this.browserWindowInstance.contentView.removeChildView(this.commandKOverlayManager.getWebContentsViewInstance());
     }
   }
-  
+
+  broadcastToTabs(channel: string, data: any): void {
+    this.tabs.forEach(tab => {
+      try {
+        tab.getWebContentsViewInstance()?.webContents?.send(channel, data);
+      } catch (_) { /* tab may be closing */ }
+    });
+  }
+
 }

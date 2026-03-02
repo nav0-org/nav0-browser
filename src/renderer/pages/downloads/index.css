@@ -165,3 +165,19 @@
   color: var(--text-secondary);
   font-size: var(--font-sm);
 }
+
+.download-progress-bar {
+  grid-column: 1 / -1;
+  height: 2px;
+  background-color: var(--border-color);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.download-progress-bar-fill {
+  height: 100%;
+  background-color: var(--primary-color);
+  border-radius: 1px;
+  transition: width 0.2s ease;
+  width: 0%;
+}

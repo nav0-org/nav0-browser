@@ -69,6 +69,9 @@ export function init(){
     fetchDownloads: async (appWindowId: string, searchTerm: string, limit: number, offset: number) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.FETCH_DOWNLOAD, appWindowId, searchTerm, limit, offset);
     },
+    openDownloadedFile: async (filePath: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.OPEN_DOWNLOADED_FILE, filePath);
+    },
     removeBrowsingHistory: async (appWindowId: string, historyId: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.REMOVE_BROWSING_HISTORY, appWindowId, historyId);
     },

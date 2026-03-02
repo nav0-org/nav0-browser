@@ -14,6 +14,9 @@ let hasMore = true;
 let currentSearchTerm = '';
 let allLoadedItems: DownloadRecord[] = [];
 
+// Track active downloads by fileName for progress bars
+const activeDownloads: Map<string, { receivedBytes: number, totalBytes: number }> = new Map();
+
 const downloadsListElement = document.getElementById('downloads-list') as HTMLElement;
 const searchInput = document.getElementById('search-input') as HTMLInputElement;
 
@@ -39,6 +42,29 @@ document.addEventListener('DOMContentLoaded', async() => {
     if (scrollTop + clientHeight >= scrollHeight - 100) {
       loadDownloadsPage();
     }
+  });
+
+  // Listen for download progress events
+  window.BrowserAPI.onDownloadStarted((data) => {
+    activeDownloads.set(data.fileName, { receivedBytes: 0, totalBytes: data.totalBytes });
+    // Reload list to pick up the newly inserted DB record
+    resetAndReload();
+  });
+
+  window.BrowserAPI.onDownloadProgress((data) => {
+    for (const [fileName, info] of activeDownloads) {
+      if (data.downloadId.endsWith(fileName)) {
+        info.receivedBytes = data.receivedBytes;
+        info.totalBytes = data.totalBytes;
+        updateProgressBar(fileName, data.receivedBytes, data.totalBytes);
+        break;
+      }
+    }
+  });
+
+  window.BrowserAPI.onDownloadCompleted((data) => {
+    activeDownloads.delete(data.fileName);
+    removeProgressBar(data.fileName);
   });
 });
 
@@ -88,6 +114,12 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
   items.forEach(item => {
     const downloadItem = document.createElement('div');
     downloadItem.className = 'download-item';
+    downloadItem.dataset.fileName = item.fileName;
+
+    const isActive = activeDownloads.has(item.fileName);
+    const progressHtml = isActive
+      ? `<div class="download-progress-bar"><div class="download-progress-bar-fill" style="width: 0%"></div></div>`
+      : '';
 
     downloadItem.innerHTML = `
       <div class="download-time">${FormatUtils.getFriendlyDateString(item.createdDate)}</div>
@@ -101,7 +133,14 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
           <i data-lucide="x" width="14" height="14"></i>
         </button>
       </div>
+      ${progressHtml}
     `;
+
+    downloadItem.addEventListener('click', () => {
+      if (!activeDownloads.has(item.fileName)) {
+        window.BrowserAPI.openDownloadedFile(item.fileLocation);
+      }
+    });
 
     downloadItem.querySelector('.delete-button')?.addEventListener('click', async (e: Event) => {
       e.stopPropagation();
@@ -118,6 +157,27 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
   });
 
   createIcons({ icons });
+};
+
+const updateProgressBar = (fileName: string, receivedBytes: number, totalBytes: number): void => {
+  const row = downloadsListElement.querySelector(`[data-file-name="${CSS.escape(fileName)}"]`);
+  if (!row) return;
+  let bar = row.querySelector('.download-progress-bar-fill') as HTMLElement;
+  if (!bar) {
+    const progressEl = document.createElement('div');
+    progressEl.className = 'download-progress-bar';
+    progressEl.innerHTML = '<div class="download-progress-bar-fill" style="width: 0%"></div>';
+    row.appendChild(progressEl);
+    bar = progressEl.querySelector('.download-progress-bar-fill') as HTMLElement;
+  }
+  const pct = totalBytes > 0 ? Math.round((receivedBytes / totalBytes) * 100) : 0;
+  bar.style.width = `${pct}%`;
+};
+
+const removeProgressBar = (fileName: string): void => {
+  const row = downloadsListElement.querySelector(`[data-file-name="${CSS.escape(fileName)}"]`);
+  if (!row) return;
+  row.querySelector('.download-progress-bar')?.remove();
 };
 
 const showLoadingIndicator = (): void => {

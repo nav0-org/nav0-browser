@@ -1,4 +1,4 @@
-import { ipcMain } from "electron";
+import { ipcMain, shell } from "electron";
 import { RendererToMainEventsForBrowserIPC } from "../../constants/app-constants";
 import { DownloadRecord } from "../../types/download-record";
 import { DatabaseManager } from "../database/database-manager";
@@ -18,6 +18,10 @@ export abstract class DownloadManager {
 
     ipcMain.handle(RendererToMainEventsForBrowserIPC.REMOVE_ALL_DOWNLOADS, async (event, appWindowId: string) => {
       return await DownloadManager.removeAllRecords(appWindowId);
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.OPEN_DOWNLOADED_FILE, async (event, filePath: string) => {
+      return await shell.openPath(filePath);
     });
   }
 

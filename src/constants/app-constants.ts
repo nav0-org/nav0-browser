@@ -110,6 +110,7 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly REMOVE_DOWNLOAD = "browser:remove-download";
   public static readonly REMOVE_ALL_DOWNLOADS = "browser:remove-all-downloads";
   public static readonly FETCH_DOWNLOAD = "browser:fetch-download";
+  public static readonly OPEN_DOWNLOADED_FILE = "browser:open-downloaded-file";
   public static readonly REMOVE_BROWSING_HISTORY = "browser:remove-browsing-history";
   public static readonly REMOVE_ALL_BROWSING_HISTORY = "browser:remove-all-browsing-history";
   public static readonly FETCH_BROWSING_HISTORY = "browser:fetch-browsing-history";

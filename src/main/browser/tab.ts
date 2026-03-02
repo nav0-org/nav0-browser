@@ -196,11 +196,10 @@ export class Tab {
     // Add the record to the database immediately so it appears on the Downloads page
     await DownloadManager.addRecord(this.parentAppWindow.id, item.getURL(), item.getFilename(), path.extname(item.getFilename()), Utils.getFileType(path.extname(item.getFilename())), item.getTotalBytes(), downloadPath);
 
-    // Notify renderer that a download has started
-    this.parentAppWindow.getBrowserWindowInstance().webContents.send(
-      MainToRendererEventsForBrowserIPC.DOWNLOAD_STARTED,
-      { downloadId, fileName: item.getFilename(), totalBytes: item.getTotalBytes() }
-    );
+    // Notify renderer (browser chrome + all tabs) that a download has started
+    const startedData = { downloadId, fileName: item.getFilename(), totalBytes: item.getTotalBytes() };
+    this.parentAppWindow.getBrowserWindowInstance().webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_STARTED, startedData);
+    this.parentAppWindow.broadcastToTabs(MainToRendererEventsForBrowserIPC.DOWNLOAD_STARTED, startedData);
 
     // Track progress updates (throttled to every 250ms)
     let lastProgressSent = 0;
@@ -210,10 +209,9 @@ export class Tab {
       lastProgressSent = now;
 
       if (state === 'progressing') {
-        this.parentAppWindow.getBrowserWindowInstance().webContents.send(
-          MainToRendererEventsForBrowserIPC.DOWNLOAD_PROGRESS,
-          { downloadId, receivedBytes: item.getReceivedBytes(), totalBytes: item.getTotalBytes() }
-        );
+        const progressData = { downloadId, receivedBytes: item.getReceivedBytes(), totalBytes: item.getTotalBytes() };
+        this.parentAppWindow.getBrowserWindowInstance().webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_PROGRESS, progressData);
+        this.parentAppWindow.broadcastToTabs(MainToRendererEventsForBrowserIPC.DOWNLOAD_PROGRESS, progressData);
       }
     });
 
@@ -222,11 +220,10 @@ export class Tab {
       if (state !== 'completed') {
         console.error(`Download failed: ${state}`);
       }
-      // Always notify renderer that this download is done
-      this.parentAppWindow.getBrowserWindowInstance().webContents.send(
-        MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED,
-        { downloadId, state, fileName: item.getFilename() }
-      );
+      // Notify renderer (browser chrome + all tabs) that this download is done
+      const completedData = { downloadId, state, fileName: item.getFilename() };
+      this.parentAppWindow.getBrowserWindowInstance().webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED, completedData);
+      this.parentAppWindow.broadcastToTabs(MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED, completedData);
     });
     console.log('Download started:', downloadPath);
   } 
