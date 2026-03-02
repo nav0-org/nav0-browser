@@ -128,6 +128,7 @@ export class FindInPageManager {
   }
 
   focusInput(): void {
+    this.webContentsViewInstance.webContents.focus();
     this.webContentsViewInstance.webContents.executeJavaScript(`(() => {
       if (typeof window.focusFindInput === 'function') {
         window.focusFindInput();
