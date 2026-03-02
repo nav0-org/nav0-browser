@@ -1,7 +1,7 @@
 import { RendererToMainEventsForBrowserIPC } from "../../constants/app-constants";
 import { AppMenuManager } from "./app-menu-manager";
 import { AppWindow } from "./app-window";
-import { app, ipcMain, Menu } from "electron";
+import { app, dialog, ipcMain, Menu } from "electron";
 import { Tab } from "./tab";
 import { DatabaseManager } from "../database/database-manager";
 import { SearchEngine } from "../web/search-engine";
@@ -296,6 +296,28 @@ export abstract class AppWindowManager {
         }));
       }
       return [];
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.OPEN_PDF_FILE, async (event, appWindowId: string) => {
+      let window: AppWindow | null = null;
+      if (appWindowId) {
+        window = AppWindowManager.getWindowById(appWindowId);
+      } else {
+        window = AppWindowManager.getActiveWindow();
+      }
+      if (!window) return null;
+
+      const result = await dialog.showOpenDialog(window.getBrowserWindowInstance(), {
+        properties: ['openFile'],
+        filters: [{ name: 'PDF Files', extensions: ['pdf'] }]
+      });
+
+      if (result.canceled || result.filePaths.length === 0) return null;
+
+      const filePath = result.filePaths[0];
+      const fileUrl = `file://${filePath}`;
+      await window.createTab(fileUrl, true);
+      return fileUrl;
     });
 
   }

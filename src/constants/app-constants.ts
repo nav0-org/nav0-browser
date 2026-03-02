@@ -115,6 +115,7 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly FETCH_BROWSING_HISTORY = "browser:fetch-browsing-history";
 
   public static readonly HANDLE_FILE_SELECTION = "browser:handle-file-selection";
+  public static readonly OPEN_PDF_FILE = "browser:open-pdf-file";
 
   public static readonly UPDATE_BROWSER_VIEW_BOUNDS = "browser:update-browser-view-bounds";
   public static readonly CLOSE_WINDOW = "browser:close-window";

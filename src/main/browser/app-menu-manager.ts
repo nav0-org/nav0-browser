@@ -1,4 +1,4 @@
-import { app, Menu } from "electron";
+import { app, dialog, Menu } from "electron";
 import { AppConstants, InAppUrls } from "../../constants/app-constants";
 import { AppWindowManager } from "./app-window-manager";
 
@@ -35,6 +35,17 @@ export abstract class AppMenuManager {
           {label: 'New Tab', accelerator: 'CmdOrCtrl+T', click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.NEW_TAB, true) }},
           {label: 'New Window', accelerator: 'CmdOrCtrl+N', click: async() => { AppWindowManager.createWindow(false); }},
           {label: 'New Private Window', accelerator: 'CmdOrCtrl+Shift+N', click: async() => { AppWindowManager.createWindow(true); }},
+          {type: 'separator' as const},
+          {label: 'Open PDF File', accelerator: 'CmdOrCtrl+Shift+O', click: async() => {
+            const activeWindow = AppWindowManager.getActiveWindow();
+            if (!activeWindow) return;
+            const result = await dialog.showOpenDialog(activeWindow.getBrowserWindowInstance(), {
+              properties: ['openFile'],
+              filters: [{ name: 'PDF Files', extensions: ['pdf'] }]
+            });
+            if (result.canceled || result.filePaths.length === 0) return;
+            await activeWindow.createTab(`file://${result.filePaths[0]}`, true);
+          }},
           {type: 'separator' as const},
           {label: 'Close Tab', click: async() => { AppWindowManager.getActiveWindow().closeTab(AppWindowManager.getActiveWindow().getActiveTabId(), true); }},
           {label: 'Close Window', click: async() => { AppWindowManager.closeWindow(AppWindowManager.getActiveWindowId()); }},
