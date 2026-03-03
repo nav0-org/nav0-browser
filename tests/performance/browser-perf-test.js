@@ -22,16 +22,26 @@ const ELECTRON_BIN = path.join(PROJECT_ROOT, 'node_modules/electron/dist/electro
 const CHROME_HARNESS = path.join(__dirname, 'chrome-harness.js');
 
 const TEST_URLS = [
-  'https://en.wikipedia.org/wiki/Main_Page',
-  'https://news.ycombinator.com',
-  'https://github.com/explore',
-  'https://developer.mozilla.org/en-US/',
-  'https://stackoverflow.com/questions',
-  'https://www.reddit.com/r/programming/',
-  'https://www.bbc.com/news',
-  'https://edition.cnn.com',
-  'https://www.npmjs.com',
-  'https://docs.github.com',
+  // Light pages — minimal JS, mostly static text/HTML
+  'https://news.ycombinator.com',                    // ~30 KB, plain HTML
+  'https://lite.cnn.com',                            // text-only news
+  'https://text.npr.org',                            // text-only public radio
+  'https://en.wikipedia.org/wiki/Main_Page',         // mostly static HTML + images
+  'https://www.craigslist.org/about/sites',          // minimal styling, static links
+
+  // Medium pages — moderate JS, standard web apps
+  'https://developer.mozilla.org/en-US/',            // docs site, moderate JS
+  'https://docs.github.com',                         // docs with some JS interactivity
+  'https://stackoverflow.com/questions',             // server-rendered + JS enhancements
+  'https://www.npmjs.com',                           // React SPA, moderate bundle
+  'https://github.com/explore',                      // server-rendered + Turbo
+
+  // Heavy pages — large JS bundles, rich media, dynamic content
+  'https://www.reddit.com/r/programming/',           // heavy React SPA, infinite scroll
+  'https://www.youtube.com',                         // video player, large JS payload
+  'https://www.bbc.com/news',                        // media-rich, ads, trackers
+  'https://edition.cnn.com',                         // heavy media, video autoplay
+  'https://www.twitch.tv/directory',                 // heavy SPA, live thumbnails
 ];
 
 // ─── Utility Functions ──────────────────────────────────────────────────────
