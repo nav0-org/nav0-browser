@@ -7,8 +7,8 @@
  * DOM the moment <html> appears — before any <head> scripts execute.
  *
  * The injected polyfill wraps navigator.geolocation so that when the native
- * provider fails with POSITION_UNAVAILABLE (e.g. Linux without Google API
- * key), it falls back to a free IP-based lookup.
+ * provider fails with POSITION_UNAVAILABLE or TIMEOUT (e.g. Linux without
+ * Google API key), it falls back to a free IP-based lookup.
  */
 
 const POLYFILL_CODE = `
@@ -47,25 +47,31 @@ const POLYFILL_CODE = `
   }
 
   navigator.geolocation.getCurrentPosition = function(success, error, options) {
+    var opts = Object.assign({}, options);
+    if (!opts.timeout || opts.timeout > 5000) opts.timeout = 5000;
     nativeGetCurrentPosition(success, function(err) {
-      if (err && err.code === 2) {
+      if (err && (err.code === 2 || err.code === 3)) {
         ipFallback(success, error);
       } else if (error) {
         error(err);
       }
-    }, options);
+    }, opts);
   };
 
   navigator.geolocation.watchPosition = function(success, error, options) {
+    var fallbackDone = false;
+    var opts = Object.assign({}, options);
+    if (!opts.timeout || opts.timeout > 5000) opts.timeout = 5000;
     var watchId = nativeWatchPosition(function(pos) {
       success(pos);
     }, function(err) {
-      if (err && err.code === 2) {
+      if (err && (err.code === 2 || err.code === 3) && !fallbackDone) {
+        fallbackDone = true;
         ipFallback(success, error);
       } else if (error) {
         error(err);
       }
-    }, options);
+    }, opts);
     return watchId;
   };
 })();
