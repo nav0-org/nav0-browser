@@ -242,6 +242,7 @@ export class AppWindow {
     this.commandKOverlayManager.getWebContentsViewInstance().setBounds(parentBounds);
     this.browserWindowInstance.contentView.addChildView(this.commandKOverlayManager.getWebContentsViewInstance());
     this.commandKOverlayManager.resetState();
+    this.commandKOverlayManager.getWebContentsViewInstance().webContents.focus();
   }
   hideCommandKOverlay(): void {
     if(this.commandKOverlayManager && this.browserWindowInstance.contentView.children.indexOf(this.commandKOverlayManager.getWebContentsViewInstance()) > -1){
