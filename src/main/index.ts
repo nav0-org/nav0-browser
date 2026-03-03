@@ -3,16 +3,8 @@ import { AppWindowManager } from './browser/app-window-manager';
 import { DataStoreManager } from './database/data-store-manager';
 import { SettingsEnforcer } from './settings/settings-enforcer';
 
-// Enable remote debugging port when running performance tests
-if (process.env.REMOTE_DEBUGGING_PORT) {
-  app.commandLine.appendSwitch('remote-debugging-port', process.env.REMOTE_DEBUGGING_PORT);
-  app.commandLine.appendSwitch('no-sandbox');
-  app.commandLine.appendSwitch('disable-dev-shm-usage');
-}
-
 // Lightweight test control server for perf tests.
-// The EnableNodeCliInspectArguments fuse blocks --remote-debugging-port in
-// packaged builds, so this provides an alternative control channel.
+// Activated when REMOTE_DEBUGGING_PORT env var is set.
 function startTestControlServer(port: number): void {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const http = require('http') as typeof import('http');
