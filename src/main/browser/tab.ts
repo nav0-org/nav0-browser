@@ -9,6 +9,7 @@ import { DownloadManager } from "./download-manager";
 import path from "path";
 import { Utils } from "../browser/utils";
 import { SearchEngine } from "../web/search-engine";
+import { PermissionManager } from "./permission-manager";
 import { ReaderModeManager, ReaderModeState } from "./reader-mode-manager";
 const domainPattern = /^[^\s]+\.[^\s]+$/;
 
@@ -26,6 +27,7 @@ export class Tab {
   private navigationDebounceTimer: ReturnType<typeof setTimeout> | null = null;
   private static readonly NAVIGATION_DEBOUNCE_MS = 500;
   private readyPromise: Promise<void> = Promise.resolve();
+  private currentOrigin: string | null = null;
   private readerMode: ReaderModeState = ReaderModeManager.createState();
   private readerModeCheckTimer: ReturnType<typeof setTimeout> | null = null;
   private readerModeToggleLock = false;
@@ -72,15 +74,15 @@ export class Tab {
       preloadScriptToLoad = null;
     } else if (this.url.startsWith('http://') || this.url.startsWith('https://')) {
       urlToLoad = this.url;
-      preloadScriptToLoad = null;
+      preloadScriptToLoad = WEB_CONTENT_PRELOAD_WEBPACK_ENTRY;
     } else if (domainPattern.test(this.url)) {
       this.url = 'https://' + this.url;
       urlToLoad = this.url;
-      preloadScriptToLoad = null;
+      preloadScriptToLoad = WEB_CONTENT_PRELOAD_WEBPACK_ENTRY;
     } else {
       this.url = await SearchEngine.getSearchUrl(this.url);
       urlToLoad = this.url;
-      preloadScriptToLoad = null;
+      preloadScriptToLoad = WEB_CONTENT_PRELOAD_WEBPACK_ENTRY;
     }
     const needsNewView = this.preloadScript !== preloadScriptToLoad || !this.webContentsViewInstance;
     if(needsNewView){
@@ -174,6 +176,7 @@ export class Tab {
   private initEventHandlers() {
     //for hard navigation (debounced)
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE, async (event, url: string) => {
+      this.handleOriginChange(url);
       this.debouncedHandleNavigationCompletion(url);
     });
     //for soft navigation (debounced)
@@ -264,6 +267,18 @@ export class Tab {
     });
     console.log('Download started:', downloadPath);
   } 
+
+  private handleOriginChange(url: string): void {
+    try {
+      const newOrigin = new URL(url).origin;
+      if (this.currentOrigin && this.currentOrigin !== newOrigin) {
+        PermissionManager.clearSessionPermissionsForTabOrigin(this.id, this.currentOrigin);
+      }
+      this.currentOrigin = newOrigin;
+    } catch {
+      // Invalid URL, ignore
+    }
+  }
 
   private debouncedHandleNavigationCompletion(url: string): void {
     if(this.navigationDebounceTimer) {

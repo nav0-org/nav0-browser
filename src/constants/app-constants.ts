@@ -142,6 +142,14 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly GET_COOKIE_COUNT = "browser:get-cookie-count";
   public static readonly APPLY_SETTINGS = "browser:apply-settings";
   public static readonly GET_STORAGE_ESTIMATE = "browser:get-storage-estimate";
+
+  // Permission system
+  public static readonly PERMISSION_PROMPT_RESPONSE = "browser:permission-prompt-response";
+  public static readonly FETCH_PERMISSIONS = "browser:fetch-permissions";
+  public static readonly REMOVE_PERMISSION = "browser:remove-permission";
+  public static readonly REMOVE_ALL_PERMISSIONS_FOR_ORIGIN = "browser:remove-all-permissions-for-origin";
+  public static readonly CLEAR_ALL_PERMISSIONS = "browser:clear-all-permissions";
+  public static readonly PERMISSION_PROMPT_READY = "browser:permission-prompt-ready";
 }
 
 export abstract class MainToRendererEventsForBrowserIPC {
@@ -155,7 +163,8 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly READER_MODE_AVAILABILITY_CHANGED = "browser:reader-mode-availability-changed";
   public static readonly READER_MODE_STATE_CHANGED = "browser:reader-mode-state-changed";
   public static readonly FIND_IN_PAGE_RESULT = "browser:find-in-page-result";
-  // public static readonly SET_DIALOG_VISIBILITY = "browser:set-dialog-visibility";
+  public static readonly SHOW_PERMISSION_PROMPT = "browser:show-permission-prompt";
+  public static readonly HIDE_PERMISSION_PROMPT = "browser:hide-permission-prompt";
 }
 
 export abstract class DataStoreConstants {

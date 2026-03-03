@@ -182,6 +182,32 @@ export function init(){
     onFindInPageResult: (callback: (data: { activeMatchOrdinal: number, matches: number, finalUpdate: boolean }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.FIND_IN_PAGE_RESULT, (_event, data) => callback(data));
     },
+
+    // Permission system
+    respondToPermissionPrompt: (appWindowId: string, requestId: string, decision: string) => {
+      ipcRenderer.send(RendererToMainEventsForBrowserIPC.PERMISSION_PROMPT_RESPONSE, appWindowId, requestId, decision);
+    },
+    onPermissionPromptShow: (callback: (data: any) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.SHOW_PERMISSION_PROMPT, (_event, data) => callback(data));
+    },
+    signalPermissionPromptReady: () => {
+      ipcRenderer.send(RendererToMainEventsForBrowserIPC.PERMISSION_PROMPT_READY);
+    },
+    onPermissionPromptHide: (callback: () => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.HIDE_PERMISSION_PROMPT, () => callback());
+    },
+    fetchPermissions: async (searchTerm?: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.FETCH_PERMISSIONS, searchTerm);
+    },
+    removePermission: async (permissionId: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.REMOVE_PERMISSION, permissionId);
+    },
+    removeAllPermissionsForOrigin: async (origin: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.REMOVE_ALL_PERMISSIONS_FOR_ORIGIN, origin);
+    },
+    clearAllPermissions: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.CLEAR_ALL_PERMISSIONS);
+    },
   });
 }
 
