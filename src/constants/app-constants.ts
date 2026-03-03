@@ -110,6 +110,11 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly REMOVE_DOWNLOAD = "browser:remove-download";
   public static readonly REMOVE_ALL_DOWNLOADS = "browser:remove-all-downloads";
   public static readonly FETCH_DOWNLOAD = "browser:fetch-download";
+  public static readonly FETCH_ACTIVE_DOWNLOADS = "browser:fetch-active-downloads";
+  public static readonly PAUSE_DOWNLOAD = "browser:pause-download";
+  public static readonly RESUME_DOWNLOAD = "browser:resume-download";
+  public static readonly CANCEL_DOWNLOAD = "browser:cancel-download";
+  public static readonly OPEN_DOWNLOADED_FILE = "browser:open-downloaded-file";
   public static readonly REMOVE_BROWSING_HISTORY = "browser:remove-browsing-history";
   public static readonly REMOVE_ALL_BROWSING_HISTORY = "browser:remove-all-browsing-history";
   public static readonly FETCH_BROWSING_HISTORY = "browser:fetch-browsing-history";
@@ -160,6 +165,11 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly TAB_FAVICON_UPDATED = "browser:tab-favicon-updated";
   public static readonly TAB_URL_UPDATED =  "browser:tab-url-updated";
   public static readonly NAVIGATION_FAILED = "browser:navigation-failed";
+  public static readonly DOWNLOAD_STARTED = "browser:download-started";
+  public static readonly DOWNLOAD_PROGRESS = "browser:download-progress";
+  public static readonly DOWNLOAD_COMPLETED = "browser:download-completed";
+  public static readonly DOWNLOAD_PAUSED = "browser:download-paused";
+  public static readonly DOWNLOAD_RESUMED = "browser:download-resumed";
   public static readonly READER_MODE_AVAILABILITY_CHANGED = "browser:reader-mode-availability-changed";
   public static readonly READER_MODE_STATE_CHANGED = "browser:reader-mode-state-changed";
   public static readonly FIND_IN_PAGE_RESULT = "browser:find-in-page-result";

@@ -70,13 +70,14 @@
 
 .download-item {
   display: grid;
-  grid-template-columns: 140px 24px 1fr 36px;
+  grid-template-columns: 140px 24px 1fr auto;
   gap: var(--spacing-xs);
   padding: 4px 12px;
   border-bottom: 1px solid var(--border-color);
   align-items: center;
   cursor: pointer;
   transition: background-color var(--transition-fast);
+  position: relative;
 }
 
 .download-item:hover {
@@ -164,4 +165,62 @@
   padding: var(--spacing-sm);
   color: var(--text-secondary);
   font-size: var(--font-sm);
+}
+
+.download-item.downloading {
+  cursor: default;
+  opacity: 0.7;
+  position: relative;
+}
+
+.download-item.downloading .delete-button {
+  display: none;
+}
+
+/* Download control buttons (pause/resume/cancel) */
+.download-controls {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  pointer-events: auto;
+}
+
+.control-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: var(--radius-sm);
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+}
+
+.control-btn:hover {
+  opacity: 1;
+}
+
+.download-item.paused .download-path {
+  color: var(--primary-color);
+  font-style: italic;
+}
+
+.download-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--border-color);
+  overflow: hidden;
+}
+
+.download-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-color), #555);
+  transition: width 0.25s ease;
+  width: 0%;
 }

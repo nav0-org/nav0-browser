@@ -6,5 +6,11 @@ export type DownloadRecord = {
   fileExtension: string,
   fileType: 'document' | 'image' | 'archive' | 'audio' | 'file' | 'executable' | 'other',
   fileSize: number,
-  fileLocation: string
+  fileLocation: string,
+  status: 'completed' | 'in_progress' | 'paused' | 'cancelled',
+  receivedBytes: number,
+  urlChain: string,
+  eTag: string,
+  lastModified: string,
+  startTime: number
 }

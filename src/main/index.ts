@@ -1,6 +1,7 @@
 import { app } from 'electron';
 import { AppWindowManager } from './browser/app-window-manager';
 import { DataStoreManager } from './database/data-store-manager';
+import { DownloadManager } from './browser/download-manager';
 import { SettingsEnforcer } from './settings/settings-enforcer';
 
 // Disable Chromium features that trigger macOS "Local Network" permission dialog.
@@ -22,6 +23,11 @@ app.whenReady().then(async() => {
   await DataStoreManager.init();
   await SettingsEnforcer.init();
   await AppWindowManager.init();
+});
+
+// Pause all in-progress downloads before quitting so they can be resumed later
+app.on('before-quit', () => {
+  DownloadManager.pauseAllDownloads();
 });
 
 // Quit when all windows are closed, except on macOS

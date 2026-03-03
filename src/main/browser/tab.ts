@@ -27,6 +27,7 @@ export class Tab {
   private navigationDebounceTimer: ReturnType<typeof setTimeout> | null = null;
   private static readonly NAVIGATION_DEBOUNCE_MS = 500;
   private readyPromise: Promise<void> = Promise.resolve();
+  private static handledDownloads: Set<string> = new Set();
   private currentOrigin: string | null = null;
   private readerMode: ReaderModeState = ReaderModeManager.createState();
   private readerModeCheckTimer: ReturnType<typeof setTimeout> | null = null;
@@ -257,16 +258,83 @@ export class Tab {
 
   async handleDownload(item: Electron.DownloadItem): Promise<void> {
     const downloadPath = app.getPath('downloads') + '/' + item.getFilename();
+    const downloadId = item.getStartTime().toString() + '_' + item.getFilename();
+
+    // Prevent duplicate handling when multiple tabs share the same session
+    if (Tab.handledDownloads.has(downloadId)) return;
+    Tab.handledDownloads.add(downloadId);
+
     item.setSavePath(downloadPath);
-    item.once('done', async (event, state) => {
+
+    // Check if this is a cross-session resume (triggered by createInterruptedDownload)
+    let dbRecordId = DownloadManager.checkResuming(downloadId);
+
+    if (dbRecordId) {
+      // Resuming from previous session – update existing record
+      DownloadManager.updateRecordStatus(this.parentAppWindow.id, dbRecordId, 'in_progress');
+    } else {
+      // New download – create DB record
+      const record = await DownloadManager.addRecord(this.parentAppWindow.id, item.getURL(), item.getFilename(), path.extname(item.getFilename()), Utils.getFileType(path.extname(item.getFilename())), item.getTotalBytes(), downloadPath);
+      dbRecordId = record.id;
+    }
+
+    // Store resume metadata in the DB for cross-session resume
+    DownloadManager.updateRecordResumeMetadata(
+      this.parentAppWindow.id, dbRecordId,
+      JSON.stringify(item.getURLChain()), item.getETag(), item.getLastModifiedTime(), item.getStartTime()
+    );
+
+    // Track in main process so renderer can query on page load
+    DownloadManager.trackDownloadStarted(downloadId, item.getFilename(), item.getTotalBytes(), dbRecordId);
+    DownloadManager.storeDownloadItem(downloadId, item);
+
+    // Notify renderer (browser chrome + all tabs) that a download has started
+    const startedData = { downloadId, dbRecordId, fileName: item.getFilename(), totalBytes: item.getTotalBytes() };
+    this.parentAppWindow.getBrowserWindowInstance().webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_STARTED, startedData);
+    this.parentAppWindow.broadcastToTabs(MainToRendererEventsForBrowserIPC.DOWNLOAD_STARTED, startedData);
+
+    // Track progress updates (throttled to every 250ms)
+    let lastProgressSent = 0;
+    item.on('updated', (_event, state) => {
+      const now = Date.now();
+      if (now - lastProgressSent < 250) return;
+      lastProgressSent = now;
+
+      if (state === 'progressing') {
+        DownloadManager.trackDownloadProgress(downloadId, item.getReceivedBytes(), item.getTotalBytes());
+        const browserWindow = this.parentAppWindow.getBrowserWindowInstance();
+        if (!browserWindow?.webContents) return;
+        const progressData = { downloadId, receivedBytes: item.getReceivedBytes(), totalBytes: item.getTotalBytes() };
+        browserWindow.webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_PROGRESS, progressData);
+        this.parentAppWindow.broadcastToTabs(MainToRendererEventsForBrowserIPC.DOWNLOAD_PROGRESS, progressData);
+      }
+    });
+
+    item.once('done', async (_event, state) => {
+      Tab.handledDownloads.delete(downloadId);
+      DownloadManager.trackDownloadCompleted(downloadId);
+
+      // Update DB record status
       if (state === 'completed') {
-        await DownloadManager.addRecord(this.parentAppWindow.id, item.getURL(), item.getFilename(), path.extname(item.getFilename()), Utils.getFileType(path.extname(item.getFilename())), item.getTotalBytes(), downloadPath);
+        DownloadManager.updateRecordStatus(this.parentAppWindow.id, dbRecordId, 'completed', item.getTotalBytes());
+      } else if (state === 'cancelled') {
+        // During shutdown, downloads are auto-cancelled after being paused by
+        // pauseAllDownloads() – don't overwrite the 'paused' status in the DB
+        if (!DownloadManager.isShuttingDown()) {
+          DownloadManager.updateRecordStatus(this.parentAppWindow.id, dbRecordId, 'cancelled');
+        }
       } else {
         console.error(`Download failed: ${state}`);
       }
+
+      const browserWindow = this.parentAppWindow.getBrowserWindowInstance();
+      if (!browserWindow?.webContents) return;
+      const completedData = { downloadId, state, fileName: item.getFilename(), dbRecordId };
+      browserWindow.webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED, completedData);
+      this.parentAppWindow.broadcastToTabs(MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED, completedData);
     });
     console.log('Download started:', downloadPath);
-  } 
+  }
 
   private handleOriginChange(url: string): void {
     try {
