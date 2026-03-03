@@ -28,9 +28,13 @@ const CHROME_DEBUG_PORT = 9222;
 const NAV0_DEBUG_PORT = 9229;
 const REPORT_DIR = path.join(__dirname, 'reports');
 
-// App paths — adjust if yours are installed elsewhere
-const CHROME_BIN = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const NAV0_BIN = '/Applications/nav0-browser.app/Contents/MacOS/nav0-browser';
+// App paths — auto-detected; override with env vars CHROME_BIN / NAV0_BIN
+const CHROME_BIN = process.env.CHROME_BIN || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const NAV0_CANDIDATES = [
+  path.join(os.homedir(), 'Desktop/nav0-browser.app/Contents/MacOS/nav0-browser'),
+  '/Applications/nav0-browser.app/Contents/MacOS/nav0-browser',
+];
+const NAV0_BIN = process.env.NAV0_BIN || NAV0_CANDIDATES.find(p => fs.existsSync(p)) || NAV0_CANDIDATES[1];
 
 const TEST_URLS = [
   // Light pages
@@ -565,8 +569,9 @@ async function main() {
     process.exit(1);
   }
   if (!fs.existsSync(NAV0_BIN)) {
-    console.error(`  ERROR: Nav0 not found at ${NAV0_BIN}`);
-    console.error('  Install Nav0 or update NAV0_BIN at the top of this script.');
+    console.error(`  ERROR: Nav0 not found. Searched:`);
+    for (const c of NAV0_CANDIDATES) console.error(`    - ${c}`);
+    console.error('  Set NAV0_BIN env var to the correct path.');
     process.exit(1);
   }
 
