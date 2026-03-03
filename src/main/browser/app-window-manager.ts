@@ -1,7 +1,7 @@
 import { RendererToMainEventsForBrowserIPC } from "../../constants/app-constants";
 import { AppMenuManager } from "./app-menu-manager";
 import { AppWindow } from "./app-window";
-import { app, ipcMain, Menu } from "electron";
+import { app, dialog, ipcMain, Menu } from "electron";
 import { Tab } from "./tab";
 import { DatabaseManager } from "../database/database-manager";
 import { SearchEngine } from "../web/search-engine";
@@ -264,6 +264,48 @@ export abstract class AppWindowManager {
       }
     });
 
+    ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_FIND_IN_PAGE, async (event, appWindowId: string) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        return window.showFindInPage();
+      }
+    });
+
+    ipcMain.on(RendererToMainEventsForBrowserIPC.HIDE_FIND_IN_PAGE, async (event, appWindowId: string) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        return window.hideFindInPage();
+      }
+    });
+
+    ipcMain.on(RendererToMainEventsForBrowserIPC.FIND_IN_PAGE, async (event, appWindowId: string, text: string, options?: { matchCase?: boolean }) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        window.findInPage(text, options);
+      }
+    });
+
+    ipcMain.on(RendererToMainEventsForBrowserIPC.FIND_IN_PAGE_NEXT, async (event, appWindowId: string, text: string, options?: { matchCase?: boolean }) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        window.findInPageNext(text, options);
+      }
+    });
+
+    ipcMain.on(RendererToMainEventsForBrowserIPC.FIND_IN_PAGE_PREVIOUS, async (event, appWindowId: string, text: string, options?: { matchCase?: boolean }) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        window.findInPagePrevious(text, options);
+      }
+    });
+
+    ipcMain.on(RendererToMainEventsForBrowserIPC.STOP_FIND_IN_PAGE, async (event, appWindowId: string) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        window.stopFindInPage();
+      }
+    });
+
     ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_ABOUT_PANEL, async () => {
       app.showAboutPanel();
     });
@@ -278,6 +320,16 @@ export abstract class AppWindowManager {
 
     ipcMain.handle(RendererToMainEventsForBrowserIPC.GET_SEARCH_URL, async (event, searchTerm: string) => {
       return await SearchEngine.getSearchUrl(searchTerm);
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.TOGGLE_READER_MODE, async (event, appWindowId: string, tabId: string) => {
+      const window = AppWindowManager.getWindowById(appWindowId);
+      if (window) {
+        const tab = tabId ? window.getTabById(tabId) : window.getActiveTab();
+        if (tab) {
+          await tab.toggleReaderMode();
+        }
+      }
     });
 
     ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_OPEN_TABS, async (event, appWindowId: string) => {
@@ -296,6 +348,28 @@ export abstract class AppWindowManager {
         }));
       }
       return [];
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.OPEN_PDF_FILE, async (event, appWindowId: string) => {
+      let window: AppWindow | null = null;
+      if (appWindowId) {
+        window = AppWindowManager.getWindowById(appWindowId);
+      } else {
+        window = AppWindowManager.getActiveWindow();
+      }
+      if (!window) return null;
+
+      const result = await dialog.showOpenDialog(window.getBrowserWindowInstance(), {
+        properties: ['openFile'],
+        filters: [{ name: 'PDF Files', extensions: ['pdf'] }]
+      });
+
+      if (result.canceled || result.filePaths.length === 0) return null;
+
+      const filePath = result.filePaths[0];
+      const fileUrl = `file://${filePath}`;
+      await window.createTab(fileUrl, true);
+      return fileUrl;
     });
 
   }

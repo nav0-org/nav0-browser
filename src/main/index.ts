@@ -3,6 +3,14 @@ import { AppWindowManager } from './browser/app-window-manager';
 import { DataStoreManager } from './database/data-store-manager';
 import { SettingsEnforcer } from './settings/settings-enforcer';
 
+// Disable Chromium features that trigger macOS "Local Network" permission dialog.
+// These features use mDNS/Bonjour for device discovery, which is unnecessary for
+// a privacy-focused browser and causes an unwanted system permission prompt on macOS.
+app.commandLine.appendSwitch('disable-features', [
+  'MediaRouter',
+  'DialMediaRouteProvider',
+  'GlobalMediaControls',
+].join(','));
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling
 if (require('electron-squirrel-startup')) {

@@ -4,6 +4,7 @@ import { Tab } from "./tab";
 import { AppConstants, InAppUrls, MainToRendererEventsForBrowserIPC } from "../../constants/app-constants";
 import { OptionsMenuManager } from "./options-menu-manager";
 import { CommandKOverlayManager } from "./command-k-overlay-manager";
+import { FindInPageManager } from "./find-in-page-manager";
 import type { Database as DB } from 'better-sqlite3';
 
 export class AppWindow {
@@ -15,6 +16,7 @@ export class AppWindow {
   private partitionSetting: string;
   private optionsMenuManager: OptionsMenuManager | null = null;
   private commandKOverlayManager: CommandKOverlayManager | null = null;
+  private findInPageManager: FindInPageManager | null = null;
   private database: DB;
 
   constructor(isPrivate = false, database: DB) {
@@ -51,6 +53,7 @@ export class AppWindow {
 
     this.optionsMenuManager = new OptionsMenuManager(this.id, this.isPrivate, this.partitionSetting);
     this.commandKOverlayManager = new CommandKOverlayManager(this.id, this.isPrivate, this.partitionSetting);
+    this.findInPageManager = new FindInPageManager(this.id, this.isPrivate, this.partitionSetting);
 
     this.browserWindowInstance.loadURL(BROWSER_LAYOUT_WEBPACK_ENTRY);
 
@@ -228,5 +231,66 @@ export class AppWindow {
       this.browserWindowInstance.contentView.removeChildView(this.commandKOverlayManager.getWebContentsViewInstance());
     }
   }
-  
+
+  private isFindInPageVisible(): boolean {
+    return this.findInPageManager && this.browserWindowInstance.contentView.children.indexOf(this.findInPageManager.getWebContentsViewInstance()) > -1;
+  }
+
+  async showFindInPage(): Promise<void> {
+    this.hideOptionsMenuOverlay();
+    this.hideCommandKOverlay();
+
+    if (this.isFindInPageVisible()) {
+      // Already open — toggle it closed
+      this.hideFindInPage();
+      return;
+    }
+
+    // Attach to the active tab's webContents
+    const activeTab = this.getActiveTab();
+    if (activeTab) {
+      this.findInPageManager.setActiveTabWebContents(activeTab.getWebContentsViewInstance().webContents);
+    }
+
+    await this.findInPageManager.whenReady();
+    const parentBounds = this.browserWindowInstance.contentView.getBounds();
+    const barWidth = Math.min(520, parentBounds.width - 24);
+    const barHeight = 48;
+    const yOffset = 85; // below the navbar
+    this.findInPageManager.getWebContentsViewInstance().setBounds({
+      x: parentBounds.width - barWidth - 12,
+      y: yOffset,
+      width: barWidth,
+      height: barHeight,
+    });
+    this.browserWindowInstance.contentView.addChildView(this.findInPageManager.getWebContentsViewInstance());
+    this.findInPageManager.focusInput();
+  }
+
+  hideFindInPage(): void {
+    if (this.isFindInPageVisible()) {
+      this.findInPageManager.stopFind();
+      this.browserWindowInstance.contentView.removeChildView(this.findInPageManager.getWebContentsViewInstance());
+    }
+  }
+
+  findInPage(text: string, options?: { matchCase?: boolean }): void {
+    if (!this.isFindInPageVisible()) return;
+    this.findInPageManager.find(text, options);
+  }
+
+  findInPageNext(text: string, options?: { matchCase?: boolean }): void {
+    if (!this.isFindInPageVisible()) return;
+    this.findInPageManager.findNext(text, options);
+  }
+
+  findInPagePrevious(text: string, options?: { matchCase?: boolean }): void {
+    if (!this.isFindInPageVisible()) return;
+    this.findInPageManager.findPrevious(text, options);
+  }
+
+  stopFindInPage(): void {
+    this.findInPageManager?.clearHighlights();
+  }
+
 }
