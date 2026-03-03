@@ -1,4 +1,4 @@
-import { session, WebContents, ipcMain } from 'electron';
+import { session, WebContents, ipcMain, net } from 'electron';
 import { v4 as uuid } from 'uuid';
 import { RendererToMainEventsForBrowserIPC } from '../../constants/app-constants';
 import type { Database as DatabaseType } from 'better-sqlite3';
@@ -547,6 +547,37 @@ export class PermissionManager {
     ipcMain.handle(RendererToMainEventsForBrowserIPC.CLEAR_ALL_PERMISSIONS, () => {
       PermissionManager.clearAllPersistentPermissions();
       return true;
+    });
+
+    ipcMain.handle('get-ip-geolocation', async () => {
+      const services = [
+        {
+          url: 'https://ipapi.co/json/',
+          parse: (d: Record<string, unknown>) => ({ lat: d.latitude as number, lon: d.longitude as number }),
+        },
+        {
+          url: 'https://ipwho.is/',
+          parse: (d: Record<string, unknown>) => ({ lat: d.latitude as number, lon: d.longitude as number }),
+        },
+        {
+          url: 'https://freeipapi.com/api/json',
+          parse: (d: Record<string, unknown>) => ({ lat: d.latitude as number, lon: d.longitude as number }),
+        },
+      ];
+      for (const svc of services) {
+        try {
+          const resp = await net.fetch(svc.url);
+          if (!resp.ok) continue;
+          const data = await resp.json();
+          const { lat, lon } = svc.parse(data);
+          if (typeof lat === 'number' && typeof lon === 'number' && !isNaN(lat) && !isNaN(lon)) {
+            return { latitude: lat, longitude: lon };
+          }
+        } catch {
+          continue;
+        }
+      }
+      return null;
     });
   }
 }

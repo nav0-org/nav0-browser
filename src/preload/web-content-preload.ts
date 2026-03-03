@@ -8,8 +8,18 @@
  *
  * The injected polyfill wraps navigator.geolocation so that when the native
  * provider fails with POSITION_UNAVAILABLE or TIMEOUT (e.g. Linux without
- * Google API key), it falls back to a free IP-based lookup.
+ * Google API key), it falls back to an IP-based lookup performed by the main
+ * process via IPC (bypassing renderer CSP / network restrictions).
  */
+
+import { contextBridge, ipcRenderer } from 'electron';
+
+// Expose a function the main-world polyfill can call to get IP geolocation
+// from the main process (uses Electron net.fetch, immune to page CSP).
+contextBridge.exposeInMainWorld('__nav0Geo', {
+  getPosition: (): Promise<{ latitude: number; longitude: number } | null> =>
+    ipcRenderer.invoke('get-ip-geolocation'),
+});
 
 const POLYFILL_CODE = `
 (function() {
@@ -20,16 +30,17 @@ const POLYFILL_CODE = `
   var nativeWatchPosition = navigator.geolocation.watchPosition.bind(navigator.geolocation);
 
   function ipFallback(success, error) {
-    fetch('https://ipapi.co/json/')
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (typeof data.latitude !== 'number' || typeof data.longitude !== 'number') {
-          throw new Error('Invalid response');
-        }
+    if (!window.__nav0Geo || !window.__nav0Geo.getPosition) {
+      if (error) error({ code: 2, message: 'Position unavailable', PERMISSION_DENIED: 1, POSITION_UNAVAILABLE: 2, TIMEOUT: 3 });
+      return;
+    }
+    window.__nav0Geo.getPosition()
+      .then(function(result) {
+        if (!result) throw new Error('No result');
         success({
           coords: {
-            latitude: data.latitude,
-            longitude: data.longitude,
+            latitude: result.latitude,
+            longitude: result.longitude,
             accuracy: 5000,
             altitude: null,
             altitudeAccuracy: null,
