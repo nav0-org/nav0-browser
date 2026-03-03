@@ -87,12 +87,19 @@
   flex-shrink: 0;
 }
 
-/* ---- Content Area ---- */
-.settings-content {
+/* ---- Content Wrapper (centers content in remaining space) ---- */
+.settings-content-wrapper {
   flex: 1;
   overflow-y: auto;
-  padding: var(--spacing-lg) var(--spacing-xl);
+  display: flex;
+  justify-content: center;
+}
+
+/* ---- Content Area ---- */
+.settings-content {
+  width: 100%;
   max-width: 800px;
+  padding: var(--spacing-lg) var(--spacing-xl);
 }
 
 .settings-section {
@@ -633,23 +640,23 @@
 }
 
 /* ---- Scrollbar styling ---- */
-.settings-content::-webkit-scrollbar,
+.settings-content-wrapper::-webkit-scrollbar,
 .settings-sidebar::-webkit-scrollbar {
   width: 6px;
 }
 
-.settings-content::-webkit-scrollbar-track,
+.settings-content-wrapper::-webkit-scrollbar-track,
 .settings-sidebar::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.settings-content::-webkit-scrollbar-thumb,
+.settings-content-wrapper::-webkit-scrollbar-thumb,
 .settings-sidebar::-webkit-scrollbar-thumb {
   background-color: var(--border-color);
   border-radius: 3px;
 }
 
-.settings-content::-webkit-scrollbar-thumb:hover,
+.settings-content-wrapper::-webkit-scrollbar-thumb:hover,
 .settings-sidebar::-webkit-scrollbar-thumb:hover {
   background-color: var(--text-secondary);
 }
