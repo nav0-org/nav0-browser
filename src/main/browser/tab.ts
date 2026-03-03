@@ -1,5 +1,5 @@
 import { app, BrowserWindow, dialog, Menu, MenuItem, WebContentsView } from "electron";
-import { InAppUrls, MainToRendererEventsForBrowserIPC, WebContentsEvents } from "../../constants/app-constants";
+import { InAppUrls, DataStoreConstants, MainToRendererEventsForBrowserIPC, WebContentsEvents } from "../../constants/app-constants";
 import { v4 as uuid } from "uuid";
 import { AppWindow } from "./app-window";
 import { BookmarkManager } from "./bookmark-manager";
@@ -11,6 +11,9 @@ import { Utils } from "../browser/utils";
 import { SearchEngine } from "../web/search-engine";
 import { PermissionManager } from "./permission-manager";
 import { ReaderModeManager, ReaderModeState } from "./reader-mode-manager";
+import { DataStoreManager } from "../database/data-store-manager";
+import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
+import { COSMETIC_FILTER_CSS } from "../ad-blocker/ad-block-lists";
 const domainPattern = /^[^\s]+\.[^\s]+$/;
 
 export class Tab {
@@ -185,6 +188,11 @@ export class Tab {
       this.debouncedHandleNavigationCompletion(url);
     });
 
+    // Cosmetic ad filtering: inject CSS to hide ad elements on external pages
+    this.webContentsViewInstance.webContents.on(WebContentsEvents.DOM_READY, () => {
+      this.injectAdBlockCosmeticCSS();
+    });
+
     this.webContentsViewInstance.webContents.session.on('will-download', async (event, item, downloadWebContents) => {
       // Only handle downloads initiated by this tab's webContents
       if (downloadWebContents !== this.webContentsViewInstance.webContents) return;
@@ -345,6 +353,35 @@ export class Tab {
       this.currentOrigin = newOrigin;
     } catch {
       // Invalid URL, ignore
+    }
+  }
+
+  private injectAdBlockCosmeticCSS(): void {
+    // Don't inject on internal pages
+    if (this.url.startsWith(InAppUrls.PREFIX) || this.url === '' || this.url.startsWith('file://')) {
+      return;
+    }
+
+    try {
+      const stored = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as BrowserSettings;
+      const settings = { ...DEFAULT_BROWSER_SETTINGS, ...stored };
+
+      if (!settings.adBlockerEnabled) return;
+
+      // Check if the current site is in the allowed list
+      const hostname = new URL(this.url).hostname;
+      const isAllowed = (settings.adBlockerAllowedSites || []).some(site => {
+        const siteDomain = site.toLowerCase().trim();
+        return hostname === siteDomain || hostname.endsWith('.' + siteDomain);
+      });
+
+      if (isAllowed) return;
+
+      this.webContentsViewInstance.webContents.insertCSS(COSMETIC_FILTER_CSS).catch(() => {
+        // Page may have navigated away
+      });
+    } catch {
+      // Ignore errors (settings not loaded, invalid URL, etc.)
     }
   }
 

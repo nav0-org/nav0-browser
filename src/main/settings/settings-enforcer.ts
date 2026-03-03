@@ -3,6 +3,7 @@ import { DataStoreConstants, RendererToMainEventsForBrowserIPC } from "../../con
 import { DataStoreManager } from "../database/data-store-manager";
 import { DatabaseManager } from "../database/database-manager";
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
+import { AD_BLOCK_DOMAINS, AD_URL_PATTERNS } from "../ad-blocker/ad-block-lists";
 
 export abstract class SettingsEnforcer {
   private static autoDeleteInterval: ReturnType<typeof setInterval> | null = null;
@@ -182,38 +183,20 @@ export abstract class SettingsEnforcer {
   private static adBlockDomains: Set<string> = new Set();
 
   private static applyAdBlocker(settings: BrowserSettings) {
-    const ses = session.fromPartition('persist:browsertabs');
+    const browsingSes = session.fromPartition('persist:browsertabs');
+    const privateSes = session.fromPartition('persist:private');
 
     if (!settings.adBlockerEnabled) {
-      // Remove ad-blocker
-      ses.webRequest.onBeforeRequest(null);
+      browsingSes.webRequest.onBeforeRequest(null);
+      privateSes.webRequest.onBeforeRequest(null);
       SettingsEnforcer.adBlockDomains.clear();
       return;
     }
 
-    // Build a basic domain blocklist from well-known ad/tracker domains
-    SettingsEnforcer.adBlockDomains = new Set([
-      'doubleclick.net', 'googlesyndication.com', 'googleadservices.com',
-      'google-analytics.com', 'googletagmanager.com', 'googletagservices.com',
-      'adnxs.com', 'adsrvr.org', 'adform.net', 'serving-sys.com',
-      'facebook.net', 'fbcdn.net', 'connect.facebook.net',
-      'amazon-adsystem.com', 'adobedtm.com', 'demdex.net',
-      'moatads.com', 'scorecardresearch.com', 'quantserve.com',
-      'taboola.com', 'outbrain.com', 'revcontent.com',
-      'criteo.com', 'criteo.net', 'casalemedia.com',
-      'rubiconproject.com', 'pubmatic.com', 'openx.net',
-      'bidswitch.net', 'mathtag.com', 'rlcdn.com',
-      'bluekai.com', 'krxd.net', 'exelator.com',
-      'eyeota.net', 'sharethis.com', 'addthis.com',
-      'hotjar.com', 'fullstory.com', 'mouseflow.com',
-      'crazyegg.com', 'luckyorange.com', 'clicktale.net',
-      'newrelic.com', 'nr-data.net',
-      'ads.yahoo.com', 'advertising.com', 'adtech.de',
-      'chartbeat.com', 'parsely.com', 'segment.com', 'segment.io',
-      'mixpanel.com', 'amplitude.com', 'heap.io', 'heapanalytics.com',
-    ]);
+    // Build domain blocklist from comprehensive ad/tracker domains
+    SettingsEnforcer.adBlockDomains = new Set(AD_BLOCK_DOMAINS);
 
-    ses.webRequest.onBeforeRequest((details, callback) => {
+    const requestHandler = (details: Electron.OnBeforeRequestListenerDetails, callback: (response: Electron.CallbackResponse) => void) => {
       const currentSettings = SettingsEnforcer.getSettings();
       if (!currentSettings.adBlockerEnabled) {
         callback({});
@@ -241,18 +224,32 @@ export abstract class SettingsEnforcer {
         }
 
         // Check if hostname matches any blocked domain
-        const shouldBlock = Array.from(SettingsEnforcer.adBlockDomains).some(domain => {
-          return hostname === domain || hostname.endsWith('.' + domain);
-        });
+        for (const domain of SettingsEnforcer.adBlockDomains) {
+          if (hostname === domain || hostname.endsWith('.' + domain)) {
+            callback({ cancel: true });
+            return;
+          }
+        }
 
-        if (shouldBlock) {
-          callback({ cancel: true });
-          return;
+        // Check URL path patterns for ad-related content
+        const urlString = details.url;
+        for (const pattern of AD_URL_PATTERNS) {
+          if (pattern.test(urlString)) {
+            // Don't block navigations to avoid breaking page loads
+            if (details.resourceType === 'mainFrame') {
+              break;
+            }
+            callback({ cancel: true });
+            return;
+          }
         }
       } catch { /* ignore parse errors */ }
 
       callback({});
-    });
+    };
+
+    browsingSes.webRequest.onBeforeRequest(requestHandler);
+    privateSes.webRequest.onBeforeRequest(requestHandler);
   }
 
   // ---- Data Retention & Auto-Deletion ----
