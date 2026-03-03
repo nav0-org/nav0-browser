@@ -286,16 +286,33 @@ async function testChrome(tabCount) {
   }
 }
 
-// ─── Nav0 Test (installed app + CDP) ────────────────────────────────────────
+// ─── Nav0 Test (installed app + HTTP test control server) ───────────────────
+//
+// The packaged app has EnableNodeCliInspectArguments fuse disabled, which blocks
+// --remote-debugging-port. Instead the app starts a lightweight HTTP control
+// server when the REMOTE_DEBUGGING_PORT env var is set (see src/main/index.ts).
+
+function httpPost(url) {
+  return new Promise((resolve, reject) => {
+    const req = http.request(url, { method: 'POST' }, (res) => {
+      let data = '';
+      res.on('data', (c) => data += c);
+      res.on('end', () => {
+        try { resolve(JSON.parse(data)); }
+        catch { resolve(data); }
+      });
+    });
+    req.on('error', reject);
+    req.end();
+  });
+}
 
 async function testNav0(tabCount) {
   log(`[Nav0] Starting test with ${tabCount} tabs...`);
   ensurePortFree(NAV0_DEBUG_PORT);
   await sleep(1000);
 
-  const proc = spawn(NAV0_BIN, [
-    `--remote-debugging-port=${NAV0_DEBUG_PORT}`,
-  ], {
+  const proc = spawn(NAV0_BIN, [], {
     env: {
       ...process.env,
       REMOTE_DEBUGGING_PORT: String(NAV0_DEBUG_PORT),
@@ -311,51 +328,19 @@ async function testNav0(tabCount) {
   const spawnPid = proc.pid;
 
   try {
-    log(`[Nav0] Waiting for debug port ${NAV0_DEBUG_PORT} (PID: ${spawnPid})...`);
+    log(`[Nav0] Waiting for test control server on port ${NAV0_DEBUG_PORT} (PID: ${spawnPid})...`);
     await waitForPort(NAV0_DEBUG_PORT, 60000);
-    log('[Nav0] Debug port ready. Waiting for app to initialize...');
-    await sleep(5000);
-
-    const wsUrl = await getCDPWebSocketUrl(NAV0_DEBUG_PORT);
-    const browser = await puppeteer.connect({ browserWSEndpoint: wsUrl, defaultViewport: null });
+    log('[Nav0] Control server ready. Waiting for app to settle...');
+    await sleep(3000);
 
     const electronPid = findPidOnPort(NAV0_DEBUG_PORT) || spawnPid;
-    log(`[Nav0] Connected (Electron PID: ${electronPid}). Finding main renderer...`);
-
-    // Find the main browser layout page
-    const pages = await browser.pages();
-    let mainPage = null;
-    for (const page of pages) {
-      if (page.url().includes('browser_layout')) {
-        mainPage = page;
-        break;
-      }
-    }
-    if (!mainPage) {
-      for (const page of pages) {
-        try {
-          const hasApi = await page.evaluate(() =>
-            typeof window.BrowserAPI === 'object' && typeof window.BrowserAPI.createTab === 'function'
-          );
-          if (hasApi) { mainPage = page; break; }
-        } catch {}
-      }
-    }
-    if (!mainPage) {
-      throw new Error(`Could not find Nav0 renderer among ${pages.length} pages: ${pages.map(p => p.url()).join(', ')}`);
-    }
-
-    log(`[Nav0] Found renderer. Creating ${tabCount} tabs via BrowserAPI...`);
+    log(`[Nav0] Connected (Electron PID: ${electronPid}). Creating ${tabCount} tabs via HTTP...`);
 
     for (let i = 0; i < tabCount; i++) {
       const url = TEST_URLS[i % TEST_URLS.length];
       try {
-        await mainPage.evaluate(async (tabUrl) => {
-          const api = window.BrowserAPI;
-          if (api && api.createTab) {
-            await api.createTab(api.appWindowId, tabUrl, false);
-          }
-        }, url);
+        const encoded = encodeURIComponent(url);
+        await httpPost(`http://127.0.0.1:${NAV0_DEBUG_PORT}/create-tab?url=${encoded}`);
       } catch (err) {
         log(`[Nav0] Tab ${i + 1} warning: ${err.message.slice(0, 80)}`);
       }
@@ -373,7 +358,6 @@ async function testNav0(tabCount) {
     const result = { browser: 'Nav0', tabCount, ...metrics };
     log(`[Nav0] ${tabCount} tabs → Mem=${result.memoryMB}MB CPU=${result.cpuPercent}% Procs=${result.processCount}`);
 
-    browser.disconnect();
     return result;
   } catch (err) {
     log(`[Nav0] ERROR: ${err.message}`);

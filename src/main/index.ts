@@ -10,6 +10,41 @@ if (process.env.REMOTE_DEBUGGING_PORT) {
   app.commandLine.appendSwitch('disable-dev-shm-usage');
 }
 
+// Lightweight test control server for perf tests.
+// The EnableNodeCliInspectArguments fuse blocks --remote-debugging-port in
+// packaged builds, so this provides an alternative control channel.
+function startTestControlServer(port: number): void {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const http = require('http') as typeof import('http');
+  const server = http.createServer((req: import('http').IncomingMessage, res: import('http').ServerResponse) => {
+    res.setHeader('Content-Type', 'application/json');
+
+    if (req.method === 'GET' && req.url === '/status') {
+      const win = AppWindowManager.getActiveWindow();
+      res.end(JSON.stringify({ ready: true, hasWindow: !!win }));
+      return;
+    }
+
+    if (req.method === 'POST' && req.url?.startsWith('/create-tab')) {
+      const parsed = new URL(req.url, `http://localhost:${port}`);
+      const tabUrl = parsed.searchParams.get('url') || 'about:blank';
+      const win = AppWindowManager.getActiveWindow();
+      if (win) {
+        win.createTab(tabUrl, false);
+        res.end(JSON.stringify({ ok: true }));
+      } else {
+        res.statusCode = 500;
+        res.end(JSON.stringify({ error: 'no active window' }));
+      }
+      return;
+    }
+
+    res.statusCode = 404;
+    res.end(JSON.stringify({ error: 'not found' }));
+  });
+  server.listen(port, '127.0.0.1');
+}
+
 // Disable Chromium features that trigger macOS "Local Network" permission dialog.
 // These features use mDNS/Bonjour for device discovery, which is unnecessary for
 // a privacy-focused browser and causes an unwanted system permission prompt on macOS.
@@ -29,6 +64,12 @@ app.whenReady().then(async() => {
   await DataStoreManager.init();
   await SettingsEnforcer.init();
   await AppWindowManager.init();
+
+  // Start test control server after everything is initialized
+  const testPort = process.env.REMOTE_DEBUGGING_PORT ? parseInt(process.env.REMOTE_DEBUGGING_PORT, 10) : 0;
+  if (testPort > 0) {
+    startTestControlServer(testPort);
+  }
 });
 
 // Quit when all windows are closed, except on macOS
