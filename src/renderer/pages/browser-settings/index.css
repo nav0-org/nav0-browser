@@ -9,8 +9,8 @@
 
 /* ---- Sidebar ---- */
 .settings-sidebar {
-  width: 220px;
-  min-width: 220px;
+  width: 280px;
+  min-width: 280px;
   background-color: var(--bg-light);
   border-right: 1px solid var(--border-color);
   display: flex;
