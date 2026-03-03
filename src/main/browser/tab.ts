@@ -29,6 +29,7 @@ export class Tab {
   private readerMode: ReaderModeState = ReaderModeManager.createState();
   private readerModeCheckTimer: ReturnType<typeof setTimeout> | null = null;
   private readerModeToggleLock = false;
+  private static pdfSessionsRegistered = new Set<string>();
 
   constructor(parentAppWindow: AppWindow, url: string , partitionSetting: string) {
     this.parentAppWindow = parentAppWindow;
@@ -66,6 +67,9 @@ export class Tab {
       preloadScriptToLoad = NEW_TAB_PRELOAD_WEBPACK_ENTRY;
       this.url = '';
       isInternalPage = true;
+    } else if (this.url.startsWith('file://')) {
+      urlToLoad = this.url;
+      preloadScriptToLoad = null;
     } else if (this.url.startsWith('http://') || this.url.startsWith('https://')) {
       urlToLoad = this.url;
       preloadScriptToLoad = null;
@@ -111,6 +115,7 @@ export class Tab {
         contextIsolation: true,
         sandbox: true,
         webSecurity: true,
+        plugins: true,
         additionalArguments: [`--app-window-id=${this.parentAppWindow.id}`, `--is-private=${this.parentAppWindow.isPrivate}`, `--tab-id=${this.id}`],
         allowRunningInsecureContent: false,
         partition: this.partitionSetting
@@ -118,7 +123,52 @@ export class Tab {
     });
     // this.webContentsViewInstance.webContents.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36');
     // this.webContentsViewInstance.webContents.openDevTools({mode : 'detach'});
+    this.registerPdfHandler();
     this.initEventHandlers();
+  }
+
+  /**
+   * Registers a session-level handler that forces PDF responses to display inline
+   * instead of triggering a download. Only registers once per session partition.
+   */
+  private registerPdfHandler(): void {
+    if (Tab.pdfSessionsRegistered.has(this.partitionSetting)) return;
+    Tab.pdfSessionsRegistered.add(this.partitionSetting);
+
+    this.webContentsViewInstance.webContents.session.webRequest.onHeadersReceived(
+      (details, callback) => {
+        const headers = details.responseHeaders;
+        if (!headers) {
+          callback({});
+          return;
+        }
+
+        // Find content-type header (case-insensitive)
+        let isPdf = false;
+        for (const key of Object.keys(headers)) {
+          if (key.toLowerCase() === 'content-type') {
+            const value = (headers[key]?.[0] || '').toLowerCase();
+            if (value.includes('application/pdf')) {
+              isPdf = true;
+            }
+            break;
+          }
+        }
+
+        if (isPdf) {
+          // Remove Content-Disposition header to force inline display
+          const newHeaders = { ...headers };
+          for (const key of Object.keys(newHeaders)) {
+            if (key.toLowerCase() === 'content-disposition') {
+              delete newHeaders[key];
+            }
+          }
+          callback({ responseHeaders: newHeaders });
+        } else {
+          callback({ responseHeaders: headers });
+        }
+      }
+    );
   }
 
   private initEventHandlers() {
@@ -131,7 +181,23 @@ export class Tab {
       this.debouncedHandleNavigationCompletion(url);
     });
 
-    this.webContentsViewInstance.webContents.session.on('will-download', async (event, item, webContents) => {
+    this.webContentsViewInstance.webContents.session.on('will-download', async (event, item, downloadWebContents) => {
+      // Only handle downloads initiated by this tab's webContents
+      if (downloadWebContents !== this.webContentsViewInstance.webContents) return;
+
+      const fileName = item.getFilename();
+      const mimeType = item.getMimeType();
+
+      // Intercept PDF downloads and open them in-tab instead
+      if (mimeType === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf')) {
+        const pdfUrl = item.getURL();
+        item.cancel();
+        if (pdfUrl) {
+          this.navigate(pdfUrl);
+        }
+        return;
+      }
+
       await this.handleDownload(item);
     });
     this.webContentsViewInstance.webContents.on(WebContentsEvents.PAGE_TITLE_UPDATED, async (event, title: string) => {

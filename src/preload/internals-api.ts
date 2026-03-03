@@ -81,6 +81,9 @@ export function init(){
     handleFileSelection: async (appWindowId: string, tabId: string, extensions: string[]) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.HANDLE_FILE_SELECTION, appWindowId, tabId, extensions);
     },
+    openPdfFile: async (appWindowId: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.OPEN_PDF_FILE, appWindowId);
+    },
     updateBrowserViewBounds: async (appWindowId: string, bounds: { x: number, y: number, width: number, height: number }) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.UPDATE_BROWSER_VIEW_BOUNDS, appWindowId, bounds);
     },
@@ -93,11 +96,29 @@ export function init(){
     hideOptionsMenu: async (appWindowId: string) => { 
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.HIDE_OPTIONS_MENU, appWindowId);
     },
-    showCommandKOverlay: async (appWindowId: string) => { 
+    showCommandKOverlay: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_COMMAND_K_OVERLAY, appWindowId);
     },
-    hideCommandKOverlay: async (appWindowId: string) => { 
+    hideCommandKOverlay: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.HIDE_COMMAND_K_OVERLAY, appWindowId);
+    },
+    showFindInPage: async (appWindowId: string) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_FIND_IN_PAGE, appWindowId);
+    },
+    hideFindInPage: async (appWindowId: string) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.HIDE_FIND_IN_PAGE, appWindowId);
+    },
+    findInPage: async (appWindowId: string, text: string, options?: { matchCase?: boolean }) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.FIND_IN_PAGE, appWindowId, text, options);
+    },
+    findInPageNext: async (appWindowId: string, text: string, options?: { matchCase?: boolean }) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.FIND_IN_PAGE_NEXT, appWindowId, text, options);
+    },
+    findInPagePrevious: async (appWindowId: string, text: string, options?: { matchCase?: boolean }) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.FIND_IN_PAGE_PREVIOUS, appWindowId, text, options);
+    },
+    stopFindInPage: async (appWindowId: string) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.STOP_FIND_IN_PAGE, appWindowId);
     },
     createNewAppWindow: async () => { 
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.CREATE_NEW_APP_WINDOW, {});
@@ -145,6 +166,9 @@ export function init(){
     },
     onReaderModeStateChanged: (callback: (data: { id: string, isActive: boolean }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.READER_MODE_STATE_CHANGED, (_event, data) => callback(data));
+    },
+    onFindInPageResult: (callback: (data: { activeMatchOrdinal: number, matches: number, finalUpdate: boolean }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.FIND_IN_PAGE_RESULT, (_event, data) => callback(data));
     },
   });
 }
