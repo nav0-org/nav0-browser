@@ -17,6 +17,7 @@ export class BrowserTabManager {
   private downloadsButton: HTMLButtonElement;
   private downloadProgressRing: SVGElement;
   private downloadProgressFill: SVGCircleElement;
+  private readerModeButton: HTMLButtonElement;
 
   // State
   private tabs: Tab[] = [];
@@ -37,7 +38,7 @@ export class BrowserTabManager {
       this.initializeDomElements();
       this.setupEventListeners();
       this.setupIpcListeners();
-      
+
       //to handle resizing
       this.updateBrowserViewBounds();
       window.addEventListener('resize', () => this.updateBrowserViewBounds());
@@ -64,6 +65,7 @@ export class BrowserTabManager {
     this.downloadsButton = document.getElementById('downloads-button') as HTMLButtonElement;
     this.downloadProgressRing = document.getElementById('download-progress-ring') as unknown as SVGElement;
     this.downloadProgressFill = document.querySelector('.download-progress-ring-fill') as unknown as SVGCircleElement;
+    this.readerModeButton = document.getElementById('reader-mode-button') as HTMLButtonElement;
   }
 
   private setupEventListeners(): void {
@@ -71,17 +73,17 @@ export class BrowserTabManager {
     this.newTabButton.addEventListener('click', async () => {
       window.BrowserAPI.createTab(this.appWindowId, InAppUrls.NEW_TAB, true);
     });
-    
+
     // Back button
     this.backButton.addEventListener('click', () => {
       window.BrowserAPI.goBack(this.appWindowId, this.activeTabId);
     });
-    
+
     // Forward button
     this.forwardButton.addEventListener('click', () => {
       window.BrowserAPI.goForward(this.appWindowId, this.activeTabId);
     });
-    
+
     // Refresh button
     this.refreshButton.addEventListener('click', () => {
       window.BrowserAPI.refreshTab(this.appWindowId, this.activeTabId);
@@ -105,6 +107,12 @@ export class BrowserTabManager {
       activeTab.bookmarkId = null;
       this.handleBookmark();
     });
+
+    // Reader mode button
+    this.readerModeButton.addEventListener('click', () => {
+      window.BrowserAPI.toggleReaderMode(this.appWindowId, this.activeTabId);
+    });
+
     // URL input - navigate on Enter key
     this.urlInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
@@ -129,7 +137,7 @@ export class BrowserTabManager {
         this.tabsContainer.appendChild(this.getTabById(tab.id)?.getTabElement());
       }
     });
-    
+
     // Tab activated
     window.BrowserAPI.onTabActivated((data: {id: string, url: string}) => {
       const newActiveTab = this.getTabById(data.id);
@@ -139,8 +147,9 @@ export class BrowserTabManager {
       this.backButton.disabled = !newActiveTab.canGoBack;
       this.forwardButton.disabled = !newActiveTab.canGoForward;
       this.handleBookmark();
+      this.updateReaderModeButton();
     });
-    
+
     // Tab closed
     window.BrowserAPI.onTabClosed((data: { id: string }) => {
       let newActiveTabId;
@@ -160,12 +169,12 @@ export class BrowserTabManager {
         window.BrowserAPI.closeAppWindow(this.appWindowId);
       }
     });
-    
+
     // Tab title updated
     window.BrowserAPI.onTabTitleUpdated((data: { id: string, title: string }) => {
       this.getTabById(data.id)?.updateTabTitle(data.title);
     });
-    
+
     // Tab URL updated
     window.BrowserAPI.onTabUrlUpdated((data: { id: string, url: string, isBookmark: boolean, bookmarkId: string | null, canGoBack: boolean, canGoForward: boolean }) => {
       this.getTabById(data.id)?.handleUrlChange(data.url, data.isBookmark, data.bookmarkId, data.canGoBack, data.canGoForward);
@@ -200,6 +209,28 @@ export class BrowserTabManager {
       this.activeDownloads.delete(data.downloadId);
       this.updateDownloadProgress();
     });
+
+    // Reader mode availability changed
+    window.BrowserAPI.onReaderModeAvailabilityChanged((data: { id: string, isEligible: boolean }) => {
+      const tab = this.getTabById(data.id);
+      if (tab) {
+        tab.isReaderModeEligible = data.isEligible;
+        if (data.id === this.activeTabId) {
+          this.updateReaderModeButton();
+        }
+      }
+    });
+
+    // Reader mode state changed
+    window.BrowserAPI.onReaderModeStateChanged((data: { id: string, isActive: boolean }) => {
+      const tab = this.getTabById(data.id);
+      if (tab) {
+        tab.isReaderModeActive = data.isActive;
+        if (data.id === this.activeTabId) {
+          this.updateReaderModeButton();
+        }
+      }
+    });
   }
 
   private handleBookmark(): void {
@@ -215,14 +246,30 @@ export class BrowserTabManager {
     }
   }
 
+  private updateReaderModeButton(): void {
+    const activeTab = this.getTabById(this.activeTabId);
+    if (!activeTab || !activeTab.isReaderModeEligible) {
+      this.readerModeButton.style.display = 'none';
+      return;
+    }
+    this.readerModeButton.style.display = 'block';
+    if (activeTab.isReaderModeActive) {
+      this.readerModeButton.classList.add('active');
+      this.readerModeButton.title = 'Exit Reader Mode';
+    } else {
+      this.readerModeButton.classList.remove('active');
+      this.readerModeButton.title = 'Reader Mode';
+    }
+  }
+
   private removeTab(tabId: string): void {
     const tabToBeClosed = this.getTabById(tabId);
     this.tabs = this.tabs.filter(tab => tab.id !== tabId);
-    
+
     if (tabToBeClosed?.getTabElement()) {
       this.tabsContainer.removeChild(tabToBeClosed.getTabElement());
     }
-    
+
     // if (tabId === this.activeTabId) {
     //   this.activeTabId = this.tabs.length > 0 ? this.tabs[0].id : null;
     //   this.updateActiveTab();
@@ -237,7 +284,7 @@ export class BrowserTabManager {
         tab.deactivateTab();
       }
     });
-    
+
     if (this.activeTabId) {
       const activeTab = this.getTabById(this.activeTabId);
       if (activeTab) {

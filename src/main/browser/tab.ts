@@ -9,6 +9,8 @@ import { DownloadManager } from "./download-manager";
 import path from "path";
 import { Utils } from "../browser/utils";
 import { SearchEngine } from "../web/search-engine";
+import { PermissionManager } from "./permission-manager";
+import { ReaderModeManager, ReaderModeState } from "./reader-mode-manager";
 const domainPattern = /^[^\s]+\.[^\s]+$/;
 
 export class Tab {
@@ -26,6 +28,11 @@ export class Tab {
   private static readonly NAVIGATION_DEBOUNCE_MS = 500;
   private readyPromise: Promise<void> = Promise.resolve();
   private static handledDownloads: Set<string> = new Set();
+  private currentOrigin: string | null = null;
+  private readerMode: ReaderModeState = ReaderModeManager.createState();
+  private readerModeCheckTimer: ReturnType<typeof setTimeout> | null = null;
+  private readerModeToggleLock = false;
+  private static pdfSessionsRegistered = new Set<string>();
 
   constructor(parentAppWindow: AppWindow, url: string , partitionSetting: string) {
     this.parentAppWindow = parentAppWindow;
@@ -63,17 +70,20 @@ export class Tab {
       preloadScriptToLoad = NEW_TAB_PRELOAD_WEBPACK_ENTRY;
       this.url = '';
       isInternalPage = true;
-    } else if (this.url.startsWith('http://') || this.url.startsWith('https://')) {
+    } else if (this.url.startsWith('file://')) {
       urlToLoad = this.url;
       preloadScriptToLoad = null;
+    } else if (this.url.startsWith('http://') || this.url.startsWith('https://')) {
+      urlToLoad = this.url;
+      preloadScriptToLoad = WEB_CONTENT_PRELOAD_WEBPACK_ENTRY;
     } else if (domainPattern.test(this.url)) {
       this.url = 'https://' + this.url;
       urlToLoad = this.url;
-      preloadScriptToLoad = null;
+      preloadScriptToLoad = WEB_CONTENT_PRELOAD_WEBPACK_ENTRY;
     } else {
       this.url = await SearchEngine.getSearchUrl(this.url);
       urlToLoad = this.url;
-      preloadScriptToLoad = null;
+      preloadScriptToLoad = WEB_CONTENT_PRELOAD_WEBPACK_ENTRY;
     }
     const needsNewView = this.preloadScript !== preloadScriptToLoad || !this.webContentsViewInstance;
     if(needsNewView){
@@ -108,6 +118,7 @@ export class Tab {
         contextIsolation: true,
         sandbox: true,
         webSecurity: true,
+        plugins: true,
         additionalArguments: [`--app-window-id=${this.parentAppWindow.id}`, `--is-private=${this.parentAppWindow.isPrivate}`, `--tab-id=${this.id}`],
         allowRunningInsecureContent: false,
         partition: this.partitionSetting
@@ -115,12 +126,58 @@ export class Tab {
     });
     // this.webContentsViewInstance.webContents.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36');
     // this.webContentsViewInstance.webContents.openDevTools({mode : 'detach'});
+    this.registerPdfHandler();
     this.initEventHandlers();
+  }
+
+  /**
+   * Registers a session-level handler that forces PDF responses to display inline
+   * instead of triggering a download. Only registers once per session partition.
+   */
+  private registerPdfHandler(): void {
+    if (Tab.pdfSessionsRegistered.has(this.partitionSetting)) return;
+    Tab.pdfSessionsRegistered.add(this.partitionSetting);
+
+    this.webContentsViewInstance.webContents.session.webRequest.onHeadersReceived(
+      (details, callback) => {
+        const headers = details.responseHeaders;
+        if (!headers) {
+          callback({});
+          return;
+        }
+
+        // Find content-type header (case-insensitive)
+        let isPdf = false;
+        for (const key of Object.keys(headers)) {
+          if (key.toLowerCase() === 'content-type') {
+            const value = (headers[key]?.[0] || '').toLowerCase();
+            if (value.includes('application/pdf')) {
+              isPdf = true;
+            }
+            break;
+          }
+        }
+
+        if (isPdf) {
+          // Remove Content-Disposition header to force inline display
+          const newHeaders = { ...headers };
+          for (const key of Object.keys(newHeaders)) {
+            if (key.toLowerCase() === 'content-disposition') {
+              delete newHeaders[key];
+            }
+          }
+          callback({ responseHeaders: newHeaders });
+        } else {
+          callback({ responseHeaders: headers });
+        }
+      }
+    );
   }
 
   private initEventHandlers() {
     //for hard navigation (debounced)
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE, async (event, url: string) => {
+      this.handleOriginChange(url);
       this.debouncedHandleNavigationCompletion(url);
     });
     //for soft navigation (debounced)
@@ -128,7 +185,23 @@ export class Tab {
       this.debouncedHandleNavigationCompletion(url);
     });
 
-    this.webContentsViewInstance.webContents.session.on('will-download', async (event, item, webContents) => {
+    this.webContentsViewInstance.webContents.session.on('will-download', async (event, item, downloadWebContents) => {
+      // Only handle downloads initiated by this tab's webContents
+      if (downloadWebContents !== this.webContentsViewInstance.webContents) return;
+
+      const fileName = item.getFilename();
+      const mimeType = item.getMimeType();
+
+      // Intercept PDF downloads and open them in-tab instead
+      if (mimeType === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf')) {
+        const pdfUrl = item.getURL();
+        item.cancel();
+        if (pdfUrl) {
+          this.navigate(pdfUrl);
+        }
+        return;
+      }
+
       await this.handleDownload(item);
     });
     this.webContentsViewInstance.webContents.on(WebContentsEvents.PAGE_TITLE_UPDATED, async (event, title: string) => {
@@ -263,10 +336,31 @@ export class Tab {
     console.log('Download started:', downloadPath);
   }
 
+  private handleOriginChange(url: string): void {
+    try {
+      const newOrigin = new URL(url).origin;
+      if (this.currentOrigin && this.currentOrigin !== newOrigin) {
+        PermissionManager.clearSessionPermissionsForTabOrigin(this.id, this.currentOrigin);
+      }
+      this.currentOrigin = newOrigin;
+    } catch {
+      // Invalid URL, ignore
+    }
+  }
+
   private debouncedHandleNavigationCompletion(url: string): void {
     if(this.navigationDebounceTimer) {
       clearTimeout(this.navigationDebounceTimer);
     }
+    // Deactivate reader mode on navigation
+    if (this.readerMode.isActive) {
+      this.deactivateReaderMode();
+    }
+    // Reset reader mode eligibility
+    this.readerMode.isEligible = false;
+    this.readerMode.cachedArticle = null;
+    this.sendReaderModeAvailability();
+
     // Update URL and send tab update immediately for responsive UI
     if(!this.url.startsWith(InAppUrls.PREFIX) && this.url !== '') {
       this.url = url;
@@ -276,6 +370,9 @@ export class Tab {
     this.navigationDebounceTimer = setTimeout(() => {
       this.recordHistory(url);
     }, Tab.NAVIGATION_DEBOUNCE_MS);
+
+    // Schedule reader mode eligibility check after page settles
+    this.scheduleReaderModeCheck();
   }
 
   private async sendTabUrlUpdate(url: string): Promise<void> {
@@ -360,6 +457,107 @@ export class Tab {
 
   navigate(url: string): void {
     this.loadURL(url);
+  }
+
+  // Reader Mode methods
+  private scheduleReaderModeCheck(): void {
+    if (this.readerModeCheckTimer) {
+      clearTimeout(this.readerModeCheckTimer);
+    }
+    // Wait for DOM to settle before checking eligibility
+    this.readerModeCheckTimer = setTimeout(async () => {
+      // Don't check internal pages
+      if (this.url.startsWith(InAppUrls.PREFIX) || this.url === '') {
+        this.readerMode.isEligible = false;
+        this.sendReaderModeAvailability();
+        return;
+      }
+      try {
+        const eligible = await ReaderModeManager.checkEligibility(
+          this.webContentsViewInstance.webContents
+        );
+        this.readerMode.isEligible = eligible;
+        this.sendReaderModeAvailability();
+      } catch {
+        this.readerMode.isEligible = false;
+        this.sendReaderModeAvailability();
+      }
+    }, 1000);
+  }
+
+  private sendReaderModeAvailability(): void {
+    try {
+      this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(
+        MainToRendererEventsForBrowserIPC.READER_MODE_AVAILABILITY_CHANGED,
+        { id: this.id, isEligible: this.readerMode.isEligible }
+      );
+    } catch {
+      // Window may be closed
+    }
+  }
+
+  private sendReaderModeStateChanged(): void {
+    try {
+      this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(
+        MainToRendererEventsForBrowserIPC.READER_MODE_STATE_CHANGED,
+        { id: this.id, isActive: this.readerMode.isActive }
+      );
+    } catch {
+      // Window may be closed
+    }
+  }
+
+  async toggleReaderMode(): Promise<void> {
+    // Prevent rapid toggling
+    if (this.readerModeToggleLock) return;
+    this.readerModeToggleLock = true;
+
+    try {
+      if (this.readerMode.isActive) {
+        await this.deactivateReaderMode();
+      } else if (this.readerMode.isEligible) {
+        await this.activateReaderMode();
+      }
+    } finally {
+      this.readerModeToggleLock = false;
+    }
+  }
+
+  private async activateReaderMode(): Promise<void> {
+    // Extract article content
+    const article = this.readerMode.cachedArticle ||
+      await ReaderModeManager.extractContent(this.webContentsViewInstance.webContents);
+    if (!article) return;
+
+    this.readerMode.cachedArticle = article;
+
+    // Inject reader mode view
+    const cssKey = await ReaderModeManager.activate(
+      this.webContentsViewInstance.webContents, article
+    );
+    if (cssKey === null) return;
+
+    this.readerMode.insertedCSSKey = cssKey;
+    this.readerMode.isActive = true;
+    this.sendReaderModeStateChanged();
+  }
+
+  private async deactivateReaderMode(): Promise<void> {
+    await ReaderModeManager.deactivate(
+      this.webContentsViewInstance.webContents,
+      this.readerMode.insertedCSSKey
+    );
+    this.readerMode.insertedCSSKey = null;
+    this.readerMode.isActive = false;
+    this.sendReaderModeStateChanged();
+  }
+
+  isReaderModeEligible(): boolean {
+    return this.readerMode.isEligible;
+  }
+
+  isReaderModeActive(): boolean {
+    return this.readerMode.isActive;
   }
 
   //for handling right clicks
@@ -452,11 +650,13 @@ export class Tab {
       );
     } 
     if (selectionText) { //for selected text
+      const engineName = SearchEngine.getSearchEngineName();
+      const truncatedText = selectionText.length > 30 ? selectionText.substring(0, 30) + '...' : selectionText;
       template.push(
         { label: 'Copy', click: () => {
           this.webContentsViewInstance.webContents.copy();
         }},
-        { label: 'Search', click: () => {
+        { label: `Search ${engineName} for "${truncatedText}"`, click: () => {
           this.parentAppWindow.createTab(selectionText, true);
         }}
       );

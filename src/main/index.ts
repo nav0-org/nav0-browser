@@ -1,8 +1,17 @@
-import { app, ipcMain } from 'electron';
+import { app } from 'electron';
 import { AppWindowManager } from './browser/app-window-manager';
 import { DataStoreManager } from './database/data-store-manager';
 import { DownloadManager } from './browser/download-manager';
+import { SettingsEnforcer } from './settings/settings-enforcer';
 
+// Disable Chromium features that trigger macOS "Local Network" permission dialog.
+// These features use mDNS/Bonjour for device discovery, which is unnecessary for
+// a privacy-focused browser and causes an unwanted system permission prompt on macOS.
+app.commandLine.appendSwitch('disable-features', [
+  'MediaRouter',
+  'DialMediaRouteProvider',
+  'GlobalMediaControls',
+].join(','));
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling
 if (require('electron-squirrel-startup')) {
@@ -12,6 +21,7 @@ if (require('electron-squirrel-startup')) {
 // Initialize main window when app is ready
 app.whenReady().then(async() => {
   await DataStoreManager.init();
+  await SettingsEnforcer.init();
   await AppWindowManager.init();
 });
 
@@ -27,13 +37,12 @@ app.on('window-all-closed', () => {
   }
 });
 
+// Handle "clear on close" settings on graceful quit
+app.on('before-quit', async () => {
+  await SettingsEnforcer.onBeforeQuit();
+});
+
 // Re-create window when dock icon is clicked (macOS)
 app.on('activate', () => {
   AppWindowManager.createWindow(false);
-});
-
-// Handle webview permission requests
-ipcMain.handle('browser:permission-request', async (event, permission, details) => {
-  //@todo - implement permission handling logic
-  return true;
 });

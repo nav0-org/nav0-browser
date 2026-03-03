@@ -1,4 +1,4 @@
-import { app, Menu } from "electron";
+import { app, dialog, Menu } from "electron";
 import { AppConstants, InAppUrls } from "../../constants/app-constants";
 import { AppWindowManager } from "./app-window-manager";
 
@@ -20,6 +20,8 @@ export abstract class AppMenuManager {
         submenu: [
           { role: 'about'  as const},
           { type: 'separator' as const },
+          { label: 'Settings...', accelerator: 'CmdOrCtrl+,', click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.BROWSER_SETTINGS, true) }},
+          { type: 'separator' as const },
           { role: 'services' as const },
           { type: 'separator' as const },
           { role: 'hide' as const },
@@ -36,6 +38,17 @@ export abstract class AppMenuManager {
           {label: 'New Window', accelerator: 'CmdOrCtrl+N', click: async() => { AppWindowManager.createWindow(false); }},
           {label: 'New Private Window', accelerator: 'CmdOrCtrl+Shift+N', click: async() => { AppWindowManager.createWindow(true); }},
           {type: 'separator' as const},
+          {label: 'Open PDF File', accelerator: 'CmdOrCtrl+Shift+O', click: async() => {
+            const activeWindow = AppWindowManager.getActiveWindow();
+            if (!activeWindow) return;
+            const result = await dialog.showOpenDialog(activeWindow.getBrowserWindowInstance(), {
+              properties: ['openFile'],
+              filters: [{ name: 'PDF Files', extensions: ['pdf'] }]
+            });
+            if (result.canceled || result.filePaths.length === 0) return;
+            await activeWindow.createTab(`file://${result.filePaths[0]}`, true);
+          }},
+          {type: 'separator' as const},
           {label: 'Close Tab', click: async() => { AppWindowManager.getActiveWindow().closeTab(AppWindowManager.getActiveWindow().getActiveTabId(), true); }},
           {label: 'Close Window', click: async() => { AppWindowManager.closeWindow(AppWindowManager.getActiveWindowId()); }},
         ]
@@ -46,6 +59,8 @@ export abstract class AppMenuManager {
           {label: 'Bookmarks', accelerator: 'CmdOrCtrl+Shift+B', click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.BOOKMARKS, true) }},
           {label: 'History', accelerator: 'CmdOrCtrl+Shift+H', click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.HISTORY, true) }},
           {label: 'Downloads', accelerator: 'CmdOrCtrl+Shift+D',click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.DOWNLOADS, true) }},
+          {type: 'separator' as const},
+          {label: 'Settings', accelerator: 'CmdOrCtrl+,', click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.BROWSER_SETTINGS, true) }},
           {type: 'separator' as const},
           {label: 'Command K Interface', accelerator: 'CmdOrCtrl+K', click: async() => { AppWindowManager.getActiveWindow().showCommandKOverlay() }},
         ]
@@ -59,6 +74,8 @@ export abstract class AppMenuManager {
           { role: 'cut' as const, accelerator: 'CmdOrCtrl+X', },
           { role: 'copy' as const, accelerator: 'CmdOrCtrl+C', },
           { role: 'paste' as const, accelerator: 'CmdOrCtrl+V', },
+          { type: 'separator' as const },
+          {label: 'Find in Page', accelerator: 'CmdOrCtrl+F', click: async() => { AppWindowManager.getActiveWindow()?.showFindInPage(); }},
           ...(isMac ? [
             { role: 'pasteAndMatchStyle' as const },
             { role: 'delete' as const },
@@ -85,7 +102,17 @@ export abstract class AppMenuManager {
           { role: 'zoomIn' as const, accelerator: 'CmdOrCtrl+Shift+=',},
           { role: 'zoomOut' as const, accelerator: 'CmdOrCtrl+Shift+-',},
           { type: 'separator' as const},
-          { role: 'togglefullscreen' as const}
+          { role: 'togglefullscreen' as const},
+          { type: 'separator' as const},
+          {label: 'Toggle Reader Mode', accelerator: 'CmdOrCtrl+Shift+R', click: async() => {
+            const activeWindow = AppWindowManager.getActiveWindow();
+            if (activeWindow) {
+              const activeTab = activeWindow.getActiveTab();
+              if (activeTab) {
+                await activeTab.toggleReaderMode();
+              }
+            }
+          }},
         ]
       },
       {

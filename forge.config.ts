@@ -127,6 +127,30 @@ const config: ForgeConfig = {
               js: './src/preload/internals-api.ts',
             },
           },
+          {
+            html: './src/renderer/permission-prompt/index.html',
+            js: './src/renderer/permission-prompt/index.ts',
+            name: 'permission_prompt',
+            preload: {
+              js: './src/preload/internals-api.ts',
+            },
+          },
+          {
+            html: './src/renderer/web-content/index.html',
+            js: './src/renderer/web-content/index.ts',
+            name: 'web_content',
+            preload: {
+              js: './src/preload/web-content-preload.ts',
+            },
+          },
+          {
+            html: './src/renderer/find-in-page/index.html',
+            js: './src/renderer/find-in-page/index.ts',
+            name: 'find_in_page',
+            preload: {
+              js: './src/preload/internals-api.ts',
+            },
+          },
         ],
       },
     }),

@@ -199,6 +199,25 @@
   color: var(--text-color);
 }
 
+/* Reader Mode Button */
+.reader-mode-btn {
+  color: #9CA3AF;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.reader-mode-btn:hover {
+  color: var(--text-color);
+  background-color: var(--bg-hover);
+}
+
+.reader-mode-btn.active {
+  color: #6366F1;
+}
+
+.reader-mode-btn.active:hover {
+  color: #4F46E5;
+}
+
 /* Ensure submenu fits within viewport */
 @media (max-width: 576px) {
   .submenu {

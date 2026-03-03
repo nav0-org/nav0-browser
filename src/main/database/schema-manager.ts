@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { BookmarksSchema } from './schema/bookmark-schema';
 import { BrowsingHistorySchema } from './schema/browsing-history-schema';
 import { DownloadsSchema } from './schema/download-schema';
+import { PermissionSchema } from './schema/permission-schema';
 
 
 // Define types for our schema
@@ -421,5 +422,6 @@ export class SchemaManager {
       this.registerSchema(BookmarksSchema);
       this.registerSchema(BrowsingHistorySchema);
       this.registerSchema(DownloadsSchema);
+      this.registerSchema(PermissionSchema);
   }
 }

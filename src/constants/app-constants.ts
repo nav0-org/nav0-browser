@@ -120,6 +120,7 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly FETCH_BROWSING_HISTORY = "browser:fetch-browsing-history";
 
   public static readonly HANDLE_FILE_SELECTION = "browser:handle-file-selection";
+  public static readonly OPEN_PDF_FILE = "browser:open-pdf-file";
 
   public static readonly UPDATE_BROWSER_VIEW_BOUNDS = "browser:update-browser-view-bounds";
   public static readonly CLOSE_WINDOW = "browser:close-window";
@@ -133,9 +134,27 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly GET_SEARCH_URL = "browser:get-search-url";
   public static readonly FETCH_OPEN_TABS = "browser:fetch-open-tabs";
   public static readonly SHOW_ABOUT_PANEL = "browser:show-about-panel";
-  // public static readonly CAPTURE_SCREENSHOT = "browser:capture-screenshot";
-  // public static readonly SAVE_SCREENSHOT = "browser:save-screenshot";
-  // public static readonly SET_DIALOG_VISIBILITY = "browser:set-dialog-visibility";
+  public static readonly TOGGLE_READER_MODE = "browser:toggle-reader-mode";
+  public static readonly SHOW_FIND_IN_PAGE = "browser:show-find-in-page";
+  public static readonly HIDE_FIND_IN_PAGE = "browser:hide-find-in-page";
+  public static readonly FIND_IN_PAGE = "browser:find-in-page";
+  public static readonly FIND_IN_PAGE_NEXT = "browser:find-in-page-next";
+  public static readonly FIND_IN_PAGE_PREVIOUS = "browser:find-in-page-previous";
+  public static readonly STOP_FIND_IN_PAGE = "browser:stop-find-in-page";
+
+  // Settings enforcement
+  public static readonly CLEAR_BROWSING_DATA = "browser:clear-browsing-data";
+  public static readonly GET_COOKIE_COUNT = "browser:get-cookie-count";
+  public static readonly APPLY_SETTINGS = "browser:apply-settings";
+  public static readonly GET_STORAGE_ESTIMATE = "browser:get-storage-estimate";
+
+  // Permission system
+  public static readonly PERMISSION_PROMPT_RESPONSE = "browser:permission-prompt-response";
+  public static readonly FETCH_PERMISSIONS = "browser:fetch-permissions";
+  public static readonly REMOVE_PERMISSION = "browser:remove-permission";
+  public static readonly REMOVE_ALL_PERMISSIONS_FOR_ORIGIN = "browser:remove-all-permissions-for-origin";
+  public static readonly CLEAR_ALL_PERMISSIONS = "browser:clear-all-permissions";
+  public static readonly PERMISSION_PROMPT_READY = "browser:permission-prompt-ready";
 }
 
 export abstract class MainToRendererEventsForBrowserIPC {
@@ -151,7 +170,11 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly DOWNLOAD_COMPLETED = "browser:download-completed";
   public static readonly DOWNLOAD_PAUSED = "browser:download-paused";
   public static readonly DOWNLOAD_RESUMED = "browser:download-resumed";
-  // public static readonly SET_DIALOG_VISIBILITY = "browser:set-dialog-visibility";
+  public static readonly READER_MODE_AVAILABILITY_CHANGED = "browser:reader-mode-availability-changed";
+  public static readonly READER_MODE_STATE_CHANGED = "browser:reader-mode-state-changed";
+  public static readonly FIND_IN_PAGE_RESULT = "browser:find-in-page-result";
+  public static readonly SHOW_PERMISSION_PROMPT = "browser:show-permission-prompt";
+  public static readonly HIDE_PERMISSION_PROMPT = "browser:hide-permission-prompt";
 }
 
 export abstract class DataStoreConstants {

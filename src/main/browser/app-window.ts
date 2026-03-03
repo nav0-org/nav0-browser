@@ -5,6 +5,9 @@ import { AppConstants, InAppUrls, MainToRendererEventsForBrowserIPC } from "../.
 import { OptionsMenuManager } from "./options-menu-manager";
 import { CommandKOverlayManager } from "./command-k-overlay-manager";
 import { DownloadManager } from "./download-manager";
+import { PermissionManager } from "./permission-manager";
+import { PermissionPromptOverlayManager, PermissionPromptData } from "./permission-prompt-overlay-manager";
+import { FindInPageManager } from "./find-in-page-manager";
 import type { Database as DB } from 'better-sqlite3';
 
 export class AppWindow {
@@ -16,6 +19,8 @@ export class AppWindow {
   private partitionSetting: string;
   private optionsMenuManager: OptionsMenuManager | null = null;
   private commandKOverlayManager: CommandKOverlayManager | null = null;
+  private permissionPromptOverlayManager: PermissionPromptOverlayManager | null = null;
+  private findInPageManager: FindInPageManager | null = null;
   private database: DB;
 
   constructor(isPrivate = false, database: DB) {
@@ -32,6 +37,7 @@ export class AppWindow {
     } else {
       this.partitionSetting = 'persist:browsertabs';
     }
+    PermissionManager.setupSession(this.partitionSetting);
     this.browserWindowInstance = new BrowserWindow({
       width: 1200,
       height: 800,
@@ -52,6 +58,8 @@ export class AppWindow {
 
     this.optionsMenuManager = new OptionsMenuManager(this.id, this.isPrivate, this.partitionSetting);
     this.commandKOverlayManager = new CommandKOverlayManager(this.id, this.isPrivate, this.partitionSetting);
+    this.permissionPromptOverlayManager = new PermissionPromptOverlayManager(this.id, this.isPrivate, this.partitionSetting);
+    this.findInPageManager = new FindInPageManager(this.id, this.isPrivate, this.partitionSetting);
 
     this.browserWindowInstance.loadURL(BROWSER_LAYOUT_WEBPACK_ENTRY);
 
@@ -92,6 +100,7 @@ export class AppWindow {
 
   public closeWindow(clearSession: boolean) {
     if(clearSession){
+      PermissionManager.clearMemoryPermissions();
       const currentSession = session.fromPartition('persist:private')
       currentSession?.clearAuthCache();
       currentSession?.clearStorageData();
@@ -138,8 +147,12 @@ export class AppWindow {
   }
 
   closeTab(id: string, isUserInitiated = true): void {
-    this.tabs.get(id)?.getWebContentsViewInstance().removeAllListeners();
-    this.tabs.get(id)?.getWebContentsViewInstance().webContents.close();
+    const tab = this.tabs.get(id);
+    if (tab) {
+      PermissionManager.clearSessionPermissionsForTab(id);
+      tab.getWebContentsViewInstance().removeAllListeners();
+      tab.getWebContentsViewInstance().webContents.close();
+    }
     this.tabs.delete(id);
     if (this.activeTabId === id) {
       this.activeTabId = null;
@@ -244,4 +257,91 @@ export class AppWindow {
     });
   }
 
+  async showPermissionPromptOverlay(data: PermissionPromptData): Promise<void> {
+    if (!this.permissionPromptOverlayManager || !this.browserWindowInstance) return;
+    await this.permissionPromptOverlayManager.whenReady();
+    const parentBounds = this.browserWindowInstance.contentView.getBounds();
+    this.permissionPromptOverlayManager.getWebContentsViewInstance().setBounds(parentBounds);
+    if (this.browserWindowInstance.contentView.children.indexOf(this.permissionPromptOverlayManager.getWebContentsViewInstance()) === -1) {
+      this.browserWindowInstance.contentView.addChildView(this.permissionPromptOverlayManager.getWebContentsViewInstance());
+    }
+    this.permissionPromptOverlayManager.showPrompt(data);
+  }
+
+  hidePermissionPromptOverlay(): void {
+    if (this.permissionPromptOverlayManager && this.browserWindowInstance &&
+        this.browserWindowInstance.contentView.children.indexOf(this.permissionPromptOverlayManager.getWebContentsViewInstance()) > -1) {
+      this.browserWindowInstance.contentView.removeChildView(this.permissionPromptOverlayManager.getWebContentsViewInstance());
+    }
+  }
+
+  findTabByWebContentsId(webContentsId: number): Tab | null {
+    for (const tab of this.tabs.values()) {
+      if (tab.getWebContentsViewInstance().webContents.id === webContentsId) {
+        return tab;
+      }
+    }
+    return null;
+  }
+
+  private isFindInPageVisible(): boolean {
+    return this.findInPageManager && this.browserWindowInstance.contentView.children.indexOf(this.findInPageManager.getWebContentsViewInstance()) > -1;
+  }
+
+  async showFindInPage(): Promise<void> {
+    this.hideOptionsMenuOverlay();
+    this.hideCommandKOverlay();
+
+    if (this.isFindInPageVisible()) {
+      // Already open — toggle it closed
+      this.hideFindInPage();
+      return;
+    }
+
+    // Attach to the active tab's webContents
+    const activeTab = this.getActiveTab();
+    if (activeTab) {
+      this.findInPageManager.setActiveTabWebContents(activeTab.getWebContentsViewInstance().webContents);
+    }
+
+    await this.findInPageManager.whenReady();
+    const parentBounds = this.browserWindowInstance.contentView.getBounds();
+    const barWidth = Math.min(520, parentBounds.width - 24);
+    const barHeight = 48;
+    const yOffset = 85; // below the navbar
+    this.findInPageManager.getWebContentsViewInstance().setBounds({
+      x: parentBounds.width - barWidth - 12,
+      y: yOffset,
+      width: barWidth,
+      height: barHeight,
+    });
+    this.browserWindowInstance.contentView.addChildView(this.findInPageManager.getWebContentsViewInstance());
+    this.findInPageManager.focusInput();
+  }
+
+  hideFindInPage(): void {
+    if (this.isFindInPageVisible()) {
+      this.findInPageManager.stopFind();
+      this.browserWindowInstance.contentView.removeChildView(this.findInPageManager.getWebContentsViewInstance());
+    }
+  }
+
+  findInPage(text: string, options?: { matchCase?: boolean }): void {
+    if (!this.isFindInPageVisible()) return;
+    this.findInPageManager.find(text, options);
+  }
+
+  findInPageNext(text: string, options?: { matchCase?: boolean }): void {
+    if (!this.isFindInPageVisible()) return;
+    this.findInPageManager.findNext(text, options);
+  }
+
+  findInPagePrevious(text: string, options?: { matchCase?: boolean }): void {
+    if (!this.isFindInPageVisible()) return;
+    this.findInPageManager.findPrevious(text, options);
+  }
+
+  stopFindInPage(): void {
+    this.findInPageManager?.clearHighlights();
+  }
 }
