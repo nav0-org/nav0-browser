@@ -55,6 +55,10 @@ export class OptionsMenuManager {
       await window.BrowserAPI.createNewPrivateAppWindow();
     });
 
+    this.optionsElement?.querySelector('#open-pdf-option')?.addEventListener('click', async () => {
+      await window.BrowserAPI.openPdfFile(this.appWindowId);
+    });
+
     this.optionsElement?.querySelector('#find-in-page-option')?.addEventListener('click', async () => {
       await window.BrowserAPI.showFindInPage(this.appWindowId);
     });

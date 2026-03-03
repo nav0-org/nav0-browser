@@ -81,6 +81,9 @@ export function init(){
     handleFileSelection: async (appWindowId: string, tabId: string, extensions: string[]) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.HANDLE_FILE_SELECTION, appWindowId, tabId, extensions);
     },
+    openPdfFile: async (appWindowId: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.OPEN_PDF_FILE, appWindowId);
+    },
     updateBrowserViewBounds: async (appWindowId: string, bounds: { x: number, y: number, width: number, height: number }) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.UPDATE_BROWSER_VIEW_BOUNDS, appWindowId, bounds);
     },
