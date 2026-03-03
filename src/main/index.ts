@@ -1,6 +1,7 @@
 import { app, ipcMain } from 'electron';
 import { AppWindowManager } from './browser/app-window-manager';
 import { DataStoreManager } from './database/data-store-manager';
+import { DownloadManager } from './browser/download-manager';
 
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling
@@ -12,6 +13,11 @@ if (require('electron-squirrel-startup')) {
 app.whenReady().then(async() => {
   await DataStoreManager.init();
   await AppWindowManager.init();
+});
+
+// Pause all in-progress downloads before quitting so they can be resumed later
+app.on('before-quit', () => {
+  DownloadManager.pauseAllDownloads();
 });
 
 // Quit when all windows are closed, except on macOS

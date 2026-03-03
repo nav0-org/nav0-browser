@@ -70,7 +70,7 @@
 
 .download-item {
   display: grid;
-  grid-template-columns: 140px 24px 1fr 36px;
+  grid-template-columns: 140px 24px 1fr auto;
   gap: var(--spacing-xs);
   padding: 4px 12px;
   border-bottom: 1px solid var(--border-color);
@@ -168,7 +168,6 @@
 }
 
 .download-item.downloading {
-  pointer-events: none;
   cursor: default;
   opacity: 0.7;
   position: relative;
@@ -176,6 +175,37 @@
 
 .download-item.downloading .delete-button {
   display: none;
+}
+
+/* Download control buttons (pause/resume/cancel) */
+.download-controls {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  pointer-events: auto;
+}
+
+.control-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: var(--radius-sm);
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+}
+
+.control-btn:hover {
+  opacity: 1;
+}
+
+.download-item.paused .download-path {
+  color: var(--primary-color);
+  font-style: italic;
 }
 
 .download-progress-bar {

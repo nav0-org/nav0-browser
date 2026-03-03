@@ -72,6 +72,15 @@ export function init(){
     fetchActiveDownloads: async () => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.FETCH_ACTIVE_DOWNLOADS);
     },
+    pauseDownload: async (downloadId: string, appWindowId: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.PAUSE_DOWNLOAD, downloadId, appWindowId);
+    },
+    resumeDownload: async (downloadId: string, appWindowId: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.RESUME_DOWNLOAD, downloadId, appWindowId);
+    },
+    cancelDownload: async (downloadId: string, appWindowId: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.CANCEL_DOWNLOAD, downloadId, appWindowId);
+    },
     openDownloadedFile: async (filePath: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.OPEN_DOWNLOADED_FILE, filePath);
     },
@@ -146,14 +155,20 @@ export function init(){
     onNavigationFailed: (callback: (data: { id: string }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.NAVIGATION_FAILED, (_event, data) => callback(data));
     },
-    onDownloadStarted: (callback: (data: { downloadId: string, fileName: string, totalBytes: number }) => void) => {
+    onDownloadStarted: (callback: (data: { downloadId: string, dbRecordId: string, fileName: string, totalBytes: number }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.DOWNLOAD_STARTED, (_event, data) => callback(data));
     },
     onDownloadProgress: (callback: (data: { downloadId: string, receivedBytes: number, totalBytes: number }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.DOWNLOAD_PROGRESS, (_event, data) => callback(data));
     },
-    onDownloadCompleted: (callback: (data: { downloadId: string, state: string, fileName: string }) => void) => {
+    onDownloadCompleted: (callback: (data: { downloadId: string, state: string, fileName: string, dbRecordId: string }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED, (_event, data) => callback(data));
+    },
+    onDownloadPaused: (callback: (data: { downloadId: string, fileName: string }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.DOWNLOAD_PAUSED, (_event, data) => callback(data));
+    },
+    onDownloadResumed: (callback: (data: { downloadId: string, fileName: string }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.DOWNLOAD_RESUMED, (_event, data) => callback(data));
     },
   });
 }

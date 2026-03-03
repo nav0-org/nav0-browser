@@ -43,6 +43,36 @@ export const DownloadsSchema: TableSchema = {
       name: 'fileLocation',
       columnType: { type: 'standard', sqlType: 'TEXT' },
       notNull: true
+    },
+    {
+      name: 'status',
+      columnType: { type: 'standard', sqlType: 'TEXT' },
+      defaultValue: 'completed'
+    },
+    {
+      name: 'receivedBytes',
+      columnType: { type: 'standard', sqlType: 'INTEGER' },
+      defaultValue: 0
+    },
+    {
+      name: 'urlChain',
+      columnType: { type: 'standard', sqlType: 'TEXT' },
+      defaultValue: '[]'
+    },
+    {
+      name: 'eTag',
+      columnType: { type: 'standard', sqlType: 'TEXT' },
+      defaultValue: ''
+    },
+    {
+      name: 'lastModified',
+      columnType: { type: 'standard', sqlType: 'TEXT' },
+      defaultValue: ''
+    },
+    {
+      name: 'startTime',
+      columnType: { type: 'standard', sqlType: 'REAL' },
+      defaultValue: 0
     }
   ],
   indices: [
@@ -57,6 +87,10 @@ export const DownloadsSchema: TableSchema = {
     {
       name: 'idxDownloadCreatedDate',
       columns: ['createdDate']
+    },
+    {
+      name: 'idxDownloadStatus',
+      columns: ['status']
     }
   ]
 };

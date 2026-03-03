@@ -111,6 +111,9 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly REMOVE_ALL_DOWNLOADS = "browser:remove-all-downloads";
   public static readonly FETCH_DOWNLOAD = "browser:fetch-download";
   public static readonly FETCH_ACTIVE_DOWNLOADS = "browser:fetch-active-downloads";
+  public static readonly PAUSE_DOWNLOAD = "browser:pause-download";
+  public static readonly RESUME_DOWNLOAD = "browser:resume-download";
+  public static readonly CANCEL_DOWNLOAD = "browser:cancel-download";
   public static readonly OPEN_DOWNLOADED_FILE = "browser:open-downloaded-file";
   public static readonly REMOVE_BROWSING_HISTORY = "browser:remove-browsing-history";
   public static readonly REMOVE_ALL_BROWSING_HISTORY = "browser:remove-all-browsing-history";
@@ -146,6 +149,8 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly DOWNLOAD_STARTED = "browser:download-started";
   public static readonly DOWNLOAD_PROGRESS = "browser:download-progress";
   public static readonly DOWNLOAD_COMPLETED = "browser:download-completed";
+  public static readonly DOWNLOAD_PAUSED = "browser:download-paused";
+  public static readonly DOWNLOAD_RESUMED = "browser:download-resumed";
   // public static readonly SET_DIALOG_VISIBILITY = "browser:set-dialog-visibility";
 }
 

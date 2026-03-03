@@ -193,14 +193,30 @@ export class Tab {
 
     item.setSavePath(downloadPath);
 
-    // Add the record to the database immediately so it appears on the Downloads page
-    await DownloadManager.addRecord(this.parentAppWindow.id, item.getURL(), item.getFilename(), path.extname(item.getFilename()), Utils.getFileType(path.extname(item.getFilename())), item.getTotalBytes(), downloadPath);
+    // Check if this is a cross-session resume (triggered by createInterruptedDownload)
+    let dbRecordId = DownloadManager.checkResuming(downloadId);
+
+    if (dbRecordId) {
+      // Resuming from previous session – update existing record
+      DownloadManager.updateRecordStatus(this.parentAppWindow.id, dbRecordId, 'in_progress');
+    } else {
+      // New download – create DB record
+      const record = await DownloadManager.addRecord(this.parentAppWindow.id, item.getURL(), item.getFilename(), path.extname(item.getFilename()), Utils.getFileType(path.extname(item.getFilename())), item.getTotalBytes(), downloadPath);
+      dbRecordId = record.id;
+    }
+
+    // Store resume metadata in the DB for cross-session resume
+    DownloadManager.updateRecordResumeMetadata(
+      this.parentAppWindow.id, dbRecordId,
+      JSON.stringify(item.getURLChain()), item.getETag(), item.getLastModifiedTime(), item.getStartTime()
+    );
 
     // Track in main process so renderer can query on page load
-    DownloadManager.trackDownloadStarted(downloadId, item.getFilename(), item.getTotalBytes());
+    DownloadManager.trackDownloadStarted(downloadId, item.getFilename(), item.getTotalBytes(), dbRecordId);
+    DownloadManager.storeDownloadItem(downloadId, item);
 
     // Notify renderer (browser chrome + all tabs) that a download has started
-    const startedData = { downloadId, fileName: item.getFilename(), totalBytes: item.getTotalBytes() };
+    const startedData = { downloadId, dbRecordId, fileName: item.getFilename(), totalBytes: item.getTotalBytes() };
     this.parentAppWindow.getBrowserWindowInstance().webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_STARTED, startedData);
     this.parentAppWindow.broadcastToTabs(MainToRendererEventsForBrowserIPC.DOWNLOAD_STARTED, startedData);
 
@@ -221,21 +237,27 @@ export class Tab {
       }
     });
 
-    item.once('done', async (event, state) => {
+    item.once('done', async (_event, state) => {
       Tab.handledDownloads.delete(downloadId);
       DownloadManager.trackDownloadCompleted(downloadId);
-      if (state !== 'completed') {
+
+      // Update DB record status
+      if (state === 'completed') {
+        DownloadManager.updateRecordStatus(this.parentAppWindow.id, dbRecordId, 'completed', item.getTotalBytes());
+      } else if (state === 'cancelled') {
+        DownloadManager.updateRecordStatus(this.parentAppWindow.id, dbRecordId, 'cancelled');
+      } else {
         console.error(`Download failed: ${state}`);
       }
+
       const browserWindow = this.parentAppWindow.getBrowserWindowInstance();
       if (!browserWindow?.webContents) return;
-      // Notify renderer (browser chrome + all tabs) that this download is done
-      const completedData = { downloadId, state, fileName: item.getFilename() };
+      const completedData = { downloadId, state, fileName: item.getFilename(), dbRecordId };
       browserWindow.webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED, completedData);
       this.parentAppWindow.broadcastToTabs(MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED, completedData);
     });
     console.log('Download started:', downloadPath);
-  } 
+  }
 
   private debouncedHandleNavigationCompletion(url: string): void {
     if(this.navigationDebounceTimer) {

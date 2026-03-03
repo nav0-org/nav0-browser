@@ -31,7 +31,10 @@ declare global {
       removeDownload: (appWindowId: string, downloadId: string) => Promise<any>;
       removeAllDownloads: (appWindowId: string) => Promise<any>;
       fetchDownloads: (appWindowId: string, searchTerm: string, limit: number, offset: number) => Promise<any>;
-      fetchActiveDownloads: () => Promise<Array<{ downloadId: string, fileName: string, receivedBytes: number, totalBytes: number }>>;
+      fetchActiveDownloads: () => Promise<Array<{ downloadId: string, fileName: string, receivedBytes: number, totalBytes: number, state: string, dbRecordId: string }>>;
+      pauseDownload: (downloadId: string, appWindowId: string) => Promise<boolean>;
+      resumeDownload: (downloadId: string, appWindowId: string) => Promise<boolean>;
+      cancelDownload: (downloadId: string, appWindowId: string) => Promise<boolean>;
       openDownloadedFile: (filePath: string) => Promise<string>;
       removeBrowsingHistory: (appWindowId: string, historyId: string) => Promise<any>;
       removeAllBrowsingHistory: (appWindowId: string) => Promise<any>;
@@ -61,9 +64,11 @@ declare global {
       onTabUrlUpdated: (callback: (data: { id: string, url: string, isBookmark: boolean, bookmarkId: string | null, canGoBack: boolean, canGoForward: boolean }) => void) => void;
       onTabFaviconUpdated: (callback: (data: { id: string, faviconUrl: string }) => void) => void;
       onNavigationFailed: (callback: (data: { id: string }) => void) => void;
-      onDownloadStarted: (callback: (data: { downloadId: string, fileName: string, totalBytes: number }) => void) => void;
+      onDownloadStarted: (callback: (data: { downloadId: string, dbRecordId: string, fileName: string, totalBytes: number }) => void) => void;
       onDownloadProgress: (callback: (data: { downloadId: string, receivedBytes: number, totalBytes: number }) => void) => void;
-      onDownloadCompleted: (callback: (data: { downloadId: string, state: string, fileName: string }) => void) => void;
+      onDownloadCompleted: (callback: (data: { downloadId: string, state: string, fileName: string, dbRecordId: string }) => void) => void;
+      onDownloadPaused: (callback: (data: { downloadId: string, fileName: string }) => void) => void;
+      onDownloadResumed: (callback: (data: { downloadId: string, fileName: string }) => void) => void;
     };
   }
 }
