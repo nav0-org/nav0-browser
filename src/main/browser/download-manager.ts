@@ -7,6 +7,32 @@ import { v4 as uuid } from "uuid";
 
 export abstract class DownloadManager {
 
+  // Track downloads currently in progress so the renderer can query on page load
+  private static activeDownloads: Map<string, { fileName: string, receivedBytes: number, totalBytes: number }> = new Map();
+
+  public static trackDownloadStarted(downloadId: string, fileName: string, totalBytes: number): void {
+    this.activeDownloads.set(downloadId, { fileName, receivedBytes: 0, totalBytes });
+  }
+
+  public static trackDownloadProgress(downloadId: string, receivedBytes: number, totalBytes: number): void {
+    const entry = this.activeDownloads.get(downloadId);
+    if (entry) {
+      entry.receivedBytes = receivedBytes;
+      entry.totalBytes = totalBytes;
+    }
+  }
+
+  public static trackDownloadCompleted(downloadId: string): void {
+    this.activeDownloads.delete(downloadId);
+  }
+
+  public static getActiveDownloads(): Array<{ downloadId: string, fileName: string, receivedBytes: number, totalBytes: number }> {
+    return Array.from(this.activeDownloads.entries()).map(([downloadId, info]) => ({
+      downloadId,
+      ...info,
+    }));
+  }
+
   public static async initListeners(){
     ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_DOWNLOAD, async (event, appWindowId: string, searchTerm?: string, limit?: number, offset?: number) => {
       return await DownloadManager.fetchRecords(appWindowId, searchTerm, limit, offset);
@@ -18,6 +44,10 @@ export abstract class DownloadManager {
 
     ipcMain.handle(RendererToMainEventsForBrowserIPC.REMOVE_ALL_DOWNLOADS, async (event, appWindowId: string) => {
       return await DownloadManager.removeAllRecords(appWindowId);
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_ACTIVE_DOWNLOADS, async () => {
+      return DownloadManager.getActiveDownloads();
     });
 
     ipcMain.handle(RendererToMainEventsForBrowserIPC.OPEN_DOWNLOADED_FILE, async (event, filePath: string) => {

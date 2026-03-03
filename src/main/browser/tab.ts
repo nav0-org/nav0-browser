@@ -196,6 +196,9 @@ export class Tab {
     // Add the record to the database immediately so it appears on the Downloads page
     await DownloadManager.addRecord(this.parentAppWindow.id, item.getURL(), item.getFilename(), path.extname(item.getFilename()), Utils.getFileType(path.extname(item.getFilename())), item.getTotalBytes(), downloadPath);
 
+    // Track in main process so renderer can query on page load
+    DownloadManager.trackDownloadStarted(downloadId, item.getFilename(), item.getTotalBytes());
+
     // Notify renderer (browser chrome + all tabs) that a download has started
     const startedData = { downloadId, fileName: item.getFilename(), totalBytes: item.getTotalBytes() };
     this.parentAppWindow.getBrowserWindowInstance().webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_STARTED, startedData);
@@ -209,6 +212,7 @@ export class Tab {
       lastProgressSent = now;
 
       if (state === 'progressing') {
+        DownloadManager.trackDownloadProgress(downloadId, item.getReceivedBytes(), item.getTotalBytes());
         const browserWindow = this.parentAppWindow.getBrowserWindowInstance();
         if (!browserWindow?.webContents) return;
         const progressData = { downloadId, receivedBytes: item.getReceivedBytes(), totalBytes: item.getTotalBytes() };
@@ -219,6 +223,7 @@ export class Tab {
 
     item.once('done', async (event, state) => {
       Tab.handledDownloads.delete(downloadId);
+      DownloadManager.trackDownloadCompleted(downloadId);
       if (state !== 'completed') {
         console.error(`Download failed: ${state}`);
       }

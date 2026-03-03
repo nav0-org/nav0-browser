@@ -21,6 +21,12 @@ const downloadsListElement = document.getElementById('downloads-list') as HTMLEl
 const searchInput = document.getElementById('search-input') as HTMLInputElement;
 
 document.addEventListener('DOMContentLoaded', async() => {
+  // Seed activeDownloads with any downloads already in progress before this page loaded
+  const inProgress = await window.BrowserAPI.fetchActiveDownloads();
+  for (const d of inProgress) {
+    activeDownloads.set(d.fileName, { receivedBytes: d.receivedBytes, totalBytes: d.totalBytes });
+  }
+
   loadDownloadsPage();
 
   document.getElementById('delete-all')?.addEventListener('click', async () => {
@@ -52,12 +58,27 @@ document.addEventListener('DOMContentLoaded', async() => {
   });
 
   window.BrowserAPI.onDownloadProgress((data) => {
+    // Try matching via activeDownloads map first
+    let matched = false;
     for (const [fileName, info] of activeDownloads) {
       if (data.downloadId.endsWith(fileName)) {
         info.receivedBytes = data.receivedBytes;
         info.totalBytes = data.totalBytes;
         updateProgressBar(fileName, data.receivedBytes, data.totalBytes);
+        matched = true;
         break;
+      }
+    }
+    // Fallback: match against rendered rows by checking downloadId suffix
+    if (!matched) {
+      const rows = downloadsListElement.querySelectorAll('.download-item[data-file-name]');
+      for (const row of rows) {
+        const fileName = (row as HTMLElement).dataset.fileName;
+        if (fileName && data.downloadId.endsWith(fileName)) {
+          activeDownloads.set(fileName, { receivedBytes: data.receivedBytes, totalBytes: data.totalBytes });
+          updateProgressBar(fileName, data.receivedBytes, data.totalBytes);
+          break;
+        }
       }
     }
   });
@@ -116,10 +137,14 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
     downloadItem.className = 'download-item';
     downloadItem.dataset.fileName = item.fileName;
 
-    const isActive = activeDownloads.has(item.fileName);
+    const activeInfo = activeDownloads.get(item.fileName);
+    const isActive = !!activeInfo;
     if (isActive) {
       downloadItem.classList.add('downloading');
     }
+    const pct = isActive && activeInfo.totalBytes > 0
+      ? Math.round((activeInfo.receivedBytes / activeInfo.totalBytes) * 100)
+      : 0;
 
     downloadItem.innerHTML = `
       <div class="download-time">${FormatUtils.getFriendlyDateString(item.createdDate)}</div>
@@ -133,7 +158,7 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
           <i data-lucide="x" width="14" height="14"></i>
         </button>
       </div>
-      ${isActive ? '<div class="download-progress-bar"><div class="download-progress-bar-fill" style="width: 0%"></div></div>' : ''}
+      ${isActive ? `<div class="download-progress-bar"><div class="download-progress-bar-fill" style="width: ${pct}%"></div></div>` : ''}
     `;
 
     downloadItem.addEventListener('click', () => {
