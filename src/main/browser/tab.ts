@@ -10,6 +10,7 @@ import path from "path";
 import { Utils } from "../browser/utils";
 import { SearchEngine } from "../web/search-engine";
 import { PermissionManager } from "./permission-manager";
+import { injectGeolocationFallback } from "./geolocation-fallback";
 const domainPattern = /^[^\s]+\.[^\s]+$/;
 
 export class Tab {
@@ -124,6 +125,11 @@ export class Tab {
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE, async (event, url: string) => {
       this.handleOriginChange(url);
       this.debouncedHandleNavigationCompletion(url);
+      // Inject geolocation fallback for external pages (IP-based fallback
+      // when native provider is unavailable, e.g. Linux without Google API key)
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        injectGeolocationFallback(this.webContentsViewInstance.webContents);
+      }
     });
     //for soft navigation (debounced)
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE_IN_PAGE, async (event, url: string) => {
