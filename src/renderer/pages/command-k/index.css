@@ -89,6 +89,7 @@ body {
 .action-btn {
   display: flex;
   align-items: center;
+  gap: 5px;
   background-color: var(--bg-color);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -106,7 +107,6 @@ body {
 }
 
 .action-btn i {
-  margin-right: 6px;
   color: var(--primary-color);
 }
 

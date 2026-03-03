@@ -1,6 +1,7 @@
 import { app } from 'electron';
 import { AppWindowManager } from './browser/app-window-manager';
 import { DataStoreManager } from './database/data-store-manager';
+import { DownloadManager } from './browser/download-manager';
 import { SettingsEnforcer } from './settings/settings-enforcer';
 
 // Lightweight test control server for perf tests.
@@ -66,6 +67,11 @@ app.whenReady().then(async() => {
   if (testPort > 0) {
     startTestControlServer(testPort);
   }
+});
+
+// Pause all in-progress downloads before quitting so they can be resumed later
+app.on('before-quit', () => {
+  DownloadManager.pauseAllDownloads();
 });
 
 // Quit when all windows are closed, except on macOS

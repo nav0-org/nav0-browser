@@ -1,9 +1,10 @@
-import { BrowserWindow, session, shell } from "electron";
+import { BrowserWindow, session } from "electron";
 import { v4 as uuid } from "uuid";
 import { Tab } from "./tab";
 import { AppConstants, InAppUrls, MainToRendererEventsForBrowserIPC } from "../../constants/app-constants";
 import { OptionsMenuManager } from "./options-menu-manager";
 import { CommandKOverlayManager } from "./command-k-overlay-manager";
+import { DownloadManager } from "./download-manager";
 import { PermissionManager } from "./permission-manager";
 import { PermissionPromptOverlayManager, PermissionPromptData } from "./permission-prompt-overlay-manager";
 import { FindInPageManager } from "./find-in-page-manager";
@@ -66,6 +67,12 @@ export class AppWindow {
         return { action: 'deny' };
       });
     
+      // Pause all active downloads before the window is destroyed
+      // so their resume metadata can be persisted to the DB
+      this.browserWindowInstance.on('close', () => {
+        DownloadManager.pauseAllDownloads();
+      });
+
       this.browserWindowInstance.on('closed', () => {
         this.browserWindowInstance = null;
       });
@@ -235,11 +242,20 @@ export class AppWindow {
     this.commandKOverlayManager.getWebContentsViewInstance().setBounds(parentBounds);
     this.browserWindowInstance.contentView.addChildView(this.commandKOverlayManager.getWebContentsViewInstance());
     this.commandKOverlayManager.resetState();
+    this.commandKOverlayManager.getWebContentsViewInstance().webContents.focus();
   }
   hideCommandKOverlay(): void {
     if(this.commandKOverlayManager && this.browserWindowInstance.contentView.children.indexOf(this.commandKOverlayManager.getWebContentsViewInstance()) > -1){
       this.browserWindowInstance.contentView.removeChildView(this.commandKOverlayManager.getWebContentsViewInstance());
     }
+  }
+
+  broadcastToTabs(channel: string, data: any): void {
+    this.tabs.forEach(tab => {
+      try {
+        tab.getWebContentsViewInstance()?.webContents?.send(channel, data);
+      } catch (_) { /* tab may be closing */ }
+    });
   }
 
   async showPermissionPromptOverlay(data: PermissionPromptData): Promise<void> {

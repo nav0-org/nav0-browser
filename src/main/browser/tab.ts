@@ -1,5 +1,5 @@
 import { app, BrowserWindow, dialog, Menu, MenuItem, WebContentsView } from "electron";
-import { InAppUrls, MainToRendererEventsForBrowserIPC, WebContentsEvents } from "../../constants/app-constants";
+import { InAppUrls, DataStoreConstants, MainToRendererEventsForBrowserIPC, WebContentsEvents } from "../../constants/app-constants";
 import { v4 as uuid } from "uuid";
 import { AppWindow } from "./app-window";
 import { BookmarkManager } from "./bookmark-manager";
@@ -11,6 +11,9 @@ import { Utils } from "../browser/utils";
 import { SearchEngine } from "../web/search-engine";
 import { PermissionManager } from "./permission-manager";
 import { ReaderModeManager, ReaderModeState } from "./reader-mode-manager";
+import { DataStoreManager } from "../database/data-store-manager";
+import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
+import { COSMETIC_FILTER_CSS, AD_BLOCK_EARLY_SCRIPT, AD_BLOCK_SCRIPT } from "../ad-blocker/ad-block-lists";
 const domainPattern = /^[^\s]+\.[^\s]+$/;
 
 export class Tab {
@@ -27,6 +30,7 @@ export class Tab {
   private navigationDebounceTimer: ReturnType<typeof setTimeout> | null = null;
   private static readonly NAVIGATION_DEBOUNCE_MS = 500;
   private readyPromise: Promise<void> = Promise.resolve();
+  private static handledDownloads: Set<string> = new Set();
   private currentOrigin: string | null = null;
   private readerMode: ReaderModeState = ReaderModeManager.createState();
   private readerModeCheckTimer: ReturnType<typeof setTimeout> | null = null;
@@ -178,10 +182,17 @@ export class Tab {
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE, async (event, url: string) => {
       this.handleOriginChange(url);
       this.debouncedHandleNavigationCompletion(url);
+      // Inject early ad-block hooks (IMA mock, play() interception) as soon as navigation commits
+      this.injectAdBlockEarlyScript(url);
     });
     //for soft navigation (debounced)
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE_IN_PAGE, async (event, url: string) => {
       this.debouncedHandleNavigationCompletion(url);
+    });
+
+    // Cosmetic ad filtering and DOM cleanup once the DOM is ready
+    this.webContentsViewInstance.webContents.on(WebContentsEvents.DOM_READY, () => {
+      this.injectAdBlockDOMScript();
     });
 
     this.webContentsViewInstance.webContents.session.on('will-download', async (event, item, downloadWebContents) => {
@@ -257,16 +268,83 @@ export class Tab {
 
   async handleDownload(item: Electron.DownloadItem): Promise<void> {
     const downloadPath = app.getPath('downloads') + '/' + item.getFilename();
+    const downloadId = item.getStartTime().toString() + '_' + item.getFilename();
+
+    // Prevent duplicate handling when multiple tabs share the same session
+    if (Tab.handledDownloads.has(downloadId)) return;
+    Tab.handledDownloads.add(downloadId);
+
     item.setSavePath(downloadPath);
-    item.once('done', async (event, state) => {
+
+    // Check if this is a cross-session resume (triggered by createInterruptedDownload)
+    let dbRecordId = DownloadManager.checkResuming(downloadId);
+
+    if (dbRecordId) {
+      // Resuming from previous session – update existing record
+      DownloadManager.updateRecordStatus(this.parentAppWindow.id, dbRecordId, 'in_progress');
+    } else {
+      // New download – create DB record
+      const record = await DownloadManager.addRecord(this.parentAppWindow.id, item.getURL(), item.getFilename(), path.extname(item.getFilename()), Utils.getFileType(path.extname(item.getFilename())), item.getTotalBytes(), downloadPath);
+      dbRecordId = record.id;
+    }
+
+    // Store resume metadata in the DB for cross-session resume
+    DownloadManager.updateRecordResumeMetadata(
+      this.parentAppWindow.id, dbRecordId,
+      JSON.stringify(item.getURLChain()), item.getETag(), item.getLastModifiedTime(), item.getStartTime()
+    );
+
+    // Track in main process so renderer can query on page load
+    DownloadManager.trackDownloadStarted(downloadId, item.getFilename(), item.getTotalBytes(), dbRecordId);
+    DownloadManager.storeDownloadItem(downloadId, item);
+
+    // Notify renderer (browser chrome + all tabs) that a download has started
+    const startedData = { downloadId, dbRecordId, fileName: item.getFilename(), totalBytes: item.getTotalBytes() };
+    this.parentAppWindow.getBrowserWindowInstance().webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_STARTED, startedData);
+    this.parentAppWindow.broadcastToTabs(MainToRendererEventsForBrowserIPC.DOWNLOAD_STARTED, startedData);
+
+    // Track progress updates (throttled to every 250ms)
+    let lastProgressSent = 0;
+    item.on('updated', (_event, state) => {
+      const now = Date.now();
+      if (now - lastProgressSent < 250) return;
+      lastProgressSent = now;
+
+      if (state === 'progressing') {
+        DownloadManager.trackDownloadProgress(downloadId, item.getReceivedBytes(), item.getTotalBytes());
+        const browserWindow = this.parentAppWindow.getBrowserWindowInstance();
+        if (!browserWindow?.webContents) return;
+        const progressData = { downloadId, receivedBytes: item.getReceivedBytes(), totalBytes: item.getTotalBytes() };
+        browserWindow.webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_PROGRESS, progressData);
+        this.parentAppWindow.broadcastToTabs(MainToRendererEventsForBrowserIPC.DOWNLOAD_PROGRESS, progressData);
+      }
+    });
+
+    item.once('done', async (_event, state) => {
+      Tab.handledDownloads.delete(downloadId);
+      DownloadManager.trackDownloadCompleted(downloadId);
+
+      // Update DB record status
       if (state === 'completed') {
-        await DownloadManager.addRecord(this.parentAppWindow.id, item.getURL(), item.getFilename(), path.extname(item.getFilename()), Utils.getFileType(path.extname(item.getFilename())), item.getTotalBytes(), downloadPath);
+        DownloadManager.updateRecordStatus(this.parentAppWindow.id, dbRecordId, 'completed', item.getTotalBytes());
+      } else if (state === 'cancelled') {
+        // During shutdown, downloads are auto-cancelled after being paused by
+        // pauseAllDownloads() – don't overwrite the 'paused' status in the DB
+        if (!DownloadManager.isShuttingDown()) {
+          DownloadManager.updateRecordStatus(this.parentAppWindow.id, dbRecordId, 'cancelled');
+        }
       } else {
         console.error(`Download failed: ${state}`);
       }
+
+      const browserWindow = this.parentAppWindow.getBrowserWindowInstance();
+      if (!browserWindow?.webContents) return;
+      const completedData = { downloadId, state, fileName: item.getFilename(), dbRecordId };
+      browserWindow.webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED, completedData);
+      this.parentAppWindow.broadcastToTabs(MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED, completedData);
     });
     console.log('Download started:', downloadPath);
-  } 
+  }
 
   private handleOriginChange(url: string): void {
     try {
@@ -278,6 +356,49 @@ export class Tab {
     } catch {
       // Invalid URL, ignore
     }
+  }
+
+  private isAdBlockAllowed(url?: string): boolean {
+    const checkUrl = url || this.url;
+    if (checkUrl.startsWith(InAppUrls.PREFIX) || checkUrl === '' || checkUrl.startsWith('file://')) {
+      return false;
+    }
+    try {
+      const stored = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as BrowserSettings;
+      const settings = { ...DEFAULT_BROWSER_SETTINGS, ...stored };
+      if (!settings.adBlockerEnabled) return false;
+
+      const hostname = new URL(checkUrl).hostname;
+      const isAllowed = (settings.adBlockerAllowedSites || []).some(site => {
+        const siteDomain = site.toLowerCase().trim();
+        return hostname === siteDomain || hostname.endsWith('.' + siteDomain);
+      });
+      return !isAllowed;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Injects early ad-block script right after navigation commits.
+   * Sets up Google IMA SDK mock, HTMLMediaElement.play() hook, and
+   * script/iframe creation interception BEFORE page scripts can load ads.
+   */
+  private injectAdBlockEarlyScript(url: string): void {
+    if (!this.isAdBlockAllowed(url)) return;
+    const wc = this.webContentsViewInstance.webContents;
+    wc.executeJavaScript(AD_BLOCK_EARLY_SCRIPT).catch(() => {});
+  }
+
+  /**
+   * Injects cosmetic CSS and DOM-level ad cleanup script once DOM is ready.
+   * Handles hiding ad elements, MutationObserver, video cleanup, and overlays.
+   */
+  private injectAdBlockDOMScript(): void {
+    if (!this.isAdBlockAllowed()) return;
+    const wc = this.webContentsViewInstance.webContents;
+    wc.insertCSS(COSMETIC_FILTER_CSS).catch(() => {});
+    wc.executeJavaScript(AD_BLOCK_SCRIPT).catch(() => {});
   }
 
   private debouncedHandleNavigationCompletion(url: string): void {
