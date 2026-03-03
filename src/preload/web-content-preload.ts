@@ -1,15 +1,17 @@
 /**
- * Geolocation fallback for platforms without a native provider (Linux).
+ * Preload script for external web content.
  *
- * On Linux, Chromium's network-based geolocation requires a Google API key.
- * This module injects a thin wrapper around navigator.geolocation that tries
- * the native implementation first and, on failure, falls back to a free
- * IP-based geolocation service (city-level accuracy).
+ * Runs before page scripts with contextIsolation: true.  Since we cannot
+ * directly modify `navigator.geolocation` from the isolated preload world,
+ * we use a MutationObserver to inject a <script> tag into the main-world
+ * DOM the moment <html> appears — before any <head> scripts execute.
+ *
+ * The injected polyfill wraps navigator.geolocation so that when the native
+ * provider fails with POSITION_UNAVAILABLE (e.g. Linux without Google API
+ * key), it falls back to a free IP-based lookup.
  */
 
-import { WebContents } from 'electron';
-
-const POLYFILL = `
+const POLYFILL_CODE = `
 (function() {
   if (window.__nav0GeolocationPatched) return;
   window.__nav0GeolocationPatched = true;
@@ -69,13 +71,30 @@ const POLYFILL = `
 })();
 `;
 
-/**
- * Inject the geolocation fallback polyfill into a webContents.
- * Call this after the page navigates so that future geolocation calls
- * use the fallback when the native provider is unavailable.
- */
-export function injectGeolocationFallback(webContents: WebContents): void {
-  webContents.executeJavaScript(POLYFILL).catch(() => {
-    // Ignore injection errors (e.g. page navigated away)
-  });
+function injectPolyfill(): void {
+  try {
+    const script = document.createElement('script');
+    script.textContent = POLYFILL_CODE;
+    (document.head || document.documentElement).appendChild(script);
+    script.remove();
+  } catch {
+    // Ignore injection errors
+  }
+}
+
+// Observe the document for the first element addition (the <html> tag from
+// the incoming page) and inject the polyfill immediately. This fires as a
+// microtask before synchronous <head> scripts execute.
+const observer = new MutationObserver(() => {
+  if (document.documentElement) {
+    observer.disconnect();
+    injectPolyfill();
+  }
+});
+
+observer.observe(document, { childList: true, subtree: true });
+
+// Also inject for the initial about:blank document if <html> already exists
+if (document.documentElement) {
+  injectPolyfill();
 }

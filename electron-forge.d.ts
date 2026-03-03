@@ -39,3 +39,6 @@ declare const REPORT_ISSUE_PRELOAD_WEBPACK_ENTRY: string;
 
 declare const PERMISSION_PROMPT_WEBPACK_ENTRY: string;
 declare const PERMISSION_PROMPT_PRELOAD_WEBPACK_ENTRY: string;
+
+declare const WEB_CONTENT_WEBPACK_ENTRY: string;
+declare const WEB_CONTENT_PRELOAD_WEBPACK_ENTRY: string;

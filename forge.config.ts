@@ -135,6 +135,14 @@ const config: ForgeConfig = {
               js: './src/preload/internals-api.ts',
             },
           },
+          {
+            html: './src/renderer/web-content/index.html',
+            js: './src/renderer/web-content/index.ts',
+            name: 'web_content',
+            preload: {
+              js: './src/preload/web-content-preload.ts',
+            },
+          },
         ],
       },
     }),
