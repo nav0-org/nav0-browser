@@ -13,6 +13,7 @@
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx .",
+    "test:perf": "node tests/performance/browser-perf-test.js",
     "postinstall": "electron-rebuild -f -w better-sqlite3",
     "rebuild": "electron-rebuild -f -w better-sqlite3"
   },
@@ -58,6 +59,7 @@
     "fork-ts-checker-webpack-plugin": "^7.3.0",
     "html-loader": "^5.1.0",
     "node-loader": "^2.1.0",
+    "puppeteer-core": "^24.37.5",
     "style-loader": "^3.3.4",
     "ts-loader": "^9.5.2",
     "ts-node": "10.9.2",

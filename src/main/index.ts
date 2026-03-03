@@ -3,6 +3,13 @@ import { AppWindowManager } from './browser/app-window-manager';
 import { DataStoreManager } from './database/data-store-manager';
 import { SettingsEnforcer } from './settings/settings-enforcer';
 
+// Enable remote debugging port when running performance tests
+if (process.env.REMOTE_DEBUGGING_PORT) {
+  app.commandLine.appendSwitch('remote-debugging-port', process.env.REMOTE_DEBUGGING_PORT);
+  app.commandLine.appendSwitch('no-sandbox');
+  app.commandLine.appendSwitch('disable-dev-shm-usage');
+}
+
 // Disable Chromium features that trigger macOS "Local Network" permission dialog.
 // These features use mDNS/Bonjour for device discovery, which is unnecessary for
 // a privacy-focused browser and causes an unwanted system permission prompt on macOS.
