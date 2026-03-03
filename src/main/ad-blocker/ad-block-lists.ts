@@ -17,6 +17,15 @@ export const AD_BLOCK_DOMAINS: string[] = [
   'ade.googlesyndication.com',
   'imasdk.googleapis.com',
   'fundingchoicesmessages.google.com',
+  'tpc.googlesyndication.com',
+  'securepubads.g.doubleclick.net',
+  'ad.doubleclick.net',
+  'stats.g.doubleclick.net',
+  'cm.g.doubleclick.net',
+  's0.2mdn.net',
+  'z.moatads.com',
+  'geo.moatads.com',
+  'px.moatads.com',
 
   // Facebook / Meta
   'facebook.net',
@@ -73,7 +82,7 @@ export const AD_BLOCK_DOMAINS: string[] = [
   'conversantmedia.com',
   'valueclick.com',
 
-  // Video Ad Networks
+  // Video Ad Networks & VAST/VPAID
   'vdo.ai',
   'vidoomy.com',
   'connatix.com',
@@ -99,17 +108,20 @@ export const AD_BLOCK_DOMAINS: string[] = [
   'chocolate-platform.com',
   'beachfront.com',
   'synacor.com',
-
-  // Video Player Ad Integration
-  'imasdk.googleapis.com',
   'vid.springserve.com',
   'ads.stickyadstv.com',
   'vast.adsrvr.org',
   'vpaid.pubmatic.com',
+  'vdopia.com',
+  'mantisadnetwork.com',
+  'avocet.io',
+  'nexage.com',
 
   // Content Recommendation
   'taboola.com',
+  'cdn.taboola.com',
   'outbrain.com',
+  'cdn.outbrain.com',
   'revcontent.com',
   'mgid.com',
   'content.ad',
@@ -274,6 +286,8 @@ export const AD_BLOCK_DOMAINS: string[] = [
 
   // India-Specific Ad Networks & Providers
   'colombiaonline.com',
+  'clmbtech.com',
+  'jsrdn.com',
   'vserv.com',
   'inuxu.com',
   'vertoz.com',
@@ -285,22 +299,16 @@ export const AD_BLOCK_DOMAINS: string[] = [
   'seventynine.in',
   'adyogi.com',
   'silverpush.co',
-
-  // Indian News Site Common Ad Providers
-  'grapeshot.co.uk',
   'netcore.co.in',
   'moengage.com',
   'webengage.com',
   'clevertap.com',
   'vizury.com',
-
-  // Common CDN-hosted ad scripts
-  'cdn.taboola.com',
-  'cdn.outbrain.com',
-  'securepubads.g.doubleclick.net',
-  'ad.doubleclick.net',
-  'stats.g.doubleclick.net',
-  'tpc.googlesyndication.com',
+  'jeeng.com',
+  'gamooga.com',
+  'onclickmedia.net',
+  'revx.io',
+  'lemmadigital.com',
 
   // Consent / Cookie Wall (tracking-related)
   'cdn.cookielaw.org',
@@ -309,7 +317,7 @@ export const AD_BLOCK_DOMAINS: string[] = [
   'cmpv2.ad.gt',
   'consensu.org',
 
-  // Additional common ad domains
+  // Ad Monetization Platforms
   'revrtb.com',
   'adsnative.com',
   'realsrv.com',
@@ -329,7 +337,6 @@ export const AD_BLOCK_DOMAINS: string[] = [
   'venatus.com',
   'playwire.com',
   'setupad.com',
-  'yandex.ru/ads',
   'mc.yandex.ru',
   'an.yandex.ru',
 ];
@@ -372,9 +379,12 @@ export const AD_URL_PATTERNS: RegExp[] = [
   /\/outstream/i,
   /\/adunit/i,
   /\/ad[_-]?tag/i,
+  /\/ima3?\//i,
+  /[?&]ad_rule=/i,
+  /[?&]cust_params=.*ad/i,
 ];
 
-// CSS selectors for cosmetic ad filtering - hides common ad containers
+// CSS selectors for cosmetic ad filtering
 export const COSMETIC_FILTER_CSS = `
 /* Google Ads */
 ins.adsbygoogle,
@@ -385,8 +395,11 @@ ins.adsbygoogle,
 [data-ad-client],
 [data-ad-slot],
 [data-google-query-id],
+div[id^="google_ads_iframe_"],
+div[class*="gpt-ad"],
+div[class*="gpt_ad"],
 
-/* Common ad containers (specific patterns) */
+/* Common ad containers */
 [id^="ad-container"],
 [id^="ad-wrapper"],
 [id^="ad-banner"],
@@ -433,9 +446,9 @@ iframe[src*="casalemedia.com"],
 iframe[src*="pubmatic.com"],
 iframe[src*="rubiconproject.com"],
 iframe[src*="openx.net"],
+iframe[src*="imasdk.googleapis.com"],
 iframe[id*="google_ads"],
 iframe[name*="google_ads"],
-iframe[src*="imasdk.googleapis.com"],
 
 /* Taboola / Outbrain / Content Recommendation */
 .trc_rbox_container,
@@ -458,7 +471,7 @@ iframe[src*="imasdk.googleapis.com"],
 .addthis_toolbox,
 .sharethis-inline-share-buttons,
 
-/* Video Ad Containers */
+/* Video Ad Containers & Players */
 [id*="video-ad"],
 [id*="video_ad"],
 [id*="videoAd"],
@@ -480,15 +493,16 @@ iframe[src*="imasdk.googleapis.com"],
 [id*="connatix-"],
 [class*="vjs-ad"],
 
-/* Autoplay video ad overlays */
-[class*="video-ad-overlay"],
-[class*="ad-overlay"],
-[class*="ad_overlay"],
-[class*="adOverlay"],
+/* Google IMA / Video Ad Overlays */
 .ima-ad-container,
 .ima-container,
 [class*="ima-countdown"],
 .vjs-ad-playing,
+[class*="video-ad-overlay"],
+[class*="ad-overlay"],
+[class*="ad_overlay"],
+[class*="adOverlay"],
+div[class*="ima-"],
 
 /* Sticky / Fixed / Floating ads */
 .sticky-ad,
@@ -575,13 +589,11 @@ iframe[src*="imasdk.googleapis.com"],
 [class*="mediavine"],
 [id*="ezoic-pub-ad"],
 
-/* GPT (Google Publisher Tag) ad containers */
-[data-google-query-id],
-div[id^="google_ads_iframe_"],
-div[class*="gpt-ad"],
-div[class*="gpt_ad"],
+/* Colombia / clmbtech (Indian ad network) */
+[id*="clmb"],
+[class*="clmb"],
 
-/* Generic patterns for dynamically injected ad wrappers */
+/* Generic high z-index overlays (ad wrappers) */
 [style*="z-index: 2147483647"],
 [style*="z-index:2147483647"] {
   display: none !important;
@@ -594,17 +606,360 @@ div[class*="gpt_ad"],
 `;
 
 /**
- * JavaScript to inject into pages for dynamic ad blocking.
- * Uses MutationObserver to catch ads inserted after page load,
- * blocks autoplay on video ad elements, and removes overlay ads.
+ * Early-injection script that sets up API-level hooks BEFORE page scripts run.
+ * This neutralizes the Google IMA SDK, hooks HTMLMediaElement.prototype.play,
+ * and prevents ad scripts from functioning even if loaded from cache.
+ */
+export const AD_BLOCK_EARLY_SCRIPT = `
+(function() {
+  'use strict';
+  if (window.__nav0AdBlockEarly) return;
+  window.__nav0AdBlockEarly = true;
+
+  // ============================================================
+  // 1. Google IMA SDK Mock
+  //    Replaces the Google Interactive Media Ads SDK with a no-op
+  //    stub so video players skip ads and play content directly.
+  // ============================================================
+  function NoopFn() {}
+  function EventTarget() { this._handlers = {}; }
+  EventTarget.prototype.addEventListener = function(e, fn) {
+    if (!this._handlers[e]) this._handlers[e] = [];
+    this._handlers[e].push(fn);
+  };
+  EventTarget.prototype.removeEventListener = function(e, fn) {
+    if (!this._handlers[e]) return;
+    this._handlers[e] = this._handlers[e].filter(function(h) { return h !== fn; });
+  };
+  EventTarget.prototype._fire = function(e, data) {
+    var handlers = this._handlers[e] || [];
+    for (var i = 0; i < handlers.length; i++) {
+      try { handlers[i](data); } catch(ex) {}
+    }
+  };
+
+  function AdDisplayContainer() {}
+  AdDisplayContainer.prototype.initialize = NoopFn;
+  AdDisplayContainer.prototype.destroy = NoopFn;
+
+  function AdsRenderingSettings() {}
+
+  function CompanionAdSelectionSettings() {}
+  CompanionAdSelectionSettings.CreativeType = { ALL: 'ALL', IMAGE: 'IMAGE', FLASH: 'FLASH' };
+  CompanionAdSelectionSettings.ResourceType = { ALL: 'ALL', HTML: 'HTML', IFRAME: 'IFRAME', STATIC: 'STATIC' };
+  CompanionAdSelectionSettings.SizeCriteria = { IGNORE: 'IGNORE', SELECT_EXACT_MATCH: 'SELECT_EXACT_MATCH', SELECT_NEAR_MATCH: 'SELECT_NEAR_MATCH' };
+
+  function AdsManager() {
+    EventTarget.call(this);
+  }
+  AdsManager.prototype = Object.create(EventTarget.prototype);
+  AdsManager.prototype.constructor = AdsManager;
+  AdsManager.prototype.getCuePoints = function() { return []; };
+  AdsManager.prototype.destroy = NoopFn;
+  AdsManager.prototype.init = NoopFn;
+  AdsManager.prototype.start = NoopFn;
+  AdsManager.prototype.stop = NoopFn;
+  AdsManager.prototype.skip = NoopFn;
+  AdsManager.prototype.pause = NoopFn;
+  AdsManager.prototype.resume = NoopFn;
+  AdsManager.prototype.resize = NoopFn;
+  AdsManager.prototype.setVolume = NoopFn;
+  AdsManager.prototype.getVolume = function() { return 1; };
+  AdsManager.prototype.collapse = NoopFn;
+  AdsManager.prototype.expand = NoopFn;
+  AdsManager.prototype.getRemainingTime = function() { return 0; };
+  AdsManager.prototype.getAdSkippableState = function() { return false; };
+  AdsManager.prototype.isCustomClickTrackingUsed = function() { return false; };
+  AdsManager.prototype.isCustomPlaybackUsed = function() { return false; };
+  AdsManager.prototype.discardAdBreak = NoopFn;
+  AdsManager.prototype.updateAdsRenderingSettings = NoopFn;
+
+  function AdsManagerLoadedEvent(adsManager) {
+    this.type = 'ADS_MANAGER_LOADED';
+    this._adsManager = adsManager;
+  }
+  AdsManagerLoadedEvent.Type = { ADS_MANAGER_LOADED: 'ADS_MANAGER_LOADED' };
+  AdsManagerLoadedEvent.prototype.getAdsManager = function() { return this._adsManager; };
+  AdsManagerLoadedEvent.prototype.getUserRequestContext = function() { return {}; };
+
+  function AdsLoader(container) {
+    EventTarget.call(this);
+    this._container = container;
+  }
+  AdsLoader.prototype = Object.create(EventTarget.prototype);
+  AdsLoader.prototype.constructor = AdsLoader;
+  AdsLoader.prototype.contentComplete = NoopFn;
+  AdsLoader.prototype.destroy = NoopFn;
+  AdsLoader.prototype.getSettings = function() { return new ImaSdkSettings(); };
+  AdsLoader.prototype.requestAds = function() {
+    var self = this;
+    var mgr = new AdsManager();
+    // Fire ADS_MANAGER_LOADED so the player thinks ads loaded (but there are none)
+    setTimeout(function() {
+      self._fire('ADS_MANAGER_LOADED', new AdsManagerLoadedEvent(mgr));
+    }, 5);
+  };
+
+  function AdsRequest() {}
+  AdsRequest.prototype.setAdWillAutoPlay = NoopFn;
+  AdsRequest.prototype.setAdWillPlayMuted = NoopFn;
+  AdsRequest.prototype.setContinuousPlayback = NoopFn;
+
+  function AdError(msg) { this.message = msg || ''; this.type = 'adError'; }
+  AdError.ErrorCode = {};
+  AdError.prototype.getErrorCode = function() { return 0; };
+  AdError.prototype.getVastErrorCode = function() { return 0; };
+  AdError.prototype.getMessage = function() { return this.message; };
+  AdError.prototype.getType = function() { return this.type; };
+  AdError.prototype.getInnerError = function() { return null; };
+
+  function AdErrorEvent(error) { this.type = 'AD_ERROR'; this._error = error; }
+  AdErrorEvent.Type = { AD_ERROR: 'AD_ERROR' };
+  AdErrorEvent.prototype.getError = function() { return this._error; };
+  AdErrorEvent.prototype.getUserRequestContext = function() { return {}; };
+
+  function AdEvent(type) { this.type = type; }
+  AdEvent.Type = {
+    AD_BREAK_READY: 'adBreakReady', AD_BUFFERING: 'adBuffering',
+    AD_CAN_PLAY: 'adCanPlay', AD_METADATA: 'adMetadata',
+    ALL_ADS_COMPLETED: 'allAdsCompleted', CLICK: 'click',
+    COMPLETE: 'complete', CONTENT_PAUSE_REQUESTED: 'contentPauseRequested',
+    CONTENT_RESUME_REQUESTED: 'contentResumeRequested',
+    DURATION_CHANGE: 'durationChange', FIRST_QUARTILE: 'firstQuartile',
+    IMPRESSION: 'impression', INTERACTION: 'interaction',
+    LINEAR_CHANGED: 'linearChanged', LOADED: 'loaded', LOG: 'log',
+    MIDPOINT: 'midpoint', PAUSED: 'pause', RESUMED: 'resume',
+    SKIPPABLE_STATE_CHANGED: 'skippableStateChanged',
+    SKIPPED: 'skip', STARTED: 'start',
+    THIRD_QUARTILE: 'thirdQuartile', USER_CLOSE: 'userClose',
+    VIDEO_CLICKED: 'videoClicked', VIDEO_ICON_CLICKED: 'videoIconClicked',
+    VOLUME_CHANGED: 'volumeChange', VOLUME_MUTED: 'mute'
+  };
+  AdEvent.prototype.getAd = function() { return {}; };
+  AdEvent.prototype.getAdData = function() { return {}; };
+
+  function ImaSdkSettings() {}
+  ImaSdkSettings.CompanionBackfillMode = { ALWAYS: 'always', ON_MASTER_AD: 'on_master_ad' };
+  ImaSdkSettings.VpaidMode = { DISABLED: 0, ENABLED: 1, INSECURE: 2 };
+  ImaSdkSettings.prototype.getCompanionBackfill = NoopFn;
+  ImaSdkSettings.prototype.setCompanionBackfill = NoopFn;
+  ImaSdkSettings.prototype.setAutoPlayAdBreaks = NoopFn;
+  ImaSdkSettings.prototype.getDisableCustomPlaybackForIOS10Plus = function() { return false; };
+  ImaSdkSettings.prototype.setDisableCustomPlaybackForIOS10Plus = NoopFn;
+  ImaSdkSettings.prototype.setLocale = NoopFn;
+  ImaSdkSettings.prototype.setNumRedirects = NoopFn;
+  ImaSdkSettings.prototype.setPlayerType = NoopFn;
+  ImaSdkSettings.prototype.setPlayerVersion = NoopFn;
+  ImaSdkSettings.prototype.setVpaidAllowed = NoopFn;
+  ImaSdkSettings.prototype.setVpaidMode = NoopFn;
+  ImaSdkSettings.prototype.setSessionId = NoopFn;
+  ImaSdkSettings.prototype.setStreamCorrelator = NoopFn;
+  ImaSdkSettings.prototype.getLocale = function() { return ''; };
+  ImaSdkSettings.prototype.getPlayerType = function() { return ''; };
+  ImaSdkSettings.prototype.getPlayerVersion = function() { return ''; };
+
+  function ViewMode() {}
+  ViewMode.FULLSCREEN = 'fullscreen';
+  ViewMode.NORMAL = 'normal';
+
+  // Install the mock IMA namespace
+  if (!window.google) window.google = {};
+  window.google.ima = {
+    AdDisplayContainer: AdDisplayContainer,
+    AdError: AdError,
+    AdErrorEvent: AdErrorEvent,
+    AdEvent: AdEvent,
+    AdsLoader: AdsLoader,
+    AdsManager: AdsManager,
+    AdsManagerLoadedEvent: AdsManagerLoadedEvent,
+    AdsRenderingSettings: AdsRenderingSettings,
+    AdsRequest: AdsRequest,
+    CompanionAdSelectionSettings: CompanionAdSelectionSettings,
+    ImaSdkSettings: ImaSdkSettings,
+    OmidAccessMode: { DOMAIN: 'domain', FULL: 'full', LIMITED: 'limited' },
+    OmidVerificationVendor: {},
+    UiElements: { COUNTDOWN: 'countdown', AD_ATTRIBUTION: 'adAttribution' },
+    UniversalAdIdInfo: NoopFn,
+    ViewMode: ViewMode,
+    VERSION: '3.0.0',
+    settings: new ImaSdkSettings()
+  };
+
+  // Prevent scripts from overriding our mock
+  try {
+    Object.defineProperty(window.google, 'ima', {
+      value: window.google.ima,
+      writable: false,
+      configurable: false
+    });
+  } catch(e) {}
+
+  // ============================================================
+  // 2. HTMLMediaElement.prototype.play hook
+  //    Intercepts all play() calls and blocks ad videos.
+  // ============================================================
+  var adDomainPatterns = [
+    'doubleclick', 'googlesyndication', 'googleadservices', 'imasdk',
+    'adnxs', 'taboola', 'outbrain', 'amazon-adsystem',
+    'criteo', 'pubmatic', 'serving-sys', 'ads.', 'adserver',
+    'vdo.ai', 'primis', 'connatix', 'springserve', 'clmbtech', 'jsrdn'
+  ];
+
+  var originalPlay = HTMLMediaElement.prototype.play;
+  HTMLMediaElement.prototype.play = function() {
+    try {
+      var video = this;
+      var src = (video.src || video.currentSrc || '').toLowerCase();
+
+      // Check source URL for ad patterns
+      for (var i = 0; i < adDomainPatterns.length; i++) {
+        if (src.indexOf(adDomainPatterns[i]) > -1) {
+          video.pause();
+          video.muted = true;
+          return Promise.resolve();
+        }
+      }
+      if (src.indexOf('/vast') > -1 || src.indexOf('/vpaid') > -1 ||
+          src.indexOf('/preroll') > -1 || src.indexOf('/midroll') > -1) {
+        video.pause();
+        video.muted = true;
+        return Promise.resolve();
+      }
+
+      // Check parent elements for ad containers
+      var el = video.parentElement;
+      for (var j = 0; j < 8 && el; j++) {
+        var id = (el.id || '').toLowerCase();
+        var cls = (el.className && typeof el.className === 'string') ? el.className.toLowerCase() : '';
+
+        if (id.indexOf('ad-') > -1 || id.indexOf('ad_') > -1 || id.indexOf('ads-') > -1 ||
+            id.indexOf('video-ad') > -1 || id.indexOf('video_ad') > -1 || id.indexOf('videoad') > -1 ||
+            cls.indexOf('ad-container') > -1 || cls.indexOf('ad_container') > -1 ||
+            cls.indexOf('ad-wrapper') > -1 || cls.indexOf('ad_wrapper') > -1 ||
+            cls.indexOf('video-ad') > -1 || cls.indexOf('video_ad') > -1 || cls.indexOf('videoad') > -1 ||
+            cls.indexOf('preroll') > -1 || cls.indexOf('outstream') > -1 ||
+            cls.indexOf('ima-') > -1 || cls.indexOf('ima_') > -1 ||
+            cls.indexOf('vdo-ai') > -1 || cls.indexOf('primis') > -1 || cls.indexOf('connatix') > -1 ||
+            cls.indexOf('clmb') > -1 ||
+            el.hasAttribute('data-ad-client') || el.hasAttribute('data-ad-slot') ||
+            el.hasAttribute('data-google-query-id')) {
+          video.pause();
+          video.muted = true;
+          return Promise.resolve();
+        }
+        el = el.parentElement;
+      }
+
+      // Check <source> children for ad URLs
+      var sources = video.querySelectorAll('source');
+      for (var s = 0; s < sources.length; s++) {
+        var sSrc = (sources[s].src || '').toLowerCase();
+        for (var d = 0; d < adDomainPatterns.length; d++) {
+          if (sSrc.indexOf(adDomainPatterns[d]) > -1) {
+            video.pause();
+            video.muted = true;
+            return Promise.resolve();
+          }
+        }
+      }
+    } catch(e) {}
+
+    return originalPlay.apply(this, arguments);
+  };
+
+  // ============================================================
+  // 3. Block ad-related script loading
+  //    Prevent known ad scripts from executing by intercepting
+  //    createElement('script') and checking src.
+  // ============================================================
+  var blockedScriptDomains = [
+    'imasdk.googleapis.com',
+    'securepubads.g.doubleclick.net',
+    'pagead2.googlesyndication.com',
+    'adservice.google.com',
+    'cdn.taboola.com',
+    'cdn.outbrain.com',
+    'vdo.ai',
+    'primis.tech',
+    'connatix.com',
+    'clmbtech.com',
+    'jsrdn.com',
+    'colombiaonline.com'
+  ];
+
+  var origCreateElement = document.createElement.bind(document);
+  document.createElement = function(tag) {
+    var el = origCreateElement(tag);
+    var lcTag = (tag || '').toLowerCase();
+
+    if (lcTag === 'script') {
+      var origSetAttr = el.setAttribute.bind(el);
+      el.setAttribute = function(name, value) {
+        if (name === 'src' && typeof value === 'string') {
+          var lcVal = value.toLowerCase();
+          for (var i = 0; i < blockedScriptDomains.length; i++) {
+            if (lcVal.indexOf(blockedScriptDomains[i]) > -1) {
+              return; // silently drop the src
+            }
+          }
+        }
+        return origSetAttr(name, value);
+      };
+      // Also intercept .src property
+      var srcDesc = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
+      if (srcDesc && srcDesc.set) {
+        Object.defineProperty(el, 'src', {
+          set: function(v) {
+            if (typeof v === 'string') {
+              var lcv = v.toLowerCase();
+              for (var i = 0; i < blockedScriptDomains.length; i++) {
+                if (lcv.indexOf(blockedScriptDomains[i]) > -1) return;
+              }
+            }
+            srcDesc.set.call(this, v);
+          },
+          get: function() { return srcDesc.get.call(this); },
+          configurable: true
+        });
+      }
+    }
+
+    if (lcTag === 'iframe') {
+      var origSetAttrIframe = el.setAttribute.bind(el);
+      el.setAttribute = function(name, value) {
+        if (name === 'src' && typeof value === 'string') {
+          var lcVal = value.toLowerCase();
+          for (var i = 0; i < blockedScriptDomains.length; i++) {
+            if (lcVal.indexOf(blockedScriptDomains[i]) > -1) {
+              value = 'about:blank';
+              break;
+            }
+          }
+          if (lcVal.indexOf('doubleclick.net') > -1 || lcVal.indexOf('adnxs.com') > -1 ||
+              lcVal.indexOf('amazon-adsystem.com') > -1 || lcVal.indexOf('criteo.') > -1 ||
+              lcVal.indexOf('serving-sys.com') > -1 || lcVal.indexOf('pubmatic.com') > -1) {
+            value = 'about:blank';
+          }
+        }
+        return origSetAttrIframe(name, value);
+      };
+    }
+
+    return el;
+  };
+})();
+`;
+
+/**
+ * DOM-ready script for cosmetic ad removal, MutationObserver, and cleanup.
+ * Runs after the DOM is ready to actively remove ad elements.
  */
 export const AD_BLOCK_SCRIPT = `
 (function() {
   'use strict';
-  if (window.__nav0AdBlockerActive) return;
-  window.__nav0AdBlockerActive = true;
+  if (window.__nav0AdBlockerDOM) return;
+  window.__nav0AdBlockerDOM = true;
 
-  // Selectors for ad elements to remove/hide
   var adSelectors = [
     'ins.adsbygoogle',
     '[id^="google_ads_"]',
@@ -638,6 +993,8 @@ export const AD_BLOCK_SCRIPT = `
     '[class*="connatix-"]',
     '[id*="connatix-"]',
     '.ima-ad-container',
+    '.ima-container',
+    'div[class*="ima-"]',
     '[class*="interstitial-ad"]',
     '[class*="interstitial_ad"]',
     '[class*="overlay-ad"]',
@@ -666,13 +1023,15 @@ export const AD_BLOCK_SCRIPT = `
     '[id^="mgid_"]',
     '.mgbox',
     '[class*="adbox"]',
-    '[id*="adbox"]'
+    '[id*="adbox"]',
+    '[id*="clmb"]',
+    '[class*="clmb"]'
   ];
 
   var combinedSelector = adSelectors.join(',');
 
   function hideElement(el) {
-    if (el && el.style) {
+    if (el && el.style && !el.getAttribute('data-nav0-blocked')) {
       el.style.setProperty('display', 'none', 'important');
       el.style.setProperty('height', '0', 'important');
       el.style.setProperty('min-height', '0', 'important');
@@ -683,94 +1042,91 @@ export const AD_BLOCK_SCRIPT = `
     }
   }
 
-  // Remove existing ad elements
   function removeExistingAds() {
     try {
       var ads = document.querySelectorAll(combinedSelector);
-      for (var i = 0; i < ads.length; i++) {
-        hideElement(ads[i]);
-      }
+      for (var i = 0; i < ads.length; i++) hideElement(ads[i]);
     } catch(e) {}
   }
 
-  // Block autoplay on video elements that appear to be ads
-  function blockAdVideos() {
+  function killAdVideos() {
     try {
-      var videos = document.querySelectorAll('video[autoplay]');
+      var videos = document.querySelectorAll('video');
       for (var i = 0; i < videos.length; i++) {
         var video = videos[i];
-        var parent = video.parentElement;
+        var src = (video.src || video.currentSrc || '').toLowerCase();
         var isAd = false;
 
-        // Walk up 5 levels checking for ad-related attributes
-        var el = parent;
-        for (var j = 0; j < 5 && el; j++) {
-          var id = (el.id || '').toLowerCase();
-          var cls = (el.className && typeof el.className === 'string') ? el.className.toLowerCase() : '';
-
-          if (id.indexOf('ad') > -1 && (id.indexOf('ad-') > -1 || id.indexOf('ad_') > -1 || id.indexOf('ads') > -1 || id === 'ad') ||
-              cls.indexOf('ad-') > -1 || cls.indexOf('ad_') > -1 || cls.indexOf('ads-') > -1 ||
-              cls.indexOf('video-ad') > -1 || cls.indexOf('video_ad') > -1 || cls.indexOf('videoad') > -1 ||
-              cls.indexOf('preroll') > -1 || cls.indexOf('outstream') > -1 || cls.indexOf('instream-ad') > -1 ||
-              cls.indexOf('vdo-ai') > -1 || cls.indexOf('primis') > -1 || cls.indexOf('connatix') > -1 ||
-              el.hasAttribute('data-ad-client') || el.hasAttribute('data-ad-slot') ||
-              el.hasAttribute('data-google-query-id')) {
-            isAd = true;
-            break;
-          }
-          el = el.parentElement;
+        // Check source
+        if (src.indexOf('doubleclick') > -1 || src.indexOf('googlesyndication') > -1 ||
+            src.indexOf('imasdk') > -1 || src.indexOf('vast') > -1 || src.indexOf('vpaid') > -1 ||
+            src.indexOf('preroll') > -1 || src.indexOf('ads') > -1 ||
+            src.indexOf('clmbtech') > -1 || src.indexOf('jsrdn') > -1) {
+          isAd = true;
         }
 
-        // Check video source for ad indicators
-        var src = (video.src || video.currentSrc || '').toLowerCase();
-        if (src.indexOf('ads') > -1 || src.indexOf('vast') > -1 || src.indexOf('vpaid') > -1 ||
-            src.indexOf('preroll') > -1 || src.indexOf('doubleclick') > -1 ||
-            src.indexOf('googlesyndication') > -1 || src.indexOf('imasdk') > -1) {
-          isAd = true;
+        // Check parent elements
+        if (!isAd) {
+          var el = video.parentElement;
+          for (var j = 0; j < 8 && el; j++) {
+            var id = (el.id || '').toLowerCase();
+            var cls = (el.className && typeof el.className === 'string') ? el.className.toLowerCase() : '';
+            if (id.indexOf('ad-') > -1 || id.indexOf('ad_') > -1 || id.indexOf('ads-') > -1 ||
+                id.indexOf('video-ad') > -1 || id.indexOf('video_ad') > -1 ||
+                cls.indexOf('ad-container') > -1 || cls.indexOf('ad_container') > -1 ||
+                cls.indexOf('ad-wrapper') > -1 || cls.indexOf('ad_wrapper') > -1 ||
+                cls.indexOf('video-ad') > -1 || cls.indexOf('video_ad') > -1 ||
+                cls.indexOf('preroll') > -1 || cls.indexOf('outstream') > -1 ||
+                cls.indexOf('ima-') > -1 || cls.indexOf('ima_') > -1 ||
+                cls.indexOf('vdo-ai') > -1 || cls.indexOf('primis') > -1 ||
+                cls.indexOf('connatix') > -1 || cls.indexOf('clmb') > -1 ||
+                el.hasAttribute('data-ad-client') || el.hasAttribute('data-ad-slot') ||
+                el.hasAttribute('data-google-query-id')) {
+              isAd = true;
+              break;
+            }
+            el = el.parentElement;
+          }
         }
 
         if (isAd) {
           video.pause();
           video.removeAttribute('autoplay');
           video.muted = true;
-          video.src = '';
-          video.load();
+          try { video.src = ''; video.load(); } catch(e) {}
           hideElement(video);
-          if (parent) hideElement(parent);
+          if (video.parentElement) hideElement(video.parentElement);
         }
       }
     } catch(e) {}
   }
 
-  // Remove high z-index overlay ads
   function removeOverlayAds() {
     try {
-      var allElements = document.querySelectorAll('[style*="z-index"]');
-      for (var i = 0; i < allElements.length; i++) {
-        var el = allElements[i];
+      var all = document.querySelectorAll('div, section, aside');
+      for (var i = 0; i < all.length; i++) {
+        var el = all[i];
         var style = window.getComputedStyle(el);
         var zIndex = parseInt(style.zIndex);
-        if (zIndex > 999999 && el.tagName !== 'DIALOG') {
+        var pos = style.position;
+        if (zIndex > 999999 && (pos === 'fixed' || pos === 'absolute')) {
           var rect = el.getBoundingClientRect();
-          // Only target large overlays covering significant viewport area
-          if (rect.width > window.innerWidth * 0.5 && rect.height > window.innerHeight * 0.3) {
+          if (rect.width > window.innerWidth * 0.4 && rect.height > window.innerHeight * 0.25) {
             var id = (el.id || '').toLowerCase();
             var cls = (el.className && typeof el.className === 'string') ? el.className.toLowerCase() : '';
-            // Avoid removing legitimate modals (cookie consent, login, etc.)
+            // Skip legitimate modals
             if (cls.indexOf('cookie') > -1 || cls.indexOf('consent') > -1 ||
-                cls.indexOf('login') > -1 || cls.indexOf('modal') > -1 ||
+                cls.indexOf('login') > -1 || cls.indexOf('signup') > -1 || cls.indexOf('paywall') > -1 ||
                 id.indexOf('cookie') > -1 || id.indexOf('consent') > -1 ||
-                id.indexOf('login') > -1) {
-              continue;
-            }
-            // Check if it looks like an ad
-            var innerHTML = el.innerHTML || '';
-            if (innerHTML.indexOf('adsbygoogle') > -1 || innerHTML.indexOf('doubleclick') > -1 ||
-                innerHTML.indexOf('googlesyndication') > -1 || innerHTML.indexOf('taboola') > -1 ||
-                innerHTML.indexOf('outbrain') > -1 || innerHTML.indexOf('sponsor') > -1 ||
-                cls.indexOf('ad') > -1 || id.indexOf('ad') > -1 ||
-                cls.indexOf('interstitial') > -1 || cls.indexOf('overlay') > -1) {
-              hideElement(el);
+                id.indexOf('login') > -1) continue;
+            hideElement(el);
+            // Also remove any backdrop/scrim behind it
+            if (el.previousElementSibling) {
+              var sib = el.previousElementSibling;
+              var sibStyle = window.getComputedStyle(sib);
+              if (parseInt(sibStyle.zIndex) > 999998 && (sibStyle.position === 'fixed' || sibStyle.position === 'absolute')) {
+                hideElement(sib);
+              }
             }
           }
         }
@@ -778,120 +1134,47 @@ export const AD_BLOCK_SCRIPT = `
     } catch(e) {}
   }
 
-  // Prevent scripts from creating ad-related iframes
-  var originalCreateElement = document.createElement.bind(document);
-  document.createElement = function(tagName) {
-    var el = originalCreateElement(tagName);
-    if (tagName.toLowerCase() === 'iframe') {
-      var originalSetAttribute = el.setAttribute.bind(el);
-      el.setAttribute = function(name, value) {
-        if (name === 'src' && typeof value === 'string') {
-          var lcValue = value.toLowerCase();
-          if (lcValue.indexOf('doubleclick.net') > -1 ||
-              lcValue.indexOf('googlesyndication.com') > -1 ||
-              lcValue.indexOf('imasdk.googleapis.com') > -1 ||
-              lcValue.indexOf('amazon-adsystem.com') > -1 ||
-              lcValue.indexOf('taboola.com') > -1 ||
-              lcValue.indexOf('outbrain.com') > -1 ||
-              lcValue.indexOf('adnxs.com') > -1 ||
-              lcValue.indexOf('criteo.') > -1 ||
-              lcValue.indexOf('pubmatic.com') > -1 ||
-              lcValue.indexOf('adform.net') > -1 ||
-              lcValue.indexOf('serving-sys.com') > -1) {
-            value = 'about:blank';
-          }
-        }
-        return originalSetAttribute(name, value);
-      };
-      // Also intercept direct src property sets
-      var srcDescriptor = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'src');
-      if (srcDescriptor && srcDescriptor.set) {
-        Object.defineProperty(el, 'src', {
-          set: function(value) {
-            if (typeof value === 'string') {
-              var lcValue = value.toLowerCase();
-              if (lcValue.indexOf('doubleclick.net') > -1 ||
-                  lcValue.indexOf('googlesyndication.com') > -1 ||
-                  lcValue.indexOf('imasdk.googleapis.com') > -1 ||
-                  lcValue.indexOf('amazon-adsystem.com') > -1 ||
-                  lcValue.indexOf('taboola.com') > -1 ||
-                  lcValue.indexOf('outbrain.com') > -1 ||
-                  lcValue.indexOf('adnxs.com') > -1 ||
-                  lcValue.indexOf('criteo.') > -1) {
-                value = 'about:blank';
-              }
-            }
-            srcDescriptor.set.call(this, value);
-          },
-          get: function() {
-            return srcDescriptor.get.call(this);
-          },
-          configurable: true
-        });
-      }
-    }
-    return el;
-  };
-
-  // MutationObserver to catch dynamically inserted ads
+  // MutationObserver for dynamically inserted ads
   var observer = new MutationObserver(function(mutations) {
-    var shouldScan = false;
+    var shouldScanVideos = false;
     for (var i = 0; i < mutations.length; i++) {
-      var mutation = mutations[i];
-      if (mutation.addedNodes.length > 0) {
-        for (var j = 0; j < mutation.addedNodes.length; j++) {
-          var node = mutation.addedNodes[j];
+      if (mutations[i].addedNodes.length > 0) {
+        for (var j = 0; j < mutations[i].addedNodes.length; j++) {
+          var node = mutations[i].addedNodes[j];
           if (node.nodeType === 1) {
-            shouldScan = true;
-            // Directly check the added node
+            shouldScanVideos = true;
             try {
-              if (node.matches && node.matches(combinedSelector)) {
-                hideElement(node);
-              }
-              // Check children of added node
+              if (node.matches && node.matches(combinedSelector)) hideElement(node);
               var childAds = node.querySelectorAll ? node.querySelectorAll(combinedSelector) : [];
-              for (var k = 0; k < childAds.length; k++) {
-                hideElement(childAds[k]);
-              }
+              for (var k = 0; k < childAds.length; k++) hideElement(childAds[k]);
             } catch(e) {}
           }
         }
       }
     }
-    if (shouldScan) {
-      blockAdVideos();
-    }
+    if (shouldScanVideos) killAdVideos();
   });
 
-  // Run initial cleanup
   removeExistingAds();
-  blockAdVideos();
+  killAdVideos();
 
-  // Start observing
-  observer.observe(document.documentElement, {
-    childList: true,
-    subtree: true
-  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
 
-  // Periodic cleanup for stubborn ads
-  var cleanupCount = 0;
-  var cleanupInterval = setInterval(function() {
+  // Periodic aggressive cleanup
+  var count = 0;
+  var interval = setInterval(function() {
     removeExistingAds();
-    blockAdVideos();
+    killAdVideos();
     removeOverlayAds();
-    cleanupCount++;
-    // Run aggressively for the first 30 seconds, then stop periodic checks
-    if (cleanupCount > 30) {
-      clearInterval(cleanupInterval);
-    }
+    count++;
+    if (count > 30) clearInterval(interval);
   }, 1000);
 
-  // Also run on visibility change (tab becoming active can trigger ad loads)
   document.addEventListener('visibilitychange', function() {
     if (!document.hidden) {
       setTimeout(function() {
         removeExistingAds();
-        blockAdVideos();
+        killAdVideos();
         removeOverlayAds();
       }, 500);
     }
