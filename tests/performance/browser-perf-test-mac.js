@@ -74,7 +74,7 @@ function log(msg) {
   console.log(`  [${ts}] ${msg}`);
 }
 
-// ─── macOS Resource Measurement (via ps) ────────────────────────────────────
+// ─── macOS Resource Measurement ─────────────────────────────────────────────
 
 function getDescendantPids(pid) {
   try {
@@ -95,19 +95,8 @@ function getProcessTree(pid) {
   return [pid, ...getDescendantPids(pid)];
 }
 
-function getMemoryKB(pid) {
-  try {
-    // ps -o rss= gives resident set size in KB
-    const out = execSync(`ps -o rss= -p ${pid}`, { encoding: 'utf-8', timeout: 5000 }).trim();
-    return parseInt(out, 10) || 0;
-  } catch {
-    return 0;
-  }
-}
-
 function getCpuPercent(pid) {
   try {
-    // ps -o %cpu= gives instantaneous CPU% (of one core)
     const out = execSync(`ps -o %cpu= -p ${pid}`, { encoding: 'utf-8', timeout: 5000 }).trim();
     return parseFloat(out) || 0;
   } catch {
@@ -115,33 +104,54 @@ function getCpuPercent(pid) {
   }
 }
 
-function snapshotProcessTree(pid) {
-  const pids = getProcessTree(pid);
-  let memoryKB = 0;
-  let cpuPercent = 0;
-  for (const p of pids) {
-    memoryKB += getMemoryKB(p);
-    cpuPercent += getCpuPercent(p);
+// System-level available memory via vm_stat.
+// Summing per-process RSS double-counts shared memory (Chromium framework)
+// across every subprocess, inflating the browser with more processes.
+// System delta avoids this entirely.
+function getAvailableMemoryMB() {
+  try {
+    const output = execSync('vm_stat', { encoding: 'utf-8', timeout: 5000 });
+    const pageSizeMatch = output.match(/page size of (\d+) bytes/);
+    const pageSize = pageSizeMatch ? parseInt(pageSizeMatch[1]) : 16384;
+
+    const getPages = (label) => {
+      const re = new RegExp(label + ':\\s+(\\d+)');
+      const m = output.match(re);
+      return m ? parseInt(m[1]) : 0;
+    };
+
+    const free = getPages('Pages free');
+    const inactive = getPages('Pages inactive');
+    const speculative = getPages('Pages speculative');
+    const purgeable = getPages('Pages purgeable');
+
+    return (free + inactive + speculative + purgeable) * pageSize / (1024 * 1024);
+  } catch {
+    return os.freemem() / (1024 * 1024);
   }
-  return { processCount: pids.length, memoryKB, cpuPercent: +cpuPercent.toFixed(2) };
 }
 
-// Sample CPU multiple times over SAMPLE_DURATION_MS and average it
-async function measureResources(pid, durationMs) {
-  const samples = [];
-  const interval = 1000; // sample every second
+// Sample CPU over SAMPLE_DURATION_MS and average it; count processes
+async function measureCpuAndProcs(pid, durationMs) {
+  const interval = 1000;
   const count = Math.max(1, Math.floor(durationMs / interval));
+  const cpuSamples = [];
+  let lastProcessCount = 0;
+
   for (let i = 0; i < count; i++) {
-    samples.push(snapshotProcessTree(pid));
+    const pids = getProcessTree(pid);
+    lastProcessCount = pids.length;
+    let totalCpu = 0;
+    for (const p of pids) {
+      totalCpu += getCpuPercent(p);
+    }
+    cpuSamples.push(totalCpu);
     if (i < count - 1) await sleep(interval);
   }
-  const last = samples[samples.length - 1];
-  const avgCpu = +(samples.reduce((s, x) => s + x.cpuPercent, 0) / samples.length).toFixed(2);
-  const memoryMB = +(last.memoryKB / 1024).toFixed(2);
+
   return {
-    processCount: last.processCount,
-    memoryMB,
-    cpuPercent: avgCpu,
+    processCount: lastProcessCount,
+    cpuPercent: +(cpuSamples.reduce((a, b) => a + b, 0) / cpuSamples.length).toFixed(2),
   };
 }
 
@@ -224,6 +234,8 @@ async function testChrome(tabCount) {
   ensurePortFree(CHROME_DEBUG_PORT);
   await sleep(1000);
 
+  const memBefore = getAvailableMemoryMB();
+
   // Create a temp profile so we don't touch the user's real profile
   const tmpProfile = fs.mkdtempSync(path.join(os.tmpdir(), 'chrome-perf-'));
 
@@ -271,9 +283,11 @@ async function testChrome(tabCount) {
     log(`[Chrome] All tabs opened. Settling for ${SETTLE_TIME_MS / 1000}s...`);
     await sleep(SETTLE_TIME_MS);
 
-    // Measure
-    const metrics = await measureResources(pid, SAMPLE_DURATION_MS);
-    const result = { browser: 'Chrome', tabCount, ...metrics };
+    // Measure memory via system delta + CPU via process tree
+    const memAfter = getAvailableMemoryMB();
+    const memoryMB = +(memBefore - memAfter).toFixed(2);
+    const metrics = await measureCpuAndProcs(pid, SAMPLE_DURATION_MS);
+    const result = { browser: 'Chrome', tabCount, memoryMB, ...metrics };
     log(`[Chrome] ${tabCount} tabs → Mem=${result.memoryMB}MB CPU=${result.cpuPercent}% Procs=${result.processCount}`);
 
     browser.disconnect();
@@ -311,6 +325,8 @@ async function testNav0(tabCount) {
   log(`[Nav0] Starting test with ${tabCount} tabs...`);
   ensurePortFree(NAV0_DEBUG_PORT);
   await sleep(1000);
+
+  const memBefore = getAvailableMemoryMB();
 
   const proc = spawn(NAV0_BIN, [], {
     env: {
@@ -353,9 +369,11 @@ async function testNav0(tabCount) {
     log(`[Nav0] All tabs opened. Settling for ${SETTLE_TIME_MS / 1000}s...`);
     await sleep(SETTLE_TIME_MS);
 
-    // Measure
-    const metrics = await measureResources(electronPid, SAMPLE_DURATION_MS);
-    const result = { browser: 'Nav0', tabCount, ...metrics };
+    // Measure memory via system delta + CPU via process tree
+    const memAfter = getAvailableMemoryMB();
+    const memoryMB = +(memBefore - memAfter).toFixed(2);
+    const metrics = await measureCpuAndProcs(electronPid, SAMPLE_DURATION_MS);
+    const result = { browser: 'Nav0', tabCount, memoryMB, ...metrics };
     log(`[Nav0] ${tabCount} tabs → Mem=${result.memoryMB}MB CPU=${result.cpuPercent}% Procs=${result.processCount}`);
 
     return result;
@@ -399,7 +417,7 @@ function generateReport(chromeResults, nav0Results) {
 
   // ── Memory Table ──
   lines.push(thin);
-  lines.push('  MEMORY USAGE (MB) — Resident Set Size across all processes');
+  lines.push('  MEMORY USAGE (MB) — System memory delta via vm_stat (avoids RSS shared-memory double-counting)');
   lines.push(thin);
   lines.push(fmtHeader());
   for (const tc of TAB_COUNTS) {

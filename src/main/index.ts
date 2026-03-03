@@ -22,8 +22,12 @@ function startTestControlServer(port: number): void {
       const tabUrl = parsed.searchParams.get('url') || 'about:blank';
       const win = AppWindowManager.getActiveWindow();
       if (win) {
-        win.createTab(tabUrl, false);
-        res.end(JSON.stringify({ ok: true }));
+        win.createTab(tabUrl, true).then(() => {
+          res.end(JSON.stringify({ ok: true }));
+        }).catch((err: Error) => {
+          res.statusCode = 500;
+          res.end(JSON.stringify({ error: err.message }));
+        });
       } else {
         res.statusCode = 500;
         res.end(JSON.stringify({ error: 'no active window' }));
