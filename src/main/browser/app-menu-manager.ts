@@ -70,6 +70,8 @@ export abstract class AppMenuManager {
           { role: 'cut' as const, accelerator: 'CmdOrCtrl+X', },
           { role: 'copy' as const, accelerator: 'CmdOrCtrl+C', },
           { role: 'paste' as const, accelerator: 'CmdOrCtrl+V', },
+          { type: 'separator' as const },
+          {label: 'Find in Page', accelerator: 'CmdOrCtrl+F', click: async() => { AppWindowManager.getActiveWindow()?.showFindInPage(); }},
           ...(isMac ? [
             { role: 'pasteAndMatchStyle' as const },
             { role: 'delete' as const },

@@ -36,3 +36,6 @@ declare const PRIVACY_POLICY_PRELOAD_WEBPACK_ENTRY: string;
 
 declare const REPORT_ISSUE_WEBPACK_ENTRY: string;
 declare const REPORT_ISSUE_PRELOAD_WEBPACK_ENTRY: string;
+
+declare const FIND_IN_PAGE_WEBPACK_ENTRY: string;
+declare const FIND_IN_PAGE_PRELOAD_WEBPACK_ENTRY: string;

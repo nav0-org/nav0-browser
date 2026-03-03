@@ -60,7 +60,7 @@ export class OptionsMenuManager {
     });
 
     this.optionsElement?.querySelector('#find-in-page-option')?.addEventListener('click', async () => {
-      //@todo: implement this
+      await window.BrowserAPI.showFindInPage(this.appWindowId);
     });
 
     this.optionsElement?.querySelector('#downloads-option')?.addEventListener('click', async () => {

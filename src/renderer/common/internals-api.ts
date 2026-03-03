@@ -47,6 +47,12 @@ declare global {
 
       showCommandKOverlay: (appWindowId: string) => Promise<any>;
       hideCommandKOverlay: (appWindowId: string) => Promise<any>;
+      showFindInPage: (appWindowId: string) => Promise<any>;
+      hideFindInPage: (appWindowId: string) => Promise<any>;
+      findInPage: (appWindowId: string, text: string, options?: { matchCase?: boolean }) => Promise<any>;
+      findInPageNext: (appWindowId: string, text: string, options?: { matchCase?: boolean }) => Promise<any>;
+      findInPagePrevious: (appWindowId: string, text: string, options?: { matchCase?: boolean }) => Promise<any>;
+      stopFindInPage: (appWindowId: string) => Promise<any>;
       showAboutPanel: () => Promise<any>;
       getSearchUrl: (searchTerm: string) => Promise<string>;
       fetchOpenTabs: (appWindowId: string) => Promise<Array<{id: string, title: string, url: string, faviconUrl: string | null}>>;
@@ -59,6 +65,7 @@ declare global {
       onTabUrlUpdated: (callback: (data: { id: string, url: string, isBookmark: boolean, bookmarkId: string | null, canGoBack: boolean, canGoForward: boolean }) => void) => void;
       onTabFaviconUpdated: (callback: (data: { id: string, faviconUrl: string }) => void) => void;
       onNavigationFailed: (callback: (data: { id: string }) => void) => void;
+      onFindInPageResult: (callback: (data: { activeMatchOrdinal: number, matches: number, finalUpdate: boolean }) => void) => void;
     };
   }
 }
