@@ -290,7 +290,7 @@ export class AppWindow {
   }
 
   stopFindInPage(): void {
-    this.findInPageManager?.stopFind();
+    this.findInPageManager?.clearHighlights();
   }
 
 }

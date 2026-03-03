@@ -110,13 +110,17 @@ export class FindInPageManager {
     });
   }
 
-  stopFind(): void {
+  clearHighlights(): void {
     if (this.currentTabWebContents) {
       this.currentTabWebContents.stopFindInPage('clearSelection');
     }
+    this.lastSearchText = '';
+  }
+
+  stopFind(): void {
+    this.clearHighlights();
     this.detachFoundInPageListener();
     this.currentTabWebContents = null;
-    this.lastSearchText = '';
   }
 
   resetState(): void {
