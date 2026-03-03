@@ -1,5 +1,5 @@
 import { app, BrowserWindow, dialog, Menu, MenuItem, WebContentsView } from "electron";
-import { InAppUrls, MainToRendererEventsForBrowserIPC, WebContentsEvents } from "../../constants/app-constants";
+import { InAppUrls, DataStoreConstants, MainToRendererEventsForBrowserIPC, WebContentsEvents } from "../../constants/app-constants";
 import { v4 as uuid } from "uuid";
 import { AppWindow } from "./app-window";
 import { BookmarkManager } from "./bookmark-manager";
@@ -11,6 +11,9 @@ import { Utils } from "../browser/utils";
 import { SearchEngine } from "../web/search-engine";
 import { PermissionManager } from "./permission-manager";
 import { ReaderModeManager, ReaderModeState } from "./reader-mode-manager";
+import { DataStoreManager } from "../database/data-store-manager";
+import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
+import { COSMETIC_FILTER_CSS, AD_BLOCK_EARLY_SCRIPT, AD_BLOCK_SCRIPT } from "../ad-blocker/ad-block-lists";
 const domainPattern = /^[^\s]+\.[^\s]+$/;
 
 export class Tab {
@@ -179,10 +182,17 @@ export class Tab {
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE, async (event, url: string) => {
       this.handleOriginChange(url);
       this.debouncedHandleNavigationCompletion(url);
+      // Inject early ad-block hooks (IMA mock, play() interception) as soon as navigation commits
+      this.injectAdBlockEarlyScript(url);
     });
     //for soft navigation (debounced)
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE_IN_PAGE, async (event, url: string) => {
       this.debouncedHandleNavigationCompletion(url);
+    });
+
+    // Cosmetic ad filtering and DOM cleanup once the DOM is ready
+    this.webContentsViewInstance.webContents.on(WebContentsEvents.DOM_READY, () => {
+      this.injectAdBlockDOMScript();
     });
 
     this.webContentsViewInstance.webContents.session.on('will-download', async (event, item, downloadWebContents) => {
@@ -346,6 +356,49 @@ export class Tab {
     } catch {
       // Invalid URL, ignore
     }
+  }
+
+  private isAdBlockAllowed(url?: string): boolean {
+    const checkUrl = url || this.url;
+    if (checkUrl.startsWith(InAppUrls.PREFIX) || checkUrl === '' || checkUrl.startsWith('file://')) {
+      return false;
+    }
+    try {
+      const stored = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as BrowserSettings;
+      const settings = { ...DEFAULT_BROWSER_SETTINGS, ...stored };
+      if (!settings.adBlockerEnabled) return false;
+
+      const hostname = new URL(checkUrl).hostname;
+      const isAllowed = (settings.adBlockerAllowedSites || []).some(site => {
+        const siteDomain = site.toLowerCase().trim();
+        return hostname === siteDomain || hostname.endsWith('.' + siteDomain);
+      });
+      return !isAllowed;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Injects early ad-block script right after navigation commits.
+   * Sets up Google IMA SDK mock, HTMLMediaElement.play() hook, and
+   * script/iframe creation interception BEFORE page scripts can load ads.
+   */
+  private injectAdBlockEarlyScript(url: string): void {
+    if (!this.isAdBlockAllowed(url)) return;
+    const wc = this.webContentsViewInstance.webContents;
+    wc.executeJavaScript(AD_BLOCK_EARLY_SCRIPT).catch(() => {});
+  }
+
+  /**
+   * Injects cosmetic CSS and DOM-level ad cleanup script once DOM is ready.
+   * Handles hiding ad elements, MutationObserver, video cleanup, and overlays.
+   */
+  private injectAdBlockDOMScript(): void {
+    if (!this.isAdBlockAllowed()) return;
+    const wc = this.webContentsViewInstance.webContents;
+    wc.insertCSS(COSMETIC_FILTER_CSS).catch(() => {});
+    wc.executeJavaScript(AD_BLOCK_SCRIPT).catch(() => {});
   }
 
   private debouncedHandleNavigationCompletion(url: string): void {
