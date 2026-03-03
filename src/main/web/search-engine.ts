@@ -2,28 +2,38 @@ import { DataStoreConstants } from "../../constants/app-constants";
 import { DataStoreManager } from "../database/data-store-manager";
 import { WebContentsView } from "electron";
 import Bluebird from "bluebird";
+import { BrowserSettings, DEFAULT_SEARCH_ENGINES, SearchEngineConfig } from "../../types/settings-types";
 
 export abstract class SearchEngine {
-  private static getSearchEngine(): string {
-    const browserSettings = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as any;
-    return browserSettings?.primarySearchEngine || 'Google';
+  private static getSettings(): BrowserSettings {
+    return (DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) || {}) as BrowserSettings;
+  }
+
+  private static getSearchEngineConfig(): SearchEngineConfig | null {
+    const settings = SearchEngine.getSettings();
+    const engineName = settings?.primarySearchEngine || 'DuckDuckGo';
+    const builtIn = DEFAULT_SEARCH_ENGINES.find(e => e.name === engineName);
+    if (builtIn) return builtIn;
+    const custom = settings?.customSearchEngines?.find(e => e.name === engineName);
+    if (custom) return custom;
+    return DEFAULT_SEARCH_ENGINES[0];
+  }
+
+  public static getSearchEngineName(): string {
+    const config = SearchEngine.getSearchEngineConfig();
+    return config?.name || 'DuckDuckGo';
   }
 
   public static async getSearchUrl(searchTerm: string): Promise<string> {
-    const searchEngine = SearchEngine.getSearchEngine();
-    if(searchEngine === 'Google'){
-      return `https://www.google.com/search?q=${searchTerm}`;
-    } else if(searchEngine === 'Bing'){
-      return `https://www.bing.com/search?q=${searchTerm}`;
-    } else if(searchEngine === 'DuckDuckGo'){
-      return `https://duckduckgo.com/?q=${searchTerm}`;
-    } else {
-      return `https://www.google.com/search?q=${searchTerm}`;
+    const config = SearchEngine.getSearchEngineConfig();
+    if (config?.searchUrlTemplate) {
+      return config.searchUrlTemplate.replace('%s', encodeURIComponent(searchTerm));
     }
+    return `https://duckduckgo.com/?q=${encodeURIComponent(searchTerm)}`;
   }
 
   public static async getTopResults(searchTerm: string): Promise<Array<string>> {
-    const searchEngine = SearchEngine.getSearchEngine();
+    const config = SearchEngine.getSearchEngineConfig();
     const searchUrl = await SearchEngine.getSearchUrl(searchTerm);
     const webContentsView = new WebContentsView({
       webPreferences: {
@@ -37,16 +47,16 @@ export abstract class SearchEngine {
     });
     webContentsView.webContents.setAudioMuted(true);
     await webContentsView.webContents.loadURL(searchUrl).catch((error) => {console.error(error);});
-    // await new Promise(resolve => setTimeout(resolve, 3000));
     let results: Array<string> = [];
-    if(searchEngine === 'Google'){
+    const engineName = config?.name || 'DuckDuckGo';
+    if(engineName === 'Google'){
       results = await SearchEngine.extractTopSearchResultsForGoogle(webContentsView);
-    } else if(searchEngine === 'Bing'){
+    } else if(engineName === 'Bing'){
       results = await SearchEngine.extractTopSearchResultsForBing(webContentsView);
-    } else if(searchEngine === 'DuckDuckGo'){
+    } else if(engineName === 'DuckDuckGo'){
       results = await SearchEngine.extractTopSearchResultsForDuckDuckGo(webContentsView);
     } else {
-      results = await SearchEngine.extractTopSearchResultsForGoogle(webContentsView);
+      results = await SearchEngine.extractTopSearchResultsGeneric(webContentsView);
     }
     webContentsView.webContents.close();
     return results;
@@ -436,6 +446,28 @@ export abstract class SearchEngine {
                 .catch(() => console.log('Could not copy to clipboard'));
         }
         
+        return results;
+    })();
+    `);
+  }
+
+  public static async extractTopSearchResultsGeneric(webContentsView: WebContentsView): Promise<Array<string>> {
+    return webContentsView.webContents.executeJavaScript(`
+      (function() {
+        const results = [];
+        const links = document.querySelectorAll('a[href^="http"]');
+        const currentDomain = window.location.hostname;
+        for (let link of links) {
+            if (results.length >= 10) break;
+            const url = link.href;
+            if (!url || url.includes(currentDomain)) continue;
+            if (link.closest('[class*="ad"]') || link.closest('[data-ad]')) continue;
+            const hasHeading = link.querySelector('h2') || link.querySelector('h3') || link.closest('h2') || link.closest('h3');
+            const linkText = link.textContent.trim();
+            if (hasHeading && linkText.length > 10 && !results.includes(url)) {
+                results.push(url);
+            }
+        }
         return results;
     })();
     `);

@@ -1,6 +1,7 @@
 import { app, ipcMain } from 'electron';
 import { AppWindowManager } from './browser/app-window-manager';
 import { DataStoreManager } from './database/data-store-manager';
+import { SettingsEnforcer } from './settings/settings-enforcer';
 
 // Disable Chromium features that trigger macOS "Local Network" permission dialog.
 // These features use mDNS/Bonjour for device discovery, which is unnecessary for
@@ -19,6 +20,7 @@ if (require('electron-squirrel-startup')) {
 // Initialize main window when app is ready
 app.whenReady().then(async() => {
   await DataStoreManager.init();
+  await SettingsEnforcer.init();
   await AppWindowManager.init();
 });
 
@@ -27,6 +29,11 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
+});
+
+// Handle "clear on close" settings on graceful quit
+app.on('before-quit', async () => {
+  await SettingsEnforcer.onBeforeQuit();
 });
 
 // Re-create window when dock icon is clicked (macOS)

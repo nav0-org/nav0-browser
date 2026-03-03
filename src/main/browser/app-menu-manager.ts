@@ -20,6 +20,8 @@ export abstract class AppMenuManager {
         submenu: [
           { role: 'about'  as const},
           { type: 'separator' as const },
+          { label: 'Settings...', accelerator: 'CmdOrCtrl+,', click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.BROWSER_SETTINGS, true) }},
+          { type: 'separator' as const },
           { role: 'services' as const },
           { type: 'separator' as const },
           { role: 'hide' as const },
@@ -57,6 +59,8 @@ export abstract class AppMenuManager {
           {label: 'Bookmarks', accelerator: 'CmdOrCtrl+Shift+B', click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.BOOKMARKS, true) }},
           {label: 'History', accelerator: 'CmdOrCtrl+Shift+H', click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.HISTORY, true) }},
           {label: 'Downloads', accelerator: 'CmdOrCtrl+Shift+D',click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.DOWNLOADS, true) }},
+          {type: 'separator' as const},
+          {label: 'Settings', accelerator: 'CmdOrCtrl+,', click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.BROWSER_SETTINGS, true) }},
           {type: 'separator' as const},
           {label: 'Command K Interface', accelerator: 'CmdOrCtrl+K', click: async() => { AppWindowManager.getActiveWindow().showCommandKOverlay() }},
         ]

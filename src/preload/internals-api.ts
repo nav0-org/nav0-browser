@@ -138,6 +138,18 @@ export function init(){
     toggleReaderMode: async (appWindowId: string, tabId: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.TOGGLE_READER_MODE, appWindowId, tabId);
     },
+    applySettings: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.APPLY_SETTINGS);
+    },
+    clearBrowsingData: async (options: any) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.CLEAR_BROWSING_DATA, options);
+    },
+    getCookieCount: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GET_COOKIE_COUNT);
+    },
+    getStorageEstimate: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GET_STORAGE_ESTIMATE);
+    },
 
     // Event listeners
     onNewTabCreated: (callback: (tab: {id: string, url: string, title: string}) => void) => {

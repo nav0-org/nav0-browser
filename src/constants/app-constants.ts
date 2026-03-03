@@ -136,9 +136,12 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly FIND_IN_PAGE_NEXT = "browser:find-in-page-next";
   public static readonly FIND_IN_PAGE_PREVIOUS = "browser:find-in-page-previous";
   public static readonly STOP_FIND_IN_PAGE = "browser:stop-find-in-page";
-  // public static readonly CAPTURE_SCREENSHOT = "browser:capture-screenshot";
-  // public static readonly SAVE_SCREENSHOT = "browser:save-screenshot";
-  // public static readonly SET_DIALOG_VISIBILITY = "browser:set-dialog-visibility";
+
+  // Settings enforcement
+  public static readonly CLEAR_BROWSING_DATA = "browser:clear-browsing-data";
+  public static readonly GET_COOKIE_COUNT = "browser:get-cookie-count";
+  public static readonly APPLY_SETTINGS = "browser:apply-settings";
+  public static readonly GET_STORAGE_ESTIMATE = "browser:get-storage-estimate";
 }
 
 export abstract class MainToRendererEventsForBrowserIPC {
