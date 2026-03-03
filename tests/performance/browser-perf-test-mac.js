@@ -293,7 +293,9 @@ async function testNav0(tabCount) {
   ensurePortFree(NAV0_DEBUG_PORT);
   await sleep(1000);
 
-  const proc = spawn(NAV0_BIN, [], {
+  const proc = spawn(NAV0_BIN, [
+    `--remote-debugging-port=${NAV0_DEBUG_PORT}`,
+  ], {
     env: {
       ...process.env,
       REMOTE_DEBUGGING_PORT: String(NAV0_DEBUG_PORT),
