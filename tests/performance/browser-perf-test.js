@@ -319,7 +319,11 @@ async function testNav0(tabCount) {
 
   const nav0Proc = spawn('npx', [
     'electron-forge', 'start',
-    '--', '--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage',
+    '--',
+    '--no-sandbox',
+    '--disable-gpu',
+    '--disable-dev-shm-usage',
+    `--remote-debugging-port=${NAV0_DEBUG_PORT}`,
   ], {
     cwd: PROJECT_ROOT,
     env: {
@@ -331,13 +335,26 @@ async function testNav0(tabCount) {
   });
 
   let stderrBuf = '';
-  nav0Proc.stderr.on('data', (d) => { stderrBuf += d.toString(); });
-  nav0Proc.stdout.on('data', () => {}); // Drain stdout
+  nav0Proc.stderr.on('data', (d) => {
+    stderrBuf += d.toString();
+    // Surface webpack/electron progress so we know it's alive
+    const line = d.toString().trim();
+    if (line.includes('Compil') || line.includes('webpack') || line.includes('Error') || line.includes('Launching')) {
+      log(`[Nav0:stderr] ${line.slice(0, 120)}`);
+    }
+  });
+  nav0Proc.stdout.on('data', (d) => {
+    const line = d.toString().trim();
+    if (line) log(`[Nav0:stdout] ${line.slice(0, 120)}`);
+  });
 
   const spawnPid = nav0Proc.pid;
+  nav0Proc.on('exit', (code, signal) => {
+    log(`[Nav0] Process exited (code=${code}, signal=${signal}) before test completed`);
+  });
 
   try {
-    log(`[Nav0] Waiting for webpack build and debug port ${NAV0_DEBUG_PORT}...`);
+    log(`[Nav0] Waiting for webpack build and debug port ${NAV0_DEBUG_PORT} (PID: ${spawnPid})...`);
     await waitForPort(NAV0_DEBUG_PORT, 180000);
     log('[Nav0] Debug port ready. Waiting for app to initialize...');
     await sleep(5000);
