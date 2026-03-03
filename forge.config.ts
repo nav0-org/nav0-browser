@@ -143,6 +143,14 @@ const config: ForgeConfig = {
               js: './src/preload/web-content-preload.ts',
             },
           },
+          {
+            html: './src/renderer/find-in-page/index.html',
+            js: './src/renderer/find-in-page/index.ts',
+            name: 'find_in_page',
+            preload: {
+              js: './src/preload/internals-api.ts',
+            },
+          },
         ],
       },
     }),

@@ -35,7 +35,7 @@ declare global {
       removeAllBrowsingHistory: (appWindowId: string) => Promise<any>;
       fetchBrowsingHistory: (appWindowId: string, searchTerm: string, limit: number, offset: number) => Promise<any>;
       handleFileSelection: (appWindowId: string, tabId: string, extensions: string[]) => Promise<string[] | null>;
-      
+      openPdfFile: (appWindowId: string) => Promise<string | null>;
 
       updateBrowserViewBounds: (appWindowId: string, bounds: { x: number, y: number, width: number, height: number }) => Promise<any>;
       closeAppWindow: (appWindowId: string) => Promise<any>;
@@ -47,9 +47,16 @@ declare global {
 
       showCommandKOverlay: (appWindowId: string) => Promise<any>;
       hideCommandKOverlay: (appWindowId: string) => Promise<any>;
+      showFindInPage: (appWindowId: string) => Promise<any>;
+      hideFindInPage: (appWindowId: string) => Promise<any>;
+      findInPage: (appWindowId: string, text: string, options?: { matchCase?: boolean }) => Promise<any>;
+      findInPageNext: (appWindowId: string, text: string, options?: { matchCase?: boolean }) => Promise<any>;
+      findInPagePrevious: (appWindowId: string, text: string, options?: { matchCase?: boolean }) => Promise<any>;
+      stopFindInPage: (appWindowId: string) => Promise<any>;
       showAboutPanel: () => Promise<any>;
       getSearchUrl: (searchTerm: string) => Promise<string>;
       fetchOpenTabs: (appWindowId: string) => Promise<Array<{id: string, title: string, url: string, faviconUrl: string | null}>>;
+      toggleReaderMode: (appWindowId: string, tabId: string) => Promise<any>;
 
       // Event listeners
       onNewTabCreated: (callback: (tab: {id: string, url: string, title: string}) => void) => void;
@@ -59,6 +66,9 @@ declare global {
       onTabUrlUpdated: (callback: (data: { id: string, url: string, isBookmark: boolean, bookmarkId: string | null, canGoBack: boolean, canGoForward: boolean }) => void) => void;
       onTabFaviconUpdated: (callback: (data: { id: string, faviconUrl: string }) => void) => void;
       onNavigationFailed: (callback: (data: { id: string }) => void) => void;
+      onReaderModeAvailabilityChanged: (callback: (data: { id: string, isEligible: boolean }) => void) => void;
+      onReaderModeStateChanged: (callback: (data: { id: string, isActive: boolean }) => void) => void;
+      onFindInPageResult: (callback: (data: { activeMatchOrdinal: number, matches: number, finalUpdate: boolean }) => void) => void;
     };
   }
 }

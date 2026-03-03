@@ -13,6 +13,8 @@ export class Tab {
   public isLoading = false;
   public isBookmark = false;
   public bookmarkId: string | null = null;
+  public isReaderModeEligible = false;
+  public isReaderModeActive = false;
 
   constructor(id: string, url: string, title?: string) {
     this.id = id;

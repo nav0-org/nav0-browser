@@ -1,6 +1,7 @@
 import { ipcMain, webContents, BrowserWindow } from 'electron';
 import Store from 'electron-store';
 import { DataStoreConstants, RendererToMainEventsForDataStoreIPC } from '../../constants/app-constants';
+import { DEFAULT_BROWSER_SETTINGS } from '../../types/settings-types';
 
 // Define interface for watcher data
 interface WatcherData {
@@ -122,7 +123,7 @@ export abstract class DataStoreManager {
     let returnValue;
     switch (storeName) {
       case DataStoreConstants.BROWSER_SETTINGS:
-        returnValue = {};
+        returnValue = { ...DEFAULT_BROWSER_SETTINGS };
         break;
       default:
         break;
