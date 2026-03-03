@@ -419,6 +419,22 @@ div[class*="gpt_ad"],
 [class^="ad-unit"],
 [class^="ad-zone"],
 [class^="ad-placement"],
+.adsbox,
+.ad-box,
+.ad-player,
+.advertising,
+[data-ad-format],
+
+/* Broader ad pattern matching */
+[class*="-ad-"],
+[class*="-ads-"],
+[id*="-ad-"],
+[id*="-ads-"],
+
+/* Ad iframes by generic src patterns */
+iframe[src*="ad."],
+iframe[src*="ads."],
+iframe[src*="adserver"],
 
 /* Advertisement labels */
 [class*="advertisement"],
@@ -430,6 +446,7 @@ div[class*="gpt_ad"],
 [aria-label="advertisement" i],
 [aria-label="Ads" i],
 [aria-label="Sponsored" i],
+[aria-label*="Advertisement"],
 
 /* Ad iframes */
 iframe[src*="doubleclick.net"],
@@ -475,12 +492,22 @@ iframe[name*="google_ads"],
 [id*="video-ad"],
 [id*="video_ad"],
 [id*="videoAd"],
+[id*="player-ads"],
 [class*="video-ad-"],
 [class*="video_ad_"],
 [class*="videoAd"],
+.video-ads,
+.video-ad-container,
+.video-ad-module,
+.video-advertisement,
+.preroll-ads,
+.player-ads,
+.ad-player,
 [class*="preroll"],
+[class*="pre-roll"],
 [class*="midroll"],
 [class*="postroll"],
+[class*="post-roll"],
 [class*="outstream-ad"],
 [class*="outstream_ad"],
 [class*="instream-ad"],
@@ -492,6 +519,7 @@ iframe[name*="google_ads"],
 [class*="connatix-"],
 [id*="connatix-"],
 [class*="vjs-ad"],
+.ad-showing,
 
 /* Google IMA / Video Ad Overlays */
 .ima-ad-container,
@@ -503,6 +531,12 @@ iframe[name*="google_ads"],
 [class*="ad_overlay"],
 [class*="adOverlay"],
 div[class*="ima-"],
+.ytp-ad-overlay-container,
+.ytp-ad-text,
+.ytp-ad-preview-container,
+
+/* JW Player ad state */
+.jwplayer.jw-state-advertising,
 
 /* Sticky / Fixed / Floating ads */
 .sticky-ad,
@@ -1030,8 +1064,22 @@ export const AD_BLOCK_SCRIPT = `
 
   var combinedSelector = adSelectors.join(',');
 
+  // Guard: don't hide elements that are major content containers
+  function isLikelyMainContent(el) {
+    try {
+      if (el.querySelectorAll('p, h1, h2, h3, article, section').length > 5) return true;
+      var tag = el.tagName;
+      if (tag === 'NAV' || tag === 'MAIN' || tag === 'ARTICLE') return true;
+      var id = (el.id || '').toLowerCase();
+      var cls = (el.className && typeof el.className === 'string') ? el.className.toLowerCase() : '';
+      if (id.indexOf('nav') > -1 || cls.indexOf('nav') > -1) return true;
+    } catch(e) {}
+    return false;
+  }
+
   function hideElement(el) {
     if (el && el.style && !el.getAttribute('data-nav0-blocked')) {
+      if (isLikelyMainContent(el)) return;
       el.style.setProperty('display', 'none', 'important');
       el.style.setProperty('height', '0', 'important');
       el.style.setProperty('min-height', '0', 'important');
@@ -1049,53 +1097,130 @@ export const AD_BLOCK_SCRIPT = `
     } catch(e) {}
   }
 
+  // Check if a video element is an ad using multiple heuristics
+  function isVideoAd(video) {
+    var src = (video.src || video.currentSrc || '').toLowerCase();
+
+    // Check source URL for ad patterns
+    if (src.indexOf('doubleclick') > -1 || src.indexOf('googlesyndication') > -1 ||
+        src.indexOf('imasdk') > -1 || src.indexOf('vast') > -1 || src.indexOf('vpaid') > -1 ||
+        src.indexOf('preroll') > -1 || src.indexOf('adserver') > -1 ||
+        src.indexOf('clmbtech') > -1 || src.indexOf('jsrdn') > -1 ||
+        src.indexOf('googleads') > -1 || src.indexOf('advert') > -1 ||
+        src.indexOf('promo') > -1 || src.indexOf('commercial') > -1) {
+      return true;
+    }
+
+    // Check <source> children
+    var sources = video.querySelectorAll('source');
+    for (var s = 0; s < sources.length; s++) {
+      var sSrc = (sources[s].src || '').toLowerCase();
+      if (sSrc.indexOf('doubleclick') > -1 || sSrc.indexOf('googleads') > -1 ||
+          sSrc.indexOf('advert') > -1 || sSrc.indexOf('promo') > -1 || sSrc.indexOf('adserver') > -1) {
+        return true;
+      }
+    }
+
+    // Check own class/id
+    var vCls = (video.className && typeof video.className === 'string') ? video.className.toLowerCase() : '';
+    var vId = (video.id || '').toLowerCase();
+    if (vCls.match(/\\bad[s]?\\b|advertisement|commercial|promo/i) ||
+        vId.match(/\\bad[s]?\\b|advertisement|commercial|promo/i)) {
+      return true;
+    }
+
+    // Walk up parent containers
+    var el = video.parentElement;
+    for (var j = 0; j < 8 && el; j++) {
+      var id = (el.id || '').toLowerCase();
+      var cls = (el.className && typeof el.className === 'string') ? el.className.toLowerCase() : '';
+      if (id.indexOf('ad-') > -1 || id.indexOf('ad_') > -1 || id.indexOf('ads-') > -1 ||
+          id.indexOf('video-ad') > -1 || id.indexOf('video_ad') > -1 ||
+          cls.indexOf('ad-container') > -1 || cls.indexOf('ad_container') > -1 ||
+          cls.indexOf('ad-wrapper') > -1 || cls.indexOf('ad_wrapper') > -1 ||
+          cls.indexOf('video-ad') > -1 || cls.indexOf('video_ad') > -1 ||
+          cls.indexOf('preroll') > -1 || cls.indexOf('outstream') > -1 ||
+          cls.indexOf('ima-') > -1 || cls.indexOf('ima_') > -1 ||
+          cls.indexOf('vdo-ai') > -1 || cls.indexOf('primis') > -1 ||
+          cls.indexOf('connatix') > -1 || cls.indexOf('clmb') > -1 ||
+          cls.indexOf('ad-showing') > -1 || cls.indexOf('ad-player') > -1 ||
+          cls.indexOf('jw-state-advertising') > -1 ||
+          el.hasAttribute('data-ad-client') || el.hasAttribute('data-ad-slot') ||
+          el.hasAttribute('data-google-query-id') || el.hasAttribute('data-ad-format')) {
+        return true;
+      }
+      el = el.parentElement;
+    }
+
+    // Duration heuristic: short videos (< 60s) in ad-like context
+    if (video.duration && video.duration > 0 && video.duration < 60) {
+      var p = video.parentElement;
+      for (var k = 0; k < 4 && p; k++) {
+        var pCls = (p.className && typeof p.className === 'string') ? p.className.toLowerCase() : '';
+        var pId = (p.id || '').toLowerCase();
+        if (pCls.match(/ad|ads|advertisement|commercial|promo|sponsor/i) ||
+            pId.match(/ad|ads|advertisement|commercial|promo|sponsor/i)) {
+          return true;
+        }
+        p = p.parentElement;
+      }
+    }
+
+    return false;
+  }
+
   function killAdVideos() {
     try {
       var videos = document.querySelectorAll('video');
       for (var i = 0; i < videos.length; i++) {
         var video = videos[i];
-        var src = (video.src || video.currentSrc || '').toLowerCase();
-        var isAd = false;
 
-        // Check source
-        if (src.indexOf('doubleclick') > -1 || src.indexOf('googlesyndication') > -1 ||
-            src.indexOf('imasdk') > -1 || src.indexOf('vast') > -1 || src.indexOf('vpaid') > -1 ||
-            src.indexOf('preroll') > -1 || src.indexOf('ads') > -1 ||
-            src.indexOf('clmbtech') > -1 || src.indexOf('jsrdn') > -1) {
-          isAd = true;
-        }
+        // Attach per-video listeners to intercept future play/load events
+        if (!video.getAttribute('data-nav0-monitored')) {
+          video.setAttribute('data-nav0-monitored', 'true');
 
-        // Check parent elements
-        if (!isAd) {
-          var el = video.parentElement;
-          for (var j = 0; j < 8 && el; j++) {
-            var id = (el.id || '').toLowerCase();
-            var cls = (el.className && typeof el.className === 'string') ? el.className.toLowerCase() : '';
-            if (id.indexOf('ad-') > -1 || id.indexOf('ad_') > -1 || id.indexOf('ads-') > -1 ||
-                id.indexOf('video-ad') > -1 || id.indexOf('video_ad') > -1 ||
-                cls.indexOf('ad-container') > -1 || cls.indexOf('ad_container') > -1 ||
-                cls.indexOf('ad-wrapper') > -1 || cls.indexOf('ad_wrapper') > -1 ||
-                cls.indexOf('video-ad') > -1 || cls.indexOf('video_ad') > -1 ||
-                cls.indexOf('preroll') > -1 || cls.indexOf('outstream') > -1 ||
-                cls.indexOf('ima-') > -1 || cls.indexOf('ima_') > -1 ||
-                cls.indexOf('vdo-ai') > -1 || cls.indexOf('primis') > -1 ||
-                cls.indexOf('connatix') > -1 || cls.indexOf('clmb') > -1 ||
-                el.hasAttribute('data-ad-client') || el.hasAttribute('data-ad-slot') ||
-                el.hasAttribute('data-google-query-id')) {
-              isAd = true;
-              break;
+          video.addEventListener('play', function() {
+            if (isVideoAd(this)) {
+              this.pause();
+              this.muted = true;
             }
-            el = el.parentElement;
-          }
+          });
+
+          video.addEventListener('loadstart', function() {
+            if (isVideoAd(this)) {
+              this.pause();
+              this.muted = true;
+            }
+          });
         }
 
-        if (isAd) {
+        if (isVideoAd(video)) {
           video.pause();
           video.removeAttribute('autoplay');
+          video.autoplay = false;
           video.muted = true;
           try { video.src = ''; video.load(); } catch(e) {}
           hideElement(video);
           if (video.parentElement) hideElement(video.parentElement);
+        }
+      }
+
+      // Also check iframe-based video players whose parent is an ad container
+      var iframes = document.querySelectorAll('iframe');
+      for (var f = 0; f < iframes.length; f++) {
+        var iframe = iframes[f];
+        var iSrc = (iframe.src || '').toLowerCase();
+        if (iSrc.match(/youtube|vimeo|dailymotion|jwplayer/)) {
+          var iParent = iframe.parentElement;
+          for (var ip = 0; ip < 4 && iParent; ip++) {
+            var iCls = (iParent.className && typeof iParent.className === 'string') ? iParent.className.toLowerCase() : '';
+            var iId = (iParent.id || '').toLowerCase();
+            if (iCls.match(/ad|ads|advertisement/i) || iId.match(/ad|ads|advertisement/i)) {
+              hideElement(iframe);
+              break;
+            }
+            iParent = iParent.parentElement;
+          }
         }
       }
     } catch(e) {}
