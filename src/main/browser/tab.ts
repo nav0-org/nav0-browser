@@ -13,7 +13,7 @@ import { PermissionManager } from "./permission-manager";
 import { ReaderModeManager, ReaderModeState } from "./reader-mode-manager";
 import { DataStoreManager } from "../database/data-store-manager";
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
-import { COSMETIC_FILTER_CSS } from "../ad-blocker/ad-block-lists";
+import { COSMETIC_FILTER_CSS, AD_BLOCK_SCRIPT } from "../ad-blocker/ad-block-lists";
 const domainPattern = /^[^\s]+\.[^\s]+$/;
 
 export class Tab {
@@ -377,9 +377,13 @@ export class Tab {
 
       if (isAllowed) return;
 
-      this.webContentsViewInstance.webContents.insertCSS(COSMETIC_FILTER_CSS).catch(() => {
-        // Page may have navigated away
-      });
+      const wc = this.webContentsViewInstance.webContents;
+
+      // Inject cosmetic CSS to hide ad elements
+      wc.insertCSS(COSMETIC_FILTER_CSS).catch(() => {});
+
+      // Inject JavaScript for dynamic ad blocking, video ad blocking, and overlay removal
+      wc.executeJavaScript(AD_BLOCK_SCRIPT).catch(() => {});
     } catch {
       // Ignore errors (settings not loaded, invalid URL, etc.)
     }
