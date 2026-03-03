@@ -4,6 +4,7 @@ import { Tab } from "./tab";
 import { AppConstants, InAppUrls, MainToRendererEventsForBrowserIPC } from "../../constants/app-constants";
 import { OptionsMenuManager } from "./options-menu-manager";
 import { CommandKOverlayManager } from "./command-k-overlay-manager";
+import { DownloadManager } from "./download-manager";
 import type { Database as DB } from 'better-sqlite3';
 
 export class AppWindow {
@@ -58,6 +59,12 @@ export class AppWindow {
         return { action: 'deny' };
       });
     
+      // Pause all active downloads before the window is destroyed
+      // so their resume metadata can be persisted to the DB
+      this.browserWindowInstance.on('close', () => {
+        DownloadManager.pauseAllDownloads();
+      });
+
       this.browserWindowInstance.on('closed', () => {
         this.browserWindowInstance = null;
       });

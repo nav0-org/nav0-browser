@@ -17,6 +17,10 @@ export abstract class DownloadManager {
   // so handleDownload can skip creating a duplicate DB record
   private static resumingDownloads: Map<string, string> = new Map();
 
+  // Set to true when the app is shutting down, so the done handler doesn't
+  // overwrite 'paused' status with 'cancelled'
+  private static shuttingDown = false;
+
   // ── tracking helpers ──
 
   public static trackDownloadStarted(downloadId: string, fileName: string, totalBytes: number, dbRecordId: string): void {
@@ -75,8 +79,15 @@ export abstract class DownloadManager {
     if (item) item.cancel(); // triggers 'done' with state='cancelled'
   }
 
-  /** Pause every in-progress download and persist its state to the DB. Called on app exit. */
+  public static isShuttingDown(): boolean {
+    return this.shuttingDown;
+  }
+
+  /** Pause every in-progress download and persist its state to the DB. Called before window close. */
   public static pauseAllDownloads(): void {
+    if (this.shuttingDown) return; // already handled
+    this.shuttingDown = true;
+
     for (const [downloadId, item] of this.downloadItems) {
       try {
         const entry = this.activeDownloads.get(downloadId);
@@ -97,6 +108,15 @@ export abstract class DownloadManager {
           } catch (_) { /* record may not exist in this DB */ }
         }
       } catch (_) { /* best-effort */ }
+    }
+
+    // Fallback: mark any remaining in_progress records as paused in DB
+    // (in case DownloadItems were already destroyed before we could read them)
+    for (const isPrivate of [false, true]) {
+      try {
+        const db = DatabaseManager.getDatabase(isPrivate);
+        db.prepare("UPDATE download SET status = 'paused' WHERE status = 'in_progress';").run();
+      } catch (_) { /* DB may not be initialized */ }
     }
   }
 

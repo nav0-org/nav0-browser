@@ -245,7 +245,11 @@ export class Tab {
       if (state === 'completed') {
         DownloadManager.updateRecordStatus(this.parentAppWindow.id, dbRecordId, 'completed', item.getTotalBytes());
       } else if (state === 'cancelled') {
-        DownloadManager.updateRecordStatus(this.parentAppWindow.id, dbRecordId, 'cancelled');
+        // During shutdown, downloads are auto-cancelled after being paused by
+        // pauseAllDownloads() – don't overwrite the 'paused' status in the DB
+        if (!DownloadManager.isShuttingDown()) {
+          DownloadManager.updateRecordStatus(this.parentAppWindow.id, dbRecordId, 'cancelled');
+        }
       } else {
         console.error(`Download failed: ${state}`);
       }
