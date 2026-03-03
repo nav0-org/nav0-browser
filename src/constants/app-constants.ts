@@ -129,6 +129,7 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly GET_SEARCH_URL = "browser:get-search-url";
   public static readonly FETCH_OPEN_TABS = "browser:fetch-open-tabs";
   public static readonly SHOW_ABOUT_PANEL = "browser:show-about-panel";
+  public static readonly TOGGLE_READER_MODE = "browser:toggle-reader-mode";
   public static readonly SHOW_FIND_IN_PAGE = "browser:show-find-in-page";
   public static readonly HIDE_FIND_IN_PAGE = "browser:hide-find-in-page";
   public static readonly FIND_IN_PAGE = "browser:find-in-page";
@@ -148,6 +149,8 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly TAB_FAVICON_UPDATED = "browser:tab-favicon-updated";
   public static readonly TAB_URL_UPDATED =  "browser:tab-url-updated";
   public static readonly NAVIGATION_FAILED = "browser:navigation-failed";
+  public static readonly READER_MODE_AVAILABILITY_CHANGED = "browser:reader-mode-availability-changed";
+  public static readonly READER_MODE_STATE_CHANGED = "browser:reader-mode-state-changed";
   public static readonly FIND_IN_PAGE_RESULT = "browser:find-in-page-result";
   // public static readonly SET_DIALOG_VISIBILITY = "browser:set-dialog-visibility";
 }

@@ -135,10 +135,10 @@ export function init(){
     fetchOpenTabs: async (appWindowId: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.FETCH_OPEN_TABS, appWindowId);
     },
-    // executeJavaScript: (code: string) => ipcRenderer.invoke('execute-javascript', code),
-    // captureScreenshot: () => ipcRenderer.invoke('capture-screenshot'),
-    // saveScreenshot: (dataUrl: string) => ipcRenderer.invoke('save-screenshot', dataUrl),
-    
+    toggleReaderMode: async (appWindowId: string, tabId: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.TOGGLE_READER_MODE, appWindowId, tabId);
+    },
+
     // Event listeners
     onNewTabCreated: (callback: (tab: {id: string, url: string, title: string}) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.NEW_TAB_CREATED, (_event, tab) => callback(tab));
@@ -160,6 +160,12 @@ export function init(){
     },
     onNavigationFailed: (callback: (data: { id: string }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.NAVIGATION_FAILED, (_event, data) => callback(data));
+    },
+    onReaderModeAvailabilityChanged: (callback: (data: { id: string, isEligible: boolean }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.READER_MODE_AVAILABILITY_CHANGED, (_event, data) => callback(data));
+    },
+    onReaderModeStateChanged: (callback: (data: { id: string, isActive: boolean }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.READER_MODE_STATE_CHANGED, (_event, data) => callback(data));
     },
     onFindInPageResult: (callback: (data: { activeMatchOrdinal: number, matches: number, finalUpdate: boolean }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.FIND_IN_PAGE_RESULT, (_event, data) => callback(data));
