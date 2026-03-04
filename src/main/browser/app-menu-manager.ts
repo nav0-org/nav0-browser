@@ -49,6 +49,16 @@ export abstract class AppMenuManager {
             await activeWindow.createTab(`file://${result.filePaths[0]}`, true);
           }},
           {type: 'separator' as const},
+          {label: 'Reopen Closed Tab', accelerator: 'CmdOrCtrl+Shift+T', click: async() => {
+            const activeWindow = AppWindowManager.getActiveWindow();
+            if (activeWindow && !activeWindow.isPrivate) {
+              const closedTab = activeWindow.popRecentlyClosedTab();
+              if (closedTab) {
+                await activeWindow.createTab(closedTab.url, true);
+              }
+            }
+          }},
+          {type: 'separator' as const},
           {label: 'Close Tab', click: async() => { AppWindowManager.getActiveWindow().closeTab(AppWindowManager.getActiveWindow().getActiveTabId(), true); }},
           {label: 'Close Window', click: async() => { AppWindowManager.closeWindow(AppWindowManager.getActiveWindowId()); }},
         ]
