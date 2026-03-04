@@ -10,6 +10,14 @@ Thoughts on privacy, browsers, and the open web.
 ---
 
 <div class="blog-post-item">
+  <a href="/blog/nav0-vs-chrome-performance-benchmark">
+    <h2>Nav0 vs Chrome: A Head-to-Head Performance Benchmark on macOS</h2>
+  </a>
+  <div class="post-meta">March 4, 2026 &middot; 11 min read &middot; Performance</div>
+  <p class="post-excerpt">We ran a rigorous head-to-head performance comparison between nav0 and Google Chrome on a MacBook Pro M1. Nav0 used 48.5% less memory, 86.3% less CPU, and spawned far fewer processes across every tab count tested.</p>
+</div>
+
+<div class="blog-post-item">
   <a href="/blog/the-enshittification-of-chrome">
     <h2>The Enshittification of Chrome: How the World's Most Popular Browser Turned Against Its Users</h2>
   </a>
