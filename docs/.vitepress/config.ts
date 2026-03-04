@@ -156,6 +156,7 @@ export default defineConfig({
       { text: 'Guide', link: '/guide/getting-started' },
       { text: 'Install', link: '/install' },
       { text: 'Blog', link: '/blog/' },
+      { text: 'Releases', link: '/releases/' },
       { text: 'FAQ', link: '/faq' },
       { text: 'Privacy', link: '/guide/privacy' },
       {
@@ -189,7 +190,21 @@ export default defineConfig({
           ]
         }
       ],
-      '/blog/': getBlogSidebar()
+      '/blog/': getBlogSidebar(),
+      '/releases/': [
+        {
+          text: 'Release Notes',
+          items: [
+            { text: 'All Releases', link: '/releases/' },
+            { text: 'v0.0.6', link: '/releases/#v0-0-6' },
+            { text: 'v0.0.5-alpha', link: '/releases/#v0-0-5-alpha' },
+            { text: 'v0.0.4', link: '/releases/#v0-0-4' },
+            { text: 'v0.0.3-alpha', link: '/releases/#v0-0-3-alpha' },
+            { text: 'v0.0.2-alpha', link: '/releases/#v0-0-2-alpha' },
+            { text: '0.0.1-alpha', link: '/releases/#v0-0-1-alpha' },
+          ]
+        }
+      ]
     },
 
     socialLinks: [
