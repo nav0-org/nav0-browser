@@ -1,5 +1,7 @@
 import './index.css';
+import { initTheme } from '../common/theme';
 import { createIcons, icons } from 'lucide';
+initTheme();
 
 let matchCase = false;
 let wholeWord = false;

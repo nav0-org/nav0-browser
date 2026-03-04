@@ -2,9 +2,11 @@
 import { HtmlUtils } from '../../../renderer/common/html-utils';
 import { BookmarkRecord } from '../../../types/bookmark-record';
 import './index.css';
+import { initTheme } from '../../../renderer/common/theme';
 
 import { createIcons, icons } from 'lucide';
 createIcons({ icons });
+initTheme();
 
 const PAGE_SIZE = 50;
 let currentOffset = 0;

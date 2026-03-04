@@ -79,6 +79,35 @@
 }
 
 /* --------------------------------------------------------------------------
+   Dark Mode Theme
+   -------------------------------------------------------------------------- */
+[data-theme="dark"] {
+  --primary-color: #ffffff;
+  --primary-light: #2a2a2a;
+  --primary-dark: #e0e0e0;
+  --text-color: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --text-light: #888;
+
+  --bg-color: #1a1a1a;
+  --bg-light: #242424;
+  --bg-hover: #3a3a3a;
+  --bg-active: #2a2a2a;
+
+  --border-color: #3a3a3a;
+  --border-color-dark: #4a4a4a;
+
+  --error-light: #3d1f1f;
+  --warning-light: #3d3420;
+  --success-light: #1f3d26;
+  --info-light: #1f2d3d;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 10px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* --------------------------------------------------------------------------
    Reset & Base Styles
    -------------------------------------------------------------------------- */
 * {
@@ -511,6 +540,10 @@ img {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .form-control:focus {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
 }
 
 .form-group {

@@ -18,6 +18,9 @@ export class BrowserTabManager {
   private downloadProgressRing: SVGElement;
   private downloadProgressFill: SVGCircleElement;
   private readerModeButton: HTMLButtonElement;
+  private darkModeButton: HTMLButtonElement;
+  private darkModeIconMoon: HTMLElement;
+  private darkModeIconSun: HTMLElement;
 
   // State
   private tabs: Tab[] = [];
@@ -66,6 +69,11 @@ export class BrowserTabManager {
     this.downloadProgressRing = document.getElementById('download-progress-ring') as unknown as SVGElement;
     this.downloadProgressFill = document.querySelector('.download-progress-ring-fill') as unknown as SVGCircleElement;
     this.readerModeButton = document.getElementById('reader-mode-button') as HTMLButtonElement;
+    this.darkModeButton = document.getElementById('dark-mode-button') as HTMLButtonElement;
+    this.darkModeIconMoon = document.getElementById('dark-mode-icon-moon') as HTMLElement;
+    this.darkModeIconSun = document.getElementById('dark-mode-icon-sun') as HTMLElement;
+
+    this.initDarkMode();
   }
 
   private setupEventListeners(): void {
@@ -122,6 +130,10 @@ export class BrowserTabManager {
 
     this.downloadsButton.addEventListener('click', () => {
       window.BrowserAPI.createTab(this.appWindowId, InAppUrls.DOWNLOADS, true);
+    });
+
+    this.darkModeButton.addEventListener('click', () => {
+      this.toggleDarkMode();
     });
 
     this.optionsButton.addEventListener('click', async() => {
@@ -322,6 +334,30 @@ export class BrowserTabManager {
     const circumference = 2 * Math.PI * 14; // 87.9646
     const offset = circumference * (1 - progress);
     this.downloadProgressFill.style.strokeDashoffset = offset.toString();
+  }
+
+  private initDarkMode(): void {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      this.darkModeIconMoon.style.display = 'none';
+      this.darkModeIconSun.style.display = 'block';
+    }
+  }
+
+  private toggleDarkMode(): void {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'light');
+      this.darkModeIconMoon.style.display = 'block';
+      this.darkModeIconSun.style.display = 'none';
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+      this.darkModeIconMoon.style.display = 'none';
+      this.darkModeIconSun.style.display = 'block';
+    }
   }
 
   private updateBrowserViewBounds(): void {

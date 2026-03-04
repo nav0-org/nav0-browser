@@ -1,8 +1,10 @@
 
 import './index.css';
+import { initTheme } from '../../common/theme';
 
 import { createIcons, icons } from 'lucide';
 createIcons({ icons });
+initTheme();
 
 // Handle search input
 const searchBar = document.getElementById('search-bar') as HTMLInputElement;

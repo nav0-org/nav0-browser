@@ -1,6 +1,8 @@
 
 import './index.css';
+import { initTheme } from '../../common/theme';
 import { createIcons, icons } from 'lucide';
+initTheme();
 
 type ResultItem = {
   type: 'tab' | 'bookmark' | 'history' | 'download' | 'search';

@@ -84,11 +84,9 @@
   }
 }
 
-/* Dark Mode Support (Optional) */
-@media (prefers-color-scheme: dark) {
-  .notification {
-    background-color: #2a2a2a;
-    color: #e0e0e0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  }
+/* Dark Mode Support */
+[data-theme="dark"] .notification {
+  background-color: #2a2a2a;
+  color: #e0e0e0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
