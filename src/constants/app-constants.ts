@@ -148,6 +148,11 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly APPLY_SETTINGS = "browser:apply-settings";
   public static readonly GET_STORAGE_ESTIMATE = "browser:get-storage-estimate";
 
+  // Recently closed
+  public static readonly FETCH_RECENTLY_CLOSED_TABS = "browser:fetch-recently-closed-tabs";
+  public static readonly FETCH_RECENTLY_CLOSED_WINDOWS = "browser:fetch-recently-closed-windows";
+  public static readonly REOPEN_CLOSED_WINDOW = "browser:reopen-closed-window";
+
   // Permission system
   public static readonly PERMISSION_PROMPT_RESPONSE = "browser:permission-prompt-response";
   public static readonly FETCH_PERMISSIONS = "browser:fetch-permissions";
@@ -180,6 +185,7 @@ export abstract class MainToRendererEventsForBrowserIPC {
 export abstract class DataStoreConstants {
   public static readonly DEFAULT_KEY = 'default';
   public static readonly BROWSER_SETTINGS = "browser-settings";
+  public static readonly RECENTLY_CLOSED_WINDOWS = "recently-closed-windows";
 }
 
 export abstract class RendererToMainEventsForDataStoreIPC {
