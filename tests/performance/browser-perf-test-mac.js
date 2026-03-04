@@ -111,20 +111,35 @@ function getCpuPercent(pid) {
 function getPhysicalFootprintMB(rootPid) {
   const pids = getProcessTree(rootPid);
   try {
-    const pidArgs = pids.map(p => `-p ${p}`).join(' ');
-    const output = execSync(`footprint ${pidArgs} 2>/dev/null`, {
+    // PIDs are positional args (the -p flag means "sort", not "pid")
+    const output = execSync(`footprint ${pids.join(' ')} 2>/dev/null`, {
       encoding: 'utf-8',
       timeout: 30000,
     });
-    let totalBytes = 0;
-    const re = /phys_footprint:\s+(\d+)\s+bytes/g;
-    let match;
-    while ((match = re.exec(output)) !== null) {
-      totalBytes += parseInt(match[1], 10);
+    let totalMB = 0;
+    let found = 0;
+    for (const line of output.split('\n')) {
+      if (line.includes('peak')) continue; // skip peak footprint lines
+      // Match "Physical footprint:  123M" or "Physical footprint:  1.2G"
+      const humanMatch = line.match(/(?:Physical footprint|phys_footprint):\s+([\d.]+)\s*([BKMG])/i);
+      if (humanMatch) {
+        const val = parseFloat(humanMatch[1]);
+        const unit = humanMatch[2].toUpperCase();
+        if (unit === 'B') totalMB += val / (1024 * 1024);
+        else if (unit === 'K') totalMB += val / 1024;
+        else if (unit === 'M') totalMB += val;
+        else if (unit === 'G') totalMB += val * 1024;
+        found++;
+        continue;
+      }
+      // Match "phys_footprint:  123456789 bytes"
+      const bytesMatch = line.match(/(?:Physical footprint|phys_footprint):\s+(\d+)\s+bytes/i);
+      if (bytesMatch) {
+        totalMB += parseInt(bytesMatch[1], 10) / (1024 * 1024);
+        found++;
+      }
     }
-    if (totalBytes > 0) {
-      return +(totalBytes / (1024 * 1024)).toFixed(2);
-    }
+    if (found > 0) return +totalMB.toFixed(2);
   } catch {}
 
   // Fallback: sum RSS (less accurate due to shared memory double-counting)
