@@ -73,12 +73,24 @@ export abstract class AppWindowManager {
       window = AppWindowManager.getActiveWindow();
     }
     if (window) {
-      // Track closed window data (not private windows)
+      // Track closed window and its tabs (not private windows)
       if (!window.isPrivate) {
         const tabCount = window.getTabCount();
         const tabs = window.getTabSummaries();
         if (tabCount > 0) {
           AppWindowManager.recordClosedWindow({ tabCount, tabs, closedAt: Date.now() });
+          // Record each tab individually to the global closed tabs list
+          for (const tab of window.getTabs()) {
+            const url = tab.getUrl();
+            if (url && !url.startsWith('nav0://') && url !== '') {
+              AppWindowManager.recordClosedTab({
+                url,
+                title: tab.getTitle(),
+                faviconUrl: tab.getFaviconUrl(),
+                closedAt: Date.now(),
+              });
+            }
+          }
         }
       }
       const remainingPrivateWindows: Array<AppWindow> = [];
