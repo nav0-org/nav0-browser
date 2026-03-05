@@ -1,9 +1,10 @@
-import { RendererToMainEventsForBrowserIPC } from "../../constants/app-constants";
+import { ClosedWindowRecord, RendererToMainEventsForBrowserIPC, DataStoreConstants } from "../../constants/app-constants";
 import { AppMenuManager } from "./app-menu-manager";
 import { AppWindow } from "./app-window";
 import { app, dialog, ipcMain, Menu } from "electron";
 import { Tab } from "./tab";
 import { DatabaseManager } from "../database/database-manager";
+import { DataStoreManager } from "../database/data-store-manager";
 import { SearchEngine } from "../web/search-engine";
 import { PermissionManager, PermissionRequest } from "./permission-manager";
 import { PermissionPromptData } from "./permission-prompt-overlay-manager";
@@ -11,6 +12,7 @@ import { PermissionPromptData } from "./permission-prompt-overlay-manager";
 export abstract class AppWindowManager {
   private static windows: Map<string, AppWindow>;
   private static activeWindowId: string | null;
+  private static readonly MAX_CLOSED_WINDOWS = 3;
 
   public static async init() {
     AppWindowManager.windows = new Map();
@@ -69,7 +71,15 @@ export abstract class AppWindowManager {
       window = AppWindowManager.getActiveWindow();
     }
     if (window) {
-      const remainingPrivateWindows: Array<AppWindow> = []; 
+      // Track closed window data (not private windows)
+      if (!window.isPrivate) {
+        const tabCount = window.getTabCount();
+        const tabs = window.getTabSummaries();
+        if (tabCount > 0) {
+          AppWindowManager.recordClosedWindow({ tabCount, tabs, closedAt: Date.now() });
+        }
+      }
+      const remainingPrivateWindows: Array<AppWindow> = [];
       AppWindowManager.windows.forEach(element => {
         if(element.isPrivate && element.id != id){
           remainingPrivateWindows.push(element);
@@ -84,6 +94,21 @@ export abstract class AppWindowManager {
     if (AppWindowManager.activeWindowId === id) {
       AppWindowManager.activeWindowId = null;
     }
+  }
+
+  private static recordClosedWindow(record: ClosedWindowRecord): void {
+    let closedWindows = AppWindowManager.getClosedWindows();
+    closedWindows.push(record);
+    if (closedWindows.length > AppWindowManager.MAX_CLOSED_WINDOWS) {
+      closedWindows = closedWindows.slice(-AppWindowManager.MAX_CLOSED_WINDOWS);
+    }
+    DataStoreManager.set(DataStoreConstants.CLOSED_WINDOWS, closedWindows);
+  }
+
+  static getClosedWindows(): ClosedWindowRecord[] {
+    const data = DataStoreManager.get(DataStoreConstants.CLOSED_WINDOWS);
+    if (Array.isArray(data)) return data;
+    return [];
   }
   static activateWindow(id: string): void {
     if (AppWindowManager.windows.has(id)) {
@@ -397,6 +422,29 @@ export abstract class AppWindowManager {
         }));
       }
       return [];
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_RECENTLY_CLOSED_TABS, async (event, appWindowId: string) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        return window.getRecentlyClosedTabs();
+      }
+      return [];
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.RESTORE_CLOSED_TAB, async (event, appWindowId: string) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        const tab = await window.restoreLastClosedTab();
+        if (tab) {
+          return { id: tab.getId(), title: tab.getTitle(), url: tab.getUrl() };
+        }
+      }
+      return null;
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_CLOSED_WINDOWS, async () => {
+      return AppWindowManager.getClosedWindows().reverse();
     });
 
     ipcMain.handle(RendererToMainEventsForBrowserIPC.OPEN_PDF_FILE, async (event, appWindowId: string) => {

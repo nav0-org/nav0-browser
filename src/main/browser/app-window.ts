@@ -1,7 +1,7 @@
 import { BrowserWindow, session } from "electron";
 import { v4 as uuid } from "uuid";
 import { Tab } from "./tab";
-import { AppConstants, InAppUrls, MainToRendererEventsForBrowserIPC } from "../../constants/app-constants";
+import { AppConstants, ClosedTabRecord, InAppUrls, MainToRendererEventsForBrowserIPC } from "../../constants/app-constants";
 import { OptionsMenuManager } from "./options-menu-manager";
 import { CommandKOverlayManager } from "./command-k-overlay-manager";
 import { DownloadManager } from "./download-manager";
@@ -16,6 +16,8 @@ export class AppWindow {
   private tabs: Map<string, Tab>;
   private activeTabId: string | null;
   public isPrivate = false;
+  private closedTabs: ClosedTabRecord[] = [];
+  private static readonly MAX_CLOSED_TABS = 10;
   private partitionSetting: string;
   private optionsMenuManager: OptionsMenuManager | null = null;
   private commandKOverlayManager: CommandKOverlayManager | null = null;
@@ -149,6 +151,23 @@ export class AppWindow {
   closeTab(id: string, isUserInitiated = true): void {
     const tab = this.tabs.get(id);
     if (tab) {
+      // Store closed tab data for restore (not in private mode)
+      if (!this.isPrivate) {
+        const url = tab.getUrl();
+        // Don't store internal pages or empty tabs
+        if (url && !url.startsWith(InAppUrls.PREFIX) && url !== '') {
+          this.closedTabs.push({
+            url,
+            title: tab.getTitle(),
+            faviconUrl: tab.getFaviconUrl(),
+            closedAt: Date.now(),
+          });
+          // Keep only the most recent MAX_CLOSED_TABS entries
+          if (this.closedTabs.length > AppWindow.MAX_CLOSED_TABS) {
+            this.closedTabs = this.closedTabs.slice(-AppWindow.MAX_CLOSED_TABS);
+          }
+        }
+      }
       PermissionManager.clearSessionPermissionsForTab(id);
       tab.getWebContentsViewInstance().removeAllListeners();
       tab.getWebContentsViewInstance().webContents.close();
@@ -344,6 +363,28 @@ export class AppWindow {
 
   stopFindInPage(): void {
     this.findInPageManager?.clearHighlights();
+  }
+
+  async restoreLastClosedTab(): Promise<Tab | null> {
+    if (this.closedTabs.length === 0) return null;
+    const closedTab = this.closedTabs.pop();
+    if (!closedTab) return null;
+    return this.createTab(closedTab.url, true);
+  }
+
+  getRecentlyClosedTabs(): ClosedTabRecord[] {
+    return [...this.closedTabs].reverse();
+  }
+
+  getTabCount(): number {
+    return this.tabs.size;
+  }
+
+  getTabSummaries(): { url: string; title: string }[] {
+    return Array.from(this.tabs.values()).map(tab => ({
+      url: tab.getUrl(),
+      title: tab.getTitle(),
+    }));
   }
 
   async setDarkMode(enabled: boolean): Promise<void> {
