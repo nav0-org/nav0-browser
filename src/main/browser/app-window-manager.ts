@@ -358,6 +358,19 @@ export abstract class AppWindowManager {
       return await SearchEngine.getSearchUrl(searchTerm);
     });
 
+    ipcMain.on(RendererToMainEventsForBrowserIPC.SET_DARK_MODE, async (event, appWindowId: string, enabled: boolean) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        await window.setDarkMode(enabled);
+      }
+      // Also apply to all other windows
+      for (const w of AppWindowManager.windows.values()) {
+        if (w.id !== window?.id) {
+          await w.setDarkMode(enabled);
+        }
+      }
+    });
+
     ipcMain.handle(RendererToMainEventsForBrowserIPC.TOGGLE_READER_MODE, async (event, appWindowId: string, tabId: string) => {
       const window = AppWindowManager.getWindowById(appWindowId);
       if (window) {

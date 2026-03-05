@@ -36,6 +36,23 @@ export class Tab {
   private readerModeCheckTimer: ReturnType<typeof setTimeout> | null = null;
   private readerModeToggleLock = false;
   private static pdfSessionsRegistered = new Set<string>();
+  private darkModeCSSKey: string | null = null;
+  private static darkModeEnabled = false;
+
+  private static readonly DARK_MODE_CSS = `
+    html {
+      filter: invert(1) hue-rotate(180deg) !important;
+      background-color: #111 !important;
+    }
+    img, video, picture, canvas, svg image,
+    [style*="background-image"],
+    embed, object {
+      filter: invert(1) hue-rotate(180deg) !important;
+    }
+    iframe {
+      filter: invert(1) hue-rotate(180deg) !important;
+    }
+  `;
 
   constructor(parentAppWindow: AppWindow, url: string , partitionSetting: string) {
     this.parentAppWindow = parentAppWindow;
@@ -193,6 +210,7 @@ export class Tab {
     // Cosmetic ad filtering and DOM cleanup once the DOM is ready
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DOM_READY, () => {
       this.injectAdBlockDOMScript();
+      this.applyDarkModeIfEnabled();
     });
 
     this.webContentsViewInstance.webContents.session.on('will-download', async (event, item, downloadWebContents) => {
@@ -611,6 +629,42 @@ export class Tab {
 
   isReaderModeActive(): boolean {
     return this.readerMode.isActive;
+  }
+
+  private isExternalPage(): boolean {
+    return !this.url.startsWith(InAppUrls.PREFIX) && this.url !== '' && !this.url.startsWith('file://');
+  }
+
+  private applyDarkModeIfEnabled(): void {
+    if (!Tab.darkModeEnabled || !this.isExternalPage()) return;
+    this.injectDarkModeCSS();
+  }
+
+  async injectDarkModeCSS(): Promise<void> {
+    if (this.darkModeCSSKey || !this.isExternalPage()) return;
+    try {
+      this.darkModeCSSKey = await this.webContentsViewInstance.webContents.insertCSS(Tab.DARK_MODE_CSS);
+    } catch {
+      // Page may not be ready
+    }
+  }
+
+  async removeDarkModeCSS(): Promise<void> {
+    if (!this.darkModeCSSKey) return;
+    try {
+      await this.webContentsViewInstance.webContents.removeInsertedCSS(this.darkModeCSSKey);
+    } catch {
+      // Page may be closed
+    }
+    this.darkModeCSSKey = null;
+  }
+
+  static setDarkModeEnabled(enabled: boolean): void {
+    Tab.darkModeEnabled = enabled;
+  }
+
+  static isDarkModeEnabled(): boolean {
+    return Tab.darkModeEnabled;
   }
 
   //for handling right clicks

@@ -342,6 +342,8 @@ export class BrowserTabManager {
       document.documentElement.setAttribute('data-theme', 'dark');
       this.darkModeIconMoon.style.display = 'none';
       this.darkModeIconSun.style.display = 'block';
+      // Sync dark mode state to main process for web page injection
+      window.BrowserAPI.setDarkMode(this.appWindowId, true);
     }
   }
 
@@ -352,11 +354,13 @@ export class BrowserTabManager {
       localStorage.setItem('theme', 'light');
       this.darkModeIconMoon.style.display = 'block';
       this.darkModeIconSun.style.display = 'none';
+      window.BrowserAPI.setDarkMode(this.appWindowId, false);
     } else {
       document.documentElement.setAttribute('data-theme', 'dark');
       localStorage.setItem('theme', 'dark');
       this.darkModeIconMoon.style.display = 'none';
       this.darkModeIconSun.style.display = 'block';
+      window.BrowserAPI.setDarkMode(this.appWindowId, true);
     }
   }
 
