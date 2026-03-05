@@ -207,6 +207,8 @@ export class Tab {
     //for soft navigation (debounced)
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE_IN_PAGE, async (event, url: string) => {
       this.debouncedHandleNavigationCompletion(url);
+      // Re-apply dark mode for back/forward in-page navigations (bfcache restores)
+      this.applyDarkModeIfEnabled();
     });
 
     // Cosmetic ad filtering and DOM cleanup once the DOM is ready
@@ -643,7 +645,14 @@ export class Tab {
   }
 
   async injectDarkModeCSS(): Promise<void> {
-    if (this.darkModeCSSKey || !this.isExternalPage()) return;
+    if (!this.isExternalPage()) return;
+    // Remove stale key before re-injecting (page may have changed via bfcache)
+    if (this.darkModeCSSKey) {
+      try {
+        await this.webContentsViewInstance.webContents.removeInsertedCSS(this.darkModeCSSKey);
+      } catch { /* old page gone */ }
+      this.darkModeCSSKey = null;
+    }
     try {
       this.darkModeCSSKey = await this.webContentsViewInstance.webContents.insertCSS(Tab.DARK_MODE_CSS);
     } catch {
