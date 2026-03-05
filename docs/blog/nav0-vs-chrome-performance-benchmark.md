@@ -250,7 +250,7 @@ If you care about system responsiveness, fewer processes means less OS overhead.
 
 ## Try It Yourself
 
-The test script is [open source in our repository](https://github.com/user/nav0-browser/blob/main/tests/performance/browser-perf-test-mac.js). If you have a Mac with Chrome and nav0 installed, you can reproduce these results in about 15 minutes. We believe in showing our work, not just making claims.
+The test script is [open source in our repository](https://github.com/nav0-org/nav0-browser/blob/main/tests/performance/browser-perf-test-mac.js). If you have a Mac with Chrome and nav0 installed, you can reproduce these results in about 15 minutes. We believe in showing our work, not just making claims.
 
 The numbers speak for themselves. Nav0 isn't just a little lighter than Chrome — it's a fundamentally different approach to building a browser. No telemetry tax, no feature bloat, no background processes doing work you never asked for.
 
