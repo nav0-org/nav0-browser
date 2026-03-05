@@ -3,6 +3,7 @@ import { AppWindowManager } from './browser/app-window-manager';
 import { DataStoreManager } from './database/data-store-manager';
 import { DownloadManager } from './browser/download-manager';
 import { SettingsEnforcer } from './settings/settings-enforcer';
+import { startTestControlServer } from './test-control-server';
 
 // Disable Chromium features that trigger macOS "Local Network" permission dialog.
 // These features use mDNS/Bonjour for device discovery, which is unnecessary for
@@ -23,6 +24,12 @@ app.whenReady().then(async() => {
   await DataStoreManager.init();
   await SettingsEnforcer.init();
   await AppWindowManager.init();
+
+  // Start test control server after everything is initialized
+  const testPort = process.env.REMOTE_DEBUGGING_PORT ? parseInt(process.env.REMOTE_DEBUGGING_PORT, 10) : 0;
+  if (testPort > 0) {
+    startTestControlServer(testPort);
+  }
 });
 
 // Pause all in-progress downloads before quitting so they can be resumed later
