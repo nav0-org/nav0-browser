@@ -172,6 +172,7 @@ export class AppWindow {
       const yOffset = 85;
       this.getActiveTab().getWebContentsViewInstance()?.setBounds({x: parentBounds.x, y: yOffset, width: parentBounds.width, height: parentBounds.height - yOffset});
       this.browserWindowInstance.contentView.addChildView(this.getActiveTab().getWebContentsViewInstance());
+      this.getActiveTab().getWebContentsViewInstance().webContents.focus();
     }
     this.browserWindowInstance?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_ACTIVATED, {
       id: this.getActiveTab().id,

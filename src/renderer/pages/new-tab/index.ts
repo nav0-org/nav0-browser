@@ -16,4 +16,9 @@ if (searchBar) {
       window.BrowserAPI.navigate(window.BrowserAPI.appWindowId, window.BrowserAPI.tabId, query);
     }
   });
+
+  // Re-focus search bar when the page gains focus (e.g. tab switched back to new tab)
+  window.addEventListener('focus', () => {
+    searchBar.focus();
+  });
 }
