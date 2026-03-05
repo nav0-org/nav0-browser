@@ -3,6 +3,39 @@ import { readdirSync, readFileSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+function getReleaseSidebar() {
+  const releasesDir = resolve(dirname(fileURLToPath(import.meta.url)), '../releases')
+  const files = readdirSync(releasesDir).filter(f => f.endsWith('.md') && f !== 'index.md')
+
+  const releases = files.map(file => {
+    const content = readFileSync(resolve(releasesDir, file), 'utf-8')
+    const match = content.match(/^---\n([\s\S]*?)\n---/)
+    if (!match) return null
+
+    const frontmatter = match[1]
+    const titleMatch = frontmatter.match(/title:\s*["'](.+?)["']/)
+    const dateMatch = frontmatter.match(/date:\s*(\S+)/)
+
+    return {
+      text: titleMatch?.[1] || file.replace('.md', ''),
+      date: dateMatch?.[1] || '',
+      link: `/releases/${file.replace('.md', '')}`
+    }
+  }).filter((r): r is { text: string; date: string; link: string } => r !== null)
+
+  releases.sort((a, b) => +new Date(b.date) - +new Date(a.date))
+
+  return [
+    {
+      text: 'Release Notes',
+      items: [
+        { text: 'All Releases', link: '/releases/' },
+        ...releases.map(({ text, link }) => ({ text, link }))
+      ]
+    }
+  ]
+}
+
 function getBlogSidebar() {
   const blogDir = resolve(dirname(fileURLToPath(import.meta.url)), '../blog')
   const files = readdirSync(blogDir).filter(f => f.endsWith('.md') && f !== 'index.md')
@@ -191,20 +224,7 @@ export default defineConfig({
         }
       ],
       '/blog/': getBlogSidebar(),
-      '/releases/': [
-        {
-          text: 'Release Notes',
-          items: [
-            { text: 'All Releases', link: '/releases/' },
-            { text: 'v0.0.6', link: '/releases/#v0-0-6' },
-            { text: 'v0.0.5-alpha', link: '/releases/#v0-0-5-alpha' },
-            { text: 'v0.0.4', link: '/releases/#v0-0-4' },
-            { text: 'v0.0.3-alpha', link: '/releases/#v0-0-3-alpha' },
-            { text: 'v0.0.2-alpha', link: '/releases/#v0-0-2-alpha' },
-            { text: '0.0.1-alpha', link: '/releases/#v0-0-1-alpha' },
-          ]
-        }
-      ]
+      '/releases/': getReleaseSidebar()
     },
 
     socialLinks: [
