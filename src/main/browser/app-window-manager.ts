@@ -519,11 +519,17 @@ export abstract class AppWindowManager {
       const closedWindow = AppWindowManager.removeClosedWindowByIndex(index);
       if (!closedWindow || !closedWindow.tabs || closedWindow.tabs.length === 0) return null;
       const newWindow = AppWindowManager.createWindow(false);
-      for (let i = 0; i < closedWindow.tabs.length; i++) {
-        const url = closedWindow.tabs[i].url;
-        if (url && url !== '' && !url.startsWith('nav0://')) {
-          await newWindow.createTab(url, i === 0);
-        }
+      // Wait for the window's renderer to load and its default New Tab to be created
+      await newWindow.whenReady();
+      // Close the default New Tab
+      const defaultTabs = newWindow.getTabs();
+      for (const tab of defaultTabs) {
+        newWindow.closeTab(tab.getId(), false);
+      }
+      // Restore tabs from the closed window
+      const restoredUrls = closedWindow.tabs.filter(t => t.url && t.url !== '' && !t.url.startsWith('nav0://'));
+      for (let i = 0; i < restoredUrls.length; i++) {
+        await newWindow.createTab(restoredUrls[i].url, i === 0);
       }
       return { ok: true };
     });

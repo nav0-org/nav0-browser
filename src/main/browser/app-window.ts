@@ -22,12 +22,17 @@ export class AppWindow {
   private permissionPromptOverlayManager: PermissionPromptOverlayManager | null = null;
   private findInPageManager: FindInPageManager | null = null;
   private database: DB;
+  private readyPromise: Promise<void>;
+  private resolveReady: () => void;
 
   constructor(isPrivate = false, database: DB) {
     this.isPrivate = isPrivate;
     this.database = database;
     this.tabs = new Map();
     this.activeTabId = null;
+    this.readyPromise = new Promise<void>((resolve) => {
+      this.resolveReady = resolve;
+    });
     this.init();
   }
 
@@ -92,6 +97,7 @@ export class AppWindow {
           title: firstTab.getTitle(),
           url: firstTab.getUrl()
         });
+        this.resolveReady();
       });
     
       // this.browserWindowInstance.webContents.openDevTools({mode : 'detach'});
@@ -358,6 +364,10 @@ export class AppWindow {
 
   stopFindInPage(): void {
     this.findInPageManager?.clearHighlights();
+  }
+
+  whenReady(): Promise<void> {
+    return this.readyPromise;
   }
 
   getTabCount(): number {
