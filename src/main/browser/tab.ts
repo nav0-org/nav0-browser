@@ -197,6 +197,8 @@ export class Tab {
   private initEventHandlers() {
     //for hard navigation (debounced)
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE, async (event, url: string) => {
+      // Reset dark mode CSS key on navigation so it can be re-injected on DOM_READY
+      this.darkModeCSSKey = null;
       this.handleOriginChange(url);
       this.debouncedHandleNavigationCompletion(url);
       // Inject early ad-block hooks (IMA mock, play() interception) as soon as navigation commits
