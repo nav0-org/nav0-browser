@@ -437,6 +437,7 @@ img {
 
 .btn-icon {
   display: inline-flex;
+  vertical-align: middle;
   margin-right: 2px;
   margin-left: 2px;
   align-items: center;
@@ -447,7 +448,7 @@ img {
   cursor: pointer;
   transition: all var(--transition-medium);
   border: 1px solid transparent;
-  line-height: 1.5;
+  line-height: 1;
   text-align: center;
   text-decoration: none;
 }

@@ -168,6 +168,7 @@
   padding-bottom: 0px;
 }
 
+
 .address-bar:focus-within {
   background-color: var(--bg-light);
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
