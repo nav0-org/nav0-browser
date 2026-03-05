@@ -153,6 +153,9 @@ export function init(){
     toggleReaderMode: async (appWindowId: string, tabId: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.TOGGLE_READER_MODE, appWindowId, tabId);
     },
+    setDarkMode: (appWindowId: string, enabled: boolean) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SET_DARK_MODE, appWindowId, enabled);
+    },
     applySettings: async () => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.APPLY_SETTINGS);
     },

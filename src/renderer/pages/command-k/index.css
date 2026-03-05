@@ -328,8 +328,53 @@ body {
   body {
     padding-top: 40px;
   }
-  
+
   .command-container {
     max-height: 80vh;
   }
+}
+
+/* --------------------------------------------------------------------------
+   Dark Mode Overrides
+   -------------------------------------------------------------------------- */
+[data-theme="dark"] body {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+[data-theme="dark"] .search-area {
+  border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .action-buttons {
+  border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .action-btn.primary {
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .action-btn.primary:hover {
+  background-color: var(--bg-hover);
+}
+
+[data-theme="dark"] .results-container::-webkit-scrollbar-thumb {
+  background: var(--border-color-dark);
+}
+
+[data-theme="dark"] .no-results i,
+[data-theme="dark"] .empty-state i {
+  color: #555;
+}
+
+[data-theme="dark"] .result-item.search-engine-item {
+  border-top-color: var(--border-color);
+}
+
+[data-theme="dark"] .loading .loader {
+  border-color: var(--border-color);
+  border-top-color: var(--primary-color);
+}
+
+[data-theme="dark"] .key {
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1);
 }

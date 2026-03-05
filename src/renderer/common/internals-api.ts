@@ -62,6 +62,7 @@ declare global {
       getSearchUrl: (searchTerm: string) => Promise<string>;
       fetchOpenTabs: (appWindowId: string) => Promise<Array<{id: string, title: string, url: string, faviconUrl: string | null}>>;
       toggleReaderMode: (appWindowId: string, tabId: string) => Promise<any>;
+      setDarkMode: (appWindowId: string, enabled: boolean) => void;
 
       // Event listeners
       onNewTabCreated: (callback: (tab: {id: string, url: string, title: string}) => void) => void;

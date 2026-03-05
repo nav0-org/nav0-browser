@@ -96,7 +96,7 @@
 
 .tab.active {
   color: var(--text-color);
-  background-color: #D3D3D3;
+  background-color: var(--bg-hover);
   border: 2px solid var(--primary-color);
   border-bottom: none;
   /* margin-bottom: -6px; */
@@ -168,9 +168,14 @@
   padding-bottom: 0px;
 }
 
+
 .address-bar:focus-within {
   background-color: var(--bg-light);
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .address-bar:focus-within {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
 }
 
 .search-icon {

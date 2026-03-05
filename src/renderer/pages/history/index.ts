@@ -3,9 +3,11 @@ import { HtmlUtils } from '../../../renderer/common/html-utils';
 import { FormatUtils } from '../../../renderer/common/format-utils';
 import { BrowsingHistoryRecord } from '../../../types/browsing-history-record';
 import './index.css';
+import { initTheme } from '../../../renderer/common/theme';
 
 import { createIcons, icons } from 'lucide';
 createIcons({ icons });
+initTheme();
 
 const PAGE_SIZE = 50;
 let currentOffset = 0;

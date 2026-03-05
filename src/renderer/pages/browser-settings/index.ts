@@ -1,6 +1,8 @@
 import './index.css';
+import { initTheme } from '../../common/theme';
 import { createIcons, icons } from 'lucide';
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS, DEFAULT_SEARCH_ENGINES, DEFAULT_FILTER_LISTS, DEFAULT_KEYBOARD_SHORTCUTS, SearchEngineConfig, FilterListConfig, KeyboardShortcutAction } from '../../../types/settings-types';
+initTheme();
 
 // ---- Globals ----
 let settings: BrowserSettings = { ...DEFAULT_BROWSER_SETTINGS };
