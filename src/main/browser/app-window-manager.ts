@@ -62,8 +62,48 @@ export abstract class AppWindowManager {
     const window = new AppWindow(isPrivate, DatabaseManager.getDatabase(isPrivate));
     AppWindowManager.windows.set(window.id, window);
     AppWindowManager.activateWindow(window.id);
+
+    // Record tabs when the native window close event fires (OS close button, Alt+F4, etc.)
+    const browserWindow = window.getBrowserWindowInstance();
+    if (browserWindow) {
+      browserWindow.on('close', () => {
+        AppWindowManager.recordWindowTabs(window);
+      });
+      browserWindow.on('closed', () => {
+        AppWindowManager.windows.delete(window.id);
+        if (AppWindowManager.activeWindowId === window.id) {
+          AppWindowManager.activeWindowId = null;
+        }
+      });
+    }
+
     return window;
   }
+
+  private static recordWindowTabs(window: AppWindow): void {
+    if (window.isPrivate) return;
+    // Avoid double-recording if already recorded
+    if ((window as any)._tabsRecorded) return;
+    (window as any)._tabsRecorded = true;
+
+    const tabCount = window.getTabCount();
+    const tabs = window.getTabSummaries();
+    if (tabCount > 0) {
+      AppWindowManager.recordClosedWindow({ tabCount, tabs, closedAt: Date.now() });
+      for (const tab of window.getTabs()) {
+        const url = tab.getUrl();
+        if (url && !url.startsWith('nav0://') && url !== '') {
+          AppWindowManager.recordClosedTab({
+            url,
+            title: tab.getTitle(),
+            faviconUrl: tab.getFaviconUrl(),
+            closedAt: Date.now(),
+          });
+        }
+      }
+    }
+  }
+
   static closeWindow(id: string): void {
     let window: AppWindow | null = null;
     let clearSession = false;
@@ -73,26 +113,10 @@ export abstract class AppWindowManager {
       window = AppWindowManager.getActiveWindow();
     }
     if (window) {
-      // Track closed window and its tabs (not private windows)
-      if (!window.isPrivate) {
-        const tabCount = window.getTabCount();
-        const tabs = window.getTabSummaries();
-        if (tabCount > 0) {
-          AppWindowManager.recordClosedWindow({ tabCount, tabs, closedAt: Date.now() });
-          // Record each tab individually to the global closed tabs list
-          for (const tab of window.getTabs()) {
-            const url = tab.getUrl();
-            if (url && !url.startsWith('nav0://') && url !== '') {
-              AppWindowManager.recordClosedTab({
-                url,
-                title: tab.getTitle(),
-                faviconUrl: tab.getFaviconUrl(),
-                closedAt: Date.now(),
-              });
-            }
-          }
-        }
-      }
+      // Record tabs before closing (the 'close' event handler will also try,
+      // but the _tabsRecorded flag prevents double-recording)
+      AppWindowManager.recordWindowTabs(window);
+
       const remainingPrivateWindows: Array<AppWindow> = [];
       AppWindowManager.windows.forEach(element => {
         if(element.isPrivate && element.id != id){
