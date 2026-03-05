@@ -90,17 +90,6 @@ export abstract class AppWindowManager {
     const tabs = window.getTabSummaries();
     if (tabCount > 0) {
       AppWindowManager.recordClosedWindow({ tabCount, tabs, closedAt: Date.now() });
-      for (const tab of window.getTabs()) {
-        const url = tab.getUrl();
-        if (url && !url.startsWith('nav0://') && url !== '') {
-          AppWindowManager.recordClosedTab({
-            url,
-            title: tab.getTitle(),
-            faviconUrl: tab.getFaviconUrl(),
-            closedAt: Date.now(),
-          });
-        }
-      }
     }
   }
 
@@ -147,6 +136,16 @@ export abstract class AppWindowManager {
     const data = DataStoreManager.get(DataStoreConstants.CLOSED_WINDOWS);
     if (Array.isArray(data)) return data;
     return [];
+  }
+
+  static removeClosedWindowByIndex(reverseIndex: number): ClosedWindowRecord | null {
+    const closedWindows = AppWindowManager.getClosedWindows();
+    // The list is displayed reversed (most-recent-first), so convert index
+    const actualIndex = closedWindows.length - 1 - reverseIndex;
+    if (actualIndex < 0 || actualIndex >= closedWindows.length) return null;
+    const removed = closedWindows.splice(actualIndex, 1)[0];
+    DataStoreManager.set(DataStoreConstants.CLOSED_WINDOWS, closedWindows);
+    return removed || null;
   }
 
   static recordClosedTab(record: ClosedTabRecord): void {
@@ -514,6 +513,19 @@ export abstract class AppWindowManager {
 
     ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_CLOSED_WINDOWS, async () => {
       return AppWindowManager.getClosedWindows().reverse();
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.RESTORE_CLOSED_WINDOW, async (event, index: number) => {
+      const closedWindow = AppWindowManager.removeClosedWindowByIndex(index);
+      if (!closedWindow || !closedWindow.tabs || closedWindow.tabs.length === 0) return null;
+      const newWindow = AppWindowManager.createWindow(false);
+      for (let i = 0; i < closedWindow.tabs.length; i++) {
+        const url = closedWindow.tabs[i].url;
+        if (url && url !== '' && !url.startsWith('nav0://')) {
+          await newWindow.createTab(url, i === 0);
+        }
+      }
+      return { ok: true };
     });
 
     ipcMain.handle(RendererToMainEventsForBrowserIPC.OPEN_PDF_FILE, async (event, appWindowId: string) => {

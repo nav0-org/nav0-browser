@@ -65,6 +65,7 @@ declare global {
       restoreClosedTab: (appWindowId: string) => Promise<{id: string, title: string, url: string} | null>;
       restoreClosedTabByIndex: (appWindowId: string, index: number) => Promise<{id: string, title: string, url: string} | null>;
       fetchClosedWindows: () => Promise<Array<{tabCount: number, tabs: Array<{url: string, title: string}>, closedAt: number}>>;
+      restoreClosedWindow: (index: number) => Promise<{ok: boolean} | null>;
       toggleReaderMode: (appWindowId: string, tabId: string) => Promise<any>;
       setDarkMode: (appWindowId: string, enabled: boolean) => void;
 

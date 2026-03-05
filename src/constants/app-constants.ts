@@ -137,6 +137,7 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly RESTORE_CLOSED_TAB = "browser:restore-closed-tab";
   public static readonly RESTORE_CLOSED_TAB_BY_INDEX = "browser:restore-closed-tab-by-index";
   public static readonly FETCH_CLOSED_WINDOWS = "browser:fetch-closed-windows";
+  public static readonly RESTORE_CLOSED_WINDOW = "browser:restore-closed-window";
   public static readonly SHOW_ABOUT_PANEL = "browser:show-about-panel";
   public static readonly TOGGLE_READER_MODE = "browser:toggle-reader-mode";
   public static readonly SET_DARK_MODE = "browser:set-dark-mode";

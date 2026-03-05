@@ -162,6 +162,9 @@ export function init(){
     fetchClosedWindows: async () => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.FETCH_CLOSED_WINDOWS);
     },
+    restoreClosedWindow: async (index: number) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.RESTORE_CLOSED_WINDOW, index);
+    },
     toggleReaderMode: async (appWindowId: string, tabId: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.TOGGLE_READER_MODE, appWindowId, tabId);
     },

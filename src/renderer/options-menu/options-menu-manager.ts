@@ -94,7 +94,8 @@ export class OptionsMenuManager {
       const closedWindows = await window.BrowserAPI.fetchClosedWindows();
       windowsList.innerHTML = '';
       if (closedWindows && closedWindows.length > 0) {
-        for (const win of closedWindows) {
+        for (let i = 0; i < closedWindows.length; i++) {
+          const win = closedWindows[i];
           const item = document.createElement('div');
           item.className = 'closed-window-item';
 
@@ -110,13 +111,10 @@ export class OptionsMenuManager {
           count.textContent = `${win.tabCount} tab${win.tabCount !== 1 ? 's' : ''}`;
           item.appendChild(count);
 
-          const tabs = win.tabs;
+          const index = i;
           item.addEventListener('click', async (e) => {
             e.stopPropagation();
-            // Open all tabs from the closed window
-            for (let i = 0; i < tabs.length; i++) {
-              await window.BrowserAPI.createTab(this.appWindowId, tabs[i].url, i === 0);
-            }
+            await window.BrowserAPI.restoreClosedWindow(index);
             await window.BrowserAPI.hideOptionsMenu(this.appWindowId);
           });
 
