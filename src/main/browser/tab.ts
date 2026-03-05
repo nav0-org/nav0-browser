@@ -44,6 +44,7 @@ export class Tab {
       filter: invert(1) hue-rotate(180deg) !important;
       background-color: #111 !important;
     }
+    /* Re-invert media so images/videos look normal */
     img, video, picture, canvas, svg image,
     [style*="background-image"],
     embed, object {
@@ -51,6 +52,26 @@ export class Tab {
     }
     iframe {
       filter: invert(1) hue-rotate(180deg) !important;
+    }
+    /* Re-invert common icon systems used by LinkedIn, Reddit, etc. */
+    svg:not(svg svg), i[class*="icon"], [data-icon], [role="img"],
+    [class*="emoji"], [class*="avatar"], [class*="Avatar"],
+    [class*="logo"], [class*="Logo"],
+    [class*="thumbnail"], [class*="Thumbnail"] {
+      filter: invert(1) hue-rotate(180deg) !important;
+    }
+    /* Force dark backgrounds on stubborn container elements */
+    [style*="background-color: rgb(255"], [style*="background-color: #fff"],
+    [style*="background-color: #FFF"], [style*="background-color: white"],
+    [style*="background: rgb(255"], [style*="background: #fff"],
+    [style*="background: #FFF"], [style*="background: white"],
+    [style*="background-color:#fff"], [style*="background-color:#FFF"] {
+      background-color: inherit !important;
+    }
+    /* Override inline white/light backgrounds on deeply nested elements */
+    [style*="background-color: rgb(2"], [style*="background-color: rgb(24"],
+    [style*="background-color: rgb(23"], [style*="background-color: rgb(22"] {
+      background-color: inherit !important;
     }
   `;
 
@@ -658,6 +679,26 @@ export class Tab {
     } catch {
       // Page may not be ready
     }
+    // Strip inline background colors that fight the invert filter
+    this.webContentsViewInstance.webContents.executeJavaScript(`
+      (function() {
+        try {
+          var els = document.querySelectorAll('[style*="background"]');
+          els.forEach(function(el) {
+            var bg = el.style.backgroundColor;
+            if (!bg) return;
+            var m = bg.match(/\\d+/g);
+            if (m && m.length >= 3) {
+              var r = parseInt(m[0]), g = parseInt(m[1]), b = parseInt(m[2]);
+              // If the inline bg is light (brightness > 180), clear it
+              if ((r * 299 + g * 587 + b * 114) / 1000 > 180) {
+                el.style.backgroundColor = 'transparent';
+              }
+            }
+          });
+        } catch(e) {}
+      })();
+    `).catch(() => {});
   }
 
   async removeDarkModeCSS(): Promise<void> {
