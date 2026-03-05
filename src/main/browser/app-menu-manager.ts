@@ -39,8 +39,11 @@ export abstract class AppMenuManager {
           {label: 'New Private Window', accelerator: 'CmdOrCtrl+Shift+N', click: async() => { AppWindowManager.createWindow(true); }},
           {label: 'Reopen Closed Tab', accelerator: 'CmdOrCtrl+Shift+T', click: async() => {
             const activeWindow = AppWindowManager.getActiveWindow();
-            if (activeWindow) {
-              await activeWindow.restoreLastClosedTab();
+            if (activeWindow && !activeWindow.isPrivate) {
+              const closedTab = AppWindowManager.popLastClosedTab();
+              if (closedTab) {
+                await activeWindow.createTab(closedTab.url, true);
+              }
             }
           }},
           {type: 'separator' as const},

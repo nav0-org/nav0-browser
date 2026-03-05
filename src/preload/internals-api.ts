@@ -156,6 +156,9 @@ export function init(){
     restoreClosedTab: async (appWindowId: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.RESTORE_CLOSED_TAB, appWindowId);
     },
+    restoreClosedTabByIndex: async (appWindowId: string, index: number) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.RESTORE_CLOSED_TAB_BY_INDEX, appWindowId, index);
+    },
     fetchClosedWindows: async () => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.FETCH_CLOSED_WINDOWS);
     },

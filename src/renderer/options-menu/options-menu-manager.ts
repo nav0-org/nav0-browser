@@ -53,7 +53,8 @@ export class OptionsMenuManager {
       const closedTabs = await window.BrowserAPI.fetchRecentlyClosedTabs(this.appWindowId);
       tabsList.innerHTML = '';
       if (closedTabs && closedTabs.length > 0) {
-        for (const tab of closedTabs) {
+        for (let i = 0; i < closedTabs.length; i++) {
+          const tab = closedTabs[i];
           const item = document.createElement('div');
           item.className = 'closed-tab-item';
 
@@ -71,10 +72,10 @@ export class OptionsMenuManager {
           title.title = tab.url;
           item.appendChild(title);
 
-          const url = tab.url;
+          const index = i;
           item.addEventListener('click', async (e) => {
             e.stopPropagation();
-            await window.BrowserAPI.createTab(this.appWindowId, url, true);
+            await window.BrowserAPI.restoreClosedTabByIndex(this.appWindowId, index);
             await window.BrowserAPI.hideOptionsMenu(this.appWindowId);
           });
 
