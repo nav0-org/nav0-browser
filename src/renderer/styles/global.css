@@ -436,7 +436,7 @@ img {
 }
 
 .btn-icon {
-  /* display: inline-flex; */
+  display: inline-flex;
   margin-right: 2px;
   margin-left: 2px;
   align-items: center;
@@ -444,14 +444,12 @@ img {
   border-radius: var(--radius-md);
   font-size: var(--font-md);
   font-weight: 500;
-  /* padding: -5px -5px 0px 0px; */
   cursor: pointer;
   transition: all var(--transition-medium);
   border: 1px solid transparent;
   line-height: 1.5;
   text-align: center;
   text-decoration: none;
-  padding-top: 6px;
 }
 
 .btn:disabled {
