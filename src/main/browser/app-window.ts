@@ -8,6 +8,8 @@ import { DownloadManager } from "./download-manager";
 import { PermissionManager } from "./permission-manager";
 import { PermissionPromptOverlayManager, PermissionPromptData } from "./permission-prompt-overlay-manager";
 import { FindInPageManager } from "./find-in-page-manager";
+import { RecentlyClosedManager } from "./recently-closed-manager";
+import { ClosedTabRecord } from "../../types/recently-closed-types";
 import type { Database as DB } from 'better-sqlite3';
 
 export class AppWindow {
@@ -22,6 +24,8 @@ export class AppWindow {
   private permissionPromptOverlayManager: PermissionPromptOverlayManager | null = null;
   private findInPageManager: FindInPageManager | null = null;
   private database: DB;
+  private recentlyClosedTabs: ClosedTabRecord[] = [];
+  private closedWindowRecorded = false;
 
   constructor(isPrivate = false, database: DB) {
     this.isPrivate = isPrivate;
@@ -71,6 +75,17 @@ export class AppWindow {
       // so their resume metadata can be persisted to the DB
       this.browserWindowInstance.on('close', () => {
         DownloadManager.pauseAllDownloads();
+
+        // Record closed window state for "Recently Closed Windows"
+        if (!this.isPrivate && !this.closedWindowRecorded) {
+          this.closedWindowRecorded = true;
+          const tabInfos = this.getTabs().map(tab => ({
+            url: tab.getUrl(),
+            title: tab.getTitle(),
+            faviconUrl: tab.getFaviconUrl(),
+          }));
+          RecentlyClosedManager.recordClosedWindow(tabInfos, this.isPrivate);
+        }
       });
 
       this.browserWindowInstance.on('closed', () => {
@@ -149,6 +164,21 @@ export class AppWindow {
   closeTab(id: string, isUserInitiated = true): void {
     const tab = this.tabs.get(id);
     if (tab) {
+      // Capture tab state before closing (skip private and internal pages)
+      if (!this.isPrivate) {
+        const url = tab.getUrl();
+        const title = tab.getTitle();
+        const faviconUrl = tab.getFaviconUrl();
+        if (url && !url.startsWith(InAppUrls.PREFIX) && url !== '') {
+          const record: ClosedTabRecord = { url, title, faviconUrl, closedAt: Date.now() };
+          this.recentlyClosedTabs.push(record);
+          if (this.recentlyClosedTabs.length > 20) {
+            this.recentlyClosedTabs.shift();
+          }
+          RecentlyClosedManager.addClosedTab(record);
+        }
+      }
+
       PermissionManager.clearSessionPermissionsForTab(id);
       tab.getWebContentsViewInstance().removeAllListeners();
       tab.getWebContentsViewInstance().webContents.close();
@@ -190,6 +220,10 @@ export class AppWindow {
 
   getTabs(): Tab[] {
     return Array.from(this.tabs.values());
+  }
+
+  popRecentlyClosedTab(): ClosedTabRecord | null {
+    return this.recentlyClosedTabs.pop() || null;
   }
 
   getActiveTabId(): string | null {

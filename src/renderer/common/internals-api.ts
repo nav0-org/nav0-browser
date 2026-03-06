@@ -64,6 +64,11 @@ declare global {
       toggleReaderMode: (appWindowId: string, tabId: string) => Promise<any>;
       setDarkMode: (appWindowId: string, enabled: boolean) => void;
 
+      // Recently closed
+      fetchRecentlyClosedTabs: (appWindowId: string) => Promise<Array<{ url: string; title: string; faviconUrl: string | null; closedAt: number }>>;
+      fetchRecentlyClosedWindows: () => Promise<Array<{ id: string; tabs: Array<{ url: string; title: string; faviconUrl: string | null }>; tabCount: number; closedAt: number }>>;
+      reopenClosedWindow: (closedWindowId: string) => Promise<any>;
+
       // Event listeners
       onNewTabCreated: (callback: (tab: {id: string, url: string, title: string}) => void) => void;
       onTabActivated: (callback: (tab: {id: string, url: string}) => void) => void;

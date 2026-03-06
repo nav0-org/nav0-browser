@@ -378,6 +378,8 @@ export abstract class SettingsEnforcer {
       } else {
         const result = db.prepare("DELETE FROM browsingHistory").run();
         deletedCount += result.changes;
+        // Also clear recently closed windows when clearing all history
+        DataStoreManager.set(DataStoreConstants.RECENTLY_CLOSED_WINDOWS, []);
       }
     }
 

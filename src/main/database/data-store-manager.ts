@@ -23,6 +23,7 @@ export abstract class DataStoreManager {
 
   private static initStores(): void {
     DataStoreManager.stores.set(DataStoreConstants.BROWSER_SETTINGS, new Store({ name: DataStoreConstants.BROWSER_SETTINGS, defaults: {'default' : DataStoreManager.getDefaultValue(DataStoreConstants.BROWSER_SETTINGS)}  as Record<string, any>}));
+    DataStoreManager.stores.set(DataStoreConstants.RECENTLY_CLOSED_WINDOWS, new Store({ name: DataStoreConstants.RECENTLY_CLOSED_WINDOWS, defaults: {'default' : DataStoreManager.getDefaultValue(DataStoreConstants.RECENTLY_CLOSED_WINDOWS)} as Record<string, any>}));
   }
 
 
@@ -124,6 +125,9 @@ export abstract class DataStoreManager {
     switch (storeName) {
       case DataStoreConstants.BROWSER_SETTINGS:
         returnValue = { ...DEFAULT_BROWSER_SETTINGS };
+        break;
+      case DataStoreConstants.RECENTLY_CLOSED_WINDOWS:
+        returnValue = [];
         break;
       default:
         break;

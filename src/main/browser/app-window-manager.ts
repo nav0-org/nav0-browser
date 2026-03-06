@@ -7,6 +7,7 @@ import { DatabaseManager } from "../database/database-manager";
 import { SearchEngine } from "../web/search-engine";
 import { PermissionManager, PermissionRequest } from "./permission-manager";
 import { PermissionPromptData } from "./permission-prompt-overlay-manager";
+import { RecentlyClosedManager } from "./recently-closed-manager";
 
 export abstract class AppWindowManager {
   private static windows: Map<string, AppWindow>;
@@ -419,6 +420,40 @@ export abstract class AppWindowManager {
       const fileUrl = `file://${filePath}`;
       await window.createTab(fileUrl, true);
       return fileUrl;
+    });
+
+    // Recently closed tabs & windows
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_RECENTLY_CLOSED_TABS, async (event, appWindowId: string) => {
+      const window = AppWindowManager.getWindowById(appWindowId);
+      if (window && !window.isPrivate) {
+        return RecentlyClosedManager.getGlobalRecentlyClosedTabs();
+      }
+      return [];
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_RECENTLY_CLOSED_WINDOWS, async () => {
+      return RecentlyClosedManager.getClosedWindows();
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.REOPEN_CLOSED_WINDOW, async (event, closedWindowId: string) => {
+      const closedWindows = RecentlyClosedManager.getClosedWindows();
+      const windowRecord = closedWindows.find(w => w.id === closedWindowId);
+      if (windowRecord && windowRecord.tabs.length > 0) {
+        const newWindow = AppWindowManager.createWindow(false);
+        // Wait for the window's did-finish-load which creates the first tab
+        newWindow.getBrowserWindowInstance().webContents.once('did-finish-load', async () => {
+          // Navigate the first (auto-created) tab to the first URL
+          const firstTab = newWindow.getActiveTab();
+          if (firstTab) {
+            firstTab.navigate(windowRecord.tabs[0].url);
+          }
+          // Create remaining tabs
+          for (let i = 1; i < windowRecord.tabs.length; i++) {
+            await newWindow.createTab(windowRecord.tabs[i].url, false);
+          }
+          RecentlyClosedManager.removeClosedWindow(closedWindowId);
+        });
+      }
     });
 
   }

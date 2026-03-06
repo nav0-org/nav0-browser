@@ -169,6 +169,17 @@ export function init(){
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GET_STORAGE_ESTIMATE);
     },
 
+    // Recently closed
+    fetchRecentlyClosedTabs: async (appWindowId: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.FETCH_RECENTLY_CLOSED_TABS, appWindowId);
+    },
+    fetchRecentlyClosedWindows: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.FETCH_RECENTLY_CLOSED_WINDOWS);
+    },
+    reopenClosedWindow: async (closedWindowId: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.REOPEN_CLOSED_WINDOW, closedWindowId);
+    },
+
     // Event listeners
     onNewTabCreated: (callback: (tab: {id: string, url: string, title: string}) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.NEW_TAB_CREATED, (_event, tab) => callback(tab));
