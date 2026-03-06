@@ -42,6 +42,7 @@ export class AppWindow {
       width: 1200,
       height: 800,
       fullscreen: true,
+      show: false,
       title : AppConstants.APP_NAME,
       icon: '../../renderer/assets/logo.png',
       webPreferences: {
@@ -75,6 +76,10 @@ export class AppWindow {
 
       this.browserWindowInstance.on('closed', () => {
         this.browserWindowInstance = null;
+      });
+
+      this.browserWindowInstance.once('ready-to-show', () => {
+        this.browserWindowInstance?.show();
       });
 
       // Prevent Escape from exiting fullscreen
