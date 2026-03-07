@@ -68,6 +68,10 @@ export abstract class AppWindowManager {
     if (browserWindow) {
       browserWindow.on('close', () => {
         AppWindowManager.recordWindowTabs(window);
+        // Clear pending timers on all tabs to prevent callbacks after window removal
+        for (const tab of window.getTabs()) {
+          tab.clearPendingTimers();
+        }
       });
       browserWindow.on('closed', () => {
         AppWindowManager.windows.delete(window.id);

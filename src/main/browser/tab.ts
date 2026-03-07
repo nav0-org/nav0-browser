@@ -489,25 +489,29 @@ export class Tab {
       this.lastHistoryRecordId = null;
       return;
     }
-    let urlObject: URL | null = null;
     try {
-      urlObject = new URL(this.url);
+      let urlObject: URL | null = null;
+      try {
+        urlObject = new URL(this.url);
+      } catch (error) {
+        //do nothing
+      }
+      // Duplicate prevention: if the most recent history entry has the same URL, update its timestamp instead
+      const existingRecord = await BrowsingHistoryManager.findLastRecordByUrl(this.parentAppWindow.id, url);
+      if(existingRecord) {
+        await BrowsingHistoryManager.updateRecordTimestamp(this.parentAppWindow.id, existingRecord.id);
+        this.lastHistoryRecordId = existingRecord.id;
+        return;
+      }
+      const record = await BrowsingHistoryManager.addRecord(
+        this.parentAppWindow.id, url, this.title,
+        urlObject ? urlObject.hostname : '',
+        urlObject ? `${urlObject.protocol}//${urlObject.hostname}/favicon.ico` : ''
+      );
+      this.lastHistoryRecordId = record.id;
     } catch (error) {
-      //do nothing
+      // Window may have been closed/removed before the debounced history recording fired
     }
-    // Duplicate prevention: if the most recent history entry has the same URL, update its timestamp instead
-    const existingRecord = await BrowsingHistoryManager.findLastRecordByUrl(this.parentAppWindow.id, url);
-    if(existingRecord) {
-      await BrowsingHistoryManager.updateRecordTimestamp(this.parentAppWindow.id, existingRecord.id);
-      this.lastHistoryRecordId = existingRecord.id;
-      return;
-    }
-    const record = await BrowsingHistoryManager.addRecord(
-      this.parentAppWindow.id, url, this.title,
-      urlObject ? urlObject.hostname : '',
-      urlObject ? `${urlObject.protocol}//${urlObject.hostname}/favicon.ico` : ''
-    );
-    this.lastHistoryRecordId = record.id;
   }
 
   whenReady(): Promise<void> {

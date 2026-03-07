@@ -105,6 +105,10 @@ export class AppWindow {
   }
 
   public closeWindow(clearSession: boolean) {
+    // Clear pending timers on all tabs to prevent callbacks after window removal
+    for (const tab of this.tabs.values()) {
+      tab.clearPendingTimers();
+    }
     if(clearSession){
       PermissionManager.clearMemoryPermissions();
       const currentSession = session.fromPartition('persist:private')
