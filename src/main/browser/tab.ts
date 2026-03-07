@@ -36,6 +36,9 @@ export class Tab {
   private readerModeCheckTimer: ReturnType<typeof setTimeout> | null = null;
   private readerModeToggleLock = false;
   private static pdfSessionsRegistered = new Set<string>();
+  private popupTimestamps: number[] = [];
+  private static readonly MAX_POPUPS = 3;
+  private static readonly POPUP_WINDOW_MS = 60_000;
   private darkModeCSSKey: string | null = null;
   private static darkModeEnabled = false;
   private _destroyed = false;
@@ -300,7 +303,23 @@ export class Tab {
     });
 
     this.webContentsViewInstance.webContents.setWindowOpenHandler(({ url, disposition }) => {
+      const now = Date.now();
+      this.popupTimestamps = this.popupTimestamps.filter(t => now - t < Tab.POPUP_WINDOW_MS);
+
+      // Flood protection: always enforced regardless of policy
+      if (this.popupTimestamps.length >= Tab.MAX_POPUPS) {
+        console.warn(`Popup blocked: tab exceeded ${Tab.MAX_POPUPS} popups in ${Tab.POPUP_WINDOW_MS / 1000}s`);
+        return { action: 'deny' }
+      }
+
+      // Check popup policy from settings
+      if (!this.isPopupAllowedBySettings(url)) {
+        console.warn(`Popup blocked by settings for: ${url}`);
+        return { action: 'deny' }
+      }
+
       if (url === 'about:blank') {
+        this.popupTimestamps.push(now);
         return {
           action: 'allow',
           overrideBrowserWindowOptions: {
@@ -310,10 +329,63 @@ export class Tab {
           }
         }
       } else if (disposition === 'foreground-tab' || disposition === 'background-tab'){
+        this.popupTimestamps.push(now);
         this.parentAppWindow.createTab(url);
+      } else if (disposition === 'new-window') {
+        // Allow popup windows (e.g. OAuth flows like "Continue with Google")
+        // to open as real windows, preserving window.opener for callback communication
+        this.popupTimestamps.push(now);
+        return {
+          action: 'allow',
+          overrideBrowserWindowOptions: {
+            width: 500,
+            height: 700,
+            fullscreenable: false,
+          }
+        }
       }
       return { action: 'deny' }
     });
+  }
+
+  private isPopupAllowedBySettings(popupUrl: string): boolean {
+    try {
+      const stored = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as BrowserSettings;
+      const s = { ...DEFAULT_BROWSER_SETTINGS, ...stored };
+
+      // Get hostnames for both the opener page and the popup destination
+      const openerUrl = this.webContentsViewInstance.webContents.getURL();
+      let openerHostname = '';
+      try { openerHostname = new URL(openerUrl).hostname; } catch { /* ignore */ }
+      let popupHostname = '';
+      try { popupHostname = new URL(popupUrl).hostname; } catch { /* ignore */ }
+
+      const matchesSite = (hostname: string, sites: string[]) =>
+        (sites || []).some(site => {
+          const d = site.toLowerCase().trim();
+          return hostname === d || hostname.endsWith('.' + d);
+        });
+
+      // Check if either the opener or the popup destination matches
+      const matchesAny = (sites: string[]) =>
+        matchesSite(openerHostname, sites) || matchesSite(popupHostname, sites);
+
+      if (s.popupPolicy === 'allow') {
+        return !matchesAny(s.popupBlockedSites);
+      }
+
+      if (s.popupPolicy === 'smart') {
+        // Allowed-list sites always pass
+        if (matchesAny(s.popupAllowedSites)) return true;
+        // Rate-limit: allow up to MAX_POPUPS within POPUP_WINDOW_MS
+        return this.popupTimestamps.length < Tab.MAX_POPUPS;
+      }
+
+      // Block policy: only allow if site is in allowed list
+      return matchesAny(s.popupAllowedSites);
+    } catch {
+      return true;
+    }
   }
 
   async handleDownload(item: Electron.DownloadItem): Promise<void> {
