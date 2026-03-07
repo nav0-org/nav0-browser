@@ -50,6 +50,13 @@ export class Tab {
       window.BrowserAPI.activateTab(appWindowId, this.id, true);
     });
 
+    // Add right-click context menu
+    this.tabElement.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      window.BrowserAPI.showTabContextMenu(appWindowId, this.id);
+    });
+
     setTimeout(() => {
       createIcons({icons});
     }, 10);
