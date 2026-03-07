@@ -1,7 +1,7 @@
 import { RendererToMainEventsForBrowserIPC } from "../../constants/app-constants";
 import { AppMenuManager } from "./app-menu-manager";
 import { AppWindow } from "./app-window";
-import { app, dialog, ipcMain, Menu } from "electron";
+import { app, dialog, ipcMain, Menu, session } from "electron";
 import { Tab } from "./tab";
 import { DatabaseManager } from "../database/database-manager";
 import { SearchEngine } from "../web/search-engine";
@@ -57,29 +57,49 @@ export abstract class AppWindowManager {
   static createWindow(isPrivate = false): AppWindow {
     const window = new AppWindow(isPrivate, DatabaseManager.getDatabase(isPrivate));
     AppWindowManager.windows.set(window.id, window);
+    window.onClosed = (windowId: string) => {
+      AppWindowManager.handleWindowClosed(windowId);
+    };
     AppWindowManager.activateWindow(window.id);
     return window;
   }
   static closeWindow(id: string): void {
     let window: AppWindow | null = null;
-    let clearSession = false;
     if (id) {
       window = AppWindowManager.getWindowById(id);
     } else {
       window = AppWindowManager.getActiveWindow();
     }
     if (window) {
-      const remainingPrivateWindows: Array<AppWindow> = []; 
+      window.closeWindow();
+    }
+  }
+  private static handleWindowClosed(id: string): void {
+    const window = AppWindowManager.windows.get(id);
+    if (!window) return;
+
+    if (window.isPrivate) {
+      let otherPrivateExists = false;
       AppWindowManager.windows.forEach(element => {
-        if(element.isPrivate && element.id != id){
-          remainingPrivateWindows.push(element);
+        if (element.isPrivate && element.id !== id) {
+          otherPrivateExists = true;
         }
       });
-      if(window.isPrivate && remainingPrivateWindows.length === 0){
-        clearSession = true;
+      if (!otherPrivateExists) {
+        PermissionManager.clearMemoryPermissions();
+        const currentSession = session.fromPartition('persist:private');
+        currentSession?.clearAuthCache();
+        currentSession?.clearStorageData();
+        currentSession?.clearCache();
+        currentSession?.clearHostResolverCache();
+        currentSession?.clearCodeCaches({});
+        currentSession?.clearSharedDictionaryCache();
+        currentSession?.clearStorageData();
+        currentSession?.closeAllConnections();
+        currentSession?.clearData();
       }
-      window.closeWindow(clearSession);
     }
+
     AppWindowManager.windows.delete(id);
     if (AppWindowManager.activeWindowId === id) {
       AppWindowManager.activeWindowId = null;

@@ -1,4 +1,4 @@
-import { BrowserWindow, session } from "electron";
+import { BrowserWindow } from "electron";
 import { v4 as uuid } from "uuid";
 import { Tab } from "./tab";
 import { AppConstants, InAppUrls, MainToRendererEventsForBrowserIPC } from "../../constants/app-constants";
@@ -16,6 +16,8 @@ export class AppWindow {
   private tabs: Map<string, Tab>;
   private activeTabId: string | null;
   public isPrivate = false;
+  private _isClosing = false;
+  public onClosed: ((windowId: string) => void) | null = null;
   private partitionSetting: string;
   private optionsMenuManager: OptionsMenuManager | null = null;
   private commandKOverlayManager: CommandKOverlayManager | null = null;
@@ -76,6 +78,13 @@ export class AppWindow {
 
       this.browserWindowInstance.on('closed', () => {
         this.browserWindowInstance = null;
+        if (!this._isClosing) {
+          this._isClosing = true;
+          this.cleanupTabs();
+        }
+        if (this.onClosed) {
+          this.onClosed(this.id);
+        }
       });
 
       // Prevent Escape from exiting fullscreen
@@ -102,21 +111,23 @@ export class AppWindow {
       this.browserWindowInstance.on('resize', this.handleResizing);
   }
 
-  public closeWindow(clearSession: boolean) {
-    if(clearSession){
-      PermissionManager.clearMemoryPermissions();
-      const currentSession = session.fromPartition('persist:private')
-      currentSession?.clearAuthCache();
-      currentSession?.clearStorageData();
-      currentSession?.clearCache();
-      currentSession?.clearHostResolverCache();
-      currentSession?.clearCodeCaches({});
-      currentSession?.clearSharedDictionaryCache();
-      currentSession?.clearStorageData();
-      currentSession?.closeAllConnections();
-      currentSession?.clearData();
+  public closeWindow(): void {
+    if (this._isClosing) return;
+    this._isClosing = true;
+    this.cleanupTabs();
+    this.browserWindowInstance?.close();
+  }
+
+  private cleanupTabs(): void {
+    const tabIds = Array.from(this.tabs.keys());
+    for (const tabId of tabIds) {
+      try {
+        this.closeTab(tabId, false);
+      } catch (_) {
+        // Tab webContents may already be destroyed on native close
+        this.tabs.delete(tabId);
+      }
     }
-    this.browserWindowInstance.close();
   }
 
   public getViewBounds(): { x: number, y: number, width: number, height: number } | null{
