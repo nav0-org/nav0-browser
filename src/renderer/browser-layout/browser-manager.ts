@@ -4,6 +4,8 @@ import { InAppUrls } from "../../constants/app-constants";
 export class BrowserTabManager {
   // DOM Elements
   private tabsContainer: HTMLElement;
+  private tabScrollLeftButton: HTMLButtonElement;
+  private tabScrollRightButton: HTMLButtonElement;
   private browserViewContainer: HTMLElement;
   private newTabButton: HTMLButtonElement;
   private backButton: HTMLButtonElement;
@@ -55,6 +57,8 @@ export class BrowserTabManager {
 
   private initializeDomElements(): void {
     this.tabsContainer = document.getElementById('tabs-container') as HTMLElement;
+    this.tabScrollLeftButton = document.getElementById('tab-scroll-left') as HTMLButtonElement;
+    this.tabScrollRightButton = document.getElementById('tab-scroll-right') as HTMLButtonElement;
     this.browserViewContainer = document.getElementById('browser-view-container') as HTMLElement;
     this.newTabButton = document.getElementById('new-tab-button') as HTMLButtonElement;
     this.backButton = document.getElementById('back-button') as HTMLButtonElement;
@@ -139,6 +143,19 @@ export class BrowserTabManager {
     this.optionsButton.addEventListener('click', async() => {
       await window.BrowserAPI.showOptionsMenu(this.appWindowId);
     });
+
+    // Tab scroll buttons
+    this.tabScrollLeftButton.addEventListener('click', () => {
+      this.tabsContainer.scrollBy({ left: -200, behavior: 'smooth' });
+    });
+
+    this.tabScrollRightButton.addEventListener('click', () => {
+      this.tabsContainer.scrollBy({ left: 200, behavior: 'smooth' });
+    });
+
+    // Update scroll arrow visibility on scroll and resize
+    this.tabsContainer.addEventListener('scroll', () => this.updateTabScrollButtons());
+    new ResizeObserver(() => this.updateTabScrollButtons()).observe(this.tabsContainer);
   }
 
   private setupIpcListeners(): void {
@@ -147,6 +164,7 @@ export class BrowserTabManager {
         this.tabs.push(new Tab(tab.id, tab.url, tab.title));
         this.getTabById(tab.id)?.createTabElement(this.appWindowId);
         this.tabsContainer.appendChild(this.getTabById(tab.id)?.getTabElement());
+        this.updateTabScrollButtons();
       }
     });
 
@@ -282,6 +300,8 @@ export class BrowserTabManager {
       this.tabsContainer.removeChild(tabToBeClosed.getTabElement());
     }
 
+    this.updateTabScrollButtons();
+
     // if (tabId === this.activeTabId) {
     //   this.activeTabId = this.tabs.length > 0 ? this.tabs[0].id : null;
     //   this.updateActiveTab();
@@ -306,6 +326,8 @@ export class BrowserTabManager {
         this.forwardButton.disabled = !activeTab.canGoForward;
       }
     }
+
+    this.scrollActiveTabIntoView();
   }
 
   private navigateToURL(): void {
@@ -361,6 +383,24 @@ export class BrowserTabManager {
       this.darkModeIconMoon.style.display = 'none';
       this.darkModeIconSun.style.display = 'block';
       window.BrowserAPI.setDarkMode(this.appWindowId, true);
+    }
+  }
+
+  private updateTabScrollButtons(): void {
+    const { scrollLeft, scrollWidth, clientWidth } = this.tabsContainer;
+    const canScrollLeft = scrollLeft > 0;
+    const canScrollRight = scrollLeft + clientWidth < scrollWidth - 1;
+
+    this.tabScrollLeftButton.classList.toggle('visible', canScrollLeft);
+    this.tabScrollRightButton.classList.toggle('visible', canScrollRight);
+  }
+
+  private scrollActiveTabIntoView(): void {
+    if (!this.activeTabId) return;
+    const activeTab = this.getTabById(this.activeTabId);
+    const el = activeTab?.getTabElement();
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
     }
   }
 
