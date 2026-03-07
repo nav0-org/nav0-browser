@@ -596,6 +596,60 @@ export abstract class AppWindowManager {
         },
       ];
 
+      // "Move to Another Window" submenu — only for non-private windows
+      if (!window.isPrivate) {
+        const otherWindows = AppWindowManager.getWindows().filter(
+          (w) => w.id !== window.id && !w.isPrivate
+        );
+
+        const moveSubmenu: Electron.MenuItemConstructorOptions[] = [
+          {
+            label: 'New Window',
+            click: async () => {
+              const url = tab.getUrl();
+              const closedRecord = window.closeTab(tabId, true);
+              if (closedRecord) {
+                AppWindowManager.recordClosedTab(closedRecord);
+              }
+              const newWindow = AppWindowManager.createWindow();
+              await newWindow.whenReady();
+              // Navigate the default tab to the moved tab's URL
+              const defaultTabs = newWindow.getTabs();
+              if (defaultTabs.length > 0) {
+                defaultTabs[0].navigate(url);
+              }
+              AppWindowManager.activateWindow(newWindow.id);
+            },
+          },
+        ];
+
+        if (otherWindows.length > 0) {
+          moveSubmenu.push({ type: 'separator' });
+          for (let index = 0; index < otherWindows.length; index++) {
+            const targetWindow = otherWindows[index];
+            const activeTab = targetWindow.getActiveTab();
+            const label = activeTab ? activeTab.getTitle() || `Window ${index + 1}` : `Window ${index + 1}`;
+            moveSubmenu.push({
+              label,
+              click: async () => {
+                const url = tab.getUrl();
+                const closedRecord = window.closeTab(tabId, true);
+                if (closedRecord) {
+                  AppWindowManager.recordClosedTab(closedRecord);
+                }
+                await targetWindow.createTab(url, true);
+                AppWindowManager.activateWindow(targetWindow.id);
+              },
+            });
+          }
+        }
+
+        template.splice(-2, 0, {
+          label: 'Move to Another Window',
+          submenu: moveSubmenu,
+        });
+      }
+
       const menu = Menu.buildFromTemplate(template);
       menu.popup({ window: window.getBrowserWindowInstance() });
     });
