@@ -200,7 +200,7 @@ export abstract class SettingsEnforcer {
   private static adBlockDomains: Set<string> = new Set();
 
   private static createAdBlockRequestHandler() {
-    return (details, callback) => {
+    return (details: Electron.OnBeforeRequestListenerDetails, callback: (response: Electron.CallbackResponse) => void) => {
       const currentSettings = SettingsEnforcer.getSettings();
       if (!currentSettings.adBlockerEnabled) {
         callback({});
