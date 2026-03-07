@@ -38,6 +38,7 @@ export class Tab {
   private static pdfSessionsRegistered = new Set<string>();
   private darkModeCSSKey: string | null = null;
   private static darkModeEnabled = false;
+  private _destroyed = false;
 
   private static readonly DARK_MODE_CSS = `
     html {
@@ -218,6 +219,7 @@ export class Tab {
   private initEventHandlers() {
     //for hard navigation (debounced)
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE, async (event, url: string) => {
+      if (this._destroyed) return;
       // Reset dark mode CSS key on navigation so it can be re-injected on DOM_READY
       this.darkModeCSSKey = null;
       this.handleOriginChange(url);
@@ -227,6 +229,7 @@ export class Tab {
     });
     //for soft navigation (debounced)
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE_IN_PAGE, async (event, url: string) => {
+      if (this._destroyed) return;
       this.debouncedHandleNavigationCompletion(url);
       // Re-apply dark mode for back/forward in-page navigations (bfcache restores)
       this.applyDarkModeIfEnabled();
@@ -258,8 +261,9 @@ export class Tab {
       await this.handleDownload(item);
     });
     this.webContentsViewInstance.webContents.on(WebContentsEvents.PAGE_TITLE_UPDATED, async (event, title: string) => {
+      if (this._destroyed) return;
       this.title = title;
-      this.parentAppWindow.getBrowserWindowInstance().webContents.send(MainToRendererEventsForBrowserIPC.TAB_TITLE_UPDATED, {
+      this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_TITLE_UPDATED, {
         id: this.id,
         title: this.title
       });
@@ -269,9 +273,10 @@ export class Tab {
       }
     });
     this.webContentsViewInstance.webContents.on(WebContentsEvents.PAGE_FAVICON_UPDATED, async (event, faviconUrls: string[]) => {
+      if (this._destroyed) return;
       if(!this.url.startsWith(InAppUrls.PREFIX) && this.url !== '') {
         this.faviconUrl = faviconUrls[faviconUrls.length - 1];
-        this.parentAppWindow.getBrowserWindowInstance().webContents.send(MainToRendererEventsForBrowserIPC.TAB_FAVICON_UPDATED, {
+        this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_FAVICON_UPDATED, {
           id: this.id,
           faviconUrl: this.faviconUrl
         });
@@ -282,13 +287,15 @@ export class Tab {
       }
     });
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_FAIL_LOAD, (event) => {
+      if (this._destroyed) return;
       console.error('Failed to load URL:', this.url);
-      this.parentAppWindow.getBrowserWindowInstance().webContents.send(MainToRendererEventsForBrowserIPC.NAVIGATION_FAILED, {
+      this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.NAVIGATION_FAILED, {
         id: this.id,
       });
     });
 
     this.webContentsViewInstance.webContents.on('context-menu', (event, params) => {
+      if (this._destroyed) return;
       this.handleContextMenuEvent(this.parentAppWindow, event, params)
     });
 
@@ -445,6 +452,7 @@ export class Tab {
   }
 
   private debouncedHandleNavigationCompletion(url: string): void {
+    if (this._destroyed) return;
     if(this.navigationDebounceTimer) {
       clearTimeout(this.navigationDebounceTimer);
     }
@@ -472,9 +480,11 @@ export class Tab {
   }
 
   private async sendTabUrlUpdate(url: string): Promise<void> {
+    if (this._destroyed) return;
     const foundBookmarkRecord = await BookmarkManager.isBookmark(this.parentAppWindow.id, url);
+    if (this._destroyed) return;
     this.bookmark = foundBookmarkRecord;
-    this.parentAppWindow.getBrowserWindowInstance().webContents.send(MainToRendererEventsForBrowserIPC.TAB_URL_UPDATED, {
+    this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_URL_UPDATED, {
       id: this.id,
       url: this.url,
       isBookmark: (this.bookmark? true : false),
@@ -552,9 +562,14 @@ export class Tab {
   }
 
   clearPendingTimers(): void {
+    this._destroyed = true;
     if (this.navigationDebounceTimer) {
       clearTimeout(this.navigationDebounceTimer);
       this.navigationDebounceTimer = null;
+    }
+    if (this.readerModeCheckTimer) {
+      clearTimeout(this.readerModeCheckTimer);
+      this.readerModeCheckTimer = null;
     }
   }
 
