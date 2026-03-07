@@ -40,7 +40,7 @@ export class Tab {
   private static readonly MAX_POPUPS = 3;
   private static readonly POPUP_WINDOW_MS = 10000;
   private static readonly SMART_POPUP_LIMIT = 3;
-  private static readonly SMART_POPUP_WINDOW_MS = 15000;
+  private static readonly SMART_POPUP_WINDOW_MS = 60000;
   private darkModeCSSKey: string | null = null;
   private static darkModeEnabled = false;
   private _destroyed = false;
