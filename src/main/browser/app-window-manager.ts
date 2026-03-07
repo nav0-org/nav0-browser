@@ -8,6 +8,8 @@ import { DataStoreManager } from "../database/data-store-manager";
 import { SearchEngine } from "../web/search-engine";
 import { PermissionManager, PermissionRequest } from "./permission-manager";
 import { PermissionPromptData } from "./permission-prompt-overlay-manager";
+import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
+import { SettingsEnforcer } from "../settings/settings-enforcer";
 
 export abstract class AppWindowManager {
   private static windows: Map<string, AppWindow>;
@@ -58,10 +60,29 @@ export abstract class AppWindowManager {
     AppWindowManager.initIPCHandlers();
     AppMenuManager.init();
   }
+  private static getPrivateSessionSetting(): boolean {
+    const stored = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as BrowserSettings;
+    const settings = { ...DEFAULT_BROWSER_SETTINGS, ...stored };
+    return settings.sharePrivateSession;
+  }
+
   static createWindow(isPrivate = false): AppWindow {
-    const window = new AppWindow(isPrivate, DatabaseManager.getDatabase(isPrivate));
+    let partition: string | undefined;
+    if (isPrivate) {
+      const shareSession = AppWindowManager.getPrivateSessionSetting();
+      if (!shareSession) {
+        // Each private window gets its own isolated partition
+        partition = `persist:private-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      }
+    }
+    const window = new AppWindow(isPrivate, DatabaseManager.getDatabase(isPrivate), partition);
     AppWindowManager.windows.set(window.id, window);
     AppWindowManager.activateWindow(window.id);
+
+    // Apply ad-blocker and other settings to dynamic private partitions
+    if (isPrivate && partition) {
+      SettingsEnforcer.setupPrivatePartition(partition);
+    }
 
     // Record tabs when the native window close event fires (OS close button, Alt+F4, etc.)
     const browserWindow = window.getBrowserWindowInstance();
@@ -110,14 +131,25 @@ export abstract class AppWindowManager {
       // but the _tabsRecorded flag prevents double-recording)
       AppWindowManager.recordWindowTabs(window);
 
-      const remainingPrivateWindows: Array<AppWindow> = [];
-      AppWindowManager.windows.forEach(element => {
-        if(element.isPrivate && element.id != id){
-          remainingPrivateWindows.push(element);
+      if (window.isPrivate) {
+        const shareSession = AppWindowManager.getPrivateSessionSetting();
+        if (shareSession) {
+          // Shared mode: clear session only when last private window closes
+          const remainingPrivateWindows: Array<AppWindow> = [];
+          AppWindowManager.windows.forEach(element => {
+            if (element.isPrivate && element.id != id) {
+              remainingPrivateWindows.push(element);
+            }
+          });
+          if (remainingPrivateWindows.length === 0) {
+            clearSession = true;
+          }
+        } else {
+          // Isolated mode: each private window has its own session, always clear
+          clearSession = true;
         }
-      });
-      if(window.isPrivate && remainingPrivateWindows.length === 0){
-        clearSession = true;
+        // Unregister partition from settings enforcer
+        SettingsEnforcer.teardownPrivatePartition(window.getPartitionSetting());
       }
       window.closeWindow(clearSession);
     }

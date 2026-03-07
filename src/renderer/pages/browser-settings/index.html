@@ -71,7 +71,7 @@
       </section>
 
       <!-- ====== PRIVACY & SECURITY SECTION ====== -->
-      <section id="section-privacy" class="settings-section" data-keywords="privacy security cookies third-party block exceptions clear ad blocker tracker filter list easylist data retention auto-delete browsing history cache">
+      <section id="section-privacy" class="settings-section" data-keywords="privacy security cookies third-party block exceptions clear ad blocker tracker filter list easylist data retention auto-delete browsing history cache private session incognito isolated share">
         <h2 class="section-title">Privacy &amp; Security</h2>
 
         <!-- Third-Party Cookie Policy -->
@@ -172,6 +172,20 @@
               <input type="text" id="allowed-site-input" class="form-input" placeholder="e.g., example.com">
               <button class="btn btn-sm btn-secondary" id="add-allowed-site-btn"><i data-lucide="plus" width="14" height="14"></i> Add Site</button>
             </div>
+          </div>
+        </div>
+
+        <!-- Private Browsing Session -->
+        <div class="setting-group">
+          <div class="setting-toggle-row">
+            <div>
+              <label class="setting-label">Share session across private windows</label>
+              <p class="setting-description">When enabled, all private windows share cookies, cache, and site data. When disabled, each private window gets its own isolated session.</p>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="share-private-session-toggle" checked>
+              <span class="toggle-slider"></span>
+            </label>
           </div>
         </div>
 

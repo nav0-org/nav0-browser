@@ -69,6 +69,9 @@ export interface BrowserSettings {
   clearHistoryOnClose: boolean;
   clearCacheOnClose: boolean;
 
+  // Privacy - Private Browsing
+  sharePrivateSession: boolean;
+
   // Keyboard Shortcuts
   keyboardShortcuts: Record<string, string>;
 }
@@ -215,6 +218,9 @@ export const DEFAULT_BROWSER_SETTINGS: BrowserSettings = {
   retentionAutofillData: 'never',
   clearHistoryOnClose: false,
   clearCacheOnClose: false,
+
+  // Privacy - Private Browsing (share session across all private windows by default)
+  sharePrivateSession: true,
 
   // Keyboard Shortcuts (empty = use defaults)
   keyboardShortcuts: {},

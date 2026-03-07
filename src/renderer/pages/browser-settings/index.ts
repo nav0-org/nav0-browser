@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initSearchSettings();
   initCookieSettings();
   initAdBlockerSettings();
+  initPrivateSessionSettings();
   initDataRetentionSettings();
   initNetworkSettings();
   initKeyboardShortcuts();
@@ -445,6 +446,18 @@ function renderAllowedSites() {
   });
 
   createIcons({ icons });
+}
+
+// ---- Private Session Settings ----
+function initPrivateSessionSettings() {
+  const toggle = document.getElementById('share-private-session-toggle') as HTMLInputElement;
+  toggle.checked = settings.sharePrivateSession !== false;
+
+  toggle.addEventListener('change', () => {
+    settings.sharePrivateSession = toggle.checked;
+    saveSettings();
+    showToast(toggle.checked ? 'Private windows will share a session' : 'Each private window will have its own session');
+  });
 }
 
 // ---- Data Retention Settings ----

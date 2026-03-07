@@ -8,6 +8,7 @@ import { AD_BLOCK_DOMAINS, AD_URL_PATTERNS } from "../ad-blocker/ad-block-lists"
 export abstract class SettingsEnforcer {
   private static autoDeleteInterval: ReturnType<typeof setInterval> | null = null;
   private static readonly AUTO_DELETE_CHECK_MS = 6 * 60 * 60 * 1000; // 6 hours
+  private static activePrivatePartitions: Set<string> = new Set();
 
   public static async init() {
     SettingsEnforcer.initIPCHandlers();
@@ -22,6 +23,22 @@ export abstract class SettingsEnforcer {
   private static getSettings(): BrowserSettings {
     const stored = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as BrowserSettings;
     return { ...DEFAULT_BROWSER_SETTINGS, ...stored };
+  }
+
+  /**
+   * Register a dynamic private partition and apply current settings (ad-blocker, etc.) to it.
+   */
+  public static setupPrivatePartition(partition: string) {
+    SettingsEnforcer.activePrivatePartitions.add(partition);
+    const settings = SettingsEnforcer.getSettings();
+    SettingsEnforcer.applyAdBlockerToPartition(partition, settings);
+  }
+
+  /**
+   * Unregister a private partition (called when a private window closes).
+   */
+  public static teardownPrivatePartition(partition: string) {
+    SettingsEnforcer.activePrivatePartitions.delete(partition);
   }
 
   private static initIPCHandlers() {
@@ -182,21 +199,8 @@ export abstract class SettingsEnforcer {
   // ---- Ad-Blocker ----
   private static adBlockDomains: Set<string> = new Set();
 
-  private static applyAdBlocker(settings: BrowserSettings) {
-    const browsingSes = session.fromPartition('persist:browsertabs');
-    const privateSes = session.fromPartition('persist:private');
-
-    if (!settings.adBlockerEnabled) {
-      browsingSes.webRequest.onBeforeRequest(null);
-      privateSes.webRequest.onBeforeRequest(null);
-      SettingsEnforcer.adBlockDomains.clear();
-      return;
-    }
-
-    // Build domain blocklist from comprehensive ad/tracker domains
-    SettingsEnforcer.adBlockDomains = new Set(AD_BLOCK_DOMAINS);
-
-    const requestHandler = (details: Electron.OnBeforeRequestListenerDetails, callback: (response: Electron.CallbackResponse) => void) => {
+  private static createAdBlockRequestHandler() {
+    return (details, callback) => {
       const currentSettings = SettingsEnforcer.getSettings();
       if (!currentSettings.adBlockerEnabled) {
         callback({});
@@ -247,9 +251,43 @@ export abstract class SettingsEnforcer {
 
       callback({});
     };
+  }
 
+  private static applyAdBlockerToPartition(partition: string, settings: BrowserSettings) {
+    const ses = session.fromPartition(partition);
+    if (!settings.adBlockerEnabled) {
+      ses.webRequest.onBeforeRequest(null);
+      return;
+    }
+    ses.webRequest.onBeforeRequest(SettingsEnforcer.createAdBlockRequestHandler());
+  }
+
+  private static applyAdBlocker(settings: BrowserSettings) {
+    const browsingSes = session.fromPartition('persist:browsertabs');
+    const privateSes = session.fromPartition('persist:private');
+
+    if (!settings.adBlockerEnabled) {
+      browsingSes.webRequest.onBeforeRequest(null);
+      privateSes.webRequest.onBeforeRequest(null);
+      // Also clear from all dynamic private partitions
+      for (const partition of SettingsEnforcer.activePrivatePartitions) {
+        session.fromPartition(partition).webRequest.onBeforeRequest(null);
+      }
+      SettingsEnforcer.adBlockDomains.clear();
+      return;
+    }
+
+    // Build domain blocklist from comprehensive ad/tracker domains
+    SettingsEnforcer.adBlockDomains = new Set(AD_BLOCK_DOMAINS);
+
+    const requestHandler = SettingsEnforcer.createAdBlockRequestHandler();
     browsingSes.webRequest.onBeforeRequest(requestHandler);
     privateSes.webRequest.onBeforeRequest(requestHandler);
+
+    // Apply to all dynamic private partitions
+    for (const partition of SettingsEnforcer.activePrivatePartitions) {
+      session.fromPartition(partition).webRequest.onBeforeRequest(requestHandler);
+    }
   }
 
   // ---- Data Retention & Auto-Deletion ----

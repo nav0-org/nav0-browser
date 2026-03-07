@@ -25,11 +25,14 @@ export class AppWindow {
   private readyPromise: Promise<void>;
   private resolveReady: () => void;
 
-  constructor(isPrivate = false, database: DB) {
+  constructor(isPrivate = false, database: DB, partitionSetting?: string) {
     this.isPrivate = isPrivate;
     this.database = database;
     this.tabs = new Map();
     this.activeTabId = null;
+    if (partitionSetting) {
+      this.partitionSetting = partitionSetting;
+    }
     this.readyPromise = new Promise<void>((resolve) => {
       this.resolveReady = resolve;
     });
@@ -37,10 +40,8 @@ export class AppWindow {
   }
 
   private init() {
-    if (this.isPrivate) {
-      this.partitionSetting = 'persist:private';
-    } else {
-      this.partitionSetting = 'persist:browsertabs';
+    if (!this.partitionSetting) {
+      this.partitionSetting = this.isPrivate ? 'persist:private' : 'persist:browsertabs';
     }
     PermissionManager.setupSession(this.partitionSetting);
     this.browserWindowInstance = new BrowserWindow({
@@ -115,7 +116,7 @@ export class AppWindow {
     }
     if(clearSession){
       PermissionManager.clearMemoryPermissions();
-      const currentSession = session.fromPartition('persist:private')
+      const currentSession = session.fromPartition(this.partitionSetting)
       currentSession?.clearAuthCache();
       currentSession?.clearStorageData();
       currentSession?.clearCache();
@@ -238,6 +239,10 @@ export class AppWindow {
 
   getBrowserWindowInstance(): BrowserWindow | null {
     return this.browserWindowInstance;
+  }
+
+  getPartitionSetting(): string {
+    return this.partitionSetting;
   }
 
   updateViewBounds(bounds: { x: number, y: number, width: number, height: number }): void {
