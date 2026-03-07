@@ -305,10 +305,14 @@ export class Tab {
     });
 
     this.webContentsViewInstance.webContents.setWindowOpenHandler(({ url, disposition }) => {
-      // Hard flood protection: always enforced regardless of policy
+      // Clean up old timestamps (keep the larger of the two windows)
       const now = Date.now();
-      this.popupTimestamps = this.popupTimestamps.filter(t => now - t < Tab.POPUP_WINDOW_MS);
-      if (this.popupTimestamps.length >= Tab.MAX_POPUPS) {
+      const maxWindow = Math.max(Tab.POPUP_WINDOW_MS, Tab.SMART_POPUP_WINDOW_MS);
+      this.popupTimestamps = this.popupTimestamps.filter(t => now - t < maxWindow);
+
+      // Hard flood protection: always enforced regardless of policy
+      const recentHard = this.popupTimestamps.filter(t => now - t < Tab.POPUP_WINDOW_MS);
+      if (recentHard.length >= Tab.MAX_POPUPS) {
         console.warn(`Popup blocked: tab exceeded ${Tab.MAX_POPUPS} popups in ${Tab.POPUP_WINDOW_MS / 1000}s`);
         return { action: 'deny' }
       }
