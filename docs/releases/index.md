@@ -10,10 +10,18 @@ What's new in every release of nav0 Browser.
 ---
 
 <div class="release-list-item">
+  <a href="/releases/v0.0.7">
+    <h2>v0.0.7</h2>
+  </a>
+  <div class="release-meta">March 7, 2026 <span class="release-badge latest">Latest</span></div>
+  <p class="release-excerpt">Dark mode toggle for any website, recently closed tabs with full window restoration, stability fixes for tab/window lifecycle crashes, and navbar FOUC resolution.</p>
+</div>
+
+<div class="release-list-item">
   <a href="/releases/v0.0.6">
     <h2>v0.0.6</h2>
   </a>
-  <div class="release-meta">March 3, 2026 <span class="release-badge latest">Latest</span></div>
+  <div class="release-meta">March 3, 2026</div>
   <p class="release-excerpt">Ad blocker, download manager with pause/resume, Find in Page, Reader Mode, PDF Reader, browser settings engine, and site permissions.</p>
 </div>
 
