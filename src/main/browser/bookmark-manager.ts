@@ -7,6 +7,12 @@ import { v4 as uuid } from "uuid";
 
 export abstract class BookmarkManager {
 
+  private static getDb(appWindowId: string) {
+    const window = AppWindowManager.getWindowById(appWindowId);
+    if (!window) return null;
+    return DatabaseManager.getDatabase(window.isPrivate);
+  }
+
   public static async initListeners(){
     ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_BOOKMARK, async (event, appWindowId: string, searchTerm?: string, limit?: number, offset?: number) => {
       return await BookmarkManager.fetchRecords(appWindowId, searchTerm, limit, offset);
@@ -29,14 +35,16 @@ export abstract class BookmarkManager {
     searchTerm = searchTerm || "";
     limit = limit || 50;
     offset = offset || 0;
-    const db = DatabaseManager.getDatabase(AppWindowManager.getWindowById(appWindowId).isPrivate);
+    const db = BookmarkManager.getDb(appWindowId);
+    if (!db) return [];
     const stmt = db.prepare("SELECT * FROM bookmark WHERE (url LIKE ? OR title LIKE ?) ORDER BY createdDate DESC LIMIT ? OFFSET ? ; ");
     const records = stmt.all(`%${searchTerm}%`, `%${searchTerm}%`, limit, offset) as Array<BookmarkRecord>;
     return records;
   }
 
-  public static async addRecord(appWindowId: string, title: string, url: string, faviconUrl: string): Promise<BookmarkRecord>{
-    const db = DatabaseManager.getDatabase(AppWindowManager.getWindowById(appWindowId).isPrivate);
+  public static async addRecord(appWindowId: string, title: string, url: string, faviconUrl: string): Promise<BookmarkRecord | null>{
+    const db = BookmarkManager.getDb(appWindowId);
+    if (!db) return null;
     const stmt = db.prepare("INSERT INTO bookmark (id, title, url, createdDate, faviconUrl) VALUES (?, ?, ?, ?, ?);");
     const id = uuid();
     const result = await stmt.run(id, title, url, new Date().toISOString(), faviconUrl);
@@ -45,21 +53,24 @@ export abstract class BookmarkManager {
   }
 
   public static async removeRecord(appWindowId: string, recordId: string): Promise<boolean>{
-    const db = DatabaseManager.getDatabase(AppWindowManager.getWindowById(appWindowId).isPrivate);
+    const db = BookmarkManager.getDb(appWindowId);
+    if (!db) return false;
     const stmt = db.prepare("DELETE FROM bookmark WHERE id = ?;");
     await stmt.run(recordId);
     return true;
   }
 
   public static async removeAllRecords(appWindowId: string): Promise<boolean>{
-    const db = DatabaseManager.getDatabase(AppWindowManager.getWindowById(appWindowId).isPrivate);
+    const db = BookmarkManager.getDb(appWindowId);
+    if (!db) return false;
     const stmt = db.prepare("DELETE FROM bookmark;");
     await stmt.run();
     return true;
   }
 
   public static async isBookmark(appWindowId: string, url: string): Promise<BookmarkRecord | null>{
-    const db = DatabaseManager.getDatabase(AppWindowManager.getWindowById(appWindowId).isPrivate);
+    const db = BookmarkManager.getDb(appWindowId);
+    if (!db) return null;
     const stmt = db.prepare("SELECT * FROM bookmark WHERE url = ?;");
     const records = stmt.all(url) as Array<BookmarkRecord>;
     if(records.length > 0){

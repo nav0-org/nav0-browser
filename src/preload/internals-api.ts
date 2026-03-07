@@ -150,6 +150,21 @@ export function init(){
     fetchOpenTabs: async (appWindowId: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.FETCH_OPEN_TABS, appWindowId);
     },
+    fetchRecentlyClosedTabs: async (appWindowId: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.FETCH_RECENTLY_CLOSED_TABS, appWindowId);
+    },
+    restoreClosedTab: async (appWindowId: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.RESTORE_CLOSED_TAB, appWindowId);
+    },
+    restoreClosedTabByIndex: async (appWindowId: string, index: number) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.RESTORE_CLOSED_TAB_BY_INDEX, appWindowId, index);
+    },
+    fetchClosedWindows: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.FETCH_CLOSED_WINDOWS);
+    },
+    restoreClosedWindow: async (index: number) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.RESTORE_CLOSED_WINDOW, index);
+    },
     toggleReaderMode: async (appWindowId: string, tabId: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.TOGGLE_READER_MODE, appWindowId, tabId);
     },

@@ -4,11 +4,13 @@ export class OptionsMenuManager {
   private optionsElement: HTMLElement | null = null;
   private appWindowId: string;
   private activeTabId: string | null = null;
+  private isPrivate: boolean;
 
   constructor() {
     this.appWindowId = window.BrowserAPI.appWindowId;
+    this.isPrivate = window.BrowserAPI.isPrivate;
     this.setupEventListeners();
-    
+
     document.addEventListener('DOMContentLoaded', () => {
       this.initializeDomElements();
       this.setupEventListeners();
@@ -35,6 +37,94 @@ export class OptionsMenuManager {
       document.getElementById('history-shortcut').textContent = 'Ctrl+⇧+H';
       document.getElementById('bookmarks-shortcut').textContent = 'Ctrl+⇧+B';
       document.getElementById('browser-settings-shortcut').textContent = 'Ctrl+⇧+,';
+    }
+
+    // Populate history submenu when hovering
+    const historyContainer = document.getElementById('history-submenu-container');
+    if (historyContainer) {
+      historyContainer.addEventListener('mouseenter', () => this.populateHistorySubmenu());
+    }
+  }
+
+  private async populateHistorySubmenu(): Promise<void> {
+    // Populate recently closed tabs (not in private mode)
+    const tabsList = document.getElementById('recently-closed-tabs-list');
+    if (tabsList && !this.isPrivate) {
+      const closedTabs = await window.BrowserAPI.fetchRecentlyClosedTabs(this.appWindowId);
+      tabsList.innerHTML = '';
+      if (closedTabs && closedTabs.length > 0) {
+        for (let i = 0; i < closedTabs.length; i++) {
+          const tab = closedTabs[i];
+          const item = document.createElement('div');
+          item.className = 'closed-tab-item';
+
+          if (tab.faviconUrl) {
+            const favicon = document.createElement('img');
+            favicon.className = 'closed-tab-favicon';
+            favicon.src = tab.faviconUrl;
+            favicon.onerror = () => { favicon.style.display = 'none'; };
+            item.appendChild(favicon);
+          }
+
+          const title = document.createElement('span');
+          title.className = 'closed-tab-title';
+          title.textContent = tab.title || tab.url;
+          title.title = tab.url;
+          item.appendChild(title);
+
+          const index = i;
+          item.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            await window.BrowserAPI.restoreClosedTabByIndex(this.appWindowId, index);
+            await window.BrowserAPI.hideOptionsMenu(this.appWindowId);
+          });
+
+          tabsList.appendChild(item);
+        }
+      } else {
+        tabsList.innerHTML = '<div class="submenu-empty-state">No recently closed tabs</div>';
+      }
+    } else if (tabsList && this.isPrivate) {
+      tabsList.innerHTML = '<div class="submenu-empty-state">Not available in private mode</div>';
+    }
+
+    // Populate recently closed windows
+    const windowsList = document.getElementById('recently-closed-windows-list');
+    if (windowsList && !this.isPrivate) {
+      const closedWindows = await window.BrowserAPI.fetchClosedWindows();
+      windowsList.innerHTML = '';
+      if (closedWindows && closedWindows.length > 0) {
+        for (let i = 0; i < closedWindows.length; i++) {
+          const win = closedWindows[i];
+          const item = document.createElement('div');
+          item.className = 'closed-window-item';
+
+          const title = document.createElement('span');
+          title.className = 'closed-window-title';
+          // Show the first tab's title as the window label
+          const firstTab = win.tabs && win.tabs.length > 0 ? win.tabs[0] : null;
+          title.textContent = firstTab ? firstTab.title || firstTab.url : 'Window';
+          item.appendChild(title);
+
+          const count = document.createElement('span');
+          count.className = 'closed-window-tab-count';
+          count.textContent = `${win.tabCount} tab${win.tabCount !== 1 ? 's' : ''}`;
+          item.appendChild(count);
+
+          const index = i;
+          item.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            await window.BrowserAPI.restoreClosedWindow(index);
+            await window.BrowserAPI.hideOptionsMenu(this.appWindowId);
+          });
+
+          windowsList.appendChild(item);
+        }
+      } else {
+        windowsList.innerHTML = '<div class="submenu-empty-state">No recently closed windows</div>';
+      }
+    } else if (windowsList && this.isPrivate) {
+      windowsList.innerHTML = '<div class="submenu-empty-state">Not available in private mode</div>';
     }
   }
 

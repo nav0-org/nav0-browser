@@ -133,6 +133,11 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly EXECUTE_JAVASCRIPT = "browser:execute-javascript";
   public static readonly GET_SEARCH_URL = "browser:get-search-url";
   public static readonly FETCH_OPEN_TABS = "browser:fetch-open-tabs";
+  public static readonly FETCH_RECENTLY_CLOSED_TABS = "browser:fetch-recently-closed-tabs";
+  public static readonly RESTORE_CLOSED_TAB = "browser:restore-closed-tab";
+  public static readonly RESTORE_CLOSED_TAB_BY_INDEX = "browser:restore-closed-tab-by-index";
+  public static readonly FETCH_CLOSED_WINDOWS = "browser:fetch-closed-windows";
+  public static readonly RESTORE_CLOSED_WINDOW = "browser:restore-closed-window";
   public static readonly SHOW_ABOUT_PANEL = "browser:show-about-panel";
   public static readonly TOGGLE_READER_MODE = "browser:toggle-reader-mode";
   public static readonly SET_DARK_MODE = "browser:set-dark-mode";
@@ -181,6 +186,20 @@ export abstract class MainToRendererEventsForBrowserIPC {
 export abstract class DataStoreConstants {
   public static readonly DEFAULT_KEY = 'default';
   public static readonly BROWSER_SETTINGS = "browser-settings";
+  public static readonly CLOSED_WINDOWS = "closed-windows";
+}
+
+export interface ClosedTabRecord {
+  url: string;
+  title: string;
+  faviconUrl: string | null;
+  closedAt: number;
+}
+
+export interface ClosedWindowRecord {
+  tabCount: number;
+  tabs: { url: string; title: string }[];
+  closedAt: number;
 }
 
 export abstract class RendererToMainEventsForDataStoreIPC {

@@ -61,6 +61,11 @@ declare global {
       showAboutPanel: () => Promise<any>;
       getSearchUrl: (searchTerm: string) => Promise<string>;
       fetchOpenTabs: (appWindowId: string) => Promise<Array<{id: string, title: string, url: string, faviconUrl: string | null}>>;
+      fetchRecentlyClosedTabs: (appWindowId: string) => Promise<Array<{url: string, title: string, faviconUrl: string | null, closedAt: number}>>;
+      restoreClosedTab: (appWindowId: string) => Promise<{id: string, title: string, url: string} | null>;
+      restoreClosedTabByIndex: (appWindowId: string, index: number) => Promise<{id: string, title: string, url: string} | null>;
+      fetchClosedWindows: () => Promise<Array<{tabCount: number, tabs: Array<{url: string, title: string}>, closedAt: number}>>;
+      restoreClosedWindow: (index: number) => Promise<{ok: boolean} | null>;
       toggleReaderMode: (appWindowId: string, tabId: string) => Promise<any>;
       setDarkMode: (appWindowId: string, enabled: boolean) => void;
 

@@ -1,7 +1,7 @@
 import { BrowserWindow, session } from "electron";
 import { v4 as uuid } from "uuid";
 import { Tab } from "./tab";
-import { AppConstants, InAppUrls, MainToRendererEventsForBrowserIPC } from "../../constants/app-constants";
+import { AppConstants, ClosedTabRecord, InAppUrls, MainToRendererEventsForBrowserIPC } from "../../constants/app-constants";
 import { OptionsMenuManager } from "./options-menu-manager";
 import { CommandKOverlayManager } from "./command-k-overlay-manager";
 import { DownloadManager } from "./download-manager";
@@ -22,12 +22,17 @@ export class AppWindow {
   private permissionPromptOverlayManager: PermissionPromptOverlayManager | null = null;
   private findInPageManager: FindInPageManager | null = null;
   private database: DB;
+  private readyPromise: Promise<void>;
+  private resolveReady: () => void;
 
   constructor(isPrivate = false, database: DB) {
     this.isPrivate = isPrivate;
     this.database = database;
     this.tabs = new Map();
     this.activeTabId = null;
+    this.readyPromise = new Promise<void>((resolve) => {
+      this.resolveReady = resolve;
+    });
     this.init();
   }
 
@@ -93,6 +98,7 @@ export class AppWindow {
           title: firstTab.getTitle(),
           url: firstTab.getUrl()
         });
+        this.resolveReady();
 
         // Show window only after browser chrome and first tab are fully loaded
         this.browserWindowInstance?.show();
@@ -103,6 +109,10 @@ export class AppWindow {
   }
 
   public closeWindow(clearSession: boolean) {
+    // Clear pending timers on all tabs to prevent callbacks after window removal
+    for (const tab of this.tabs.values()) {
+      tab.clearPendingTimers();
+    }
     if(clearSession){
       PermissionManager.clearMemoryPermissions();
       const currentSession = session.fromPartition('persist:private')
@@ -150,10 +160,25 @@ export class AppWindow {
     return tab;
   }
 
-  closeTab(id: string, isUserInitiated = true): void {
+  closeTab(id: string, isUserInitiated = true): ClosedTabRecord | null {
     const tab = this.tabs.get(id);
+    let closedRecord: ClosedTabRecord | null = null;
     if (tab) {
+      // Capture closed tab data before destroying
+      if (!this.isPrivate) {
+        const url = tab.getUrl();
+        if (url && !url.startsWith(InAppUrls.PREFIX) && url !== '') {
+          closedRecord = {
+            url,
+            title: tab.getTitle(),
+            faviconUrl: tab.getFaviconUrl(),
+            closedAt: Date.now(),
+          };
+        }
+      }
+      tab.clearPendingTimers();
       PermissionManager.clearSessionPermissionsForTab(id);
+      tab.getWebContentsViewInstance().webContents.removeAllListeners();
       tab.getWebContentsViewInstance().removeAllListeners();
       tab.getWebContentsViewInstance().webContents.close();
     }
@@ -164,6 +189,7 @@ export class AppWindow {
     this.browserWindowInstance?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_CLOSED, {
       id: id,
     });
+    return closedRecord;
   }
 
   activateTab(id: string, isUserInitiated = true): void {
@@ -349,6 +375,21 @@ export class AppWindow {
 
   stopFindInPage(): void {
     this.findInPageManager?.clearHighlights();
+  }
+
+  whenReady(): Promise<void> {
+    return this.readyPromise;
+  }
+
+  getTabCount(): number {
+    return this.tabs.size;
+  }
+
+  getTabSummaries(): { url: string; title: string }[] {
+    return Array.from(this.tabs.values()).map(tab => ({
+      url: tab.getUrl(),
+      title: tab.getTitle(),
+    }));
   }
 
   async setDarkMode(enabled: boolean): Promise<void> {

@@ -37,6 +37,15 @@ export abstract class AppMenuManager {
           {label: 'New Tab', accelerator: 'CmdOrCtrl+T', click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.NEW_TAB, true) }},
           {label: 'New Window', accelerator: 'CmdOrCtrl+N', click: async() => { AppWindowManager.createWindow(false); }},
           {label: 'New Private Window', accelerator: 'CmdOrCtrl+Shift+N', click: async() => { AppWindowManager.createWindow(true); }},
+          {label: 'Reopen Closed Tab', accelerator: 'CmdOrCtrl+Shift+T', click: async() => {
+            const activeWindow = AppWindowManager.getActiveWindow();
+            if (activeWindow && !activeWindow.isPrivate) {
+              const closedTab = AppWindowManager.popLastClosedTab();
+              if (closedTab) {
+                await activeWindow.createTab(closedTab.url, true);
+              }
+            }
+          }},
           {type: 'separator' as const},
           {label: 'Open PDF File', accelerator: 'CmdOrCtrl+Shift+O', click: async() => {
             const activeWindow = AppWindowManager.getActiveWindow();

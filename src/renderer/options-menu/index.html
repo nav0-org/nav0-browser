@@ -47,10 +47,36 @@
         <span id="downloads-shortcut"  class="keyboard-shortcut"></span>
       </div>
       
-      <div class="dropdown-item" id="history-option">
+      <div class="dropdown-item has-submenu" id="history-submenu-container">
         <i data-lucide="clock" width="16" height="16"></i>
         <span class="dropdown-item-text">History</span>
-        <span id="history-shortcut"  class="keyboard-shortcut"></span>
+        <span id="history-shortcut" class="keyboard-shortcut"></span>
+        <i data-lucide="chevron-right" class="submenu-indicator" width="14" height="14"></i>
+
+        <!-- History Submenu -->
+        <div class="submenu history-submenu">
+          <!-- Section 1: Show All History -->
+          <div class="dropdown-item" id="history-option">
+            <i data-lucide="clock" width="16" height="16"></i>
+            <span class="dropdown-item-text">Show All History</span>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Section 2: Recently Closed Tabs -->
+          <div class="submenu-section-label">Recently Closed</div>
+          <div id="recently-closed-tabs-list">
+            <div class="submenu-empty-state">No recently closed tabs</div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Section 3: Recently Closed Windows -->
+          <div class="submenu-section-label">Recently Closed Windows</div>
+          <div id="recently-closed-windows-list">
+            <div class="submenu-empty-state">No recently closed windows</div>
+          </div>
+        </div>
       </div>
     
       <div class="dropdown-item" id="bookmarks-option">
