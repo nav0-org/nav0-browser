@@ -602,37 +602,52 @@ export abstract class AppWindowManager {
           (w) => w.id !== window.id && !w.isPrivate
         );
 
+        const moveSubmenu: Electron.MenuItemConstructorOptions[] = [
+          {
+            label: 'New Window',
+            click: async () => {
+              const url = tab.getUrl();
+              const closedRecord = window.closeTab(tabId, true);
+              if (closedRecord) {
+                AppWindowManager.recordClosedTab(closedRecord);
+              }
+              const newWindow = AppWindowManager.createWindow();
+              await newWindow.whenReady();
+              // Navigate the default tab to the moved tab's URL
+              const defaultTabs = newWindow.getTabs();
+              if (defaultTabs.length > 0) {
+                defaultTabs[0].navigate(url);
+              }
+              AppWindowManager.activateWindow(newWindow.id);
+            },
+          },
+        ];
+
         if (otherWindows.length > 0) {
-          const moveSubmenu: Electron.MenuItemConstructorOptions[] = otherWindows.map((targetWindow, index) => {
+          moveSubmenu.push({ type: 'separator' });
+          for (let index = 0; index < otherWindows.length; index++) {
+            const targetWindow = otherWindows[index];
             const activeTab = targetWindow.getActiveTab();
             const label = activeTab ? activeTab.getTitle() || `Window ${index + 1}` : `Window ${index + 1}`;
-            return {
+            moveSubmenu.push({
               label,
               click: async () => {
                 const url = tab.getUrl();
-                // Close the tab in the source window
                 const closedRecord = window.closeTab(tabId, true);
                 if (closedRecord) {
                   AppWindowManager.recordClosedTab(closedRecord);
                 }
-                // Create the tab in the target window and activate it
                 await targetWindow.createTab(url, true);
-                // Focus the target window
                 AppWindowManager.activateWindow(targetWindow.id);
               },
-            };
-          });
-
-          template.splice(-2, 0, {
-            label: 'Move to Another Window',
-            submenu: moveSubmenu,
-          });
-        } else {
-          template.splice(-2, 0, {
-            label: 'Move to Another Window',
-            enabled: false,
-          });
+            });
+          }
         }
+
+        template.splice(-2, 0, {
+          label: 'Move to Another Window',
+          submenu: moveSubmenu,
+        });
       }
 
       const menu = Menu.buildFromTemplate(template);
