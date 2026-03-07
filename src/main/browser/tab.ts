@@ -547,6 +547,13 @@ export class Tab {
     return result.filePaths;
   }
 
+  clearPendingTimers(): void {
+    if (this.navigationDebounceTimer) {
+      clearTimeout(this.navigationDebounceTimer);
+      this.navigationDebounceTimer = null;
+    }
+  }
+
   getWebContentsViewInstance(): WebContentsView {
     return this.webContentsViewInstance;
   }

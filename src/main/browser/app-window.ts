@@ -168,6 +168,7 @@ export class AppWindow {
           };
         }
       }
+      tab.clearPendingTimers();
       PermissionManager.clearSessionPermissionsForTab(id);
       tab.getWebContentsViewInstance().removeAllListeners();
       tab.getWebContentsViewInstance().webContents.close();
