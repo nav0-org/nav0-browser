@@ -141,6 +141,9 @@ export function init(){
     createNewPrivateAppWindow: async () => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.CREATE_NEW_PRIVATE_APP_WINDOW, {});
     },
+    printPage: async (appWindowId: string) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.PRINT_PAGE, appWindowId);
+    },
     showTabContextMenu: (appWindowId: string, tabId: string) => {
       ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_TAB_CONTEXT_MENU, appWindowId, tabId);
     },

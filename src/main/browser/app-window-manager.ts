@@ -539,6 +539,14 @@ export abstract class AppWindowManager {
       return { ok: true };
     });
 
+    ipcMain.on(RendererToMainEventsForBrowserIPC.PRINT_PAGE, async (event, appWindowId: string) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (!window) return;
+      const activeTab = window.getActiveTab();
+      if (!activeTab) return;
+      activeTab.getWebContentsViewInstance().webContents.print();
+    });
+
     ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_TAB_CONTEXT_MENU, async (event, appWindowId: string, tabId: string) => {
       const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
       if (!window) return;
@@ -560,6 +568,12 @@ export abstract class AppWindowManager {
           click: () => {
             const url = tab.getUrl();
             window.createTab(url, true);
+          },
+        },
+        {
+          label: 'Print...',
+          click: () => {
+            webContents.print();
           },
         },
         { type: 'separator' },

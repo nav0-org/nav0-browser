@@ -58,6 +58,15 @@ export abstract class AppMenuManager {
             await activeWindow.createTab(`file://${result.filePaths[0]}`, true);
           }},
           {type: 'separator' as const},
+          {label: 'Print...', accelerator: 'CmdOrCtrl+P', click: async() => {
+            const activeWindow = AppWindowManager.getActiveWindow();
+            if (!activeWindow) return;
+            const activeTab = activeWindow.getActiveTab();
+            if (activeTab) {
+              activeTab.getWebContentsViewInstance().webContents.print();
+            }
+          }},
+          {type: 'separator' as const},
           {label: 'Close Tab', click: async() => { AppWindowManager.getActiveWindow().closeTab(AppWindowManager.getActiveWindow().getActiveTabId(), true); }},
           {label: 'Close Window', click: async() => { AppWindowManager.closeWindow(AppWindowManager.getActiveWindowId()); }},
         ]
