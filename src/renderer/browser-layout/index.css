@@ -56,7 +56,6 @@ body.is-private .private-window-identifier{
 /* Scroll arrow buttons */
 .tab-scroll-btn {
   display: none;
-  margin-top: 6px;
 }
 
 .tab-scroll-btn.visible {
