@@ -58,6 +58,7 @@ declare global {
       findInPageNext: (appWindowId: string, text: string, options?: { matchCase?: boolean }) => Promise<any>;
       findInPagePrevious: (appWindowId: string, text: string, options?: { matchCase?: boolean }) => Promise<any>;
       stopFindInPage: (appWindowId: string) => Promise<any>;
+      showTabContextMenu: (appWindowId: string, tabId: string) => void;
       showAboutPanel: () => Promise<any>;
       getSearchUrl: (searchTerm: string) => Promise<string>;
       fetchOpenTabs: (appWindowId: string) => Promise<Array<{id: string, title: string, url: string, faviconUrl: string | null}>>;

@@ -539,6 +539,67 @@ export abstract class AppWindowManager {
       return { ok: true };
     });
 
+    ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_TAB_CONTEXT_MENU, async (event, appWindowId: string, tabId: string) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (!window) return;
+      const tab = window.getTabById(tabId);
+      if (!tab) return;
+
+      const webContents = tab.getWebContentsViewInstance().webContents;
+      const isMuted = webContents.isAudioMuted();
+
+      const template: Electron.MenuItemConstructorOptions[] = [
+        {
+          label: 'Reload Tab',
+          click: () => {
+            webContents.reload();
+          },
+        },
+        {
+          label: 'Duplicate Tab',
+          click: () => {
+            const url = tab.getUrl();
+            window.createTab(url, true);
+          },
+        },
+        { type: 'separator' },
+        {
+          label: isMuted ? 'Unmute Site' : 'Mute Site',
+          click: () => {
+            webContents.setAudioMuted(!isMuted);
+          },
+        },
+        { type: 'separator' },
+        {
+          label: 'Close Tab',
+          click: () => {
+            const closedRecord = window.closeTab(tabId, true);
+            if (closedRecord) {
+              AppWindowManager.recordClosedTab(closedRecord);
+            }
+          },
+        },
+        {
+          label: 'Close Other Tabs',
+          enabled: window.getTabs().length > 1,
+          click: () => {
+            const allTabs = window.getTabs();
+            for (const t of allTabs) {
+              if (t.getId() !== tabId) {
+                const closedRecord = window.closeTab(t.getId(), true);
+                if (closedRecord) {
+                  AppWindowManager.recordClosedTab(closedRecord);
+                }
+              }
+            }
+          },
+        },
+      ];
+
+      const menu = Menu.buildFromTemplate(template);
+      menu.popup({ window: window.getBrowserWindowInstance() });
+    });
+
     ipcMain.handle(RendererToMainEventsForBrowserIPC.OPEN_PDF_FILE, async (event, appWindowId: string) => {
       let window: AppWindow | null = null;
       if (appWindowId) {
