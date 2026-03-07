@@ -174,6 +174,10 @@ export class OptionsMenuManager {
       await window.BrowserAPI.showAboutPanel();
     });
 
+    this.optionsElement?.querySelector('#privacy-policy-option')?.addEventListener('click', async () => {
+      await window.BrowserAPI.createTab(this.appWindowId, 'https://nav0.org/privacy-policy', true);
+    });
+
   }
   public toggleOptionsVisibility(): void {
     this.optionsElement?.classList.toggle('show');

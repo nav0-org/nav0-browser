@@ -191,7 +191,7 @@ export default defineConfig({
       { text: 'Blog', link: '/blog/' },
       { text: 'Releases', link: '/releases/' },
       { text: 'FAQ', link: '/faq' },
-      { text: 'Privacy', link: '/guide/privacy' },
+      { text: 'Privacy Policy', link: '/privacy-policy' },
       {
         text: 'Links',
         items: [
@@ -213,7 +213,8 @@ export default defineConfig({
           text: 'Core Principles',
           items: [
             { text: 'Privacy', link: '/guide/privacy' },
-            { text: 'Philosophy', link: '/guide/philosophy' }
+            { text: 'Philosophy', link: '/guide/philosophy' },
+            { text: 'Privacy Policy', link: '/privacy-policy' }
           ]
         },
         {

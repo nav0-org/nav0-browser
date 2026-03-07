@@ -143,6 +143,7 @@ export abstract class AppMenuManager {
         label: 'Help and More',
         submenu: [
           {label: 'About Nav0 Browser', click: () => { app.showAboutPanel(); }},
+          {label: 'Privacy Policy', click: async () => { await AppWindowManager.getActiveWindow().createTab('https://nav0.org/privacy-policy', true); }},
         ]
       }
     ];
