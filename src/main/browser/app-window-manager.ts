@@ -579,6 +579,21 @@ export abstract class AppWindowManager {
             }
           },
         },
+        {
+          label: 'Close Other Tabs',
+          enabled: window.getTabs().length > 1,
+          click: () => {
+            const allTabs = window.getTabs();
+            for (const t of allTabs) {
+              if (t.getId() !== tabId) {
+                const closedRecord = window.closeTab(t.getId(), true);
+                if (closedRecord) {
+                  AppWindowManager.recordClosedTab(closedRecord);
+                }
+              }
+            }
+          },
+        },
       ];
 
       const menu = Menu.buildFromTemplate(template);
