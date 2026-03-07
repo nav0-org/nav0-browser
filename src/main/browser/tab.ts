@@ -311,6 +311,17 @@ export class Tab {
         }
       } else if (disposition === 'foreground-tab' || disposition === 'background-tab'){
         this.parentAppWindow.createTab(url);
+      } else if (disposition === 'new-window') {
+        // Allow popup windows (e.g. OAuth flows like "Continue with Google")
+        // to open as real windows, preserving window.opener for callback communication
+        return {
+          action: 'allow',
+          overrideBrowserWindowOptions: {
+            width: 500,
+            height: 700,
+            fullscreenable: false,
+          }
+        }
       }
       return { action: 'deny' }
     });
