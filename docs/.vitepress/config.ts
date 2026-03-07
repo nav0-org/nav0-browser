@@ -215,7 +215,8 @@ export default defineConfig({
           items: [
             { text: 'Privacy', link: '/guide/privacy' },
             { text: 'Philosophy', link: '/guide/philosophy' },
-            { text: 'Terms of Use', link: '/guide/terms-of-use' }
+            { text: 'Terms of Use', link: '/guide/terms-of-use' },
+            { text: 'Disclaimer', link: '/guide/disclaimer' }
           ]
         },
         {
