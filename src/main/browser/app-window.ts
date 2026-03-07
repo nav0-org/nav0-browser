@@ -174,6 +174,7 @@ export class AppWindow {
       }
       tab.clearPendingTimers();
       PermissionManager.clearSessionPermissionsForTab(id);
+      tab.getWebContentsViewInstance().webContents.removeAllListeners();
       tab.getWebContentsViewInstance().removeAllListeners();
       tab.getWebContentsViewInstance().webContents.close();
     }
