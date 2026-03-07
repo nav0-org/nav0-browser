@@ -578,15 +578,18 @@ export class Tab {
       } catch (error) {
         //do nothing
       }
+      // Strip URL fragment/hash to avoid duplicate history entries for the same page
+      // (e.g. page.html#section1 vs page.html#section2 should be one record)
+      const urlWithoutFragment = urlObject ? url.split('#')[0] : url;
       // Duplicate prevention: if the most recent history entry has the same URL, update its timestamp instead
-      const existingRecord = await BrowsingHistoryManager.findLastRecordByUrl(this.parentAppWindow.id, url);
+      const existingRecord = await BrowsingHistoryManager.findLastRecordByUrl(this.parentAppWindow.id, urlWithoutFragment);
       if(existingRecord) {
         await BrowsingHistoryManager.updateRecordTimestamp(this.parentAppWindow.id, existingRecord.id);
         this.lastHistoryRecordId = existingRecord.id;
         return;
       }
       const record = await BrowsingHistoryManager.addRecord(
-        this.parentAppWindow.id, url, this.title,
+        this.parentAppWindow.id, urlWithoutFragment, this.title,
         urlObject ? urlObject.hostname : '',
         urlObject ? `${urlObject.protocol}//${urlObject.hostname}/favicon.ico` : ''
       );
