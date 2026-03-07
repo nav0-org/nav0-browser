@@ -36,6 +36,9 @@ export class Tab {
   private readerModeCheckTimer: ReturnType<typeof setTimeout> | null = null;
   private readerModeToggleLock = false;
   private static pdfSessionsRegistered = new Set<string>();
+  private popupTimestamps: number[] = [];
+  private static readonly MAX_POPUPS = 3;
+  private static readonly POPUP_WINDOW_MS = 10000;
   private darkModeCSSKey: string | null = null;
   private static darkModeEnabled = false;
   private _destroyed = false;
@@ -300,7 +303,16 @@ export class Tab {
     });
 
     this.webContentsViewInstance.webContents.setWindowOpenHandler(({ url, disposition }) => {
+      // Popup flood protection: block if too many popups opened in a short window
+      const now = Date.now();
+      this.popupTimestamps = this.popupTimestamps.filter(t => now - t < Tab.POPUP_WINDOW_MS);
+      if (this.popupTimestamps.length >= Tab.MAX_POPUPS) {
+        console.warn(`Popup blocked: tab exceeded ${Tab.MAX_POPUPS} popups in ${Tab.POPUP_WINDOW_MS / 1000}s`);
+        return { action: 'deny' }
+      }
+
       if (url === 'about:blank') {
+        this.popupTimestamps.push(now);
         return {
           action: 'allow',
           overrideBrowserWindowOptions: {
@@ -310,10 +322,12 @@ export class Tab {
           }
         }
       } else if (disposition === 'foreground-tab' || disposition === 'background-tab'){
+        this.popupTimestamps.push(now);
         this.parentAppWindow.createTab(url);
       } else if (disposition === 'new-window') {
         // Allow popup windows (e.g. OAuth flows like "Continue with Google")
         // to open as real windows, preserving window.opener for callback communication
+        this.popupTimestamps.push(now);
         return {
           action: 'allow',
           overrideBrowserWindowOptions: {
