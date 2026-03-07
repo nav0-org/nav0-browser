@@ -601,6 +601,7 @@ export abstract class AppWindowManager {
         const otherWindows = AppWindowManager.getWindows().filter(
           (w) => w.id !== window.id && !w.isPrivate
         );
+
         if (otherWindows.length > 0) {
           const moveSubmenu: Electron.MenuItemConstructorOptions[] = otherWindows.map((targetWindow, index) => {
             const activeTab = targetWindow.getActiveTab();
@@ -625,6 +626,11 @@ export abstract class AppWindowManager {
           template.splice(-2, 0, {
             label: 'Move to Another Window',
             submenu: moveSubmenu,
+          });
+        } else {
+          template.splice(-2, 0, {
+            label: 'Move to Another Window',
+            enabled: false,
           });
         }
       }
