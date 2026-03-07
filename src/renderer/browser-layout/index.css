@@ -17,9 +17,13 @@
   background-color: var(--primary-dark);
   color: white;
   padding: 0px 10px 0px 10px;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
+}
+
+body.is-private .private-window-identifier{
+  display: flex;
 }
 
 .browser-layout-container {

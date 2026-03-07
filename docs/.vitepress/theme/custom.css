@@ -343,6 +343,53 @@
   line-height: 1.6;
 }
 
+/* ========== Release List Page ========== */
+.release-list-item {
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--vp-c-divider);
+}
+
+.release-list-item:last-child {
+  border-bottom: none;
+}
+
+.release-list-item a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.release-list-item h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  border-top: none;
+  padding-top: 0;
+}
+
+.release-list-item h2:hover {
+  color: var(--vp-c-brand-1);
+}
+
+.release-list-item .release-meta {
+  font-size: 0.8rem;
+  color: var(--vp-c-text-3);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.release-list-item .release-meta .release-badge {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.5rem;
+}
+
+.release-list-item .release-excerpt {
+  color: var(--vp-c-text-2);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
 /* ========== Divider ========== */
 .home-section-divider {
   max-width: 1392px;
