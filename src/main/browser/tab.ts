@@ -38,9 +38,7 @@ export class Tab {
   private static pdfSessionsRegistered = new Set<string>();
   private popupTimestamps: number[] = [];
   private static readonly MAX_POPUPS = 3;
-  private static readonly POPUP_WINDOW_MS = 10000;
-  private static readonly SMART_POPUP_LIMIT = 3;
-  private static readonly SMART_POPUP_WINDOW_MS = 60000;
+  private static readonly POPUP_WINDOW_MS = 60_000;
   private darkModeCSSKey: string | null = null;
   private static darkModeEnabled = false;
   private _destroyed = false;
@@ -305,14 +303,11 @@ export class Tab {
     });
 
     this.webContentsViewInstance.webContents.setWindowOpenHandler(({ url, disposition }) => {
-      // Clean up old timestamps (keep the larger of the two windows)
       const now = Date.now();
-      const maxWindow = Math.max(Tab.POPUP_WINDOW_MS, Tab.SMART_POPUP_WINDOW_MS);
-      this.popupTimestamps = this.popupTimestamps.filter(t => now - t < maxWindow);
+      this.popupTimestamps = this.popupTimestamps.filter(t => now - t < Tab.POPUP_WINDOW_MS);
 
-      // Hard flood protection: always enforced regardless of policy
-      const recentHard = this.popupTimestamps.filter(t => now - t < Tab.POPUP_WINDOW_MS);
-      if (recentHard.length >= Tab.MAX_POPUPS) {
+      // Flood protection: always enforced regardless of policy
+      if (this.popupTimestamps.length >= Tab.MAX_POPUPS) {
         console.warn(`Popup blocked: tab exceeded ${Tab.MAX_POPUPS} popups in ${Tab.POPUP_WINDOW_MS / 1000}s`);
         return { action: 'deny' }
       }
@@ -382,10 +377,8 @@ export class Tab {
       if (s.popupPolicy === 'smart') {
         // Allowed-list sites always pass
         if (matchesAny(s.popupAllowedSites)) return true;
-        // Rate-limit: allow up to SMART_POPUP_LIMIT within SMART_POPUP_WINDOW_MS
-        const now = Date.now();
-        const recent = this.popupTimestamps.filter(t => now - t < Tab.SMART_POPUP_WINDOW_MS);
-        return recent.length < Tab.SMART_POPUP_LIMIT;
+        // Rate-limit: allow up to MAX_POPUPS within POPUP_WINDOW_MS
+        return this.popupTimestamps.length < Tab.MAX_POPUPS;
       }
 
       // Block policy: only allow if site is in allowed list
