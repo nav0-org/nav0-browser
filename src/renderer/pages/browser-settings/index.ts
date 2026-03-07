@@ -468,7 +468,7 @@ function initPopupSettings() {
   });
 
   function updatePopupContainerVisibility(policy: string) {
-    allowedContainer.style.display = policy === 'block' ? '' : 'none';
+    allowedContainer.style.display = (policy === 'block' || policy === 'smart') ? '' : 'none';
     blockedContainer.style.display = policy === 'allow' ? '' : 'none';
   }
 

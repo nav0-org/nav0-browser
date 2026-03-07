@@ -70,7 +70,7 @@ export interface BrowserSettings {
   clearCacheOnClose: boolean;
 
   // Pop-ups
-  popupPolicy: 'block' | 'allow';
+  popupPolicy: 'block' | 'allow' | 'smart';
   popupAllowedSites: string[];
   popupBlockedSites: string[];
 

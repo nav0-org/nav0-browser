@@ -39,6 +39,8 @@ export class Tab {
   private popupTimestamps: number[] = [];
   private static readonly MAX_POPUPS = 3;
   private static readonly POPUP_WINDOW_MS = 10000;
+  private static readonly SMART_POPUP_LIMIT = 3;
+  private static readonly SMART_POPUP_WINDOW_MS = 15000;
   private darkModeCSSKey: string | null = null;
   private static darkModeEnabled = false;
   private _destroyed = false;
@@ -303,7 +305,7 @@ export class Tab {
     });
 
     this.webContentsViewInstance.webContents.setWindowOpenHandler(({ url, disposition }) => {
-      // Popup flood protection: block if too many popups opened in a short window
+      // Hard flood protection: always enforced regardless of policy
       const now = Date.now();
       this.popupTimestamps = this.popupTimestamps.filter(t => now - t < Tab.POPUP_WINDOW_MS);
       if (this.popupTimestamps.length >= Tab.MAX_POPUPS) {
@@ -352,10 +354,12 @@ export class Tab {
       const stored = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as BrowserSettings;
       const s = { ...DEFAULT_BROWSER_SETTINGS, ...stored };
 
-      // Determine the origin hostname of the page opening the popup
+      // Get hostnames for both the opener page and the popup destination
       const openerUrl = this.webContentsViewInstance.webContents.getURL();
       let openerHostname = '';
       try { openerHostname = new URL(openerUrl).hostname; } catch { /* ignore */ }
+      let popupHostname = '';
+      try { popupHostname = new URL(popupUrl).hostname; } catch { /* ignore */ }
 
       const matchesSite = (hostname: string, sites: string[]) =>
         (sites || []).some(site => {
@@ -363,14 +367,26 @@ export class Tab {
           return hostname === d || hostname.endsWith('.' + d);
         });
 
+      // Check if either the opener or the popup destination matches
+      const matchesAny = (sites: string[]) =>
+        matchesSite(openerHostname, sites) || matchesSite(popupHostname, sites);
+
       if (s.popupPolicy === 'allow') {
-        // Allow by default, but check blocked list
-        return !matchesSite(openerHostname, s.popupBlockedSites);
+        return !matchesAny(s.popupBlockedSites);
       }
-      // Block by default, but check allowed list
-      return matchesSite(openerHostname, s.popupAllowedSites);
+
+      if (s.popupPolicy === 'smart') {
+        // Allowed-list sites always pass
+        if (matchesAny(s.popupAllowedSites)) return true;
+        // Rate-limit: allow up to SMART_POPUP_LIMIT within SMART_POPUP_WINDOW_MS
+        const now = Date.now();
+        const recent = this.popupTimestamps.filter(t => now - t < Tab.SMART_POPUP_WINDOW_MS);
+        return recent.length < Tab.SMART_POPUP_LIMIT;
+      }
+
+      // Block policy: only allow if site is in allowed list
+      return matchesAny(s.popupAllowedSites);
     } catch {
-      // On error, fall through to default (allow)
       return true;
     }
   }
