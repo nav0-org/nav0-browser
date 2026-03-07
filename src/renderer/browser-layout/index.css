@@ -56,28 +56,11 @@ body.is-private .private-window-identifier{
 /* Scroll arrow buttons */
 .tab-scroll-btn {
   display: none;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  min-width: 20px;
-  height: 28px;
-  padding: 0;
   margin-top: 6px;
-  border: none;
-  background: var(--bg-color);
-  color: var(--text-secondary);
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  z-index: 1;
-}
-
-.tab-scroll-btn:hover {
-  background-color: var(--bg-hover);
-  color: var(--text-color);
 }
 
 .tab-scroll-btn.visible {
-  display: flex;
+  display: inline-flex;
 }
 
 .tab {
