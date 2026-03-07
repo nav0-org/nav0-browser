@@ -596,6 +596,39 @@ export abstract class AppWindowManager {
         },
       ];
 
+      // "Move to Another Window" submenu — only for non-private windows
+      if (!window.isPrivate) {
+        const otherWindows = AppWindowManager.getWindows().filter(
+          (w) => w.id !== window.id && !w.isPrivate
+        );
+        if (otherWindows.length > 0) {
+          const moveSubmenu: Electron.MenuItemConstructorOptions[] = otherWindows.map((targetWindow, index) => {
+            const activeTab = targetWindow.getActiveTab();
+            const label = activeTab ? activeTab.getTitle() || `Window ${index + 1}` : `Window ${index + 1}`;
+            return {
+              label,
+              click: async () => {
+                const url = tab.getUrl();
+                // Close the tab in the source window
+                const closedRecord = window.closeTab(tabId, true);
+                if (closedRecord) {
+                  AppWindowManager.recordClosedTab(closedRecord);
+                }
+                // Create the tab in the target window and activate it
+                await targetWindow.createTab(url, true);
+                // Focus the target window
+                AppWindowManager.activateWindow(targetWindow.id);
+              },
+            };
+          });
+
+          template.splice(-2, 0, {
+            label: 'Move to Another Window',
+            submenu: moveSubmenu,
+          });
+        }
+      }
+
       const menu = Menu.buildFromTemplate(template);
       menu.popup({ window: window.getBrowserWindowInstance() });
     });
