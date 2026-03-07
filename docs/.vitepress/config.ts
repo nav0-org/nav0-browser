@@ -190,6 +190,7 @@ export default defineConfig({
       { text: 'Install', link: '/install' },
       { text: 'Blog', link: '/blog/' },
       { text: 'Releases', link: '/releases/' },
+      { text: 'About', link: '/about' },
       { text: 'FAQ', link: '/faq' },
       { text: 'Privacy', link: '/guide/privacy' },
       {

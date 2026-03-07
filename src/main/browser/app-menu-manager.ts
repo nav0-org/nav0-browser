@@ -142,6 +142,7 @@ export abstract class AppMenuManager {
       {
         label: 'Help and More',
         submenu: [
+          {label: 'About Nav0', click: async () => { await AppWindowManager.getActiveWindow().createTab('https://nav0.org/about', true); }},
           {label: 'About Nav0 Browser', click: () => { app.showAboutPanel(); }},
         ]
       }
