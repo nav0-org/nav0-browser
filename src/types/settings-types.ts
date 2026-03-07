@@ -69,6 +69,11 @@ export interface BrowserSettings {
   clearHistoryOnClose: boolean;
   clearCacheOnClose: boolean;
 
+  // Pop-ups
+  popupPolicy: 'block' | 'allow';
+  popupAllowedSites: string[];
+  popupBlockedSites: string[];
+
   // Keyboard Shortcuts
   keyboardShortcuts: Record<string, string>;
 }
@@ -215,6 +220,11 @@ export const DEFAULT_BROWSER_SETTINGS: BrowserSettings = {
   retentionAutofillData: 'never',
   clearHistoryOnClose: false,
   clearCacheOnClose: false,
+
+  // Pop-ups (block by default)
+  popupPolicy: 'block',
+  popupAllowedSites: [],
+  popupBlockedSites: [],
 
   // Keyboard Shortcuts (empty = use defaults)
   keyboardShortcuts: {},

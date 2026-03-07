@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initSearchSettings();
   initCookieSettings();
   initAdBlockerSettings();
+  initPopupSettings();
   initDataRetentionSettings();
   initNetworkSettings();
   initKeyboardShortcuts();
@@ -440,6 +441,110 @@ function renderAllowedSites() {
       settings.adBlockerAllowedSites.splice(idx, 1);
       saveSettings();
       renderAllowedSites();
+    });
+    container.appendChild(item);
+  });
+
+  createIcons({ icons });
+}
+
+// ---- Pop-up Settings ----
+function initPopupSettings() {
+  const radios = document.querySelectorAll('input[name="popup-policy"]') as NodeListOf<HTMLInputElement>;
+  const allowedContainer = document.getElementById('popup-allowed-container');
+  const blockedContainer = document.getElementById('popup-blocked-container');
+
+  // Set initial state
+  radios.forEach(r => { if (r.value === (settings.popupPolicy || 'block')) r.checked = true; });
+  updatePopupContainerVisibility(settings.popupPolicy || 'block');
+
+  radios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      settings.popupPolicy = radio.value as BrowserSettings['popupPolicy'];
+      updatePopupContainerVisibility(radio.value);
+      saveSettings();
+      showToast('Pop-up policy updated');
+    });
+  });
+
+  function updatePopupContainerVisibility(policy: string) {
+    allowedContainer.style.display = policy === 'block' ? '' : 'none';
+    blockedContainer.style.display = policy === 'allow' ? '' : 'none';
+  }
+
+  renderPopupAllowedSites();
+  renderPopupBlockedSites();
+
+  document.getElementById('add-popup-allowed-btn')?.addEventListener('click', () => {
+    const input = document.getElementById('popup-allowed-input') as HTMLInputElement;
+    const site = input.value.trim();
+    if (!site) return;
+    if (!settings.popupAllowedSites) settings.popupAllowedSites = [];
+    if (settings.popupAllowedSites.indexOf(site) === -1) {
+      settings.popupAllowedSites.push(site);
+      saveSettings();
+      input.value = '';
+      renderPopupAllowedSites();
+    }
+  });
+
+  document.getElementById('add-popup-blocked-btn')?.addEventListener('click', () => {
+    const input = document.getElementById('popup-blocked-input') as HTMLInputElement;
+    const site = input.value.trim();
+    if (!site) return;
+    if (!settings.popupBlockedSites) settings.popupBlockedSites = [];
+    if (settings.popupBlockedSites.indexOf(site) === -1) {
+      settings.popupBlockedSites.push(site);
+      saveSettings();
+      input.value = '';
+      renderPopupBlockedSites();
+    }
+  });
+}
+
+function renderPopupAllowedSites() {
+  const container = document.getElementById('popup-allowed-list');
+  if (!container) return;
+  container.innerHTML = '';
+
+  (settings.popupAllowedSites || []).forEach((site, idx) => {
+    const item = document.createElement('div');
+    item.className = 'list-item';
+    item.innerHTML = `
+      <div class="list-item-content"><span class="list-item-text">${site}</span></div>
+      <div class="list-item-actions">
+        <button class="list-item-btn" title="Remove"><i data-lucide="x" width="14" height="14"></i></button>
+      </div>
+    `;
+    item.querySelector('.list-item-btn')?.addEventListener('click', () => {
+      settings.popupAllowedSites.splice(idx, 1);
+      saveSettings();
+      renderPopupAllowedSites();
+    });
+    container.appendChild(item);
+  });
+
+  createIcons({ icons });
+}
+
+function renderPopupBlockedSites() {
+  const container = document.getElementById('popup-blocked-list');
+  if (!container) return;
+  container.innerHTML = '';
+
+  (settings.popupBlockedSites || []).forEach((site, idx) => {
+    const item = document.createElement('div');
+    item.className = 'list-item';
+    item.innerHTML = `
+      <div class="list-item-content"><span class="list-item-text">${site}</span></div>
+      <div class="list-item-actions">
+        <button class="list-item-btn" title="Remove"><i data-lucide="x" width="14" height="14"></i></button>
+      </div>
+    `;
+    item.querySelector('.list-item-btn')?.addEventListener('click', () => {
+      settings.popupBlockedSites.splice(idx, 1);
+      saveSettings();
+      renderPopupBlockedSites();
     });
     container.appendChild(item);
   });

@@ -311,6 +311,12 @@ export class Tab {
         return { action: 'deny' }
       }
 
+      // Check popup policy from settings
+      if (!this.isPopupAllowedBySettings(url)) {
+        console.warn(`Popup blocked by settings for: ${url}`);
+        return { action: 'deny' }
+      }
+
       if (url === 'about:blank') {
         this.popupTimestamps.push(now);
         return {
@@ -339,6 +345,34 @@ export class Tab {
       }
       return { action: 'deny' }
     });
+  }
+
+  private isPopupAllowedBySettings(popupUrl: string): boolean {
+    try {
+      const stored = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as BrowserSettings;
+      const s = { ...DEFAULT_BROWSER_SETTINGS, ...stored };
+
+      // Determine the origin hostname of the page opening the popup
+      const openerUrl = this.webContentsViewInstance.webContents.getURL();
+      let openerHostname = '';
+      try { openerHostname = new URL(openerUrl).hostname; } catch { /* ignore */ }
+
+      const matchesSite = (hostname: string, sites: string[]) =>
+        (sites || []).some(site => {
+          const d = site.toLowerCase().trim();
+          return hostname === d || hostname.endsWith('.' + d);
+        });
+
+      if (s.popupPolicy === 'allow') {
+        // Allow by default, but check blocked list
+        return !matchesSite(openerHostname, s.popupBlockedSites);
+      }
+      // Block by default, but check allowed list
+      return matchesSite(openerHostname, s.popupAllowedSites);
+    } catch {
+      // On error, fall through to default (allow)
+      return true;
+    }
   }
 
   async handleDownload(item: Electron.DownloadItem): Promise<void> {

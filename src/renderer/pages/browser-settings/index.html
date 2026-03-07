@@ -71,7 +71,7 @@
       </section>
 
       <!-- ====== PRIVACY & SECURITY SECTION ====== -->
-      <section id="section-privacy" class="settings-section" data-keywords="privacy security cookies third-party block exceptions clear ad blocker tracker filter list easylist data retention auto-delete browsing history cache">
+      <section id="section-privacy" class="settings-section" data-keywords="privacy security cookies third-party block exceptions clear ad blocker tracker filter list easylist data retention auto-delete browsing history cache popup popups pop-up window open allow block site">
         <h2 class="section-title">Privacy &amp; Security</h2>
 
         <!-- Third-Party Cookie Policy -->
@@ -171,6 +171,46 @@
             <div class="add-item-form">
               <input type="text" id="allowed-site-input" class="form-input" placeholder="e.g., example.com">
               <button class="btn btn-sm btn-secondary" id="add-allowed-site-btn"><i data-lucide="plus" width="14" height="14"></i> Add Site</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pop-up Blocking -->
+        <div class="setting-group">
+          <label class="setting-label">Pop-up Windows</label>
+          <p class="setting-description">Control whether websites can open pop-up windows.</p>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="popup-policy" value="block" checked>
+              <span class="radio-label">Block pop-ups <span class="badge-recommend">Recommended</span></span>
+              <span class="radio-description">Pop-ups are blocked unless the site is in your allowed list.</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="popup-policy" value="allow">
+              <span class="radio-label">Allow pop-ups</span>
+              <span class="radio-description">All pop-ups are allowed unless the site is in your blocked list.</span>
+            </label>
+          </div>
+
+          <!-- Allowed Sites (shown when policy is 'block') -->
+          <div id="popup-allowed-container" class="sub-setting">
+            <label class="setting-label">Allowed Sites</label>
+            <p class="setting-description">Sites that are always allowed to open pop-ups.</p>
+            <div id="popup-allowed-list" class="items-list"></div>
+            <div class="add-item-form">
+              <input type="text" id="popup-allowed-input" class="form-input" placeholder="e.g., accounts.google.com">
+              <button class="btn btn-sm btn-secondary" id="add-popup-allowed-btn"><i data-lucide="plus" width="14" height="14"></i> Add</button>
+            </div>
+          </div>
+
+          <!-- Blocked Sites (shown when policy is 'allow') -->
+          <div id="popup-blocked-container" class="sub-setting" style="display: none;">
+            <label class="setting-label">Blocked Sites</label>
+            <p class="setting-description">Sites that are never allowed to open pop-ups.</p>
+            <div id="popup-blocked-list" class="items-list"></div>
+            <div class="add-item-form">
+              <input type="text" id="popup-blocked-input" class="form-input" placeholder="e.g., annoying-ads.com">
+              <button class="btn btn-sm btn-secondary" id="add-popup-blocked-btn"><i data-lucide="plus" width="14" height="14"></i> Add</button>
             </div>
           </div>
         </div>
