@@ -522,18 +522,19 @@ export abstract class AppWindowManager {
     ipcMain.handle(RendererToMainEventsForBrowserIPC.RESTORE_CLOSED_WINDOW, async (event, index: number) => {
       const closedWindow = AppWindowManager.removeClosedWindowByIndex(index);
       if (!closedWindow || !closedWindow.tabs || closedWindow.tabs.length === 0) return null;
+      const restoredUrls = closedWindow.tabs.filter(t => t.url && t.url !== '' && !t.url.startsWith('nav0://'));
+      if (restoredUrls.length === 0) return null;
       const newWindow = AppWindowManager.createWindow(false);
       // Wait for the window's renderer to load and its default New Tab to be created
       await newWindow.whenReady();
-      // Close the default New Tab
+      // Navigate the default tab to the first restored URL instead of closing it
       const defaultTabs = newWindow.getTabs();
-      for (const tab of defaultTabs) {
-        newWindow.closeTab(tab.getId(), false);
+      if (defaultTabs.length > 0) {
+        defaultTabs[0].navigate(restoredUrls[0].url);
       }
-      // Restore tabs from the closed window
-      const restoredUrls = closedWindow.tabs.filter(t => t.url && t.url !== '' && !t.url.startsWith('nav0://'));
-      for (let i = 0; i < restoredUrls.length; i++) {
-        await newWindow.createTab(restoredUrls[i].url, i === 0);
+      // Create additional tabs for the remaining URLs
+      for (let i = 1; i < restoredUrls.length; i++) {
+        await newWindow.createTab(restoredUrls[i].url, false);
       }
       return { ok: true };
     });
