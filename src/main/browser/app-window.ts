@@ -42,6 +42,7 @@ export class AppWindow {
       width: 1200,
       height: 800,
       fullscreen: true,
+      show: false,
       title : AppConstants.APP_NAME,
       icon: '../../renderer/assets/logo.png',
       webPreferences: {
@@ -81,7 +82,7 @@ export class AppWindow {
       this.browserWindowInstance.on('leave-full-screen', () => {
         this.browserWindowInstance?.setFullScreen(true);
       });
-    
+
       this.browserWindowInstance.webContents.on('did-finish-load', async () => {
         const firstTab = await this.createTab(InAppUrls.NEW_TAB);
         this.activateTab(firstTab.getId());
@@ -92,6 +93,9 @@ export class AppWindow {
           title: firstTab.getTitle(),
           url: firstTab.getUrl()
         });
+
+        // Show window only after browser chrome and first tab are fully loaded
+        this.browserWindowInstance?.show();
       });
     
       // this.browserWindowInstance.webContents.openDevTools({mode : 'detach'});
