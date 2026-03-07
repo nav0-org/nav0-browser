@@ -222,7 +222,7 @@ export const DEFAULT_BROWSER_SETTINGS: BrowserSettings = {
   clearCacheOnClose: false,
 
   // Pop-ups (block by default)
-  popupPolicy: 'block',
+  popupPolicy: 'smart',
   popupAllowedSites: [],
   popupBlockedSites: [],
 
