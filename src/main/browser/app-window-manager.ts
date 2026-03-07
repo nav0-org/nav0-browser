@@ -66,6 +66,9 @@ export abstract class AppWindowManager {
     // Record tabs when the native window close event fires (OS close button, Alt+F4, etc.)
     const browserWindow = window.getBrowserWindowInstance();
     if (browserWindow) {
+      browserWindow.on('focus', () => {
+        AppWindowManager.setActiveWindowId(window.id);
+      });
       browserWindow.on('close', () => {
         AppWindowManager.recordWindowTabs(window);
         // Clear pending timers on all tabs to prevent callbacks after window removal
