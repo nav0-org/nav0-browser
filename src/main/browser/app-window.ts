@@ -78,15 +78,11 @@ export class AppWindow {
         this.browserWindowInstance = null;
       });
 
-      this.browserWindowInstance.once('ready-to-show', () => {
-        this.browserWindowInstance?.show();
-      });
-
       // Prevent Escape from exiting fullscreen
       this.browserWindowInstance.on('leave-full-screen', () => {
         this.browserWindowInstance?.setFullScreen(true);
       });
-    
+
       this.browserWindowInstance.webContents.on('did-finish-load', async () => {
         const firstTab = await this.createTab(InAppUrls.NEW_TAB);
         this.activateTab(firstTab.getId());
@@ -97,6 +93,9 @@ export class AppWindow {
           title: firstTab.getTitle(),
           url: firstTab.getUrl()
         });
+
+        // Show window only after browser chrome and first tab are fully loaded
+        this.browserWindowInstance?.show();
       });
     
       // this.browserWindowInstance.webContents.openDevTools({mode : 'detach'});

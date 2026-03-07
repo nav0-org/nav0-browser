@@ -33,8 +33,8 @@ export class BrowserTabManager {
     this.appWindowId = window.BrowserAPI.appWindowId;
     this.isPrivate = window.BrowserAPI.isPrivate;
 
-    if(this.isPrivate){
-      document.body.classList.add('is-private');
+    if(!this.isPrivate){
+      document.getElementById('private-window-identifier')?.remove();
     }
 
     document.addEventListener('DOMContentLoaded', () => {

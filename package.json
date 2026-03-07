@@ -58,7 +58,6 @@
     "eslint-plugin-import": "^2.31.0",
     "fork-ts-checker-webpack-plugin": "^7.3.0",
     "html-loader": "^5.1.0",
-    "mini-css-extract-plugin": "^2.10.0",
     "node-loader": "^2.1.0",
     "puppeteer-core": "^24.37.5",
     "style-loader": "^3.3.4",
