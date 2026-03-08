@@ -105,6 +105,19 @@ body.is-private .private-window-identifier{
   opacity: 1;
 }
 
+.tab.pinned {
+  min-width: 36px;
+  width: 36px;
+  max-width: 36px;
+  justify-content: center;
+  padding: 6px 0;
+}
+
+.tab.pinned .tab-favicon {
+  margin-left: 0;
+  margin-right: 0;
+}
+
 .tab:hover {
   background-color: var(--bg-hover);
 }

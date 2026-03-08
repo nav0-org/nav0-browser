@@ -128,6 +128,14 @@ const config: ForgeConfig = {
             },
           },
           {
+            html: './src/renderer/pages/about/index.html',
+            js: './src/renderer/pages/about/index.ts',
+            name: 'about',
+            preload: {
+              js: './src/preload/internals-api.ts',
+            },
+          },
+          {
             html: './src/renderer/permission-prompt/index.html',
             js: './src/renderer/permission-prompt/index.ts',
             name: 'permission_prompt',

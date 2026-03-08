@@ -1,4 +1,4 @@
-import { ClosedTabRecord, ClosedWindowRecord, RendererToMainEventsForBrowserIPC, DataStoreConstants } from "../../constants/app-constants";
+import { ClosedTabRecord, ClosedWindowRecord, RendererToMainEventsForBrowserIPC, MainToRendererEventsForBrowserIPC, DataStoreConstants } from "../../constants/app-constants";
 import { AppMenuManager } from "./app-menu-manager";
 import { AppWindow } from "./app-window";
 import { app, dialog, ipcMain, Menu } from "electron";
@@ -8,6 +8,9 @@ import { DataStoreManager } from "../database/data-store-manager";
 import { SearchEngine } from "../web/search-engine";
 import { PermissionManager, PermissionRequest } from "./permission-manager";
 import { PermissionPromptData } from "./permission-prompt-overlay-manager";
+import fs from "fs";
+import path from "path";
+import crypto from "crypto";
 
 export abstract class AppWindowManager {
   private static windows: Map<string, AppWindow>;
@@ -66,6 +69,9 @@ export abstract class AppWindowManager {
     // Record tabs when the native window close event fires (OS close button, Alt+F4, etc.)
     const browserWindow = window.getBrowserWindowInstance();
     if (browserWindow) {
+      browserWindow.on('focus', () => {
+        AppWindowManager.setActiveWindowId(window.id);
+      });
       browserWindow.on('close', () => {
         AppWindowManager.recordWindowTabs(window);
         // Clear pending timers on all tabs to prevent callbacks after window removal
@@ -438,6 +444,44 @@ export abstract class AppWindowManager {
       app.showAboutPanel();
     });
 
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.GET_ABOUT_INFO, async () => {
+      let executableChecksum = '';
+      try {
+        const execPath = app.getPath('exe');
+        const fileBuffer = fs.readFileSync(execPath);
+        executableChecksum = crypto.createHash('sha256').update(fileBuffer).digest('hex');
+      } catch {
+        executableChecksum = 'unavailable';
+      }
+
+      let asarChecksum = '';
+      try {
+        const asarPath = path.join(path.dirname(app.getAppPath()), 'app.asar');
+        if (fs.existsSync(asarPath)) {
+          const asarBuffer = fs.readFileSync(asarPath);
+          asarChecksum = crypto.createHash('sha256').update(asarBuffer).digest('hex');
+        } else {
+          asarChecksum = 'not packaged (dev mode)';
+        }
+      } catch {
+        asarChecksum = 'unavailable';
+      }
+
+      return {
+        appVersion: app.getVersion(),
+        electronVersion: process.versions.electron,
+        chromiumVersion: process.versions.chrome,
+        nodeVersion: process.versions.node,
+        v8Version: process.versions.v8,
+        platform: process.platform,
+        arch: process.arch,
+        osVersion: process.getSystemVersion(),
+        appPath: app.getAppPath(),
+        executableChecksum,
+        asarChecksum,
+      };
+    });
+
     ipcMain.on(RendererToMainEventsForBrowserIPC.CREATE_NEW_APP_WINDOW, async (event) => {
       AppWindowManager.createWindow(false);
     });
@@ -547,7 +591,7 @@ export abstract class AppWindowManager {
       activeTab.getWebContentsViewInstance().webContents.print();
     });
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_TAB_CONTEXT_MENU, async (event, appWindowId: string, tabId: string) => {
+    ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_TAB_CONTEXT_MENU, async (event, appWindowId: string, tabId: string, isPinned: boolean) => {
       const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
       if (!window) return;
       const tab = window.getTabById(tabId);
@@ -557,6 +601,17 @@ export abstract class AppWindowManager {
       const isMuted = webContents.isAudioMuted();
 
       const template: Electron.MenuItemConstructorOptions[] = [
+        {
+          label: isPinned ? 'Unpin Tab' : 'Pin Tab',
+          click: () => {
+            if (isPinned) {
+              window.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_UNPINNED, { id: tabId });
+            } else {
+              window.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_PINNED, { id: tabId });
+            }
+          },
+        },
+        { type: 'separator' },
         {
           label: 'Reload Tab',
           click: () => {

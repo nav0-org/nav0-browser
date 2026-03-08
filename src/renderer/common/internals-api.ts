@@ -59,7 +59,7 @@ declare global {
       findInPagePrevious: (appWindowId: string, text: string, options?: { matchCase?: boolean }) => Promise<any>;
       stopFindInPage: (appWindowId: string) => Promise<any>;
       printPage: (appWindowId: string) => Promise<any>;
-      showTabContextMenu: (appWindowId: string, tabId: string) => void;
+      showTabContextMenu: (appWindowId: string, tabId: string, isPinned: boolean) => void;
       showAboutPanel: () => Promise<any>;
       getSearchUrl: (searchTerm: string) => Promise<string>;
       fetchOpenTabs: (appWindowId: string) => Promise<Array<{id: string, title: string, url: string, faviconUrl: string | null}>>;
@@ -87,6 +87,8 @@ declare global {
       onReaderModeAvailabilityChanged: (callback: (data: { id: string, isEligible: boolean }) => void) => void;
       onReaderModeStateChanged: (callback: (data: { id: string, isActive: boolean }) => void) => void;
       onFindInPageResult: (callback: (data: { activeMatchOrdinal: number, matches: number, finalUpdate: boolean }) => void) => void;
+      onTabPinned: (callback: (data: { id: string }) => void) => void;
+      onTabUnpinned: (callback: (data: { id: string }) => void) => void;
     };
   }
 }

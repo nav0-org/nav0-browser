@@ -115,6 +115,10 @@ export class Tab {
       preloadScriptToLoad = NEW_TAB_PRELOAD_WEBPACK_ENTRY;
       this.url = '';
       isInternalPage = true;
+    } else if (this.url.startsWith(InAppUrls.ABOUT)){
+      urlToLoad = ABOUT_WEBPACK_ENTRY;
+      preloadScriptToLoad = ABOUT_PRELOAD_WEBPACK_ENTRY;
+      isInternalPage = true;
     } else if (this.url.startsWith('file://')) {
       urlToLoad = this.url;
       preloadScriptToLoad = null;
@@ -566,7 +570,7 @@ export class Tab {
     });
   }
 
-  private async recordHistory(url: string): Promise<void> {
+  private recordHistory(url: string): void {
     if(this.url.startsWith(InAppUrls.PREFIX) || this.url === '') {
       this.lastHistoryRecordId = null;
       return;
@@ -578,19 +582,18 @@ export class Tab {
       } catch (error) {
         //do nothing
       }
-      // Duplicate prevention: if the most recent history entry has the same URL, update its timestamp instead
-      const existingRecord = await BrowsingHistoryManager.findLastRecordByUrl(this.parentAppWindow.id, url);
-      if(existingRecord) {
-        await BrowsingHistoryManager.updateRecordTimestamp(this.parentAppWindow.id, existingRecord.id);
-        this.lastHistoryRecordId = existingRecord.id;
-        return;
-      }
-      const record = await BrowsingHistoryManager.addRecord(
-        this.parentAppWindow.id, url, this.title,
+      // Strip URL fragment/hash to avoid duplicate history entries for the same page
+      // (e.g. page.html#section1 vs page.html#section2 should be one record)
+      const urlWithoutFragment = url.split('#')[0];
+      // Atomic upsert: finds existing record by URL and updates timestamp,
+      // or inserts a new record — all within a single synchronous transaction
+      // to prevent duplicate entries from concurrent calls.
+      const record = BrowsingHistoryManager.upsertRecord(
+        this.parentAppWindow.id, urlWithoutFragment, this.title,
         urlObject ? urlObject.hostname : '',
         urlObject ? `${urlObject.protocol}//${urlObject.hostname}/favicon.ico` : ''
       );
-      this.lastHistoryRecordId = record.id;
+      this.lastHistoryRecordId = record?.id ?? null;
     } catch (error) {
       // Window may have been closed/removed before the debounced history recording fired
     }

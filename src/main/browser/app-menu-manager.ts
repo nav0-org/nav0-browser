@@ -1,4 +1,4 @@
-import { app, dialog, Menu } from "electron";
+import { app, dialog, Menu, shell } from "electron";
 import { AppConstants, InAppUrls } from "../../constants/app-constants";
 import { AppWindowManager } from "./app-window-manager";
 
@@ -151,7 +151,19 @@ export abstract class AppMenuManager {
       {
         label: 'Help and More',
         submenu: [
+          {label: 'About Nav0', click: async () => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.ABOUT, true); }},
           {label: 'About Nav0 Browser', click: () => { app.showAboutPanel(); }},
+          {label: 'Privacy Policy', click: async () => { await AppWindowManager.getActiveWindow().createTab('https://nav0.org/privacy-policy', true); }},
+          {label: 'nav0 Philosophy', click: async () => { await AppWindowManager.getActiveWindow().createTab('https://nav0.org/guide/philosophy', true); }},
+          {label: 'Terms of Use', click: async() => { await AppWindowManager.getActiveWindow().createTab('https://nav0.org/guide/terms-of-use', true); }},
+          {label: 'Disclaimer', click: async () => {
+            const activeWindow = AppWindowManager.getActiveWindow();
+            if (activeWindow) {
+              await activeWindow.createTab('https://nav0.org/guide/disclaimer', true);
+            } else {
+              await shell.openExternal('https://nav0.org/guide/disclaimer');
+            }
+          }},
         ]
       }
     ];
