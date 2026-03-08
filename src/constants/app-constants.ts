@@ -162,6 +162,8 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly CLEAR_ALL_PERMISSIONS = "browser:clear-all-permissions";
   public static readonly PERMISSION_PROMPT_READY = "browser:permission-prompt-ready";
   public static readonly SHOW_TAB_CONTEXT_MENU = "browser:show-tab-context-menu";
+  public static readonly PIN_TAB = "browser:pin-tab";
+  public static readonly UNPIN_TAB = "browser:unpin-tab";
 }
 
 export abstract class MainToRendererEventsForBrowserIPC {
@@ -182,6 +184,8 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly FIND_IN_PAGE_RESULT = "browser:find-in-page-result";
   public static readonly SHOW_PERMISSION_PROMPT = "browser:show-permission-prompt";
   public static readonly HIDE_PERMISSION_PROMPT = "browser:hide-permission-prompt";
+  public static readonly TAB_PINNED = "browser:tab-pinned";
+  public static readonly TAB_UNPINNED = "browser:tab-unpinned";
 }
 
 export abstract class DataStoreConstants {

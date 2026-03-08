@@ -1,4 +1,4 @@
-import { ClosedTabRecord, ClosedWindowRecord, RendererToMainEventsForBrowserIPC, DataStoreConstants } from "../../constants/app-constants";
+import { ClosedTabRecord, ClosedWindowRecord, RendererToMainEventsForBrowserIPC, MainToRendererEventsForBrowserIPC, DataStoreConstants } from "../../constants/app-constants";
 import { AppMenuManager } from "./app-menu-manager";
 import { AppWindow } from "./app-window";
 import { app, dialog, ipcMain, Menu } from "electron";
@@ -542,7 +542,7 @@ export abstract class AppWindowManager {
       return { ok: true };
     });
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_TAB_CONTEXT_MENU, async (event, appWindowId: string, tabId: string) => {
+    ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_TAB_CONTEXT_MENU, async (event, appWindowId: string, tabId: string, isPinned: boolean) => {
       const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
       if (!window) return;
       const tab = window.getTabById(tabId);
@@ -552,6 +552,17 @@ export abstract class AppWindowManager {
       const isMuted = webContents.isAudioMuted();
 
       const template: Electron.MenuItemConstructorOptions[] = [
+        {
+          label: isPinned ? 'Unpin Tab' : 'Pin Tab',
+          click: () => {
+            if (isPinned) {
+              window.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_UNPINNED, { id: tabId });
+            } else {
+              window.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_PINNED, { id: tabId });
+            }
+          },
+        },
+        { type: 'separator' },
         {
           label: 'Reload Tab',
           click: () => {

@@ -15,6 +15,7 @@ export class Tab {
   public bookmarkId: string | null = null;
   public isReaderModeEligible = false;
   public isReaderModeActive = false;
+  public isPinned = false;
 
   constructor(id: string, url: string, title?: string) {
     this.id = id;
@@ -54,7 +55,7 @@ export class Tab {
     this.tabElement.addEventListener('contextmenu', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      window.BrowserAPI.showTabContextMenu(appWindowId, this.id);
+      window.BrowserAPI.showTabContextMenu(appWindowId, this.id, this.isPinned);
     });
 
     setTimeout(() => {
@@ -105,6 +106,28 @@ export class Tab {
   deactivateTab(): void {
     if (this.tabElement) {
       this.tabElement.classList.remove('active');
+    }
+  }
+
+  pinTab(): void {
+    this.isPinned = true;
+    if (this.tabElement) {
+      this.tabElement.classList.add('pinned');
+      const titleSpan = this.tabElement.querySelector('#tab-title') as HTMLElement;
+      if (titleSpan) titleSpan.style.display = 'none';
+      const closeButton = this.tabElement.querySelector('#tab-close-button') as HTMLElement;
+      if (closeButton) closeButton.style.display = 'none';
+    }
+  }
+
+  unpinTab(): void {
+    this.isPinned = false;
+    if (this.tabElement) {
+      this.tabElement.classList.remove('pinned');
+      const titleSpan = this.tabElement.querySelector('#tab-title') as HTMLElement;
+      if (titleSpan) titleSpan.style.display = '';
+      const closeButton = this.tabElement.querySelector('#tab-close-button') as HTMLElement;
+      if (closeButton) closeButton.style.display = '';
     }
   }
 
