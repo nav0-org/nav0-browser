@@ -551,8 +551,11 @@ async function testNav0DataConsumption() {
   log(`[Nav0] Starting data consumption test using: ${NAV0_BIN}`);
   ensurePortFree(NAV0_DEBUG_PORT);
 
+  const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'nav0-data-test-'));
   const nav0Flags = [
     `--remote-debugging-port=${NAV0_DEBUG_PORT}`,
+    `--user-data-dir=${userDataDir}`,
+    '--no-first-run',
     ...(IS_LINUX ? ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage'] : []),
   ];
   const nav0Proc = spawn(NAV0_BIN, nav0Flags, {
@@ -577,7 +580,7 @@ async function testNav0DataConsumption() {
     log(`[Nav0] Waiting for debug port ${NAV0_DEBUG_PORT} (PID: ${spawnPid})...`);
     await waitForPort(NAV0_DEBUG_PORT, 60000);
     log('[Nav0] Debug port ready. Waiting for app to initialize...');
-    await sleep(5000);
+    await sleep(2000);
 
     const info = await httpGetJson(`http://127.0.0.1:${NAV0_DEBUG_PORT}/json/version`);
     const browser = await puppeteer.connect({
@@ -663,8 +666,14 @@ async function testNav0DataConsumption() {
         log(`[Nav0]   [${i + 1}/${TEST_URLS.length}] ${url} (could not attach, using page-level monitoring)`);
       }
 
-      // Wait for page to fully load + async resources
-      await sleep(PAGE_LOAD_TIMEOUT_MS / 2);
+      // Wait for page to load + async resources (same settle time as Chrome)
+      if (targetPage) {
+        try {
+          await targetPage.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: PAGE_LOAD_TIMEOUT_MS });
+        } catch {}
+      } else {
+        await sleep(PAGE_LOAD_TIMEOUT_MS / 2);
+      }
       await sleep(POST_LOAD_SETTLE_MS);
 
       const pageData = collector.getResults();
@@ -673,6 +682,11 @@ async function testNav0DataConsumption() {
         ...summarizeResults(pageData),
         requestDetails: categorizeRequests(pageData.requests, url),
       });
+
+      // Close the tab page (like Chrome test does)
+      if (targetPage) {
+        try { await targetPage.close(); } catch {}
+      }
     }
 
     // Phase 2: Monitor idle/background traffic
@@ -695,7 +709,9 @@ async function testNav0DataConsumption() {
     return { perPageResults, idleResult };
   } finally {
     killTree(spawnPid);
-    await sleep(3000);
+    await sleep(2000);
+    // Clean up temp profile
+    try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch {}
   }
 }
 
@@ -815,8 +831,8 @@ function generateDataReport(chromeData, nav0Data) {
   lines.push(`  Test URLs:   ${TEST_URLS.length} pages`);
   lines.push(`  Idle monitor: ${IDLE_MONITOR}s`);
   lines.push(`  Runs:        ${RUNS}`);
-  lines.push(`  Chrome:      Electron's bundled Chromium (plain BrowserWindows)`);
-  lines.push(`  Nav0:        Full nav0 browser with ad-blocking & privacy features`);
+  lines.push(`  Chrome:      ${CHROME_BIN}`);
+  lines.push(`  Nav0:        ${NAV0_BIN}`);
   lines.push('');
 
   // ── Per-page comparison ──
