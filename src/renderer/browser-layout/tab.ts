@@ -35,6 +35,7 @@ export class Tab {
     if (titleSpan) {
       titleSpan.textContent = this.title || 'New Tab';
     }
+    this.tabElement.title = this.title || 'New Tab';
     
     // Add close button event listener
     const closeButton = this.tabElement.querySelector('#tab-close-button');
@@ -69,6 +70,7 @@ export class Tab {
       if (titleSpan) {
         titleSpan.textContent = title || 'New Tab';
       }
+      this.tabElement.title = title || 'New Tab';
     }
   }
 
