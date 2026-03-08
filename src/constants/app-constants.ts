@@ -139,6 +139,7 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly FETCH_CLOSED_WINDOWS = "browser:fetch-closed-windows";
   public static readonly RESTORE_CLOSED_WINDOW = "browser:restore-closed-window";
   public static readonly SHOW_ABOUT_PANEL = "browser:show-about-panel";
+  public static readonly GET_ABOUT_INFO = "browser:get-about-info";
   public static readonly TOGGLE_READER_MODE = "browser:toggle-reader-mode";
   public static readonly SET_DARK_MODE = "browser:set-dark-mode";
   public static readonly SHOW_FIND_IN_PAGE = "browser:show-find-in-page";
@@ -218,6 +219,7 @@ export abstract class InAppUrls {
   public static readonly BOOKMARKS = "nav0://bookmarks";
   public static readonly BROWSER_SETTINGS = "nav0://browser-settings";
   public static readonly NEW_TAB = "nav0://new-tab";
+  public static readonly ABOUT = "nav0://about";
 }
 
 export abstract class ImageBase64Strings {

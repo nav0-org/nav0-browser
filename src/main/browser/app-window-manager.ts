@@ -8,6 +8,9 @@ import { DataStoreManager } from "../database/data-store-manager";
 import { SearchEngine } from "../web/search-engine";
 import { PermissionManager, PermissionRequest } from "./permission-manager";
 import { PermissionPromptData } from "./permission-prompt-overlay-manager";
+import fs from "fs";
+import path from "path";
+import crypto from "crypto";
 
 export abstract class AppWindowManager {
   private static windows: Map<string, AppWindow>;
@@ -439,6 +442,44 @@ export abstract class AppWindowManager {
 
     ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_ABOUT_PANEL, async () => {
       app.showAboutPanel();
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.GET_ABOUT_INFO, async () => {
+      let executableChecksum = '';
+      try {
+        const execPath = app.getPath('exe');
+        const fileBuffer = fs.readFileSync(execPath);
+        executableChecksum = crypto.createHash('sha256').update(fileBuffer).digest('hex');
+      } catch {
+        executableChecksum = 'unavailable';
+      }
+
+      let asarChecksum = '';
+      try {
+        const asarPath = path.join(path.dirname(app.getAppPath()), 'app.asar');
+        if (fs.existsSync(asarPath)) {
+          const asarBuffer = fs.readFileSync(asarPath);
+          asarChecksum = crypto.createHash('sha256').update(asarBuffer).digest('hex');
+        } else {
+          asarChecksum = 'not packaged (dev mode)';
+        }
+      } catch {
+        asarChecksum = 'unavailable';
+      }
+
+      return {
+        appVersion: app.getVersion(),
+        electronVersion: process.versions.electron,
+        chromiumVersion: process.versions.chrome,
+        nodeVersion: process.versions.node,
+        v8Version: process.versions.v8,
+        platform: process.platform,
+        arch: process.arch,
+        osVersion: process.getSystemVersion(),
+        appPath: app.getAppPath(),
+        executableChecksum,
+        asarChecksum,
+      };
     });
 
     ipcMain.on(RendererToMainEventsForBrowserIPC.CREATE_NEW_APP_WINDOW, async (event) => {

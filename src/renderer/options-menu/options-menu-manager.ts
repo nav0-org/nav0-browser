@@ -171,7 +171,7 @@ export class OptionsMenuManager {
     });
 
     this.optionsElement?.querySelector('#about-nav0-option')?.addEventListener('click', async () => {
-      await window.BrowserAPI.createTab(this.appWindowId, 'https://nav0.org/about', true);
+      await window.BrowserAPI.createTab(this.appWindowId, InAppUrls.ABOUT, true);
     });
 
     this.optionsElement?.querySelector('#about-option')?.addEventListener('click', async () => {
