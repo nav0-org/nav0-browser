@@ -2,7 +2,7 @@
 'use strict';
 
 /**
- * Data Consumption Comparison Test: Nav0 vs Chrome (Electron Chromium baseline)
+ * Data Consumption Comparison Test: Nav0 vs Chrome
  *
  * Measures ACTUAL network data transferred by each browser when loading
  * the same set of web pages, using the Chrome DevTools Protocol (CDP)
@@ -33,15 +33,11 @@ const os = require('os');
 
 const PROJECT_ROOT = path.resolve(__dirname, '../..');
 const REPORT_DIR = path.join(__dirname, 'reports');
-const ELECTRON_BIN = require('electron');
-const CHROME_HARNESS = path.join(__dirname, 'chrome-data-harness.js');
 const IS_MAC = process.platform === 'darwin';
 const IS_LINUX = process.platform === 'linux';
 
 const NAV0_DEBUG_PORT = 9229;
 const CHROME_DEBUG_PORT = 9230;
-const CHROME_CONTROL_PORT = 19280;
-
 const PAGE_LOAD_TIMEOUT_MS = 30000;
 const POST_LOAD_SETTLE_MS = 5000;   // Wait after DOMContentLoaded for async resources
 const IDLE_MONITOR_SEC = 20;        // Monitor idle traffic after all pages loaded
@@ -194,26 +190,41 @@ function httpGetJson(url) {
   });
 }
 
-function httpPost(url) {
-  return new Promise((resolve, reject) => {
-    const parsed = new URL(url);
-    const req = http.request({
-      hostname: parsed.hostname,
-      port: parsed.port,
-      path: parsed.pathname + parsed.search,
-      method: 'POST',
-    }, (res) => {
-      let data = '';
-      res.on('data', (chunk) => data += chunk);
-      res.on('end', () => {
-        try { resolve(JSON.parse(data)); }
-        catch { resolve(data); }
-      });
-    });
-    req.on('error', reject);
-    req.end();
-  });
+// ─── Chrome Binary Discovery ────────────────────────────────────────────────
+
+function findChromeBinary() {
+  const candidates = IS_MAC
+    ? [
+        '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+        '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
+        '/Applications/Chromium.app/Contents/MacOS/Chromium',
+      ]
+    : [
+        'google-chrome-stable',
+        'google-chrome',
+        'chromium-browser',
+        'chromium',
+      ];
+
+  for (const candidate of candidates) {
+    try {
+      // For absolute paths, check existence directly
+      if (path.isAbsolute(candidate)) {
+        fs.accessSync(candidate, fs.constants.X_OK);
+        return candidate;
+      }
+      // For command names, use which/where to find them
+      const resolved = execSync(`which ${candidate} 2>/dev/null`, { encoding: 'utf-8' }).trim();
+      if (resolved) return resolved;
+    } catch {}
+  }
+
+  throw new Error(
+    'Could not find Chrome or Chromium. Install Google Chrome or set CHROME_BIN env var.'
+  );
 }
+
+const CHROME_BIN = process.env.CHROME_BIN || findChromeBinary();
 
 // ─── Display Management ─────────────────────────────────────────────────────
 // Only needed on headless Linux (CI). macOS and Linux desktops have a display.
@@ -395,40 +406,33 @@ async function attachNetworkMonitor(cdpSession, collector) {
   }
 }
 
-// ─── Chrome (Electron Chromium Baseline) Test ───────────────────────────────
+// ─── Chrome (Real Browser Baseline) Test ────────────────────────────────────
 
 async function testChromeDataConsumption() {
-  log('[Chrome] Starting data consumption test...');
+  log(`[Chrome] Starting data consumption test using: ${CHROME_BIN}`);
   ensurePortFree(CHROME_DEBUG_PORT);
-  ensurePortFree(CHROME_CONTROL_PORT);
 
-  const electronFlags = [
+  const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chrome-data-test-'));
+  const chromeFlags = [
     `--remote-debugging-port=${CHROME_DEBUG_PORT}`,
+    `--user-data-dir=${userDataDir}`,
+    '--no-first-run',
+    '--no-default-browser-check',
     ...(IS_LINUX ? ['--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu'] : []),
-    CHROME_HARNESS,
+    'about:blank',
   ];
-  const proc = spawn(ELECTRON_BIN, electronFlags, {
-    env: {
-      ...process.env,
-      ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
-      CONTROL_PORT: String(CHROME_CONTROL_PORT),
-    },
+  const proc = spawn(CHROME_BIN, chromeFlags, {
     stdio: ['ignore', 'pipe', 'pipe'],
   });
 
   proc.stderr.on('data', () => {});
-  // Watch for control server readiness
-  let controlReady = false;
-  proc.stdout.on('data', (d) => {
-    if (d.toString().includes('CONTROL_READY')) controlReady = true;
-  });
+  proc.stdout.on('data', () => {});
 
   const pid = proc.pid;
 
   try {
     log(`[Chrome] Waiting for debug port ${CHROME_DEBUG_PORT} (PID: ${pid})...`);
     await waitForPort(CHROME_DEBUG_PORT, 60000);
-    await waitForPort(CHROME_CONTROL_PORT, 10000);
     await sleep(2000);
 
     // Connect via CDP
@@ -448,39 +452,19 @@ async function testChromeDataConsumption() {
       const testUrl = TEST_URLS[i];
       collector.reset();
 
-      // Ask the harness to open a new BrowserWindow for this URL
-      await httpPost(`http://127.0.0.1:${CHROME_CONTROL_PORT}/open?url=${encodeURIComponent(testUrl)}`);
+      // Open a new tab and navigate to the URL
+      const page = await browser.newPage();
+      const cdp = await page.createCDPSession();
+      await attachNetworkMonitor(cdp, collector);
 
-      // Wait for the new target to appear in CDP
-      await sleep(2000);
-
-      // Find the target matching our URL
-      const targets = await browser.targets();
-      let targetPage = null;
-      const testHostname = new URL(testUrl).hostname;
-
-      for (const target of targets) {
-        if (target.type() === 'page') {
-          try {
-            const p = await target.page();
-            if (p && p.url().includes(testHostname)) {
-              targetPage = p;
-              break;
-            }
-          } catch {}
-        }
+      log(`[Chrome]   [${i + 1}/${TEST_URLS.length}] ${testUrl}`);
+      try {
+        await page.goto(testUrl, { waitUntil: 'domcontentloaded', timeout: PAGE_LOAD_TIMEOUT_MS });
+      } catch (e) {
+        log(`[Chrome]   [${i + 1}/${TEST_URLS.length}] Navigation warning: ${e.message}`);
       }
 
-      if (targetPage) {
-        const cdp = await targetPage.createCDPSession();
-        await attachNetworkMonitor(cdp, collector);
-        log(`[Chrome]   [${i + 1}/${TEST_URLS.length}] ${testUrl} (attached CDP)`);
-      } else {
-        log(`[Chrome]   [${i + 1}/${TEST_URLS.length}] ${testUrl} (could not attach CDP target)`);
-      }
-
-      // Wait for page to load + async resources
-      await sleep(PAGE_LOAD_TIMEOUT_MS / 2);
+      // Wait for async resources to settle
       await sleep(POST_LOAD_SETTLE_MS);
 
       const pageData = collector.getResults();
@@ -489,29 +473,17 @@ async function testChromeDataConsumption() {
         ...summarizeResults(pageData),
         requestDetails: categorizeRequests(pageData.requests, testUrl),
       });
+
+      await page.close();
     }
 
     // Phase 2: Monitor idle/background traffic
     log(`[Chrome] Monitoring idle background traffic for ${IDLE_MONITOR}s...`);
     collector.reset();
 
-    // Open a blank page via harness and monitor background activity
-    await httpPost(`http://127.0.0.1:${CHROME_CONTROL_PORT}/open?url=${encodeURIComponent('about:blank')}`);
-    await sleep(2000);
-
-    const targets = await browser.targets();
-    for (const target of targets) {
-      if (target.type() === 'page') {
-        try {
-          const p = await target.page();
-          if (p && p.url() === 'about:blank') {
-            const idleCdp = await p.createCDPSession();
-            await attachNetworkMonitor(idleCdp, collector);
-            break;
-          }
-        } catch {}
-      }
-    }
+    const idlePage = await browser.newPage();
+    const idleCdp = await idlePage.createCDPSession();
+    await attachNetworkMonitor(idleCdp, collector);
 
     await sleep(IDLE_MONITOR * 1000);
 
@@ -521,6 +493,7 @@ async function testChromeDataConsumption() {
       requests: idleData.requests.map(r => ({ url: r.url, type: r.type, bytes: r.totalEncodedLength || 0 })),
     };
 
+    await idlePage.close();
     browser.disconnect();
 
     log('[Chrome] Data collection complete.');
@@ -528,6 +501,8 @@ async function testChromeDataConsumption() {
   } finally {
     killTree(pid);
     await sleep(2000);
+    // Clean up temp profile
+    try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch {}
   }
 }
 
@@ -1083,11 +1058,7 @@ async function main() {
     console.error('  ERROR: This test requires Linux or macOS.');
     process.exit(1);
   }
-  if (!fs.existsSync(ELECTRON_BIN)) {
-    console.error(`  ERROR: Electron binary not found at ${ELECTRON_BIN}`);
-    console.error('  Run: npm install');
-    process.exit(1);
-  }
+  console.log(`  Chrome:        ${CHROME_BIN}`);
 
   ensureDisplay();
 
