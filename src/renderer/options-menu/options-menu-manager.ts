@@ -170,8 +170,17 @@ export class OptionsMenuManager {
       await window.BrowserAPI.createTab(this.appWindowId, InAppUrls.BROWSER_SETTINGS, true);
     });
 
+    this.optionsElement?.querySelector('#about-nav0-option')?.addEventListener('click', async () => {
+      await window.BrowserAPI.createTab(this.appWindowId, InAppUrls.ABOUT, true);
+    });
+
     this.optionsElement?.querySelector('#about-option')?.addEventListener('click', async () => {
       await window.BrowserAPI.showAboutPanel();
+    });
+
+    this.optionsElement?.querySelector('#philosophy-option')?.addEventListener('click', async () => {
+      await window.BrowserAPI.createTab(this.appWindowId, 'https://nav0.org/guide/philosophy', true);
+      await window.BrowserAPI.hideOptionsMenu(this.appWindowId);
     });
 
     this.optionsElement?.querySelector('#terms-of-use-option')?.addEventListener('click', async () => {

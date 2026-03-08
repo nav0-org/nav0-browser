@@ -1,0 +1,113 @@
+@import url("../../styles/global.css");
+
+.hero-section {
+  background-color: var(--primary-light);
+  padding: var(--spacing-sm) 0;
+  margin-bottom: var(--spacing-lg);
+}
+
+.hero-section h1 {
+  font-size: var(--font-xxl);
+  margin-bottom: 2px;
+}
+
+.hero-section p {
+  font-size: var(--font-sm);
+  margin-bottom: var(--spacing-xs);
+  color: var(--text-secondary);
+}
+
+/* About Cards */
+.about-card {
+  background-color: var(--bg-light);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-md);
+  overflow: hidden;
+}
+
+.about-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.about-card-body {
+  padding: 0;
+}
+
+/* About Rows */
+.about-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.about-row:last-child {
+  border-bottom: none;
+}
+
+.about-row-stacked {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
+}
+
+.about-row-clickable {
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.about-row-clickable:hover {
+  background-color: var(--bg-hover);
+}
+
+.about-label {
+  font-size: var(--font-md);
+  color: var(--text-color);
+}
+
+.about-value {
+  font-size: var(--font-md);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.about-checksum {
+  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  background-color: var(--bg-color);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  word-break: break-all;
+  line-height: 1.6;
+  display: block;
+  width: 100%;
+  user-select: all;
+}
+
+.about-link-icon {
+  color: var(--text-light);
+}
+
+/* Footer */
+.about-footer {
+  text-align: center;
+  padding: var(--spacing-lg) 0;
+  color: var(--text-light);
+  font-size: var(--font-sm);
+}
+
+.about-footer p {
+  margin-bottom: var(--spacing-xs);
+}

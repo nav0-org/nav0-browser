@@ -48,6 +48,34 @@ export abstract class BrowsingHistoryManager {
     return newlyCreatedRecord;
   }
 
+  /**
+   * Atomically finds an existing record by URL and updates its timestamp,
+   * or inserts a new record if none exists. Uses a synchronous transaction
+   * to prevent duplicate entries from concurrent async calls.
+   */
+  public static upsertRecord(appWindowId: string, url: string, title: string, topLevelDomain: string, faviconUrl: string): BrowsingHistoryRecord | null {
+    const db = BrowsingHistoryManager.getDb(appWindowId);
+    if (!db) return null;
+
+    const findStmt = db.prepare("SELECT * FROM browsingHistory WHERE url = ? ORDER BY createdDate DESC LIMIT 1;");
+    const updateStmt = db.prepare("UPDATE browsingHistory SET createdDate = ? WHERE id = ?;");
+    const insertStmt = db.prepare("INSERT INTO browsingHistory (id, url, title, createdDate, topLevelDomain, faviconUrl) VALUES (?, ?, ?, ?, ?, ?);");
+
+    const upsert = db.transaction((url: string, title: string, topLevelDomain: string, faviconUrl: string) => {
+      const existing = findStmt.get(url) as BrowsingHistoryRecord | undefined;
+      const now = new Date().toISOString();
+      if (existing) {
+        updateStmt.run(now, existing.id);
+        return { ...existing, createdDate: new Date(now) } as BrowsingHistoryRecord;
+      }
+      const id = uuid();
+      insertStmt.run(id, url, title, now, topLevelDomain, faviconUrl);
+      return { id, url, title, createdDate: new Date(now), topLevelDomain, faviconUrl } as BrowsingHistoryRecord;
+    });
+
+    return upsert(url, title, topLevelDomain, faviconUrl);
+  }
+
   public static async updateRecordTitle(appWindowId: string, recordId: string, title: string): Promise<void>{
     const db = BrowsingHistoryManager.getDb(appWindowId);
     if (!db) return;
