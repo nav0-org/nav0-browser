@@ -251,6 +251,24 @@ export class BrowserTabManager {
       }
     });
 
+    // Tab pinned
+    window.BrowserAPI.onTabPinned((data: { id: string }) => {
+      const tab = this.getTabById(data.id);
+      if (tab) {
+        tab.pinTab();
+        this.reorderPinnedTabs();
+      }
+    });
+
+    // Tab unpinned
+    window.BrowserAPI.onTabUnpinned((data: { id: string }) => {
+      const tab = this.getTabById(data.id);
+      if (tab) {
+        tab.unpinTab();
+        this.reorderPinnedTabs();
+      }
+    });
+
     // Reader mode state changed
     window.BrowserAPI.onReaderModeStateChanged((data: { id: string, isActive: boolean }) => {
       const tab = this.getTabById(data.id);
@@ -393,6 +411,20 @@ export class BrowserTabManager {
 
     this.tabScrollLeftButton.classList.toggle('visible', canScrollLeft);
     this.tabScrollRightButton.classList.toggle('visible', canScrollRight);
+  }
+
+  private reorderPinnedTabs(): void {
+    const pinnedTabs = this.tabs.filter(t => t.isPinned);
+    const unpinnedTabs = this.tabs.filter(t => !t.isPinned);
+    this.tabs = [...pinnedTabs, ...unpinnedTabs];
+
+    // Reorder DOM elements
+    for (const tab of this.tabs) {
+      const el = tab.getTabElement();
+      if (el) {
+        this.tabsContainer.appendChild(el);
+      }
+    }
   }
 
   private scrollActiveTabIntoView(): void {

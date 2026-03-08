@@ -141,8 +141,8 @@ export function init(){
     createNewPrivateAppWindow: async () => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.CREATE_NEW_PRIVATE_APP_WINDOW, {});
     },
-    showTabContextMenu: (appWindowId: string, tabId: string) => {
-      ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_TAB_CONTEXT_MENU, appWindowId, tabId);
+    showTabContextMenu: (appWindowId: string, tabId: string, isPinned: boolean) => {
+      ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_TAB_CONTEXT_MENU, appWindowId, tabId, isPinned);
     },
     showAboutPanel: async () => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_ABOUT_PANEL);
@@ -235,6 +235,12 @@ export function init(){
     },
     onFindInPageResult: (callback: (data: { activeMatchOrdinal: number, matches: number, finalUpdate: boolean }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.FIND_IN_PAGE_RESULT, (_event, data) => callback(data));
+    },
+    onTabPinned: (callback: (data: { id: string }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.TAB_PINNED, (_event, data) => callback(data));
+    },
+    onTabUnpinned: (callback: (data: { id: string }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.TAB_UNPINNED, (_event, data) => callback(data));
     },
 
     // Permission system
