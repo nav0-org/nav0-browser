@@ -33,11 +33,14 @@ const os = require('os');
 
 const PROJECT_ROOT = path.resolve(__dirname, '../..');
 const REPORT_DIR = path.join(__dirname, 'reports');
-const ELECTRON_BIN = path.join(PROJECT_ROOT, 'node_modules/electron/dist/electron');
+const ELECTRON_BIN = require('electron');
 const CHROME_HARNESS = path.join(__dirname, 'chrome-data-harness.js');
+const IS_MAC = process.platform === 'darwin';
+const IS_LINUX = process.platform === 'linux';
 
 const NAV0_DEBUG_PORT = 9229;
 const CHROME_DEBUG_PORT = 9230;
+const CHROME_CONTROL_PORT = 19280;
 
 const PAGE_LOAD_TIMEOUT_MS = 30000;
 const POST_LOAD_SETTLE_MS = 5000;   // Wait after DOMContentLoaded for async resources
@@ -110,7 +113,8 @@ function formatBytes(bytes) {
 
 function getDescendantPids(pid) {
   try {
-    const out = execSync(`pgrep -P ${pid}`, { encoding: 'utf-8', timeout: 5000 }).trim();
+    // pgrep -P works on both Linux and macOS
+    const out = execSync(`pgrep -P ${pid} 2>/dev/null`, { encoding: 'utf-8', timeout: 5000 }).trim();
     if (!out) return [];
     const children = out.split('\n').map(Number).filter(n => !isNaN(n) && n > 0);
     let all = [...children];
@@ -133,17 +137,21 @@ function killTree(pid) {
 
 function findPidOnPort(port) {
   try {
+    // lsof works on both macOS and Linux
     const out = execSync(`lsof -ti :${port} 2>/dev/null`, { encoding: 'utf-8' }).trim();
     const pid = parseInt(out.split('\n')[0], 10);
     return isNaN(pid) ? null : pid;
   } catch {
-    try {
-      const out = execSync(`fuser ${port}/tcp 2>/dev/null`, { encoding: 'utf-8' }).trim();
-      const pid = parseInt(out, 10);
-      return isNaN(pid) ? null : pid;
-    } catch {
-      return null;
+    if (IS_LINUX) {
+      try {
+        const out = execSync(`fuser ${port}/tcp 2>/dev/null`, { encoding: 'utf-8' }).trim();
+        const pid = parseInt(out, 10);
+        return isNaN(pid) ? null : pid;
+      } catch {
+        return null;
+      }
     }
+    return null;
   }
 }
 
@@ -186,11 +194,36 @@ function httpGetJson(url) {
   });
 }
 
+function httpPost(url) {
+  return new Promise((resolve, reject) => {
+    const parsed = new URL(url);
+    const req = http.request({
+      hostname: parsed.hostname,
+      port: parsed.port,
+      path: parsed.pathname + parsed.search,
+      method: 'POST',
+    }, (res) => {
+      let data = '';
+      res.on('data', (chunk) => data += chunk);
+      res.on('end', () => {
+        try { resolve(JSON.parse(data)); }
+        catch { resolve(data); }
+      });
+    });
+    req.on('error', reject);
+    req.end();
+  });
+}
+
 // ─── Display Management ─────────────────────────────────────────────────────
 
 let xvfbProcess = null;
 
 function ensureDisplay() {
+  if (IS_MAC) {
+    log('macOS detected — no virtual display needed.');
+    return;
+  }
   if (process.env.DISPLAY) {
     log(`Using existing display: ${process.env.DISPLAY}`);
     return;
@@ -370,29 +403,35 @@ async function attachNetworkMonitor(cdpSession, collector) {
 async function testChromeDataConsumption() {
   log('[Chrome] Starting data consumption test...');
   ensurePortFree(CHROME_DEBUG_PORT);
+  ensurePortFree(CHROME_CONTROL_PORT);
 
-  const proc = spawn(ELECTRON_BIN, [
-    '--no-sandbox',
-    '--disable-dev-shm-usage',
-    '--disable-gpu',
+  const electronFlags = [
     `--remote-debugging-port=${CHROME_DEBUG_PORT}`,
+    ...(IS_LINUX ? ['--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu'] : []),
     CHROME_HARNESS,
-  ], {
+  ];
+  const proc = spawn(ELECTRON_BIN, electronFlags, {
     env: {
       ...process.env,
       ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
+      CONTROL_PORT: String(CHROME_CONTROL_PORT),
     },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
 
   proc.stderr.on('data', () => {});
-  proc.stdout.on('data', () => {});
+  // Watch for control server readiness
+  let controlReady = false;
+  proc.stdout.on('data', (d) => {
+    if (d.toString().includes('CONTROL_READY')) controlReady = true;
+  });
 
   const pid = proc.pid;
 
   try {
     log(`[Chrome] Waiting for debug port ${CHROME_DEBUG_PORT} (PID: ${pid})...`);
     await waitForPort(CHROME_DEBUG_PORT, 60000);
+    await waitForPort(CHROME_CONTROL_PORT, 10000);
     await sleep(2000);
 
     // Connect via CDP
@@ -409,46 +448,74 @@ async function testChromeDataConsumption() {
     log(`[Chrome] Loading ${TEST_URLS.length} pages sequentially...`);
 
     for (let i = 0; i < TEST_URLS.length; i++) {
-      const url = TEST_URLS[i];
+      const testUrl = TEST_URLS[i];
       collector.reset();
 
-      const page = await browser.newPage();
-      const cdp = await page.createCDPSession();
-      await attachNetworkMonitor(cdp, collector);
+      // Ask the harness to open a new BrowserWindow for this URL
+      await httpPost(`http://127.0.0.1:${CHROME_CONTROL_PORT}/open?url=${encodeURIComponent(testUrl)}`);
 
-      log(`[Chrome]   [${i + 1}/${TEST_URLS.length}] ${url}`);
+      // Wait for the new target to appear in CDP
+      await sleep(2000);
 
-      try {
-        await page.goto(url, {
-          waitUntil: 'networkidle2',
-          timeout: PAGE_LOAD_TIMEOUT_MS,
-        });
-      } catch (err) {
-        log(`[Chrome]   Warning: ${err.message.slice(0, 80)}`);
+      // Find the target matching our URL
+      const targets = await browser.targets();
+      let targetPage = null;
+      const testHostname = new URL(testUrl).hostname;
+
+      for (const target of targets) {
+        if (target.type() === 'page') {
+          try {
+            const p = await target.page();
+            if (p && p.url().includes(testHostname)) {
+              targetPage = p;
+              break;
+            }
+          } catch {}
+        }
       }
 
-      // Wait for async resources (analytics scripts, lazy-loaded content)
+      if (targetPage) {
+        const cdp = await targetPage.createCDPSession();
+        await attachNetworkMonitor(cdp, collector);
+        log(`[Chrome]   [${i + 1}/${TEST_URLS.length}] ${testUrl} (attached CDP)`);
+      } else {
+        log(`[Chrome]   [${i + 1}/${TEST_URLS.length}] ${testUrl} (could not attach CDP target)`);
+      }
+
+      // Wait for page to load + async resources
+      await sleep(PAGE_LOAD_TIMEOUT_MS / 2);
       await sleep(POST_LOAD_SETTLE_MS);
 
       const pageData = collector.getResults();
       perPageResults.push({
-        url,
+        url: testUrl,
         ...summarizeResults(pageData),
-        requestDetails: categorizeRequests(pageData.requests, url),
+        requestDetails: categorizeRequests(pageData.requests, testUrl),
       });
-
-      await page.close();
     }
 
     // Phase 2: Monitor idle/background traffic
     log(`[Chrome] Monitoring idle background traffic for ${IDLE_MONITOR}s...`);
     collector.reset();
 
-    // Open a blank page and monitor what the browser does in the background
-    const idlePage = await browser.newPage();
-    const idleCdp = await idlePage.createCDPSession();
-    await attachNetworkMonitor(idleCdp, collector);
-    await idlePage.goto('about:blank');
+    // Open a blank page via harness and monitor background activity
+    await httpPost(`http://127.0.0.1:${CHROME_CONTROL_PORT}/open?url=${encodeURIComponent('about:blank')}`);
+    await sleep(2000);
+
+    const targets = await browser.targets();
+    for (const target of targets) {
+      if (target.type() === 'page') {
+        try {
+          const p = await target.page();
+          if (p && p.url() === 'about:blank') {
+            const idleCdp = await p.createCDPSession();
+            await attachNetworkMonitor(idleCdp, collector);
+            break;
+          }
+        } catch {}
+      }
+    }
+
     await sleep(IDLE_MONITOR * 1000);
 
     const idleData = collector.getResults();
@@ -457,7 +524,6 @@ async function testChromeDataConsumption() {
       requests: idleData.requests.map(r => ({ url: r.url, type: r.type, bytes: r.totalEncodedLength || 0 })),
     };
 
-    await idlePage.close();
     browser.disconnect();
 
     log('[Chrome] Data collection complete.');
@@ -474,13 +540,14 @@ async function testNav0DataConsumption() {
   log('[Nav0] Starting data consumption test...');
   ensurePortFree(NAV0_DEBUG_PORT);
 
+  const nav0ElectronFlags = [
+    `--remote-debugging-port=${NAV0_DEBUG_PORT}`,
+    ...(IS_LINUX ? ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage'] : []),
+  ];
   const nav0Proc = spawn('npx', [
     'electron-forge', 'start',
     '--',
-    '--no-sandbox',
-    '--disable-gpu',
-    '--disable-dev-shm-usage',
-    `--remote-debugging-port=${NAV0_DEBUG_PORT}`,
+    ...nav0ElectronFlags,
   ], {
     cwd: PROJECT_ROOT,
     env: {
@@ -1015,8 +1082,8 @@ async function main() {
   console.log(`  Runs:          ${RUNS}`);
   console.log('');
 
-  if (process.platform !== 'linux') {
-    console.error('  ERROR: This test requires Linux.');
+  if (process.platform !== 'linux' && process.platform !== 'darwin') {
+    console.error('  ERROR: This test requires Linux or macOS.');
     process.exit(1);
   }
   if (!fs.existsSync(ELECTRON_BIN)) {
