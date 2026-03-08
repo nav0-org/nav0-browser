@@ -940,6 +940,10 @@ export class Tab {
       { label: 'Reload', click: () => {
         this.webContentsViewInstance.webContents.reload();
       }},
+      { type: 'separator' },
+      { label: 'Print...', click: () => {
+        this.webContentsViewInstance.webContents.print();
+      }},
     );
   
     

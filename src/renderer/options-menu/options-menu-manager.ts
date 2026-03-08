@@ -23,6 +23,7 @@ export class OptionsMenuManager {
       document.getElementById('new-tab-shortcut').textContent = '⌘+T';
       document.getElementById('new-window-shortcut').textContent = '⌘+N';
       document.getElementById('new-private-window-shortcut').textContent = '⌘+⇧+T';
+      document.getElementById('print-shortcut').textContent = '⌘+P';
       document.getElementById('find-in-page-shortcut').textContent = '⌘+F';
       document.getElementById('downloads-shortcut').textContent = '⌘+⇧+D';
       document.getElementById('history-shortcut').textContent = '⌘+⇧+H';
@@ -32,6 +33,7 @@ export class OptionsMenuManager {
       document.getElementById('new-tab-shortcut').textContent = 'Ctrl+T';
       document.getElementById('new-window-shortcut').textContent = 'Ctrl+N';
       document.getElementById('new-private-window-shortcut').textContent = 'Ctrl+⇧+T';
+      document.getElementById('print-shortcut').textContent = 'Ctrl+P';
       document.getElementById('find-in-page-shortcut').textContent = 'Ctrl+F';
       document.getElementById('downloads-shortcut').textContent = 'Ctrl+⇧+D';
       document.getElementById('history-shortcut').textContent = 'Ctrl+⇧+H';
@@ -147,6 +149,10 @@ export class OptionsMenuManager {
 
     this.optionsElement?.querySelector('#open-pdf-option')?.addEventListener('click', async () => {
       await window.BrowserAPI.openPdfFile(this.appWindowId);
+    });
+
+    this.optionsElement?.querySelector('#print-option')?.addEventListener('click', async () => {
+      await window.BrowserAPI.printPage(this.appWindowId);
     });
 
     this.optionsElement?.querySelector('#find-in-page-option')?.addEventListener('click', async () => {
