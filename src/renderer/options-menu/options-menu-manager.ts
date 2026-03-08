@@ -183,6 +183,11 @@ export class OptionsMenuManager {
       await window.BrowserAPI.hideOptionsMenu(this.appWindowId);
     });
 
+    this.optionsElement?.querySelector('#terms-of-use-option')?.addEventListener('click', async () => {
+      await window.BrowserAPI.createTab(this.appWindowId, 'https://nav0.org/guide/terms-of-use', true);
+      await window.BrowserAPI.hideOptionsMenu(this.appWindowId);
+    });
+
   }
   public toggleOptionsVisibility(): void {
     this.optionsElement?.classList.toggle('show');
