@@ -236,11 +236,14 @@ function findNav0Binary() {
         '/Applications/Nav0 Browser.app/Contents/MacOS/Nav0 Browser',
         '/Applications/Nav0.app/Contents/MacOS/Nav0',
         `${os.homedir()}/Applications/nav0-browser.app/Contents/MacOS/nav0-browser`,
+        `${os.homedir()}/Desktop/nav0-browser.app/Contents/MacOS/nav0-browser`,
       ]
     : [
         '/usr/bin/nav0-browser',
         '/usr/local/bin/nav0-browser',
         `${os.homedir()}/.local/bin/nav0-browser`,
+        `${os.homedir()}/Desktop/nav0-browser`,
+        `${os.homedir()}/Desktop/nav0-browser.AppImage`,
       ];
 
   for (const candidate of candidates) {
