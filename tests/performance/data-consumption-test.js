@@ -31,7 +31,6 @@ const os = require('os');
 
 // ─── Configuration ──────────────────────────────────────────────────────────
 
-const PROJECT_ROOT = path.resolve(__dirname, '../..');
 const REPORT_DIR = path.join(__dirname, 'reports');
 const IS_MAC = process.platform === 'darwin';
 const IS_LINUX = process.platform === 'linux';
@@ -227,6 +226,44 @@ function findChromeBinary() {
 }
 
 const CHROME_BIN = process.env.CHROME_BIN || findChromeBinary();
+
+// ─── Nav0 Binary Discovery ──────────────────────────────────────────────────
+
+function findNav0Binary() {
+  const candidates = IS_MAC
+    ? [
+        '/Applications/nav0-browser.app/Contents/MacOS/nav0-browser',
+        '/Applications/Nav0 Browser.app/Contents/MacOS/Nav0 Browser',
+        '/Applications/Nav0.app/Contents/MacOS/Nav0',
+        `${os.homedir()}/Applications/nav0-browser.app/Contents/MacOS/nav0-browser`,
+      ]
+    : [
+        '/usr/bin/nav0-browser',
+        '/usr/local/bin/nav0-browser',
+        `${os.homedir()}/.local/bin/nav0-browser`,
+      ];
+
+  for (const candidate of candidates) {
+    try {
+      fs.accessSync(candidate, fs.constants.X_OK);
+      return candidate;
+    } catch {}
+  }
+
+  // Try which on Linux
+  if (IS_LINUX) {
+    try {
+      const resolved = execSync('which nav0-browser 2>/dev/null', { encoding: 'utf-8' }).trim();
+      if (resolved) return resolved;
+    } catch {}
+  }
+
+  throw new Error(
+    'Could not find installed Nav0. Install Nav0 or set NAV0_BIN env var.'
+  );
+}
+
+const NAV0_BIN = process.env.NAV0_BIN || findNav0Binary();
 
 // ─── Display Management ─────────────────────────────────────────────────────
 // Only needed on headless Linux (CI). macOS and Linux desktops have a display.
@@ -511,22 +548,16 @@ async function testChromeDataConsumption() {
 // ─── Nav0 Test ──────────────────────────────────────────────────────────────
 
 async function testNav0DataConsumption() {
-  log('[Nav0] Starting data consumption test...');
+  log(`[Nav0] Starting data consumption test using: ${NAV0_BIN}`);
   ensurePortFree(NAV0_DEBUG_PORT);
 
-  const nav0ElectronFlags = [
+  const nav0Flags = [
     `--remote-debugging-port=${NAV0_DEBUG_PORT}`,
     ...(IS_LINUX ? ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage'] : []),
   ];
-  const nav0Proc = spawn('npx', [
-    'electron-forge', 'start',
-    '--',
-    ...nav0ElectronFlags,
-  ], {
-    cwd: PROJECT_ROOT,
+  const nav0Proc = spawn(NAV0_BIN, nav0Flags, {
     env: {
       ...process.env,
-      REMOTE_DEBUGGING_PORT: String(NAV0_DEBUG_PORT),
       ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
     },
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -534,20 +565,17 @@ async function testNav0DataConsumption() {
 
   nav0Proc.stderr.on('data', (d) => {
     const line = d.toString().trim();
-    if (line.includes('Compil') || line.includes('webpack') || line.includes('Error') || line.includes('Launching')) {
+    if (line.includes('Error') || line.includes('Warning')) {
       log(`[Nav0:stderr] ${line.slice(0, 120)}`);
     }
   });
-  nav0Proc.stdout.on('data', (d) => {
-    const line = d.toString().trim();
-    if (line) log(`[Nav0:stdout] ${line.slice(0, 120)}`);
-  });
+  nav0Proc.stdout.on('data', () => {});
 
   const spawnPid = nav0Proc.pid;
 
   try {
-    log(`[Nav0] Waiting for webpack build and debug port ${NAV0_DEBUG_PORT} (PID: ${spawnPid})...`);
-    await waitForPort(NAV0_DEBUG_PORT, 180000);
+    log(`[Nav0] Waiting for debug port ${NAV0_DEBUG_PORT} (PID: ${spawnPid})...`);
+    await waitForPort(NAV0_DEBUG_PORT, 60000);
     log('[Nav0] Debug port ready. Waiting for app to initialize...');
     await sleep(5000);
 
@@ -1061,6 +1089,7 @@ async function main() {
     process.exit(1);
   }
   console.log(`  Chrome:        ${CHROME_BIN}`);
+  console.log(`  Nav0:          ${NAV0_BIN}`);
 
   ensureDisplay();
 
