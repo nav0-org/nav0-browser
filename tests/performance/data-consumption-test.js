@@ -36,8 +36,8 @@ const REPORT_DIR = path.join(__dirname, 'reports');
 const IS_MAC = process.platform === 'darwin';
 const IS_LINUX = process.platform === 'linux';
 
-const NAV0_DEBUG_PORT = 9229;
-const CHROME_DEBUG_PORT = 9230;
+const NAV0_DEBUG_PORT = 9333;
+const CHROME_DEBUG_PORT = 9334;
 const PAGE_LOAD_TIMEOUT_MS = 30000;
 const POST_LOAD_SETTLE_MS = 5000;   // Wait after DOMContentLoaded for async resources
 const IDLE_MONITOR_SEC = 20;        // Monitor idle traffic after all pages loaded
@@ -156,6 +156,8 @@ function ensurePortFree(port) {
   if (pid) {
     log(`Port ${port} in use by PID ${pid}, killing...`);
     killTree(pid);
+    // Give OS time to release the port
+    try { execSync('sleep 1'); } catch {}
   }
 }
 
