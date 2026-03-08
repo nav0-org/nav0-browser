@@ -216,19 +216,16 @@ function httpPost(url) {
 }
 
 // ─── Display Management ─────────────────────────────────────────────────────
+// Only needed on headless Linux (CI). macOS and Linux desktops have a display.
 
 let xvfbProcess = null;
 
 function ensureDisplay() {
-  if (IS_MAC) {
-    log('macOS detected — no virtual display needed.');
-    return;
-  }
-  if (process.env.DISPLAY) {
-    log(`Using existing display: ${process.env.DISPLAY}`);
-    return;
-  }
-  log('No DISPLAY detected. Starting Xvfb on :99...');
+  // macOS and Linux with existing DISPLAY don't need anything
+  if (IS_MAC || process.env.DISPLAY) return;
+
+  // Headless Linux (CI) — start Xvfb
+  log('No DISPLAY detected (headless Linux). Starting Xvfb on :99...');
   xvfbProcess = spawn('Xvfb', [':99', '-screen', '0', '1920x1080x24', '-nolisten', 'tcp'], {
     stdio: 'ignore', detached: true,
   });

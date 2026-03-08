@@ -25,7 +25,7 @@ function createWindow(targetUrl) {
   const win = new BrowserWindow({
     width: 1280,
     height: 900,
-    show: false,
+    show: true,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
