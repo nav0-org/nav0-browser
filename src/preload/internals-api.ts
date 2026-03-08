@@ -147,6 +147,9 @@ export function init(){
     showAboutPanel: async () => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_ABOUT_PANEL);
     },
+    getAboutInfo: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GET_ABOUT_INFO);
+    },
     getSearchUrl: async (searchTerm: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GET_SEARCH_URL, searchTerm);
     },

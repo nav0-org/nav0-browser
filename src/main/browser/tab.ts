@@ -115,6 +115,10 @@ export class Tab {
       preloadScriptToLoad = NEW_TAB_PRELOAD_WEBPACK_ENTRY;
       this.url = '';
       isInternalPage = true;
+    } else if (this.url.startsWith(InAppUrls.ABOUT)){
+      urlToLoad = ABOUT_WEBPACK_ENTRY;
+      preloadScriptToLoad = ABOUT_PRELOAD_WEBPACK_ENTRY;
+      isInternalPage = true;
     } else if (this.url.startsWith('file://')) {
       urlToLoad = this.url;
       preloadScriptToLoad = null;
