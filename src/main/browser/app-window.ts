@@ -4,6 +4,7 @@ import { Tab } from "./tab";
 import { AppConstants, ClosedTabRecord, InAppUrls, MainToRendererEventsForBrowserIPC } from "../../constants/app-constants";
 import { OptionsMenuManager } from "./options-menu-manager";
 import { CommandKOverlayManager } from "./command-k-overlay-manager";
+import { CommandOOverlayManager } from "./command-o-overlay-manager";
 import { DownloadManager } from "./download-manager";
 import { PermissionManager } from "./permission-manager";
 import { PermissionPromptOverlayManager, PermissionPromptData } from "./permission-prompt-overlay-manager";
@@ -19,6 +20,7 @@ export class AppWindow {
   private partitionSetting: string;
   private optionsMenuManager: OptionsMenuManager | null = null;
   private commandKOverlayManager: CommandKOverlayManager | null = null;
+  private commandOOverlayManager: CommandOOverlayManager | null = null;
   private permissionPromptOverlayManager: PermissionPromptOverlayManager | null = null;
   private findInPageManager: FindInPageManager | null = null;
   private database: DB;
@@ -64,6 +66,7 @@ export class AppWindow {
 
     this.optionsMenuManager = new OptionsMenuManager(this.id, this.isPrivate, this.partitionSetting);
     this.commandKOverlayManager = new CommandKOverlayManager(this.id, this.isPrivate, this.partitionSetting);
+    this.commandOOverlayManager = new CommandOOverlayManager(this.id, this.isPrivate, this.partitionSetting);
     this.permissionPromptOverlayManager = new PermissionPromptOverlayManager(this.id, this.isPrivate, this.partitionSetting);
     this.findInPageManager = new FindInPageManager(this.id, this.isPrivate, this.partitionSetting);
 
@@ -263,6 +266,7 @@ export class AppWindow {
 
   async showCommandKOverlay(): Promise<void> {
     this.hideOptionsMenuOverlay();
+    this.hideCommandOOverlay();
     if(this.browserWindowInstance.contentView.children.indexOf(this.commandKOverlayManager.getWebContentsViewInstance()) > -1){
       // Already open — toggle it closed
       this.hideCommandKOverlay();
@@ -278,6 +282,27 @@ export class AppWindow {
   hideCommandKOverlay(): void {
     if(this.commandKOverlayManager && this.browserWindowInstance.contentView.children.indexOf(this.commandKOverlayManager.getWebContentsViewInstance()) > -1){
       this.browserWindowInstance.contentView.removeChildView(this.commandKOverlayManager.getWebContentsViewInstance());
+    }
+  }
+
+  async showCommandOOverlay(): Promise<void> {
+    this.hideOptionsMenuOverlay();
+    this.hideCommandKOverlay();
+    if(this.browserWindowInstance.contentView.children.indexOf(this.commandOOverlayManager.getWebContentsViewInstance()) > -1){
+      // Already open — toggle it closed
+      this.hideCommandOOverlay();
+      return;
+    }
+    await this.commandOOverlayManager.whenReady();
+    const parentBounds = this.browserWindowInstance.contentView.getBounds();
+    this.commandOOverlayManager.getWebContentsViewInstance().setBounds(parentBounds);
+    this.browserWindowInstance.contentView.addChildView(this.commandOOverlayManager.getWebContentsViewInstance());
+    this.commandOOverlayManager.resetState();
+    this.commandOOverlayManager.getWebContentsViewInstance().webContents.focus();
+  }
+  hideCommandOOverlay(): void {
+    if(this.commandOOverlayManager && this.browserWindowInstance.contentView.children.indexOf(this.commandOOverlayManager.getWebContentsViewInstance()) > -1){
+      this.browserWindowInstance.contentView.removeChildView(this.commandOOverlayManager.getWebContentsViewInstance());
     }
   }
 
@@ -323,6 +348,7 @@ export class AppWindow {
   async showFindInPage(): Promise<void> {
     this.hideOptionsMenuOverlay();
     this.hideCommandKOverlay();
+    this.hideCommandOOverlay();
 
     if (this.isFindInPageVisible()) {
       // Already open — toggle it closed
