@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://nav0-issue-creation.100-percent-ketan.workers.dev;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://nav0-issue-creation.100-percent-ketan.workers.dev;">
 </head>
 <body>
   <div class="issue-report-overlay" id="issue-report-overlay">
@@ -32,6 +32,18 @@
         <div class="form-group">
           <label class="form-label" for="issue-description">Description</label>
           <textarea class="form-control" id="issue-description" rows="5" placeholder="Describe the issue or suggestion in detail..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Attachments</label>
+          <div class="attachment-area" id="attachment-area">
+            <label class="attachment-drop-zone" id="attachment-drop-zone" for="attachment-input">
+              <i data-lucide="image-plus" width="20" height="20"></i>
+              <span>Click to attach images (max 3, 5MB each)</span>
+            </label>
+            <input type="file" id="attachment-input" accept="image/png,image/jpeg,image/gif,image/webp" multiple style="display:none;" />
+            <div class="attachment-previews" id="attachment-previews"></div>
+          </div>
         </div>
 
         <div class="issue-report-sysinfo">

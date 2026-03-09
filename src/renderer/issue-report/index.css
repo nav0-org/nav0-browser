@@ -127,6 +127,77 @@ html, body {
   appearance: auto;
 }
 
+/* Attachments */
+.attachment-area {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.attachment-drop-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.attachment-drop-zone:hover {
+  border-color: var(--primary-color);
+  color: var(--text-color);
+  background-color: var(--bg-color);
+}
+
+.attachment-previews {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.attachment-preview {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.attachment-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.attachment-remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-circle);
+  background-color: var(--error-color);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  line-height: 1;
+  padding: 0;
+}
+
+.attachment-remove:hover {
+  background-color: #c0392b;
+}
+
 /* System info preview */
 .issue-report-sysinfo {
   margin-top: 8px;
