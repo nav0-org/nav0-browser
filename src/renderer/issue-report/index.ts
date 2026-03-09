@@ -7,6 +7,8 @@ initTheme();
 const WORKER_URL = 'https://nav0-issue-creation.100-percent-ketan.workers.dev';
 const MAX_ATTACHMENTS = 3;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_IMAGE_DIMENSION = 1280; // max width or height in pixels
+const JPEG_QUALITY = 0.8;
 
 interface AttachedImage {
   name: string;
@@ -87,17 +89,45 @@ function renderAttachmentPreviews(): void {
   }
 }
 
-function fileToBase64(file: File): Promise<string> {
+function resizeAndCompressImage(file: File): Promise<{ base64: string; mimeType: string }> {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      // Strip the data URI prefix (e.g., "data:image/png;base64,")
-      const base64 = result.split(',')[1];
-      resolve(base64);
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+
+      let { width, height } = img;
+
+      // Downscale if either dimension exceeds the limit
+      if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
+        if (width > height) {
+          height = Math.round(height * (MAX_IMAGE_DIMENSION / width));
+          width = MAX_IMAGE_DIMENSION;
+        } else {
+          width = Math.round(width * (MAX_IMAGE_DIMENSION / height));
+          height = MAX_IMAGE_DIMENSION;
+        }
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Always output as JPEG for smaller size (unless it's a PNG with transparency needs — but for issue screenshots JPEG is fine)
+      const dataUrl = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
+      const base64 = dataUrl.split(',')[1];
+      resolve({ base64, mimeType: 'image/jpeg' });
     };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
+
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error(`Failed to load image: ${file.name}`));
+    };
+
+    img.src = objectUrl;
   });
 }
 
@@ -120,12 +150,12 @@ async function handleFiles(files: FileList): Promise<void> {
       continue;
     }
 
-    const base64 = await fileToBase64(file);
+    const { base64, mimeType } = await resizeAndCompressImage(file);
     const previewUrl = URL.createObjectURL(file);
     attachedImages.push({
       name: file.name,
       base64,
-      mimeType: file.type,
+      mimeType,
       previewUrl,
     });
   }
