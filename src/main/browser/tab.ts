@@ -334,7 +334,7 @@ export class Tab {
         }
       } else if (disposition === 'foreground-tab' || disposition === 'background-tab'){
         this.popupTimestamps.push(now);
-        this.parentAppWindow.createTab(url);
+        this.parentAppWindow.createTab(url, false);
       } else if (disposition === 'new-window') {
         // Allow popup windows (e.g. OAuth flows like "Continue with Google")
         // to open as real windows, preserving window.opener for callback communication
@@ -885,7 +885,7 @@ export class Tab {
     if (linkURL) { //for clicking on hyperlinks
       template.push(
         { label: 'Open link in new tab', click: () => {
-          parentAppWindow.createTab(linkURL);
+          parentAppWindow.createTab(linkURL, false);
         }},
         { label: 'Open link in new window', click: () => {
           //@todo - implement this
