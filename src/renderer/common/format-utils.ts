@@ -29,6 +29,14 @@ export abstract class FormatUtils {
     return `${day}-${monthName}-${year.toString().substring(2, 4)}`;
   }
 
+  public static formatFileSize(bytes: number): string {
+    if (bytes <= 0) return '';
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    const size = bytes / Math.pow(1024, i);
+    return `${size % 1 === 0 ? size : size.toFixed(1)} ${units[i]}`;
+  }
+
   public static getFileMetadata(filePath: string): { fileName: string; fileNameWithoutExtension: string; extension: string } {
     const normalizedPath = filePath.replace(/\\/g, '/');
     const basename = normalizedPath.split('/').pop() || '';

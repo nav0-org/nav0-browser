@@ -206,6 +206,16 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
         </div>`;
     }
 
+    // Build file size display
+    let sizeHtml = '';
+    if (isActive && activeInfo.totalBytes > 0) {
+      sizeHtml = `<span class="download-size">${FormatUtils.formatFileSize(activeInfo.receivedBytes)} / ${FormatUtils.formatFileSize(activeInfo.totalBytes)}</span>`;
+    } else if (isActive && activeInfo.totalBytes === 0) {
+      sizeHtml = activeInfo.receivedBytes > 0 ? `<span class="download-size">${FormatUtils.formatFileSize(activeInfo.receivedBytes)}</span>` : '';
+    } else if (item.fileSize > 0) {
+      sizeHtml = `<span class="download-size">${FormatUtils.formatFileSize(item.fileSize)}</span>`;
+    }
+
     downloadItem.innerHTML = `
       <div class="download-time">${FormatUtils.getFriendlyDateString(item.createdDate)}</div>
       <div><i data-lucide="${getFileIcon(item.fileExtension)}" class="download-icon"></i></div>
@@ -213,6 +223,7 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
         <div class="download-filename" title="${item.fileName}">${item.fileName}</div>
         <div class="download-path">${isPausedFromDb ? 'Paused' : item.fileLocation}</div>
       </div>
+      ${sizeHtml}
       <div>
         ${controlsHtml || `<button class="delete-button"><i data-lucide="x" width="14" height="14"></i></button>`}
       </div>
@@ -298,6 +309,16 @@ const updateProgressBar = (fileName: string, receivedBytes: number, totalBytes: 
   }
   const pct = totalBytes > 0 ? Math.round((receivedBytes / totalBytes) * 100) : 0;
   bar.style.width = `${pct}%`;
+
+  // Update file size display
+  const sizeEl = row.querySelector('.download-size') as HTMLElement;
+  if (sizeEl) {
+    if (totalBytes > 0) {
+      sizeEl.textContent = `${FormatUtils.formatFileSize(receivedBytes)} / ${FormatUtils.formatFileSize(totalBytes)}`;
+    } else if (receivedBytes > 0) {
+      sizeEl.textContent = FormatUtils.formatFileSize(receivedBytes);
+    }
+  }
 };
 
 const removeProgressBar = (fileName: string): void => {
