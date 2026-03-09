@@ -868,9 +868,15 @@ function generateDataReport(chromeData, nav0Data) {
 
     const shortUrl = new URL(c.url).hostname.replace('www.', '').slice(0, 38);
     const diff = nBytes - cBytes;
+    const bothZero = cBytes === 0 && nBytes === 0;
+    const chromeFailed = cBytes === 0 && nBytes > 0;
+    const nav0Failed = nBytes === 0 && cBytes > 0;
     const pct = cBytes > 0 ? ((diff / cBytes) * 100).toFixed(1) : 'N/A';
     const sign = diff >= 0 ? '+' : '';
-    const winner = nBytes <= cBytes ? 'Nav0' : 'Chrome';
+    const winner = bothZero ? 'Both failed'
+      : chromeFailed ? 'Chrome failed'
+      : nav0Failed ? 'Nav0'
+      : nBytes <= cBytes ? 'Nav0' : 'Chrome';
 
     lines.push('  ' +
       pad(shortUrl, 42) +
