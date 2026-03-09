@@ -174,6 +174,11 @@ export class OptionsMenuManager {
       await window.BrowserAPI.showAboutPanel();
     });
 
+    this.optionsElement?.querySelector('#report-issue-option')?.addEventListener('click', async () => {
+      await window.BrowserAPI.hideOptionsMenu(this.appWindowId);
+      await window.BrowserAPI.showIssueReport(this.appWindowId);
+    });
+
   }
   public toggleOptionsVisibility(): void {
     this.optionsElement?.classList.toggle('show');

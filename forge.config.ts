@@ -136,6 +136,14 @@ const config: ForgeConfig = {
             },
           },
           {
+            html: './src/renderer/issue-report/index.html',
+            js: './src/renderer/issue-report/index.ts',
+            name: 'issue_report',
+            preload: {
+              js: './src/preload/internals-api.ts',
+            },
+          },
+          {
             html: './src/renderer/web-content/index.html',
             js: './src/renderer/web-content/index.ts',
             name: 'web_content',

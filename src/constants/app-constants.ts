@@ -162,6 +162,10 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly CLEAR_ALL_PERMISSIONS = "browser:clear-all-permissions";
   public static readonly PERMISSION_PROMPT_READY = "browser:permission-prompt-ready";
   public static readonly SHOW_TAB_CONTEXT_MENU = "browser:show-tab-context-menu";
+
+  // Issue report
+  public static readonly SHOW_ISSUE_REPORT = "browser:show-issue-report";
+  public static readonly HIDE_ISSUE_REPORT = "browser:hide-issue-report";
 }
 
 export abstract class MainToRendererEventsForBrowserIPC {

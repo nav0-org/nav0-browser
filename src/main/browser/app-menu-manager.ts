@@ -143,6 +143,13 @@ export abstract class AppMenuManager {
         label: 'Help and More',
         submenu: [
           {label: 'About Nav0 Browser', click: () => { app.showAboutPanel(); }},
+          {type: 'separator' as const},
+          {label: 'Report an Issue', click: async() => {
+            const activeWindow = AppWindowManager.getActiveWindow();
+            if (activeWindow) {
+              await activeWindow.showIssueReportOverlay();
+            }
+          }},
         ]
       }
     ];
