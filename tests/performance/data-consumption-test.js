@@ -626,33 +626,31 @@ async function testNav0DataConsumption() {
       const url = TEST_URLS[i];
       const collector = createNetworkCollector();
 
-      // Create tab via BrowserAPI
+      // Create a blank tab first so we can attach CDP before navigation
+      let targetPage = null;
       try {
-        await mainPage.evaluate(async (tabUrl) => {
+        await mainPage.evaluate(async () => {
           const api = window.BrowserAPI;
           if (api && api.createTab) {
-            await api.createTab(api.appWindowId, tabUrl, false);
+            await api.createTab(api.appWindowId, 'about:blank', false);
           }
-        }, url);
+        });
       } catch (err) {
         log(`[Nav0]   Tab creation warning: ${err.message.slice(0, 80)}`);
       }
 
-      // Wait for the new target to appear and attach CDP
+      // Wait for the blank tab target to appear
       await sleep(2000);
 
-      // Find the newly created target (web content page loading our URL)
+      // Find the newly created blank tab
       const targets = await browser.targets();
-      let targetPage = null;
-
       for (const target of targets) {
         if (target.type() === 'page') {
           try {
             const p = await target.page();
             if (p) {
               const pageUrl = p.url();
-              // Match by URL (the tab should be navigating to our test URL)
-              if (pageUrl.includes(new URL(url).hostname)) {
+              if (pageUrl === 'about:blank' || pageUrl === '') {
                 targetPage = p;
                 break;
               }
@@ -662,19 +660,27 @@ async function testNav0DataConsumption() {
       }
 
       if (targetPage) {
+        // Attach CDP monitoring BEFORE navigation (same as Chrome test)
         const cdp = await targetPage.createCDPSession();
         await attachNetworkMonitor(cdp, collector);
-        log(`[Nav0]   [${i + 1}/${TEST_URLS.length}] ${url} (attached CDP)`);
-      } else {
-        log(`[Nav0]   [${i + 1}/${TEST_URLS.length}] ${url} (could not attach, using page-level monitoring)`);
-      }
+        log(`[Nav0]   [${i + 1}/${TEST_URLS.length}] ${url} (attached CDP, navigating...)`);
 
-      // Wait for page to load + async resources (same settle time as Chrome)
-      if (targetPage) {
         try {
-          await targetPage.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: PAGE_LOAD_TIMEOUT_MS });
-        } catch {}
+          await targetPage.goto(url, { waitUntil: 'domcontentloaded', timeout: PAGE_LOAD_TIMEOUT_MS });
+        } catch (e) {
+          log(`[Nav0]   [${i + 1}/${TEST_URLS.length}] Navigation warning: ${e.message.slice(0, 80)}`);
+        }
       } else {
+        // Fallback: create tab with URL directly (CDP will miss early traffic)
+        log(`[Nav0]   [${i + 1}/${TEST_URLS.length}] ${url} (could not attach blank tab, falling back)`);
+        try {
+          await mainPage.evaluate(async (tabUrl) => {
+            const api = window.BrowserAPI;
+            if (api && api.createTab) {
+              await api.createTab(api.appWindowId, tabUrl, false);
+            }
+          }, url);
+        } catch {}
         await sleep(PAGE_LOAD_TIMEOUT_MS / 2);
       }
       await sleep(POST_LOAD_SETTLE_MS);
