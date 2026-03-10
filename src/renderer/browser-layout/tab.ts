@@ -86,6 +86,23 @@ export class Tab {
     }
   }
 
+  setLoading(isLoading: boolean): void {
+    this.isLoading = isLoading;
+    if (this.tabElement) {
+      const faviconElement = this.tabElement.querySelector('.tab-favicon') as HTMLElement;
+      const loaderElement = this.tabElement.querySelector('.tab-loader') as HTMLElement;
+      if (faviconElement && loaderElement) {
+        if (isLoading) {
+          faviconElement.style.display = 'none';
+          loaderElement.style.display = 'block';
+        } else {
+          faviconElement.style.display = '';
+          loaderElement.style.display = 'none';
+        }
+      }
+    }
+  }
+
   updateTabFavicon(faviconUrl: string): void {
     if(this.url.startsWith(InAppUrls.PREFIX)) {
       this.faviconUrl = ImageBase64Strings.FAVICON;

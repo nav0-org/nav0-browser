@@ -186,6 +186,7 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly FIND_IN_PAGE_RESULT = "browser:find-in-page-result";
   public static readonly SHOW_PERMISSION_PROMPT = "browser:show-permission-prompt";
   public static readonly HIDE_PERMISSION_PROMPT = "browser:hide-permission-prompt";
+  public static readonly TAB_LOADING_CHANGED = "browser:tab-loading-changed";
   public static readonly TAB_PINNED = "browser:tab-pinned";
   public static readonly TAB_UNPINNED = "browser:tab-unpinned";
 }

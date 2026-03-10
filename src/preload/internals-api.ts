@@ -239,6 +239,9 @@ export function init(){
     onFindInPageResult: (callback: (data: { activeMatchOrdinal: number, matches: number, finalUpdate: boolean }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.FIND_IN_PAGE_RESULT, (_event, data) => callback(data));
     },
+    onTabLoadingChanged: (callback: (data: { id: string, isLoading: boolean }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.TAB_LOADING_CHANGED, (_event, data) => callback(data));
+    },
     onTabPinned: (callback: (data: { id: string }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.TAB_PINNED, (_event, data) => callback(data));
     },
