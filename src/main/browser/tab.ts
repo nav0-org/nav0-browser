@@ -267,6 +267,20 @@ export class Tab {
 
       await this.handleDownload(item);
     });
+    this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_START_LOADING, () => {
+      if (this._destroyed) return;
+      this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_LOADING_CHANGED, {
+        id: this.id,
+        isLoading: true
+      });
+    });
+    this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_STOP_LOADING, () => {
+      if (this._destroyed) return;
+      this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_LOADING_CHANGED, {
+        id: this.id,
+        isLoading: false
+      });
+    });
     this.webContentsViewInstance.webContents.on(WebContentsEvents.PAGE_TITLE_UPDATED, async (event, title: string) => {
       if (this._destroyed) return;
       this.title = title;
