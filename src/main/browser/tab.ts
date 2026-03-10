@@ -14,6 +14,7 @@ import { ReaderModeManager, ReaderModeState } from "./reader-mode-manager";
 import { DataStoreManager } from "../database/data-store-manager";
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
 import { COSMETIC_FILTER_CSS, AD_BLOCK_EARLY_SCRIPT, AD_BLOCK_SCRIPT } from "../ad-blocker/ad-block-lists";
+import { generateSSLWarningHTML, SSLWarningType } from "./ssl-warning-page";
 const domainPattern = /^[^\s]+\.[^\s]+$/;
 
 export class Tab {
@@ -42,6 +43,9 @@ export class Tab {
   private darkModeCSSKey: string | null = null;
   private static darkModeEnabled = false;
   private _destroyed = false;
+  private sslBypassedHosts: Set<string> = new Set();
+  private httpBypassedHosts: Set<string> = new Set();
+  private showingSSLWarning = false;
 
   private static readonly DARK_MODE_CSS = `
     html {
@@ -122,6 +126,23 @@ export class Tab {
     } else if (this.url.startsWith('file://')) {
       urlToLoad = this.url;
       preloadScriptToLoad = null;
+    } else if (this.url.startsWith('http://') && !this.isHttpBypassed(this.url) && !this.isLocalhost(this.url)) {
+      // Non-SSL connection — show warning page
+      this.showingSSLWarning = true;
+      const warningHTML = generateSSLWarningHTML({ type: 'http', url: this.url });
+      const pendingUrl = this.url;
+      const needsNewView = !this.webContentsViewInstance;
+      if (needsNewView) {
+        this.preloadScript = null;
+        this.initWebContentsView();
+      }
+      this.readyPromise = Promise.resolve();
+      this.webContentsViewInstance.webContents.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(warningHTML)}`);
+      this.setupSSLWarningProceedHandler(pendingUrl, 'http');
+      if (needsNewView && this.parentAppWindow.getActiveTabId() === this.id) {
+        this.parentAppWindow.activateTab(this.id);
+      }
+      return;
     } else if (this.url.startsWith('http://') || this.url.startsWith('https://')) {
       urlToLoad = this.url;
       preloadScriptToLoad = WEB_CONTENT_PRELOAD_WEBPACK_ENTRY;
@@ -304,6 +325,33 @@ export class Tab {
     this.webContentsViewInstance.webContents.on('context-menu', (event, params) => {
       if (this._destroyed) return;
       this.handleContextMenuEvent(this.parentAppWindow, event, params)
+    });
+
+    // Handle SSL certificate errors — show interstitial warning page
+    this.webContentsViewInstance.webContents.on('certificate-error', (event, url, error, certificate, callback) => {
+      if (this._destroyed) {
+        callback(false);
+        return;
+      }
+
+      // If the host has been explicitly bypassed by the user, allow the connection
+      try {
+        const hostname = new URL(url).hostname;
+        if (this.sslBypassedHosts.has(hostname)) {
+          event.preventDefault();
+          callback(true);
+          return;
+        }
+      } catch { /* ignore parse errors */ }
+
+      // Block the insecure connection and show warning page
+      event.preventDefault();
+      callback(false);
+
+      this.showingSSLWarning = true;
+      const warningHTML = generateSSLWarningHTML({ type: 'certificate', url, errorCode: error });
+      this.webContentsViewInstance.webContents.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(warningHTML)}`);
+      this.setupSSLWarningProceedHandler(url, 'certificate');
     });
 
     this.webContentsViewInstance.webContents.setWindowOpenHandler(({ url, disposition }) => {
@@ -818,6 +866,51 @@ export class Tab {
 
   static isDarkModeEnabled(): boolean {
     return Tab.darkModeEnabled;
+  }
+
+  private isHttpBypassed(url: string): boolean {
+    try {
+      return this.httpBypassedHosts.has(new URL(url).hostname);
+    } catch {
+      return false;
+    }
+  }
+
+  private isLocalhost(url: string): boolean {
+    try {
+      const hostname = new URL(url).hostname;
+      return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]';
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Sets up a one-time navigation handler on the warning page's webContents.
+   * When the user clicks "Proceed" on the warning page, the page navigates
+   * to the original URL. We intercept that navigation, record the bypass,
+   * and re-navigate properly.
+   */
+  private setupSSLWarningProceedHandler(pendingUrl: string, warningType: SSLWarningType): void {
+    const handler = (event: Electron.Event, navigationUrl: string) => {
+      // The proceed button navigates to the original URL from the data: page.
+      // Any navigation away from the data: URL means the user clicked proceed
+      // or the back button. We only care about navigation to the pending URL.
+      if (navigationUrl === pendingUrl) {
+        event.preventDefault();
+        try {
+          const hostname = new URL(pendingUrl).hostname;
+          if (warningType === 'http') {
+            this.httpBypassedHosts.add(hostname);
+          } else {
+            this.sslBypassedHosts.add(hostname);
+          }
+        } catch { /* ignore */ }
+        this.showingSSLWarning = false;
+        this.navigate(pendingUrl);
+      }
+    };
+    this.webContentsViewInstance.webContents.once('will-navigate', handler);
   }
 
   //for handling right clicks
