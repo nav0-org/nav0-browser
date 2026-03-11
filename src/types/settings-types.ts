@@ -74,6 +74,10 @@ export interface BrowserSettings {
   popupAllowedSites: string[];
   popupBlockedSites: string[];
 
+  // User Agent
+  userAgentPreset: 'default' | 'chrome-windows' | 'chrome-mac' | 'safari-mac' | 'firefox-windows' | 'firefox-mac' | 'edge-windows' | 'custom';
+  userAgentCustomValue: string;
+
   // Keyboard Shortcuts
   keyboardShortcuts: Record<string, string>;
 }
@@ -155,6 +159,41 @@ export const DEFAULT_FILTER_LISTS: FilterListConfig[] = [
   },
 ];
 
+export const USER_AGENT_PRESETS: Record<string, { label: string; value: string }> = {
+  'default': {
+    label: 'nav0-browser (Default)',
+    value: 'nav0-browser',
+  },
+  'chrome-windows': {
+    label: 'Chrome on Windows',
+    value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+  },
+  'chrome-mac': {
+    label: 'Chrome on macOS',
+    value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+  },
+  'safari-mac': {
+    label: 'Safari on macOS',
+    value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.2 Safari/605.1.15',
+  },
+  'firefox-windows': {
+    label: 'Firefox on Windows',
+    value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0',
+  },
+  'firefox-mac': {
+    label: 'Firefox on macOS',
+    value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:134.0) Gecko/20100101 Firefox/134.0',
+  },
+  'edge-windows': {
+    label: 'Edge on Windows',
+    value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0',
+  },
+  'custom': {
+    label: 'Custom',
+    value: '',
+  },
+};
+
 export const DEFAULT_KEYBOARD_SHORTCUTS: KeyboardShortcutAction[] = [
   { id: 'new-tab', label: 'New Tab', category: 'Tabs', defaultShortcut: 'mod+T', currentShortcut: 'mod+T' },
   { id: 'close-tab', label: 'Close Tab', category: 'Tabs', defaultShortcut: 'mod+W', currentShortcut: 'mod+W' },
@@ -225,6 +264,10 @@ export const DEFAULT_BROWSER_SETTINGS: BrowserSettings = {
   popupPolicy: 'smart',
   popupAllowedSites: [],
   popupBlockedSites: [],
+
+  // User Agent (nav0-browser by default)
+  userAgentPreset: 'default',
+  userAgentCustomValue: '',
 
   // Keyboard Shortcuts (empty = use defaults)
   keyboardShortcuts: {},

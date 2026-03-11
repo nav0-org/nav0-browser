@@ -2,7 +2,7 @@ import { session, ipcMain, app } from "electron";
 import { DataStoreConstants, RendererToMainEventsForBrowserIPC } from "../../constants/app-constants";
 import { DataStoreManager } from "../database/data-store-manager";
 import { DatabaseManager } from "../database/database-manager";
-import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
+import { BrowserSettings, DEFAULT_BROWSER_SETTINGS, USER_AGENT_PRESETS } from "../../types/settings-types";
 import { AD_BLOCK_DOMAINS, AD_URL_PATTERNS } from "../ad-blocker/ad-block-lists";
 
 export abstract class SettingsEnforcer {
@@ -14,6 +14,7 @@ export abstract class SettingsEnforcer {
     const settings = SettingsEnforcer.getSettings();
     SettingsEnforcer.applyCookiePolicy(settings);
     SettingsEnforcer.applyProxySettings(settings);
+    SettingsEnforcer.applyUserAgent(settings);
     SettingsEnforcer.applyAdBlocker(settings);
     SettingsEnforcer.startAutoDeleteScheduler(settings);
     SettingsEnforcer.runStartupCleanup(settings);
@@ -29,6 +30,7 @@ export abstract class SettingsEnforcer {
       const settings = SettingsEnforcer.getSettings();
       SettingsEnforcer.applyCookiePolicy(settings);
       SettingsEnforcer.applyProxySettings(settings);
+      SettingsEnforcer.applyUserAgent(settings);
       SettingsEnforcer.applyAdBlocker(settings);
       SettingsEnforcer.startAutoDeleteScheduler(settings);
       return true;
@@ -177,6 +179,24 @@ export abstract class SettingsEnforcer {
         }
         break;
     }
+  }
+
+  // ---- User Agent ----
+  private static applyUserAgent(settings: BrowserSettings) {
+    const browsingSes = session.fromPartition('persist:browsertabs');
+    const privateSes = session.fromPartition('persist:private');
+
+    const preset = settings.userAgentPreset || 'default';
+    let userAgent: string;
+
+    if (preset === 'custom') {
+      userAgent = settings.userAgentCustomValue || 'nav0-browser';
+    } else {
+      userAgent = USER_AGENT_PRESETS[preset]?.value || 'nav0-browser';
+    }
+
+    browsingSes.setUserAgent(userAgent);
+    privateSes.setUserAgent(userAgent);
   }
 
   // ---- Ad-Blocker ----
