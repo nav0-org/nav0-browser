@@ -43,7 +43,8 @@ export class Tab {
   private darkModeCSSKey: string | null = null;
   private static darkModeEnabled = false;
   private _destroyed = false;
-  private sslBypassedHosts: Set<string> = new Set();
+  private static readonly SSL_BYPASS_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+  private static sslBypassedHosts: Map<string, number> = new Map();
   private showingSSLWarning = false;
 
   private static readonly DARK_MODE_CSS = `
@@ -325,10 +326,15 @@ export class Tab {
       // If the host has been explicitly bypassed by the user, allow the connection
       try {
         const hostname = new URL(url).hostname;
-        if (this.sslBypassedHosts.has(hostname)) {
-          event.preventDefault();
-          callback(true);
-          return;
+        const bypassedAt = Tab.sslBypassedHosts.get(hostname);
+        if (bypassedAt) {
+          if ((Date.now() - bypassedAt) < Tab.SSL_BYPASS_TTL_MS) {
+            event.preventDefault();
+            callback(true);
+            return;
+          }
+          // Expired — remove stale entry
+          Tab.sslBypassedHosts.delete(hostname);
         }
       } catch { /* ignore parse errors */ }
 
@@ -886,7 +892,7 @@ export class Tab {
         event.preventDefault();
         try {
           const hostname = new URL(pendingUrl).hostname;
-          this.sslBypassedHosts.add(hostname);
+          Tab.sslBypassedHosts.set(hostname, Date.now());
         } catch { /* ignore */ }
         this.showingSSLWarning = false;
         this.navigate(pendingUrl);
