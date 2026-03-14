@@ -14,7 +14,7 @@ import { ReaderModeManager, ReaderModeState } from "./reader-mode-manager";
 import { DataStoreManager } from "../database/data-store-manager";
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
 import { COSMETIC_FILTER_CSS, AD_BLOCK_EARLY_SCRIPT, AD_BLOCK_SCRIPT } from "../ad-blocker/ad-block-lists";
-import { generateSSLWarningHTML } from "./ssl-warning-page";
+import { SSLManager } from "./ssl-manager";
 const domainPattern = /^[^\s]+\.[^\s]+$/;
 
 export class Tab {
@@ -43,8 +43,6 @@ export class Tab {
   private darkModeCSSKey: string | null = null;
   private static darkModeEnabled = false;
   private _destroyed = false;
-  private static readonly SSL_BYPASS_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
-  private static sslBypassedHosts: Map<string, number> = new Map();
   private showingSSLWarning = false;
 
   private static readonly DARK_MODE_CSS = `
@@ -317,45 +315,41 @@ export class Tab {
     });
 
     // Handle SSL certificate errors — show interstitial warning page
-    this.webContentsViewInstance.webContents.on('certificate-error', (event, url, error, certificate, callback) => {
-      if (this._destroyed) {
-        callback(false);
-        return;
-      }
+    this.webContentsViewInstance.webContents.on('certificate-error', (event, url, error, _certificate, callback) => {
+      if (this._destroyed) { callback(false); return; }
 
       // If the host has been explicitly bypassed by the user, allow the connection
       try {
-        const hostname = new URL(url).hostname;
-        const bypassedAt = Tab.sslBypassedHosts.get(hostname);
-        if (bypassedAt) {
-          if ((Date.now() - bypassedAt) < Tab.SSL_BYPASS_TTL_MS) {
-            event.preventDefault();
-            callback(true);
-            return;
-          }
-          // Expired — remove stale entry
-          Tab.sslBypassedHosts.delete(hostname);
+        if (SSLManager.isHostBypassed(new URL(url).hostname)) {
+          event.preventDefault();
+          callback(true);
+          return;
         }
       } catch { /* ignore parse errors */ }
 
-      // Guard: if we're already showing a warning, don't stack another one
-      if (this.showingSSLWarning) {
-        event.preventDefault();
-        callback(false);
-        return;
-      }
+      // Guard: don't stack multiple warnings
+      if (this.showingSSLWarning) { event.preventDefault(); callback(false); return; }
 
-      // Block the insecure connection and show warning page
       event.preventDefault();
       callback(false);
 
       this.showingSSLWarning = true;
-      const warningHTML = generateSSLWarningHTML({ type: 'certificate', url, errorCode: error });
-      this.webContentsViewInstance.webContents.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(warningHTML)}`);
-      // Show the original URL in the address bar instead of the data: URL
       this.url = url;
       this.sendTabUrlUpdate(url);
-      this.setupSSLWarningProceedHandler(url);
+
+      SSLManager.showWarning(this.webContentsViewInstance.webContents, url, error).then((decision) => {
+        this.showingSSLWarning = false;
+        if (decision === 'proceed') {
+          this.navigate(url);
+        } else {
+          const wc = this.webContentsViewInstance.webContents;
+          if (wc.navigationHistory.canGoBack()) {
+            wc.navigationHistory.goBack();
+          } else {
+            this.navigate(InAppUrls.NEW_TAB);
+          }
+        }
+      });
     });
 
     this.webContentsViewInstance.webContents.setWindowOpenHandler(({ url, disposition }) => {
@@ -881,52 +875,6 @@ export class Tab {
     } catch {
       return false;
     }
-  }
-
-  /**
-   * Sets up a one-time navigation handler on the warning page's webContents.
-   * When the user clicks "Proceed" on the warning page, the page navigates
-   * to the original URL. We intercept that navigation, record the bypass,
-   * and re-navigate properly.
-   */
-  private setupSSLWarningProceedHandler(pendingUrl: string): void {
-    const wc = this.webContentsViewInstance.webContents;
-
-    // Handle "Proceed" — will-navigate fires for real URLs from data: pages
-    const willNavHandler = (event: Electron.Event, navigationUrl: string) => {
-      if (navigationUrl === pendingUrl) {
-        event.preventDefault();
-        cleanup();
-        try {
-          const hostname = new URL(pendingUrl).hostname;
-          Tab.sslBypassedHosts.set(hostname, Date.now());
-        } catch { /* ignore */ }
-        this.showingSSLWarning = false;
-        this.navigate(pendingUrl);
-      }
-    };
-
-    // Handle "Go back to safety" — about:blank navigations bypass will-navigate
-    // from data: URLs, so we catch them after they complete in did-navigate
-    const didNavHandler = (_event: Electron.Event, navigationUrl: string) => {
-      if (navigationUrl === 'about:blank#ssl-go-back') {
-        cleanup();
-        this.showingSSLWarning = false;
-        if (wc.navigationHistory.canGoBack()) {
-          wc.navigationHistory.goBack();
-        } else {
-          this.navigate(InAppUrls.NEW_TAB);
-        }
-      }
-    };
-
-    const cleanup = () => {
-      wc.removeListener('will-navigate', willNavHandler);
-      wc.removeListener('did-navigate', didNavHandler);
-    };
-
-    wc.on('will-navigate', willNavHandler);
-    wc.on('did-navigate', didNavHandler);
   }
 
   //for handling right clicks
