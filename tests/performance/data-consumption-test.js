@@ -626,22 +626,35 @@ async function testNav0DataConsumption() {
       const url = TEST_URLS[i];
       const collector = createNetworkCollector();
 
-      // Listen for new target BEFORE creating the tab, so we catch it immediately
+      // Snapshot existing targets so we can identify the new one
+      const existingTargets = new Set((await browser.targets()).map(t => t._targetId || t.url()));
+
+      // Set up a listener for the new target BEFORE creating the tab
       let targetPage = null;
+      let cdpAttached = false;
       const targetPromise = new Promise((resolve) => {
+        let resolved = false;
         const onTarget = async (target) => {
+          if (resolved) return;
           if (target.type() === 'page') {
-            try {
-              const p = await target.page();
-              if (p) resolve(p);
-            } catch {}
+            const id = target._targetId || target.url();
+            if (!existingTargets.has(id) || target.url().includes(new URL(url).hostname)) {
+              resolved = true;
+              browser.off('targetcreated', onTarget);
+              try {
+                const p = await target.page();
+                resolve(p);
+              } catch { resolve(null); }
+            }
           }
         };
         browser.on('targetcreated', onTarget);
-        // Clean up listener after timeout
         setTimeout(() => {
-          browser.off('targetcreated', onTarget);
-          resolve(null);
+          if (!resolved) {
+            resolved = true;
+            browser.off('targetcreated', onTarget);
+            resolve(null);
+          }
         }, 10000);
       });
 
@@ -657,22 +670,46 @@ async function testNav0DataConsumption() {
         log(`[Nav0]   Tab creation warning: ${err.message.slice(0, 80)}`);
       }
 
-      // Wait for the new target to appear
+      // Wait for the new target to appear via event
       targetPage = await targetPromise;
 
+      // Fallback: if event didn't fire, poll for new target by URL
+      if (!targetPage) {
+        const hostname = new URL(url).hostname;
+        for (let attempt = 0; attempt < 10; attempt++) {
+          await sleep(500);
+          const targets = await browser.targets();
+          for (const target of targets) {
+            if (target.type() === 'page') {
+              try {
+                const p = await target.page();
+                if (p && p.url().includes(hostname)) {
+                  targetPage = p;
+                  break;
+                }
+              } catch {}
+            }
+          }
+          if (targetPage) break;
+        }
+      }
+
       if (targetPage) {
-        // Attach CDP monitoring as soon as the target is created
+        // Attach CDP monitoring
         const cdp = await targetPage.createCDPSession();
         await attachNetworkMonitor(cdp, collector);
+        cdpAttached = true;
         log(`[Nav0]   [${i + 1}/${TEST_URLS.length}] ${url} (attached CDP)`);
 
-        // Wait for page to finish loading
+        // Reload the page so we capture ALL network traffic from the start.
+        // The initial load may have completed before CDP was attached.
         try {
-          await targetPage.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: PAGE_LOAD_TIMEOUT_MS });
-        } catch {}
+          await targetPage.reload({ waitUntil: 'domcontentloaded', timeout: PAGE_LOAD_TIMEOUT_MS });
+        } catch (e) {
+          log(`[Nav0]   [${i + 1}/${TEST_URLS.length}] Reload warning: ${e.message.slice(0, 80)}`);
+        }
       } else {
         log(`[Nav0]   [${i + 1}/${TEST_URLS.length}] ${url} (target not detected, data may be incomplete)`);
-        await sleep(PAGE_LOAD_TIMEOUT_MS / 2);
       }
       await sleep(POST_LOAD_SETTLE_MS);
 
@@ -681,6 +718,7 @@ async function testNav0DataConsumption() {
         url,
         ...summarizeResults(pageData),
         requestDetails: categorizeRequests(pageData.requests, url),
+        cdpAttached,
       });
 
       // Close the tab page (like Chrome test does)
@@ -865,14 +903,15 @@ function generateDataReport(chromeData, nav0Data) {
 
     const shortUrl = new URL(c.url).hostname.replace('www.', '').slice(0, 38);
     const diff = nBytes - cBytes;
+    const nav0CdpOk = n.cdpAttached !== false; // true if cdpAttached is true or undefined (Chrome has no flag)
     const bothZero = cBytes === 0 && nBytes === 0;
     const chromeFailed = cBytes === 0 && nBytes > 0;
-    const nav0Failed = nBytes === 0 && cBytes > 0;
+    const nav0Incomplete = nBytes === 0 && cBytes > 0 && !nav0CdpOk;
     const pct = cBytes > 0 ? ((diff / cBytes) * 100).toFixed(1) : 'N/A';
     const sign = diff >= 0 ? '+' : '';
-    const winner = bothZero ? 'Both failed'
-      : chromeFailed ? 'Chrome failed'
-      : nav0Failed ? 'Nav0'
+    const winner = bothZero ? 'Both N/A'
+      : chromeFailed ? 'Chrome N/A'
+      : nav0Incomplete ? 'Nav0 N/A*'
       : nBytes <= cBytes ? 'Nav0' : 'Chrome';
 
     lines.push('  ' +
