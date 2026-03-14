@@ -45,6 +45,27 @@ function showStatus(message: string, type: 'success' | 'error'): void {
   }
 }
 
+function showStatusWithLink(message: string, url: string): void {
+  const statusEl = document.getElementById('issue-report-status');
+  if (statusEl) {
+    statusEl.innerHTML = '';
+    statusEl.className = 'issue-report-status success';
+    statusEl.style.display = '';
+
+    const text = document.createTextNode(message + ' ');
+    statusEl.appendChild(text);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.textContent = 'View on GitHub';
+    link.target = '_blank';
+    link.style.color = 'var(--success-color)';
+    link.style.textDecoration = 'underline';
+    link.style.fontWeight = '500';
+    statusEl.appendChild(link);
+  }
+}
+
 function renderAttachmentPreviews(): void {
   const container = document.getElementById('attachment-previews');
   if (!container) return;
@@ -206,7 +227,7 @@ async function submitIssue(): Promise<void> {
   const typeLabel = type === 'bug' ? 'Bug Report' : type === 'feature' ? 'Feature Request' : 'Other';
 
   const images = attachedImages.map(img => ({
-    name: img.name,
+    name: img.name.replace(/\.[^.]+$/, '.jpg'),
     base64: img.base64,
     mimeType: img.mimeType,
   }));
@@ -224,12 +245,22 @@ async function submitIssue(): Promise<void> {
       }),
     });
 
-    const data = await response.json().catch(() => null);
+    let data: any = null;
+    try {
+      data = await response.json();
+    } catch (_) {
+      // response body wasn't JSON
+    }
 
     if (response.ok) {
-      showStatus('Issue submitted successfully! Thank you for your feedback.', 'success');
+      const issueUrl = data?.issue_url;
+      if (issueUrl) {
+        showStatusWithLink('Issue submitted successfully!', issueUrl);
+      } else {
+        showStatus('Issue submitted successfully! Thank you for your feedback.', 'success');
+      }
       resetForm();
-      setTimeout(() => close(), 2000);
+      setTimeout(() => close(), 3000);
     } else {
       const errorMsg = data?.error || data?.message || `Server error (${response.status})`;
       showStatus(`Failed to submit: ${errorMsg}`, 'error');

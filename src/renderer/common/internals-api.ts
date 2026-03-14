@@ -86,6 +86,10 @@ declare global {
       onReaderModeAvailabilityChanged: (callback: (data: { id: string, isEligible: boolean }) => void) => void;
       onReaderModeStateChanged: (callback: (data: { id: string, isActive: boolean }) => void) => void;
       onFindInPageResult: (callback: (data: { activeMatchOrdinal: number, matches: number, finalUpdate: boolean }) => void) => void;
+
+      // Issue report
+      showIssueReport: (appWindowId: string) => Promise<any>;
+      hideIssueReport: (appWindowId: string) => Promise<any>;
     };
   }
 }
