@@ -553,7 +553,6 @@ async function testChromeDataConsumption() {
     }
     try { await idlePage.close(); } catch {}
 
-    await idlePage.close();
     browser.disconnect();
 
     log('[Chrome] Data collection complete.');
