@@ -10,6 +10,14 @@ Thoughts on privacy, browsers, and the open web.
 ---
 
 <div class="blog-post-item">
+  <a href="/blog/nav0-vs-chrome-data-consumption">
+    <h2>Nav0 vs Chrome: Which Browser Actually Respects Your Data?</h2>
+  </a>
+  <div class="post-meta">March 14, 2026 &middot; 10 min read &middot; Data Consumption</div>
+  <p class="post-excerpt">We measured every byte transferred by Nav0 and Chrome across 15 real websites. Nav0 used 17.7% less data, made 29.1% fewer requests, blocked 2.5 MB of trackers, and produced zero idle background traffic.</p>
+</div>
+
+<div class="blog-post-item">
   <a href="/blog/nav0-vs-chrome-performance-benchmark">
     <h2>Nav0 vs Chrome: A Head-to-Head Performance Benchmark on macOS</h2>
   </a>
