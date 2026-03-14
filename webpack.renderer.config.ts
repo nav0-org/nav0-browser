@@ -1,4 +1,4 @@
-import type { Configuration } from 'webpack';
+import { type Configuration, DefinePlugin } from 'webpack';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
 import { rules } from './webpack.rules';
@@ -16,6 +16,9 @@ export const rendererConfig: Configuration = {
   plugins: [
     ...plugins,
     new MiniCssExtractPlugin(),
+    new DefinePlugin({
+      'process.env.NAV0_ISSUE_API_KEY': JSON.stringify(process.env.NAV0_ISSUE_API_KEY || ''),
+    }),
   ],
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.css'],

@@ -231,6 +231,23 @@ html, body {
   background-color: var(--error-light);
 }
 
+.issue-copy-url-btn {
+  margin-left: 4px;
+  padding: 2px 8px;
+  font-size: var(--font-xs);
+  border: 1px solid var(--success-color);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--success-color);
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.issue-copy-url-btn:hover {
+  background: var(--success-color);
+  color: #fff;
+}
+
 /* Actions */
 .issue-report-actions {
   display: flex;

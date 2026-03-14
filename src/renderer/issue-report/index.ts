@@ -5,6 +5,7 @@ import { createIcons, icons } from 'lucide';
 initTheme();
 
 const WORKER_URL = 'https://nav0-issue-creation.100-percent-ketan.workers.dev';
+const API_KEY = process.env.NAV0_ISSUE_API_KEY || '';
 const MAX_ATTACHMENTS = 3;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_IMAGE_DIMENSION = 1280; // max width or height in pixels
@@ -56,13 +57,33 @@ function showStatusWithLink(message: string, url: string): void {
     statusEl.appendChild(text);
 
     const link = document.createElement('a');
-    link.href = url;
+    link.href = '#';
     link.textContent = 'View on GitHub';
-    link.target = '_blank';
     link.style.color = 'var(--success-color)';
     link.style.textDecoration = 'underline';
     link.style.fontWeight = '500';
+    link.style.cursor = 'pointer';
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const appWindowId = (window as any).BrowserAPI?.appWindowId;
+      if (appWindowId) {
+        (window as any).BrowserAPI.createTab(appWindowId, url, true);
+        close();
+      }
+    });
     statusEl.appendChild(link);
+
+    const copyBtn = document.createElement('button');
+    copyBtn.textContent = 'Copy URL';
+    copyBtn.className = 'issue-copy-url-btn';
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(url).then(() => {
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => { copyBtn.textContent = 'Copy URL'; }, 2000);
+      });
+    });
+    statusEl.appendChild(document.createTextNode(' '));
+    statusEl.appendChild(copyBtn);
   }
 }
 
@@ -237,7 +258,7 @@ async function submitIssue(): Promise<void> {
   try {
     const response = await fetch(WORKER_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
       body: JSON.stringify({
         title: `[${typeLabel}] ${title}`,
         body,
