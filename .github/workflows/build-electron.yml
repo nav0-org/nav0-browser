@@ -173,6 +173,7 @@ jobs:
         run: npm run make -- --arch=${{ matrix.arch }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NAV0_ISSUE_API_KEY: ${{ secrets.NAV0_ISSUE_API_KEY }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
