@@ -412,10 +412,11 @@ export abstract class AppWindowManager {
       }
     });
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_ALL_WINDOWS_TABS, async () => {
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_ALL_WINDOWS_TABS, async (event, isPrivate: boolean) => {
       const result: Array<{ windowId: string; windowName: string; isPrivate: boolean; tabs: Array<{ id: string; title: string; url: string; faviconUrl: string | null; isActive: boolean }> }> = [];
       let windowIndex = 0;
       for (const window of AppWindowManager.windows.values()) {
+        if (window.isPrivate !== isPrivate) continue;
         const activeTabId = window.getActiveTabId();
         const tabs = window.getTabs().map(tab => ({
           id: tab.getId(),

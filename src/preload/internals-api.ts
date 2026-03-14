@@ -123,8 +123,8 @@ export function init(){
     hideCommandOOverlay: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.HIDE_COMMAND_O_OVERLAY, appWindowId);
     },
-    fetchAllWindowsTabs: async () => {
-      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.FETCH_ALL_WINDOWS_TABS);
+    fetchAllWindowsTabs: async (isPrivate: boolean) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.FETCH_ALL_WINDOWS_TABS, isPrivate);
     },
     showFindInPage: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_FIND_IN_PAGE, appWindowId);

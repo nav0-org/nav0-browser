@@ -175,7 +175,7 @@ const init = () => {
 
     const loadTabs = async () => {
       try {
-        const result = await window.BrowserAPI.fetchAllWindowsTabs();
+        const result = await window.BrowserAPI.fetchAllWindowsTabs(window.BrowserAPI.isPrivate);
         allGroups = result as WindowGroup[];
         filterTabs(searchInput.value);
       } catch {
