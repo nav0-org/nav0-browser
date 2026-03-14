@@ -312,11 +312,51 @@ export abstract class AppWindowManager {
       if(appWindow && tabId){
         tab = AppWindowManager.getWindowById(appWindowId).getTabById(tabId);
       } else if (appWindow){
-        tab = appWindow.getActiveTab(); 
+        tab = appWindow.getActiveTab();
       }
 
       if (tab) {
         return tab.getWebContentsViewInstance().webContents.reload();
+      }
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.HARD_RELOAD, async (event, appWindowId: string, tabId: string) => {
+      let appWindow: AppWindow;
+      let tab: Tab;
+      if(appWindowId){
+        appWindow = AppWindowManager.getWindowById(appWindowId)
+      } else {
+        appWindow = AppWindowManager.getActiveWindow();
+      }
+      if(appWindow && tabId){
+        tab = AppWindowManager.getWindowById(appWindowId).getTabById(tabId);
+      } else if (appWindow){
+        tab = appWindow.getActiveTab();
+      }
+
+      if (tab) {
+        const webContents = tab.getWebContentsViewInstance().webContents;
+        const session = webContents.session;
+        const currentUrl = webContents.getURL();
+
+        try {
+          // Extract origin from the current URL for site-specific clearing
+          const origin = new URL(currentUrl).origin;
+
+          // Clear all storage data (cookies, localStorage, sessionStorage, indexedDB, service workers, cache storage) for this origin
+          await session.clearStorageData({ origin });
+
+          // Clear HTTP cache and code caches globally (Electron doesn't support per-origin HTTP cache clearing)
+          await session.clearCache();
+          await session.clearCodeCaches({});
+        } catch (e) {
+          // If URL parsing fails (e.g. about: pages), clear all caches
+          await session.clearCache();
+          await session.clearCodeCaches({});
+        }
+
+        // Reload ignoring any remaining in-memory cache
+        return webContents.reloadIgnoringCache();
       }
     });
 
