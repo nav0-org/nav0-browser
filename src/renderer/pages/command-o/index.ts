@@ -3,6 +3,13 @@ import { initTheme } from '../../common/theme';
 import { createIcons, icons } from 'lucide';
 initTheme();
 
+declare global {
+  interface Window {
+    BrowserAPI: any;
+    __commandOReloadTabs: () => void;
+  }
+}
+
 type TabInfo = {
   id: string;
   title: string;
