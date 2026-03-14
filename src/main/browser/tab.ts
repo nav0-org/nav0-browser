@@ -15,6 +15,7 @@ import { DataStoreManager } from "../database/data-store-manager";
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
 import { COSMETIC_FILTER_CSS, AD_BLOCK_EARLY_SCRIPT, AD_BLOCK_SCRIPT } from "../ad-blocker/ad-block-lists";
 import { SSLManager } from "./ssl-manager";
+import { buildErrorPageScript, NavigationError } from "./error-page/error-page";
 const domainPattern = /^[^\s]+\.[^\s]+$/;
 
 export class Tab {
@@ -44,6 +45,7 @@ export class Tab {
   private static darkModeEnabled = false;
   private _destroyed = false;
   private showingSSLWarning = false;
+  private pendingError: NavigationError | null = null;
 
   private static readonly DARK_MODE_CSS = `
     html {
@@ -181,7 +183,7 @@ export class Tab {
         partition: this.partitionSetting
       }
     });
-    // this.webContentsViewInstance.webContents.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36');
+    // User agent is set at the session level by SettingsEnforcer.applyUserAgent()
     // this.webContentsViewInstance.webContents.openDevTools({mode : 'detach'});
     this.registerPdfHandler();
     this.initEventHandlers();
@@ -244,6 +246,8 @@ export class Tab {
         }
         return;
       }
+      // Clear any pending error on successful navigation
+      this.pendingError = null;
       // Reset dark mode CSS key on navigation so it can be re-injected on DOM_READY
       this.darkModeCSSKey = null;
       this.handleOriginChange(url);
@@ -261,6 +265,11 @@ export class Tab {
 
     // Cosmetic ad filtering and DOM cleanup once the DOM is ready
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DOM_READY, () => {
+      if (this.pendingError) {
+        this.injectCustomErrorPage(this.pendingError);
+        this.pendingError = null;
+        return;
+      }
       this.injectAdBlockDOMScript();
       this.applyDarkModeIfEnabled();
     });
@@ -283,6 +292,20 @@ export class Tab {
       }
 
       await this.handleDownload(item);
+    });
+    this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_START_LOADING, () => {
+      if (this._destroyed) return;
+      this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_LOADING_CHANGED, {
+        id: this.id,
+        isLoading: true
+      });
+    });
+    this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_STOP_LOADING, () => {
+      if (this._destroyed) return;
+      this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_LOADING_CHANGED, {
+        id: this.id,
+        isLoading: false
+      });
     });
     this.webContentsViewInstance.webContents.on(WebContentsEvents.PAGE_TITLE_UPDATED, async (event, title: string) => {
       if (this._destroyed) return;
@@ -310,9 +333,12 @@ export class Tab {
         }
       }
     });
-    this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_FAIL_LOAD, (event) => {
+    this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_FAIL_LOAD, (event, errorCode, errorDescription, validatedURL, isMainFrame) => {
       if (this._destroyed) return;
-      console.error('Failed to load URL:', this.url);
+      // Only handle main frame failures; ignore subframe/resource errors and aborted loads
+      if (!isMainFrame || errorCode === -3) return;
+      console.error('Failed to load URL:', this.url, errorCode, errorDescription);
+      this.pendingError = { errorCode, errorDescription, validatedURL };
       this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.NAVIGATION_FAILED, {
         id: this.id,
       });
@@ -580,6 +606,11 @@ export class Tab {
     const wc = this.webContentsViewInstance.webContents;
     wc.insertCSS(COSMETIC_FILTER_CSS).catch(() => {});
     wc.executeJavaScript(AD_BLOCK_SCRIPT).catch(() => {});
+  }
+
+  private injectCustomErrorPage(error: NavigationError): void {
+    const script = buildErrorPageScript(error);
+    this.webContentsViewInstance.webContents.executeJavaScript(script).catch(() => {});
   }
 
   private debouncedHandleNavigationCompletion(url: string): void {

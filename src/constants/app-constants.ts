@@ -128,6 +128,9 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly HIDE_OPTIONS_MENU = "browser:hide-options-menu";
   public static readonly SHOW_COMMAND_K_OVERLAY = "browser:show-command-k-overlay";
   public static readonly HIDE_COMMAND_K_OVERLAY = "browser:hide-command-k-overlay";
+  public static readonly SHOW_COMMAND_O_OVERLAY = "browser:show-command-o-overlay";
+  public static readonly HIDE_COMMAND_O_OVERLAY = "browser:hide-command-o-overlay";
+  public static readonly FETCH_ALL_WINDOWS_TABS = "browser:fetch-all-windows-tabs";
   public static readonly CREATE_NEW_APP_WINDOW = "browser:create-new-app-window";
   public static readonly CREATE_NEW_PRIVATE_APP_WINDOW = "browser:create-new-private-app-window";
   public static readonly EXECUTE_JAVASCRIPT = "browser:execute-javascript";
@@ -166,6 +169,10 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly PRINT_PAGE = "browser:print-page";
   public static readonly PIN_TAB = "browser:pin-tab";
   public static readonly UNPIN_TAB = "browser:unpin-tab";
+
+  // Issue report
+  public static readonly SHOW_ISSUE_REPORT = "browser:show-issue-report";
+  public static readonly HIDE_ISSUE_REPORT = "browser:hide-issue-report";
 }
 
 export abstract class MainToRendererEventsForBrowserIPC {
@@ -186,6 +193,7 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly FIND_IN_PAGE_RESULT = "browser:find-in-page-result";
   public static readonly SHOW_PERMISSION_PROMPT = "browser:show-permission-prompt";
   public static readonly HIDE_PERMISSION_PROMPT = "browser:hide-permission-prompt";
+  public static readonly TAB_LOADING_CHANGED = "browser:tab-loading-changed";
   public static readonly TAB_PINNED = "browser:tab-pinned";
   public static readonly TAB_UNPINNED = "browser:tab-unpinned";
 }

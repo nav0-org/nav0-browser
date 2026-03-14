@@ -52,6 +52,10 @@ declare global {
 
       showCommandKOverlay: (appWindowId: string) => Promise<any>;
       hideCommandKOverlay: (appWindowId: string) => Promise<any>;
+      showCommandOOverlay: (appWindowId: string) => Promise<any>;
+      hideCommandOOverlay: (appWindowId: string) => Promise<any>;
+      fetchAllWindowsTabs: (isPrivate: boolean) => Promise<Array<{ windowId: string; windowName: string; isPrivate: boolean; tabs: Array<{ id: string; title: string; url: string; faviconUrl: string | null; isActive: boolean }> }>>;
+      getAboutInfo: () => Promise<{ appVersion: string; electronVersion: string; chromiumVersion: string; nodeVersion: string; v8Version: string; platform: string; arch: string; osVersion: string; appPath: string; executableChecksum: string; asarChecksum: string }>;
       showFindInPage: (appWindowId: string) => Promise<any>;
       hideFindInPage: (appWindowId: string) => Promise<any>;
       findInPage: (appWindowId: string, text: string, options?: { matchCase?: boolean }) => Promise<any>;
@@ -87,8 +91,13 @@ declare global {
       onReaderModeAvailabilityChanged: (callback: (data: { id: string, isEligible: boolean }) => void) => void;
       onReaderModeStateChanged: (callback: (data: { id: string, isActive: boolean }) => void) => void;
       onFindInPageResult: (callback: (data: { activeMatchOrdinal: number, matches: number, finalUpdate: boolean }) => void) => void;
+      onTabLoadingChanged: (callback: (data: { id: string, isLoading: boolean }) => void) => void;
       onTabPinned: (callback: (data: { id: string }) => void) => void;
       onTabUnpinned: (callback: (data: { id: string }) => void) => void;
+
+      // Issue report
+      showIssueReport: (appWindowId: string) => Promise<any>;
+      hideIssueReport: (appWindowId: string) => Promise<any>;
     };
   }
 }

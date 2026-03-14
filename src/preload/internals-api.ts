@@ -117,6 +117,15 @@ export function init(){
     hideCommandKOverlay: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.HIDE_COMMAND_K_OVERLAY, appWindowId);
     },
+    showCommandOOverlay: async (appWindowId: string) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_COMMAND_O_OVERLAY, appWindowId);
+    },
+    hideCommandOOverlay: async (appWindowId: string) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.HIDE_COMMAND_O_OVERLAY, appWindowId);
+    },
+    fetchAllWindowsTabs: async (isPrivate: boolean) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.FETCH_ALL_WINDOWS_TABS, isPrivate);
+    },
     showFindInPage: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_FIND_IN_PAGE, appWindowId);
     },
@@ -239,6 +248,9 @@ export function init(){
     onFindInPageResult: (callback: (data: { activeMatchOrdinal: number, matches: number, finalUpdate: boolean }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.FIND_IN_PAGE_RESULT, (_event, data) => callback(data));
     },
+    onTabLoadingChanged: (callback: (data: { id: string, isLoading: boolean }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.TAB_LOADING_CHANGED, (_event, data) => callback(data));
+    },
     onTabPinned: (callback: (data: { id: string }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.TAB_PINNED, (_event, data) => callback(data));
     },
@@ -270,6 +282,14 @@ export function init(){
     },
     clearAllPermissions: async () => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.CLEAR_ALL_PERMISSIONS);
+    },
+
+    // Issue report
+    showIssueReport: async (appWindowId: string) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_ISSUE_REPORT, appWindowId);
+    },
+    hideIssueReport: async (appWindowId: string) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.HIDE_ISSUE_REPORT, appWindowId);
     },
   });
 }

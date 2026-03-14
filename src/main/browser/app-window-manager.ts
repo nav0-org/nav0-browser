@@ -398,6 +398,45 @@ export abstract class AppWindowManager {
       }
     });
 
+    ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_COMMAND_O_OVERLAY, async (event, appWindowId: string) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        return window.showCommandOOverlay();
+      }
+    });
+
+    ipcMain.on(RendererToMainEventsForBrowserIPC.HIDE_COMMAND_O_OVERLAY, async (event, appWindowId: string) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        return window.hideCommandOOverlay();
+      }
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_ALL_WINDOWS_TABS, async (event, isPrivate: boolean) => {
+      const result: Array<{ windowId: string; windowName: string; isPrivate: boolean; tabs: Array<{ id: string; title: string; url: string; faviconUrl: string | null; isActive: boolean }> }> = [];
+      let windowIndex = 0;
+      for (const window of AppWindowManager.windows.values()) {
+        if (window.isPrivate !== isPrivate) continue;
+        const activeTabId = window.getActiveTabId();
+        const tabs = window.getTabs().map(tab => ({
+          id: tab.getId(),
+          title: tab.getTitle(),
+          url: tab.getUrl(),
+          faviconUrl: tab.getFaviconUrl(),
+          isActive: tab.getId() === activeTabId,
+        }));
+        const label = window.isPrivate ? `Private Window ${windowIndex + 1}` : `Window ${windowIndex + 1}`;
+        result.push({
+          windowId: window.id,
+          windowName: label,
+          isPrivate: window.isPrivate,
+          tabs,
+        });
+        windowIndex++;
+      }
+      return result;
+    });
+
     ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_FIND_IN_PAGE, async (event, appWindowId: string) => {
       const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
       if (window) {
@@ -437,6 +476,20 @@ export abstract class AppWindowManager {
       const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
       if (window) {
         window.stopFindInPage();
+      }
+    });
+
+    ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_ISSUE_REPORT, async (event, appWindowId: string) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        return window.showIssueReportOverlay();
+      }
+    });
+
+    ipcMain.on(RendererToMainEventsForBrowserIPC.HIDE_ISSUE_REPORT, async (event, appWindowId: string) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        return window.hideIssueReportOverlay();
       }
     });
 

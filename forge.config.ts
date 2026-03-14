@@ -104,6 +104,14 @@ const config: ForgeConfig = {
             },
           },
           {
+            html: './src/renderer/pages/command-o/index.html',
+            js: './src/renderer/pages/command-o/index.ts',
+            name: 'command_o',
+            preload: {
+              js: './src/preload/internals-api.ts',
+            },
+          },
+          {
             html: './src/renderer/pages/downloads/index.html',
             js: './src/renderer/pages/downloads/index.ts',
             name: 'downloads',
@@ -139,6 +147,14 @@ const config: ForgeConfig = {
             html: './src/renderer/permission-prompt/index.html',
             js: './src/renderer/permission-prompt/index.ts',
             name: 'permission_prompt',
+            preload: {
+              js: './src/preload/internals-api.ts',
+            },
+          },
+          {
+            html: './src/renderer/issue-report/index.html',
+            js: './src/renderer/issue-report/index.ts',
+            name: 'issue_report',
             preload: {
               js: './src/preload/internals-api.ts',
             },

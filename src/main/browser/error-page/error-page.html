@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1c1c1e;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .error-container {
+    text-align: center;
+    max-width: 480px;
+    padding: 40px 24px;
+  }
+
+  .error-icon {
+    margin-bottom: 24px;
+  }
+
+  .error-icon svg {
+    width: 64px;
+    height: 64px;
+    color: #999;
+  }
+
+  .error-title {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: -0.3px;
+  }
+
+  .error-message {
+    font-size: 15px;
+    color: #666;
+    margin-bottom: 6px;
+    line-height: 1.5;
+  }
+
+  .error-suggestion {
+    font-size: 14px;
+    color: #999;
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+
+  .error-reload {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    background: #1c1c1e;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .error-reload:hover {
+    background: #333;
+  }
+
+  .error-reload svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .error-code {
+    margin-top: 20px;
+    font-size: 11px;
+    color: #bbb;
+    font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      background: #1a1a1a;
+      color: #e0e0e0;
+    }
+
+    .error-icon svg {
+      color: #666;
+    }
+
+    .error-message {
+      color: #a0a0a0;
+    }
+
+    .error-suggestion {
+      color: #777;
+    }
+
+    .error-reload {
+      background: #e0e0e0;
+      color: #1a1a1a;
+    }
+
+    .error-reload:hover {
+      background: #fff;
+    }
+
+    .error-code {
+      color: #555;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="error-container">
+    <div class="error-icon">{{ICON}}</div>
+    <div class="error-title">{{TITLE}}</div>
+    <div class="error-message">{{MESSAGE}}</div>
+    <div class="error-suggestion">{{SUGGESTION}}</div>
+    <button class="error-reload" onclick="location.reload()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      Reload
+    </button>
+    <div class="error-code">{{ERROR_CODE}}</div>
+  </div>
+</body>
+</html>

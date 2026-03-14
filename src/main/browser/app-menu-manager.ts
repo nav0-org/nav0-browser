@@ -81,6 +81,7 @@ export abstract class AppMenuManager {
           {label: 'Settings', accelerator: 'CmdOrCtrl+,', click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.BROWSER_SETTINGS, true) }},
           {type: 'separator' as const},
           {label: 'Command K Interface', accelerator: 'CmdOrCtrl+K', click: async() => { AppWindowManager.getActiveWindow().showCommandKOverlay() }},
+          {label: 'Tab Switcher', accelerator: 'CmdOrCtrl+O', click: async() => { AppWindowManager.getActiveWindow().showCommandOOverlay() }},
         ]
       },
       {
@@ -162,6 +163,13 @@ export abstract class AppMenuManager {
               await activeWindow.createTab('https://nav0.org/guide/disclaimer', true);
             } else {
               await shell.openExternal('https://nav0.org/guide/disclaimer');
+            }
+          }},
+          {type: 'separator' as const},
+          {label: 'Report an Issue', click: async() => {
+            const activeWindow = AppWindowManager.getActiveWindow();
+            if (activeWindow) {
+              await activeWindow.showIssueReportOverlay();
             }
           }},
         ]

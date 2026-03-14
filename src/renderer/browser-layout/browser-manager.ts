@@ -220,6 +220,11 @@ export class BrowserTabManager {
       this.getTabById(data.id)?.updateTabFavicon(data.faviconUrl);
     });
 
+    // Tab loading state changed
+    window.BrowserAPI.onTabLoadingChanged((data: { id: string, isLoading: boolean }) => {
+      this.getTabById(data.id)?.setLoading(data.isLoading);
+    });
+
     // Download progress tracking
     window.BrowserAPI.onDownloadStarted((data: { downloadId: string, fileName: string, totalBytes: number }) => {
       this.activeDownloads.set(data.downloadId, { receivedBytes: 0, totalBytes: data.totalBytes });

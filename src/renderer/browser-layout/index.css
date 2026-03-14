@@ -138,6 +138,22 @@ body.is-private .private-window-identifier{
   flex-shrink: 0;
 }
 
+.tab-loader {
+  height: 14px;
+  width: 14px;
+  margin-left: 6px;
+  margin-right: 6px;
+  flex-shrink: 0;
+  border: 2px solid var(--border-color, #ccc);
+  border-top-color: var(--primary-color, #666);
+  border-radius: 50%;
+  animation: tab-loader-spin 0.8s linear infinite;
+}
+
+@keyframes tab-loader-spin {
+  to { transform: rotate(360deg); }
+}
+
 .tab-title {
   white-space: nowrap;
   overflow: hidden;
