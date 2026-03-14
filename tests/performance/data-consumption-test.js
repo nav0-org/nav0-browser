@@ -494,11 +494,19 @@ async function testChromeDataConsumption() {
       const testUrl = TEST_URLS[i];
       collector.reset();
 
-      // Open a new tab and navigate to the URL
+      // Open a new tab and navigate to the URL (mirrors Nav0's createTab behavior)
       const page = await browser.newPage();
+      try {
+        await page.goto(testUrl, { waitUntil: 'domcontentloaded', timeout: PAGE_LOAD_TIMEOUT_MS });
+      } catch (e) {
+        log(`[Chrome]   [${i + 1}/${TEST_URLS.length}] Initial load warning: ${e.message}`);
+      }
+
+      // Attach CDP monitoring AFTER initial load (same as Nav0 where CDP attaches
+      // after createTab has already started loading), then re-navigate to capture
+      // network traffic under the same conditions.
       const cdp = await page.createCDPSession();
       await attachNetworkMonitor(cdp, collector);
-      // Disable cache so every request is a fresh network fetch (matches Nav0 test)
       await cdp.send('Network.setCacheDisabled', { cacheDisabled: true });
 
       log(`[Chrome]   [${i + 1}/${TEST_URLS.length}] ${testUrl}`);
