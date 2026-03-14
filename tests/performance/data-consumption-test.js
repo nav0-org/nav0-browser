@@ -498,6 +498,8 @@ async function testChromeDataConsumption() {
       const page = await browser.newPage();
       const cdp = await page.createCDPSession();
       await attachNetworkMonitor(cdp, collector);
+      // Disable cache so every request is a fresh network fetch (matches Nav0 test)
+      await cdp.send('Network.setCacheDisabled', { cacheDisabled: true });
 
       log(`[Chrome]   [${i + 1}/${TEST_URLS.length}] ${testUrl}`);
       try {
