@@ -52,7 +52,9 @@ export class CommandOOverlayManager {
       if (input) {
         input.value = '';
         input.focus();
-        input.dispatchEvent(new Event('input'));
+      }
+      if (typeof window.__commandOReloadTabs === 'function') {
+        window.__commandOReloadTabs();
       }
     })()`).catch(() => {});
   }

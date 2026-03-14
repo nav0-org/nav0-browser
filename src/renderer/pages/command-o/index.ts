@@ -248,6 +248,9 @@ const init = () => {
 
     // Load tabs on init
     loadTabs();
+
+    // Expose reload function for resetState calls from main process
+    (window as any).__commandOReloadTabs = loadTabs;
   });
 };
 
