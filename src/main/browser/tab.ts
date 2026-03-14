@@ -14,6 +14,7 @@ import { ReaderModeManager, ReaderModeState } from "./reader-mode-manager";
 import { DataStoreManager } from "../database/data-store-manager";
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
 import { COSMETIC_FILTER_CSS, AD_BLOCK_EARLY_SCRIPT, AD_BLOCK_SCRIPT } from "../ad-blocker/ad-block-lists";
+import { buildErrorPageScript, NavigationError } from "./error-page/error-page";
 const domainPattern = /^[^\s]+\.[^\s]+$/;
 
 export class Tab {
@@ -42,7 +43,7 @@ export class Tab {
   private darkModeCSSKey: string | null = null;
   private static darkModeEnabled = false;
   private _destroyed = false;
-  private pendingError: { errorCode: number; errorDescription: string; validatedURL: string } | null = null;
+  private pendingError: NavigationError | null = null;
 
   private static readonly DARK_MODE_CSS = `
     html {
@@ -538,114 +539,9 @@ export class Tab {
     wc.executeJavaScript(AD_BLOCK_SCRIPT).catch(() => {});
   }
 
-  private injectCustomErrorPage(error: { errorCode: number; errorDescription: string; validatedURL: string }): void {
-    const { errorCode, errorDescription, validatedURL } = error;
-
-    // Map error codes to user-friendly messages
-    let title = 'This page can\u2019t be reached';
-    let message = 'Something went wrong while loading this page.';
-    let suggestion = 'Check your connection and try again.';
-    const icon = this.getErrorIcon(errorCode);
-
-    if (errorCode === -106 || errorCode === -109) {
-      // ERR_INTERNET_DISCONNECTED / ERR_ADDRESS_UNREACHABLE
-      title = 'No internet connection';
-      message = 'You\u2019re not connected to the internet.';
-      suggestion = 'Check your network cables, modem, and router, or reconnect to Wi-Fi.';
-    } else if (errorCode === -105) {
-      // ERR_NAME_NOT_RESOLVED
-      let hostname = validatedURL;
-      try { hostname = new URL(validatedURL).hostname; } catch {}
-      title = 'Site can\u2019t be reached';
-      message = `${hostname}\u2019s server DNS address could not be found.`;
-      suggestion = 'Check if there is a typo in the URL.';
-    } else if (errorCode === -7 || errorCode === -118) {
-      // ERR_TIMED_OUT / ERR_CONNECTION_TIMED_OUT
-      title = 'Connection timed out';
-      message = 'The server took too long to respond.';
-      suggestion = 'The site could be temporarily down or too busy. Try again later.';
-    } else if (errorCode === -102) {
-      // ERR_CONNECTION_REFUSED
-      title = 'Connection refused';
-      message = 'The server refused the connection.';
-      suggestion = 'Check if the site is running and the address is correct.';
-    } else if (errorCode === -100 || errorCode === -101 || errorCode === -104) {
-      // ERR_CONNECTION_CLOSED / RESET / FAILED
-      title = 'Connection lost';
-      message = 'The connection to the server was interrupted.';
-      suggestion = 'Try reloading the page.';
-    } else if (errorCode <= -200 && errorCode >= -299) {
-      // Certificate errors
-      title = 'Connection is not private';
-      message = 'This site\u2019s security certificate is not trusted.';
-      suggestion = 'Proceed with caution or contact the site owner.';
-    }
-
-    const errorCodeLabel = errorDescription || `ERR_UNKNOWN (${errorCode})`;
-
-    const html = `
-      (function() {
-        document.documentElement.innerHTML = '<head><style>' +
-          '* { margin: 0; padding: 0; box-sizing: border-box; }' +
-          'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #fafafa; color: #1c1c1e; min-height: 100vh; display: flex; align-items: center; justify-content: center; -webkit-font-smoothing: antialiased; }' +
-          '.error-container { text-align: center; max-width: 480px; padding: 40px 24px; }' +
-          '.error-icon { margin-bottom: 24px; }' +
-          '.error-icon svg { width: 64px; height: 64px; color: #999; }' +
-          '.error-title { font-size: 22px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.3px; }' +
-          '.error-message { font-size: 15px; color: #666; margin-bottom: 6px; line-height: 1.5; }' +
-          '.error-suggestion { font-size: 14px; color: #999; margin-bottom: 28px; line-height: 1.5; }' +
-          '.error-reload { display: inline-flex; align-items: center; gap: 6px; padding: 10px 24px; font-size: 14px; font-weight: 500; color: #fff; background: #1c1c1e; border: none; border-radius: 8px; cursor: pointer; transition: background 0.2s; }' +
-          '.error-reload:hover { background: #333; }' +
-          '.error-reload svg { width: 14px; height: 14px; }' +
-          '.error-code { margin-top: 20px; font-size: 11px; color: #bbb; font-family: "SF Mono", Monaco, "Cascadia Code", monospace; }' +
-          '@media (prefers-color-scheme: dark) {' +
-            'body { background: #1a1a1a; color: #e0e0e0; }' +
-            '.error-icon svg { color: #666; }' +
-            '.error-message { color: #a0a0a0; }' +
-            '.error-suggestion { color: #777; }' +
-            '.error-reload { background: #e0e0e0; color: #1a1a1a; }' +
-            '.error-reload:hover { background: #fff; }' +
-            '.error-code { color: #555; }' +
-          '}' +
-        '</style></head>' +
-        '<body>' +
-          '<div class="error-container">' +
-            '<div class="error-icon">${icon}</div>' +
-            '<div class="error-title">${title.replace(/'/g, "\\'")}</div>' +
-            '<div class="error-message">${message.replace(/'/g, "\\'")}</div>' +
-            '<div class="error-suggestion">${suggestion.replace(/'/g, "\\'")}</div>' +
-            '<button class="error-reload" onclick="location.reload()">' +
-              '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>' +
-              'Reload' +
-            '</button>' +
-            '<div class="error-code">${errorCodeLabel}</div>' +
-          '</div>' +
-        '</body>';
-      })();
-    `;
-
-    this.webContentsViewInstance.webContents.executeJavaScript(html).catch(() => {});
-  }
-
-  private getErrorIcon(errorCode: number): string {
-    if (errorCode === -106 || errorCode === -109) {
-      // Wi-Fi off icon
-      return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>';
-    }
-    if (errorCode === -105) {
-      // Search/DNS icon
-      return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
-    }
-    if (errorCode === -7 || errorCode === -118) {
-      // Clock icon
-      return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
-    }
-    if (errorCode <= -200 && errorCode >= -299) {
-      // Shield icon
-      return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
-    }
-    // Default: alert-circle
-    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+  private injectCustomErrorPage(error: NavigationError): void {
+    const script = buildErrorPageScript(error);
+    this.webContentsViewInstance.webContents.executeJavaScript(script).catch(() => {});
   }
 
   private debouncedHandleNavigationCompletion(url: string): void {
