@@ -104,6 +104,14 @@ const config: ForgeConfig = {
             },
           },
           {
+            html: './src/renderer/pages/command-o/index.html',
+            js: './src/renderer/pages/command-o/index.ts',
+            name: 'command_o',
+            preload: {
+              js: './src/preload/internals-api.ts',
+            },
+          },
+          {
             html: './src/renderer/pages/downloads/index.html',
             js: './src/renderer/pages/downloads/index.ts',
             name: 'downloads',
@@ -123,6 +131,14 @@ const config: ForgeConfig = {
             html: './src/renderer/pages/new-tab/index.html',
             js: './src/renderer/pages/new-tab/index.ts',
             name: 'new_tab',
+            preload: {
+              js: './src/preload/internals-api.ts',
+            },
+          },
+          {
+            html: './src/renderer/pages/about/index.html',
+            js: './src/renderer/pages/about/index.ts',
+            name: 'about',
             preload: {
               js: './src/preload/internals-api.ts',
             },

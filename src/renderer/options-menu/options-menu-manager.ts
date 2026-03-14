@@ -23,6 +23,7 @@ export class OptionsMenuManager {
       document.getElementById('new-tab-shortcut').textContent = '⌘+T';
       document.getElementById('new-window-shortcut').textContent = '⌘+N';
       document.getElementById('new-private-window-shortcut').textContent = '⌘+⇧+T';
+      document.getElementById('print-shortcut').textContent = '⌘+P';
       document.getElementById('find-in-page-shortcut').textContent = '⌘+F';
       document.getElementById('downloads-shortcut').textContent = '⌘+⇧+D';
       document.getElementById('history-shortcut').textContent = '⌘+⇧+H';
@@ -32,6 +33,7 @@ export class OptionsMenuManager {
       document.getElementById('new-tab-shortcut').textContent = 'Ctrl+T';
       document.getElementById('new-window-shortcut').textContent = 'Ctrl+N';
       document.getElementById('new-private-window-shortcut').textContent = 'Ctrl+⇧+T';
+      document.getElementById('print-shortcut').textContent = 'Ctrl+P';
       document.getElementById('find-in-page-shortcut').textContent = 'Ctrl+F';
       document.getElementById('downloads-shortcut').textContent = 'Ctrl+⇧+D';
       document.getElementById('history-shortcut').textContent = 'Ctrl+⇧+H';
@@ -149,6 +151,10 @@ export class OptionsMenuManager {
       await window.BrowserAPI.openPdfFile(this.appWindowId);
     });
 
+    this.optionsElement?.querySelector('#print-option')?.addEventListener('click', async () => {
+      await window.BrowserAPI.printPage(this.appWindowId);
+    });
+
     this.optionsElement?.querySelector('#find-in-page-option')?.addEventListener('click', async () => {
       await window.BrowserAPI.showFindInPage(this.appWindowId);
     });
@@ -170,8 +176,31 @@ export class OptionsMenuManager {
       await window.BrowserAPI.createTab(this.appWindowId, InAppUrls.BROWSER_SETTINGS, true);
     });
 
+    this.optionsElement?.querySelector('#about-nav0-option')?.addEventListener('click', async () => {
+      await window.BrowserAPI.createTab(this.appWindowId, InAppUrls.ABOUT, true);
+    });
+
     this.optionsElement?.querySelector('#about-option')?.addEventListener('click', async () => {
       await window.BrowserAPI.showAboutPanel();
+    });
+
+    this.optionsElement?.querySelector('#privacy-policy-option')?.addEventListener('click', async () => {
+      await window.BrowserAPI.createTab(this.appWindowId, 'https://nav0.org/privacy-policy', true);
+    });
+
+    this.optionsElement?.querySelector('#philosophy-option')?.addEventListener('click', async () => {
+      await window.BrowserAPI.createTab(this.appWindowId, 'https://nav0.org/guide/philosophy', true);
+      await window.BrowserAPI.hideOptionsMenu(this.appWindowId);
+    });
+
+    this.optionsElement?.querySelector('#terms-of-use-option')?.addEventListener('click', async () => {
+      await window.BrowserAPI.createTab(this.appWindowId, 'https://nav0.org/guide/terms-of-use', true);
+      await window.BrowserAPI.hideOptionsMenu(this.appWindowId);
+    });
+
+    this.optionsElement?.querySelector('#disclaimer-option')?.addEventListener('click', async () => {
+      await window.BrowserAPI.createTab(this.appWindowId, 'https://nav0.org/guide/disclaimer', true);
+      await window.BrowserAPI.hideOptionsMenu(this.appWindowId);
     });
 
     this.optionsElement?.querySelector('#report-issue-option')?.addEventListener('click', async () => {

@@ -1,4 +1,4 @@
-import { app, dialog, Menu } from "electron";
+import { app, dialog, Menu, shell } from "electron";
 import { AppConstants, InAppUrls } from "../../constants/app-constants";
 import { AppWindowManager } from "./app-window-manager";
 
@@ -58,6 +58,15 @@ export abstract class AppMenuManager {
             await activeWindow.createTab(`file://${result.filePaths[0]}`, true);
           }},
           {type: 'separator' as const},
+          {label: 'Print...', accelerator: 'CmdOrCtrl+P', click: async() => {
+            const activeWindow = AppWindowManager.getActiveWindow();
+            if (!activeWindow) return;
+            const activeTab = activeWindow.getActiveTab();
+            if (activeTab) {
+              activeTab.getWebContentsViewInstance().webContents.print();
+            }
+          }},
+          {type: 'separator' as const},
           {label: 'Close Tab', click: async() => { AppWindowManager.getActiveWindow().closeTab(AppWindowManager.getActiveWindow().getActiveTabId(), true); }},
           {label: 'Close Window', click: async() => { AppWindowManager.closeWindow(AppWindowManager.getActiveWindowId()); }},
         ]
@@ -72,6 +81,7 @@ export abstract class AppMenuManager {
           {label: 'Settings', accelerator: 'CmdOrCtrl+,', click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.BROWSER_SETTINGS, true) }},
           {type: 'separator' as const},
           {label: 'Command K Interface', accelerator: 'CmdOrCtrl+K', click: async() => { AppWindowManager.getActiveWindow().showCommandKOverlay() }},
+          {label: 'Tab Switcher', accelerator: 'CmdOrCtrl+O', click: async() => { AppWindowManager.getActiveWindow().showCommandOOverlay() }},
         ]
       },
       {
@@ -142,7 +152,19 @@ export abstract class AppMenuManager {
       {
         label: 'Help and More',
         submenu: [
+          {label: 'About Nav0', click: async () => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.ABOUT, true); }},
           {label: 'About Nav0 Browser', click: () => { app.showAboutPanel(); }},
+          {label: 'Privacy Policy', click: async () => { await AppWindowManager.getActiveWindow().createTab('https://nav0.org/privacy-policy', true); }},
+          {label: 'nav0 Philosophy', click: async () => { await AppWindowManager.getActiveWindow().createTab('https://nav0.org/guide/philosophy', true); }},
+          {label: 'Terms of Use', click: async() => { await AppWindowManager.getActiveWindow().createTab('https://nav0.org/guide/terms-of-use', true); }},
+          {label: 'Disclaimer', click: async () => {
+            const activeWindow = AppWindowManager.getActiveWindow();
+            if (activeWindow) {
+              await activeWindow.createTab('https://nav0.org/guide/disclaimer', true);
+            } else {
+              await shell.openExternal('https://nav0.org/guide/disclaimer');
+            }
+          }},
           {type: 'separator' as const},
           {label: 'Report an Issue', click: async() => {
             const activeWindow = AppWindowManager.getActiveWindow();

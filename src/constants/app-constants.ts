@@ -128,6 +128,9 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly HIDE_OPTIONS_MENU = "browser:hide-options-menu";
   public static readonly SHOW_COMMAND_K_OVERLAY = "browser:show-command-k-overlay";
   public static readonly HIDE_COMMAND_K_OVERLAY = "browser:hide-command-k-overlay";
+  public static readonly SHOW_COMMAND_O_OVERLAY = "browser:show-command-o-overlay";
+  public static readonly HIDE_COMMAND_O_OVERLAY = "browser:hide-command-o-overlay";
+  public static readonly FETCH_ALL_WINDOWS_TABS = "browser:fetch-all-windows-tabs";
   public static readonly CREATE_NEW_APP_WINDOW = "browser:create-new-app-window";
   public static readonly CREATE_NEW_PRIVATE_APP_WINDOW = "browser:create-new-private-app-window";
   public static readonly EXECUTE_JAVASCRIPT = "browser:execute-javascript";
@@ -139,6 +142,7 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly FETCH_CLOSED_WINDOWS = "browser:fetch-closed-windows";
   public static readonly RESTORE_CLOSED_WINDOW = "browser:restore-closed-window";
   public static readonly SHOW_ABOUT_PANEL = "browser:show-about-panel";
+  public static readonly GET_ABOUT_INFO = "browser:get-about-info";
   public static readonly TOGGLE_READER_MODE = "browser:toggle-reader-mode";
   public static readonly SET_DARK_MODE = "browser:set-dark-mode";
   public static readonly SHOW_FIND_IN_PAGE = "browser:show-find-in-page";
@@ -162,6 +166,9 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly CLEAR_ALL_PERMISSIONS = "browser:clear-all-permissions";
   public static readonly PERMISSION_PROMPT_READY = "browser:permission-prompt-ready";
   public static readonly SHOW_TAB_CONTEXT_MENU = "browser:show-tab-context-menu";
+  public static readonly PRINT_PAGE = "browser:print-page";
+  public static readonly PIN_TAB = "browser:pin-tab";
+  public static readonly UNPIN_TAB = "browser:unpin-tab";
 
   // Issue report
   public static readonly SHOW_ISSUE_REPORT = "browser:show-issue-report";
@@ -186,6 +193,9 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly FIND_IN_PAGE_RESULT = "browser:find-in-page-result";
   public static readonly SHOW_PERMISSION_PROMPT = "browser:show-permission-prompt";
   public static readonly HIDE_PERMISSION_PROMPT = "browser:hide-permission-prompt";
+  public static readonly TAB_LOADING_CHANGED = "browser:tab-loading-changed";
+  public static readonly TAB_PINNED = "browser:tab-pinned";
+  public static readonly TAB_UNPINNED = "browser:tab-unpinned";
 }
 
 export abstract class DataStoreConstants {
@@ -222,6 +232,7 @@ export abstract class InAppUrls {
   public static readonly BOOKMARKS = "nav0://bookmarks";
   public static readonly BROWSER_SETTINGS = "nav0://browser-settings";
   public static readonly NEW_TAB = "nav0://new-tab";
+  public static readonly ABOUT = "nav0://about";
 }
 
 export abstract class ImageBase64Strings {

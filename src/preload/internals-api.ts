@@ -117,6 +117,15 @@ export function init(){
     hideCommandKOverlay: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.HIDE_COMMAND_K_OVERLAY, appWindowId);
     },
+    showCommandOOverlay: async (appWindowId: string) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_COMMAND_O_OVERLAY, appWindowId);
+    },
+    hideCommandOOverlay: async (appWindowId: string) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.HIDE_COMMAND_O_OVERLAY, appWindowId);
+    },
+    fetchAllWindowsTabs: async (isPrivate: boolean) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.FETCH_ALL_WINDOWS_TABS, isPrivate);
+    },
     showFindInPage: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_FIND_IN_PAGE, appWindowId);
     },
@@ -141,11 +150,17 @@ export function init(){
     createNewPrivateAppWindow: async () => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.CREATE_NEW_PRIVATE_APP_WINDOW, {});
     },
-    showTabContextMenu: (appWindowId: string, tabId: string) => {
-      ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_TAB_CONTEXT_MENU, appWindowId, tabId);
+    printPage: async (appWindowId: string) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.PRINT_PAGE, appWindowId);
+    },
+    showTabContextMenu: (appWindowId: string, tabId: string, isPinned: boolean) => {
+      ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_TAB_CONTEXT_MENU, appWindowId, tabId, isPinned);
     },
     showAboutPanel: async () => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_ABOUT_PANEL);
+    },
+    getAboutInfo: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GET_ABOUT_INFO);
     },
     getSearchUrl: async (searchTerm: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GET_SEARCH_URL, searchTerm);
@@ -232,6 +247,15 @@ export function init(){
     },
     onFindInPageResult: (callback: (data: { activeMatchOrdinal: number, matches: number, finalUpdate: boolean }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.FIND_IN_PAGE_RESULT, (_event, data) => callback(data));
+    },
+    onTabLoadingChanged: (callback: (data: { id: string, isLoading: boolean }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.TAB_LOADING_CHANGED, (_event, data) => callback(data));
+    },
+    onTabPinned: (callback: (data: { id: string }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.TAB_PINNED, (_event, data) => callback(data));
+    },
+    onTabUnpinned: (callback: (data: { id: string }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.TAB_UNPINNED, (_event, data) => callback(data));
     },
 
     // Permission system

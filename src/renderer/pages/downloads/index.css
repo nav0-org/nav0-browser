@@ -70,7 +70,7 @@
 
 .download-item {
   display: grid;
-  grid-template-columns: 140px 24px 1fr auto;
+  grid-template-columns: 140px 24px 1fr auto auto;
   gap: var(--spacing-xs);
   padding: 4px 12px;
   border-bottom: 1px solid var(--border-color);
@@ -123,6 +123,8 @@
 .download-size {
   color: var(--text-secondary);
   font-size: var(--font-xs);
+  white-space: nowrap;
+  text-align: right;
 }
 
 .delete-button {

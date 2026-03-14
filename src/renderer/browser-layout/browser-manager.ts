@@ -220,6 +220,11 @@ export class BrowserTabManager {
       this.getTabById(data.id)?.updateTabFavicon(data.faviconUrl);
     });
 
+    // Tab loading state changed
+    window.BrowserAPI.onTabLoadingChanged((data: { id: string, isLoading: boolean }) => {
+      this.getTabById(data.id)?.setLoading(data.isLoading);
+    });
+
     // Download progress tracking
     window.BrowserAPI.onDownloadStarted((data: { downloadId: string, fileName: string, totalBytes: number }) => {
       this.activeDownloads.set(data.downloadId, { receivedBytes: 0, totalBytes: data.totalBytes });
@@ -248,6 +253,24 @@ export class BrowserTabManager {
         if (data.id === this.activeTabId) {
           this.updateReaderModeButton();
         }
+      }
+    });
+
+    // Tab pinned
+    window.BrowserAPI.onTabPinned((data: { id: string }) => {
+      const tab = this.getTabById(data.id);
+      if (tab) {
+        tab.pinTab();
+        this.reorderPinnedTabs();
+      }
+    });
+
+    // Tab unpinned
+    window.BrowserAPI.onTabUnpinned((data: { id: string }) => {
+      const tab = this.getTabById(data.id);
+      if (tab) {
+        tab.unpinTab();
+        this.reorderPinnedTabs();
       }
     });
 
@@ -393,6 +416,20 @@ export class BrowserTabManager {
 
     this.tabScrollLeftButton.classList.toggle('visible', canScrollLeft);
     this.tabScrollRightButton.classList.toggle('visible', canScrollRight);
+  }
+
+  private reorderPinnedTabs(): void {
+    const pinnedTabs = this.tabs.filter(t => t.isPinned);
+    const unpinnedTabs = this.tabs.filter(t => !t.isPinned);
+    this.tabs = [...pinnedTabs, ...unpinnedTabs];
+
+    // Reorder DOM elements
+    for (const tab of this.tabs) {
+      const el = tab.getTabElement();
+      if (el) {
+        this.tabsContainer.appendChild(el);
+      }
+    }
   }
 
   private scrollActiveTabIntoView(): void {

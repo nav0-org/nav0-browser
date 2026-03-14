@@ -1,0 +1,300 @@
+@import url("../../styles/global.css");
+
+body {
+  background-color: rgba(0, 0, 0, 0.7);
+  line-height: 1.4;
+  font-size: 13px;
+  height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 60px;
+  backdrop-filter: blur(5px);
+}
+
+.overlay-container {
+  width: 720px;
+  max-width: 90vw;
+  background-color: var(--bg-light);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 75vh;
+}
+
+/* ---- Search bar ---- */
+.search-bar {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  gap: 10px;
+}
+
+.shortcut-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 4px 8px;
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.search-icon {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: var(--text-color);
+  background: transparent;
+}
+
+.search-input::placeholder {
+  color: var(--text-light);
+}
+
+.tab-count {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ---- Tabs body (scrollable) ---- */
+.tabs-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+}
+
+.tabs-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tabs-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tabs-body::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.tabs-body::-webkit-scrollbar-thumb:hover {
+  background: var(--border-color-dark);
+}
+
+/* ---- Window group ---- */
+.window-group {
+  margin-bottom: 16px;
+}
+
+.window-group:last-child {
+  margin-bottom: 0;
+}
+
+.window-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.window-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.window-name {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.window-tab-count {
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+}
+
+.window-line {
+  flex: 1;
+  height: 1px;
+  margin-left: 8px;
+}
+
+/* ---- Tab grid ---- */
+.tab-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+/* ---- Tab card ---- */
+.tab-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--bg-color);
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  min-width: 0;
+}
+
+.tab-card:hover {
+  border-color: var(--border-color-dark);
+  background: var(--bg-hover);
+}
+
+.tab-card.active {
+  border-color: var(--text-secondary);
+  background: var(--bg-hover);
+}
+
+.tab-card.selected {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -1px;
+}
+
+.tab-favicon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.tab-favicon img {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+}
+
+.tab-favicon-letter {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-hover);
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.tab-title {
+  flex: 1;
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.tab-active-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--info-color);
+  flex-shrink: 0;
+}
+
+/* ---- Empty state ---- */
+.empty-state {
+  padding: 32px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+}
+
+/* ---- Footer bar ---- */
+.footer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-top: 1px solid var(--border-color);
+  gap: 12px;
+}
+
+.footer-keys {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 4px;
+  font-size: var(--font-xs);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+  color: var(--text-secondary);
+}
+
+.key-label {
+  font-size: var(--font-xs);
+  color: var(--text-light);
+  margin-right: 8px;
+}
+
+.footer-right {
+  font-size: var(--font-xs);
+  color: var(--text-light);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  body {
+    padding-top: 40px;
+  }
+  .tab-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .tab-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Dark Mode Overrides
+   -------------------------------------------------------------------------- */
+[data-theme="dark"] body {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+[data-theme="dark"] .key {
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
+}

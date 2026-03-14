@@ -1,4 +1,4 @@
-import { ClosedTabRecord, ClosedWindowRecord, RendererToMainEventsForBrowserIPC, DataStoreConstants } from "../../constants/app-constants";
+import { ClosedTabRecord, ClosedWindowRecord, RendererToMainEventsForBrowserIPC, MainToRendererEventsForBrowserIPC, DataStoreConstants } from "../../constants/app-constants";
 import { AppMenuManager } from "./app-menu-manager";
 import { AppWindow } from "./app-window";
 import { app, dialog, ipcMain, Menu } from "electron";
@@ -8,6 +8,9 @@ import { DataStoreManager } from "../database/data-store-manager";
 import { SearchEngine } from "../web/search-engine";
 import { PermissionManager, PermissionRequest } from "./permission-manager";
 import { PermissionPromptData } from "./permission-prompt-overlay-manager";
+import fs from "fs";
+import path from "path";
+import crypto from "crypto";
 
 export abstract class AppWindowManager {
   private static windows: Map<string, AppWindow>;
@@ -395,6 +398,45 @@ export abstract class AppWindowManager {
       }
     });
 
+    ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_COMMAND_O_OVERLAY, async (event, appWindowId: string) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        return window.showCommandOOverlay();
+      }
+    });
+
+    ipcMain.on(RendererToMainEventsForBrowserIPC.HIDE_COMMAND_O_OVERLAY, async (event, appWindowId: string) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        return window.hideCommandOOverlay();
+      }
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_ALL_WINDOWS_TABS, async (event, isPrivate: boolean) => {
+      const result: Array<{ windowId: string; windowName: string; isPrivate: boolean; tabs: Array<{ id: string; title: string; url: string; faviconUrl: string | null; isActive: boolean }> }> = [];
+      let windowIndex = 0;
+      for (const window of AppWindowManager.windows.values()) {
+        if (window.isPrivate !== isPrivate) continue;
+        const activeTabId = window.getActiveTabId();
+        const tabs = window.getTabs().map(tab => ({
+          id: tab.getId(),
+          title: tab.getTitle(),
+          url: tab.getUrl(),
+          faviconUrl: tab.getFaviconUrl(),
+          isActive: tab.getId() === activeTabId,
+        }));
+        const label = window.isPrivate ? `Private Window ${windowIndex + 1}` : `Window ${windowIndex + 1}`;
+        result.push({
+          windowId: window.id,
+          windowName: label,
+          isPrivate: window.isPrivate,
+          tabs,
+        });
+        windowIndex++;
+      }
+      return result;
+    });
+
     ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_FIND_IN_PAGE, async (event, appWindowId: string) => {
       const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
       if (window) {
@@ -453,6 +495,44 @@ export abstract class AppWindowManager {
 
     ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_ABOUT_PANEL, async () => {
       app.showAboutPanel();
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.GET_ABOUT_INFO, async () => {
+      let executableChecksum = '';
+      try {
+        const execPath = app.getPath('exe');
+        const fileBuffer = fs.readFileSync(execPath);
+        executableChecksum = crypto.createHash('sha256').update(fileBuffer).digest('hex');
+      } catch {
+        executableChecksum = 'unavailable';
+      }
+
+      let asarChecksum = '';
+      try {
+        const asarPath = path.join(path.dirname(app.getAppPath()), 'app.asar');
+        if (fs.existsSync(asarPath)) {
+          const asarBuffer = fs.readFileSync(asarPath);
+          asarChecksum = crypto.createHash('sha256').update(asarBuffer).digest('hex');
+        } else {
+          asarChecksum = 'not packaged (dev mode)';
+        }
+      } catch {
+        asarChecksum = 'unavailable';
+      }
+
+      return {
+        appVersion: app.getVersion(),
+        electronVersion: process.versions.electron,
+        chromiumVersion: process.versions.chrome,
+        nodeVersion: process.versions.node,
+        v8Version: process.versions.v8,
+        platform: process.platform,
+        arch: process.arch,
+        osVersion: process.getSystemVersion(),
+        appPath: app.getAppPath(),
+        executableChecksum,
+        asarChecksum,
+      };
     });
 
     ipcMain.on(RendererToMainEventsForBrowserIPC.CREATE_NEW_APP_WINDOW, async (event) => {
@@ -556,7 +636,15 @@ export abstract class AppWindowManager {
       return { ok: true };
     });
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_TAB_CONTEXT_MENU, async (event, appWindowId: string, tabId: string) => {
+    ipcMain.on(RendererToMainEventsForBrowserIPC.PRINT_PAGE, async (event, appWindowId: string) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (!window) return;
+      const activeTab = window.getActiveTab();
+      if (!activeTab) return;
+      activeTab.getWebContentsViewInstance().webContents.print();
+    });
+
+    ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_TAB_CONTEXT_MENU, async (event, appWindowId: string, tabId: string, isPinned: boolean) => {
       const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
       if (!window) return;
       const tab = window.getTabById(tabId);
@@ -566,6 +654,17 @@ export abstract class AppWindowManager {
       const isMuted = webContents.isAudioMuted();
 
       const template: Electron.MenuItemConstructorOptions[] = [
+        {
+          label: isPinned ? 'Unpin Tab' : 'Pin Tab',
+          click: () => {
+            if (isPinned) {
+              window.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_UNPINNED, { id: tabId });
+            } else {
+              window.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_PINNED, { id: tabId });
+            }
+          },
+        },
+        { type: 'separator' },
         {
           label: 'Reload Tab',
           click: () => {
@@ -577,6 +676,12 @@ export abstract class AppWindowManager {
           click: () => {
             const url = tab.getUrl();
             window.createTab(url, true);
+          },
+        },
+        {
+          label: 'Print...',
+          click: () => {
+            webContents.print();
           },
         },
         { type: 'separator' },

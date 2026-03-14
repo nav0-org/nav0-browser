@@ -115,6 +115,10 @@ export class Tab {
       preloadScriptToLoad = NEW_TAB_PRELOAD_WEBPACK_ENTRY;
       this.url = '';
       isInternalPage = true;
+    } else if (this.url.startsWith(InAppUrls.ABOUT)){
+      urlToLoad = ABOUT_WEBPACK_ENTRY;
+      preloadScriptToLoad = ABOUT_PRELOAD_WEBPACK_ENTRY;
+      isInternalPage = true;
     } else if (this.url.startsWith('file://')) {
       urlToLoad = this.url;
       preloadScriptToLoad = null;
@@ -169,7 +173,7 @@ export class Tab {
         partition: this.partitionSetting
       }
     });
-    // this.webContentsViewInstance.webContents.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36');
+    // User agent is set at the session level by SettingsEnforcer.applyUserAgent()
     // this.webContentsViewInstance.webContents.openDevTools({mode : 'detach'});
     this.registerPdfHandler();
     this.initEventHandlers();
@@ -263,6 +267,20 @@ export class Tab {
 
       await this.handleDownload(item);
     });
+    this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_START_LOADING, () => {
+      if (this._destroyed) return;
+      this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_LOADING_CHANGED, {
+        id: this.id,
+        isLoading: true
+      });
+    });
+    this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_STOP_LOADING, () => {
+      if (this._destroyed) return;
+      this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_LOADING_CHANGED, {
+        id: this.id,
+        isLoading: false
+      });
+    });
     this.webContentsViewInstance.webContents.on(WebContentsEvents.PAGE_TITLE_UPDATED, async (event, title: string) => {
       if (this._destroyed) return;
       this.title = title;
@@ -330,7 +348,7 @@ export class Tab {
         }
       } else if (disposition === 'foreground-tab' || disposition === 'background-tab'){
         this.popupTimestamps.push(now);
-        this.parentAppWindow.createTab(url);
+        this.parentAppWindow.createTab(url, false);
       } else if (disposition === 'new-window') {
         // Allow popup windows (e.g. OAuth flows like "Continue with Google")
         // to open as real windows, preserving window.opener for callback communication
@@ -566,7 +584,7 @@ export class Tab {
     });
   }
 
-  private async recordHistory(url: string): Promise<void> {
+  private recordHistory(url: string): void {
     if(this.url.startsWith(InAppUrls.PREFIX) || this.url === '') {
       this.lastHistoryRecordId = null;
       return;
@@ -578,19 +596,18 @@ export class Tab {
       } catch (error) {
         //do nothing
       }
-      // Duplicate prevention: if the most recent history entry has the same URL, update its timestamp instead
-      const existingRecord = await BrowsingHistoryManager.findLastRecordByUrl(this.parentAppWindow.id, url);
-      if(existingRecord) {
-        await BrowsingHistoryManager.updateRecordTimestamp(this.parentAppWindow.id, existingRecord.id);
-        this.lastHistoryRecordId = existingRecord.id;
-        return;
-      }
-      const record = await BrowsingHistoryManager.addRecord(
-        this.parentAppWindow.id, url, this.title,
+      // Strip URL fragment/hash to avoid duplicate history entries for the same page
+      // (e.g. page.html#section1 vs page.html#section2 should be one record)
+      const urlWithoutFragment = url.split('#')[0];
+      // Atomic upsert: finds existing record by URL and updates timestamp,
+      // or inserts a new record — all within a single synchronous transaction
+      // to prevent duplicate entries from concurrent calls.
+      const record = BrowsingHistoryManager.upsertRecord(
+        this.parentAppWindow.id, urlWithoutFragment, this.title,
         urlObject ? urlObject.hostname : '',
         urlObject ? `${urlObject.protocol}//${urlObject.hostname}/favicon.ico` : ''
       );
-      this.lastHistoryRecordId = record.id;
+      this.lastHistoryRecordId = record?.id ?? null;
     } catch (error) {
       // Window may have been closed/removed before the debounced history recording fired
     }
@@ -882,7 +899,7 @@ export class Tab {
     if (linkURL) { //for clicking on hyperlinks
       template.push(
         { label: 'Open link in new tab', click: () => {
-          parentAppWindow.createTab(linkURL);
+          parentAppWindow.createTab(linkURL, false);
         }},
         { label: 'Open link in new window', click: () => {
           //@todo - implement this
@@ -936,6 +953,10 @@ export class Tab {
       }},
       { label: 'Reload', click: () => {
         this.webContentsViewInstance.webContents.reload();
+      }},
+      { type: 'separator' },
+      { label: 'Print...', click: () => {
+        this.webContentsViewInstance.webContents.print();
       }},
     );
   
