@@ -14,6 +14,7 @@ import { ReaderModeManager, ReaderModeState } from "./reader-mode-manager";
 import { DataStoreManager } from "../database/data-store-manager";
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
 import { COSMETIC_FILTER_CSS, AD_BLOCK_EARLY_SCRIPT, AD_BLOCK_SCRIPT } from "../ad-blocker/ad-block-lists";
+import { SSLManager } from "./ssl-manager";
 import { buildErrorPageScript, NavigationError } from "./error-page/error-page";
 const domainPattern = /^[^\s]+\.[^\s]+$/;
 
@@ -43,6 +44,7 @@ export class Tab {
   private darkModeCSSKey: string | null = null;
   private static darkModeEnabled = false;
   private _destroyed = false;
+  private showingSSLWarning = false;
   private pendingError: NavigationError | null = null;
 
   private static readonly DARK_MODE_CSS = `
@@ -124,6 +126,12 @@ export class Tab {
     } else if (this.url.startsWith('file://')) {
       urlToLoad = this.url;
       preloadScriptToLoad = null;
+    } else if (this.url.startsWith('http://') && !this.isLocalhost(this.url)) {
+      // Force HTTP to HTTPS — if the certificate is invalid, the
+      // certificate-error handler will show the interstitial warning.
+      this.url = this.url.replace(/^http:\/\//, 'https://');
+      urlToLoad = this.url;
+      preloadScriptToLoad = WEB_CONTENT_PRELOAD_WEBPACK_ENTRY;
     } else if (this.url.startsWith('http://') || this.url.startsWith('https://')) {
       urlToLoad = this.url;
       preloadScriptToLoad = WEB_CONTENT_PRELOAD_WEBPACK_ENTRY;
@@ -229,6 +237,15 @@ export class Tab {
     //for hard navigation (debounced)
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE, async (event, url: string) => {
       if (this._destroyed) return;
+      // Skip data: URLs (SSL warning interstitials) during forward/back navigation.
+      // These are not real pages — go back to where the user came from.
+      if (url.startsWith('data:') && !this.showingSSLWarning) {
+        const nav = this.webContentsViewInstance.webContents.navigationHistory;
+        if (nav.canGoBack()) {
+          nav.goBack();
+        }
+        return;
+      }
       // Clear any pending error on successful navigation
       this.pendingError = null;
       // Reset dark mode CSS key on navigation so it can be re-injected on DOM_READY
@@ -330,6 +347,44 @@ export class Tab {
     this.webContentsViewInstance.webContents.on('context-menu', (event, params) => {
       if (this._destroyed) return;
       this.handleContextMenuEvent(this.parentAppWindow, event, params)
+    });
+
+    // Handle SSL certificate errors — show interstitial warning page
+    this.webContentsViewInstance.webContents.on('certificate-error', (event, url, error, _certificate, callback) => {
+      if (this._destroyed) { callback(false); return; }
+
+      // If the host has been explicitly bypassed by the user, allow the connection
+      try {
+        if (SSLManager.isHostBypassed(new URL(url).hostname)) {
+          event.preventDefault();
+          callback(true);
+          return;
+        }
+      } catch { /* ignore parse errors */ }
+
+      // Guard: don't stack multiple warnings
+      if (this.showingSSLWarning) { event.preventDefault(); callback(false); return; }
+
+      event.preventDefault();
+      callback(false);
+
+      this.showingSSLWarning = true;
+      this.url = url;
+      this.sendTabUrlUpdate(url);
+
+      SSLManager.showWarning(this.webContentsViewInstance.webContents, url, error).then((decision) => {
+        this.showingSSLWarning = false;
+        if (decision === 'proceed') {
+          this.navigate(url);
+        } else {
+          const wc = this.webContentsViewInstance.webContents;
+          if (wc.navigationHistory.canGoBack()) {
+            wc.navigationHistory.goBack();
+          } else {
+            this.navigate(InAppUrls.NEW_TAB);
+          }
+        }
+      });
     });
 
     this.webContentsViewInstance.webContents.setWindowOpenHandler(({ url, disposition }) => {
@@ -573,6 +628,8 @@ export class Tab {
     this.sendReaderModeAvailability();
 
     // Update URL and send tab update immediately for responsive UI
+    // Skip data: URLs (e.g. SSL warning pages) and active SSL warnings
+    if (this.showingSSLWarning || url.startsWith('data:')) return;
     if(!this.url.startsWith(InAppUrls.PREFIX) && this.url !== '') {
       this.url = url;
     }
@@ -849,6 +906,15 @@ export class Tab {
 
   static isDarkModeEnabled(): boolean {
     return Tab.darkModeEnabled;
+  }
+
+  private isLocalhost(url: string): boolean {
+    try {
+      const hostname = new URL(url).hostname;
+      return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]';
+    } catch {
+      return false;
+    }
   }
 
   //for handling right clicks

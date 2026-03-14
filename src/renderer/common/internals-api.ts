@@ -65,7 +65,6 @@ declare global {
       printPage: (appWindowId: string) => Promise<any>;
       showTabContextMenu: (appWindowId: string, tabId: string, isPinned: boolean) => void;
       showAboutPanel: () => Promise<any>;
-      getAboutInfo: () => Promise<{ appVersion: string; electronVersion: string; chromiumVersion: string; nodeVersion: string; v8Version: string; platform: string; arch: string; osVersion: string; appPath: string; executableChecksum: string; asarChecksum: string }>;
       getSearchUrl: (searchTerm: string) => Promise<string>;
       fetchOpenTabs: (appWindowId: string) => Promise<Array<{id: string, title: string, url: string, faviconUrl: string | null}>>;
       fetchRecentlyClosedTabs: (appWindowId: string) => Promise<Array<{url: string, title: string, faviconUrl: string | null, closedAt: number}>>;
