@@ -588,8 +588,8 @@ export class Tab {
     this.sendReaderModeAvailability();
 
     // Update URL and send tab update immediately for responsive UI
-    // Skip URL bar update when showing SSL warning — the original URL is already displayed
-    if (this.showingSSLWarning) return;
+    // Skip data: URLs (e.g. SSL warning pages) and active SSL warnings
+    if (this.showingSSLWarning || url.startsWith('data:')) return;
     if(!this.url.startsWith(InAppUrls.PREFIX) && this.url !== '') {
       this.url = url;
     }
