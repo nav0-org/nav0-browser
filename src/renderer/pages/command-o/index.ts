@@ -5,7 +5,6 @@ initTheme();
 
 declare global {
   interface Window {
-    BrowserAPI: any;
     __commandOReloadTabs: () => void;
   }
 }
