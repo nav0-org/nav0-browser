@@ -235,6 +235,15 @@ export class Tab {
     //for hard navigation (debounced)
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE, async (event, url: string) => {
       if (this._destroyed) return;
+      // Skip data: URLs (SSL warning interstitials) during forward/back navigation.
+      // These are not real pages — go back to where the user came from.
+      if (url.startsWith('data:') && !this.showingSSLWarning) {
+        const nav = this.webContentsViewInstance.webContents.navigationHistory;
+        if (nav.canGoBack()) {
+          nav.goBack();
+        }
+        return;
+      }
       // Reset dark mode CSS key on navigation so it can be re-injected on DOM_READY
       this.darkModeCSSKey = null;
       this.handleOriginChange(url);
