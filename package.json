@@ -14,6 +14,7 @@
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx .",
     "test:perf": "node tests/performance/browser-perf-test.js",
+    "test:data": "node tests/performance/data-consumption-test.js",
     "postinstall": "electron-rebuild -f -w better-sqlite3",
     "rebuild": "electron-rebuild -f -w better-sqlite3"
   },
