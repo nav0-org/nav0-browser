@@ -18,10 +18,6 @@ export const mainConfig: Configuration = {
         include: [/node_modules[\\/]@mozilla[\\/]readability/],
         type: 'asset/source',
       },
-      {
-        test: /ssl-warning-page\.html$/,
-        type: 'asset/source',
-      },
     ],
   },
   plugins,
