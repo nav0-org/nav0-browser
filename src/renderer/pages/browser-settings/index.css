@@ -281,13 +281,18 @@
 /* ---- Form Elements ---- */
 .form-select,
 .form-select-sm {
-  padding: 6px 10px;
+  padding: 6px 28px 6px 10px;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   font-size: var(--font-sm);
   background: var(--bg-light);
   color: var(--text-color);
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
 }
 
 .form-select:focus,
@@ -297,8 +302,9 @@
 }
 
 .form-select-sm {
-  padding: 4px 8px;
+  padding: 4px 24px 4px 8px;
   font-size: var(--font-xs);
+  background-position: right 6px center;
 }
 
 .form-input {
