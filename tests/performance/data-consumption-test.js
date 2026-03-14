@@ -781,9 +781,20 @@ function categorizeRequests(requests, pageUrl) {
     thirdParty: { count: 0, bytes: 0 },
     tracker: { count: 0, bytes: 0 },
     cached: { count: 0, bytes: 0 },
+    blocked: { count: 0 },
     failed: { count: 0 },
     byType: {},
   };
+
+  // Error texts that indicate the browser intentionally blocked the request
+  const BLOCKED_ERRORS = [
+    'net::ERR_BLOCKED_BY_CLIENT',
+    'net::ERR_BLOCKED_BY_RESPONSE',
+    'net::ERR_BLOCKED_BY_ADMINISTRATOR',
+    'net::ERR_BLOCKED_BY_CSP',
+    'NS_ERROR_ABORT',
+    'blocked',
+  ];
 
   // Common tracker/telemetry domains
   const TRACKER_PATTERNS = [
@@ -818,7 +829,12 @@ function categorizeRequests(requests, pageUrl) {
 
   for (const req of requests) {
     if (req.failed) {
-      categories.failed.count++;
+      const err = (req.errorText || '').toLowerCase();
+      if (BLOCKED_ERRORS.some(b => err.includes(b.toLowerCase()))) {
+        categories.blocked.count++;
+      } else {
+        categories.failed.count++;
+      }
       continue;
     }
 
@@ -977,7 +993,7 @@ function generateDataReport(chromeData, nav0Data) {
   lines.push('  ' + pad('Category', 24) + pad('Chrome Reqs', 14) + pad('Chrome Bytes', 16) + pad('Nav0 Reqs', 14) + pad('Nav0 Bytes', 16));
   lines.push('  ' + '-'.repeat(84));
 
-  for (const cat of ['firstParty', 'thirdParty', 'tracker', 'cached', 'failed']) {
+  for (const cat of ['firstParty', 'thirdParty', 'tracker', 'cached', 'blocked', 'failed']) {
     const cCat = chromeAgg[cat] || { count: 0, bytes: 0 };
     const nCat = nav0Agg[cat] || { count: 0, bytes: 0 };
     lines.push('  ' +
@@ -1114,6 +1130,7 @@ function aggregateCategories(perPageResults) {
     thirdParty: { count: 0, bytes: 0 },
     tracker: { count: 0, bytes: 0 },
     cached: { count: 0, bytes: 0 },
+    blocked: { count: 0 },
     failed: { count: 0 },
     byType: {},
   };
@@ -1125,6 +1142,7 @@ function aggregateCategories(perPageResults) {
       agg[cat].count += d[cat]?.count || 0;
       agg[cat].bytes += d[cat]?.bytes || 0;
     }
+    agg.blocked.count += d.blocked?.count || 0;
     agg.failed.count += d.failed?.count || 0;
 
     if (d.byType) {
