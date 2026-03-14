@@ -253,13 +253,14 @@ async function submitIssue(): Promise<void> {
     }
 
     if (response.ok) {
+      // Reset form fields first (this hides status), then show the success message
+      resetForm();
       const issueUrl = data?.issue_url;
       if (issueUrl) {
         showStatusWithLink('Issue submitted successfully!', issueUrl);
       } else {
         showStatus('Issue submitted successfully! Thank you for your feedback.', 'success');
       }
-      resetForm();
       setTimeout(() => close(), 3000);
     } else {
       const errorMsg = data?.error || data?.message || `Server error (${response.status})`;
