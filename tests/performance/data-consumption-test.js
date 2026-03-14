@@ -486,25 +486,30 @@ async function testChromeDataConsumption() {
 
     const collector = createNetworkCollector();
 
-    // Phase 1: Load each URL and measure data consumed
+    // Phase 1: Open all URLs in new tabs
     const perPageResults = [];
-    log(`[Chrome] Loading ${TEST_URLS.length} pages sequentially...`);
+    const pages = [];
+    log(`[Chrome] Opening ${TEST_URLS.length} tabs...`);
 
     for (let i = 0; i < TEST_URLS.length; i++) {
       const testUrl = TEST_URLS[i];
-      collector.reset();
-
-      // Open a new tab and navigate to the URL (mirrors Nav0's createTab behavior)
       const page = await browser.newPage();
+      log(`[Chrome]   [${i + 1}/${TEST_URLS.length}] Opening tab: ${testUrl}`);
       try {
         await page.goto(testUrl, { waitUntil: 'domcontentloaded', timeout: PAGE_LOAD_TIMEOUT_MS });
       } catch (e) {
         log(`[Chrome]   [${i + 1}/${TEST_URLS.length}] Initial load warning: ${e.message}`);
       }
+      pages.push({ page, url: testUrl });
+    }
 
-      // Attach CDP monitoring AFTER initial load (same as Nav0 where CDP attaches
-      // after createTab has already started loading), then re-navigate to capture
-      // network traffic under the same conditions.
+    // Phase 2: Measure each tab (attach CDP, disable cache, re-navigate)
+    log(`[Chrome] Measuring ${TEST_URLS.length} pages...`);
+
+    for (let i = 0; i < pages.length; i++) {
+      const { page, url: testUrl } = pages[i];
+      collector.reset();
+
       const cdp = await page.createCDPSession();
       await attachNetworkMonitor(cdp, collector);
       await cdp.send('Network.setCacheDisabled', { cacheDisabled: true });
@@ -516,7 +521,6 @@ async function testChromeDataConsumption() {
         log(`[Chrome]   [${i + 1}/${TEST_URLS.length}] Navigation warning: ${e.message}`);
       }
 
-      // Wait for async resources to settle
       await sleep(POST_LOAD_SETTLE_MS);
 
       const pageData = collector.getResults();
@@ -525,11 +529,9 @@ async function testChromeDataConsumption() {
         ...summarizeResults(pageData),
         requestDetails: categorizeRequests(pageData.requests, testUrl),
       });
-
-      await page.close();
     }
 
-    // Phase 2: Monitor idle/background traffic
+    // Phase 3: Monitor idle/background traffic (all tabs still open)
     log(`[Chrome] Monitoring idle background traffic for ${IDLE_MONITOR}s...`);
     collector.reset();
 
@@ -544,6 +546,12 @@ async function testChromeDataConsumption() {
       ...summarizeResults(idleData),
       requests: idleData.requests.map(r => ({ url: r.url, type: r.type, bytes: r.totalEncodedLength || 0 })),
     };
+
+    // Close all tabs
+    for (const { page } of pages) {
+      try { await page.close(); } catch {}
+    }
+    try { await idlePage.close(); } catch {}
 
     await idlePage.close();
     browser.disconnect();
@@ -627,21 +635,18 @@ async function testNav0DataConsumption() {
     log('[Nav0] Found main renderer. Starting data measurement...');
 
     // For Nav0, we need to monitor network on each webContents target.
-    // CDP allows us to attach to specific targets. We'll use the browser-level
-    // CDP connection to monitor all targets.
+    // Phase 1: Open all URLs in new tabs via BrowserAPI
     const perPageResults = [];
-    log(`[Nav0] Loading ${TEST_URLS.length} pages sequentially via BrowserAPI...`);
+    const tabPages = [];
+    log(`[Nav0] Opening ${TEST_URLS.length} tabs via BrowserAPI...`);
 
     for (let i = 0; i < TEST_URLS.length; i++) {
       const url = TEST_URLS[i];
-      const collector = createNetworkCollector();
 
       // Snapshot existing targets so we can identify the new one
       const existingTargets = new Set((await browser.targets()).map(t => t._targetId || t.url()));
 
       // Set up a listener for the new target BEFORE creating the tab
-      let targetPage = null;
-      let cdpAttached = false;
       const targetPromise = new Promise((resolve) => {
         let resolved = false;
         const onTarget = async (target) => {
@@ -668,7 +673,7 @@ async function testNav0DataConsumption() {
         }, 10000);
       });
 
-      // Create the tab with the real URL via BrowserAPI
+      // Create the tab with the URL
       try {
         await mainPage.evaluate(async (tabUrl) => {
           const api = window.BrowserAPI;
@@ -681,7 +686,7 @@ async function testNav0DataConsumption() {
       }
 
       // Wait for the new target to appear via event
-      targetPage = await targetPromise;
+      let targetPage = await targetPromise;
 
       // Fallback: if event didn't fire, poll for new target by URL
       if (!targetPage) {
@@ -704,19 +709,26 @@ async function testNav0DataConsumption() {
         }
       }
 
+      log(`[Nav0]   [${i + 1}/${TEST_URLS.length}] Opened tab: ${url}${targetPage ? '' : ' (target not found)'}`);
+      tabPages.push({ url, targetPage });
+    }
+
+    // Phase 2: Measure each tab (attach CDP, disable cache, re-navigate)
+    log(`[Nav0] Measuring ${TEST_URLS.length} pages...`);
+
+    for (let i = 0; i < tabPages.length; i++) {
+      const { url, targetPage } = tabPages[i];
+      const collector = createNetworkCollector();
+      let cdpAttached = false;
+
       if (targetPage) {
-        // Attach CDP monitoring
         const cdp = await targetPage.createCDPSession();
         await attachNetworkMonitor(cdp, collector);
         cdpAttached = true;
-
-        // Disable cache so the reload is a fresh load (same as Chrome's first visit).
-        // Without this, the reload gets 304/cached responses from the initial createTab load.
         await cdp.send('Network.setCacheDisabled', { cacheDisabled: true });
 
-        log(`[Nav0]   [${i + 1}/${TEST_URLS.length}] ${url} (attached CDP)`);
+        log(`[Nav0]   [${i + 1}/${TEST_URLS.length}] ${url} (measuring...)`);
 
-        // Navigate fresh to the URL (instead of reload) to ensure a clean load.
         try {
           await targetPage.goto(url, { waitUntil: 'domcontentloaded', timeout: PAGE_LOAD_TIMEOUT_MS });
         } catch (e) {
@@ -734,18 +746,12 @@ async function testNav0DataConsumption() {
         requestDetails: categorizeRequests(pageData.requests, url),
         cdpAttached,
       });
-
-      // Close the tab page (like Chrome test does)
-      if (targetPage) {
-        try { await targetPage.close(); } catch {}
-      }
     }
 
-    // Phase 2: Monitor idle/background traffic
+    // Phase 3: Monitor idle/background traffic (all tabs still open)
     log(`[Nav0] Monitoring idle background traffic for ${IDLE_MONITOR}s...`);
     const idleCollector = createNetworkCollector();
 
-    // Attach to main page for idle monitoring
     const idleCdp = await mainPage.createCDPSession();
     await attachNetworkMonitor(idleCdp, idleCollector);
     await sleep(IDLE_MONITOR * 1000);
@@ -755,6 +761,13 @@ async function testNav0DataConsumption() {
       ...summarizeResults(idleData),
       requests: idleData.requests.map(r => ({ url: r.url, type: r.type, bytes: r.totalEncodedLength || 0 })),
     };
+
+    // Close all tabs
+    for (const { targetPage } of tabPages) {
+      if (targetPage) {
+        try { await targetPage.close(); } catch {}
+      }
+    }
 
     browser.disconnect();
     log('[Nav0] Data collection complete.');
