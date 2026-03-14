@@ -261,7 +261,6 @@ async function submitIssue(): Promise<void> {
       } else {
         showStatus('Issue submitted successfully! Thank you for your feedback.', 'success');
       }
-      setTimeout(() => close(), 3000);
     } else {
       const errorMsg = data?.error || data?.message || `Server error (${response.status})`;
       showStatus(`Failed to submit: ${errorMsg}`, 'error');
