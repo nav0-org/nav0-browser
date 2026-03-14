@@ -699,14 +699,18 @@ async function testNav0DataConsumption() {
         const cdp = await targetPage.createCDPSession();
         await attachNetworkMonitor(cdp, collector);
         cdpAttached = true;
+
+        // Disable cache so the reload is a fresh load (same as Chrome's first visit).
+        // Without this, the reload gets 304/cached responses from the initial createTab load.
+        await cdp.send('Network.setCacheDisabled', { cacheDisabled: true });
+
         log(`[Nav0]   [${i + 1}/${TEST_URLS.length}] ${url} (attached CDP)`);
 
-        // Reload the page so we capture ALL network traffic from the start.
-        // The initial load may have completed before CDP was attached.
+        // Navigate fresh to the URL (instead of reload) to ensure a clean load.
         try {
-          await targetPage.reload({ waitUntil: 'domcontentloaded', timeout: PAGE_LOAD_TIMEOUT_MS });
+          await targetPage.goto(url, { waitUntil: 'domcontentloaded', timeout: PAGE_LOAD_TIMEOUT_MS });
         } catch (e) {
-          log(`[Nav0]   [${i + 1}/${TEST_URLS.length}] Reload warning: ${e.message.slice(0, 80)}`);
+          log(`[Nav0]   [${i + 1}/${TEST_URLS.length}] Navigation warning: ${e.message.slice(0, 80)}`);
         }
       } else {
         log(`[Nav0]   [${i + 1}/${TEST_URLS.length}] ${url} (target not detected, data may be incomplete)`);
