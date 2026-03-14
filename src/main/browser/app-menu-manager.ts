@@ -129,16 +129,16 @@ export abstract class AppMenuManager {
               const activeTab = activeWindow.getActiveTab();
               if (activeTab) {
                 const webContents = activeTab.getWebContentsViewInstance().webContents;
-                const ses = webContents.session;
+                const session = webContents.session;
                 const currentUrl = webContents.getURL();
                 try {
                   const origin = new URL(currentUrl).origin;
-                  await ses.clearStorageData({ origin });
-                  await ses.clearCache();
-                  await ses.clearCodeCaches({});
+                  await session.clearStorageData({ origin });
+                  await session.clearCache();
+                  await session.clearCodeCaches({});
                 } catch (e) {
-                  await ses.clearCache();
-                  await ses.clearCodeCaches({});
+                  await session.clearCache();
+                  await session.clearCodeCaches({});
                 }
                 webContents.reloadIgnoringCache();
               }
