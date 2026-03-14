@@ -1,4 +1,4 @@
-import { session, ipcMain, app } from "electron";
+import { session, ipcMain, app, webContents } from "electron";
 import { DataStoreConstants, RendererToMainEventsForBrowserIPC } from "../../constants/app-constants";
 import { DataStoreManager } from "../database/data-store-manager";
 import { DatabaseManager } from "../database/database-manager";
@@ -197,6 +197,14 @@ export abstract class SettingsEnforcer {
 
     browsingSes.setUserAgent(userAgent);
     privateSes.setUserAgent(userAgent);
+
+    // Apply to all existing open tabs so the change takes effect immediately
+    for (const wc of webContents.getAllWebContents()) {
+      const wcSession = wc.session;
+      if (wcSession === browsingSes || wcSession === privateSes) {
+        wc.setUserAgent(userAgent);
+      }
+    }
   }
 
   // ---- Ad-Blocker ----
