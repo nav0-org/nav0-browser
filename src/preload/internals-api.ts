@@ -48,6 +48,9 @@ export function init(){
     refreshTab: async (appWindowId: string, tabId: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.REFRESH, appWindowId, tabId);
     },
+    hardReloadTab: async (appWindowId: string, tabId: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.HARD_RELOAD, appWindowId, tabId);
+    },
     addBookmark: async (appWindowId: string, title: string, url: string, faviconUrl: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.ADD_BOOKMARK, appWindowId, title, url, faviconUrl);
     },

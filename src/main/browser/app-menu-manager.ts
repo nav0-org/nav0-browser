@@ -123,7 +123,29 @@ export abstract class AppMenuManager {
           { type: 'separator' as const},
           { role: 'togglefullscreen' as const},
           { type: 'separator' as const},
-          {label: 'Toggle Reader Mode', accelerator: 'CmdOrCtrl+Shift+R', click: async() => {
+          {label: 'Hard Reload', accelerator: 'CmdOrCtrl+Shift+R', click: async() => {
+            const activeWindow = AppWindowManager.getActiveWindow();
+            if (activeWindow) {
+              const activeTab = activeWindow.getActiveTab();
+              if (activeTab) {
+                const webContents = activeTab.getWebContentsViewInstance().webContents;
+                const ses = webContents.session;
+                const currentUrl = webContents.getURL();
+                try {
+                  const origin = new URL(currentUrl).origin;
+                  await ses.clearStorageData({ origin });
+                  await ses.clearCache();
+                  await ses.clearCodeCaches({});
+                } catch (e) {
+                  await ses.clearCache();
+                  await ses.clearCodeCaches({});
+                }
+                webContents.reloadIgnoringCache();
+              }
+            }
+          }},
+          { type: 'separator' as const},
+          {label: 'Toggle Reader Mode', click: async() => {
             const activeWindow = AppWindowManager.getActiveWindow();
             if (activeWindow) {
               const activeTab = activeWindow.getActiveTab();
