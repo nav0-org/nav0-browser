@@ -1,9 +1,8 @@
 import { WebContents } from 'electron';
 import { generateSSLWarningHTML } from './ssl-warning-page';
-import { InAppUrls } from '../../constants/app-constants';
 
 const SSL_BYPASS_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
-const GO_BACK_SENTINEL = 'about:blank#ssl-go-back';
+const GO_BACK_TITLE_SENTINEL = '__ssl_go_back__';
 
 /**
  * Central manager for SSL certificate warning interstitials.
@@ -63,8 +62,8 @@ export class SSLManager {
         }
       };
 
-      const didNavHandler = (_event: Electron.Event, navigationUrl: string) => {
-        if (navigationUrl === GO_BACK_SENTINEL) {
+      const titleHandler = (_event: Electron.Event, title: string) => {
+        if (title === GO_BACK_TITLE_SENTINEL) {
           cleanup();
           resolve('go-back');
         }
@@ -72,11 +71,11 @@ export class SSLManager {
 
       const cleanup = () => {
         wc.removeListener('will-navigate', willNavHandler);
-        wc.removeListener('did-navigate', didNavHandler);
+        wc.removeListener('page-title-updated', titleHandler);
       };
 
       wc.on('will-navigate', willNavHandler);
-      wc.on('did-navigate', didNavHandler);
+      wc.on('page-title-updated', titleHandler);
     });
   }
 }
