@@ -352,6 +352,9 @@ export class Tab {
       this.showingSSLWarning = true;
       const warningHTML = generateSSLWarningHTML({ type: 'certificate', url, errorCode: error });
       this.webContentsViewInstance.webContents.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(warningHTML)}`);
+      // Show the original URL in the address bar instead of the data: URL
+      this.url = url;
+      this.sendTabUrlUpdate(url);
       this.setupSSLWarningProceedHandler(url);
     });
 
@@ -886,6 +889,17 @@ export class Tab {
    */
   private setupSSLWarningProceedHandler(pendingUrl: string): void {
     const handler = (event: Electron.Event, navigationUrl: string) => {
+      if (navigationUrl === 'nav0://ssl-warning-go-back') {
+        // "Go back to safety" — go back if possible, otherwise open new tab page
+        event.preventDefault();
+        this.showingSSLWarning = false;
+        if (this.webContentsViewInstance.webContents.navigationHistory.canGoBack()) {
+          this.webContentsViewInstance.webContents.navigationHistory.goBack();
+        } else {
+          this.navigate(InAppUrls.NEW_TAB);
+        }
+        return;
+      }
       // The proceed button navigates to the original URL from the data: page.
       // We only care about navigation to the pending URL.
       if (navigationUrl === pendingUrl) {
