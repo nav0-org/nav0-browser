@@ -1234,13 +1234,24 @@ async function main() {
     generateDataReport(chromeData, nav0Data);
   } else {
     log('One or both tests failed. Cannot generate comparison report.');
-    if (chromeData) {
-      log('Chrome data collected successfully.');
-      console.log(JSON.stringify(chromeData, null, 2));
-    }
-    if (nav0Data) {
-      log('Nav0 data collected successfully.');
-      console.log(JSON.stringify(nav0Data, null, 2));
+    // Generate a single-browser summary for whichever succeeded
+    const data = chromeData || nav0Data;
+    const name = chromeData ? 'Chrome' : 'Nav0';
+    if (data) {
+      log(`${name} data collected successfully. Per-page summary:`);
+      const lines = [];
+      lines.push('  ' + pad('URL', 42) + pad('Received', 16) + pad('Sent', 16) + 'Requests');
+      lines.push('  ' + '-'.repeat(86));
+      for (const p of data.perPageResults) {
+        const shortUrl = new URL(p.url).hostname.replace('www.', '').slice(0, 38);
+        lines.push('  ' +
+          pad(shortUrl, 42) +
+          pad(formatBytes(p.totalBytesReceived), 16) +
+          pad(formatBytes(p.totalBytesSent), 16) +
+          String(p.totalRequests)
+        );
+      }
+      console.log(lines.join('\n'));
     }
   }
 }
