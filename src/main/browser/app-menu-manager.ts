@@ -81,6 +81,7 @@ export abstract class AppMenuManager {
           {label: 'Settings', accelerator: 'CmdOrCtrl+,', click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.BROWSER_SETTINGS, true) }},
           {type: 'separator' as const},
           {label: 'Command K Interface', accelerator: 'CmdOrCtrl+K', click: async() => { AppWindowManager.getActiveWindow().showCommandKOverlay() }},
+          {label: 'Tab Switcher', accelerator: 'CmdOrCtrl+O', click: async() => { AppWindowManager.getActiveWindow().showCommandOOverlay() }},
         ]
       },
       {

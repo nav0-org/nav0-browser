@@ -16,6 +16,9 @@ declare const BROWSER_SETTINGS_PRELOAD_WEBPACK_ENTRY: string;
 declare const COMMAND_K_WEBPACK_ENTRY: string;
 declare const COMMAND_K_PRELOAD_WEBPACK_ENTRY: string;
 
+declare const COMMAND_O_WEBPACK_ENTRY: string;
+declare const COMMAND_O_PRELOAD_WEBPACK_ENTRY: string;
+
 declare const DOWNLOADS_WEBPACK_ENTRY: string;
 declare const DOWNLOADS_PRELOAD_WEBPACK_ENTRY: string;
 
