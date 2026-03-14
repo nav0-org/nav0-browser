@@ -57,13 +57,33 @@ function showStatusWithLink(message: string, url: string): void {
     statusEl.appendChild(text);
 
     const link = document.createElement('a');
-    link.href = url;
+    link.href = '#';
     link.textContent = 'View on GitHub';
-    link.target = '_blank';
     link.style.color = 'var(--success-color)';
     link.style.textDecoration = 'underline';
     link.style.fontWeight = '500';
+    link.style.cursor = 'pointer';
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const appWindowId = (window as any).BrowserAPI?.appWindowId;
+      if (appWindowId) {
+        (window as any).BrowserAPI.createTab(appWindowId, url, true);
+        close();
+      }
+    });
     statusEl.appendChild(link);
+
+    const copyBtn = document.createElement('button');
+    copyBtn.textContent = 'Copy URL';
+    copyBtn.className = 'issue-copy-url-btn';
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(url).then(() => {
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => { copyBtn.textContent = 'Copy URL'; }, 2000);
+      });
+    });
+    statusEl.appendChild(document.createTextNode(' '));
+    statusEl.appendChild(copyBtn);
   }
 }
 
