@@ -594,6 +594,8 @@ export class Tab {
     this.sendReaderModeAvailability();
 
     // Update URL and send tab update immediately for responsive UI
+    // Skip URL bar update when showing SSL warning — the original URL is already displayed
+    if (this.showingSSLWarning) return;
     if(!this.url.startsWith(InAppUrls.PREFIX) && this.url !== '') {
       this.url = url;
     }
@@ -888,22 +890,23 @@ export class Tab {
    * and re-navigate properly.
    */
   private setupSSLWarningProceedHandler(pendingUrl: string): void {
+    const wc = this.webContentsViewInstance.webContents;
     const handler = (event: Electron.Event, navigationUrl: string) => {
-      if (navigationUrl === 'nav0://ssl-warning-go-back') {
+      if (navigationUrl === 'about:blank#ssl-go-back') {
         // "Go back to safety" — go back if possible, otherwise open new tab page
         event.preventDefault();
+        wc.removeListener('will-navigate', handler);
         this.showingSSLWarning = false;
-        if (this.webContentsViewInstance.webContents.navigationHistory.canGoBack()) {
-          this.webContentsViewInstance.webContents.navigationHistory.goBack();
+        if (wc.navigationHistory.canGoBack()) {
+          wc.navigationHistory.goBack();
         } else {
           this.navigate(InAppUrls.NEW_TAB);
         }
         return;
       }
-      // The proceed button navigates to the original URL from the data: page.
-      // We only care about navigation to the pending URL.
       if (navigationUrl === pendingUrl) {
         event.preventDefault();
+        wc.removeListener('will-navigate', handler);
         try {
           const hostname = new URL(pendingUrl).hostname;
           Tab.sslBypassedHosts.set(hostname, Date.now());
@@ -912,7 +915,7 @@ export class Tab {
         this.navigate(pendingUrl);
       }
     };
-    this.webContentsViewInstance.webContents.once('will-navigate', handler);
+    wc.on('will-navigate', handler);
   }
 
   //for handling right clicks

@@ -204,7 +204,7 @@
     <h1>{{HEADING}}</h1>
     <p class="description">{{DESCRIPTION}}</p>
 
-    <button class="back-button" onclick="window.location.href='nav0://ssl-warning-go-back'">
+    <button class="back-button" id="goBackBtn">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       Go back to safety
     </button>
@@ -239,6 +239,10 @@
       content.classList.toggle('visible');
       arrow.classList.toggle('open');
     }
+
+    document.getElementById('goBackBtn').addEventListener('click', function() {
+      window.location.href = 'about:blank#ssl-go-back';
+    });
 
     document.getElementById('proceedBtn').addEventListener('click', function() {
       var encoded = this.getAttribute('data-url');
