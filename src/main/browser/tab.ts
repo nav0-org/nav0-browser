@@ -891,22 +891,12 @@ export class Tab {
    */
   private setupSSLWarningProceedHandler(pendingUrl: string): void {
     const wc = this.webContentsViewInstance.webContents;
-    const handler = (event: Electron.Event, navigationUrl: string) => {
-      if (navigationUrl === 'about:blank#ssl-go-back') {
-        // "Go back to safety" — go back if possible, otherwise open new tab page
-        event.preventDefault();
-        wc.removeListener('will-navigate', handler);
-        this.showingSSLWarning = false;
-        if (wc.navigationHistory.canGoBack()) {
-          wc.navigationHistory.goBack();
-        } else {
-          this.navigate(InAppUrls.NEW_TAB);
-        }
-        return;
-      }
+
+    // Handle "Proceed" — will-navigate fires for real URLs from data: pages
+    const willNavHandler = (event: Electron.Event, navigationUrl: string) => {
       if (navigationUrl === pendingUrl) {
         event.preventDefault();
-        wc.removeListener('will-navigate', handler);
+        cleanup();
         try {
           const hostname = new URL(pendingUrl).hostname;
           Tab.sslBypassedHosts.set(hostname, Date.now());
@@ -915,7 +905,28 @@ export class Tab {
         this.navigate(pendingUrl);
       }
     };
-    wc.on('will-navigate', handler);
+
+    // Handle "Go back to safety" — about:blank navigations bypass will-navigate
+    // from data: URLs, so we catch them after they complete in did-navigate
+    const didNavHandler = (_event: Electron.Event, navigationUrl: string) => {
+      if (navigationUrl === 'about:blank#ssl-go-back') {
+        cleanup();
+        this.showingSSLWarning = false;
+        if (wc.navigationHistory.canGoBack()) {
+          wc.navigationHistory.goBack();
+        } else {
+          this.navigate(InAppUrls.NEW_TAB);
+        }
+      }
+    };
+
+    const cleanup = () => {
+      wc.removeListener('will-navigate', willNavHandler);
+      wc.removeListener('did-navigate', didNavHandler);
+    };
+
+    wc.on('will-navigate', willNavHandler);
+    wc.on('did-navigate', didNavHandler);
   }
 
   //for handling right clicks
