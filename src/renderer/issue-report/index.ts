@@ -5,6 +5,7 @@ import { createIcons, icons } from 'lucide';
 initTheme();
 
 const WORKER_URL = 'https://nav0-issue-creation.100-percent-ketan.workers.dev';
+const API_KEY = process.env.NAV0_ISSUE_API_KEY || '';
 const MAX_ATTACHMENTS = 3;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_IMAGE_DIMENSION = 1280; // max width or height in pixels
@@ -237,7 +238,7 @@ async function submitIssue(): Promise<void> {
   try {
     const response = await fetch(WORKER_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
       body: JSON.stringify({
         title: `[${typeLabel}] ${title}`,
         body,
