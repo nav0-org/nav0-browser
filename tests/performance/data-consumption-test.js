@@ -782,6 +782,7 @@ function categorizeRequests(requests, pageUrl) {
     tracker: { count: 0, bytes: 0 },
     cached: { count: 0, bytes: 0 },
     blocked: { count: 0 },
+    blockedTracker: { count: 0 },
     failed: { count: 0 },
     byType: {},
   };
@@ -830,7 +831,11 @@ function categorizeRequests(requests, pageUrl) {
   for (const req of requests) {
     if (req.failed) {
       const err = (req.errorText || '').toLowerCase();
-      if (BLOCKED_ERRORS.some(b => err.includes(b.toLowerCase()))) {
+      const isBlocked = BLOCKED_ERRORS.some(b => err.includes(b.toLowerCase()));
+      const isTracker = TRACKER_PATTERNS.some(p => p.test(req.url));
+      if (isBlocked && isTracker) {
+        categories.blockedTracker.count++;
+      } else if (isBlocked) {
         categories.blocked.count++;
       } else {
         categories.failed.count++;
@@ -993,7 +998,7 @@ function generateDataReport(chromeData, nav0Data) {
   lines.push('  ' + pad('Category', 24) + pad('Chrome Reqs', 14) + pad('Chrome Bytes', 16) + pad('Nav0 Reqs', 14) + pad('Nav0 Bytes', 16));
   lines.push('  ' + '-'.repeat(84));
 
-  for (const cat of ['firstParty', 'thirdParty', 'tracker', 'cached', 'blocked', 'failed']) {
+  for (const cat of ['firstParty', 'thirdParty', 'tracker', 'cached', 'blocked', 'blockedTracker', 'failed']) {
     const cCat = chromeAgg[cat] || { count: 0, bytes: 0 };
     const nCat = nav0Agg[cat] || { count: 0, bytes: 0 };
     lines.push('  ' +
@@ -1076,6 +1081,10 @@ function generateDataReport(chromeData, nav0Data) {
     ? `Nav0 blocks ${formatBytes(chromeAgg.tracker.bytes - (nav0Agg.tracker.bytes || 0))} of tracker data`
     : 'No tracker data detected';
   lines.push(`  Tracker data: ${trackerSavings}`);
+  const blockedTrackers = nav0Agg.blockedTracker?.count || 0;
+  if (blockedTrackers > 0) {
+    lines.push(`  Blocked tracker requests: ${blockedTrackers} tracker requests blocked by Nav0`);
+  }
 
   const reqSavings = chromeTotalRequests - nav0TotalRequests;
   lines.push(`  Request reduction: ${reqSavings > 0 ? `Nav0 makes ${reqSavings} fewer requests (${((reqSavings / chromeTotalRequests) * 100).toFixed(1)}% fewer)` : `Nav0 makes ${-reqSavings} more requests`}`);
@@ -1131,6 +1140,7 @@ function aggregateCategories(perPageResults) {
     tracker: { count: 0, bytes: 0 },
     cached: { count: 0, bytes: 0 },
     blocked: { count: 0 },
+    blockedTracker: { count: 0 },
     failed: { count: 0 },
     byType: {},
   };
@@ -1143,6 +1153,7 @@ function aggregateCategories(perPageResults) {
       agg[cat].bytes += d[cat]?.bytes || 0;
     }
     agg.blocked.count += d.blocked?.count || 0;
+    agg.blockedTracker.count += d.blockedTracker?.count || 0;
     agg.failed.count += d.failed?.count || 0;
 
     if (d.byType) {
