@@ -173,7 +173,7 @@ export class Tab {
         partition: this.partitionSetting
       }
     });
-    // this.webContentsViewInstance.webContents.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36');
+    // User agent is set at the session level by SettingsEnforcer.applyUserAgent()
     // this.webContentsViewInstance.webContents.openDevTools({mode : 'detach'});
     this.registerPdfHandler();
     this.initEventHandlers();

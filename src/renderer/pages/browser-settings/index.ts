@@ -1,7 +1,7 @@
 import './index.css';
 import { initTheme } from '../../common/theme';
 import { createIcons, icons } from 'lucide';
-import { BrowserSettings, DEFAULT_BROWSER_SETTINGS, DEFAULT_SEARCH_ENGINES, DEFAULT_FILTER_LISTS, DEFAULT_KEYBOARD_SHORTCUTS, SearchEngineConfig, FilterListConfig, KeyboardShortcutAction } from '../../../types/settings-types';
+import { BrowserSettings, DEFAULT_BROWSER_SETTINGS, DEFAULT_SEARCH_ENGINES, DEFAULT_FILTER_LISTS, DEFAULT_KEYBOARD_SHORTCUTS, USER_AGENT_PRESETS, SearchEngineConfig, FilterListConfig, KeyboardShortcutAction } from '../../../types/settings-types';
 initTheme();
 
 // ---- Globals ----
@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initAdBlockerSettings();
   initPopupSettings();
   initDataRetentionSettings();
+  initUserAgentSettings();
   initNetworkSettings();
   initKeyboardShortcuts();
   initSettingsSearch();
@@ -641,6 +642,46 @@ function initDataRetentionSettings() {
 function setSelectValue(id: string, value: string) {
   const select = document.getElementById(id) as HTMLSelectElement;
   if (select) select.value = value;
+}
+
+// ---- User Agent Settings ----
+function initUserAgentSettings() {
+  const select = document.getElementById('user-agent-select') as HTMLSelectElement;
+  const customContainer = document.getElementById('custom-ua-container');
+  const customInput = document.getElementById('custom-ua-input') as HTMLInputElement;
+  const preview = document.getElementById('ua-preview');
+
+  // Set initial values
+  select.value = settings.userAgentPreset || 'default';
+  customInput.value = settings.userAgentCustomValue || '';
+  customContainer.style.display = select.value === 'custom' ? '' : 'none';
+  updateUAPreview();
+
+  select.addEventListener('change', () => {
+    settings.userAgentPreset = select.value as BrowserSettings['userAgentPreset'];
+    customContainer.style.display = select.value === 'custom' ? '' : 'none';
+    updateUAPreview();
+    saveSettings();
+    showToast('User agent updated');
+  });
+
+  customInput.addEventListener('change', () => {
+    settings.userAgentCustomValue = customInput.value;
+    updateUAPreview();
+    saveSettings();
+    showToast('Custom user agent saved');
+  });
+
+  function updateUAPreview() {
+    const preset = select.value;
+    let ua: string;
+    if (preset === 'custom') {
+      ua = customInput.value || 'nav0-browser';
+    } else {
+      ua = USER_AGENT_PRESETS[preset]?.value || 'nav0-browser';
+    }
+    preview.textContent = `Current: ${ua}`;
+  }
 }
 
 // ---- Network / Proxy Settings ----
