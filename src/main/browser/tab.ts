@@ -14,6 +14,7 @@ import { ReaderModeManager, ReaderModeState } from "./reader-mode-manager";
 import { DataStoreManager } from "../database/data-store-manager";
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
 import { COSMETIC_FILTER_CSS, AD_BLOCK_EARLY_SCRIPT, AD_BLOCK_SCRIPT } from "../ad-blocker/ad-block-lists";
+import { buildErrorPageScript, NavigationError } from "./error-page/error-page";
 const domainPattern = /^[^\s]+\.[^\s]+$/;
 
 export class Tab {
@@ -42,6 +43,7 @@ export class Tab {
   private darkModeCSSKey: string | null = null;
   private static darkModeEnabled = false;
   private _destroyed = false;
+  private pendingError: NavigationError | null = null;
 
   private static readonly DARK_MODE_CSS = `
     html {
@@ -227,6 +229,8 @@ export class Tab {
     //for hard navigation (debounced)
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE, async (event, url: string) => {
       if (this._destroyed) return;
+      // Clear any pending error on successful navigation
+      this.pendingError = null;
       // Reset dark mode CSS key on navigation so it can be re-injected on DOM_READY
       this.darkModeCSSKey = null;
       this.handleOriginChange(url);
@@ -244,6 +248,11 @@ export class Tab {
 
     // Cosmetic ad filtering and DOM cleanup once the DOM is ready
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DOM_READY, () => {
+      if (this.pendingError) {
+        this.injectCustomErrorPage(this.pendingError);
+        this.pendingError = null;
+        return;
+      }
       this.injectAdBlockDOMScript();
       this.applyDarkModeIfEnabled();
     });
@@ -307,9 +316,12 @@ export class Tab {
         }
       }
     });
-    this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_FAIL_LOAD, (event) => {
+    this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_FAIL_LOAD, (event, errorCode, errorDescription, validatedURL, isMainFrame) => {
       if (this._destroyed) return;
-      console.error('Failed to load URL:', this.url);
+      // Only handle main frame failures; ignore subframe/resource errors and aborted loads
+      if (!isMainFrame || errorCode === -3) return;
+      console.error('Failed to load URL:', this.url, errorCode, errorDescription);
+      this.pendingError = { errorCode, errorDescription, validatedURL };
       this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.NAVIGATION_FAILED, {
         id: this.id,
       });
@@ -539,6 +551,11 @@ export class Tab {
     const wc = this.webContentsViewInstance.webContents;
     wc.insertCSS(COSMETIC_FILTER_CSS).catch(() => {});
     wc.executeJavaScript(AD_BLOCK_SCRIPT).catch(() => {});
+  }
+
+  private injectCustomErrorPage(error: NavigationError): void {
+    const script = buildErrorPageScript(error);
+    this.webContentsViewInstance.webContents.executeJavaScript(script).catch(() => {});
   }
 
   private debouncedHandleNavigationCompletion(url: string): void {
