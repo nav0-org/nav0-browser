@@ -283,6 +283,14 @@ export function init(){
     clearAllPermissions: async () => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.CLEAR_ALL_PERMISSIONS);
     },
+
+    // Issue report
+    showIssueReport: async (appWindowId: string) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_ISSUE_REPORT, appWindowId);
+    },
+    hideIssueReport: async (appWindowId: string) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.HIDE_ISSUE_REPORT, appWindowId);
+    },
   });
 }
 

@@ -9,6 +9,7 @@ import { DownloadManager } from "./download-manager";
 import { PermissionManager } from "./permission-manager";
 import { PermissionPromptOverlayManager, PermissionPromptData } from "./permission-prompt-overlay-manager";
 import { FindInPageManager } from "./find-in-page-manager";
+import { IssueReportOverlayManager } from "./issue-report-overlay-manager";
 import type { Database as DB } from 'better-sqlite3';
 
 export class AppWindow {
@@ -23,6 +24,7 @@ export class AppWindow {
   private commandOOverlayManager: CommandOOverlayManager | null = null;
   private permissionPromptOverlayManager: PermissionPromptOverlayManager | null = null;
   private findInPageManager: FindInPageManager | null = null;
+  private issueReportOverlayManager: IssueReportOverlayManager | null = null;
   private database: DB;
   private readyPromise: Promise<void>;
   private resolveReady: () => void;
@@ -69,6 +71,7 @@ export class AppWindow {
     this.commandOOverlayManager = new CommandOOverlayManager(this.id, this.isPrivate, this.partitionSetting);
     this.permissionPromptOverlayManager = new PermissionPromptOverlayManager(this.id, this.isPrivate, this.partitionSetting);
     this.findInPageManager = new FindInPageManager(this.id, this.isPrivate, this.partitionSetting);
+    this.issueReportOverlayManager = new IssueReportOverlayManager(this.id, this.isPrivate, this.partitionSetting);
 
     this.browserWindowInstance.loadURL(BROWSER_LAYOUT_WEBPACK_ENTRY);
 
@@ -329,6 +332,27 @@ export class AppWindow {
     if (this.permissionPromptOverlayManager && this.browserWindowInstance &&
         this.browserWindowInstance.contentView.children.indexOf(this.permissionPromptOverlayManager.getWebContentsViewInstance()) > -1) {
       this.browserWindowInstance.contentView.removeChildView(this.permissionPromptOverlayManager.getWebContentsViewInstance());
+    }
+  }
+
+  async showIssueReportOverlay(): Promise<void> {
+    if (!this.issueReportOverlayManager || !this.browserWindowInstance) return;
+    this.hideOptionsMenuOverlay();
+    this.hideCommandKOverlay();
+    if (this.browserWindowInstance.contentView.children.indexOf(this.issueReportOverlayManager.getWebContentsViewInstance()) > -1) {
+      return;
+    }
+    await this.issueReportOverlayManager.whenReady();
+    const parentBounds = this.browserWindowInstance.contentView.getBounds();
+    this.issueReportOverlayManager.getWebContentsViewInstance().setBounds(parentBounds);
+    this.browserWindowInstance.contentView.addChildView(this.issueReportOverlayManager.getWebContentsViewInstance());
+    this.issueReportOverlayManager.getWebContentsViewInstance().webContents.focus();
+  }
+
+  hideIssueReportOverlay(): void {
+    if (this.issueReportOverlayManager && this.browserWindowInstance &&
+        this.browserWindowInstance.contentView.children.indexOf(this.issueReportOverlayManager.getWebContentsViewInstance()) > -1) {
+      this.browserWindowInstance.contentView.removeChildView(this.issueReportOverlayManager.getWebContentsViewInstance());
     }
   }
 

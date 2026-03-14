@@ -95,6 +95,10 @@ declare global {
       onTabLoadingChanged: (callback: (data: { id: string, isLoading: boolean }) => void) => void;
       onTabPinned: (callback: (data: { id: string }) => void) => void;
       onTabUnpinned: (callback: (data: { id: string }) => void) => void;
+
+      // Issue report
+      showIssueReport: (appWindowId: string) => Promise<any>;
+      hideIssueReport: (appWindowId: string) => Promise<any>;
     };
   }
 }

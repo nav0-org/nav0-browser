@@ -165,6 +165,13 @@ export abstract class AppMenuManager {
               await shell.openExternal('https://nav0.org/guide/disclaimer');
             }
           }},
+          {type: 'separator' as const},
+          {label: 'Report an Issue', click: async() => {
+            const activeWindow = AppWindowManager.getActiveWindow();
+            if (activeWindow) {
+              await activeWindow.showIssueReportOverlay();
+            }
+          }},
         ]
       }
     ];

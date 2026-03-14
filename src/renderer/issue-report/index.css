@@ -1,0 +1,256 @@
+@import url("../styles/global.css");
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: transparent !important;
+  overflow: hidden;
+}
+
+/* Overlay container */
+.issue-report-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+}
+
+/* Semi-transparent scrim */
+.issue-report-scrim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+/* Dialog card */
+.issue-report-dialog {
+  position: relative;
+  width: 480px;
+  max-width: 90%;
+  max-height: 80vh;
+  background-color: var(--bg-light);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  z-index: 1;
+  animation: issueSlideIn 0.2s ease-out;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes issueSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .issue-report-dialog {
+    animation: none;
+  }
+}
+
+/* Header */
+.issue-report-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 20px 12px 20px;
+  border-bottom: 1px solid var(--border-color);
+  font-size: var(--font-lg);
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+/* Body */
+.issue-report-body {
+  padding: 16px 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.issue-report-body .form-group {
+  margin-bottom: 14px;
+}
+
+.issue-report-body .form-label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+  font-size: var(--font-sm);
+  color: var(--text-color);
+}
+
+.issue-report-body .form-control {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  font-size: var(--font-md);
+  color: var(--text-color);
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast);
+  box-sizing: border-box;
+}
+
+.issue-report-body .form-control:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.issue-report-body textarea.form-control {
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit;
+}
+
+.issue-report-body select.form-control {
+  cursor: pointer;
+  appearance: auto;
+}
+
+/* Attachments */
+.attachment-area {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.attachment-drop-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.attachment-drop-zone:hover {
+  border-color: var(--primary-color);
+  color: var(--text-color);
+  background-color: var(--bg-color);
+}
+
+.attachment-previews {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.attachment-preview {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.attachment-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.attachment-remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-circle);
+  background-color: var(--error-color);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  line-height: 1;
+  padding: 0;
+}
+
+.attachment-remove:hover {
+  background-color: #c0392b;
+}
+
+/* System info preview */
+.issue-report-sysinfo {
+  margin-top: 8px;
+}
+
+.sysinfo-preview {
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+/* Status message */
+.issue-report-status {
+  padding: 8px 20px;
+  font-size: var(--font-sm);
+  text-align: center;
+}
+
+.issue-report-status.success {
+  color: var(--success-color);
+  background-color: var(--success-light);
+}
+
+.issue-report-status.error {
+  color: var(--error-color);
+  background-color: var(--error-light);
+}
+
+/* Actions */
+.issue-report-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px 16px 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.issue-report-actions .btn {
+  padding: 8px 20px;
+  font-size: var(--font-sm);
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: 1px solid transparent;
+}
+
+.issue-report-actions .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

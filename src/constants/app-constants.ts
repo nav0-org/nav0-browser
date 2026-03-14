@@ -169,6 +169,10 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly PRINT_PAGE = "browser:print-page";
   public static readonly PIN_TAB = "browser:pin-tab";
   public static readonly UNPIN_TAB = "browser:unpin-tab";
+
+  // Issue report
+  public static readonly SHOW_ISSUE_REPORT = "browser:show-issue-report";
+  public static readonly HIDE_ISSUE_REPORT = "browser:hide-issue-report";
 }
 
 export abstract class MainToRendererEventsForBrowserIPC {
