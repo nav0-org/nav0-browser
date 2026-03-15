@@ -11,9 +11,42 @@
   margin-bottom: 2px;
 }
 
-.hero-section p {
-  font-size: var(--font-sm);
+.day-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-xs);
   margin-bottom: var(--spacing-xs);
+}
+
+.day-nav-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 50%;
+  color: inherit;
+  transition: background-color var(--transition-fast);
+}
+
+.day-nav-btn:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+}
+
+.day-nav-btn:disabled {
+  cursor: default;
+}
+
+.day-nav-label {
+  font-size: var(--font-md);
+  font-weight: 500;
+  min-width: 120px;
+  text-align: center;
 }
 
 .search-container {

@@ -16,11 +16,54 @@ let hasMore = true;
 let currentSearchTerm = '';
 let allLoadedItems: BrowsingHistoryRecord[] = [];
 
+// Day navigation state
+let currentDate = new Date();
+currentDate.setHours(0, 0, 0, 0);
+
 const historyListElement = document.getElementById('history-list') as HTMLElement;
 const searchInput = document.getElementById('search-input') as HTMLInputElement;
+const dayNavLabel = document.getElementById('day-nav-label') as HTMLElement;
+const dayNavLeft = document.getElementById('day-nav-left') as HTMLButtonElement;
+const dayNavRight = document.getElementById('day-nav-right') as HTMLButtonElement;
+
+const getDateString = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const updateDayLabel = (): void => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  if (currentDate.getTime() === today.getTime()) {
+    dayNavLabel.textContent = 'Today';
+  } else if (currentDate.getTime() === yesterday.getTime()) {
+    dayNavLabel.textContent = 'Yesterday';
+  } else {
+    dayNavLabel.textContent = FormatUtils.getShortFormattedDate(currentDate);
+  }
+
+  // Disable right button if current date is today
+  dayNavRight.disabled = currentDate.getTime() >= today.getTime();
+  dayNavRight.style.opacity = dayNavRight.disabled ? '0.3' : '1';
+};
+
+const navigateDay = (offset: number): void => {
+  currentDate.setDate(currentDate.getDate() + offset);
+  updateDayLabel();
+  resetAndReload();
+};
 
 document.addEventListener('DOMContentLoaded', async() => {
+  updateDayLabel();
   loadHistoryPage();
+
+  dayNavLeft.addEventListener('click', () => navigateDay(-1));
+  dayNavRight.addEventListener('click', () => navigateDay(1));
 
   document.getElementById('delete-all')?.addEventListener('click', async () => {
     await window.BrowserAPI.removeAllBrowsingHistory(window.BrowserAPI.appWindowId);
@@ -59,8 +102,9 @@ const loadHistoryPage = async (): Promise<void> => {
 
   showLoadingIndicator();
 
-  const historyData: Array<BrowsingHistoryRecord> = await window.BrowserAPI.fetchBrowsingHistory(
-    window.BrowserAPI.appWindowId, currentSearchTerm, PAGE_SIZE, currentOffset
+  const dateString = getDateString(currentDate);
+  const historyData: Array<BrowsingHistoryRecord> = await window.BrowserAPI.fetchBrowsingHistoryByDate(
+    window.BrowserAPI.appWindowId, dateString, currentSearchTerm, PAGE_SIZE, currentOffset
   );
 
   removeLoadingIndicator();

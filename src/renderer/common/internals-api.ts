@@ -39,6 +39,7 @@ declare global {
       removeBrowsingHistory: (appWindowId: string, historyId: string) => Promise<any>;
       removeAllBrowsingHistory: (appWindowId: string) => Promise<any>;
       fetchBrowsingHistory: (appWindowId: string, searchTerm: string, limit: number, offset: number) => Promise<any>;
+      fetchBrowsingHistoryByDate: (appWindowId: string, dateString: string, searchTerm: string, limit: number, offset: number) => Promise<any>;
       handleFileSelection: (appWindowId: string, tabId: string, extensions: string[]) => Promise<string[] | null>;
       openPdfFile: (appWindowId: string) => Promise<string | null>;
 

@@ -18,6 +18,10 @@ export abstract class BrowsingHistoryManager {
       return await BrowsingHistoryManager.fetchRecords(appWindowId, searchTerm, limit, offset);
     });
 
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_BROWSING_HISTORY_BY_DATE, async (event, appWindowId: string, dateString: string, searchTerm?: string, limit?: number, offset?: number) => {
+      return await BrowsingHistoryManager.fetchRecordsByDate(appWindowId, dateString, searchTerm, limit, offset);
+    });
+
     ipcMain.handle(RendererToMainEventsForBrowserIPC.REMOVE_BROWSING_HISTORY, async (event, appWindowId: string, recordId: string) => {
       return await BrowsingHistoryManager.removeRecord(appWindowId, recordId);
     });
@@ -35,6 +39,19 @@ export abstract class BrowsingHistoryManager {
     if (!db) return [];
     const stmt = db.prepare("SELECT * FROM browsingHistory WHERE (url LIKE ? or title LIKE ?) ORDER BY createdDate DESC LIMIT ? OFFSET ? ; ");
     const records = stmt.all(`%${searchTerm}%`,`%${searchTerm}%`, limit, offset) as Array<BrowsingHistoryRecord>;
+    return records;
+  }
+
+  public static async fetchRecordsByDate(appWindowId: string, dateString: string, searchTerm?: string, limit?: number, offset?: number): Promise<Array<BrowsingHistoryRecord>>{
+    searchTerm = searchTerm || "";
+    limit = limit || 500;
+    offset = offset || 0;
+    const db = BrowsingHistoryManager.getDb(appWindowId);
+    if (!db) return [];
+    const startOfDay = `${dateString}T00:00:00.000Z`;
+    const endOfDay = `${dateString}T23:59:59.999Z`;
+    const stmt = db.prepare("SELECT * FROM browsingHistory WHERE createdDate >= ? AND createdDate <= ? AND (url LIKE ? OR title LIKE ?) ORDER BY createdDate DESC LIMIT ? OFFSET ?;");
+    const records = stmt.all(startOfDay, endOfDay, `%${searchTerm}%`, `%${searchTerm}%`, limit, offset) as Array<BrowsingHistoryRecord>;
     return records;
   }
 
