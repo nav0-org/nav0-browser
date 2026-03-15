@@ -10,10 +10,18 @@ What's new in every release of nav0 Browser.
 ---
 
 <div class="release-list-item">
+  <a href="/releases/v0.0.8">
+    <h2>v0.0.8</h2>
+  </a>
+  <div class="release-meta">March 15, 2026 <span class="release-badge latest">Latest</span></div>
+  <p class="release-excerpt">Tab context menu, pinning, Cmd+O switcher, popup blocking, hard reload, SSL warning page, offline page, in-app issue reporting, customizable user agent, print support, and HTTPS enforcement.</p>
+</div>
+
+<div class="release-list-item">
   <a href="/releases/v0.0.7">
     <h2>v0.0.7</h2>
   </a>
-  <div class="release-meta">March 7, 2026 <span class="release-badge latest">Latest</span></div>
+  <div class="release-meta">March 7, 2026</div>
   <p class="release-excerpt">Dark mode toggle for any website, recently closed tabs with full window restoration, stability fixes for tab/window lifecycle crashes, and navbar FOUC resolution.</p>
 </div>
 
