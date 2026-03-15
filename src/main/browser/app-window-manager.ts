@@ -664,14 +664,16 @@ export abstract class AppWindowManager {
       const newWindow = AppWindowManager.createWindow(false);
       // Wait for the window's renderer to load and its default New Tab to be created
       await newWindow.whenReady();
-      // Navigate the default tab to the first restored URL instead of closing it
+      // Close the auto-created new tab — navigating it doesn't work reliably
+      // because the preload script change requires a new WebContentsView,
+      // and navigate() doesn't await the async loadURL swap.
       const defaultTabs = newWindow.getTabs();
       if (defaultTabs.length > 0) {
-        defaultTabs[0].navigate(restoredUrls[0].url);
+        newWindow.closeTab(defaultTabs[0].getId(), false);
       }
-      // Create additional tabs for the remaining URLs
-      for (let i = 1; i < restoredUrls.length; i++) {
-        await newWindow.createTab(restoredUrls[i].url, false);
+      // Create all tabs fresh with the correct URLs
+      for (let i = 0; i < restoredUrls.length; i++) {
+        await newWindow.createTab(restoredUrls[i].url, i === 0);
       }
       return { ok: true };
     });
@@ -775,11 +777,12 @@ export abstract class AppWindowManager {
               }
               const newWindow = AppWindowManager.createWindow();
               await newWindow.whenReady();
-              // Navigate the default tab to the moved tab's URL
+              // Close the auto-created new tab and create a fresh tab with the URL
               const defaultTabs = newWindow.getTabs();
               if (defaultTabs.length > 0) {
-                defaultTabs[0].navigate(url);
+                newWindow.closeTab(defaultTabs[0].getId(), false);
               }
+              await newWindow.createTab(url, true);
               AppWindowManager.activateWindow(newWindow.id);
             },
           },

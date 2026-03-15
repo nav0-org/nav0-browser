@@ -168,14 +168,6 @@ export class Tab {
 
   private async initWebContentsView(){
     if(this.webContentsViewInstance) {
-      // Remove old view from parent contentView before destroying, otherwise
-      // the stale view stays attached and blocks the replacement view.
-      try {
-        const contentView = this.parentAppWindow.getBrowserWindowInstance()?.contentView;
-        if (contentView && contentView.children.includes(this.webContentsViewInstance)) {
-          contentView.removeChildView(this.webContentsViewInstance);
-        }
-      } catch (_) { /* window may already be closing */ }
       this.webContentsViewInstance.webContents.close();
     }
     this.webContentsViewInstance = new WebContentsView({
