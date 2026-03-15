@@ -174,6 +174,14 @@ export abstract class RendererToMainEventsForBrowserIPC {
   // Issue report
   public static readonly SHOW_ISSUE_REPORT = "browser:show-issue-report";
   public static readonly HIDE_ISSUE_REPORT = "browser:hide-issue-report";
+
+  // Google Auth
+  public static readonly GOOGLE_AUTH_SIGN_IN = "browser:google-auth-sign-in";
+  public static readonly GOOGLE_AUTH_SIGN_OUT = "browser:google-auth-sign-out";
+  public static readonly GOOGLE_AUTH_GET_STATUS = "browser:google-auth-get-status";
+
+  // Google Calendar
+  public static readonly GOOGLE_CALENDAR_GET_EVENTS = "browser:google-calendar-get-events";
 }
 
 export abstract class MainToRendererEventsForBrowserIPC {

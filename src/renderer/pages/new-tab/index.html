@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:; connect-src 'self' https://www.googleapis.com https://oauth2.googleapis.com;">
   <title>New Tab</title>
 </head>
 <body>
@@ -10,6 +10,46 @@
   <div class="bento-container">
       <div class="bento-item search-item">
           <input type="text" id="search-bar" class="search-bar" placeholder="Enter a search term or a URL">
+      </div>
+
+      <div class="bento-item calendar-item">
+          <div class="calendar-header">
+              <div class="calendar-title-row">
+                  <div class="calendar-icon-container">
+                      <i data-lucide="calendar" class="calendar-icon"></i>
+                  </div>
+                  <span class="calendar-title">Calendar</span>
+              </div>
+              <div id="google-auth-container">
+                  <button id="google-sign-in-btn" class="google-sign-in-btn" style="display: none;">
+                      <i data-lucide="log-in" class="btn-icon-lucide"></i>
+                      Sign in with Google
+                  </button>
+                  <div id="google-user-info" class="google-user-info" style="display: none;">
+                      <img id="google-user-avatar" class="google-user-avatar" alt="" />
+                      <span id="google-user-name" class="google-user-name"></span>
+                      <button id="google-sign-out-btn" class="google-sign-out-btn" title="Sign out">
+                          <i data-lucide="log-out" class="btn-icon-lucide"></i>
+                      </button>
+                  </div>
+              </div>
+          </div>
+          <div id="calendar-content" class="calendar-content">
+              <div id="calendar-loading" class="calendar-loading" style="display: none;">
+                  <div class="loading-spinner"></div>
+                  <span>Loading events...</span>
+              </div>
+              <div id="calendar-not-signed-in" class="calendar-empty">
+                  <i data-lucide="calendar-x" class="calendar-empty-icon"></i>
+                  <p>Sign in with Google to see your calendar events</p>
+              </div>
+              <div id="calendar-no-events" class="calendar-empty" style="display: none;">
+                  <i data-lucide="calendar-check" class="calendar-empty-icon"></i>
+                  <p>No upcoming events</p>
+              </div>
+              <div id="calendar-events-list" class="calendar-events-list" style="display: none;">
+              </div>
+          </div>
       </div>
   </div>
 </html>

@@ -98,6 +98,24 @@ declare global {
       // Issue report
       showIssueReport: (appWindowId: string) => Promise<any>;
       hideIssueReport: (appWindowId: string) => Promise<any>;
+
+      // Google Auth
+      googleAuthSignIn: () => Promise<{ isSignedIn: boolean; user: { email: string; name: string; picture: string } | null }>;
+      googleAuthSignOut: () => Promise<{ isSignedIn: boolean; user: null }>;
+      googleAuthGetStatus: () => Promise<{ isSignedIn: boolean; user: { email: string; name: string; picture: string } | null }>;
+
+      // Google Calendar
+      googleCalendarGetEvents: (timeMin?: string, timeMax?: string) => Promise<Array<{
+        id: string;
+        summary: string;
+        start: string;
+        end: string;
+        allDay: boolean;
+        location?: string;
+        description?: string;
+        htmlLink?: string;
+        colorId?: string;
+      }>>;
     };
   }
 }

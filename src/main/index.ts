@@ -4,6 +4,8 @@ import { DataStoreManager } from './database/data-store-manager';
 import { DownloadManager } from './browser/download-manager';
 import { SettingsEnforcer } from './settings/settings-enforcer';
 import { startTestControlServer } from './test-control-server';
+import { GoogleAuthManager } from './google/google-auth-manager';
+import { GoogleCalendarManager } from './google/google-calendar-manager';
 
 // Disable Chromium features that trigger macOS "Local Network" permission dialog.
 // These features use mDNS/Bonjour for device discovery, which is unnecessary for
@@ -23,6 +25,8 @@ if (require('electron-squirrel-startup')) {
 app.whenReady().then(async() => {
   await DataStoreManager.init();
   await SettingsEnforcer.init();
+  GoogleAuthManager.init();
+  GoogleCalendarManager.init();
   await AppWindowManager.init();
 
   // Start test control server after everything is initialized

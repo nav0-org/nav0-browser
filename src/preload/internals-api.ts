@@ -294,6 +294,22 @@ export function init(){
     hideIssueReport: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.HIDE_ISSUE_REPORT, appWindowId);
     },
+
+    // Google Auth
+    googleAuthSignIn: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GOOGLE_AUTH_SIGN_IN);
+    },
+    googleAuthSignOut: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GOOGLE_AUTH_SIGN_OUT);
+    },
+    googleAuthGetStatus: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GOOGLE_AUTH_GET_STATUS);
+    },
+
+    // Google Calendar
+    googleCalendarGetEvents: async (timeMin?: string, timeMax?: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GOOGLE_CALENDAR_GET_EVENTS, timeMin, timeMax);
+    },
   });
 }
 
