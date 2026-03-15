@@ -235,6 +235,109 @@ export class Tab {
   }
 
   private initEventHandlers() {
+    // Intercept keyboard shortcuts from the tab's webContents so they work
+    // even when the tab (not the browser chrome) has focus.
+    this.webContentsViewInstance.webContents.on('before-input-event', (event, input) => {
+      if (this._destroyed) return;
+      if (input.type !== 'keyDown') return;
+
+      const mod = process.platform === 'darwin' ? input.meta : input.control;
+      if (!mod) return;
+
+      const key = input.key.toLowerCase();
+
+      if (input.shift) {
+        switch (key) {
+          case 'r': {
+            // Hard Reload (Cmd/Ctrl+Shift+R)
+            event.preventDefault();
+            const wc = this.webContentsViewInstance.webContents;
+            const sess = wc.session;
+            const currentUrl = wc.getURL();
+            (async () => {
+              try {
+                const origin = new URL(currentUrl).origin;
+                await sess.clearStorageData({ origin });
+                await sess.clearCache();
+                await sess.clearCodeCaches({});
+              } catch {
+                await sess.clearCache();
+                await sess.clearCodeCaches({});
+              }
+              wc.reloadIgnoringCache();
+            })();
+            return;
+          }
+          case 't':
+            // Reopen Closed Tab (Cmd/Ctrl+Shift+T) — handled by menu
+            return;
+          case 'n':
+            // New Private Window (Cmd/Ctrl+Shift+N) — handled by menu
+            return;
+          case 'b':
+            // Open Bookmarks (Cmd/Ctrl+Shift+B)
+            event.preventDefault();
+            this.parentAppWindow.createTab(InAppUrls.BOOKMARKS, true);
+            return;
+          case 'h':
+            // Open History (Cmd/Ctrl+Shift+H)
+            event.preventDefault();
+            this.parentAppWindow.createTab(InAppUrls.HISTORY, true);
+            return;
+          case 'd':
+            // Open Downloads (Cmd/Ctrl+Shift+D)
+            event.preventDefault();
+            this.parentAppWindow.createTab(InAppUrls.DOWNLOADS, true);
+            return;
+          case 'o':
+            // Open PDF File (Cmd/Ctrl+Shift+O) — handled by menu
+            return;
+        }
+      } else {
+        switch (key) {
+          case 'o':
+            // Tab Switcher / Command O (Cmd/Ctrl+O)
+            event.preventDefault();
+            this.parentAppWindow.showCommandOOverlay();
+            return;
+          case 'k':
+            // Command K (Cmd/Ctrl+K)
+            event.preventDefault();
+            this.parentAppWindow.showCommandKOverlay();
+            return;
+          case 'f':
+            // Find in Page (Cmd/Ctrl+F)
+            event.preventDefault();
+            this.parentAppWindow.showFindInPage();
+            return;
+          case 'r':
+            // Reload (Cmd/Ctrl+R)
+            event.preventDefault();
+            this.webContentsViewInstance.webContents.reload();
+            return;
+          case 'l':
+            // Focus URL Bar (Cmd/Ctrl+L) — send to browser chrome
+            return;
+          case 'w': {
+            // Close Tab (Cmd/Ctrl+W)
+            event.preventDefault();
+            const closedRecord = this.parentAppWindow.closeTab(this.id, true);
+            if (closedRecord) {
+              // Dynamically import to avoid circular dependency
+              const { AppWindowManager } = require('./app-window-manager');
+              AppWindowManager.recordClosedTab(closedRecord);
+            }
+            return;
+          }
+          case 't':
+            // New Tab (Cmd/Ctrl+T)
+            event.preventDefault();
+            this.parentAppWindow.createTab(InAppUrls.NEW_TAB, true);
+            return;
+        }
+      }
+    });
+
     //for hard navigation (debounced)
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE, async (event, url: string) => {
       if (this._destroyed) return;

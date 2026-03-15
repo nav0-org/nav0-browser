@@ -216,6 +216,8 @@ export const DEFAULT_KEYBOARD_SHORTCUTS: KeyboardShortcutAction[] = [
   { id: 'zoom-out', label: 'Zoom Out', category: 'View', defaultShortcut: 'mod+Shift+-', currentShortcut: 'mod+Shift+-' },
   { id: 'reset-zoom', label: 'Reset Zoom', category: 'View', defaultShortcut: 'mod+0', currentShortcut: 'mod+0' },
   { id: 'command-k', label: 'Command Palette', category: 'Utilities', defaultShortcut: 'mod+K', currentShortcut: 'mod+K' },
+  { id: 'tab-switcher', label: 'Tab Switcher', category: 'Tabs', defaultShortcut: 'mod+O', currentShortcut: 'mod+O' },
+  { id: 'toggle-reader-mode', label: 'Toggle Reader Mode', category: 'View', defaultShortcut: '', currentShortcut: '' },
 ];
 
 export const DEFAULT_BROWSER_SETTINGS: BrowserSettings = {
