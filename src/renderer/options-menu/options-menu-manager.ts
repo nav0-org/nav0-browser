@@ -180,9 +180,6 @@ export class OptionsMenuManager {
       await window.BrowserAPI.createTab(this.appWindowId, InAppUrls.ABOUT, true);
     });
 
-    this.optionsElement?.querySelector('#about-option')?.addEventListener('click', async () => {
-      await window.BrowserAPI.showAboutPanel();
-    });
 
     this.optionsElement?.querySelector('#privacy-policy-option')?.addEventListener('click', async () => {
       await window.BrowserAPI.createTab(this.appWindowId, 'https://nav0.org/privacy-policy', true);
