@@ -10,6 +10,14 @@ Thoughts on privacy, browsers, and the open web.
 ---
 
 <div class="blog-post-item">
+  <a href="/blog/incognito-mode-is-not-private">
+    <h2>Incognito Mode Is Not Private: The Biggest Lie Your Browser Tells You</h2>
+  </a>
+  <div class="post-meta">March 15, 2026 &middot; 8 min read &middot; Privacy</div>
+  <p class="post-excerpt">Private browsing modes like Chrome's Incognito don't make you private. They hide your history from your device — not from your ISP, employer, or the websites you visit. Here's what they actually do.</p>
+</div>
+
+<div class="blog-post-item">
   <a href="/blog/nav0-vs-chrome-data-consumption">
     <h2>Nav0 vs Chrome: Which Browser Actually Respects Your Data?</h2>
   </a>
