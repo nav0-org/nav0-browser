@@ -193,7 +193,7 @@ export default defineConfig({
       { text: 'FAQ', link: '/faq' },
       { text: 'Privacy', link: '/guide/privacy' },
       { text: 'Privacy Policy', link: '/privacy-policy' },
-      { text: 'Terms of Use', link: '/guide/terms-of-use' },
+      { text: 'Terms of Use', link: '/terms-of-use' },
       {
         text: 'Links',
         items: [
@@ -217,8 +217,8 @@ export default defineConfig({
             { text: 'Privacy', link: '/guide/privacy' },
             { text: 'Philosophy', link: '/guide/philosophy' },
             { text: 'Privacy Policy', link: '/privacy-policy' },
-            { text: 'Terms of Use', link: '/guide/terms-of-use' },
-            { text: 'Disclaimer', link: '/guide/disclaimer' }
+            { text: 'Terms of Use', link: '/terms-of-use' },
+            { text: 'Disclaimer', link: '/disclaimer' }
           ]
         },
         {

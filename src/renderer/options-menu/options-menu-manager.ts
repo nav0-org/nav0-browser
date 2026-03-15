@@ -191,12 +191,12 @@ export class OptionsMenuManager {
     });
 
     this.optionsElement?.querySelector('#terms-of-use-option')?.addEventListener('click', async () => {
-      await window.BrowserAPI.createTab(this.appWindowId, 'https://nav0.org/guide/terms-of-use', true);
+      await window.BrowserAPI.createTab(this.appWindowId, 'https://nav0.org/terms-of-use', true);
       await window.BrowserAPI.hideOptionsMenu(this.appWindowId);
     });
 
     this.optionsElement?.querySelector('#disclaimer-option')?.addEventListener('click', async () => {
-      await window.BrowserAPI.createTab(this.appWindowId, 'https://nav0.org/guide/disclaimer', true);
+      await window.BrowserAPI.createTab(this.appWindowId, 'https://nav0.org/disclaimer', true);
       await window.BrowserAPI.hideOptionsMenu(this.appWindowId);
     });
 
