@@ -46,6 +46,7 @@ export class Tab {
   private _destroyed = false;
   private showingSSLWarning = false;
   private pendingError: NavigationError | null = null;
+  private willDownloadHandler: ((event: Electron.Event, item: Electron.DownloadItem, webContents: Electron.WebContents) => void) | null = null;
 
   private static readonly DARK_MODE_CSS = `
     html {
@@ -274,7 +275,7 @@ export class Tab {
       this.applyDarkModeIfEnabled();
     });
 
-    this.webContentsViewInstance.webContents.session.on('will-download', async (event, item, downloadWebContents) => {
+    this.willDownloadHandler = async (event: Electron.Event, item: Electron.DownloadItem, downloadWebContents: Electron.WebContents) => {
       // Only handle downloads initiated by this tab's webContents
       if (downloadWebContents !== this.webContentsViewInstance.webContents) return;
 
@@ -292,7 +293,8 @@ export class Tab {
       }
 
       await this.handleDownload(item);
-    });
+    };
+    this.webContentsViewInstance.webContents.session.on('will-download', this.willDownloadHandler);
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_START_LOADING, () => {
       if (this._destroyed) return;
       this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_LOADING_CHANGED, {
@@ -733,6 +735,10 @@ export class Tab {
     if (this.readerModeCheckTimer) {
       clearTimeout(this.readerModeCheckTimer);
       this.readerModeCheckTimer = null;
+    }
+    if (this.willDownloadHandler) {
+      this.webContentsViewInstance.webContents.session.removeListener('will-download', this.willDownloadHandler);
+      this.willDownloadHandler = null;
     }
   }
 
