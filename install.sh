@@ -18,22 +18,15 @@ case "$ARCH" in
     ;;
 esac
 
-# Check if nav0 is currently running and quit it before installing
+# Check if nav0 is currently running and ask the user to close it
 if pgrep -f "$APP_NAME" >/dev/null 2>&1; then
-  echo "Nav0 is currently running. Quitting before upgrade..."
-  osascript -e "tell application \"$APP_NAME\" to quit" 2>/dev/null || true
-  # Wait for the process to exit (up to 5 seconds)
-  for i in $(seq 1 10); do
-    if ! pgrep -f "$APP_NAME" >/dev/null 2>&1; then
-      break
-    fi
-    sleep 0.5
-  done
-  # Force kill if still running
+  echo ""
+  echo "Nav0 is currently running. Please close it before upgrading."
+  echo "Press Enter once you've closed nav0 (or Ctrl+C to cancel)..."
+  read -r
   if pgrep -f "$APP_NAME" >/dev/null 2>&1; then
-    echo "Force-closing nav0..."
-    pkill -f "$APP_NAME" 2>/dev/null || true
-    sleep 1
+    echo "Error: Nav0 is still running. Please close it and try again."
+    exit 1
   fi
 fi
 
