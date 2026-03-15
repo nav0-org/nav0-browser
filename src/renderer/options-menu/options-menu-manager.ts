@@ -185,11 +185,6 @@ export class OptionsMenuManager {
       await window.BrowserAPI.createTab(this.appWindowId, 'https://nav0.org/privacy-policy', true);
     });
 
-    this.optionsElement?.querySelector('#philosophy-option')?.addEventListener('click', async () => {
-      await window.BrowserAPI.createTab(this.appWindowId, 'https://nav0.org/guide/philosophy', true);
-      await window.BrowserAPI.hideOptionsMenu(this.appWindowId);
-    });
-
     this.optionsElement?.querySelector('#terms-of-use-option')?.addEventListener('click', async () => {
       await window.BrowserAPI.createTab(this.appWindowId, 'https://nav0.org/terms-of-use', true);
       await window.BrowserAPI.hideOptionsMenu(this.appWindowId);

@@ -176,7 +176,6 @@ export abstract class AppMenuManager {
         submenu: [
           {label: 'About Nav0', click: async () => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.ABOUT, true); }},
           {label: 'Privacy Policy', click: async () => { await AppWindowManager.getActiveWindow().createTab('https://nav0.org/privacy-policy', true); }},
-          {label: 'nav0 Philosophy', click: async () => { await AppWindowManager.getActiveWindow().createTab('https://nav0.org/guide/philosophy', true); }},
           {label: 'Terms of Use', click: async() => { await AppWindowManager.getActiveWindow().createTab('https://nav0.org/terms-of-use', true); }},
           {label: 'Disclaimer', click: async () => {
             const activeWindow = AppWindowManager.getActiveWindow();
