@@ -61,8 +61,8 @@ export abstract class AppWindowManager {
     AppWindowManager.initIPCHandlers();
     AppMenuManager.init();
   }
-  static createWindow(isPrivate = false): AppWindow {
-    const window = new AppWindow(isPrivate, DatabaseManager.getDatabase(isPrivate));
+  static createWindow(isPrivate = false, initialUrls?: string[]): AppWindow {
+    const window = new AppWindow(isPrivate, DatabaseManager.getDatabase(isPrivate), initialUrls);
     AppWindowManager.windows.set(window.id, window);
     AppWindowManager.activateWindow(window.id);
 
@@ -661,20 +661,10 @@ export abstract class AppWindowManager {
       if (!closedWindow || !closedWindow.tabs || closedWindow.tabs.length === 0) return null;
       const restoredUrls = closedWindow.tabs.filter(t => t.url && t.url !== '' && !t.url.startsWith('nav0://'));
       if (restoredUrls.length === 0) return null;
-      const newWindow = AppWindowManager.createWindow(false);
-      // Wait for the window's renderer to load and its default New Tab to be created
+      // Pass URLs directly so the window creates the right tabs from the start
+      // (avoids issues with navigating or closing the default new-tab)
+      const newWindow = AppWindowManager.createWindow(false, restoredUrls.map(t => t.url));
       await newWindow.whenReady();
-      // Close the auto-created new tab — navigating it doesn't work reliably
-      // because the preload script change requires a new WebContentsView,
-      // and navigate() doesn't await the async loadURL swap.
-      const defaultTabs = newWindow.getTabs();
-      if (defaultTabs.length > 0) {
-        newWindow.closeTab(defaultTabs[0].getId(), false);
-      }
-      // Create all tabs fresh with the correct URLs
-      for (let i = 0; i < restoredUrls.length; i++) {
-        await newWindow.createTab(restoredUrls[i].url, i === 0);
-      }
       return { ok: true };
     });
 
@@ -775,14 +765,8 @@ export abstract class AppWindowManager {
               if (closedRecord) {
                 AppWindowManager.recordClosedTab(closedRecord);
               }
-              const newWindow = AppWindowManager.createWindow();
+              const newWindow = AppWindowManager.createWindow(false, [url]);
               await newWindow.whenReady();
-              // Close the auto-created new tab and create a fresh tab with the URL
-              const defaultTabs = newWindow.getTabs();
-              if (defaultTabs.length > 0) {
-                newWindow.closeTab(defaultTabs[0].getId(), false);
-              }
-              await newWindow.createTab(url, true);
               AppWindowManager.activateWindow(newWindow.id);
             },
           },

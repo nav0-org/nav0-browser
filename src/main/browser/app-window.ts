@@ -28,12 +28,14 @@ export class AppWindow {
   private database: DB;
   private readyPromise: Promise<void>;
   private resolveReady: () => void;
+  private initialUrls: string[] | null;
 
-  constructor(isPrivate = false, database: DB) {
+  constructor(isPrivate = false, database: DB, initialUrls?: string[]) {
     this.isPrivate = isPrivate;
     this.database = database;
     this.tabs = new Map();
     this.activeTabId = null;
+    this.initialUrls = initialUrls?.length ? initialUrls : null;
     this.readyPromise = new Promise<void>((resolve) => {
       this.resolveReady = resolve;
     });
@@ -95,15 +97,23 @@ export class AppWindow {
       });
 
       this.browserWindowInstance.webContents.on('did-finish-load', async () => {
-        const firstTab = await this.createTab(InAppUrls.NEW_TAB);
-        this.activateTab(firstTab.getId());
+        if (this.initialUrls) {
+          // Restore tabs from provided URLs (e.g. window restoration)
+          for (let i = 0; i < this.initialUrls.length; i++) {
+            await this.createTab(this.initialUrls[i], i === 0);
+          }
+          this.initialUrls = null;
+        } else {
+          const firstTab = await this.createTab(InAppUrls.NEW_TAB);
+          this.activateTab(firstTab.getId());
 
-        // Tell the renderer about the new tab
-        this.browserWindowInstance.webContents.send(MainToRendererEventsForBrowserIPC.NEW_TAB_CREATED, {
-          id: firstTab.id,
-          title: firstTab.getTitle(),
-          url: firstTab.getUrl()
-        });
+          // Tell the renderer about the new tab
+          this.browserWindowInstance.webContents.send(MainToRendererEventsForBrowserIPC.NEW_TAB_CREATED, {
+            id: firstTab.id,
+            title: firstTab.getTitle(),
+            url: firstTab.getUrl()
+          });
+        }
         this.resolveReady();
 
         // Show window only after browser chrome and first tab are fully loaded
