@@ -145,7 +145,7 @@ nav0 does not auto-update without your knowledge. You may choose to download and
 
 We may update these Terms from time to time. When we do:
 
-- The updated Terms will be posted on the nav0 website at [https://nav0.org/guide/terms-of-use](https://nav0.org/guide/terms-of-use).
+- The updated Terms will be posted on the nav0 website at [https://nav0.org/terms-of-use](https://nav0.org/terms-of-use).
 - The "Last Updated" date at the top of this page will be revised.
 - For material changes, we will make reasonable efforts to notify users through release notes, the nav0 website, or the project repository.
 
