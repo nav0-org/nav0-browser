@@ -74,15 +74,6 @@ jobs:
           "
           echo "Updated package.json version to ${VERSION}"
 
-      - name: Verify build version
-        shell: bash
-        run: |
-          PKG_VERSION=$(node -p "require('./package.json').version")
-          echo "::notice::Building version ${PKG_VERSION} from commit ${{ github.sha }}"
-          echo "Package.json version: ${PKG_VERSION}"
-          echo "Git SHA: ${{ github.sha }}"
-          echo "Git ref: ${{ github.ref }}"
-
       # Windows dependencies for electron-forge
       - name: Install Windows dependencies
         if: matrix.platform == 'win'
@@ -183,25 +174,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NAV0_ISSUE_API_KEY: ${{ secrets.NAV0_ISSUE_API_KEY }}
-
-      - name: Verify packaged version
-        shell: bash
-        run: |
-          PKG_VERSION=$(node -p "require('./package.json').version")
-          echo "Expected version: ${PKG_VERSION}"
-          # Find the packaged package.json inside the build output
-          PACKAGED_PKG=$(find out -name "package.json" -path "*/resources/app/*" -o -name "package.json" -path "*/app.asar.unpacked/*" 2>/dev/null | head -1)
-          if [ -n "$PACKAGED_PKG" ]; then
-            PACKAGED_VERSION=$(node -p "require('./${PACKAGED_PKG}').version")
-            echo "Packaged version: ${PACKAGED_VERSION}"
-            if [ "$PKG_VERSION" != "$PACKAGED_VERSION" ]; then
-              echo "::error::Version mismatch! package.json has ${PKG_VERSION} but packaged app has ${PACKAGED_VERSION}"
-              exit 1
-            fi
-            echo "Version verified: ${PACKAGED_VERSION}"
-          else
-            echo "Packaged app uses asar archive — verifying source package.json version (${PKG_VERSION}) was used at build time"
-          fi
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

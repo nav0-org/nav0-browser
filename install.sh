@@ -18,6 +18,25 @@ case "$ARCH" in
     ;;
 esac
 
+# Check if nav0 is currently running and quit it before installing
+if pgrep -f "$APP_NAME" >/dev/null 2>&1; then
+  echo "Nav0 is currently running. Quitting before upgrade..."
+  osascript -e "tell application \"$APP_NAME\" to quit" 2>/dev/null || true
+  # Wait for the process to exit (up to 5 seconds)
+  for i in $(seq 1 10); do
+    if ! pgrep -f "$APP_NAME" >/dev/null 2>&1; then
+      break
+    fi
+    sleep 0.5
+  done
+  # Force kill if still running
+  if pgrep -f "$APP_NAME" >/dev/null 2>&1; then
+    echo "Force-closing nav0..."
+    pkill -f "$APP_NAME" 2>/dev/null || true
+    sleep 1
+  fi
+fi
+
 # Get latest release tag
 echo "Fetching latest release..."
 TAG=$(curl -sfL "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name"' | head -1 | cut -d'"' -f4)
@@ -61,11 +80,17 @@ if [ -z "$APP_PATH" ]; then
   exit 1
 fi
 
-# Copy to Applications (remove old version if exists), fall back to ~/Desktop
+# Remove old version if it exists
 if [ -d "$INSTALL_DIR/$APP_NAME.app" ]; then
-  rm -rf "$INSTALL_DIR/$APP_NAME.app" 2>/dev/null || true
+  if ! rm -rf "$INSTALL_DIR/$APP_NAME.app"; then
+    echo "Error: Failed to remove existing $APP_NAME.app. Is it still running?"
+    echo "Please close nav0 and try again."
+    hdiutil detach "$MOUNT_POINT" -quiet 2>/dev/null || true
+    exit 1
+  fi
 fi
 
+# Copy to Applications, fall back to ~/Desktop on permission errors
 if ! cp -R "$APP_PATH" "$INSTALL_DIR/" 2>/dev/null; then
   INSTALL_DIR="$HOME/Desktop"
   echo "No write access to /Applications, installing to $INSTALL_DIR instead..."
