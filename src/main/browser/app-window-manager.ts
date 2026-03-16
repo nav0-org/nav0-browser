@@ -208,6 +208,20 @@ export abstract class AppWindowManager {
     return AppWindowManager.windows.get(id) || null;
   }
 
+  static async moveTabToWindow(sourceWindow: AppWindow, tabId: string, targetWindow: AppWindow): Promise<boolean> {
+    const tab = sourceWindow.getTabs().find(t => t.getId() === tabId);
+    if (!tab) return false;
+
+    const url = tab.getUrl();
+    const closedRecord = sourceWindow.closeTab(tabId, true);
+    if (closedRecord) {
+      AppWindowManager.recordClosedTab(closedRecord);
+    }
+    await targetWindow.createTab(url, true);
+    AppWindowManager.activateWindow(targetWindow.id);
+    return true;
+  }
+
   static initIPCHandlers(): void {
     ipcMain.on(RendererToMainEventsForBrowserIPC.CREATE_TAB, async (event, appWindowId: string, url: string, activateNewTab: boolean) => {
       let window: AppWindow | null = null;
@@ -484,17 +498,8 @@ export abstract class AppWindowManager {
       if (sourceWindow.isPrivate || targetWindow.isPrivate) return { success: false };
       if (sourceWindowId === targetWindowId) return { success: false };
 
-      const tab = sourceWindow.getTabs().find(t => t.getId() === tabId);
-      if (!tab) return { success: false };
-
-      const url = tab.getUrl();
-      const closedRecord = sourceWindow.closeTab(tabId, true);
-      if (closedRecord) {
-        AppWindowManager.recordClosedTab(closedRecord);
-      }
-      await targetWindow.createTab(url, true);
-      AppWindowManager.activateWindow(targetWindow.id);
-      return { success: true };
+      const success = await AppWindowManager.moveTabToWindow(sourceWindow, tabId, targetWindow);
+      return { success };
     });
 
     ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_FIND_IN_PAGE, async (event, appWindowId: string) => {
@@ -814,13 +819,7 @@ export abstract class AppWindowManager {
             moveSubmenu.push({
               label,
               click: async () => {
-                const url = tab.getUrl();
-                const closedRecord = window.closeTab(tabId, true);
-                if (closedRecord) {
-                  AppWindowManager.recordClosedTab(closedRecord);
-                }
-                await targetWindow.createTab(url, true);
-                AppWindowManager.activateWindow(targetWindow.id);
+                await AppWindowManager.moveTabToWindow(window, tabId, targetWindow);
               },
             });
           }
