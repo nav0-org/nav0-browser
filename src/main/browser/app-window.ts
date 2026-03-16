@@ -28,6 +28,7 @@ export class AppWindow {
   private database: DB;
   private readyPromise: Promise<void>;
   private resolveReady: () => void;
+  private _fullscreenToggleIntentional = false;
 
   constructor(isPrivate = false, database: DB) {
     this.isPrivate = isPrivate;
@@ -89,9 +90,17 @@ export class AppWindow {
         this.browserWindowInstance = null;
       });
 
-      // Prevent Escape from exiting fullscreen
+      // Prevent Escape from exiting fullscreen, but allow intentional toggles
       this.browserWindowInstance.on('leave-full-screen', () => {
+        if (this._fullscreenToggleIntentional) {
+          this._fullscreenToggleIntentional = false;
+          return;
+        }
         this.browserWindowInstance?.setFullScreen(true);
+      });
+
+      this.browserWindowInstance.on('enter-full-screen', () => {
+        this._fullscreenToggleIntentional = false;
       });
 
       this.browserWindowInstance.webContents.on('did-finish-load', async () => {
@@ -244,6 +253,13 @@ export class AppWindow {
 
   getBrowserWindowInstance(): BrowserWindow | null {
     return this.browserWindowInstance;
+  }
+
+  toggleFullScreen(): void {
+    if (this.browserWindowInstance) {
+      this._fullscreenToggleIntentional = true;
+      this.browserWindowInstance.setFullScreen(!this.browserWindowInstance.isFullScreen());
+    }
   }
 
   updateViewBounds(bounds: { x: number, y: number, width: number, height: number }): void {
