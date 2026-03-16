@@ -55,6 +55,7 @@ declare global {
       showCommandOOverlay: (appWindowId: string) => Promise<any>;
       hideCommandOOverlay: (appWindowId: string) => Promise<any>;
       fetchAllWindowsTabs: (isPrivate: boolean) => Promise<Array<{ windowId: string; windowName: string; isPrivate: boolean; tabs: Array<{ id: string; title: string; url: string; faviconUrl: string | null; isActive: boolean }> }>>;
+      moveTabToWindow: (sourceWindowId: string, tabId: string, targetWindowId: string) => Promise<{ success: boolean }>;
       getAboutInfo: () => Promise<{ appVersion: string; electronVersion: string; chromiumVersion: string; nodeVersion: string; v8Version: string; platform: string; arch: string; osVersion: string; appPath: string; executableChecksum: string; asarChecksum: string }>;
       showFindInPage: (appWindowId: string) => Promise<any>;
       hideFindInPage: (appWindowId: string) => Promise<any>;

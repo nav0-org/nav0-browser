@@ -477,6 +477,26 @@ export abstract class AppWindowManager {
       return result;
     });
 
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.MOVE_TAB_TO_WINDOW, async (event, sourceWindowId: string, tabId: string, targetWindowId: string) => {
+      const sourceWindow = AppWindowManager.getWindowById(sourceWindowId);
+      const targetWindow = AppWindowManager.getWindowById(targetWindowId);
+      if (!sourceWindow || !targetWindow) return { success: false };
+      if (sourceWindow.isPrivate || targetWindow.isPrivate) return { success: false };
+      if (sourceWindowId === targetWindowId) return { success: false };
+
+      const tab = sourceWindow.getTabs().find(t => t.getId() === tabId);
+      if (!tab) return { success: false };
+
+      const url = tab.getUrl();
+      const closedRecord = sourceWindow.closeTab(tabId, true);
+      if (closedRecord) {
+        AppWindowManager.recordClosedTab(closedRecord);
+      }
+      await targetWindow.createTab(url, true);
+      AppWindowManager.activateWindow(targetWindow.id);
+      return { success: true };
+    });
+
     ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_FIND_IN_PAGE, async (event, appWindowId: string) => {
       const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
       if (window) {
