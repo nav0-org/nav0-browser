@@ -46,6 +46,8 @@ export class Tab {
   private _destroyed = false;
   private showingSSLWarning = false;
   private pendingError: NavigationError | null = null;
+  private sslStatus: 'secure' | 'insecure' | 'internal' = 'internal';
+  private sslCertificate: Electron.Certificate | null = null;
   private willDownloadHandler: ((event: Electron.Event, item: Electron.DownloadItem, webContents: Electron.WebContents) => void) | null = null;
 
   private static readonly DARK_MODE_CSS = `
@@ -251,6 +253,14 @@ export class Tab {
       this.pendingError = null;
       // Reset dark mode CSS key on navigation so it can be re-injected on DOM_READY
       this.darkModeCSSKey = null;
+      // Reset SSL status for new navigation (will be re-evaluated in sendTabUrlUpdate)
+      try {
+        const hostname = new URL(url).hostname;
+        if (this.sslStatus === 'insecure' && !SSLManager.isHostBypassed(hostname)) {
+          this.sslStatus = 'secure';
+          this.sslCertificate = null;
+        }
+      } catch { /* ignore invalid URLs */ }
       this.handleOriginChange(url);
       this.debouncedHandleNavigationCompletion(url);
       // Inject early ad-block hooks (IMA mock, play() interception) as soon as navigation commits
@@ -352,7 +362,7 @@ export class Tab {
     });
 
     // Handle SSL certificate errors — show interstitial warning page
-    this.webContentsViewInstance.webContents.on('certificate-error', (event, url, error, _certificate, callback) => {
+    this.webContentsViewInstance.webContents.on('certificate-error', (event, url, error, certificate, callback) => {
       if (this._destroyed) { callback(false); return; }
 
       // If the host has been explicitly bypassed by the user, allow the connection
@@ -371,12 +381,14 @@ export class Tab {
       callback(false);
 
       this.showingSSLWarning = true;
+      this.sslCertificate = certificate;
       this.url = url;
       this.sendTabUrlUpdate(url);
 
       SSLManager.showWarning(this.webContentsViewInstance.webContents, url, error).then((decision) => {
         this.showingSSLWarning = false;
         if (decision === 'proceed') {
+          this.sslStatus = 'insecure';
           this.navigate(url);
         } else {
           const wc = this.webContentsViewInstance.webContents;
@@ -650,14 +662,64 @@ export class Tab {
     const foundBookmarkRecord = await BookmarkManager.isBookmark(this.parentAppWindow.id, url);
     if (this._destroyed) return;
     this.bookmark = foundBookmarkRecord;
+
+    // Determine SSL status for this URL
+    this.updateSSLStatus(url);
+
+    // Build certificate details if available
+    let sslDetails: { issuer: string; validFrom: string; validTo: string; subjectName: string } | null = null;
+    if (this.sslCertificate) {
+      sslDetails = {
+        issuer: this.sslCertificate.issuerName,
+        validFrom: new Date(this.sslCertificate.validStart * 1000).toLocaleDateString(),
+        validTo: new Date(this.sslCertificate.validExpiry * 1000).toLocaleDateString(),
+        subjectName: this.sslCertificate.subjectName,
+      };
+    }
+
     this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_URL_UPDATED, {
       id: this.id,
       url: this.url,
       isBookmark: (this.bookmark? true : false),
       bookmarkId: this.bookmark ? this.bookmark.id : null,
       canGoBack: this.webContentsViewInstance.webContents.navigationHistory.canGoBack(),
-      canGoForward: this.webContentsViewInstance.webContents.navigationHistory.canGoForward()
+      canGoForward: this.webContentsViewInstance.webContents.navigationHistory.canGoForward(),
+      sslStatus: this.sslStatus,
+      sslDetails,
     });
+  }
+
+  private updateSSLStatus(url: string): void {
+    if (!url || url.startsWith(InAppUrls.PREFIX) || url.startsWith('file://')) {
+      this.sslStatus = 'internal';
+      this.sslCertificate = null;
+      return;
+    }
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol === 'https:') {
+        // If the host was bypassed, keep insecure status
+        if (SSLManager.isHostBypassed(parsed.hostname)) {
+          this.sslStatus = 'insecure';
+        } else if (this.sslStatus !== 'insecure') {
+          // Secure HTTPS with valid certificate
+          this.sslStatus = 'secure';
+          // Fetch the actual certificate from the webContents
+          this.fetchCertificate();
+        }
+      } else {
+        this.sslStatus = 'insecure';
+        this.sslCertificate = null;
+      }
+    } catch {
+      this.sslStatus = 'internal';
+    }
+  }
+
+  private fetchCertificate(): void {
+    // Certificate details are populated from the certificate-error handler
+    // for bypassed sites. For valid HTTPS, certificate details aren't available
+    // through Electron's API without a verify proc, so we just show the lock icon.
   }
 
   private recordHistory(url: string): void {

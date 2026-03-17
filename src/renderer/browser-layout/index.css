@@ -226,7 +226,14 @@ body.is-private .private-window-identifier{
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
 }
 
-.search-icon {
+/* SSL Indicator */
+.ssl-indicator-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ssl-indicator {
   color: var(--text-secondary);
   margin-right: var(--spacing-xs);
   cursor: pointer;
@@ -237,11 +244,95 @@ body.is-private .private-window-identifier{
   border-radius: var(--radius-circle);
   background: none;
   border: none;
+  transition: color 0.2s ease, background-color 0.2s ease;
 }
 
-.search-icon:hover {
+.ssl-indicator:hover {
   background-color: var(--bg-hover);
+}
+
+.ssl-indicator.ssl-search {
+  color: var(--text-secondary);
+}
+
+.ssl-indicator.ssl-search:hover {
   color: var(--text-color);
+}
+
+.ssl-indicator.ssl-secure {
+  color: #16a34a;
+}
+
+.ssl-indicator.ssl-secure:hover {
+  color: #15803d;
+}
+
+.ssl-indicator.ssl-insecure {
+  color: #dc2626;
+  animation: ssl-pulse 2s ease-in-out infinite;
+}
+
+.ssl-indicator.ssl-insecure:hover {
+  color: #b91c1c;
+}
+
+@keyframes ssl-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* SSL Tooltip */
+.ssl-tooltip {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 6px;
+  z-index: 1000;
+  min-width: 280px;
+  max-width: 360px;
+  background-color: var(--bg-light);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-color);
+}
+
+[data-theme="dark"] .ssl-tooltip {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.ssl-tooltip-secure strong {
+  color: #16a34a;
+}
+
+.ssl-tooltip-insecure strong {
+  color: #dc2626;
+}
+
+.ssl-tooltip-detail {
+  margin-top: 6px;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.ssl-tooltip-cert {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-color);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.ssl-tooltip-cert div {
+  margin-bottom: 2px;
+}
+
+.ssl-label {
+  color: var(--text-color);
+  font-weight: 500;
 }
 
 .url-input {

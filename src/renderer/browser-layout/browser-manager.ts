@@ -23,6 +23,12 @@ export class BrowserTabManager {
   private darkModeButton: HTMLButtonElement;
   private darkModeIconMoon: HTMLElement;
   private darkModeIconSun: HTMLElement;
+  private sslIndicator: HTMLButtonElement;
+  private sslIconSearch: HTMLElement;
+  private sslIconSecure: HTMLElement;
+  private sslIconInsecure: HTMLElement;
+  private sslTooltip: HTMLElement;
+  private sslTooltipContent: HTMLElement;
 
   // State
   private tabs: Tab[] = [];
@@ -76,8 +82,15 @@ export class BrowserTabManager {
     this.darkModeButton = document.getElementById('dark-mode-button') as HTMLButtonElement;
     this.darkModeIconMoon = document.getElementById('dark-mode-icon-moon') as HTMLElement;
     this.darkModeIconSun = document.getElementById('dark-mode-icon-sun') as HTMLElement;
+    this.sslIndicator = document.getElementById('ssl-indicator') as HTMLButtonElement;
+    this.sslIconSearch = document.getElementById('ssl-icon-search') as HTMLElement;
+    this.sslIconSecure = document.getElementById('ssl-icon-secure') as HTMLElement;
+    this.sslIconInsecure = document.getElementById('ssl-icon-insecure') as HTMLElement;
+    this.sslTooltip = document.getElementById('ssl-tooltip') as HTMLElement;
+    this.sslTooltipContent = document.getElementById('ssl-tooltip-content') as HTMLElement;
 
     this.initDarkMode();
+    this.setupSSLIndicator();
   }
 
   private setupEventListeners(): void {
@@ -178,6 +191,7 @@ export class BrowserTabManager {
       this.forwardButton.disabled = !newActiveTab.canGoForward;
       this.handleBookmark();
       this.updateReaderModeButton();
+      this.updateSSLIndicator();
     });
 
     // Tab closed
@@ -206,13 +220,19 @@ export class BrowserTabManager {
     });
 
     // Tab URL updated
-    window.BrowserAPI.onTabUrlUpdated((data: { id: string, url: string, isBookmark: boolean, bookmarkId: string | null, canGoBack: boolean, canGoForward: boolean }) => {
-      this.getTabById(data.id)?.handleUrlChange(data.url, data.isBookmark, data.bookmarkId, data.canGoBack, data.canGoForward);
+    window.BrowserAPI.onTabUrlUpdated((data: { id: string, url: string, isBookmark: boolean, bookmarkId: string | null, canGoBack: boolean, canGoForward: boolean, sslStatus?: string, sslDetails?: { issuer: string; validFrom: string; validTo: string; subjectName: string } | null }) => {
+      const tab = this.getTabById(data.id);
+      if (tab) {
+        tab.handleUrlChange(data.url, data.isBookmark, data.bookmarkId, data.canGoBack, data.canGoForward);
+        tab.sslStatus = (data.sslStatus as 'secure' | 'insecure' | 'internal') || 'internal';
+        tab.sslDetails = data.sslDetails || null;
+      }
       if (data.id === this.activeTabId) {
         this.urlInput.value = data.url;
         this.backButton.disabled = !data.canGoBack;
         this.forwardButton.disabled = !data.canGoForward;
         this.handleBookmark();
+        this.updateSSLIndicator();
       }
     });
 
@@ -439,6 +459,91 @@ export class BrowserTabManager {
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
     }
+  }
+
+  private setupSSLIndicator(): void {
+    this.sslIndicator.addEventListener('mouseenter', () => {
+      const activeTab = this.getTabById(this.activeTabId);
+      if (!activeTab || activeTab.sslStatus === 'internal') return;
+      this.showSSLTooltip(activeTab);
+    });
+    this.sslIndicator.addEventListener('mouseleave', () => {
+      this.sslTooltip.style.display = 'none';
+    });
+  }
+
+  private showSSLTooltip(tab: Tab): void {
+    if (tab.sslStatus === 'secure') {
+      let html = '<div class="ssl-tooltip-secure"><strong>Connection is secure</strong></div>';
+      html += '<div class="ssl-tooltip-detail">Your information (for example, passwords or credit card numbers) is private when it is sent to this site.</div>';
+      if (tab.sslDetails) {
+        html += '<div class="ssl-tooltip-cert">';
+        html += `<div><span class="ssl-label">Issued to:</span> ${this.escapeHtml(tab.sslDetails.subjectName)}</div>`;
+        html += `<div><span class="ssl-label">Issued by:</span> ${this.escapeHtml(tab.sslDetails.issuer)}</div>`;
+        html += `<div><span class="ssl-label">Valid:</span> ${this.escapeHtml(tab.sslDetails.validFrom)} - ${this.escapeHtml(tab.sslDetails.validTo)}</div>`;
+        html += '</div>';
+      }
+      this.sslTooltipContent.innerHTML = html;
+    } else {
+      let html = '<div class="ssl-tooltip-insecure"><strong>Connection is not secure</strong></div>';
+      if (tab.url.startsWith('http://')) {
+        html += '<div class="ssl-tooltip-detail">This site does not use a secure (HTTPS) connection. Information you send may be visible to others.</div>';
+      } else {
+        html += '<div class="ssl-tooltip-detail">The certificate for this site is not trusted. You have chosen to proceed despite the warning.</div>';
+        if (tab.sslDetails) {
+          html += '<div class="ssl-tooltip-cert">';
+          html += `<div><span class="ssl-label">Issued to:</span> ${this.escapeHtml(tab.sslDetails.subjectName)}</div>`;
+          html += `<div><span class="ssl-label">Issued by:</span> ${this.escapeHtml(tab.sslDetails.issuer)}</div>`;
+          html += `<div><span class="ssl-label">Valid:</span> ${this.escapeHtml(tab.sslDetails.validFrom)} - ${this.escapeHtml(tab.sslDetails.validTo)}</div>`;
+          html += '</div>';
+        }
+      }
+      this.sslTooltipContent.innerHTML = html;
+    }
+    this.sslTooltip.style.display = 'block';
+  }
+
+  private updateSSLIndicator(): void {
+    const activeTab = this.getTabById(this.activeTabId);
+    if (!activeTab) return;
+
+    const url = activeTab.url;
+    const isNewTab = !url || url === '' || url.startsWith('nav0://');
+    const sslStatus = activeTab.sslStatus || 'internal';
+
+    // Hide all icons first
+    this.sslIconSearch.style.display = 'none';
+    this.sslIconSecure.style.display = 'none';
+    this.sslIconInsecure.style.display = 'none';
+
+    // Remove all state classes
+    this.sslIndicator.classList.remove('ssl-search', 'ssl-secure', 'ssl-insecure');
+
+    if (isNewTab) {
+      // Show magnifier on new tab page
+      this.sslIconSearch.style.display = '';
+      this.sslIndicator.classList.add('ssl-search');
+      this.sslIndicator.title = 'Search';
+    } else if (sslStatus === 'secure') {
+      this.sslIconSecure.style.display = '';
+      this.sslIndicator.classList.add('ssl-secure');
+      this.sslIndicator.title = 'Connection is secure';
+    } else if (sslStatus === 'insecure') {
+      this.sslIconInsecure.style.display = '';
+      this.sslIndicator.classList.add('ssl-insecure');
+      this.sslIndicator.title = 'Connection is not secure';
+    } else {
+      // Internal pages - show search icon
+      this.sslIconSearch.style.display = '';
+      this.sslIndicator.classList.add('ssl-search');
+      this.sslIndicator.title = 'Search';
+    }
+  }
+
+  private escapeHtml(str: string): string {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
   }
 
   private updateBrowserViewBounds(): void {

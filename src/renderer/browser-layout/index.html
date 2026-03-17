@@ -50,9 +50,16 @@
       </div>
       
       <div class="address-bar">
-        <button class="btn-icon btn-ghost rounded-circle p-0 search-icon" style="width: 32px; height: 32px;">
-          <i data-lucide="search" width="16" height="16"></i>
-        </button>
+        <div class="ssl-indicator-wrapper" id="ssl-indicator-wrapper">
+          <button class="btn-icon btn-ghost rounded-circle p-0 ssl-indicator ssl-search" id="ssl-indicator" style="width: 32px; height: 32px;" title="Search">
+            <i data-lucide="search" width="16" height="16" id="ssl-icon-search"></i>
+            <i data-lucide="lock" width="16" height="16" id="ssl-icon-secure" style="display:none;"></i>
+            <i data-lucide="lock-open" width="16" height="16" id="ssl-icon-insecure" style="display:none;"></i>
+          </button>
+          <div class="ssl-tooltip" id="ssl-tooltip" style="display:none;">
+            <div class="ssl-tooltip-content" id="ssl-tooltip-content"></div>
+          </div>
+        </div>
         <input type="text" class="url-input" id="url-input">
         <button id="reader-mode-button" title="Reader Mode" class="btn-icon btn-ghost rounded-circle p-0 reader-mode-btn" style="width: 32px; height: 32px; display: none;">
           <i data-lucide="book-open-text" width="16" height="16"></i>
