@@ -37,7 +37,7 @@
 
 .search-input {
   width: 100%;
-  padding: 6px var(--spacing-md) 6px var(--spacing-xl);
+  padding: 8px var(--spacing-md) 8px 32px;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   font-size: var(--font-sm);
