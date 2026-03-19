@@ -19,26 +19,30 @@ export class OptionsMenuManager {
 
   private initializeDomElements(): void {
     this.optionsElement = document.getElementById('options-dropdown') as HTMLElement;
+    // Use Unicode escape sequences to avoid encoding issues in bundled output
+    const cmdKey = '\u2318'; // ⌘
+    const shiftKey = '\u21E7'; // ⇧
+
     if(window.BrowserAPI.platform === 'darwin'){
-      document.getElementById('new-tab-shortcut').textContent = '⌘+T';
-      document.getElementById('new-window-shortcut').textContent = '⌘+N';
-      document.getElementById('new-private-window-shortcut').textContent = '⌘+⇧+T';
-      document.getElementById('print-shortcut').textContent = '⌘+P';
-      document.getElementById('find-in-page-shortcut').textContent = '⌘+F';
-      document.getElementById('downloads-shortcut').textContent = '⌘+⇧+D';
-      document.getElementById('history-shortcut').textContent = '⌘+⇧+H';
-      document.getElementById('bookmarks-shortcut').textContent = '⌘+⇧+B';
-      document.getElementById('browser-settings-shortcut').textContent = '⌘+⇧+,';
+      document.getElementById('new-tab-shortcut').textContent = `${cmdKey}+T`;
+      document.getElementById('new-window-shortcut').textContent = `${cmdKey}+N`;
+      document.getElementById('new-private-window-shortcut').textContent = `${cmdKey}+${shiftKey}+T`;
+      document.getElementById('print-shortcut').textContent = `${cmdKey}+P`;
+      document.getElementById('find-in-page-shortcut').textContent = `${cmdKey}+F`;
+      document.getElementById('downloads-shortcut').textContent = `${cmdKey}+${shiftKey}+D`;
+      document.getElementById('history-shortcut').textContent = `${cmdKey}+${shiftKey}+H`;
+      document.getElementById('bookmarks-shortcut').textContent = `${cmdKey}+${shiftKey}+B`;
+      document.getElementById('browser-settings-shortcut').textContent = `${cmdKey}+${shiftKey}+,`;
     } else {
       document.getElementById('new-tab-shortcut').textContent = 'Ctrl+T';
       document.getElementById('new-window-shortcut').textContent = 'Ctrl+N';
-      document.getElementById('new-private-window-shortcut').textContent = 'Ctrl+⇧+T';
+      document.getElementById('new-private-window-shortcut').textContent = `Ctrl+${shiftKey}+T`;
       document.getElementById('print-shortcut').textContent = 'Ctrl+P';
       document.getElementById('find-in-page-shortcut').textContent = 'Ctrl+F';
-      document.getElementById('downloads-shortcut').textContent = 'Ctrl+⇧+D';
-      document.getElementById('history-shortcut').textContent = 'Ctrl+⇧+H';
-      document.getElementById('bookmarks-shortcut').textContent = 'Ctrl+⇧+B';
-      document.getElementById('browser-settings-shortcut').textContent = 'Ctrl+⇧+,';
+      document.getElementById('downloads-shortcut').textContent = `Ctrl+${shiftKey}+D`;
+      document.getElementById('history-shortcut').textContent = `Ctrl+${shiftKey}+H`;
+      document.getElementById('bookmarks-shortcut').textContent = `Ctrl+${shiftKey}+B`;
+      document.getElementById('browser-settings-shortcut').textContent = `Ctrl+${shiftKey}+,`;
     }
 
     // Populate history submenu when hovering
