@@ -27,7 +27,18 @@ body.is-private .private-window-identifier{
 }
 
 .browser-layout-container {
-  height: 85px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+#browser-control-panel {
+  flex-shrink: 0;
+}
+
+#browser-view-container {
+  flex: 1;
+  min-height: 0;
 }
 
 /* Tab Bar */

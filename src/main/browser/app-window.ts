@@ -1,4 +1,4 @@
-import { BrowserWindow, session } from "electron";
+import { BrowserWindow, screen, session } from "electron";
 import { v4 as uuid } from "uuid";
 import { Tab } from "./tab";
 import { AppConstants, ClosedTabRecord, InAppUrls, MainToRendererEventsForBrowserIPC } from "../../constants/app-constants";
@@ -28,6 +28,7 @@ export class AppWindow {
   private database: DB;
   private readyPromise: Promise<void>;
   private resolveReady: () => void;
+  private _desiredFullScreen = true;
 
   constructor(isPrivate = false, database: DB) {
     this.isPrivate = isPrivate;
@@ -89,9 +90,23 @@ export class AppWindow {
         this.browserWindowInstance = null;
       });
 
-      // Prevent Escape from exiting fullscreen
+      // When leaving fullscreen, set proper windowed bounds and resize all views.
       this.browserWindowInstance.on('leave-full-screen', () => {
-        this.browserWindowInstance?.setFullScreen(true);
+        this._desiredFullScreen = false;
+        // Window was created with fullscreen: true so it has no pre-fullscreen
+        // geometry. Set centered bounds now that the transition is complete.
+        const { width: screenW, height: screenH } = screen.getPrimaryDisplay().workAreaSize;
+        const w = Math.min(1200, screenW);
+        const h = Math.min(800, screenH);
+        const x = Math.round((screenW - w) / 2);
+        const y = Math.round((screenH - h) / 2);
+        this.browserWindowInstance?.setBounds({ x, y, width: w, height: h });
+        this.handleResizing();
+      });
+
+      this.browserWindowInstance.on('enter-full-screen', () => {
+        this._desiredFullScreen = true;
+        this.handleResizing();
       });
 
       this.browserWindowInstance.webContents.on('did-finish-load', async () => {
@@ -111,7 +126,7 @@ export class AppWindow {
       });
     
       // this.browserWindowInstance.webContents.openDevTools({mode : 'detach'});
-      this.browserWindowInstance.on('resize', this.handleResizing);
+      this.browserWindowInstance.on('resize', this.handleResizing.bind(this));
   }
 
   public closeWindow(clearSession: boolean) {
@@ -143,8 +158,44 @@ export class AppWindow {
   }
 
   private handleResizing() {
-    if (this.browserWindowInstance && this.getActiveTab()) {
-      this.getActiveTab().getWebContentsViewInstance().setBounds(this.browserWindowInstance.getBounds());
+    if (!this.browserWindowInstance) return;
+    const parentBounds = this.browserWindowInstance.contentView.getBounds();
+    const yOffset = 85;
+
+    // Resize active tab
+    if (this.getActiveTab()) {
+      this.getActiveTab().getWebContentsViewInstance().setBounds({
+        x: 0,
+        y: yOffset,
+        width: parentBounds.width,
+        height: parentBounds.height - yOffset,
+      });
+    }
+
+    // Resize full-size overlays that are currently visible
+    const children = this.browserWindowInstance.contentView.children;
+    const fullSizeOverlays = [
+      this.optionsMenuManager,
+      this.commandKOverlayManager,
+      this.commandOOverlayManager,
+      this.permissionPromptOverlayManager,
+      this.issueReportOverlayManager,
+    ];
+    for (const mgr of fullSizeOverlays) {
+      if (mgr && children.includes(mgr.getWebContentsViewInstance())) {
+        mgr.getWebContentsViewInstance().setBounds(parentBounds);
+      }
+    }
+
+    // Resize find-in-page bar if visible
+    if (this.findInPageManager && children.includes(this.findInPageManager.getWebContentsViewInstance())) {
+      const barWidth = Math.min(520, parentBounds.width - 24);
+      this.findInPageManager.getWebContentsViewInstance().setBounds({
+        x: parentBounds.width - barWidth - 12,
+        y: yOffset,
+        width: barWidth,
+        height: 48,
+      });
     }
   }
 
@@ -206,7 +257,7 @@ export class AppWindow {
       this.activeTabId = id;
       const parentBounds = this.browserWindowInstance.contentView.getBounds();
       const yOffset = 85;
-      this.getActiveTab().getWebContentsViewInstance()?.setBounds({x: parentBounds.x, y: yOffset, width: parentBounds.width, height: parentBounds.height - yOffset});
+      this.getActiveTab().getWebContentsViewInstance()?.setBounds({x: 0, y: yOffset, width: parentBounds.width, height: parentBounds.height - yOffset});
       this.browserWindowInstance.contentView.addChildView(this.getActiveTab().getWebContentsViewInstance());
       this.getActiveTab().getWebContentsViewInstance().webContents.focus();
     }
@@ -246,8 +297,17 @@ export class AppWindow {
     return this.browserWindowInstance;
   }
 
+  toggleFullScreen(): void {
+    if (this.browserWindowInstance) {
+      this._desiredFullScreen = !this._desiredFullScreen;
+      this.browserWindowInstance.setFullScreen(this._desiredFullScreen);
+    }
+  }
+
   updateViewBounds(bounds: { x: number, y: number, width: number, height: number }): void {
-    this.getBrowserWindowInstance().setBounds(bounds);
+    if (this.getActiveTab()) {
+      this.getActiveTab().getWebContentsViewInstance().setBounds(bounds);
+    }
   }
 
   async showOptionsMenuOverlay(): Promise<void> {

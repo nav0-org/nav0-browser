@@ -121,7 +121,7 @@ export abstract class AppMenuManager {
           { role: 'zoomIn' as const, accelerator: 'CmdOrCtrl+Shift+=',},
           { role: 'zoomOut' as const, accelerator: 'CmdOrCtrl+Shift+-',},
           { type: 'separator' as const},
-          { role: 'togglefullscreen' as const},
+          { label: 'Toggle Full Screen', accelerator: isMac ? 'Ctrl+Command+F' : 'F11', click: () => { AppWindowManager.getActiveWindow()?.toggleFullScreen(); }},
           { type: 'separator' as const},
           {label: 'Hard Reload', accelerator: 'CmdOrCtrl+Shift+R', click: async() => {
             const activeWindow = AppWindowManager.getActiveWindow();
