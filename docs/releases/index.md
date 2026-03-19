@@ -14,7 +14,7 @@ What's new in every release of nav0 Browser.
     <h2>v0.0.9</h2>
   </a>
   <div class="release-meta">March 19, 2026 <span class="release-badge latest">Latest</span></div>
-  <p class="release-excerpt">SSL certificate indicator overlay, fullscreen exit fixes, drag-and-drop tabs between windows, installer graceful quit prompt, MIT license, and new blog post on incognito mode.</p>
+  <p class="release-excerpt">SSL certificate indicator overlay, fullscreen exit fixes, drag-and-drop tabs between windows, and installer graceful quit prompt.</p>
 </div>
 
 <div class="release-list-item">
@@ -46,7 +46,7 @@ What's new in every release of nav0 Browser.
     <h2>v0.0.5-alpha</h2>
   </a>
   <div class="release-meta">March 1, 2026 <span class="release-badge alpha">Alpha</span></div>
-  <p class="release-excerpt">New nav0 compass logo and Vercel Black rebrand. Multiple bug fixes for fullscreen, hero images, dark mode, and Command+K overlay.</p>
+  <p class="release-excerpt">New nav0 compass logo and rebrand. Bug fixes for fullscreen, Command+K overlay, and auto-launch after macOS install.</p>
 </div>
 
 <div class="release-list-item">
@@ -54,7 +54,7 @@ What's new in every release of nav0 Browser.
     <h2>v0.0.4</h2>
   </a>
   <div class="release-meta">March 1, 2026</div>
-  <p class="release-excerpt">macOS curl install script, Gatekeeper bypass, and VitePress ESM build fix.</p>
+  <p class="release-excerpt">macOS curl install script, Gatekeeper bypass, and startup crash fix.</p>
 </div>
 
 <div class="release-list-item">
@@ -70,7 +70,7 @@ What's new in every release of nav0 Browser.
     <h2>v0.0.2-alpha</h2>
   </a>
   <div class="release-meta">February 25, 2026 <span class="release-badge alpha">Alpha</span></div>
-  <p class="release-excerpt">macOS stability fixes, Homebrew Cask distribution, downloads page with GitHub Releases integration, and hardened build pipeline.</p>
+  <p class="release-excerpt">macOS stability fixes and Homebrew Cask distribution.</p>
 </div>
 
 <div class="release-list-item">
@@ -78,5 +78,5 @@ What's new in every release of nav0 Browser.
     <h2>v0.0.1-alpha</h2>
   </a>
   <div class="release-meta">February 12, 2026 <span class="release-badge alpha">Alpha</span></div>
-  <p class="release-excerpt">First alpha release — Electron-based browser with Chromium engine, Command-K search, tab management, bookmarks, and VitePress documentation site.</p>
+  <p class="release-excerpt">First alpha release — Electron-based browser with Chromium engine, Command-K search, tab management, bookmarks, and download manager.</p>
 </div>

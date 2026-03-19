@@ -78,6 +78,30 @@ head:
           },
           {
             "@type": "Question",
+            "name": "Does nav0 have a built-in ad blocker?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. nav0 includes a built-in ad blocker with domain blocking, URL pattern matching, cosmetic filtering, and video ad blocking. It works out of the box with no configuration needed."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does nav0 support dark mode?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. nav0 has a dark mode toggle in the navbar that applies dark CSS to any website. It persists across back/forward navigation."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I open PDFs in nav0?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. nav0 has a built-in PDF reader that opens PDFs inline in browser tabs. You can also open local PDFs via File > Open PDF (Ctrl+Shift+O / Cmd+Shift+O)."
+            }
+          },
+          {
+            "@type": "Question",
             "name": "Why doesn't nav0 have an AI assistant?",
             "acceptedAnswer": {
               "@type": "Answer",
@@ -131,6 +155,22 @@ head:
               "@type": "Answer",
               "text": "The code is open source under the MIT License. Even if the project changes hands, the community can fork it and continue development independently. Users can always build from a trusted commit."
             }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I report a bug?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "You can report bugs directly from inside the browser using the built-in issue reporter, which supports image attachments. Alternatively, open an issue on GitHub at https://github.com/nav0-org/nav0-browser/issues."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I restore tabs I accidentally closed?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. nav0 tracks recently closed tabs and lets you restore them from the History menu. You can even restore an entire closed window with all its tabs."
+            }
           }
         ]
       }
@@ -161,6 +201,10 @@ nav0 uses **Chromium** via Electron, giving it full compatibility with the moder
 ### Is nav0 open source?
 
 Yes. nav0 is fully open source under the **MIT License**. The complete source code is publicly available at [github.com/nav0-org/nav0-browser](https://github.com/nav0-org/nav0-browser). You can audit it, fork it, or build it from source yourself.
+
+### How do I update nav0?
+
+Download the latest release from [GitHub Releases](https://github.com/nav0-org/nav0-browser/releases) or, on macOS, run `brew upgrade nav0-browser`. nav0 never forces updates — you control when and how you update.
 
 ---
 
@@ -193,6 +237,14 @@ Configuration locations:
 ### Does nav0 phone home?
 
 No. nav0 makes **zero unsolicited network requests**. No analytics pings, no heartbeat checks, no "anonymous" usage data, no background sync. You can verify this by monitoring your network traffic.
+
+### Does nav0 block ads and trackers?
+
+Yes. nav0 includes a **built-in ad blocker** with domain blocking, URL pattern matching, cosmetic filtering, and video ad blocking. It also blocks third-party cookies by default and includes fingerprinting protection. Everything works out of the box.
+
+### Is private browsing truly private in nav0?
+
+In private mode, nav0 saves no history, clears cookies on close, and persists no cached data. Unlike other browsers, nav0 also doesn't collect data in normal mode — so private mode is an extra layer on top of already-private browsing.
 
 ---
 
@@ -228,6 +280,30 @@ Yes. nav0 supports extensions. However, third-party extensions have their own pr
 - Using open-source extensions
 - Limiting the number of installed extensions
 
+### Does nav0 have a built-in ad blocker?
+
+Yes. nav0 ships with a comprehensive ad blocker that includes domain blocking, URL pattern matching, cosmetic filtering, and video ad blocking. It works out of the box with no configuration required.
+
+### Does nav0 support dark mode?
+
+Yes. nav0 has a **dark mode toggle** in the browser navbar that applies dark CSS to any website. It works on sites like LinkedIn and Reddit and persists across back/forward navigation.
+
+### Can I open PDFs in nav0?
+
+Yes. nav0 has a **built-in PDF reader** that opens PDFs inline in browser tabs. You can also open local PDF files via File > Open PDF (Ctrl+Shift+O / Cmd+Shift+O).
+
+### Does nav0 have a reader mode?
+
+Yes. nav0 includes **Reader Mode** powered by Readability.js — strip away page clutter and read articles in a clean, distraction-free layout.
+
+### Can I restore tabs I accidentally closed?
+
+Yes. nav0 tracks recently closed tabs and lets you restore them from the History menu. You can even restore an entire closed window with all its tabs.
+
+### Does nav0 support tab pinning?
+
+Yes. Right-click any tab to pin it. Pinned tabs stay compact and persistent at the left side of the tab strip.
+
 ### Why doesn't nav0 have an AI assistant?
 
 nav0 does not include AI because **a browser's job is to browse the web**. AI features typically require sending page content and user queries to cloud servers for processing, which contradicts nav0's privacy-first design. If you want AI tools, you can visit them in a browser tab like any other website.
@@ -239,6 +315,18 @@ Browser VPNs create **conflicts of interest** and a false sense of security. A V
 ### Why doesn't nav0 have sync or cloud features?
 
 Cloud sync requires accounts, which enable identity-linked data collection. It also means your bookmarks, history, and settings exist on someone else's server. nav0 keeps everything local by design. If you need to transfer data between devices, you can export and import bookmarks manually.
+
+### How do I report a bug?
+
+You can report bugs **directly from inside the browser** using the built-in issue reporter, which supports image attachments. Screenshots are automatically compressed before upload. Alternatively, open an issue on [GitHub](https://github.com/nav0-org/nav0-browser/issues).
+
+### Does nav0 enforce HTTPS?
+
+Yes. nav0 **automatically upgrades HTTP URLs to HTTPS** when possible. For sites with invalid or expired SSL certificates, nav0 shows a security warning page with a temporary bypass option.
+
+### Can I check if a site's SSL certificate is valid?
+
+Yes. Click the **lock icon** in the address bar to view SSL certificate details in an overlay panel. The icon also reflects whether the connection is secure, insecure, or has no certificate info.
 
 ---
 
@@ -263,6 +351,10 @@ The code is open source under the MIT License. Even if the project changes hands
 ### How can I contribute?
 
 Visit the [Contributing guide](/guide/contributing) for details. You can contribute by reporting bugs, submitting pull requests, improving documentation, or simply using nav0 and spreading the word.
+
+### What license does nav0 use?
+
+nav0 is licensed under the **MIT License** — one of the most permissive open-source licenses. You are free to use, modify, and distribute the software.
 
 ---
 
