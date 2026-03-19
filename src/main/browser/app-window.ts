@@ -445,6 +445,8 @@ export class AppWindow {
     }));
   }
 
+  private sslInfoDismissedAt = 0;
+
   private isSSLInfoVisible(): boolean {
     return this.sslInfoOverlayManager && this.browserWindowInstance.contentView.children.indexOf(this.sslInfoOverlayManager.getWebContentsViewInstance()) > -1;
   }
@@ -457,6 +459,12 @@ export class AppWindow {
 
     if (this.isSSLInfoVisible()) {
       this.hideSSLInfoOverlay();
+      return;
+    }
+
+    // If overlay was just dismissed by blur (e.g. user clicked the SSL icon to close),
+    // the blur fires before the click, so don't reopen immediately.
+    if (Date.now() - this.sslInfoDismissedAt < 300) {
       return;
     }
 
@@ -494,6 +502,7 @@ export class AppWindow {
 
   hideSSLInfoOverlay(): void {
     if (this.isSSLInfoVisible()) {
+      this.sslInfoDismissedAt = Date.now();
       this.browserWindowInstance.contentView.removeChildView(this.sslInfoOverlayManager.getWebContentsViewInstance());
     }
   }
