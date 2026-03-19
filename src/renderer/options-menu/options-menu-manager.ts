@@ -19,30 +19,35 @@ export class OptionsMenuManager {
 
   private initializeDomElements(): void {
     this.optionsElement = document.getElementById('options-dropdown') as HTMLElement;
-    // Use Unicode escape sequences to avoid encoding issues in bundled output
-    const cmdKey = '\u2318'; // ⌘
-    const shiftKey = '\u21E7'; // ⇧
+    // Use HTML character references (&#x2318; for ⌘, &#x21E7; for ⇧) to avoid
+    // encoding issues — webpack/terser converts \u escapes to literal UTF-8 bytes
+    // which get corrupted when the bundled JS is loaded with wrong encoding on macOS.
+    // HTML character references are pure ASCII and always resolve correctly.
+    const setShortcut = (id: string, html: string) => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = html;
+    };
 
     if(window.BrowserAPI.platform === 'darwin'){
-      document.getElementById('new-tab-shortcut').textContent = `${cmdKey}+T`;
-      document.getElementById('new-window-shortcut').textContent = `${cmdKey}+N`;
-      document.getElementById('new-private-window-shortcut').textContent = `${cmdKey}+${shiftKey}+T`;
-      document.getElementById('print-shortcut').textContent = `${cmdKey}+P`;
-      document.getElementById('find-in-page-shortcut').textContent = `${cmdKey}+F`;
-      document.getElementById('downloads-shortcut').textContent = `${cmdKey}+${shiftKey}+D`;
-      document.getElementById('history-shortcut').textContent = `${cmdKey}+${shiftKey}+H`;
-      document.getElementById('bookmarks-shortcut').textContent = `${cmdKey}+${shiftKey}+B`;
-      document.getElementById('browser-settings-shortcut').textContent = `${cmdKey}+${shiftKey}+,`;
+      setShortcut('new-tab-shortcut', '&#x2318;+T');
+      setShortcut('new-window-shortcut', '&#x2318;+N');
+      setShortcut('new-private-window-shortcut', '&#x2318;+&#x21E7;+T');
+      setShortcut('print-shortcut', '&#x2318;+P');
+      setShortcut('find-in-page-shortcut', '&#x2318;+F');
+      setShortcut('downloads-shortcut', '&#x2318;+&#x21E7;+D');
+      setShortcut('history-shortcut', '&#x2318;+&#x21E7;+H');
+      setShortcut('bookmarks-shortcut', '&#x2318;+&#x21E7;+B');
+      setShortcut('browser-settings-shortcut', '&#x2318;+&#x21E7;+,');
     } else {
-      document.getElementById('new-tab-shortcut').textContent = 'Ctrl+T';
-      document.getElementById('new-window-shortcut').textContent = 'Ctrl+N';
-      document.getElementById('new-private-window-shortcut').textContent = `Ctrl+${shiftKey}+T`;
-      document.getElementById('print-shortcut').textContent = 'Ctrl+P';
-      document.getElementById('find-in-page-shortcut').textContent = 'Ctrl+F';
-      document.getElementById('downloads-shortcut').textContent = `Ctrl+${shiftKey}+D`;
-      document.getElementById('history-shortcut').textContent = `Ctrl+${shiftKey}+H`;
-      document.getElementById('bookmarks-shortcut').textContent = `Ctrl+${shiftKey}+B`;
-      document.getElementById('browser-settings-shortcut').textContent = `Ctrl+${shiftKey}+,`;
+      setShortcut('new-tab-shortcut', 'Ctrl+T');
+      setShortcut('new-window-shortcut', 'Ctrl+N');
+      setShortcut('new-private-window-shortcut', 'Ctrl+&#x21E7;+T');
+      setShortcut('print-shortcut', 'Ctrl+P');
+      setShortcut('find-in-page-shortcut', 'Ctrl+F');
+      setShortcut('downloads-shortcut', 'Ctrl+&#x21E7;+D');
+      setShortcut('history-shortcut', 'Ctrl+&#x21E7;+H');
+      setShortcut('bookmarks-shortcut', 'Ctrl+&#x21E7;+B');
+      setShortcut('browser-settings-shortcut', 'Ctrl+&#x21E7;+,');
     }
 
     // Populate history submenu when hovering
