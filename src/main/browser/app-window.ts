@@ -90,11 +90,26 @@ export class AppWindow {
         this.browserWindowInstance = null;
       });
 
-      // Re-enter fullscreen if exit wasn't intentional (e.g. Escape key)
+      // Re-enter fullscreen if exit wasn't intentional (e.g. Escape key).
+      // Otherwise, set proper window bounds and resize the tab view.
       this.browserWindowInstance.on('leave-full-screen', () => {
         if (this._desiredFullScreen) {
           this.browserWindowInstance?.setFullScreen(true);
+          return;
         }
+        // Window was created with fullscreen: true so it has no pre-fullscreen
+        // geometry. Set centered bounds now that the transition is complete.
+        const { width: screenW, height: screenH } = screen.getPrimaryDisplay().workAreaSize;
+        const w = Math.min(1200, screenW);
+        const h = Math.min(800, screenH);
+        const x = Math.round((screenW - w) / 2);
+        const y = Math.round((screenH - h) / 2);
+        this.browserWindowInstance?.setBounds({ x, y, width: w, height: h });
+        this.handleResizing();
+      });
+
+      this.browserWindowInstance.on('enter-full-screen', () => {
+        this.handleResizing();
       });
 
       this.browserWindowInstance.webContents.on('did-finish-load', async () => {
@@ -259,16 +274,6 @@ export class AppWindow {
   toggleFullScreen(): void {
     if (this.browserWindowInstance) {
       this._desiredFullScreen = !this._desiredFullScreen;
-      if (!this._desiredFullScreen) {
-        // Set sensible bounds before exiting fullscreen, since the window
-        // was created with fullscreen: true and has no pre-fullscreen geometry.
-        const { width: screenW, height: screenH } = screen.getPrimaryDisplay().workAreaSize;
-        const w = Math.min(1200, screenW);
-        const h = Math.min(800, screenH);
-        const x = Math.round((screenW - w) / 2);
-        const y = Math.round((screenH - h) / 2);
-        this.browserWindowInstance.setBounds({ x, y, width: w, height: h });
-      }
       this.browserWindowInstance.setFullScreen(this._desiredFullScreen);
     }
   }
