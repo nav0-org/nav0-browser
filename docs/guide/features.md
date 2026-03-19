@@ -1,6 +1,6 @@
 ---
 title: "nav0 Browser Features — Privacy, Security & Performance"
-description: "Explore nav0's features: tracker blocking, fingerprint protection, HTTPS upgrades, tab management, local bookmarks, sandboxing, and more. Only essential browsing features, nothing more."
+description: "Explore nav0's features: ad blocking, tracker blocking, fingerprint protection, HTTPS upgrades, dark mode, tab management, reader mode, PDF reader, local bookmarks, sandboxing, and more. Only essential browsing features, nothing more."
 ---
 
 # Features
@@ -11,13 +11,35 @@ nav0 includes only the features essential for a clean browsing experience. Nothi
 
 ### Tab Management
 
-Simple, efficient tab handling:
+Full-featured tab handling:
 
 - Open unlimited tabs
 - Tab preview on hover
 - Drag to reorder
 - Close with middle-click
-- Restore recently closed tabs
+- Restore recently closed tabs (including full window restoration)
+- Tab context menu — right-click for Reload, Close, Duplicate, Mute/Unmute, and Close Other Tabs
+- Tab pinning — keep tabs compact and persistent
+- Move tabs between windows, or into a new window
+- Drag and drop tabs between windows from the Cmd+O tab switcher
+- Scrollable tab strip — tabs scroll horizontally with a minimum readable width
+- Loading spinner in the favicon area while pages load
+- New tabs open in the background without stealing focus
+
+### Cmd+O Tab Switcher
+
+Quick overlay to search and switch between open tabs:
+
+- Filtered by private/non-private context
+- Drag and drop tabs across windows
+
+### Command-K Search
+
+Unified search across the browser:
+
+- Search bookmarks, history, downloads, and the web from one place
+- Open tab search with switch-to-tab action
+- Keyboard navigation with Escape and Tab support
 
 ### Bookmarks
 
@@ -39,14 +61,56 @@ Browse your history privately:
 
 ### Downloads
 
-Straightforward download management:
+Full download management:
 
 - Choose download location
-- Pause and resume
+- Pause, resume, and cancel downloads
+- Cross-session download resume — paused downloads survive browser restarts
+- Download progress bar with click-to-open
+- Downloads icon with circular progress indicator in the navbar
+- File size display on the Downloads page
 - Clear download history
 - No scanning uploads to external servers
 
+## Browsing & Reading
+
+### Find in Page
+
+Search any page with Ctrl+F / Cmd+F.
+
+### Reader Mode
+
+Distraction-free reading powered by Readability.js — strip away clutter and focus on the content.
+
+### PDF Reader
+
+Open PDFs inline in browser tabs. Also available via File > Open PDF (Ctrl+Shift+O).
+
+### Dark Mode
+
+Apply dark CSS to any website:
+
+- Dark mode toggle in the browser navbar
+- Improved coverage for sites like LinkedIn and Reddit
+- Persists across back/forward navigation
+
+### Print Page
+
+Print from the File menu, Options menu, or right-click context menu.
+
+### Hard Reload
+
+Cmd+Shift+R clears the site's cache and performs a fresh reload.
+
 ## Privacy Features
+
+### Ad Blocker
+
+Built-in ad blocking:
+
+- Domain blocking and URL pattern matching
+- Cosmetic filtering
+- Video ad blocking with IMA SDK mock and early script injection
 
 ### Tracking Protection
 
@@ -57,6 +121,13 @@ Built-in protection against common trackers:
 - Referrer trimming
 - No tracking of your tracking protection usage
 
+### Popup Blocking
+
+Per-site popup controls:
+
+- Smart-allow policy with a 60-second window
+- Popup flood protection — prevents sites from opening too many popups at once
+
 ### Private Browsing
 
 Enhanced private mode:
@@ -66,15 +137,36 @@ Enhanced private mode:
 - No cached data persists
 - Truly private—we can't see it either
 
-### HTTPS Upgrades
+### HTTPS Enforcement
 
 Automatic security:
 
-- Upgrade HTTP to HTTPS when available
+- HTTP URLs are automatically upgraded to HTTPS
 - Clear warnings for insecure sites
 - No phoning home to check URLs
 
+### Customizable User Agent
+
+Choose from presets or enter a custom user agent string. Changes apply to all open tabs immediately.
+
 ## Security Features
+
+### SSL Certificate Indicator
+
+Click the lock icon in the address bar to view certificate details:
+
+- Clean overlay panel with certificate information
+- Icon reflects whether the connection is secure, insecure, or has no certificate info
+- Overlay closes on click-outside or Escape
+
+### SSL/Security Warning Page
+
+Interstitial warning for unsafe connections with a 24-hour bypass expiry.
+
+### Custom Error & Offline Pages
+
+- Friendly error page when navigation fails
+- Dedicated offline page when there is no internet connection
 
 ### Safe Browsing
 
@@ -101,6 +193,24 @@ Stay secure:
 - Transparent changelog
 - No forced updates—you control when
 
+## Browser Settings & Permissions
+
+### Settings & Preferences Engine
+
+Full settings UI with enforcement — configure the browser to work the way you want.
+
+### Site Permission Handling
+
+Granular permission system with custom in-browser UI for camera, microphone, location, and more.
+
+### Geolocation
+
+IP-based geolocation fallback for Linux — no Google location services required.
+
+## In-App Issue Reporting
+
+Submit bug reports directly from the browser with image attachments. Screenshots are resized and compressed client-side before upload.
+
 ## What's Intentionally Missing
 
 We deliberately exclude:
@@ -124,6 +234,8 @@ We deliberately exclude:
 - Download location
 - Cookie policy
 - JavaScript enable/disable per site
+- User agent string
+- Dark mode per site
 
 ### Settings We Don't Include
 
