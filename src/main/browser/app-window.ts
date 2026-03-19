@@ -114,7 +114,7 @@ export class AppWindow {
       });
     
       // this.browserWindowInstance.webContents.openDevTools({mode : 'detach'});
-      this.browserWindowInstance.on('resize', this.handleResizing);
+      this.browserWindowInstance.on('resize', this.handleResizing.bind(this));
   }
 
   public closeWindow(clearSession: boolean) {
@@ -147,7 +147,14 @@ export class AppWindow {
 
   private handleResizing() {
     if (this.browserWindowInstance && this.getActiveTab()) {
-      this.getActiveTab().getWebContentsViewInstance().setBounds(this.browserWindowInstance.getBounds());
+      const parentBounds = this.browserWindowInstance.contentView.getBounds();
+      const yOffset = 85;
+      this.getActiveTab().getWebContentsViewInstance().setBounds({
+        x: parentBounds.x,
+        y: yOffset,
+        width: parentBounds.width,
+        height: parentBounds.height - yOffset,
+      });
     }
   }
 
