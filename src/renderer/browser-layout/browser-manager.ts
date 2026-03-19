@@ -24,9 +24,6 @@ export class BrowserTabManager {
   private darkModeIconMoon: HTMLElement;
   private darkModeIconSun: HTMLElement;
   private sslIndicator: HTMLButtonElement;
-  private sslIndicatorWrapper: HTMLElement;
-  private sslTooltip: HTMLElement;
-  private sslTooltipContent: HTMLElement;
 
   // State
   private tabs: Tab[] = [];
@@ -81,9 +78,6 @@ export class BrowserTabManager {
     this.darkModeIconMoon = document.getElementById('dark-mode-icon-moon') as HTMLElement;
     this.darkModeIconSun = document.getElementById('dark-mode-icon-sun') as HTMLElement;
     this.sslIndicator = document.getElementById('ssl-indicator') as HTMLButtonElement;
-    this.sslIndicatorWrapper = document.getElementById('ssl-indicator-wrapper') as HTMLElement;
-    this.sslTooltip = document.getElementById('ssl-tooltip') as HTMLElement;
-    this.sslTooltipContent = document.getElementById('ssl-tooltip-content') as HTMLElement;
 
     this.initDarkMode();
     this.setupSSLIndicator();
@@ -463,109 +457,17 @@ export class BrowserTabManager {
   private static readonly SSL_ICON_INSECURE = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
 
   private setupSSLIndicator(): void {
-    // Use wrapper for hover so mouse can move from button to tooltip without closing
-    this.sslIndicatorWrapper.addEventListener('mouseenter', () => {
+    this.sslIndicator.addEventListener('click', () => {
       const activeTab = this.getTabById(this.activeTabId);
       if (!activeTab) return;
       const url = activeTab.url;
       const isNewTab = !url || url === '' || url.startsWith('nav0://');
       if (isNewTab) return;
-      this.showSSLTooltip(activeTab);
-    });
-    this.sslIndicatorWrapper.addEventListener('mouseleave', () => {
-      this.hideSSLTooltip();
-    });
-  }
-
-  private hideSSLTooltip(): void {
-    this.sslTooltip.style.display = 'none';
-    // Restore the WebContentsView to its normal y=85 position
-    window.BrowserAPI.setTabViewYOffset(this.appWindowId, 85);
-  }
-
-  private showSSLTooltip(tab: Tab): void {
-    let hostname = '';
-    let protocol = '';
-    try {
-      const parsed = new URL(tab.url);
-      hostname = parsed.hostname;
-      protocol = parsed.protocol;
-    } catch { /* ignore */ }
-
-    if (tab.sslStatus === 'secure') {
-      let html = '<div class="ssl-tooltip-header ssl-tooltip-secure">';
-      html += '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
-      html += '<strong>Connection is secure</strong></div>';
-      html += `<div class="ssl-tooltip-detail">Your connection to <strong>${this.escapeHtml(hostname)}</strong> is encrypted using TLS. This means your passwords, messages, and credit card numbers stay private.</div>`;
-      html += '<div class="ssl-tooltip-protocol">';
-      html += `<div><span class="ssl-label">Protocol:</span> HTTPS (encrypted)</div>`;
-      html += `<div><span class="ssl-label">Host:</span> ${this.escapeHtml(hostname)}</div>`;
-      html += '</div>';
-      if (tab.sslDetails) {
-        html += '<div class="ssl-tooltip-cert">';
-        html += '<div class="ssl-cert-heading">Certificate</div>';
-        html += `<div><span class="ssl-label">Subject:</span> ${this.escapeHtml(tab.sslDetails.subjectName)}</div>`;
-        html += `<div><span class="ssl-label">Issuer:</span> ${this.escapeHtml(tab.sslDetails.issuer)}</div>`;
-        html += `<div><span class="ssl-label">Valid from:</span> ${this.escapeHtml(tab.sslDetails.validFrom)}</div>`;
-        html += `<div><span class="ssl-label">Valid until:</span> ${this.escapeHtml(tab.sslDetails.validTo)}</div>`;
-        html += '</div>';
-      }
-      this.sslTooltipContent.innerHTML = html;
-    } else {
-      let html = '<div class="ssl-tooltip-header ssl-tooltip-insecure">';
-      html += '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
-      html += '<strong>Connection is not secure</strong></div>';
-
-      if (protocol === 'http:') {
-        html += '<div class="ssl-tooltip-warning-banner">Your connection to this site is not encrypted</div>';
-        html += `<div class="ssl-tooltip-detail">You should not enter any sensitive information on this site (for example, passwords or credit cards), because it could be stolen by attackers.</div>`;
-        html += '<div class="ssl-tooltip-protocol">';
-        html += `<div><span class="ssl-label">Protocol:</span> <span class="ssl-text-danger">HTTP (not encrypted)</span></div>`;
-        html += `<div><span class="ssl-label">Host:</span> ${this.escapeHtml(hostname)}</div>`;
-        html += '</div>';
-        html += '<div class="ssl-tooltip-risks">';
-        html += '<div class="ssl-cert-heading">Risks</div>';
-        html += '<ul>';
-        html += '<li>Passwords and data are sent in plain text</li>';
-        html += '<li>Attackers on your network can see and modify content</li>';
-        html += '<li>The identity of this website cannot be verified</li>';
-        html += '</ul></div>';
-      } else {
-        html += '<div class="ssl-tooltip-warning-banner">Certificate error — you bypassed the warning</div>';
-        html += `<div class="ssl-tooltip-detail">The certificate for <strong>${this.escapeHtml(hostname)}</strong> is not trusted. Someone could be intercepting your connection.</div>`;
-        html += '<div class="ssl-tooltip-protocol">';
-        html += `<div><span class="ssl-label">Protocol:</span> <span class="ssl-text-danger">HTTPS (certificate invalid)</span></div>`;
-        html += `<div><span class="ssl-label">Host:</span> ${this.escapeHtml(hostname)}</div>`;
-        html += '</div>';
-        if (tab.sslDetails) {
-          html += '<div class="ssl-tooltip-cert">';
-          html += '<div class="ssl-cert-heading">Certificate (untrusted)</div>';
-          html += `<div><span class="ssl-label">Subject:</span> ${this.escapeHtml(tab.sslDetails.subjectName)}</div>`;
-          html += `<div><span class="ssl-label">Issuer:</span> ${this.escapeHtml(tab.sslDetails.issuer)}</div>`;
-          html += `<div><span class="ssl-label">Valid from:</span> ${this.escapeHtml(tab.sslDetails.validFrom)}</div>`;
-          html += `<div><span class="ssl-label">Valid until:</span> ${this.escapeHtml(tab.sslDetails.validTo)}</div>`;
-          html += '</div>';
-        }
-        html += '<div class="ssl-tooltip-risks">';
-        html += '<div class="ssl-cert-heading">Risks</div>';
-        html += '<ul>';
-        html += '<li>An attacker may be impersonating this site</li>';
-        html += '<li>Your data could be intercepted (man-in-the-middle)</li>';
-        html += '<li>The certificate may be expired, self-signed, or revoked</li>';
-        html += '</ul></div>';
-      }
-      this.sslTooltipContent.innerHTML = html;
-    }
-    this.sslTooltip.style.display = 'block';
-
-    // The tooltip drops below the 85px browser chrome into WebContentsView territory.
-    // WebContentsView is a native Electron view painted on top of chrome HTML,
-    // so we temporarily push it down to reveal the tooltip.
-    requestAnimationFrame(() => {
-      const tooltipBottom = Math.round(this.sslTooltip.getBoundingClientRect().bottom);
-      if (tooltipBottom > 85) {
-        window.BrowserAPI.setTabViewYOffset(this.appWindowId, tooltipBottom);
-      }
+      window.BrowserAPI.showSSLInfo(this.appWindowId, {
+        sslStatus: activeTab.sslStatus,
+        sslDetails: activeTab.sslDetails,
+        url: activeTab.url,
+      });
     });
   }
 
@@ -598,12 +500,6 @@ export class BrowserTabManager {
       this.sslIndicator.classList.add('ssl-search');
       this.sslIndicator.title = 'Internal page';
     }
-  }
-
-  private escapeHtml(str: string): string {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
   }
 
   private updateBrowserViewBounds(): void {

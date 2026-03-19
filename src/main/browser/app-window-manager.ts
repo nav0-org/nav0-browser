@@ -533,10 +533,17 @@ export abstract class AppWindowManager {
       }
     });
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.SET_TAB_VIEW_Y_OFFSET, (event, appWindowId: string, yOffset: number) => {
+    ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_SSL_INFO, async (event, appWindowId: string, data: { sslStatus: string; sslDetails: any; url: string }) => {
       const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
       if (window) {
-        window.setTabViewYOffset(yOffset);
+        return window.showSSLInfoOverlay(data);
+      }
+    });
+
+    ipcMain.on(RendererToMainEventsForBrowserIPC.HIDE_SSL_INFO, async (event, appWindowId: string) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        return window.hideSSLInfoOverlay();
       }
     });
 

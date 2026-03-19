@@ -10,6 +10,7 @@ import { PermissionManager } from "./permission-manager";
 import { PermissionPromptOverlayManager, PermissionPromptData } from "./permission-prompt-overlay-manager";
 import { FindInPageManager } from "./find-in-page-manager";
 import { IssueReportOverlayManager } from "./issue-report-overlay-manager";
+import { SSLInfoOverlayManager } from "./ssl-info-overlay-manager";
 import type { Database as DB } from 'better-sqlite3';
 
 export class AppWindow {
@@ -25,6 +26,7 @@ export class AppWindow {
   private permissionPromptOverlayManager: PermissionPromptOverlayManager | null = null;
   private findInPageManager: FindInPageManager | null = null;
   private issueReportOverlayManager: IssueReportOverlayManager | null = null;
+  private sslInfoOverlayManager: SSLInfoOverlayManager | null = null;
   private database: DB;
   private readyPromise: Promise<void>;
   private resolveReady: () => void;
@@ -72,6 +74,7 @@ export class AppWindow {
     this.permissionPromptOverlayManager = new PermissionPromptOverlayManager(this.id, this.isPrivate, this.partitionSetting);
     this.findInPageManager = new FindInPageManager(this.id, this.isPrivate, this.partitionSetting);
     this.issueReportOverlayManager = new IssueReportOverlayManager(this.id, this.isPrivate, this.partitionSetting);
+    this.sslInfoOverlayManager = new SSLInfoOverlayManager(this.id, this.isPrivate, this.partitionSetting);
 
     this.browserWindowInstance.loadURL(BROWSER_LAYOUT_WEBPACK_ENTRY);
 
@@ -442,16 +445,40 @@ export class AppWindow {
     }));
   }
 
-  setTabViewYOffset(yOffset: number): void {
-    const activeTab = this.getActiveTab();
-    if (!activeTab || !this.browserWindowInstance) return;
+  private isSSLInfoVisible(): boolean {
+    return this.sslInfoOverlayManager && this.browserWindowInstance.contentView.children.indexOf(this.sslInfoOverlayManager.getWebContentsViewInstance()) > -1;
+  }
+
+  async showSSLInfoOverlay(data: { sslStatus: string; sslDetails: any; url: string }): Promise<void> {
+    if (!this.sslInfoOverlayManager || !this.browserWindowInstance) return;
+    this.hideOptionsMenuOverlay();
+    this.hideCommandKOverlay();
+    this.hideCommandOOverlay();
+
+    if (this.isSSLInfoVisible()) {
+      this.hideSSLInfoOverlay();
+      return;
+    }
+
+    await this.sslInfoOverlayManager.whenReady();
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
-    activeTab.getWebContentsViewInstance()?.setBounds({
-      x: parentBounds.x,
+    const panelWidth = Math.min(380, parentBounds.width - 24);
+    const panelHeight = Math.min(340, parentBounds.height - 85 - 12);
+    const yOffset = 85;
+    this.sslInfoOverlayManager.getWebContentsViewInstance().setBounds({
+      x: 12,
       y: yOffset,
-      width: parentBounds.width,
-      height: parentBounds.height - yOffset
+      width: panelWidth,
+      height: panelHeight,
     });
+    this.browserWindowInstance.contentView.addChildView(this.sslInfoOverlayManager.getWebContentsViewInstance());
+    this.sslInfoOverlayManager.showInfo(data);
+  }
+
+  hideSSLInfoOverlay(): void {
+    if (this.isSSLInfoVisible()) {
+      this.browserWindowInstance.contentView.removeChildView(this.sslInfoOverlayManager.getWebContentsViewInstance());
+    }
   }
 
   async setDarkMode(enabled: boolean): Promise<void> {

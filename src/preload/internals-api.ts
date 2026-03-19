@@ -159,8 +159,11 @@ export function init(){
     showTabContextMenu: (appWindowId: string, tabId: string, isPinned: boolean) => {
       ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_TAB_CONTEXT_MENU, appWindowId, tabId, isPinned);
     },
-    setTabViewYOffset: (appWindowId: string, yOffset: number) => {
-      ipcRenderer.send(RendererToMainEventsForBrowserIPC.SET_TAB_VIEW_Y_OFFSET, appWindowId, yOffset);
+    showSSLInfo: (appWindowId: string, data: { sslStatus: string; sslDetails: any; url: string }) => {
+      ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_SSL_INFO, appWindowId, data);
+    },
+    hideSSLInfo: (appWindowId: string) => {
+      ipcRenderer.send(RendererToMainEventsForBrowserIPC.HIDE_SSL_INFO, appWindowId);
     },
     showAboutPanel: async () => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_ABOUT_PANEL);
