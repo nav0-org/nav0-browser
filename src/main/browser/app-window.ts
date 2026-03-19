@@ -161,14 +161,43 @@ export class AppWindow {
   }
 
   private handleResizing() {
-    if (this.browserWindowInstance && this.getActiveTab()) {
-      const parentBounds = this.browserWindowInstance.contentView.getBounds();
-      const yOffset = 85;
+    if (!this.browserWindowInstance) return;
+    const parentBounds = this.browserWindowInstance.contentView.getBounds();
+    const yOffset = 85;
+
+    // Resize active tab
+    if (this.getActiveTab()) {
       this.getActiveTab().getWebContentsViewInstance().setBounds({
-        x: parentBounds.x,
+        x: 0,
         y: yOffset,
         width: parentBounds.width,
         height: parentBounds.height - yOffset,
+      });
+    }
+
+    // Resize full-size overlays that are currently visible
+    const children = this.browserWindowInstance.contentView.children;
+    const fullSizeOverlays = [
+      this.optionsMenuManager,
+      this.commandKOverlayManager,
+      this.commandOOverlayManager,
+      this.permissionPromptOverlayManager,
+      this.issueReportOverlayManager,
+    ];
+    for (const mgr of fullSizeOverlays) {
+      if (mgr && children.includes(mgr.getWebContentsViewInstance())) {
+        mgr.getWebContentsViewInstance().setBounds(parentBounds);
+      }
+    }
+
+    // Resize find-in-page bar if visible
+    if (this.findInPageManager && children.includes(this.findInPageManager.getWebContentsViewInstance())) {
+      const barWidth = Math.min(520, parentBounds.width - 24);
+      this.findInPageManager.getWebContentsViewInstance().setBounds({
+        x: parentBounds.width - barWidth - 12,
+        y: yOffset,
+        width: barWidth,
+        height: 48,
       });
     }
   }
@@ -231,7 +260,7 @@ export class AppWindow {
       this.activeTabId = id;
       const parentBounds = this.browserWindowInstance.contentView.getBounds();
       const yOffset = 85;
-      this.getActiveTab().getWebContentsViewInstance()?.setBounds({x: parentBounds.x, y: yOffset, width: parentBounds.width, height: parentBounds.height - yOffset});
+      this.getActiveTab().getWebContentsViewInstance()?.setBounds({x: 0, y: yOffset, width: parentBounds.width, height: parentBounds.height - yOffset});
       this.browserWindowInstance.contentView.addChildView(this.getActiveTab().getWebContentsViewInstance());
       this.getActiveTab().getWebContentsViewInstance().webContents.focus();
     }
