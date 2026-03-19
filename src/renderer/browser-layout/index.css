@@ -237,7 +237,8 @@ body.is-private .private-window-identifier{
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
 }
 
-.search-icon {
+/* SSL Indicator */
+.ssl-indicator {
   color: var(--text-secondary);
   margin-right: var(--spacing-xs);
   cursor: pointer;
@@ -248,11 +249,43 @@ body.is-private .private-window-identifier{
   border-radius: var(--radius-circle);
   background: none;
   border: none;
+  transition: color 0.2s ease, background-color 0.2s ease;
 }
 
-.search-icon:hover {
+.ssl-indicator:hover {
   background-color: var(--bg-hover);
+}
+
+.ssl-indicator.ssl-search {
+  color: var(--text-secondary);
+}
+
+.ssl-indicator.ssl-search:hover {
   color: var(--text-color);
+}
+
+.ssl-indicator.ssl-secure {
+  color: #16a34a;
+}
+
+.ssl-indicator.ssl-secure:hover {
+  color: #15803d;
+}
+
+.ssl-indicator.ssl-insecure {
+  color: #dc2626;
+  background-color: rgba(220, 38, 38, 0.08);
+  animation: ssl-pulse 2s ease-in-out infinite;
+}
+
+.ssl-indicator.ssl-insecure:hover {
+  color: #b91c1c;
+  background-color: rgba(220, 38, 38, 0.15);
+}
+
+@keyframes ssl-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
 .url-input {

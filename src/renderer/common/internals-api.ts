@@ -96,6 +96,10 @@ declare global {
       onTabPinned: (callback: (data: { id: string }) => void) => void;
       onTabUnpinned: (callback: (data: { id: string }) => void) => void;
 
+      // SSL info overlay
+      showSSLInfo: (appWindowId: string, data: { sslStatus: string; sslDetails: any; url: string }) => void;
+      hideSSLInfo: (appWindowId: string) => void;
+
       // Issue report
       showIssueReport: (appWindowId: string) => Promise<any>;
       hideIssueReport: (appWindowId: string) => Promise<any>;

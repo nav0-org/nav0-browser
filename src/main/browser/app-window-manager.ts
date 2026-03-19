@@ -553,6 +553,20 @@ export abstract class AppWindowManager {
       }
     });
 
+    ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_SSL_INFO, async (event, appWindowId: string, data: { sslStatus: string; sslDetails: any; url: string }) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        return window.showSSLInfoOverlay(data);
+      }
+    });
+
+    ipcMain.on(RendererToMainEventsForBrowserIPC.HIDE_SSL_INFO, async (event, appWindowId: string) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        return window.hideSSLInfoOverlay();
+      }
+    });
+
     ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_ABOUT_PANEL, async () => {
       app.showAboutPanel();
     });

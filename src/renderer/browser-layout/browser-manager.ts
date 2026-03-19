@@ -23,6 +23,7 @@ export class BrowserTabManager {
   private darkModeButton: HTMLButtonElement;
   private darkModeIconMoon: HTMLElement;
   private darkModeIconSun: HTMLElement;
+  private sslIndicator: HTMLButtonElement;
 
   // State
   private tabs: Tab[] = [];
@@ -76,8 +77,10 @@ export class BrowserTabManager {
     this.darkModeButton = document.getElementById('dark-mode-button') as HTMLButtonElement;
     this.darkModeIconMoon = document.getElementById('dark-mode-icon-moon') as HTMLElement;
     this.darkModeIconSun = document.getElementById('dark-mode-icon-sun') as HTMLElement;
+    this.sslIndicator = document.getElementById('ssl-indicator') as HTMLButtonElement;
 
     this.initDarkMode();
+    this.setupSSLIndicator();
   }
 
   private setupEventListeners(): void {
@@ -178,6 +181,7 @@ export class BrowserTabManager {
       this.forwardButton.disabled = !newActiveTab.canGoForward;
       this.handleBookmark();
       this.updateReaderModeButton();
+      this.updateSSLIndicator();
     });
 
     // Tab closed
@@ -206,13 +210,19 @@ export class BrowserTabManager {
     });
 
     // Tab URL updated
-    window.BrowserAPI.onTabUrlUpdated((data: { id: string, url: string, isBookmark: boolean, bookmarkId: string | null, canGoBack: boolean, canGoForward: boolean }) => {
-      this.getTabById(data.id)?.handleUrlChange(data.url, data.isBookmark, data.bookmarkId, data.canGoBack, data.canGoForward);
+    window.BrowserAPI.onTabUrlUpdated((data: { id: string, url: string, isBookmark: boolean, bookmarkId: string | null, canGoBack: boolean, canGoForward: boolean, sslStatus?: string, sslDetails?: { issuer: string; validFrom: string; validTo: string; subjectName: string } | null }) => {
+      const tab = this.getTabById(data.id);
+      if (tab) {
+        tab.handleUrlChange(data.url, data.isBookmark, data.bookmarkId, data.canGoBack, data.canGoForward);
+        tab.sslStatus = (data.sslStatus as 'secure' | 'insecure' | 'internal') || 'internal';
+        tab.sslDetails = data.sslDetails || null;
+      }
       if (data.id === this.activeTabId) {
         this.urlInput.value = data.url;
         this.backButton.disabled = !data.canGoBack;
         this.forwardButton.disabled = !data.canGoForward;
         this.handleBookmark();
+        this.updateSSLIndicator();
       }
     });
 
@@ -438,6 +448,57 @@ export class BrowserTabManager {
     const el = activeTab?.getTabElement();
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    }
+  }
+
+  // Inline SVG strings for SSL indicator icons (avoids Lucide element replacement issues)
+  private static readonly SSL_ICON_SEARCH = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>';
+  private static readonly SSL_ICON_SECURE = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+  private static readonly SSL_ICON_INSECURE = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+
+  private setupSSLIndicator(): void {
+    this.sslIndicator.addEventListener('click', () => {
+      const activeTab = this.getTabById(this.activeTabId);
+      if (!activeTab) return;
+      const url = activeTab.url;
+      const isNewTab = !url || url === '' || url.startsWith('nav0://');
+      if (isNewTab) return;
+      window.BrowserAPI.showSSLInfo(this.appWindowId, {
+        sslStatus: activeTab.sslStatus,
+        sslDetails: activeTab.sslDetails,
+        url: activeTab.url,
+      });
+    });
+  }
+
+  private updateSSLIndicator(): void {
+    const activeTab = this.getTabById(this.activeTabId);
+    if (!activeTab) return;
+
+    const url = activeTab.url;
+    const isNewTab = !url || url === '' || url.startsWith('nav0://');
+    const sslStatus = activeTab.sslStatus || 'internal';
+
+    // Remove all state classes
+    this.sslIndicator.classList.remove('ssl-search', 'ssl-secure', 'ssl-insecure');
+
+    if (isNewTab) {
+      this.sslIndicator.innerHTML = BrowserTabManager.SSL_ICON_SEARCH;
+      this.sslIndicator.classList.add('ssl-search');
+      this.sslIndicator.title = 'Search';
+    } else if (sslStatus === 'secure') {
+      this.sslIndicator.innerHTML = BrowserTabManager.SSL_ICON_SECURE;
+      this.sslIndicator.classList.add('ssl-secure');
+      this.sslIndicator.title = 'Connection is secure';
+    } else if (sslStatus === 'insecure') {
+      this.sslIndicator.innerHTML = BrowserTabManager.SSL_ICON_INSECURE;
+      this.sslIndicator.classList.add('ssl-insecure');
+      this.sslIndicator.title = 'Connection is not secure';
+    } else {
+      // Internal pages - show lock (these are local safe pages)
+      this.sslIndicator.innerHTML = BrowserTabManager.SSL_ICON_SECURE;
+      this.sslIndicator.classList.add('ssl-search');
+      this.sslIndicator.title = 'Internal page';
     }
   }
 

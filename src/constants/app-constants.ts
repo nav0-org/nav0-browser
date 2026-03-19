@@ -171,6 +171,9 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly PRINT_PAGE = "browser:print-page";
   public static readonly PIN_TAB = "browser:pin-tab";
   public static readonly UNPIN_TAB = "browser:unpin-tab";
+  // SSL info overlay
+  public static readonly SHOW_SSL_INFO = "browser:show-ssl-info";
+  public static readonly HIDE_SSL_INFO = "browser:hide-ssl-info";
 
   // Issue report
   public static readonly SHOW_ISSUE_REPORT = "browser:show-issue-report";

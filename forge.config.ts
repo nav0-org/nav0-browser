@@ -175,6 +175,14 @@ const config: ForgeConfig = {
               js: './src/preload/internals-api.ts',
             },
           },
+          {
+            html: './src/renderer/ssl-info/index.html',
+            js: './src/renderer/ssl-info/index.ts',
+            name: 'ssl_info',
+            preload: {
+              js: './src/preload/internals-api.ts',
+            },
+          },
         ],
       },
     }),

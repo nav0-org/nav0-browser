@@ -16,6 +16,8 @@ export class Tab {
   public isReaderModeEligible = false;
   public isReaderModeActive = false;
   public isPinned = false;
+  public sslStatus: 'secure' | 'insecure' | 'internal' = 'internal';
+  public sslDetails: { issuer: string; validFrom: string; validTo: string; subjectName: string } | null = null;
 
   constructor(id: string, url: string, title?: string) {
     this.id = id;

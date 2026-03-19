@@ -51,3 +51,6 @@ declare const WEB_CONTENT_PRELOAD_WEBPACK_ENTRY: string;
 
 declare const FIND_IN_PAGE_WEBPACK_ENTRY: string;
 declare const FIND_IN_PAGE_PRELOAD_WEBPACK_ENTRY: string;
+
+declare const SSL_INFO_WEBPACK_ENTRY: string;
+declare const SSL_INFO_PRELOAD_WEBPACK_ENTRY: string;
