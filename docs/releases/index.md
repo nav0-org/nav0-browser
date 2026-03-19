@@ -10,10 +10,18 @@ What's new in every release of nav0 Browser.
 ---
 
 <div class="release-list-item">
+  <a href="/releases/v0.0.9">
+    <h2>v0.0.9</h2>
+  </a>
+  <div class="release-meta">March 19, 2026 <span class="release-badge latest">Latest</span></div>
+  <p class="release-excerpt">SSL certificate indicator overlay, fullscreen exit fixes, drag-and-drop tabs between windows, installer graceful quit prompt, MIT license, and new blog post on incognito mode.</p>
+</div>
+
+<div class="release-list-item">
   <a href="/releases/v0.0.8">
     <h2>v0.0.8</h2>
   </a>
-  <div class="release-meta">March 15, 2026 <span class="release-badge latest">Latest</span></div>
+  <div class="release-meta">March 15, 2026</div>
   <p class="release-excerpt">Tab context menu, pinning, Cmd+O switcher, popup blocking, hard reload, SSL warning page, offline page, in-app issue reporting, customizable user agent, print support, and HTTPS enforcement.</p>
 </div>
 
