@@ -132,6 +132,7 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly SHOW_COMMAND_O_OVERLAY = "browser:show-command-o-overlay";
   public static readonly HIDE_COMMAND_O_OVERLAY = "browser:hide-command-o-overlay";
   public static readonly FETCH_ALL_WINDOWS_TABS = "browser:fetch-all-windows-tabs";
+  public static readonly MOVE_TAB_TO_WINDOW = "browser:move-tab-to-window";
   public static readonly CREATE_NEW_APP_WINDOW = "browser:create-new-app-window";
   public static readonly CREATE_NEW_PRIVATE_APP_WINDOW = "browser:create-new-private-app-window";
   public static readonly EXECUTE_JAVASCRIPT = "browser:execute-javascript";

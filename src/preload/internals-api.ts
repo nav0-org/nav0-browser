@@ -129,6 +129,9 @@ export function init(){
     fetchAllWindowsTabs: async (isPrivate: boolean) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.FETCH_ALL_WINDOWS_TABS, isPrivate);
     },
+    moveTabToWindow: async (sourceWindowId: string, tabId: string, targetWindowId: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.MOVE_TAB_TO_WINDOW, sourceWindowId, tabId, targetWindowId);
+    },
     showFindInPage: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_FIND_IN_PAGE, appWindowId);
     },

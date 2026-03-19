@@ -222,6 +222,26 @@ body {
   flex-shrink: 0;
 }
 
+/* ---- Drag and drop ---- */
+.tab-card.dragging {
+  opacity: 0.4;
+}
+
+.tab-card[draggable="true"] {
+  cursor: grab;
+}
+
+.tab-card[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+.window-group.drop-target {
+  background: var(--bg-hover);
+  border-radius: var(--radius-md);
+  outline: 2px dashed var(--primary-color);
+  outline-offset: 2px;
+}
+
 /* ---- Empty state ---- */
 .empty-state {
   padding: 32px;

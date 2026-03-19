@@ -32,6 +32,7 @@ let filteredGroups: WindowGroup[] = [];
 let flatTabs: { tab: TabInfo; windowId: string }[] = [];
 let selectedIndex = 0;
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+let dragData: { tabId: string; sourceWindowId: string } | null = null;
 
 const init = () => {
   document.addEventListener('DOMContentLoaded', () => {
@@ -39,6 +40,7 @@ const init = () => {
     const tabsBody = document.getElementById('tabs-body') as HTMLElement;
     const tabCountEl = document.getElementById('tab-count') as HTMLElement;
     const footerPrivate = document.getElementById('footer-private') as HTMLElement;
+    const footerDragHint = document.getElementById('footer-drag-hint') as HTMLElement;
 
     createIcons({ icons });
 
@@ -83,6 +85,8 @@ const init = () => {
       }
 
       const showHeaders = allGroups.length > 1;
+      const canDrag = !window.BrowserAPI.isPrivate && allGroups.length > 1;
+      footerDragHint.style.display = canDrag ? '' : 'none';
 
       let flatIdx = 0;
       for (let gi = 0; gi < filteredGroups.length; gi++) {
@@ -91,6 +95,30 @@ const init = () => {
 
         const groupEl = document.createElement('div');
         groupEl.className = 'window-group';
+        groupEl.dataset.windowId = group.windowId;
+
+        if (canDrag) {
+          groupEl.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (dragData && dragData.sourceWindowId !== group.windowId) {
+              groupEl.classList.add('drop-target');
+            }
+          });
+          groupEl.addEventListener('dragleave', (e) => {
+            const related = e.relatedTarget as HTMLElement | null;
+            if (!related || !groupEl.contains(related)) {
+              groupEl.classList.remove('drop-target');
+            }
+          });
+          groupEl.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            groupEl.classList.remove('drop-target');
+            if (dragData && dragData.sourceWindowId !== group.windowId) {
+              await window.BrowserAPI.moveTabToWindow(dragData.sourceWindowId, dragData.tabId, group.windowId);
+              window.BrowserAPI.hideCommandOOverlay(window.BrowserAPI.appWindowId);
+            }
+          });
+        }
 
         if (showHeaders) {
           const color = WINDOW_COLORS[gi % WINDOW_COLORS.length];
@@ -130,6 +158,22 @@ const init = () => {
             <span class="tab-title" title="${escapeHtml(titleText)}">${truncatedTitle}</span>
             ${tab.isActive ? '<span class="tab-active-dot"></span>' : ''}
           `;
+
+          if (canDrag) {
+            card.draggable = true;
+            card.addEventListener('dragstart', (e) => {
+              dragData = { tabId: tab.id, sourceWindowId: group.windowId };
+              card.classList.add('dragging');
+              if (e.dataTransfer) {
+                e.dataTransfer.effectAllowed = 'move';
+              }
+            });
+            card.addEventListener('dragend', () => {
+              card.classList.remove('dragging');
+              dragData = null;
+              document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
+            });
+          }
 
           card.addEventListener('click', () => {
             switchToTab(tab, group.windowId);
