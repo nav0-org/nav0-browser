@@ -279,7 +279,9 @@ export class AppWindow {
   }
 
   updateViewBounds(bounds: { x: number, y: number, width: number, height: number }): void {
-    this.getBrowserWindowInstance().setBounds(bounds);
+    if (this.getActiveTab()) {
+      this.getActiveTab().getWebContentsViewInstance().setBounds(bounds);
+    }
   }
 
   async showOptionsMenuOverlay(): Promise<void> {
