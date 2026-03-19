@@ -24,6 +24,7 @@ export class BrowserTabManager {
   private darkModeIconMoon: HTMLElement;
   private darkModeIconSun: HTMLElement;
   private sslIndicator: HTMLButtonElement;
+  private sslIndicatorWrapper: HTMLElement;
   private sslTooltip: HTMLElement;
   private sslTooltipContent: HTMLElement;
 
@@ -80,6 +81,7 @@ export class BrowserTabManager {
     this.darkModeIconMoon = document.getElementById('dark-mode-icon-moon') as HTMLElement;
     this.darkModeIconSun = document.getElementById('dark-mode-icon-sun') as HTMLElement;
     this.sslIndicator = document.getElementById('ssl-indicator') as HTMLButtonElement;
+    this.sslIndicatorWrapper = document.getElementById('ssl-indicator-wrapper') as HTMLElement;
     this.sslTooltip = document.getElementById('ssl-tooltip') as HTMLElement;
     this.sslTooltipContent = document.getElementById('ssl-tooltip-content') as HTMLElement;
 
@@ -461,7 +463,8 @@ export class BrowserTabManager {
   private static readonly SSL_ICON_INSECURE = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
 
   private setupSSLIndicator(): void {
-    this.sslIndicator.addEventListener('mouseenter', () => {
+    // Use wrapper for hover so mouse can move from button to tooltip without closing
+    this.sslIndicatorWrapper.addEventListener('mouseenter', () => {
       const activeTab = this.getTabById(this.activeTabId);
       if (!activeTab) return;
       const url = activeTab.url;
@@ -469,9 +472,15 @@ export class BrowserTabManager {
       if (isNewTab) return;
       this.showSSLTooltip(activeTab);
     });
-    this.sslIndicator.addEventListener('mouseleave', () => {
-      this.sslTooltip.style.display = 'none';
+    this.sslIndicatorWrapper.addEventListener('mouseleave', () => {
+      this.hideSSLTooltip();
     });
+  }
+
+  private hideSSLTooltip(): void {
+    this.sslTooltip.style.display = 'none';
+    // Restore the WebContentsView to its normal position
+    this.updateBrowserViewBounds();
   }
 
   private showSSLTooltip(tab: Tab): void {
@@ -548,6 +557,23 @@ export class BrowserTabManager {
       this.sslTooltipContent.innerHTML = html;
     }
     this.sslTooltip.style.display = 'block';
+
+    // The tooltip drops below the browser chrome into WebContentsView territory.
+    // WebContentsView is a native Electron view painted on top of chrome HTML,
+    // so we temporarily push it down to reveal the tooltip.
+    requestAnimationFrame(() => {
+      const tooltipRect = this.sslTooltip.getBoundingClientRect();
+      const viewRect = this.browserViewContainer.getBoundingClientRect();
+      const tooltipBottom = Math.round(tooltipRect.bottom);
+      if (tooltipBottom > Math.round(viewRect.top)) {
+        window.BrowserAPI.updateBrowserViewBounds(this.appWindowId, {
+          x: 0,
+          y: tooltipBottom,
+          width: Math.round(viewRect.width),
+          height: window.innerHeight - tooltipBottom
+        });
+      }
+    });
   }
 
   private updateSSLIndicator(): void {
