@@ -1,4 +1,4 @@
-import { BrowserWindow, session } from "electron";
+import { BrowserWindow, screen, session } from "electron";
 import { v4 as uuid } from "uuid";
 import { Tab } from "./tab";
 import { AppConstants, ClosedTabRecord, InAppUrls, MainToRendererEventsForBrowserIPC } from "../../constants/app-constants";
@@ -252,6 +252,16 @@ export class AppWindow {
   toggleFullScreen(): void {
     if (this.browserWindowInstance) {
       this._desiredFullScreen = !this._desiredFullScreen;
+      if (!this._desiredFullScreen) {
+        // Set sensible bounds before exiting fullscreen, since the window
+        // was created with fullscreen: true and has no pre-fullscreen geometry.
+        const { width: screenW, height: screenH } = screen.getPrimaryDisplay().workAreaSize;
+        const w = Math.min(1200, screenW);
+        const h = Math.min(800, screenH);
+        const x = Math.round((screenW - w) / 2);
+        const y = Math.round((screenH - h) / 2);
+        this.browserWindowInstance.setBounds({ x, y, width: w, height: h });
+      }
       this.browserWindowInstance.setFullScreen(this._desiredFullScreen);
     }
   }
