@@ -90,13 +90,9 @@ export class AppWindow {
         this.browserWindowInstance = null;
       });
 
-      // Re-enter fullscreen if exit wasn't intentional (e.g. Escape key).
-      // Otherwise, set proper window bounds and resize the tab view.
+      // When leaving fullscreen, set proper windowed bounds and resize all views.
       this.browserWindowInstance.on('leave-full-screen', () => {
-        if (this._desiredFullScreen) {
-          this.browserWindowInstance?.setFullScreen(true);
-          return;
-        }
+        this._desiredFullScreen = false;
         // Window was created with fullscreen: true so it has no pre-fullscreen
         // geometry. Set centered bounds now that the transition is complete.
         const { width: screenW, height: screenH } = screen.getPrimaryDisplay().workAreaSize;
@@ -109,6 +105,7 @@ export class AppWindow {
       });
 
       this.browserWindowInstance.on('enter-full-screen', () => {
+        this._desiredFullScreen = true;
         this.handleResizing();
       });
 
