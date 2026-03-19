@@ -6,6 +6,7 @@ export class SSLInfoOverlayManager {
   private isPrivate: boolean;
   private partitionSetting: string;
   private readyPromise: Promise<void>;
+  private onDismiss: (() => void) | null = null;
 
   constructor(appWindowId: string, isPrivate: boolean, partitionSetting: string) {
     this.appWindowId = appWindowId;
@@ -38,6 +39,22 @@ export class SSLInfoOverlayManager {
     this.webContentsViewInstance.webContents.setWindowOpenHandler(() => {
       return { action: 'deny' };
     });
+
+    // Close when user clicks outside (focus moves away from overlay)
+    this.webContentsViewInstance.webContents.on('blur', () => {
+      if (this.onDismiss) this.onDismiss();
+    });
+
+    // Close on Escape key
+    this.webContentsViewInstance.webContents.on('before-input-event', (_event, input) => {
+      if (input.key === 'Escape' && input.type === 'keyDown') {
+        if (this.onDismiss) this.onDismiss();
+      }
+    });
+  }
+
+  setOnDismiss(callback: () => void): void {
+    this.onDismiss = callback;
   }
 
   whenReady(): Promise<void> {
@@ -50,10 +67,22 @@ export class SSLInfoOverlayManager {
 
   showInfo(data: { sslStatus: string; sslDetails: any; url: string }): void {
     const serialized = JSON.stringify(data);
+    this.webContentsViewInstance.webContents.focus();
     this.webContentsViewInstance.webContents.executeJavaScript(`(() => {
       if (typeof window.showSSLInfo === 'function') {
         window.showSSLInfo(${serialized});
       }
     })()`).catch(() => {});
+  }
+
+  async getContentHeight(): Promise<number> {
+    try {
+      const height = await this.webContentsViewInstance.webContents.executeJavaScript(
+        `document.getElementById('ssl-info-panel').scrollHeight`
+      );
+      return height as number;
+    } catch {
+      return 200;
+    }
   }
 }

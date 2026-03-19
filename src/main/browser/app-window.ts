@@ -460,19 +460,36 @@ export class AppWindow {
       return;
     }
 
+    this.sslInfoOverlayManager.setOnDismiss(() => this.hideSSLInfoOverlay());
+
     await this.sslInfoOverlayManager.whenReady();
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
-    const panelWidth = Math.min(380, parentBounds.width - 24);
-    const panelHeight = Math.min(340, parentBounds.height - 85 - 12);
+    const panelWidth = Math.min(300, parentBounds.width - 24);
     const yOffset = 85;
+    // Initial bounds — will be resized after content renders
     this.sslInfoOverlayManager.getWebContentsViewInstance().setBounds({
       x: 12,
       y: yOffset,
       width: panelWidth,
-      height: panelHeight,
+      height: 300,
     });
     this.browserWindowInstance.contentView.addChildView(this.sslInfoOverlayManager.getWebContentsViewInstance());
     this.sslInfoOverlayManager.showInfo(data);
+
+    // Resize to fit content after a short delay for rendering
+    setTimeout(async () => {
+      try {
+        const contentHeight = await this.sslInfoOverlayManager.getContentHeight();
+        const maxHeight = parentBounds.height - yOffset - 12;
+        const finalHeight = Math.min(contentHeight + 2, maxHeight);
+        this.sslInfoOverlayManager.getWebContentsViewInstance().setBounds({
+          x: 12,
+          y: yOffset,
+          width: panelWidth,
+          height: finalHeight,
+        });
+      } catch { /* ignore */ }
+    }, 50);
   }
 
   hideSSLInfoOverlay(): void {

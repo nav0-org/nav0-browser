@@ -1,10 +1,11 @@
 @import url("../styles/global.css");
 
-body {
+html, body {
   margin: 0;
   padding: 0;
   background: transparent;
   overflow: hidden;
+  height: auto;
 }
 
 .ssl-info-panel {
@@ -16,9 +17,6 @@ body {
   line-height: 1.5;
   color: var(--text-color);
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
 }
 
 [data-theme="dark"] .ssl-info-panel {
@@ -90,7 +88,6 @@ body {
 
 .ssl-info-body {
   overflow-y: auto;
-  flex: 1;
 }
 
 .ssl-info-detail {
