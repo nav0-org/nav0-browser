@@ -115,6 +115,14 @@ body {
   margin-left: auto;
 }
 
+.keyboard-shortcut .keycap {
+  min-width: 14px;
+  height: 14px;
+  font-size: 9px;
+  padding: 0 3px;
+  margin: 0 1px;
+}
+
 /* History submenu */
 .history-submenu {
   width: 300px;
