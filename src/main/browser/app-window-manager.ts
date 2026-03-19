@@ -533,6 +533,13 @@ export abstract class AppWindowManager {
       }
     });
 
+    ipcMain.on(RendererToMainEventsForBrowserIPC.SET_TAB_VIEW_Y_OFFSET, (event, appWindowId: string, yOffset: number) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        window.setTabViewYOffset(yOffset);
+      }
+    });
+
     ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_ABOUT_PANEL, async () => {
       app.showAboutPanel();
     });

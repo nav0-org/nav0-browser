@@ -442,6 +442,18 @@ export class AppWindow {
     }));
   }
 
+  setTabViewYOffset(yOffset: number): void {
+    const activeTab = this.getActiveTab();
+    if (!activeTab || !this.browserWindowInstance) return;
+    const parentBounds = this.browserWindowInstance.contentView.getBounds();
+    activeTab.getWebContentsViewInstance()?.setBounds({
+      x: parentBounds.x,
+      y: yOffset,
+      width: parentBounds.width,
+      height: parentBounds.height - yOffset
+    });
+  }
+
   async setDarkMode(enabled: boolean): Promise<void> {
     Tab.setDarkModeEnabled(enabled);
     for (const tab of this.tabs.values()) {

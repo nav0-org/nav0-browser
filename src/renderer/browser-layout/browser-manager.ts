@@ -479,8 +479,8 @@ export class BrowserTabManager {
 
   private hideSSLTooltip(): void {
     this.sslTooltip.style.display = 'none';
-    // Restore the WebContentsView to its normal position
-    this.updateBrowserViewBounds();
+    // Restore the WebContentsView to its normal y=85 position
+    window.BrowserAPI.setTabViewYOffset(this.appWindowId, 85);
   }
 
   private showSSLTooltip(tab: Tab): void {
@@ -558,20 +558,13 @@ export class BrowserTabManager {
     }
     this.sslTooltip.style.display = 'block';
 
-    // The tooltip drops below the browser chrome into WebContentsView territory.
+    // The tooltip drops below the 85px browser chrome into WebContentsView territory.
     // WebContentsView is a native Electron view painted on top of chrome HTML,
     // so we temporarily push it down to reveal the tooltip.
     requestAnimationFrame(() => {
-      const tooltipRect = this.sslTooltip.getBoundingClientRect();
-      const viewRect = this.browserViewContainer.getBoundingClientRect();
-      const tooltipBottom = Math.round(tooltipRect.bottom);
-      if (tooltipBottom > Math.round(viewRect.top)) {
-        window.BrowserAPI.updateBrowserViewBounds(this.appWindowId, {
-          x: 0,
-          y: tooltipBottom,
-          width: Math.round(viewRect.width),
-          height: window.innerHeight - tooltipBottom
-        });
+      const tooltipBottom = Math.round(this.sslTooltip.getBoundingClientRect().bottom);
+      if (tooltipBottom > 85) {
+        window.BrowserAPI.setTabViewYOffset(this.appWindowId, tooltipBottom);
       }
     });
   }
