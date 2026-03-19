@@ -19,27 +19,21 @@ export class OptionsMenuManager {
 
   private initializeDomElements(): void {
     this.optionsElement = document.getElementById('options-dropdown') as HTMLElement;
-    if(window.BrowserAPI.platform === 'darwin'){
-      document.getElementById('new-tab-shortcut').textContent = '⌘+T';
-      document.getElementById('new-window-shortcut').textContent = '⌘+N';
-      document.getElementById('new-private-window-shortcut').textContent = '⌘+⇧+T';
-      document.getElementById('print-shortcut').textContent = '⌘+P';
-      document.getElementById('find-in-page-shortcut').textContent = '⌘+F';
-      document.getElementById('downloads-shortcut').textContent = '⌘+⇧+D';
-      document.getElementById('history-shortcut').textContent = '⌘+⇧+H';
-      document.getElementById('bookmarks-shortcut').textContent = '⌘+⇧+B';
-      document.getElementById('browser-settings-shortcut').textContent = '⌘+⇧+,';
-    } else {
-      document.getElementById('new-tab-shortcut').textContent = 'Ctrl+T';
-      document.getElementById('new-window-shortcut').textContent = 'Ctrl+N';
-      document.getElementById('new-private-window-shortcut').textContent = 'Ctrl+⇧+T';
-      document.getElementById('print-shortcut').textContent = 'Ctrl+P';
-      document.getElementById('find-in-page-shortcut').textContent = 'Ctrl+F';
-      document.getElementById('downloads-shortcut').textContent = 'Ctrl+⇧+D';
-      document.getElementById('history-shortcut').textContent = 'Ctrl+⇧+H';
-      document.getElementById('bookmarks-shortcut').textContent = 'Ctrl+⇧+B';
-      document.getElementById('browser-settings-shortcut').textContent = 'Ctrl+⇧+,';
-    }
+    const modKey = window.BrowserAPI.platform === 'darwin' ? 'Cmd' : 'Ctrl';
+    const setShortcut = (id: string, keys: string[]) => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = keys.map(k => `<span class="keycap">${k}</span>`).join('');
+    };
+
+    setShortcut('new-tab-shortcut', [modKey, 'T']);
+    setShortcut('new-window-shortcut', [modKey, 'N']);
+    setShortcut('new-private-window-shortcut', [modKey, 'Shift', 'T']);
+    setShortcut('print-shortcut', [modKey, 'P']);
+    setShortcut('find-in-page-shortcut', [modKey, 'F']);
+    setShortcut('downloads-shortcut', [modKey, 'Shift', 'D']);
+    setShortcut('history-shortcut', [modKey, 'Shift', 'H']);
+    setShortcut('bookmarks-shortcut', [modKey, 'Shift', 'B']);
+    setShortcut('browser-settings-shortcut', [modKey, 'Shift', ',']);
 
     // Populate history submenu when hovering
     const historyContainer = document.getElementById('history-submenu-container');

@@ -9,7 +9,7 @@ body {
   position: absolute;
   top: 80px;
   right: 0;
-  width: 280px;
+  width: 320px;
   background-color: var(--bg-light);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
@@ -108,11 +108,19 @@ body {
 
 .keyboard-shortcut{
   padding-right: 6px;
-  flex: 1;
+  flex-shrink: 0;
   text-align: right;
-  font-size: xx-small;
-  max-width: 50px;
-  /* display: none; */
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.keyboard-shortcut .keycap {
+  min-width: 14px;
+  height: 14px;
+  font-size: 9px;
+  padding: 0 3px;
+  margin: 0 1px;
 }
 
 /* History submenu */
