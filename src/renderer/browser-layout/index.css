@@ -269,16 +269,18 @@ body.is-private .private-window-identifier{
 
 .ssl-indicator.ssl-insecure {
   color: #dc2626;
+  background-color: rgba(220, 38, 38, 0.08);
   animation: ssl-pulse 2s ease-in-out infinite;
 }
 
 .ssl-indicator.ssl-insecure:hover {
   color: #b91c1c;
+  background-color: rgba(220, 38, 38, 0.15);
 }
 
 @keyframes ssl-pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  50% { opacity: 0.6; }
 }
 
 /* SSL Tooltip */
@@ -288,50 +290,136 @@ body.is-private .private-window-identifier{
   left: 0;
   margin-top: 6px;
   z-index: 1000;
-  min-width: 280px;
-  max-width: 360px;
+  min-width: 300px;
+  max-width: 380px;
   background-color: var(--bg-light);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  padding: 12px;
+  padding: 0;
   font-size: 12px;
   line-height: 1.5;
   color: var(--text-color);
+  overflow: hidden;
 }
 
 [data-theme="dark"] .ssl-tooltip {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
-.ssl-tooltip-secure strong {
+.ssl-tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+.ssl-tooltip-header.ssl-tooltip-secure {
+  background-color: rgba(22, 163, 74, 0.08);
+  border-bottom: 2px solid #16a34a;
+}
+
+.ssl-tooltip-header.ssl-tooltip-secure strong {
   color: #16a34a;
 }
 
-.ssl-tooltip-insecure strong {
+.ssl-tooltip-header.ssl-tooltip-secure svg {
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+.ssl-tooltip-header.ssl-tooltip-insecure {
+  background-color: rgba(220, 38, 38, 0.08);
+  border-bottom: 2px solid #dc2626;
+}
+
+.ssl-tooltip-header.ssl-tooltip-insecure strong {
   color: #dc2626;
 }
 
+.ssl-tooltip-header.ssl-tooltip-insecure svg {
+  color: #dc2626;
+  flex-shrink: 0;
+}
+
+.ssl-tooltip-warning-banner {
+  background-color: rgba(220, 38, 38, 0.06);
+  color: #dc2626;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-bottom: 1px solid rgba(220, 38, 38, 0.12);
+}
+
+[data-theme="dark"] .ssl-tooltip-warning-banner {
+  background-color: rgba(220, 38, 38, 0.12);
+}
+
 .ssl-tooltip-detail {
-  margin-top: 6px;
+  padding: 8px 12px;
   color: var(--text-secondary);
   font-size: 11px;
 }
 
-.ssl-tooltip-cert {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid var(--border-color);
+.ssl-tooltip-detail strong {
+  color: var(--text-color);
+}
+
+.ssl-tooltip-protocol {
+  padding: 6px 12px;
   font-size: 11px;
   color: var(--text-secondary);
+  background-color: var(--bg-color);
+}
+
+.ssl-tooltip-protocol div {
+  margin-bottom: 1px;
+}
+
+.ssl-tooltip-cert {
+  padding: 8px 12px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border-color);
 }
 
 .ssl-tooltip-cert div {
   margin-bottom: 2px;
 }
 
+.ssl-cert-heading {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.ssl-tooltip-risks {
+  padding: 8px 12px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border-color);
+}
+
+.ssl-tooltip-risks ul {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.ssl-tooltip-risks li {
+  margin-bottom: 2px;
+}
+
 .ssl-label {
   color: var(--text-color);
+  font-weight: 500;
+}
+
+.ssl-text-danger {
+  color: #dc2626;
   font-weight: 500;
 }
 
