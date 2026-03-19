@@ -9,7 +9,7 @@ body {
   position: absolute;
   top: 80px;
   right: 0;
-  width: 280px;
+  width: 320px;
   background-color: var(--bg-light);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
