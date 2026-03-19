@@ -108,9 +108,10 @@ body {
 
 .keyboard-shortcut{
   padding-right: 6px;
-  flex-shrink: 0;
+  flex: 1;
   text-align: right;
   font-size: xx-small;
+  max-width: 50px;
   /* display: none; */
 }
 
