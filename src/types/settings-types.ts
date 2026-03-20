@@ -161,8 +161,8 @@ export const DEFAULT_FILTER_LISTS: FilterListConfig[] = [
 
 export const USER_AGENT_PRESETS: Record<string, { label: string; value: string }> = {
   'default': {
-    label: 'nav0-browser (Default)',
-    value: 'nav0-browser',
+    label: 'Chrome (Default)',
+    value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
   },
   'chrome-windows': {
     label: 'Chrome on Windows',
@@ -265,7 +265,7 @@ export const DEFAULT_BROWSER_SETTINGS: BrowserSettings = {
   popupAllowedSites: [],
   popupBlockedSites: [],
 
-  // User Agent (nav0-browser by default)
+  // User Agent (Chrome UA by default)
   userAgentPreset: 'default',
   userAgentCustomValue: '',
 

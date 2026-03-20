@@ -190,9 +190,9 @@ export abstract class SettingsEnforcer {
     let userAgent: string;
 
     if (preset === 'custom') {
-      userAgent = settings.userAgentCustomValue || 'nav0-browser';
+      userAgent = settings.userAgentCustomValue || USER_AGENT_PRESETS['default'].value;
     } else {
-      userAgent = USER_AGENT_PRESETS[preset]?.value || 'nav0-browser';
+      userAgent = USER_AGENT_PRESETS[preset]?.value || USER_AGENT_PRESETS['default'].value;
     }
 
     browsingSes.setUserAgent(userAgent);
