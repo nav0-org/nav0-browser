@@ -182,6 +182,20 @@ export abstract class SettingsEnforcer {
   }
 
   // ---- User Agent ----
+
+  /**
+   * Derives a clean Chrome-like user agent from Electron's built-in UA by
+   * stripping the Electron/X.X.X and app-name/X.X.X tokens. This keeps the
+   * real Chromium version so sites like Google don't flag a version mismatch.
+   */
+  private static getCleanChromeUA(): string {
+    const raw = app.userAgentFallback;
+    return raw
+      .replace(/\s*Electron\/[\w.-]+/g, '')
+      .replace(new RegExp(`\\s*${app.getName()}\\/[\\w.-]+`, 'g'), '')
+      .trim();
+  }
+
   private static applyUserAgent(settings: BrowserSettings) {
     const browsingSes = session.fromPartition('persist:browsertabs');
     const privateSes = session.fromPartition('persist:private');
@@ -189,10 +203,12 @@ export abstract class SettingsEnforcer {
     const preset = settings.userAgentPreset || 'default';
     let userAgent: string;
 
-    if (preset === 'custom') {
-      userAgent = settings.userAgentCustomValue || USER_AGENT_PRESETS['default'].value;
+    if (preset === 'default') {
+      userAgent = SettingsEnforcer.getCleanChromeUA();
+    } else if (preset === 'custom') {
+      userAgent = settings.userAgentCustomValue || SettingsEnforcer.getCleanChromeUA();
     } else {
-      userAgent = USER_AGENT_PRESETS[preset]?.value || USER_AGENT_PRESETS['default'].value;
+      userAgent = USER_AGENT_PRESETS[preset]?.value || SettingsEnforcer.getCleanChromeUA();
     }
 
     browsingSes.setUserAgent(userAgent);
