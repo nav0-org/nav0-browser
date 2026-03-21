@@ -40,7 +40,7 @@ head:
         "datePublished": "2026-03-04",
         "author": { "@type": "Organization", "name": "Nav0 team", "url": "https://nav0.org" },
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
-        "mainEntityOfPage": "https://nav0.org/blog/Nav0-vs-chrome-performance-benchmark",
+        "mainEntityOfPage": "https://nav0.org/blog/nav0-vs-chrome-performance-benchmark",
         "keywords": ["Nav0 vs chrome", "browser performance", "chrome memory usage", "browser benchmark", "chrome RAM", "lightweight browser", "browser CPU usage"]
       }
 ---

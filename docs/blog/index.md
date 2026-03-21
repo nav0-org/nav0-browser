@@ -42,7 +42,7 @@ Thoughts on privacy, browsers, and the open web.
 </div>
 
 <div class="blog-post-item">
-  <a href="/blog/Nav0-vs-chrome-data-consumption">
+  <a href="/blog/nav0-vs-chrome-data-consumption">
     <h2>Nav0 vs Chrome: Which Browser Actually Respects Your Data?</h2>
   </a>
   <div class="post-meta">March 14, 2026 &middot; 10 min read &middot; Data Consumption</div>
@@ -50,7 +50,7 @@ Thoughts on privacy, browsers, and the open web.
 </div>
 
 <div class="blog-post-item">
-  <a href="/blog/Nav0-vs-chrome-performance-benchmark">
+  <a href="/blog/nav0-vs-chrome-performance-benchmark">
     <h2>Nav0 vs Chrome: A Head-to-Head Performance Benchmark on macOS</h2>
   </a>
   <div class="post-meta">March 4, 2026 &middot; 11 min read &middot; Performance</div>
