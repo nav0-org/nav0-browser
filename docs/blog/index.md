@@ -10,6 +10,30 @@ Thoughts on privacy, browsers, and the open web.
 ---
 
 <div class="blog-post-item">
+  <a href="/blog/nav0-vs-arc">
+    <h2>Nav0 vs Arc: Rethinking the Browser vs. Stripping It Down</h2>
+  </a>
+  <div class="post-meta">March 21, 2026 &middot; 10 min read &middot; Comparison</div>
+  <p class="post-excerpt">Arc and nav0 both reject Chrome's status quo, but from opposite directions. Arc adds more UI — Spaces, Easels, AI features, split views. Nav0 removes UI. This is maximalism vs. minimalism, and only one approach doesn't require your data.</p>
+</div>
+
+<div class="blog-post-item">
+  <a href="/blog/nav0-vs-firefox">
+    <h2>Nav0 vs Firefox: When "Good Enough" Privacy Isn't Good Enough</h2>
+  </a>
+  <div class="post-meta">March 21, 2026 &middot; 11 min read &middot; Comparison</div>
+  <p class="post-excerpt">Firefox is the most respected alternative browser and genuinely cares about privacy. But it still ships telemetry by default, pushes Mozilla accounts, shows sponsored content, and grows more complex every year. Nav0 takes Firefox's ideals further.</p>
+</div>
+
+<div class="blog-post-item">
+  <a href="/blog/nav0-vs-brave">
+    <h2>Nav0 vs Brave: Privacy Shouldn't Come with a Business Model</h2>
+  </a>
+  <div class="post-meta">March 21, 2026 &middot; 10 min read &middot; Comparison</div>
+  <p class="post-excerpt">Brave markets itself as the privacy browser, but it ships with a crypto wallet, its own ad network, an AI assistant, and a VPN upsell. Nav0 has none of that. Here's why true privacy means no monetization layer touching your browser.</p>
+</div>
+
+<div class="blog-post-item">
   <a href="/blog/incognito-mode-is-not-private">
     <h2>Incognito Mode Is Not Private: The Biggest Lie Your Browser Tells You</h2>
   </a>
