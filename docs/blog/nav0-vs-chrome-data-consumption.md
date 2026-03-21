@@ -40,7 +40,7 @@ head:
         "datePublished": "2026-03-14",
         "author": { "@type": "Organization", "name": "Nav0 team", "url": "https://nav0.org" },
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
-        "mainEntityOfPage": "https://nav0.org/blog/Nav0-vs-chrome-data-consumption",
+        "mainEntityOfPage": "https://nav0.org/blog/nav0-vs-chrome-data-consumption",
         "keywords": ["Nav0 vs chrome", "browser data usage", "chrome data consumption", "tracker blocking", "browser bandwidth", "browser privacy", "lightweight browser"]
       }
 ---
@@ -49,7 +49,7 @@ head:
 
 <p style="color: var(--vp-c-text-2); font-size: 0.9rem;">March 14, 2026 &middot; 10 min read</p>
 
-Last week we published a [performance benchmark](/blog/Nav0-vs-chrome-performance-benchmark) showing that Nav0 uses roughly half the memory and a fraction of the CPU compared to Chrome. But performance is only part of the story.
+Last week we published a [performance benchmark](/blog/nav0-vs-chrome-performance-benchmark) showing that Nav0 uses roughly half the memory and a fraction of the CPU compared to Chrome. But performance is only part of the story.
 
 This time, we measured something different: how much data each browser actually transfers when you browse the web. Every HTTP request, every tracker pixel, every background ping — we captured it all using the Chrome DevTools Protocol's network interception, then compared the two browsers side by side across 15 real websites.
 
