@@ -252,6 +252,157 @@ There are 15 separate webpack entry points for different renderer windows/overla
 - Keep renderer code separate from main process code — communicate via IPC only
 - No inline styles — use CSS files in `src/renderer/styles/`
 
+## Writing Blog Posts
+
+Blog posts live in `docs/blog/`. The sidebar and index are auto-generated from frontmatter.
+
+### Steps to add a new blog post
+
+1. **Create the markdown file** at `docs/blog/<slug>.md` (use kebab-case for the filename)
+2. **Add frontmatter** with the following required fields:
+
+```yaml
+---
+title: "Your Post Title Here"
+description: "A concise description for SEO and social sharing."
+date: 2026-03-21
+author: Nav0 Team
+tags: [privacy, browsers]
+head:
+  - - meta
+    - property: og:type
+      content: article
+  - - meta
+    - property: article:published_time
+      content: "2026-03-21"
+  - - meta
+    - property: article:author
+      content: Nav0 Team
+  - - meta
+    - property: article:tag
+      content: privacy
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Your Post Title Here",
+        "description": "A concise description for SEO and social sharing.",
+        "datePublished": "2026-03-21",
+        "author": { "@type": "Organization", "name": "Nav0" },
+        "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
+        "mainEntityOfPage": "https://nav0.org/blog/<slug>",
+        "keywords": ["privacy", "browsers"]
+      }
+---
+```
+
+3. **Write the post content** in markdown. Start with an `h1` heading matching the title, followed by the byline:
+
+```md
+# Your Post Title Here
+
+<p style="color: var(--vp-c-text-2); font-size: 0.9rem;">By Nav0 Team &middot; March 21, 2026 &middot; 8 min read</p>
+
+Your content here...
+```
+
+4. **End with the Nav0 CTA footer:**
+
+```md
+---
+
+*Nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started).*
+```
+
+5. **Add the entry to `docs/blog/index.md`** at the top of the list (newest first):
+
+```html
+<div class="blog-post-item">
+  <a href="/blog/<slug>">
+    <h2>Your Post Title Here</h2>
+  </a>
+  <div class="post-meta">By Nav0 Team &middot; March 21, 2026 &middot; 8 min read &middot; Category</div>
+  <p class="post-excerpt">A brief excerpt summarizing the post (1-2 sentences).</p>
+</div>
+```
+
+### Blog conventions
+
+- Categories used: Privacy, Security, Comparison, Performance, Data Consumption, AI & Bloat, Open Web
+- Author is always "Nav0 Team"
+- Include reading time estimate in the byline
+- All posts should align with Nav0's privacy-first philosophy
+- The sidebar is auto-generated from frontmatter by `getBlogSidebar()` in `docs/.vitepress/config.ts`
+
+## Writing Release Notes
+
+Release notes live in `docs/releases/`. The sidebar is auto-generated from frontmatter.
+
+### Steps to add a new release
+
+1. **Create the markdown file** at `docs/releases/v<version>.md` (e.g., `v0.1.0.md`)
+2. **Add frontmatter:**
+
+```yaml
+---
+title: "v0.1.0"
+date: 2026-03-21
+badge: Latest
+---
+```
+
+- Use `badge: Latest` only for the newest release. Remove `badge` from the previous latest release file.
+- For alpha releases, use `badge: Alpha` and name the file `v<version>-alpha.md`.
+
+3. **Write the release content** with this structure:
+
+```md
+# v0.1.0
+
+<span class="release-badge latest">Latest</span>
+
+<div class="release-date-meta">March 21, 2026</div>
+
+## Feature Section Name
+
+- **Feature Name** — short description of what it does
+- **Another Feature** — description
+
+## Bug Fixes
+
+- **Fix Name** — what was fixed and how
+
+## Improvements
+
+- **Improvement Name** — what changed
+```
+
+4. **Update `docs/releases/index.md`** — add the new entry at the top (newest first) and move the `latest` badge:
+
+```html
+<div class="release-list-item">
+  <a href="/releases/v0.1.0">
+    <h2>v0.1.0</h2>
+  </a>
+  <div class="release-meta">March 21, 2026 <span class="release-badge latest">Latest</span></div>
+  <p class="release-excerpt">Brief summary of major changes in this release.</p>
+</div>
+```
+
+Remove the `<span class="release-badge latest">Latest</span>` from the previous release entry.
+
+5. **Update `package.json` version** to match the new release version.
+
+### Release note conventions
+
+- Group changes by feature area with `##` headings
+- Each item is a bold feature/fix name followed by an em dash and description
+- Keep descriptions concise — one line per item
+- Badge classes: `latest`, `alpha`
+- The sidebar is auto-generated from frontmatter by `getReleaseSidebar()` in `docs/.vitepress/config.ts`
+
 ## Default Browser Settings
 
 | Category | Setting | Default |
