@@ -2,7 +2,7 @@
 title: "Nav0 vs Chrome: Which Browser Actually Respects Your Data?"
 description: "We measured every byte transferred by Nav0 and Chrome across 15 real websites. Nav0 used 17.7% less data, made 29.1% fewer requests, blocked 2.5 MB of trackers, and produced zero idle background traffic."
 date: 2026-03-14
-author: nav0 team
+author: Nav0 team
 tags: [data-consumption, privacy, benchmark, chrome, trackers, bandwidth]
 head:
   - - meta
@@ -13,7 +13,7 @@ head:
       content: "2026-03-14"
   - - meta
     - property: article:author
-      content: nav0 team
+      content: Nav0 team
   - - meta
     - property: article:tag
       content: data-consumption
@@ -28,7 +28,7 @@ head:
       content: chrome
   - - meta
     - name: keywords
-      content: "nav0 vs chrome, browser data usage, chrome data consumption, browser bandwidth, tracker blocking, chrome background requests, lightweight browser, browser privacy, chrome telemetry, nav0 browser data"
+      content: "Nav0 vs chrome, browser data usage, chrome data consumption, browser bandwidth, tracker blocking, chrome background requests, lightweight browser, browser privacy, chrome telemetry, Nav0 browser data"
   - - script
     - type: application/ld+json
     - |
@@ -38,10 +38,10 @@ head:
         "headline": "Nav0 vs Chrome: Which Browser Actually Respects Your Data?",
         "description": "We measured every byte transferred by Nav0 and Chrome across 15 real websites. Nav0 used 17.7% less data, made 29.1% fewer requests, blocked 2.5 MB of trackers, and produced zero idle background traffic.",
         "datePublished": "2026-03-14",
-        "author": { "@type": "Organization", "name": "nav0 team", "url": "https://nav0.org" },
-        "publisher": { "@type": "Organization", "name": "nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
-        "mainEntityOfPage": "https://nav0.org/blog/nav0-vs-chrome-data-consumption",
-        "keywords": ["nav0 vs chrome", "browser data usage", "chrome data consumption", "tracker blocking", "browser bandwidth", "browser privacy", "lightweight browser"]
+        "author": { "@type": "Organization", "name": "Nav0 team", "url": "https://nav0.org" },
+        "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
+        "mainEntityOfPage": "https://nav0.org/blog/Nav0-vs-chrome-data-consumption",
+        "keywords": ["Nav0 vs chrome", "browser data usage", "chrome data consumption", "tracker blocking", "browser bandwidth", "browser privacy", "lightweight browser"]
       }
 ---
 
@@ -49,11 +49,11 @@ head:
 
 <p style="color: var(--vp-c-text-2); font-size: 0.9rem;">March 14, 2026 &middot; 10 min read</p>
 
-Last week we published a [performance benchmark](/blog/nav0-vs-chrome-performance-benchmark) showing that nav0 uses roughly half the memory and a fraction of the CPU compared to Chrome. But performance is only part of the story.
+Last week we published a [performance benchmark](/blog/Nav0-vs-chrome-performance-benchmark) showing that Nav0 uses roughly half the memory and a fraction of the CPU compared to Chrome. But performance is only part of the story.
 
 This time, we measured something different: how much data each browser actually transfers when you browse the web. Every HTTP request, every tracker pixel, every background ping — we captured it all using the Chrome DevTools Protocol's network interception, then compared the two browsers side by side across 15 real websites.
 
-The short version: Chrome transferred 44.02 MB. Nav0 transferred 36.22 MB. That's 17.7% less data. But the raw totals don't tell the full story. Where Chrome and nav0 really diverge is in *what* that data is and *who* it's for.
+The short version: Chrome transferred 44.02 MB. Nav0 transferred 36.22 MB. That's 17.7% less data. But the raw totals don't tell the full story. Where Chrome and Nav0 really diverge is in *what* that data is and *who* it's for.
 
 ## The Numbers
 
@@ -81,7 +81,7 @@ We opened the same 15 websites in both browsers and measured every network reque
 
 Nav0 used less data on 11 of 15 pages. Chrome won on 4 — all by small margins except Craigslist, which we'll address in the methodology section.
 
-The biggest wins were on heavy, ad-laden pages. BBC News: nav0 cut data consumption by 52.8%. CNN Lite: 53.6% less. Stack Overflow: 30.2% less. These are exactly the pages where third-party scripts and tracker payloads dominate the page weight.
+The biggest wins were on heavy, ad-laden pages. BBC News: Nav0 cut data consumption by 52.8%. CNN Lite: 53.6% less. Stack Overflow: 30.2% less. These are exactly the pages where third-party scripts and tracker payloads dominate the page weight.
 
 On lightweight pages like Hacker News and NPR Text, both browsers transferred nearly identical amounts. That's expected — when there's no junk to block, both browsers do the same work. The gap only appears when sites start loading trackers, analytics, and ad scripts.
 
@@ -117,7 +117,7 @@ Chrome blocked zero requests. Zero trackers. It loaded every single one.
 
 Nav0's built-in tracker blocking isn't an afterthought bolted on via an extension. It's part of the browser. No extension overhead, no add-on to install, no configuration to fiddle with. It just works.
 
-And the third-party numbers are striking too. Chrome made 935 third-party requests; nav0 made 612. That's 323 fewer requests to domains other than the site you're actually visiting. Every one of those requests is a potential tracking vector — a cookie being read, a fingerprint being built, a behavioral profile being updated.
+And the third-party numbers are striking too. Chrome made 935 third-party requests; Nav0 made 612. That's 323 fewer requests to domains other than the site you're actually visiting. Every one of those requests is a potential tracking vector — a cookie being read, a fingerprint being built, a behavioral profile being updated.
 
 ### Resource Types
 
@@ -172,21 +172,21 @@ We said we'd be honest, so let's talk about where Chrome won.
 
 Chrome used less data on 4 of the 15 pages: Hacker News (+0.3%), Craigslist (+66.7%), GitHub Explore (+30.8%), and YouTube (+3.5%).
 
-The Craigslist result is the most notable outlier. Nav0 transferred 310 KB more than Chrome on craigslist.org. We investigated this and believe it's related to Craigslist's redirect and bot-detection behavior — different browser signatures can trigger different response paths, and nav0's Electron-based user agent may have caused additional redirects or a heavier page variant. This is worth investigating further and we plan to.
+The Craigslist result is the most notable outlier. Nav0 transferred 310 KB more than Chrome on craigslist.org. We investigated this and believe it's related to Craigslist's redirect and bot-detection behavior — different browser signatures can trigger different response paths, and Nav0's Electron-based user agent may have caused additional redirects or a heavier page variant. This is worth investigating further and we plan to.
 
 The GitHub Explore difference (+30.8%) likely reflects similar server-side content negotiation or caching behavior differences between the two browsers.
 
 On Hacker News and YouTube, the differences were negligible — 0.3% and 3.5% respectively.
 
-The important thing: on the pages where Chrome "won," the margins were small in absolute terms (except Craigslist). On the pages where nav0 won, the savings were measured in megabytes.
+The important thing: on the pages where Chrome "won," the margins were small in absolute terms (except Craigslist). On the pages where Nav0 won, the savings were measured in megabytes.
 
 ## What About First-Party Data?
 
-You might have noticed that nav0 actually transferred *more* first-party data than Chrome: 4.38 MB vs 3.87 MB. That's a 13% increase.
+You might have noticed that Nav0 actually transferred *more* first-party data than Chrome: 4.38 MB vs 3.87 MB. That's a 13% increase.
 
 We think this is a feature, not a bug. Nav0 blocks third-party tracker scripts that Chrome loads. Some of those scripts dynamically modify what first-party content gets loaded — for example, a tracker script might lazy-load certain images or defer content loading. When those scripts are blocked, the browser may load the full first-party content directly instead.
 
-In other words: nav0 loads more of the actual content you came for and less of the surveillance infrastructure around it.
+In other words: Nav0 loads more of the actual content you came for and less of the surveillance infrastructure around it.
 
 ## Testing Methodology
 
@@ -233,7 +233,7 @@ We used the same 15 real-world websites from our performance benchmark, spanning
 ### What We Didn't Do
 
 - **Multiple runs.** This was a single test run. Network responses vary between requests — CDN routing, A/B tests, and ad auction results all introduce variability. The trends are directionally clear, but individual page numbers should be taken as representative, not exact.
-- **Extension testing.** Chrome was tested without extensions. A user running uBlock Origin would see numbers closer to nav0's. But that's the point — nav0's protections are built in. You shouldn't need to install and maintain a third-party extension to stop your browser from hemorrhaging data.
+- **Extension testing.** Chrome was tested without extensions. A user running uBlock Origin would see numbers closer to Nav0's. But that's the point — Nav0's protections are built in. You shouldn't need to install and maintain a third-party extension to stop your browser from hemorrhaging data.
 - **Mobile testing.** This was a desktop test. Data consumption on mobile, where bandwidth is metered and more expensive, is an even more important benchmark. That's coming.
 - **VPN or proxy analysis.** We measured browser-level network activity. We didn't attempt to capture OS-level network traffic that might bypass the browser's network stack.
 
@@ -261,8 +261,8 @@ These aren't opinions. They're measurements. The test script is [open source in 
 
 Your browser should load the page you asked for and then stop. Nav0 does that. Chrome doesn't.
 
-[Download nav0 — free, open source, and light on your data](/guide/getting-started).
+[Download Nav0 — free, open source, and light on your data](/guide/getting-started).
 
 ---
 
-*nav0 is a minimal, open-source browser built on one principle: your browser should work for you, not for an ad company. Zero telemetry. Zero bloat. Zero BS. [Learn more](/guide/philosophy).*
+*Nav0 is a minimal, open-source browser built on one principle: your browser should work for you, not for an ad company. Zero telemetry. Zero bloat. Zero BS. [Learn more](/guide/philosophy).*

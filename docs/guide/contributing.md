@@ -1,24 +1,24 @@
 ---
-title: "Contributing to nav0 Browser — Open Source Development Guide"
-description: "How to contribute to nav0: report bugs, submit code, improve documentation, and help the community. Setup instructions, guidelines, and code of conduct."
+title: "Contributing to Nav0 Browser — Open Source Development Guide"
+description: "How to contribute to Nav0: report bugs, submit code, improve documentation, and help the community. Setup instructions, guidelines, and code of conduct."
 ---
 
 # Contributing
 
-nav0 is open source and welcomes contributions from the community.
+Nav0 is open source and welcomes contributions from the community.
 
 ## Ways to Contribute
 
 ### Use and Report
 
 The simplest contribution:
-- Use nav0 as your browser
+- Use Nav0 as your browser
 - Report bugs when you find them
 - Suggest improvements
 
 ### Code Contributions
 
-Help build nav0:
+Help build Nav0:
 - Fix bugs
 - Improve performance
 - Enhance security
@@ -250,8 +250,8 @@ Contributors are recognized in:
 
 ## License
 
-By contributing to nav0, you agree that your contributions will be licensed under the MIT License.
+By contributing to Nav0, you agree that your contributions will be licensed under the MIT License.
 
 ---
 
-Thank you for helping make nav0 better. Every contribution matters.
+Thank you for helping make Nav0 better. Every contribution matters.

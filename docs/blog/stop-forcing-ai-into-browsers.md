@@ -2,7 +2,7 @@
 title: "Stop Forcing AI Into My Browser"
 description: "Every major browser is cramming AI features into their product. Nobody asked for this. Here's why forced AI integration is bad for users, bad for privacy, and bad for the web."
 date: 2026-02-08
-author: nav0 team
+author: Nav0 team
 tags: [ai, browsers, bloat, privacy]
 head:
   - - meta
@@ -13,7 +13,7 @@ head:
       content: "2026-02-08"
   - - meta
     - property: article:author
-      content: nav0 team
+      content: Nav0 team
   - - meta
     - property: article:tag
       content: ai
@@ -32,8 +32,8 @@ head:
         "headline": "Stop Forcing AI Into My Browser",
         "description": "Every major browser is cramming AI features into their product. Nobody asked for this. Here's why forced AI integration is bad for users, bad for privacy, and bad for the web.",
         "datePublished": "2026-02-08",
-        "author": { "@type": "Organization", "name": "nav0 team", "url": "https://nav0.org" },
-        "publisher": { "@type": "Organization", "name": "nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
+        "author": { "@type": "Organization", "name": "Nav0 team", "url": "https://nav0.org" },
+        "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/stop-forcing-ai-into-browsers",
         "keywords": ["AI in browsers", "browser bloat", "privacy", "browser AI features", "Copilot"]
       }
@@ -117,11 +117,11 @@ The AI trend is particularly concerning because it normalizes the idea that your
 
 ## The Alternative: Just Browse
 
-At nav0, we think a browser should do exactly one thing: let you browse the web. That's it.
+At Nav0, we think a browser should do exactly one thing: let you browse the web. That's it.
 
 No AI assistant. No chatbot. No sidebar that wants to read your pages. No "smart" features that phone home to cloud servers. No sparkle icons. No features you need to disable after every update.
 
-We don't include AI in nav0 for the same reason we don't include a built-in word processor or a cryptocurrency wallet: it's not what a browser is for.
+We don't include AI in Nav0 for the same reason we don't include a built-in word processor or a cryptocurrency wallet: it's not what a browser is for.
 
 If you want to use AI tools, you can visit them in a tab, like any other website. Your browser doesn't need to embed them. Your browser doesn't need to mediate your interaction with them. And your browser certainly doesn't need to send your browsing data to them automatically.
 
@@ -135,8 +135,8 @@ The best browser is one that gets out of your way. It loads pages fast, keeps yo
 
 3. **Consider whether you actually use these features.** If you've never intentionally clicked the AI button, the feature is using resources and collecting data for nothing.
 
-4. **Switch to a browser that respects your choices.** nav0 ships with zero AI features and zero telemetry. We don't add features you didn't ask for, and we don't collect data you didn't offer. [Get started with nav0](/guide/getting-started).
+4. **Switch to a browser that respects your choices.** Nav0 ships with zero AI features and zero telemetry. We don't add features you didn't ask for, and we don't collect data you didn't offer. [Get started with Nav0](/guide/getting-started).
 
 ---
 
-*nav0 is a minimal, privacy-focused browser that believes your browser should browse, nothing more. No AI, no bloat, no data collection. [Learn more](/guide/philosophy).*
+*Nav0 is a minimal, privacy-focused browser that believes your browser should browse, nothing more. No AI, no bloat, no data collection. [Learn more](/guide/philosophy).*

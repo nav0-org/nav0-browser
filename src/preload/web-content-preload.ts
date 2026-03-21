@@ -16,25 +16,25 @@ import { contextBridge, ipcRenderer } from 'electron';
 
 // Expose a function the main-world polyfill can call to get IP geolocation
 // from the main process (uses Electron net.fetch, immune to page CSP).
-contextBridge.exposeInMainWorld('__nav0Geo', {
+contextBridge.exposeInMainWorld('__Nav0Geo', {
   getPosition: (): Promise<{ latitude: number; longitude: number } | null> =>
     ipcRenderer.invoke('get-ip-geolocation'),
 });
 
 const POLYFILL_CODE = `
 (function() {
-  if (window.__nav0GeolocationPatched) return;
-  window.__nav0GeolocationPatched = true;
+  if (window.__Nav0GeolocationPatched) return;
+  window.__Nav0GeolocationPatched = true;
 
   var nativeGetCurrentPosition = navigator.geolocation.getCurrentPosition.bind(navigator.geolocation);
   var nativeWatchPosition = navigator.geolocation.watchPosition.bind(navigator.geolocation);
 
   function ipFallback(success, error) {
-    if (!window.__nav0Geo || !window.__nav0Geo.getPosition) {
+    if (!window.__Nav0Geo || !window.__Nav0Geo.getPosition) {
       if (error) error({ code: 2, message: 'Position unavailable', PERMISSION_DENIED: 1, POSITION_UNAVAILABLE: 2, TIMEOUT: 3 });
       return;
     }
-    window.__nav0Geo.getPosition()
+    window.__Nav0Geo.getPosition()
       .then(function(result) {
         if (!result) throw new Error('No result');
         success({

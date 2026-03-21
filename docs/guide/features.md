@@ -1,11 +1,11 @@
 ---
-title: "nav0 Browser Features — Privacy, Security & Performance"
-description: "Explore nav0's features: ad blocking, tracker blocking, fingerprint protection, HTTPS upgrades, dark mode, tab management, reader mode, PDF reader, local bookmarks, sandboxing, and more. Only essential browsing features, nothing more."
+title: "Nav0 Browser Features — Privacy, Security & Performance"
+description: "Explore Nav0's features: ad blocking, tracker blocking, fingerprint protection, HTTPS upgrades, dark mode, tab management, reader mode, PDF reader, local bookmarks, sandboxing, and more. Only essential browsing features, nothing more."
 ---
 
 # Features
 
-nav0 includes only the features essential for a clean browsing experience. Nothing more.
+Nav0 includes only the features essential for a clean browsing experience. Nothing more.
 
 ## Core Features
 
@@ -247,7 +247,7 @@ We deliberately exclude:
 
 ### Resource Usage
 
-nav0 is designed to be light:
+Nav0 is designed to be light:
 
 - Minimal background processes
 - No pre-loading of "suggested" content

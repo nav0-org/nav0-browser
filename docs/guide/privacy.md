@@ -1,17 +1,17 @@
 ---
-title: "nav0 Privacy Policy — Zero Data Collection"
-description: "nav0 collects nothing. No telemetry, no personal information, no browsing data, no device info, no network data. Privacy is not a feature — it is the foundation."
+title: "Nav0 Privacy Policy — Zero Data Collection"
+description: "Nav0 collects nothing. No telemetry, no personal information, no browsing data, no device info, no network data. Privacy is not a feature — it is the foundation."
 ---
 
 # Privacy
 
-Privacy isn't a feature in nav0—it's the foundation.
+Privacy isn't a feature in Nav0—it's the foundation.
 
 ## Our Privacy Promise
 
 **We collect nothing.**
 
-That's not a simplified summary. That's the complete policy. nav0 does not collect, store, transmit, or process any user data. Period.
+That's not a simplified summary. That's the complete policy. Nav0 does not collect, store, transmit, or process any user data. Period.
 
 ## What We Don't Collect
 
@@ -49,7 +49,7 @@ That's not a simplified summary. That's the complete policy. nav0 does not colle
 
 ### No Accounts
 
-Most data collection starts with "sign in." nav0 has no accounts, so there's nothing to sign into and no profile to build.
+Most data collection starts with "sign in." Nav0 has no accounts, so there's nothing to sign into and no profile to build.
 
 ### No Cloud Services
 
@@ -61,7 +61,7 @@ Your data stays on your device:
 
 ### No Phone Home
 
-nav0 makes no unsolicited network requests:
+Nav0 makes no unsolicited network requests:
 - No analytics pings
 - No heartbeat checks
 - No "anonymous" usage data
@@ -77,7 +77,7 @@ Don't trust us—verify:
 
 ## Comparison
 
-| Data Point | Other Browsers | nav0 |
+| Data Point | Other Browsers | Nav0 |
 |------------|----------------|------|
 | Browsing history | Often synced/analyzed | Local only |
 | Search queries | Logged by default | Never collected |
@@ -95,7 +95,7 @@ When you search, your query goes to your chosen search engine. We recommend priv
 - Startpage
 - Brave Search
 
-nav0 doesn't see or log what you search.
+Nav0 doesn't see or log what you search.
 
 ### Websites You Visit
 
@@ -104,11 +104,11 @@ Websites you visit can still:
 - Run JavaScript (controllable per-site)
 - Track you through their own means
 
-nav0 provides tools to limit this, but we can't control what websites do.
+Nav0 provides tools to limit this, but we can't control what websites do.
 
 ### Extensions
 
-nav0 supports extensions. Third-party extensions may have their own privacy policies. We recommend:
+Nav0 supports extensions. Third-party extensions may have their own privacy policies. We recommend:
 - Reviewing extension permissions
 - Using open-source extensions
 - Limiting installed extensions
@@ -151,12 +151,12 @@ grep -r "telemetry\|analytics\|tracking" src/
 
 ## Your Responsibilities
 
-While nav0 protects your privacy from us, you should still:
+While Nav0 protects your privacy from us, you should still:
 
 - Use private browsing for sensitive activities
 - Choose privacy-respecting search engines
 - Be cautious with extensions
-- Keep nav0 updated for security fixes
+- Keep Nav0 updated for security fixes
 - Understand that websites can still track you
 
 ## Questions?
@@ -170,7 +170,7 @@ While nav0 protects your privacy from us, you should still:
 
 ### "How do you make money?"
 
-nav0 is a community project. We don't monetize users.
+Nav0 is a community project. We don't monetize users.
 
 ### "What if you get acquired?"
 

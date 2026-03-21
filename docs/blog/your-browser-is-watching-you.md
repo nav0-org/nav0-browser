@@ -2,7 +2,7 @@
 title: "Your Browser Is Watching You: The Hidden Cost of Free Browsing"
 description: "Modern browsers collect an astonishing amount of data about you. We break down exactly what they track, why it matters, and what you can do about it."
 date: 2026-02-10
-author: nav0 team
+author: Nav0 team
 tags: [privacy, browsers, data-collection]
 head:
   - - meta
@@ -13,7 +13,7 @@ head:
       content: "2026-02-10"
   - - meta
     - property: article:author
-      content: nav0 team
+      content: Nav0 team
   - - meta
     - property: article:tag
       content: privacy
@@ -32,8 +32,8 @@ head:
         "headline": "Your Browser Is Watching You: The Hidden Cost of Free Browsing",
         "description": "Modern browsers collect an astonishing amount of data about you. We break down exactly what they track, why it matters, and what you can do about it.",
         "datePublished": "2026-02-10",
-        "author": { "@type": "Organization", "name": "nav0 team", "url": "https://nav0.org" },
-        "publisher": { "@type": "Organization", "name": "nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
+        "author": { "@type": "Organization", "name": "Nav0 team", "url": "https://nav0.org" },
+        "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/your-browser-is-watching-you",
         "keywords": ["privacy", "browsers", "data collection", "browser tracking", "web privacy"]
       }
@@ -143,7 +143,7 @@ If you're concerned about browser privacy, here are concrete steps:
 
 2. **Don't sign into your browser.** This single step prevents the vast majority of cross-device tracking and data collection.
 
-3. **Use a privacy-focused browser.** Choose one that collects nothing by default, like nav0. Not one that collects everything and asks you to opt out.
+3. **Use a privacy-focused browser.** Choose one that collects nothing by default, like Nav0. Not one that collects everything and asks you to opt out.
 
 4. **Check the source.** If your browser isn't open source, you can't verify its privacy claims. Trust, but verify. Or better yet, just verify.
 
@@ -159,4 +159,4 @@ The browser you choose is one of the most consequential technology decisions you
 
 ---
 
-*nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started).*
+*Nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started).*

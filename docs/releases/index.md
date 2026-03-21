@@ -1,11 +1,11 @@
 ---
-title: "Release Notes — nav0 Browser"
-description: "Release notes and changelog for nav0 Browser. See what's new in every release — features, fixes, and improvements."
+title: "Release Notes — Nav0 Browser"
+description: "Release notes and changelog for Nav0 Browser. See what's new in every release — features, fixes, and improvements."
 ---
 
 # Release Notes
 
-What's new in every release of nav0 Browser.
+What's new in every release of Nav0 Browser.
 
 ---
 
@@ -46,7 +46,7 @@ What's new in every release of nav0 Browser.
     <h2>v0.0.5-alpha</h2>
   </a>
   <div class="release-meta">March 1, 2026 <span class="release-badge alpha">Alpha</span></div>
-  <p class="release-excerpt">New nav0 compass logo and rebrand. Bug fixes for fullscreen, Command+K overlay, and auto-launch after macOS install.</p>
+  <p class="release-excerpt">New Nav0 compass logo and rebrand. Bug fixes for fullscreen, Command+K overlay, and auto-launch after macOS install.</p>
 </div>
 
 <div class="release-list-item">

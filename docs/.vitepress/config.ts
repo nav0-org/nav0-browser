@@ -70,7 +70,7 @@ function getBlogSidebar() {
 }
 
 const siteUrl = 'https://nav0.org'
-const siteName = 'nav0'
+const siteName = 'Nav0'
 const siteDescription = 'A minimal, privacy-focused web browser. No data collection. No bloat. No AI gimmicks. Just clean, safe browsing.'
 const ogImage = `${siteUrl}/og-image.png`
 
@@ -95,7 +95,7 @@ export default defineConfig({
     // Open Graph
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:site_name', content: siteName }],
-    ['meta', { property: 'og:title', content: 'nav0 — Minimal Privacy Browser' }],
+    ['meta', { property: 'og:title', content: 'Nav0 — Minimal Privacy Browser' }],
     ['meta', { property: 'og:description', content: siteDescription }],
     ['meta', { property: 'og:image', content: ogImage }],
     ['meta', { property: 'og:url', content: siteUrl }],
@@ -103,19 +103,19 @@ export default defineConfig({
 
     // Twitter Card
     ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
-    ['meta', { name: 'twitter:title', content: 'nav0 — Minimal Privacy Browser' }],
+    ['meta', { name: 'twitter:title', content: 'Nav0 — Minimal Privacy Browser' }],
     ['meta', { name: 'twitter:description', content: siteDescription }],
     ['meta', { name: 'twitter:image', content: ogImage }],
 
     // Additional SEO
-    ['meta', { name: 'author', content: 'nav0 Contributors' }],
+    ['meta', { name: 'author', content: 'Nav0 Contributors' }],
     ['meta', { name: 'robots', content: 'index, follow' }],
 
     // JSON-LD: Organization
     ['script', { type: 'application/ld+json' }, JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'Organization',
-      name: 'nav0',
+      name: 'Nav0',
       url: siteUrl,
       logo: `${siteUrl}/logo.webp`,
       description: 'An open-source, privacy-focused web browser project.',
@@ -128,7 +128,7 @@ export default defineConfig({
     ['script', { type: 'application/ld+json' }, JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'SoftwareApplication',
-      name: 'nav0 Browser',
+      name: 'Nav0 Browser',
       description: 'A minimal, privacy-focused web browser built on Electron. No data collection. No bloat. No AI gimmicks.',
       url: siteUrl,
       applicationCategory: 'BrowserApplication',
@@ -144,7 +144,7 @@ export default defineConfig({
       softwareVersion: '0.1.0',
       author: {
         '@type': 'Organization',
-        name: 'nav0',
+        name: 'Nav0',
         url: siteUrl
       },
       featureList: [
@@ -174,7 +174,7 @@ export default defineConfig({
       description: siteDescription,
       publisher: {
         '@type': 'Organization',
-        name: 'nav0',
+        name: 'Nav0',
         url: siteUrl
       }
     })],
@@ -182,7 +182,7 @@ export default defineConfig({
 
   themeConfig: {
     logo: '/logo.webp',
-    siteTitle: 'nav0',
+    siteTitle: 'Nav0',
 
     nav: [
       { text: 'Home', link: '/' },
@@ -234,7 +234,7 @@ export default defineConfig({
 
     footer: {
       message: 'Released under the MIT License.',
-      copyright: 'Copyright nav0 Contributors'
+      copyright: 'Copyright Nav0 Contributors'
     },
 
     search: {

@@ -231,13 +231,13 @@ export abstract class RendererToMainEventsForDataStoreIPC {
 
 
 export abstract class InAppUrls {
-  public static readonly PREFIX = "nav0://";
-  public static readonly DOWNLOADS = "nav0://downloads";
-  public static readonly HISTORY = "nav0://history";
-  public static readonly BOOKMARKS = "nav0://bookmarks";
-  public static readonly BROWSER_SETTINGS = "nav0://browser-settings";
-  public static readonly NEW_TAB = "nav0://new-tab";
-  public static readonly ABOUT = "nav0://about";
+  public static readonly PREFIX = "Nav0://";
+  public static readonly DOWNLOADS = "Nav0://downloads";
+  public static readonly HISTORY = "Nav0://history";
+  public static readonly BOOKMARKS = "Nav0://bookmarks";
+  public static readonly BROWSER_SETTINGS = "Nav0://browser-settings";
+  public static readonly NEW_TAB = "Nav0://new-tab";
+  public static readonly ABOUT = "Nav0://about";
 }
 
 export abstract class ImageBase64Strings {

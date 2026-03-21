@@ -1,6 +1,6 @@
 ---
-title: "nav0 Blog — Privacy, Browsers & the Open Web"
-description: "Thoughts on privacy, browsers, and the open web from the nav0 team. Articles about browser tracking, AI bloat, VPN security theater, extension risks, and big tech browser control."
+title: "Nav0 Blog — Privacy, Browsers & the Open Web"
+description: "Thoughts on privacy, browsers, and the open web from the Nav0 team. Articles about browser tracking, AI bloat, VPN security theater, extension risks, and big tech browser control."
 ---
 
 # Blog
@@ -18,7 +18,7 @@ Thoughts on privacy, browsers, and the open web.
 </div>
 
 <div class="blog-post-item">
-  <a href="/blog/nav0-vs-chrome-data-consumption">
+  <a href="/blog/Nav0-vs-chrome-data-consumption">
     <h2>Nav0 vs Chrome: Which Browser Actually Respects Your Data?</h2>
   </a>
   <div class="post-meta">March 14, 2026 &middot; 10 min read &middot; Data Consumption</div>
@@ -26,11 +26,11 @@ Thoughts on privacy, browsers, and the open web.
 </div>
 
 <div class="blog-post-item">
-  <a href="/blog/nav0-vs-chrome-performance-benchmark">
+  <a href="/blog/Nav0-vs-chrome-performance-benchmark">
     <h2>Nav0 vs Chrome: A Head-to-Head Performance Benchmark on macOS</h2>
   </a>
   <div class="post-meta">March 4, 2026 &middot; 11 min read &middot; Performance</div>
-  <p class="post-excerpt">We ran a rigorous head-to-head performance comparison between nav0 and Google Chrome on a MacBook Pro M1. Nav0 used 48.5% less memory, 86.3% less CPU, and spawned far fewer processes across every tab count tested.</p>
+  <p class="post-excerpt">We ran a rigorous head-to-head performance comparison between Nav0 and Google Chrome on a MacBook Pro M1. Nav0 used 48.5% less memory, 86.3% less CPU, and spawned far fewer processes across every tab count tested.</p>
 </div>
 
 <div class="blog-post-item">
