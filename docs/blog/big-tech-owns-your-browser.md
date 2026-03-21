@@ -2,7 +2,7 @@
 title: "Big Tech Owns Your Browser"
 description: "Google, Microsoft, and Apple control how billions of people access the web. When your browser is made by an ad company or a platform gatekeeper, whose interests does it really serve?"
 date: 2026-02-04
-author: Nav0 team
+author: Nav0 Team
 tags: [big-tech, browsers, open-web, privacy]
 head:
   - - meta
@@ -13,7 +13,7 @@ head:
       content: "2026-02-04"
   - - meta
     - property: article:author
-      content: Nav0 team
+      content: Nav0 Team
   - - meta
     - property: article:tag
       content: big-tech
@@ -32,7 +32,7 @@ head:
         "headline": "Big Tech Owns Your Browser",
         "description": "Google, Microsoft, and Apple control how billions of people access the web. When your browser is made by an ad company or a platform gatekeeper, whose interests does it really serve?",
         "datePublished": "2026-02-04",
-        "author": { "@type": "Organization", "name": "Nav0 team", "url": "https://nav0.org" },
+        "author": { "@type": "Organization", "name": "Nav0" },
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/big-tech-owns-your-browser",
         "keywords": ["big tech", "browser monopoly", "Chrome", "Edge", "Safari", "open web", "Chromium"]
@@ -41,7 +41,7 @@ head:
 
 # Big Tech Owns Your Browser
 
-<p style="color: var(--vp-c-text-2); font-size: 0.9rem;">February 4, 2026 &middot; 8 min read</p>
+<p style="color: var(--vp-c-text-2); font-size: 0.9rem;">By Nav0 Team &middot; February 4, 2026 &middot; 8 min read</p>
 
 There are roughly 5 billion internet users worldwide. The vast majority of them access the web through a browser made by one of four companies: Google, Apple, Microsoft, or the Mozilla Foundation (which gets over 80% of its revenue from Google). That's it. Four organizations mediate almost the entire world's relationship with the internet.
 

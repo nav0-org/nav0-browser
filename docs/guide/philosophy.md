@@ -1,6 +1,6 @@
 ---
 title: "Nav0 Philosophy — Why We Built a Minimal Browser"
-description: "Nav0 exists because modern browsers have lost their way. Learn our principles: do one thing well, absence over presence, local over cloud, transparent over proprietary, user over user data."
+description: "Nav0 exists because browsers got bloated. Read the philosophy behind building a browser that does one thing: browse the web."
 ---
 
 # Philosophy

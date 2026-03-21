@@ -2,7 +2,7 @@
 title: "Nav0 vs Chrome: Which Browser Actually Respects Your Data?"
 description: "We measured every byte transferred by Nav0 and Chrome across 15 real websites. Nav0 used 17.7% less data, made 29.1% fewer requests, blocked 2.5 MB of trackers, and produced zero idle background traffic."
 date: 2026-03-14
-author: Nav0 team
+author: Nav0 Team
 tags: [data-consumption, privacy, benchmark, chrome, trackers, bandwidth]
 head:
   - - meta
@@ -13,7 +13,7 @@ head:
       content: "2026-03-14"
   - - meta
     - property: article:author
-      content: Nav0 team
+      content: Nav0 Team
   - - meta
     - property: article:tag
       content: data-consumption
@@ -38,7 +38,7 @@ head:
         "headline": "Nav0 vs Chrome: Which Browser Actually Respects Your Data?",
         "description": "We measured every byte transferred by Nav0 and Chrome across 15 real websites. Nav0 used 17.7% less data, made 29.1% fewer requests, blocked 2.5 MB of trackers, and produced zero idle background traffic.",
         "datePublished": "2026-03-14",
-        "author": { "@type": "Organization", "name": "Nav0 team", "url": "https://nav0.org" },
+        "author": { "@type": "Organization", "name": "Nav0" },
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/nav0-vs-chrome-data-consumption",
         "keywords": ["Nav0 vs chrome", "browser data usage", "chrome data consumption", "tracker blocking", "browser bandwidth", "browser privacy", "lightweight browser"]
@@ -47,7 +47,7 @@ head:
 
 # Nav0 vs Chrome: Which Browser Actually Respects Your Data?
 
-<p style="color: var(--vp-c-text-2); font-size: 0.9rem;">March 14, 2026 &middot; 10 min read</p>
+<p style="color: var(--vp-c-text-2); font-size: 0.9rem;">By Nav0 Team &middot; March 14, 2026 &middot; 10 min read</p>
 
 Last week we published a [performance benchmark](/blog/nav0-vs-chrome-performance-benchmark) showing that Nav0 uses roughly half the memory and a fraction of the CPU compared to Chrome. But performance is only part of the story.
 

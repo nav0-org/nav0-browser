@@ -8,7 +8,7 @@
         <span class="blog-tag">{{ post.tag }}</span>
         <h3>{{ post.title }}</h3>
         <p>{{ post.excerpt }}</p>
-        <span class="blog-meta">{{ post.date }} &middot; {{ post.readTime }}</span>
+        <span class="blog-meta">By {{ post.author }} &middot; {{ post.date }} &middot; {{ post.readTime }}</span>
       </a>
     </div>
 

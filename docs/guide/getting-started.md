@@ -1,6 +1,6 @@
 ---
 title: "Getting Started with Nav0 Browser — Installation & Setup"
-description: "Download and install Nav0 browser for Windows, macOS, or Linux. Learn keyboard shortcuts, configuration, and basic usage of the privacy-focused browser."
+description: "Get started with Nav0 — a minimal, privacy-focused browser. Install on macOS, Windows, or Linux with no account, no setup dialogs, and no data collection."
 ---
 
 # Getting Started

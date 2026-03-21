@@ -2,7 +2,7 @@
 title: "Nav0 vs Arc: Rethinking the Browser vs. Stripping It Down"
 description: "Arc and nav0 both reject Chrome's status quo, but from opposite directions. Arc adds more UI — Spaces, Easels, AI features, split views. Nav0 removes UI. This is maximalism vs. minimalism, and only one approach doesn't require your data."
 date: 2026-03-21
-author: nav0 team
+author: Nav0 Team
 tags: [arc, comparison, privacy, minimalism, ai, bloat]
 head:
   - - meta
@@ -13,7 +13,7 @@ head:
       content: "2026-03-21"
   - - meta
     - property: article:author
-      content: nav0 team
+      content: Nav0 Team
   - - meta
     - property: article:tag
       content: arc
@@ -38,8 +38,8 @@ head:
         "headline": "Nav0 vs Arc: Rethinking the Browser vs. Stripping It Down",
         "description": "Arc and nav0 both reject Chrome's status quo, but from opposite directions. Arc adds more — Spaces, Easels, AI features, split views. Nav0 removes. This is maximalism vs. minimalism.",
         "datePublished": "2026-03-21",
-        "author": { "@type": "Organization", "name": "nav0 team", "url": "https://nav0.org" },
-        "publisher": { "@type": "Organization", "name": "nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
+        "author": { "@type": "Organization", "name": "Nav0" },
+        "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/nav0-vs-arc",
         "keywords": ["nav0 vs arc", "arc browser privacy", "arc browser review", "the browser company", "arc closed source", "arc AI", "minimal browser"]
       }
@@ -47,7 +47,7 @@ head:
 
 # Nav0 vs Arc: Rethinking the Browser vs. Stripping It Down
 
-<p style="color: var(--vp-c-text-2); font-size: 0.9rem;">March 21, 2026 &middot; 10 min read</p>
+<p style="color: var(--vp-c-text-2); font-size: 0.9rem;">By Nav0 Team &middot; March 21, 2026 &middot; 10 min read</p>
 
 Arc and nav0 agree on one thing: Chrome is not the answer.
 

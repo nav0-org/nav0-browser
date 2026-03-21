@@ -2,7 +2,7 @@
 title: "Your Browser Doesn't Need a Built-In VPN"
 description: "Browsers are shipping with built-in VPN services and calling it a privacy feature. It's not. Here's why browser VPNs are security theater and what you should use instead."
 date: 2026-02-06
-author: Nav0 team
+author: Nav0 Team
 tags: [vpn, privacy, browsers, security]
 head:
   - - meta
@@ -13,7 +13,7 @@ head:
       content: "2026-02-06"
   - - meta
     - property: article:author
-      content: Nav0 team
+      content: Nav0 Team
   - - meta
     - property: article:tag
       content: vpn
@@ -32,7 +32,7 @@ head:
         "headline": "Your Browser Doesn't Need a Built-In VPN",
         "description": "Browsers are shipping with built-in VPN services and calling it a privacy feature. It's not. Here's why browser VPNs are security theater and what you should use instead.",
         "datePublished": "2026-02-06",
-        "author": { "@type": "Organization", "name": "Nav0 team", "url": "https://nav0.org" },
+        "author": { "@type": "Organization", "name": "Nav0" },
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/your-browser-doesnt-need-a-vpn",
         "keywords": ["browser VPN", "VPN security", "Opera VPN", "Edge VPN", "privacy", "security theater"]
@@ -41,7 +41,7 @@ head:
 
 # Your Browser Doesn't Need a Built-In VPN
 
-<p style="color: var(--vp-c-text-2); font-size: 0.9rem;">February 6, 2026 &middot; 7 min read</p>
+<p style="color: var(--vp-c-text-2); font-size: 0.9rem;">By Nav0 Team &middot; February 6, 2026 &middot; 7 min read</p>
 
 Opera has one. Edge has one. Chrome is testing one through Google One. Brave offers one through a paid subscription. The latest trend in browser bloat is built-in VPN services, marketed as essential privacy tools that protect you from prying eyes.
 

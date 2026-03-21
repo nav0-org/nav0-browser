@@ -2,7 +2,7 @@
 title: "Incognito Mode Is Not Private: The Biggest Lie Your Browser Tells You"
 description: "Private browsing modes like Chrome's Incognito don't make you private. They hide your history from your device — not from your ISP, employer, or the websites you visit. Here's what they actually do."
 date: 2026-03-15
-author: Nav0 team
+author: Nav0 Team
 tags: [privacy, browsers, incognito]
 head:
   - - meta
@@ -13,7 +13,7 @@ head:
       content: "2026-03-15"
   - - meta
     - property: article:author
-      content: Nav0 team
+      content: Nav0 Team
   - - meta
     - property: article:tag
       content: privacy
@@ -32,7 +32,7 @@ head:
         "headline": "Incognito Mode Is Not Private: The Biggest Lie Your Browser Tells You",
         "description": "Private browsing modes like Chrome's Incognito don't make you private. They hide your history from your device — not from your ISP, employer, or the websites you visit. Here's what they actually do.",
         "datePublished": "2026-03-15",
-        "author": { "@type": "Organization", "name": "Nav0 team", "url": "https://nav0.org" },
+        "author": { "@type": "Organization", "name": "Nav0" },
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/incognito-mode-is-not-private",
         "keywords": ["privacy", "incognito mode", "private browsing", "browser privacy", "online tracking"]
@@ -41,7 +41,7 @@ head:
 
 # Incognito Mode Is Not Private: The Biggest Lie Your Browser Tells You
 
-<p style="color: var(--vp-c-text-2); font-size: 0.9rem;">March 15, 2026 &middot; 8 min read</p>
+<p style="color: var(--vp-c-text-2); font-size: 0.9rem;">By Nav0 Team &middot; March 15, 2026 &middot; 8 min read</p>
 
 Open a new Incognito window in Chrome. You'll see a little spy icon and a reassuring message: "You've gone Incognito." Firefox calls it "Private Browsing." Safari calls it "Private." Edge calls it "InPrivate." The naming is deliberate. It's designed to make you feel invisible.
 

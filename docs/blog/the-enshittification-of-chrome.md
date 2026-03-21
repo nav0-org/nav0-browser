@@ -2,7 +2,7 @@
 title: "The Enshittification of Chrome: How the World's Most Popular Browser Turned Against Its Users"
 description: "Chrome used to be the fast, clean browser that saved us from Internet Explorer. Now it's a bloated, data-hungry machine that serves Google's ad business first and users second. Here's how it happened."
 date: 2026-02-28
-author: Nav0 team
+author: Nav0 Team
 tags: [chrome, enshittification, privacy, google, browsers, bloat]
 head:
   - - meta
@@ -13,7 +13,7 @@ head:
       content: "2026-02-28"
   - - meta
     - property: article:author
-      content: Nav0 team
+      content: Nav0 Team
   - - meta
     - property: article:tag
       content: chrome
@@ -38,7 +38,7 @@ head:
         "headline": "The Enshittification of Chrome: How the World's Most Popular Browser Turned Against Its Users",
         "description": "Chrome used to be the fast, clean browser that saved us from Internet Explorer. Now it's a bloated, data-hungry machine that serves Google's ad business first and users second.",
         "datePublished": "2026-02-28",
-        "author": { "@type": "Organization", "name": "Nav0 team", "url": "https://nav0.org" },
+        "author": { "@type": "Organization", "name": "Nav0" },
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/the-enshittification-of-chrome",
         "keywords": ["chrome enshittification", "google chrome bloat", "chrome privacy", "manifest v3", "chrome alternatives", "browser privacy", "google tracking", "chrome data collection"]
@@ -47,7 +47,7 @@ head:
 
 # The Enshittification of Chrome: How the World's Most Popular Browser  Turned Against Its Users
 
-<p style="color: var(--vp-c-text-2); font-size: 0.9rem;">February 28, 2026 &middot; 9 min read</p>
+<p style="color: var(--vp-c-text-2); font-size: 0.9rem;">By Nav0 Team &middot; February 28, 2026 &middot; 9 min read</p>
 
 Look, I'm just gonna say it.  Chrome is cooked.
 

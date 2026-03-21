@@ -1,14 +1,17 @@
 ---
 layout: home
 title: "Nav0 — Minimal Privacy Browser | No Data Collection, No Bloat"
-description: "Nav0 is a free, open-source, privacy-focused web browser. Zero telemetry, no AI gimmicks, no bloat. Available for Windows, macOS, and Linux."
+description: "Nav0 is a free, open-source desktop browser that collects zero data. No telemetry, no AI, no crypto. Just a browser that browses. Windows, macOS, and Linux."
 head:
   - - meta
     - property: og:title
       content: "Nav0 — Minimal Privacy Browser | No Data Collection, No Bloat"
   - - meta
     - property: og:description
-      content: "Nav0 is a free, open-source, privacy-focused web browser. Zero telemetry, no AI gimmicks, no bloat. Available for Windows, macOS, and Linux."
+      content: "Nav0 is a free, open-source desktop browser that collects zero data. No telemetry, no AI, no crypto. Just a browser that browses. Windows, macOS, and Linux."
+  - - script
+    - type: application/ld+json
+    - '{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Nav0","operatingSystem":"Windows, macOS, Linux","applicationCategory":"BrowserApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"A minimal, privacy-focused desktop web browser. Zero telemetry, no data collection, no AI, no bloat.","url":"https://nav0.org","downloadUrl":"https://nav0.org/install","softwareVersion":"latest","license":"https://opensource.org/licenses/MIT"}'
 
 hero:
   name: Nav0
@@ -17,7 +20,7 @@ hero:
   image:
     light: /hero-light.webp
     dark: /hero-dark.webp
-    alt: Nav0 browser mockup
+    alt: "Nav0 browser on desktop — minimal dark mode interface with address bar and tab strip"
   actions:
     - theme: brand
       text: Get Started
