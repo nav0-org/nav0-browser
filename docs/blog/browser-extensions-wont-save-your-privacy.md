@@ -2,7 +2,7 @@
 title: "Browser Extensions Won't Save Your Privacy"
 description: "Privacy-focused extensions are the most common advice for staying safe online. But extensions themselves are a privacy and security risk most people overlook. Here's why bolting on privacy doesn't work."
 date: 2026-02-15
-author: Nav0 team
+author: Nav0 Team
 tags: [privacy, extensions, security, browsers]
 head:
   - - meta
@@ -13,7 +13,7 @@ head:
       content: "2026-02-15"
   - - meta
     - property: article:author
-      content: Nav0 team
+      content: Nav0 Team
   - - meta
     - property: article:tag
       content: privacy
@@ -35,7 +35,7 @@ head:
         "headline": "Browser Extensions Won't Save Your Privacy",
         "description": "Privacy-focused extensions are the most common advice for staying safe online. But extensions themselves are a privacy and security risk most people overlook. Here's why bolting on privacy doesn't work.",
         "datePublished": "2026-02-15",
-        "author": { "@type": "Organization", "name": "Nav0 team", "url": "https://nav0.org" },
+        "author": { "@type": "Organization", "name": "Nav0" },
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/browser-extensions-wont-save-your-privacy",
         "keywords": ["privacy", "browser extensions", "security", "browser privacy", "extension permissions"]
@@ -44,7 +44,7 @@ head:
 
 # Browser Extensions Won't Save Your Privacy
 
-<p style="color: var(--vp-c-text-2); font-size: 0.9rem;">February 15, 2026 &middot; 8 min read</p>
+<p style="color: var(--vp-c-text-2); font-size: 0.9rem;">By Nav0 Team &middot; February 15, 2026 &middot; 8 min read</p>
 
 Go to any privacy forum, any "how to secure your browser" guide, any tech journalist's recommendations, and you'll find the same advice: install these five extensions. uBlock Origin. Privacy Badger. HTTPS Everywhere. NoScript. Cookie AutoDelete. Maybe a few more.
 

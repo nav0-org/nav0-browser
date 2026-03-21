@@ -1,6 +1,6 @@
 ---
 title: "Frequently Asked Questions — Nav0 Browser"
-description: "Common questions about Nav0, the minimal privacy-focused web browser. Learn about features, privacy, platforms, and more."
+description: "Answers to common questions about Nav0 — privacy, data collection, features, and how it differs from Chrome, Brave, and Firefox."
 head:
   - - meta
     - property: og:type
@@ -30,6 +30,30 @@ head:
           },
           {
             "@type": "Question",
+            "name": "What browser engine does Nav0 use?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Nav0 uses Chromium via Electron, giving it full compatibility with the modern web while maintaining privacy through zero telemetry and local-only data storage."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is Nav0 open source?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Nav0 is fully open source under the MIT License. The complete source code is publicly available at https://github.com/nav0-org/nav0-browser. You can audit it, fork it, or build it from source yourself."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I update Nav0?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Download the latest release from GitHub Releases or, on macOS, run brew upgrade nav0-browser. Nav0 never forces updates — you control when and how you update."
+            }
+          },
+          {
+            "@type": "Question",
             "name": "Does Nav0 collect any data?",
             "acceptedAnswer": {
               "@type": "Answer",
@@ -46,18 +70,34 @@ head:
           },
           {
             "@type": "Question",
-            "name": "Is Nav0 open source?",
+            "name": "Where is my data stored?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Yes. Nav0 is fully open source under the MIT License. The complete source code is publicly available at https://github.com/nav0-org/nav0-browser."
+              "text": "All data is stored locally on your device. Bookmarks, browsing history, settings, and downloads are kept in local files and databases. On Windows: %APPDATA%/nav0/, on macOS: ~/Library/Application Support/nav0/, on Linux: ~/.config/nav0/."
             }
           },
           {
             "@type": "Question",
-            "name": "What browser engine does Nav0 use?",
+            "name": "Does Nav0 phone home?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Nav0 uses Chromium via Electron, giving it full compatibility with the modern web while maintaining privacy through zero telemetry and local-only data storage."
+              "text": "No. Nav0 makes zero unsolicited network requests. No analytics pings, no heartbeat checks, no anonymous usage data, no background sync. You can verify this by monitoring your network traffic."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Nav0 block ads and trackers?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Nav0 includes a built-in ad blocker with domain blocking, URL pattern matching, cosmetic filtering, and video ad blocking. It also blocks third-party cookies by default and includes fingerprinting protection. Everything works out of the box."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is private browsing truly private in Nav0?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "In private mode, Nav0 saves no history, clears cookies on close, and persists no cached data. Unlike other browsers, Nav0 also doesn't collect data in normal mode — so private mode is an extra layer on top of already-private browsing."
             }
           },
           {
@@ -65,7 +105,7 @@ head:
             "name": "How is Nav0 different from Chrome, Edge, or other mainstream browsers?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Unlike mainstream browsers, Nav0 does not send browsing data to any server, does not require sign-in, does not include advertising or monetization features, does not bundle AI assistants, and does not phone home for any reason. Most mainstream browsers are funded by advertising revenue and designed to collect user data."
+              "text": "Unlike mainstream browsers, Nav0 does not send browsing data to any server, does not require or encourage sign-in, does not include advertising or monetization features, does not bundle AI assistants, and does not phone home for any reason. Most mainstream browsers are funded by advertising revenue and designed to collect user data."
             }
           },
           {
@@ -78,10 +118,26 @@ head:
           },
           {
             "@type": "Question",
+            "name": "How is Nav0 different from Firefox?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Firefox receives approximately 80-85% of its revenue from Google search engine deals, creating a financial dependency. Firefox has also been adding AI-powered features. Nav0 has no search engine deals and no AI features."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Nav0 support browser extensions?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Nav0 supports extensions. However, third-party extensions have their own privacy policies and data practices. We recommend reviewing extension permissions, using open-source extensions, and limiting the number of installed extensions."
+            }
+          },
+          {
+            "@type": "Question",
             "name": "Does Nav0 have a built-in ad blocker?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Yes. Nav0 includes a built-in ad blocker with domain blocking, URL pattern matching, cosmetic filtering, and video ad blocking. It works out of the box with no configuration needed."
+              "text": "Yes. Nav0 ships with a comprehensive ad blocker that includes domain blocking, URL pattern matching, cosmetic filtering, and video ad blocking. It works out of the box with no configuration required."
             }
           },
           {
@@ -89,7 +145,7 @@ head:
             "name": "Does Nav0 support dark mode?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Yes. Nav0 has a dark mode toggle in the navbar that applies dark CSS to any website. It persists across back/forward navigation."
+              "text": "Yes. Nav0 has a dark mode toggle in the browser navbar that applies dark CSS to any website. It works on sites like LinkedIn and Reddit and persists across back/forward navigation."
             }
           },
           {
@@ -97,7 +153,31 @@ head:
             "name": "Can I open PDFs in Nav0?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Yes. Nav0 has a built-in PDF reader that opens PDFs inline in browser tabs. You can also open local PDFs via File > Open PDF (Ctrl+Shift+O / Cmd+Shift+O)."
+              "text": "Yes. Nav0 has a built-in PDF reader that opens PDFs inline in browser tabs. You can also open local PDF files via File > Open PDF (Ctrl+Shift+O / Cmd+Shift+O)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Nav0 have a reader mode?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Nav0 includes Reader Mode powered by Readability.js — strip away page clutter and read articles in a clean, distraction-free layout."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I restore tabs I accidentally closed?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Nav0 tracks recently closed tabs and lets you restore them from the History menu. You can even restore an entire closed window with all its tabs."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Nav0 support tab pinning?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Right-click any tab to pin it. Pinned tabs stay compact and persistent at the left side of the tab strip."
             }
           },
           {
@@ -118,6 +198,38 @@ head:
           },
           {
             "@type": "Question",
+            "name": "Why doesn't Nav0 have sync or cloud features?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Cloud sync requires accounts, which enable identity-linked data collection. It also means your bookmarks, history, and settings exist on someone else's server. Nav0 keeps everything local by design. If you need to transfer data between devices, you can export and import bookmarks manually."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I report a bug?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "You can report bugs directly from inside the browser using the built-in issue reporter, which supports image attachments. Screenshots are automatically compressed before upload. Alternatively, open an issue on GitHub at https://github.com/nav0-org/nav0-browser/issues."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Nav0 enforce HTTPS?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Nav0 automatically upgrades HTTP URLs to HTTPS when possible. For sites with invalid or expired SSL certificates, Nav0 shows a security warning page with a temporary bypass option."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I check if a site's SSL certificate is valid?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Click the lock icon in the address bar to view SSL certificate details in an overlay panel. The icon also reflects whether the connection is secure, insecure, or has no certificate info."
+            }
+          },
+          {
+            "@type": "Question",
             "name": "How does Nav0 make money?",
             "acceptedAnswer": {
               "@type": "Answer",
@@ -129,23 +241,7 @@ head:
             "name": "How does Nav0 improve without collecting telemetry?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Through voluntary bug reports from users, GitHub issues, community feedback and discussion, and the developers' own daily usage of the browser."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Does Nav0 support browser extensions?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Yes. Nav0 supports extensions. However, third-party extensions have their own privacy policies and data practices. We recommend reviewing extension permissions, using open-source extensions, and limiting the number of installed extensions."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Where is my data stored?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "All data is stored locally on your device. Bookmarks, browsing history, settings, and downloads are kept in local files and databases. On Windows: %APPDATA%/nav0/, on macOS: ~/Library/Application Support/nav0/, on Linux: ~/.config/nav0/."
+              "text": "Through voluntary bug reports from users, GitHub issues and discussions, community feedback, and the developers' own daily usage of the browser."
             }
           },
           {
@@ -158,18 +254,18 @@ head:
           },
           {
             "@type": "Question",
-            "name": "How do I report a bug?",
+            "name": "How can I contribute?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "You can report bugs directly from inside the browser using the built-in issue reporter, which supports image attachments. Alternatively, open an issue on GitHub at https://github.com/nav0-org/nav0-browser/issues."
+              "text": "Visit the Contributing guide for details. You can contribute by reporting bugs, submitting pull requests, improving documentation, or simply using Nav0 and spreading the word."
             }
           },
           {
             "@type": "Question",
-            "name": "Can I restore tabs I accidentally closed?",
+            "name": "What license does Nav0 use?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Yes. Nav0 tracks recently closed tabs and lets you restore them from the History menu. You can even restore an entire closed window with all its tabs."
+              "text": "Nav0 is licensed under the MIT License — one of the most permissive open-source licenses. You are free to use, modify, and distribute the software."
             }
           }
         ]

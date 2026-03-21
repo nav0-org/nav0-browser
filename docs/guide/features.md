@@ -1,6 +1,6 @@
 ---
 title: "Nav0 Browser Features — Privacy, Security & Performance"
-description: "Explore Nav0's features: ad blocking, tracker blocking, fingerprint protection, HTTPS upgrades, dark mode, tab management, reader mode, PDF reader, local bookmarks, sandboxing, and more. Only essential browsing features, nothing more."
+description: "Explore Nav0's features: built-in ad blocker, reader mode, PDF viewer, tab pinning, private browsing, and more — with zero telemetry and no bloat."
 ---
 
 # Features

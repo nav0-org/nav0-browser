@@ -2,7 +2,7 @@
 title: "Stop Forcing AI Into My Browser"
 description: "Every major browser is cramming AI features into their product. Nobody asked for this. Here's why forced AI integration is bad for users, bad for privacy, and bad for the web."
 date: 2026-02-08
-author: Nav0 team
+author: Nav0 Team
 tags: [ai, browsers, bloat, privacy]
 head:
   - - meta
@@ -13,7 +13,7 @@ head:
       content: "2026-02-08"
   - - meta
     - property: article:author
-      content: Nav0 team
+      content: Nav0 Team
   - - meta
     - property: article:tag
       content: ai
@@ -32,7 +32,7 @@ head:
         "headline": "Stop Forcing AI Into My Browser",
         "description": "Every major browser is cramming AI features into their product. Nobody asked for this. Here's why forced AI integration is bad for users, bad for privacy, and bad for the web.",
         "datePublished": "2026-02-08",
-        "author": { "@type": "Organization", "name": "Nav0 team", "url": "https://nav0.org" },
+        "author": { "@type": "Organization", "name": "Nav0" },
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/stop-forcing-ai-into-browsers",
         "keywords": ["AI in browsers", "browser bloat", "privacy", "browser AI features", "Copilot"]
@@ -41,7 +41,7 @@ head:
 
 # Stop Forcing AI Into My Browser
 
-<p style="color: var(--vp-c-text-2); font-size: 0.9rem;">February 8, 2026 &middot; 7 min read</p>
+<p style="color: var(--vp-c-text-2); font-size: 0.9rem;">By Nav0 Team &middot; February 8, 2026 &middot; 7 min read</p>
 
 Open your browser. Notice anything new lately? Maybe it's a sparkle icon in the toolbar. Maybe it's a sidebar that wants to "summarize" the page you're reading. Maybe it's a chatbot hovering in the corner, eager to "assist" you.
 

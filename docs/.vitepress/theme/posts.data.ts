@@ -29,6 +29,7 @@ export interface BlogPost {
   excerpt: string
   tag: string
   readTime: string
+  author: string
 }
 
 declare const data: BlogPost[]
@@ -46,7 +47,8 @@ export default createContentLoader('blog/*.md', {
         date: formatDate(page.frontmatter.date),
         excerpt: page.frontmatter.description,
         tag: formatTag(page.frontmatter.tags?.[0] || 'blog'),
-        readTime: calculateReadTime(page.src || '')
+        readTime: calculateReadTime(page.src || ''),
+        author: page.frontmatter.author || 'Nav0 Team'
       }))
   }
 })

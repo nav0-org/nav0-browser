@@ -1,6 +1,6 @@
 ---
 title: "Nav0 Privacy Policy — Zero Data Collection"
-description: "Nav0 collects nothing. No telemetry, no personal information, no browsing data, no device info, no network data. Privacy is not a feature — it is the foundation."
+description: "Nav0 collects zero data. No telemetry, no crash reports, no browsing history sent anywhere. Learn exactly how Nav0 protects your privacy by doing nothing."
 ---
 
 # Privacy
