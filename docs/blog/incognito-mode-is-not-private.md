@@ -2,7 +2,7 @@
 title: "Incognito Mode Is Not Private: The Biggest Lie Your Browser Tells You"
 description: "Private browsing modes like Chrome's Incognito don't make you private. They hide your history from your device — not from your ISP, employer, or the websites you visit. Here's what they actually do."
 date: 2026-03-15
-author: nav0 team
+author: Nav0 team
 tags: [privacy, browsers, incognito]
 head:
   - - meta
@@ -13,7 +13,7 @@ head:
       content: "2026-03-15"
   - - meta
     - property: article:author
-      content: nav0 team
+      content: Nav0 team
   - - meta
     - property: article:tag
       content: privacy
@@ -32,8 +32,8 @@ head:
         "headline": "Incognito Mode Is Not Private: The Biggest Lie Your Browser Tells You",
         "description": "Private browsing modes like Chrome's Incognito don't make you private. They hide your history from your device — not from your ISP, employer, or the websites you visit. Here's what they actually do.",
         "datePublished": "2026-03-15",
-        "author": { "@type": "Organization", "name": "nav0 team", "url": "https://nav0.org" },
-        "publisher": { "@type": "Organization", "name": "nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
+        "author": { "@type": "Organization", "name": "Nav0 team", "url": "https://nav0.org" },
+        "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/incognito-mode-is-not-private",
         "keywords": ["privacy", "incognito mode", "private browsing", "browser privacy", "online tracking"]
       }
@@ -165,4 +165,4 @@ Privacy isn't a mode. It's an architecture.
 
 ---
 
-*nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started).*
+*Nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started).*

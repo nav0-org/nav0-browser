@@ -1,23 +1,23 @@
 ---
 layout: home
-title: "nav0 — Minimal Privacy Browser | No Data Collection, No Bloat"
-description: "nav0 is a free, open-source, privacy-focused web browser. Zero telemetry, no AI gimmicks, no bloat. Available for Windows, macOS, and Linux."
+title: "Nav0 — Minimal Privacy Browser | No Data Collection, No Bloat"
+description: "Nav0 is a free, open-source, privacy-focused web browser. Zero telemetry, no AI gimmicks, no bloat. Available for Windows, macOS, and Linux."
 head:
   - - meta
     - property: og:title
-      content: "nav0 — Minimal Privacy Browser | No Data Collection, No Bloat"
+      content: "Nav0 — Minimal Privacy Browser | No Data Collection, No Bloat"
   - - meta
     - property: og:description
-      content: "nav0 is a free, open-source, privacy-focused web browser. Zero telemetry, no AI gimmicks, no bloat. Available for Windows, macOS, and Linux."
+      content: "Nav0 is a free, open-source, privacy-focused web browser. Zero telemetry, no AI gimmicks, no bloat. Available for Windows, macOS, and Linux."
 
 hero:
-  name: nav0
+  name: Nav0
   text: Browse. Nothing More.
   tagline: A minimal, privacy-focused web browser. No data collection. No bloat. No AI gimmicks. Just clean, safe browsing.
   image:
     light: /hero-light.webp
     dark: /hero-dark.webp
-    alt: nav0 browser mockup
+    alt: Nav0 browser mockup
   actions:
     - theme: brand
       text: Get Started
@@ -29,7 +29,7 @@ hero:
 features:
   - icon: 🪶
     title: Lightweight
-    details: Built for speed and efficiency. nav0 uses minimal system resources, giving you a fast browsing experience without the overhead.
+    details: Built for speed and efficiency. Nav0 uses minimal system resources, giving you a fast browsing experience without the overhead.
 
   - icon: 🔒
     title: Privacy First
@@ -54,16 +54,16 @@ features:
 
 <HomeContent />
 
-## Why nav0?
+## Why Nav0?
 
 The modern web browser has become bloated. What started as a simple tool to view web pages has transformed into a data harvesting machine packed with features most users never asked for.
 
-**nav0 takes a different approach.**
+**Nav0 takes a different approach.**
 
 We believe a browser should do one thing well: let you browse the web. That's it. No AI assistants trying to "help" you. No telemetry phoning home. No unnecessary features cluttering your interface.
 
 ```
-nav0 = navigate + zero (bloat)
+Nav0 = navigate + zero (bloat)
 ```
 
 ### The Problem with Modern Browsers
@@ -73,7 +73,7 @@ nav0 = navigate + zero (bloat)
 - **Feature Creep**: AI assistants, news feeds, crypto wallets
 - **Forced Accounts**: Sign in to sync, sign in to use
 
-### The nav0 Solution
+### The Nav0 Solution
 
 - **Zero Telemetry**: We collect nothing
 - **Minimal Footprint**: Light on resources

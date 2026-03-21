@@ -2,7 +2,7 @@
 title: "Your Browser Doesn't Need a Built-In VPN"
 description: "Browsers are shipping with built-in VPN services and calling it a privacy feature. It's not. Here's why browser VPNs are security theater and what you should use instead."
 date: 2026-02-06
-author: nav0 team
+author: Nav0 team
 tags: [vpn, privacy, browsers, security]
 head:
   - - meta
@@ -13,7 +13,7 @@ head:
       content: "2026-02-06"
   - - meta
     - property: article:author
-      content: nav0 team
+      content: Nav0 team
   - - meta
     - property: article:tag
       content: vpn
@@ -32,8 +32,8 @@ head:
         "headline": "Your Browser Doesn't Need a Built-In VPN",
         "description": "Browsers are shipping with built-in VPN services and calling it a privacy feature. It's not. Here's why browser VPNs are security theater and what you should use instead.",
         "datePublished": "2026-02-06",
-        "author": { "@type": "Organization", "name": "nav0 team", "url": "https://nav0.org" },
-        "publisher": { "@type": "Organization", "name": "nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
+        "author": { "@type": "Organization", "name": "Nav0 team", "url": "https://nav0.org" },
+        "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/your-browser-doesnt-need-a-vpn",
         "keywords": ["browser VPN", "VPN security", "Opera VPN", "Edge VPN", "privacy", "security theater"]
       }
@@ -139,22 +139,22 @@ If you genuinely need a VPN, here's what works:
 
 1. **Use a standalone, reputable VPN provider.** Choose one with a proven no-logs policy, ideally verified by independent audits. Run it at the system level so all your traffic is protected, not just browser traffic.
 
-2. **Use a minimal browser alongside your VPN.** A browser that collects nothing (like nav0) combined with a system-level VPN gives you actual privacy. The browser doesn't spy on you, and the VPN hides your traffic from your ISP.
+2. **Use a minimal browser alongside your VPN.** A browser that collects nothing (like Nav0) combined with a system-level VPN gives you actual privacy. The browser doesn't spy on you, and the VPN hides your traffic from your ISP.
 
 3. **Understand your threat model.** Most people don't need a VPN for everyday browsing. HTTPS already encrypts your connection to individual websites. A VPN matters most on untrusted networks, when you need to mask your IP from specific services, or when you want to prevent ISP logging.
 
 4. **Don't confuse a VPN with privacy.** A VPN is one tool in a privacy toolkit. It's not a substitute for a browser that doesn't track you, an ad blocker, or sensible browsing habits.
 
-## nav0's Approach: Don't Bundle, Don't Pretend
+## Nav0's Approach: Don't Bundle, Don't Pretend
 
-nav0 doesn't include a built-in VPN. This is a deliberate choice.
+Nav0 doesn't include a built-in VPN. This is a deliberate choice.
 
 We don't believe your browser should be your VPN provider. These are separate concerns that should be handled by separate, auditable tools. Bundling them creates conflicts of interest and gives users a false sense of security.
 
 If you want a VPN, use a dedicated one. If you want a private browser, use one that doesn't collect your data in the first place. A browser that gathers zero telemetry and makes zero network requests to its vendor is already more private than any browser-plus-VPN combination from a big tech company.
 
-Privacy isn't a feature you bolt on. It's a design principle you build from the ground up. [Get started with nav0](/guide/getting-started).
+Privacy isn't a feature you bolt on. It's a design principle you build from the ground up. [Get started with Nav0](/guide/getting-started).
 
 ---
 
-*nav0 is a minimal, privacy-focused browser. No built-in VPN because we don't need to protect you from ourselves. No telemetry. No data collection. Just browsing. [Learn more](/guide/philosophy).*
+*Nav0 is a minimal, privacy-focused browser. No built-in VPN because we don't need to protect you from ourselves. No telemetry. No data collection. Just browsing. [Learn more](/guide/philosophy).*

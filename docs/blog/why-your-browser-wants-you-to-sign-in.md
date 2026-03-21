@@ -2,7 +2,7 @@
 title: "Why Your Browser Wants You to Sign In"
 description: "Every time you open your browser, it nudges you to create an account and sign in. That's not about convenience — it's about tying every click, search, and keystroke to your real identity."
 date: 2026-02-21
-author: nav0 team
+author: Nav0 team
 tags: [privacy, browsers, accounts, tracking]
 head:
   - - meta
@@ -13,7 +13,7 @@ head:
       content: "2026-02-21"
   - - meta
     - property: article:author
-      content: nav0 team
+      content: Nav0 team
   - - meta
     - property: article:tag
       content: privacy
@@ -32,8 +32,8 @@ head:
         "headline": "Why Your Browser Wants You to Sign In",
         "description": "Every time you open your browser, it nudges you to create an account and sign in. That's not about convenience — it's about tying every click, search, and keystroke to your real identity.",
         "datePublished": "2026-02-21",
-        "author": { "@type": "Organization", "name": "nav0 team", "url": "https://nav0.org" },
-        "publisher": { "@type": "Organization", "name": "nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
+        "author": { "@type": "Organization", "name": "Nav0 team", "url": "https://nav0.org" },
+        "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/why-your-browser-wants-you-to-sign-in",
         "keywords": ["browser sign in", "browser accounts", "privacy", "cross-device tracking", "data collection"]
       }
@@ -137,9 +137,9 @@ The core argument for browser accounts is convenience.  But that convenience has
 
 The convenience is real, but it's marginal. The privacy cost is not.
 
-## nav0's Approach: No Account, No Problem
+## Nav0's Approach: No Account, No Problem
 
-nav0 doesn't have accounts. No sign-in screen. No profile icon.  No "complete your setup" flow. No cloud sync. Nothing.
+Nav0 doesn't have accounts. No sign-in screen. No profile icon.  No "complete your setup" flow. No cloud sync. Nothing.
 
 Your bookmarks, history, and settings live on your device and nowhere else.  There's nobody to upload them to because there's no server waiting to recieve them. There's no account to link them to  because there's no account system.
 
@@ -159,8 +159,8 @@ We think that tradeoff is worth it.
 
 4. **Use a standalone password manager.** Don't rely on your browser to store passwords, specially when that browser is also tracking your behavior. A dedicated tool is both more  secure and more portable.
 
-5. **Try a browser that doesn't ask.** nav0 never asks you to sign in because there's nothing to sign into. No accounts, no sync, no data collection. Just browsing. [Get started with nav0](/guide/getting-started).
+5. **Try a browser that doesn't ask.** Nav0 never asks you to sign in because there's nothing to sign into. No accounts, no sync, no data collection. Just browsing. [Get started with Nav0](/guide/getting-started).
 
 ---
 
-*nav0 is a minimal, privacy-focused browser that believes your browser should browse, nothing more. No accounts, no sync, no data collection. [Learn more](/guide/philosophy).*
+*Nav0 is a minimal, privacy-focused browser that believes your browser should browse, nothing more. No accounts, no sync, no data collection. [Learn more](/guide/philosophy).*

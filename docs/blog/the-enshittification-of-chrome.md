@@ -2,7 +2,7 @@
 title: "The Enshittification of Chrome: How the World's Most Popular Browser Turned Against Its Users"
 description: "Chrome used to be the fast, clean browser that saved us from Internet Explorer. Now it's a bloated, data-hungry machine that serves Google's ad business first and users second. Here's how it happened."
 date: 2026-02-28
-author: nav0 team
+author: Nav0 team
 tags: [chrome, enshittification, privacy, google, browsers, bloat]
 head:
   - - meta
@@ -13,7 +13,7 @@ head:
       content: "2026-02-28"
   - - meta
     - property: article:author
-      content: nav0 team
+      content: Nav0 team
   - - meta
     - property: article:tag
       content: chrome
@@ -38,8 +38,8 @@ head:
         "headline": "The Enshittification of Chrome: How the World's Most Popular Browser Turned Against Its Users",
         "description": "Chrome used to be the fast, clean browser that saved us from Internet Explorer. Now it's a bloated, data-hungry machine that serves Google's ad business first and users second.",
         "datePublished": "2026-02-28",
-        "author": { "@type": "Organization", "name": "nav0 team", "url": "https://nav0.org" },
-        "publisher": { "@type": "Organization", "name": "nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
+        "author": { "@type": "Organization", "name": "Nav0 team", "url": "https://nav0.org" },
+        "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/the-enshittification-of-chrome",
         "keywords": ["chrome enshittification", "google chrome bloat", "chrome privacy", "manifest v3", "chrome alternatives", "browser privacy", "google tracking", "chrome data collection"]
       }
@@ -169,11 +169,11 @@ A real alternative needs to be:
 - **Minimal** — the fewer features, the fewer ways to collect data and the less bloat weighing things down
 - **Zero telemetry** — not "anonymized" telemetry, not "optional" telemetry. Zero. None. Nothing phoning home, period.
 
-## Why We Built nav0
+## Why We Built Nav0
 
-This is exactly why nav0 exists. We got tired of watching browsers get worse  while pretending to get better.
+This is exactly why Nav0 exists. We got tired of watching browsers get worse  while pretending to get better.
 
-nav0 collects zero telemetry. Not reduced telemetry, not anonymized telemetry — literally zero. There are no analytics, no crash reports phoning home, no usage data being collected. Your browsing data stays on your machine and nowhere else.
+Nav0 collects zero telemetry. Not reduced telemetry, not anonymized telemetry — literally zero. There are no analytics, no crash reports phoning home, no usage data being collected. Your browsing data stays on your machine and nowhere else.
 
 There's no sign-in, no account, no sync service routing your data  through our servers. There are no AI features mining your browsing for training data. No news feeds, no shopping assistants, no crypto wallets. Just a browser that browses the web.
 
@@ -181,8 +181,8 @@ It's fully open source so you don't have to trust us. Read the code. Audit it. B
 
 The browser you use shapes your entire experience of the internet. Maybe it's time to pick one that isn't  actively working against you.
 
-[Try nav0 — it's free, open source, and actually respects your privacy](/guide/getting-started).
+[Try Nav0 — it's free, open source, and actually respects your privacy](/guide/getting-started).
 
 ---
 
-*nav0 is a minimal, open-source browser built on one principle: your browser should work for you, not for an ad company. Zero telemetry. Zero bloat. Zero BS. [Learn more](/guide/philosophy).*
+*Nav0 is a minimal, open-source browser built on one principle: your browser should work for you, not for an ad company. Zero telemetry. Zero bloat. Zero BS. [Learn more](/guide/philosophy).*

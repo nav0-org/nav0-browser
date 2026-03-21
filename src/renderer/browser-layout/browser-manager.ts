@@ -461,7 +461,7 @@ export class BrowserTabManager {
       const activeTab = this.getTabById(this.activeTabId);
       if (!activeTab) return;
       const url = activeTab.url;
-      const isNewTab = !url || url === '' || url.startsWith('nav0://');
+      const isNewTab = !url || url === '' || url.startsWith('Nav0://');
       if (isNewTab) return;
       window.BrowserAPI.showSSLInfo(this.appWindowId, {
         sslStatus: activeTab.sslStatus,
@@ -476,7 +476,7 @@ export class BrowserTabManager {
     if (!activeTab) return;
 
     const url = activeTab.url;
-    const isNewTab = !url || url === '' || url.startsWith('nav0://');
+    const isNewTab = !url || url === '' || url.startsWith('Nav0://');
     const sslStatus = activeTab.sslStatus || 'internal';
 
     // Remove all state classes

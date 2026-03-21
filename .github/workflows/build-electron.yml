@@ -358,7 +358,7 @@ jobs:
                   verified: "github.com/nav0-org/nav0-browser/"
             end
 
-            name "nav0"
+            name "Nav0"
             desc "Minimal, privacy-focused web browser"
             homepage "https://nav0.org"
 

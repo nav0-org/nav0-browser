@@ -693,7 +693,7 @@ export abstract class AppWindowManager {
     ipcMain.handle(RendererToMainEventsForBrowserIPC.RESTORE_CLOSED_WINDOW, async (event, index: number) => {
       const closedWindow = AppWindowManager.removeClosedWindowByIndex(index);
       if (!closedWindow || !closedWindow.tabs || closedWindow.tabs.length === 0) return null;
-      const restoredUrls = closedWindow.tabs.filter(t => t.url && t.url !== '' && !t.url.startsWith('nav0://'));
+      const restoredUrls = closedWindow.tabs.filter(t => t.url && t.url !== '' && !t.url.startsWith('Nav0://'));
       if (restoredUrls.length === 0) return null;
       const newWindow = AppWindowManager.createWindow(false);
       // Wait for the window's renderer to load and its default New Tab to be created

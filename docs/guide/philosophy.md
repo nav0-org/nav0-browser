@@ -1,13 +1,13 @@
 ---
-title: "nav0 Philosophy — Why We Built a Minimal Browser"
-description: "nav0 exists because modern browsers have lost their way. Learn our principles: do one thing well, absence over presence, local over cloud, transparent over proprietary, user over user data."
+title: "Nav0 Philosophy — Why We Built a Minimal Browser"
+description: "Nav0 exists because modern browsers have lost their way. Learn our principles: do one thing well, absence over presence, local over cloud, transparent over proprietary, user over user data."
 ---
 
 # Philosophy
 
-nav0 exists because modern browsers have lost their way.
+Nav0 exists because modern browsers have lost their way.
 
-What follows is not a marketing pitch. It's a set of convictions that guide every decision we make — what we build, what we refuse to build, and why. If you've ever felt that your browser is working against you rather than for you, this page explains why that feeling is justified and what nav0 does differently.
+What follows is not a marketing pitch. It's a set of convictions that guide every decision we make — what we build, what we refuse to build, and why. If you've ever felt that your browser is working against you rather than for you, this page explains why that feeling is justified and what Nav0 does differently.
 
 ## The State of Browsers Today
 
@@ -58,11 +58,11 @@ A truly private browser doesn't need privacy settings. It doesn't need a "privac
 
 ## Our Principles
 
-nav0 is built on five principles. These are not aspirations — they are hard constraints that govern what nav0 is and what it will never become.
+Nav0 is built on five principles. These are not aspirations — they are hard constraints that govern what Nav0 is and what it will never become.
 
 ### 1. Do One Thing Well
 
-nav0 browses the web. That's it.
+Nav0 browses the web. That's it.
 
 This principle comes from the Unix philosophy: write programs that do one thing and do it well. A browser's job is to fetch web pages, render them correctly, keep you safe while doing so, and get out of the way. Everything else is scope creep.
 
@@ -90,15 +90,15 @@ But every feature has costs, whether or not anyone uses it:
 - **User confusion.** Every feature adds settings, menu items, and behavioral complexity. Users shouldn't need to navigate through pages of options to make their browser behave sensibly.
 - **Resource consumption.** Every feature uses memory, CPU time, and disk space. Background processes for sync, AI, and telemetry all consume resources even when the user isn't actively using them.
 
-We add features only when they are absolutely necessary for core browsing. The bar is high: does this feature directly serve the task of loading and displaying web pages? If not, it doesn't belong in nav0.
+We add features only when they are absolutely necessary for core browsing. The bar is high: does this feature directly serve the task of loading and displaying web pages? If not, it doesn't belong in Nav0.
 
-This means nav0 will always have fewer features than Chrome, Edge, or Firefox. That's not a limitation. It's the entire point. The absence of unnecessary features is what makes nav0 fast, secure, and trustworthy.
+This means Nav0 will always have fewer features than Chrome, Edge, or Firefox. That's not a limitation. It's the entire point. The absence of unnecessary features is what makes Nav0 fast, secure, and trustworthy.
 
 ### 3. Local Over Cloud
 
 Your data belongs on your device, under your control.
 
-In nav0:
+In Nav0:
 - **Bookmarks:** stored locally in a database on your machine
 - **History:** stored locally, never transmitted anywhere
 - **Settings:** local configuration, not synced to any server
@@ -112,22 +112,22 @@ Cloud sync is marketed as a convenience, and it is convenient. But convenience h
 - **Server dependencies.** Cloud features break when servers go down, when APIs change, when companies pivot their business model. Local data doesn't have dependencies.
 - **Privacy risks.** Data that doesn't leave your device can't be breached from a remote server. Data that isn't collected can't be subpoenaed. Data that doesn't exist in a cloud can't be sold, shared, or leaked.
 
-The trade-off is real: nav0 doesn't sync your bookmarks across devices. If you need cross-device access, you'll need to export and import manually, or use a third-party sync solution of your choosing. We believe this trade-off is worth it. Your data's security and your privacy are more important than the convenience of automatic sync.
+The trade-off is real: Nav0 doesn't sync your bookmarks across devices. If you need cross-device access, you'll need to export and import manually, or use a third-party sync solution of your choosing. We believe this trade-off is worth it. Your data's security and your privacy are more important than the convenience of automatic sync.
 
 ### 4. Transparent Over Proprietary
 
-Everything about nav0 is open. Not partially open. Not "open core." Completely open.
+Everything about Nav0 is open. Not partially open. Not "open core." Completely open.
 
 - **Source code:** publicly available on GitHub. Every line of code that runs in your browser can be read, audited, and verified by anyone.
 - **Development process:** public issue tracker, public pull requests, public discussions. Decisions are made in the open.
 - **Roadmap:** public. You can see what we're planning and why.
 - **Decision rationale:** public. When we make a significant decision, the reasoning is documented and visible.
 
-This matters because trust in software must be verifiable. When a browser vendor says "we don't collect your data," you have two options: take their word for it, or verify it yourself. With proprietary browsers, you can only do the former. With nav0, you can do the latter.
+This matters because trust in software must be verifiable. When a browser vendor says "we don't collect your data," you have two options: take their word for it, or verify it yourself. With proprietary browsers, you can only do the former. With Nav0, you can do the latter.
 
-Open source also provides a structural guarantee against enshittification. If nav0 ever abandons its principles — if a future maintainer adds telemetry or inserts advertising — the community can fork the project and continue from the last trustworthy version. The code belongs to everyone. The project is bigger than any individual or organization.
+Open source also provides a structural guarantee against enshittification. If Nav0 ever abandons its principles — if a future maintainer adds telemetry or inserts advertising — the community can fork the project and continue from the last trustworthy version. The code belongs to everyone. The project is bigger than any individual or organization.
 
-This transparency extends to what we don't do. nav0 has:
+This transparency extends to what we don't do. Nav0 has:
 - No obfuscated code
 - No binary blobs with unknown functionality
 - No proprietary protocols
@@ -138,11 +138,11 @@ If you can't see how your software works, you can't trust it. Full stop.
 
 ### 5. User Over User Data
 
-We value users, not user data. This distinction defines everything about how nav0 operates.
+We value users, not user data. This distinction defines everything about how Nav0 operates.
 
 Most browser vendors have a fundamental conflict of interest. Their revenue depends on knowing things about you — what you search for, what you buy, what you read, where you go. The more they know, the more valuable their advertising inventory becomes. This creates an incentive structure where user experience and user surveillance are permanently in tension.
 
-nav0 has no such conflict because we have no advertising business, no data brokerage, and no analytics platform.
+Nav0 has no such conflict because we have no advertising business, no data brokerage, and no analytics platform.
 
 We succeed when:
 - **Users have a fast, responsive browser** that doesn't waste their time or their hardware's resources
@@ -156,7 +156,7 @@ We don't succeed by:
 - Creating lock-in through proprietary sync and account systems
 - Growing a user base to impress investors or acquirers
 
-nav0 is free. nav0 is open source. nav0 collects nothing. These aren't marketing claims — they are architectural facts that anyone can verify by reading the source code.
+Nav0 is free. Nav0 is open source. Nav0 collects nothing. These aren't marketing claims — they are architectural facts that anyone can verify by reading the source code.
 
 ## What We Believe
 
@@ -166,21 +166,21 @@ Privacy is not a premium feature you unlock by paying for a subscription. Privac
 
 Privacy is a right.
 
-nav0 treats privacy as the default state, not an afterthought. We don't collect data and then promise to protect it. We simply don't collect data. There is nothing to protect because there is nothing to collect.
+Nav0 treats privacy as the default state, not an afterthought. We don't collect data and then promise to protect it. We simply don't collect data. There is nothing to protect because there is nothing to collect.
 
 This is not a technical limitation — it's a design choice. We could add telemetry. We could add crash reporting. We could add usage analytics. We choose not to because we believe your relationship with the web is none of our business.
 
 ### About Simplicity
 
-Simplicity is frequently misunderstood. When we say nav0 is simple, we don't mean:
+Simplicity is frequently misunderstood. When we say Nav0 is simple, we don't mean:
 
-- **Lacking capability.** nav0 runs on Chromium. It renders the modern web correctly. It supports complex web applications, streaming media, and interactive content. The engine is powerful; the interface is minimal.
+- **Lacking capability.** Nav0 runs on Chromium. It renders the modern web correctly. It supports complex web applications, streaming media, and interactive content. The engine is powerful; the interface is minimal.
 - **Ugly or unpolished.** Simplicity is not the absence of design. It's the result of careful design decisions about what to include and what to leave out. A clean interface is the product of discipline, not laziness.
-- **Incomplete.** nav0 isn't a work in progress that will eventually grow into a full-featured browser. The minimal feature set is the finished product. We're not building toward complexity; we're maintaining simplicity.
+- **Incomplete.** Nav0 isn't a work in progress that will eventually grow into a full-featured browser. The minimal feature set is the finished product. We're not building toward complexity; we're maintaining simplicity.
 
 Simplicity means:
 - **Focused.** Every element of the interface serves a clear purpose related to browsing the web. There are no distractions, no promotional content, no features competing for your attention.
-- **Understandable.** You shouldn't need documentation to use a browser. nav0's interface is self-explanatory because there's nothing extraneous to confuse you.
+- **Understandable.** You shouldn't need documentation to use a browser. Nav0's interface is self-explanatory because there's nothing extraneous to confuse you.
 - **Maintainable.** Simple software is easier to audit, easier to debug, and less likely to contain hidden defects. Fewer moving parts means fewer things that can break.
 - **Trustworthy.** Simple software is easier to understand. Software you understand is software you can trust. Complexity is the enemy of trust.
 
@@ -191,7 +191,7 @@ Open source is more than a development methodology or a licensing choice. It's a
 Open source means:
 - **Transparency.** The code is visible. The development process is visible. There's nowhere to hide tracking code, data collection, or anti-user behavior.
 - **Trust through verification.** "Don't trust us — verify" is not a slogan. It's a genuine invitation. We expect users and security researchers to audit our code. We welcome it.
-- **Community ownership.** No single entity can take nav0 away from its users. The code is published under the MIT License. If the project changes direction, the community can fork it. This structural guarantee against enshittification is one of the most important properties of open source software.
+- **Community ownership.** No single entity can take Nav0 away from its users. The code is published under the MIT License. If the project changes direction, the community can fork it. This structural guarantee against enshittification is one of the most important properties of open source software.
 - **Permanence.** Companies get acquired, pivot, or shut down. Open source projects survive because the code belongs to everyone. A trusted commit will always be available to build from, regardless of what happens to the project's maintainers.
 
 ### About the Web
@@ -200,9 +200,9 @@ We believe the web should be open, accessible, and free from gatekeepers. A brow
 
 The browser should not decide what content to show you on startup. It should not recommend articles, products, or services. It should not insert itself between you and the websites you choose to visit. It should not analyze your behavior to predict what you'll do next. It should load the page you asked for, render it correctly, and wait for your next instruction.
 
-That's what a browser is. That's what nav0 does.
+That's what a browser is. That's what Nav0 does.
 
-## What nav0 Deliberately Excludes
+## What Nav0 Deliberately Excludes
 
 Choosing what not to build is as important as choosing what to build. These exclusions are not temporary gaps in our feature list — they are permanent, principled decisions.
 
@@ -217,13 +217,13 @@ Choosing what not to build is as important as choosing what to build. These excl
 | **Telemetry / analytics** | We don't collect usage data. Not "anonymized" data, not "optional" data, not "aggregated" data. Zero. |
 | **Shopping / coupon features** | These features monitor your purchases and insert the browser vendor into your transactions. They exist to monetize your browsing, not to help you. |
 | **Reading lists / collections** | Bookmarks and bookmark folders handle this. We don't need three different organizational features when one works fine. |
-| **Sidebar panels** | Sidebars are screen real estate claimed by the browser for features unrelated to the page you're viewing. nav0 maximizes the space for actual web content. |
+| **Sidebar panels** | Sidebars are screen real estate claimed by the browser for features unrelated to the page you're viewing. Nav0 maximizes the space for actual web content. |
 
-## The nav0 Way
+## The Nav0 Way
 
 ### We Say No
 
-The most important word in nav0's vocabulary is "no."
+The most important word in Nav0's vocabulary is "no."
 
 We say no to features that:
 - Collect data, whether the user knows about it or not
@@ -234,7 +234,7 @@ We say no to features that:
 - Increase the attack surface without corresponding security value
 - Consume resources for functionality unrelated to browsing
 
-Saying no is difficult in an industry that measures progress by feature count. But the discipline to say no is what keeps nav0 minimal, fast, and trustworthy. Every feature we decline is bloat we don't ship, a vulnerability we don't create, and complexity we don't impose on our users.
+Saying no is difficult in an industry that measures progress by feature count. But the discipline to say no is what keeps Nav0 minimal, fast, and trustworthy. Every feature we decline is bloat we don't ship, a vulnerability we don't create, and complexity we don't impose on our users.
 
 ### We Say Yes
 
@@ -263,28 +263,28 @@ Adapting does not mean:
 - Copying the design decisions of browsers with different values
 - Expanding scope beyond core browsing
 
-nav0 will evolve, but it will evolve in its own direction — toward better browsing, not toward more features.
+Nav0 will evolve, but it will evolve in its own direction — toward better browsing, not toward more features.
 
 ## How We Make Decisions
 
-Every feature request, pull request, and design decision at nav0 is evaluated against a simple framework:
+Every feature request, pull request, and design decision at Nav0 is evaluated against a simple framework:
 
-1. **Does this serve core browsing?** If the feature isn't directly related to loading, rendering, and navigating web pages, it probably doesn't belong in nav0.
-2. **Does this respect user privacy?** If the feature requires collecting, transmitting, or processing user data, it doesn't belong in nav0.
+1. **Does this serve core browsing?** If the feature isn't directly related to loading, rendering, and navigating web pages, it probably doesn't belong in Nav0.
+2. **Does this respect user privacy?** If the feature requires collecting, transmitting, or processing user data, it doesn't belong in Nav0.
 3. **Does this add justified complexity?** Every feature adds complexity. Is the benefit to the user clearly worth the added complexity, maintenance burden, and attack surface?
 4. **Can the user achieve this with an existing tool?** If a dedicated tool already handles this task well, the browser doesn't need to duplicate it.
-5. **Would removing this feature make nav0 worse at browsing?** If removing a proposed feature wouldn't affect the core browsing experience, the feature isn't essential.
+5. **Would removing this feature make Nav0 worse at browsing?** If removing a proposed feature wouldn't affect the core browsing experience, the feature isn't essential.
 
-If a feature can't pass all five questions, we don't build it. This framework has served us well. It will continue to guide nav0's development for as long as the project exists.
+If a feature can't pass all five questions, we don't build it. This framework has served us well. It will continue to guide Nav0's development for as long as the project exists.
 
 ## Join Us
 
-nav0 is built by people who were tired of bloated, invasive browsers and decided to build something better. If you share that frustration, you're welcome here.
+Nav0 is built by people who were tired of bloated, invasive browsers and decided to build something better. If you share that frustration, you're welcome here.
 
-- **Use nav0.** The simplest and most important contribution. Every user who switches to nav0 is one fewer profile being built by an advertising company.
+- **Use Nav0.** The simplest and most important contribution. Every user who switches to Nav0 is one fewer profile being built by an advertising company.
 - **Report bugs.** Found something broken? Tell us. Bug reports from real users are how we improve without telemetry.
-- **Contribute code.** nav0 is open source and welcomes contributions. Read our [Contributing Guide](/guide/contributing) to get started.
-- **Spread the word.** Tell others about nav0. The web needs more people who care about privacy and simplicity.
+- **Contribute code.** Nav0 is open source and welcomes contributions. Read our [Contributing Guide](/guide/contributing) to get started.
+- **Spread the word.** Tell others about Nav0. The web needs more people who care about privacy and simplicity.
 - **Audit the code.** Security researchers, privacy advocates, and curious developers — we want you looking at our code. Transparency only works if people actually look.
 
 The web deserves a better browser. One that works for its users instead of against them. One that respects privacy as a right instead of marketing it as a feature. One that stays simple in a world that rewards complexity.

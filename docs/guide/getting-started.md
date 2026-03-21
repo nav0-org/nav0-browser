@@ -1,17 +1,17 @@
 ---
-title: "Getting Started with nav0 Browser — Installation & Setup"
-description: "Download and install nav0 browser for Windows, macOS, or Linux. Learn keyboard shortcuts, configuration, and basic usage of the privacy-focused browser."
+title: "Getting Started with Nav0 Browser — Installation & Setup"
+description: "Download and install Nav0 browser for Windows, macOS, or Linux. Learn keyboard shortcuts, configuration, and basic usage of the privacy-focused browser."
 ---
 
 # Getting Started
 
-nav0 is a minimal web browser built on Electron that prioritizes your privacy and system resources.
+Nav0 is a minimal web browser built on Electron that prioritizes your privacy and system resources.
 
 ## Installation
 
 ### macOS
 
-Run this command in Terminal to install nav0:
+Run this command in Terminal to install Nav0:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/nav0-org/nav0-browser/main/install.sh | bash
@@ -23,7 +23,7 @@ curl -fsSL https://raw.githubusercontent.com/nav0-org/nav0-browser/main/install.
 Alternatively, install via [Homebrew](https://brew.sh):
 
 ```bash
-brew install --cask nav0-org/nav0/nav0-browser
+brew install --cask nav0-org/Nav0/nav0-browser
 ```
 
 To update:
@@ -43,7 +43,7 @@ Download `.deb` (Debian/Ubuntu) or `.rpm` (Fedora/RHEL) packages from [GitHub Re
 
 ### Build from Source
 
-On any platform, you can also build nav0 from source:
+On any platform, you can also build Nav0 from source:
 
 ```bash
 # Clone the repository
@@ -61,7 +61,7 @@ The built app will be in the `out/` directory. Requires [Node.js](https://nodejs
 
 ## First Launch
 
-When you first open nav0, you'll notice something different: **nothing asks for your data**.
+When you first open Nav0, you'll notice something different: **nothing asks for your data**.
 
 - No account creation prompts
 - No "personalization" setup
@@ -91,7 +91,7 @@ Just a browser, ready to use.
 
 ## Configuration
 
-nav0 stores its configuration locally on your machine. No cloud sync, no account needed.
+Nav0 stores its configuration locally on your machine. No cloud sync, no account needed.
 
 Configuration location:
 - **Windows**: `%APPDATA%/nav0/`
@@ -100,7 +100,7 @@ Configuration location:
 
 ## What's Not Included
 
-By design, nav0 does **not** include:
+By design, Nav0 does **not** include:
 
 - User accounts or sign-in
 - Sync services
@@ -110,10 +110,10 @@ By design, nav0 does **not** include:
 - Built-in VPN upsells
 - Telemetry or analytics
 
-If you need these features, nav0 isn't for you—and that's okay. We built nav0 for users who want less, not more.
+If you need these features, Nav0 isn't for you—and that's okay. We built Nav0 for users who want less, not more.
 
 ## Next Steps
 
-- Learn about nav0's [Features](/guide/features)
+- Learn about Nav0's [Features](/guide/features)
 - Understand our [Privacy](/guide/privacy) commitment
 - Read about our [Philosophy](/guide/philosophy)

@@ -647,8 +647,8 @@ div[class*="ima-"],
 export const AD_BLOCK_EARLY_SCRIPT = `
 (function() {
   'use strict';
-  if (window.__nav0AdBlockEarly) return;
-  window.__nav0AdBlockEarly = true;
+  if (window.__Nav0AdBlockEarly) return;
+  window.__Nav0AdBlockEarly = true;
 
   // ============================================================
   // 1. Google IMA SDK Mock
@@ -991,8 +991,8 @@ export const AD_BLOCK_EARLY_SCRIPT = `
 export const AD_BLOCK_SCRIPT = `
 (function() {
   'use strict';
-  if (window.__nav0AdBlockerDOM) return;
-  window.__nav0AdBlockerDOM = true;
+  if (window.__Nav0AdBlockerDOM) return;
+  window.__Nav0AdBlockerDOM = true;
 
   var adSelectors = [
     'ins.adsbygoogle',
@@ -1078,7 +1078,7 @@ export const AD_BLOCK_SCRIPT = `
   }
 
   function hideElement(el) {
-    if (el && el.style && !el.getAttribute('data-nav0-blocked')) {
+    if (el && el.style && !el.getAttribute('data-Nav0-blocked')) {
       if (isLikelyMainContent(el)) return;
       el.style.setProperty('display', 'none', 'important');
       el.style.setProperty('height', '0', 'important');
@@ -1086,7 +1086,7 @@ export const AD_BLOCK_SCRIPT = `
       el.style.setProperty('max-height', '0', 'important');
       el.style.setProperty('overflow', 'hidden', 'important');
       el.style.setProperty('pointer-events', 'none', 'important');
-      el.setAttribute('data-nav0-blocked', 'true');
+      el.setAttribute('data-Nav0-blocked', 'true');
     }
   }
 
@@ -1176,8 +1176,8 @@ export const AD_BLOCK_SCRIPT = `
         var video = videos[i];
 
         // Attach per-video listeners to intercept future play/load events
-        if (!video.getAttribute('data-nav0-monitored')) {
-          video.setAttribute('data-nav0-monitored', 'true');
+        if (!video.getAttribute('data-Nav0-monitored')) {
+          video.setAttribute('data-Nav0-monitored', 'true');
 
           video.addEventListener('play', function() {
             if (isVideoAd(this)) {

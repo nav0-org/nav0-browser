@@ -170,7 +170,7 @@ export class OptionsMenuManager {
       await window.BrowserAPI.createTab(this.appWindowId, InAppUrls.BROWSER_SETTINGS, true);
     });
 
-    this.optionsElement?.querySelector('#about-nav0-option')?.addEventListener('click', async () => {
+    this.optionsElement?.querySelector('#about-Nav0-option')?.addEventListener('click', async () => {
       await window.BrowserAPI.createTab(this.appWindowId, InAppUrls.ABOUT, true);
     });
 

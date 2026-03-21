@@ -2,7 +2,7 @@
 title: "Browser Extensions Won't Save Your Privacy"
 description: "Privacy-focused extensions are the most common advice for staying safe online. But extensions themselves are a privacy and security risk most people overlook. Here's why bolting on privacy doesn't work."
 date: 2026-02-15
-author: nav0 team
+author: Nav0 team
 tags: [privacy, extensions, security, browsers]
 head:
   - - meta
@@ -13,7 +13,7 @@ head:
       content: "2026-02-15"
   - - meta
     - property: article:author
-      content: nav0 team
+      content: Nav0 team
   - - meta
     - property: article:tag
       content: privacy
@@ -35,8 +35,8 @@ head:
         "headline": "Browser Extensions Won't Save Your Privacy",
         "description": "Privacy-focused extensions are the most common advice for staying safe online. But extensions themselves are a privacy and security risk most people overlook. Here's why bolting on privacy doesn't work.",
         "datePublished": "2026-02-15",
-        "author": { "@type": "Organization", "name": "nav0 team", "url": "https://nav0.org" },
-        "publisher": { "@type": "Organization", "name": "nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
+        "author": { "@type": "Organization", "name": "Nav0 team", "url": "https://nav0.org" },
+        "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/browser-extensions-wont-save-your-privacy",
         "keywords": ["privacy", "browser extensions", "security", "browser privacy", "extension permissions"]
       }
@@ -177,4 +177,4 @@ The real solution isn't a better extension. It's a better browser — one where 
 
 ---
 
-*nav0 is a minimal, privacy-focused browser with tracking protection, HTTPS upgrades, and fingerprinting resistance built in. No extensions required. It's open source, free, and collects zero data. [Get started](/guide/getting-started).*
+*Nav0 is a minimal, privacy-focused browser with tracking protection, HTTPS upgrades, and fingerprinting resistance built in. No extensions required. It's open source, free, and collects zero data. [Get started](/guide/getting-started).*

@@ -1,8 +1,8 @@
-# nav0
+# Nav0
 
 **Browse. Nothing More.**
 
-nav0 is a minimal, privacy-focused web browser built on Electron. No data collection. No bloat. No AI gimmicks. Just clean, safe browsing.
+Nav0 is a minimal, privacy-focused web browser built on Electron. No data collection. No bloat. No AI gimmicks. Just clean, safe browsing.
 
 ## Features
 
@@ -37,7 +37,7 @@ npm run make
 
 ## Documentation
 
-Full documentation available at the [nav0 docs site](https://nav0-org.github.io/nav0-browser/).
+Full documentation available at the [Nav0 docs site](https://nav0-org.github.io/nav0-browser/).
 
 To run documentation locally:
 
@@ -47,7 +47,7 @@ npm run docs:dev
 
 ## Philosophy
 
-Modern browsers have become bloated data harvesting machines. nav0 takes a different approach:
+Modern browsers have become bloated data harvesting machines. Nav0 takes a different approach:
 
 - **Do one thing well** — Browse the web, nothing more
 - **Local over cloud** — Your data stays on your device
@@ -56,7 +56,7 @@ Modern browsers have become bloated data harvesting machines. nav0 takes a diffe
 
 ## What's Not Included
 
-By design, nav0 does not include:
+By design, Nav0 does not include:
 
 - User accounts or sign-in
 - Sync services
