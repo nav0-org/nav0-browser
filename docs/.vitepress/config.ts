@@ -107,6 +107,9 @@ export default defineConfig({
     ['meta', { name: 'twitter:description', content: siteDescription }],
     ['meta', { name: 'twitter:image', content: ogImage }],
 
+    // Google Search Console
+    ['meta', { name: 'google-site-verification', content: '9xATJZCv2SiLHb9BMJXHLSOqzbddjf7m2CQWwIqI1I0' }],
+
     // Additional SEO
     ['meta', { name: 'author', content: 'Nav0 Contributors' }],
     ['meta', { name: 'robots', content: 'index, follow' }],
