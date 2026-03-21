@@ -40,6 +40,12 @@ export class BrowserTabManager {
       document.body.classList.add('is-private');
     }
 
+    // Add platform class for platform-specific styling (e.g. traffic light padding on macOS)
+    const platform = window.BrowserAPI.platform;
+    if (platform) {
+      document.body.classList.add(`platform-${platform}`);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       this.initializeDomElements();
       this.setupEventListeners();
