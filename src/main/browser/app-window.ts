@@ -79,6 +79,13 @@ export class AppWindow {
 
     this.browserWindowInstance.loadURL(BROWSER_LAYOUT_WEBPACK_ENTRY);
 
+    // Warm up overlay renderer processes after the window is visible so they
+    // don't compete with initial page load but are ready before the user
+    // triggers them. Each is staggered to avoid a CPU spike.
+    this.browserWindowInstance.once('show', () => {
+      this.warmUpOverlays();
+    });
+
       this.browserWindowInstance.webContents.setWindowOpenHandler(({ url }) => {
         return { action: 'deny' };
       });
@@ -130,6 +137,23 @@ export class AppWindow {
     
       // this.browserWindowInstance.webContents.openDevTools({mode : 'detach'});
       this.browserWindowInstance.on('resize', this.handleResizing.bind(this));
+  }
+
+  private warmUpOverlays(): void {
+    // Stagger overlay init so renderer processes don't all spawn at once.
+    // High-frequency overlays first, rarely-used ones last.
+    const overlays = [
+      this.commandKOverlayManager,
+      this.findInPageManager,
+      this.commandOOverlayManager,
+      this.optionsMenuManager,
+      this.permissionPromptOverlayManager,
+      this.sslInfoOverlayManager,
+      this.issueReportOverlayManager,
+    ];
+    overlays.forEach((mgr, i) => {
+      setTimeout(() => mgr.whenReady(), i * 100);
+    });
   }
 
   public closeWindow(clearSession: boolean) {
