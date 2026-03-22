@@ -95,6 +95,7 @@ declare global {
       onTabLoadingChanged: (callback: (data: { id: string, isLoading: boolean }) => void) => void;
       onTabPinned: (callback: (data: { id: string }) => void) => void;
       onTabUnpinned: (callback: (data: { id: string }) => void) => void;
+      onFullScreenChanged: (callback: (data: { isFullScreen: boolean }) => void) => void;
 
       // SSL info overlay
       showSSLInfo: (appWindowId: string, data: { sslStatus: string; sslDetails: any; url: string }) => void;
