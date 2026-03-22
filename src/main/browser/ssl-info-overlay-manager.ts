@@ -2,70 +2,46 @@ import { WebContentsView } from "electron";
 
 export class SSLInfoOverlayManager {
   private webContentsViewInstance: WebContentsView | null = null;
-  private appWindowId: string;
-  private isPrivate: boolean;
-  private partitionSetting: string;
-  private readyPromise: Promise<void> | null = null;
   private onDismiss: (() => void) | null = null;
-  private initialized = false;
+  private blurHandler: (() => void) | null = null;
+  private inputHandler: ((event: Electron.Event, input: Electron.Input) => void) | null = null;
 
-  constructor(appWindowId: string, isPrivate: boolean, partitionSetting: string) {
-    this.appWindowId = appWindowId;
-    this.isPrivate = isPrivate;
-    this.partitionSetting = partitionSetting;
-  }
-
-  private ensureInitialized(): void {
-    if (this.initialized) return;
-    this.initialized = true;
-    this.init();
-  }
-
-  private init() {
-    this.webContentsViewInstance = new WebContentsView({
-      webPreferences: {
-        preload: SSL_INFO_PRELOAD_WEBPACK_ENTRY,
-        nodeIntegration: false,
-        contextIsolation: true,
-        sandbox: true,
-        webSecurity: true,
-        allowRunningInsecureContent: false,
-        partition: this.partitionSetting,
-        additionalArguments: [`--app-window-id=${this.appWindowId}`, `--is-private=${this.isPrivate}`],
-        transparent: true,
-      }
-    });
-
-    this.readyPromise = new Promise<void>((resolve) => {
-      this.webContentsViewInstance.webContents.once('did-finish-load', () => resolve());
-    });
-
-    this.webContentsViewInstance.webContents.loadURL(SSL_INFO_WEBPACK_ENTRY);
-
-    this.webContentsViewInstance.webContents.setWindowOpenHandler(() => {
-      return { action: 'deny' };
-    });
-
-    // Close when user clicks outside (focus moves away from overlay)
-    this.webContentsViewInstance.webContents.on('blur', () => {
-      if (this.onDismiss) this.onDismiss();
-    });
-
-    // Close on Escape key
-    this.webContentsViewInstance.webContents.on('before-input-event', (_event, input) => {
-      if (input.key === 'Escape' && input.type === 'keyDown') {
-        if (this.onDismiss) this.onDismiss();
-      }
-    });
+  setView(view: WebContentsView | null): void {
+    this.webContentsViewInstance = view;
   }
 
   setOnDismiss(callback: () => void): void {
     this.onDismiss = callback;
   }
 
-  whenReady(): Promise<void> {
-    this.ensureInitialized();
-    return this.readyPromise;
+  /** Attach blur / Escape listeners to the shared view. */
+  setupListeners(): void {
+    if (!this.webContentsViewInstance) return;
+
+    this.blurHandler = () => {
+      if (this.onDismiss) this.onDismiss();
+    };
+    this.inputHandler = (_event: Electron.Event, input: Electron.Input) => {
+      if (input.key === 'Escape' && input.type === 'keyDown') {
+        if (this.onDismiss) this.onDismiss();
+      }
+    };
+
+    this.webContentsViewInstance.webContents.on('blur', this.blurHandler);
+    this.webContentsViewInstance.webContents.on('before-input-event', this.inputHandler);
+  }
+
+  /** Remove blur / Escape listeners so they don't fire on other overlays. */
+  teardownListeners(): void {
+    if (!this.webContentsViewInstance) return;
+    if (this.blurHandler) {
+      this.webContentsViewInstance.webContents.removeListener('blur', this.blurHandler);
+      this.blurHandler = null;
+    }
+    if (this.inputHandler) {
+      this.webContentsViewInstance.webContents.removeListener('before-input-event', this.inputHandler);
+      this.inputHandler = null;
+    }
   }
 
   getWebContentsViewInstance(): WebContentsView | null {
@@ -93,14 +69,5 @@ export class SSLInfoOverlayManager {
     } catch {
       return 200;
     }
-  }
-
-  destroy(): void {
-    if (!this.initialized) return;
-    this.onDismiss = null;
-    try { this.webContentsViewInstance?.webContents.close(); } catch { /* already closing */ }
-    this.webContentsViewInstance = null;
-    this.readyPromise = null;
-    this.initialized = false;
   }
 }

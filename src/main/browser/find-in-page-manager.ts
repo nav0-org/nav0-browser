@@ -3,56 +3,12 @@ import { MainToRendererEventsForBrowserIPC } from "../../constants/app-constants
 
 export class FindInPageManager {
   private webContentsViewInstance: WebContentsView | null = null;
-  private appWindowId: string;
-  private isPrivate: boolean;
-  private partitionSetting: string;
-  private readyPromise: Promise<void> | null = null;
   private lastSearchText: string = '';
   private currentTabWebContents: Electron.WebContents | null = null;
   private foundInPageHandler: ((event: Electron.Event, result: Electron.FoundInPageResult) => void) | null = null;
-  private initialized = false;
 
-  constructor(appWindowId: string, isPrivate: boolean, partitionSetting: string) {
-    this.appWindowId = appWindowId;
-    this.isPrivate = isPrivate;
-    this.partitionSetting = partitionSetting;
-  }
-
-  private ensureInitialized(): void {
-    if (this.initialized) return;
-    this.initialized = true;
-    this.init();
-  }
-
-  private init() {
-    this.webContentsViewInstance = new WebContentsView({
-      webPreferences: {
-        preload: FIND_IN_PAGE_PRELOAD_WEBPACK_ENTRY,
-        nodeIntegration: false,
-        contextIsolation: true,
-        sandbox: true,
-        webSecurity: true,
-        allowRunningInsecureContent: false,
-        partition: this.partitionSetting,
-        additionalArguments: [`--app-window-id=${this.appWindowId}`, `--is-private=${this.isPrivate}`],
-        transparent: true,
-      }
-    });
-
-    this.readyPromise = new Promise<void>((resolve) => {
-      this.webContentsViewInstance.webContents.once('did-finish-load', () => resolve());
-    });
-
-    this.webContentsViewInstance.webContents.loadURL(FIND_IN_PAGE_WEBPACK_ENTRY);
-
-    this.webContentsViewInstance.webContents.setWindowOpenHandler(() => {
-      return { action: 'deny' };
-    });
-  }
-
-  whenReady(): Promise<void> {
-    this.ensureInitialized();
-    return this.readyPromise;
+  setView(view: WebContentsView | null): void {
+    this.webContentsViewInstance = view;
   }
 
   getWebContentsViewInstance(): WebContentsView | null {
@@ -152,14 +108,5 @@ export class FindInPageManager {
 
   getLastSearchText(): string {
     return this.lastSearchText;
-  }
-
-  destroy(): void {
-    if (!this.initialized) return;
-    this.stopFind();
-    try { this.webContentsViewInstance?.webContents.close(); } catch { /* already closing */ }
-    this.webContentsViewInstance = null;
-    this.readyPromise = null;
-    this.initialized = false;
   }
 }

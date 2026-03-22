@@ -1,4 +1,4 @@
-import { BrowserWindow, screen, session } from "electron";
+import { BrowserWindow, screen, session, WebContentsView } from "electron";
 import { v4 as uuid } from "uuid";
 import { Tab } from "./tab";
 import { AppConstants, ClosedTabRecord, InAppUrls, MainToRendererEventsForBrowserIPC } from "../../constants/app-constants";
@@ -31,6 +31,14 @@ export class AppWindow {
   private readyPromise: Promise<void>;
   private resolveReady: () => void;
   private _desiredFullScreen = true;
+
+  // Single shared WebContentsView for all overlays. Since overlays are
+  // mutually exclusive, one renderer process handles all 7 overlay UIs.
+  // Content is swapped via loadURL(); the process stays alive across
+  // navigations so there is no spawn/kill overhead.
+  private sharedOverlayView: WebContentsView | null = null;
+  private sharedOverlayLoadedUrl: string | null = null;
+  private currentOverlayType: string | null = null;
 
   constructor(isPrivate = false, database: DB) {
     this.isPrivate = isPrivate;
@@ -69,27 +77,45 @@ export class AppWindow {
       },
     });
 
-    this.optionsMenuManager = new OptionsMenuManager(this.id, this.isPrivate, this.partitionSetting);
-    this.commandKOverlayManager = new CommandKOverlayManager(this.id, this.isPrivate, this.partitionSetting);
-    this.commandOOverlayManager = new CommandOOverlayManager(this.id, this.isPrivate, this.partitionSetting);
-    this.permissionPromptOverlayManager = new PermissionPromptOverlayManager(this.id, this.isPrivate, this.partitionSetting);
-    this.findInPageManager = new FindInPageManager(this.id, this.isPrivate, this.partitionSetting);
-    this.issueReportOverlayManager = new IssueReportOverlayManager(this.id, this.isPrivate, this.partitionSetting);
-    this.sslInfoOverlayManager = new SSLInfoOverlayManager(this.id, this.isPrivate, this.partitionSetting);
+    // Create the single shared overlay view. All overlays use the same
+    // preload (internals-api.ts), so one WebContentsView can serve them all.
+    this.sharedOverlayView = new WebContentsView({
+      webPreferences: {
+        preload: COMMAND_K_PRELOAD_WEBPACK_ENTRY,
+        nodeIntegration: false,
+        contextIsolation: true,
+        sandbox: true,
+        webSecurity: true,
+        allowRunningInsecureContent: false,
+        partition: this.partitionSetting,
+        additionalArguments: [`--app-window-id=${this.id}`, `--is-private=${this.isPrivate}`],
+        transparent: true,
+      }
+    });
+    this.sharedOverlayView.webContents.setWindowOpenHandler(() => ({ action: 'deny' as const }));
+
+    // Overlay-specific managers (thin wrappers for overlay-specific logic)
+    this.optionsMenuManager = new OptionsMenuManager();
+    this.commandKOverlayManager = new CommandKOverlayManager();
+    this.commandOOverlayManager = new CommandOOverlayManager();
+    this.permissionPromptOverlayManager = new PermissionPromptOverlayManager();
+    this.findInPageManager = new FindInPageManager();
+    this.issueReportOverlayManager = new IssueReportOverlayManager();
+    this.sslInfoOverlayManager = new SSLInfoOverlayManager();
 
     this.browserWindowInstance.loadURL(BROWSER_LAYOUT_WEBPACK_ENTRY);
 
-    // Warm up overlay renderer processes after the window is visible so they
-    // don't compete with initial page load but are ready before the user
-    // triggers them. Each is staggered to avoid a CPU spike.
+    // Pre-load Command K (most frequently used overlay) into the shared view
+    // after the window is visible so it doesn't compete with initial page load.
     this.browserWindowInstance.once('show', () => {
-      this.warmUpOverlays();
+      this.sharedOverlayView.webContents.loadURL(COMMAND_K_WEBPACK_ENTRY);
+      this.sharedOverlayLoadedUrl = COMMAND_K_WEBPACK_ENTRY;
     });
 
       this.browserWindowInstance.webContents.setWindowOpenHandler(({ url }) => {
         return { action: 'deny' };
       });
-    
+
       // Pause all active downloads before the window is destroyed
       // so their resume metadata can be persisted to the DB
       this.browserWindowInstance.on('close', () => {
@@ -134,37 +160,49 @@ export class AppWindow {
         // Show window only after browser chrome and first tab are fully loaded
         this.browserWindowInstance?.show();
       });
-    
+
       // this.browserWindowInstance.webContents.openDevTools({mode : 'detach'});
       this.browserWindowInstance.on('resize', this.handleResizing.bind(this));
   }
 
-  private warmUpOverlays(): void {
-    // Only pre-warm Command K (most frequently used overlay).
-    // Other overlays init on first use; their processes are torn down
-    // when a different overlay is shown to keep at most 1 alive.
-    this.commandKOverlayManager.whenReady();
+  // ── Shared overlay helpers ──────────────────────────────────────────
+
+  /** Whether the shared overlay view is currently attached to the window. */
+  private isOverlayVisible(): boolean {
+    return this.sharedOverlayView != null &&
+      this.browserWindowInstance?.contentView?.children?.includes(this.sharedOverlayView) === true;
   }
 
-  // Destroy renderer processes for all overlay managers except the one
-  // being shown. Since overlays are mutually exclusive, this keeps at
-  // most 1 overlay process alive at any time.
-  private destroyOverlaysExcept(active: unknown): void {
-    const all = [
-      this.commandKOverlayManager,
-      this.commandOOverlayManager,
-      this.optionsMenuManager,
-      this.permissionPromptOverlayManager,
-      this.findInPageManager,
-      this.issueReportOverlayManager,
-      this.sslInfoOverlayManager,
-    ];
-    for (const mgr of all) {
-      if (mgr && mgr !== active) {
-        mgr.destroy();
-      }
-    }
+  /** Load a URL into the shared overlay view if it isn't already loaded. */
+  private async loadOverlayUrl(url: string): Promise<void> {
+    if (this.sharedOverlayLoadedUrl === url) return;
+    await new Promise<void>((resolve) => {
+      this.sharedOverlayView.webContents.once('did-finish-load', () => resolve());
+      this.sharedOverlayView.webContents.loadURL(url);
+    });
+    this.sharedOverlayLoadedUrl = url;
   }
+
+  /** Remove the shared overlay from children and clean up overlay-specific state. */
+  private hideCurrentOverlay(): void {
+    if (!this.isOverlayVisible()) return;
+
+    // Overlay-specific teardown
+    if (this.currentOverlayType === 'find-in-page') {
+      this.findInPageManager.stopFind();
+    }
+    if (this.currentOverlayType === 'ssl-info') {
+      this.sslInfoOverlayManager.teardownListeners();
+    }
+    if (this.currentOverlayType === 'permission-prompt') {
+      this.permissionPromptOverlayManager.teardownReadyListener();
+    }
+
+    this.browserWindowInstance.contentView.removeChildView(this.sharedOverlayView);
+    this.currentOverlayType = null;
+  }
+
+  // ── Window lifecycle ────────────────────────────────────────────────
 
   public closeWindow(clearSession: boolean) {
     // Clear pending timers on all tabs to prevent callbacks after window removal
@@ -209,34 +247,25 @@ export class AppWindow {
       });
     }
 
-    // Resize full-size overlays that are currently visible
-    const children = this.browserWindowInstance.contentView.children;
-    const fullSizeOverlays = [
-      this.optionsMenuManager,
-      this.commandKOverlayManager,
-      this.commandOOverlayManager,
-      this.permissionPromptOverlayManager,
-      this.issueReportOverlayManager,
-    ];
-    for (const mgr of fullSizeOverlays) {
-      const view = mgr?.getWebContentsViewInstance();
-      if (view && children.includes(view)) {
-        view.setBounds(parentBounds);
+    // Resize the shared overlay view if it's currently visible
+    if (this.isOverlayVisible()) {
+      if (this.currentOverlayType === 'find-in-page') {
+        const barWidth = Math.min(520, parentBounds.width - 24);
+        this.sharedOverlayView.setBounds({
+          x: parentBounds.width - barWidth - 12,
+          y: yOffset,
+          width: barWidth,
+          height: 48,
+        });
+      } else if (this.currentOverlayType !== 'ssl-info') {
+        // Full-size overlays (command-k, command-o, options-menu, etc.)
+        this.sharedOverlayView.setBounds(parentBounds);
       }
-    }
-
-    // Resize find-in-page bar if visible
-    const findView = this.findInPageManager?.getWebContentsViewInstance();
-    if (findView && children.includes(findView)) {
-      const barWidth = Math.min(520, parentBounds.width - 24);
-      findView.setBounds({
-        x: parentBounds.width - barWidth - 12,
-        y: yOffset,
-        width: barWidth,
-        height: 48,
-      });
+      // SSL info panel has dynamic height — skip resize
     }
   }
+
+  // ── Tab management ──────────────────────────────────────────────────
 
   async createTab(url: string, activateNewTab = true): Promise<Tab> {
     const tab = new Tab(this, url, this.partitionSetting);
@@ -349,74 +378,71 @@ export class AppWindow {
     }
   }
 
+  // ── Overlay show/hide methods ───────────────────────────────────────
+
   async showOptionsMenuOverlay(): Promise<void> {
-    this.hideCommandKOverlay();
-    const existingView = this.optionsMenuManager.getWebContentsViewInstance();
-    if(existingView && this.browserWindowInstance.contentView.children.indexOf(existingView) > -1){
-      //already open
+    // Already open — do nothing
+    if (this.currentOverlayType === 'options-menu' && this.isOverlayVisible()) {
       return;
     }
-    this.destroyOverlaysExcept(this.optionsMenuManager);
-    await this.optionsMenuManager.whenReady();
-    const view = this.optionsMenuManager.getWebContentsViewInstance();
+    this.hideCurrentOverlay();
+    await this.loadOverlayUrl(OPTIONS_MENU_WEBPACK_ENTRY);
+    this.currentOverlayType = 'options-menu';
+    this.optionsMenuManager.setView(this.sharedOverlayView);
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
-    view.setBounds(parentBounds);
-    this.browserWindowInstance.contentView.addChildView(view);
+    this.sharedOverlayView.setBounds(parentBounds);
+    this.browserWindowInstance.contentView.addChildView(this.sharedOverlayView);
   }
+
   hideOptionsMenuOverlay(): void {
-    const view = this.optionsMenuManager?.getWebContentsViewInstance();
-    if(view && this.browserWindowInstance.contentView.children.indexOf(view) > -1){
-      this.browserWindowInstance.contentView.removeChildView(view);
+    if (this.currentOverlayType === 'options-menu') {
+      this.hideCurrentOverlay();
     }
   }
 
   async showCommandKOverlay(): Promise<void> {
-    this.hideOptionsMenuOverlay();
-    this.hideCommandOOverlay();
-    const existingView = this.commandKOverlayManager.getWebContentsViewInstance();
-    if(existingView && this.browserWindowInstance.contentView.children.indexOf(existingView) > -1){
-      // Already open — toggle it closed
-      this.hideCommandKOverlay();
+    // Toggle: if already open, close it
+    if (this.currentOverlayType === 'command-k' && this.isOverlayVisible()) {
+      this.hideCurrentOverlay();
       return;
     }
-    this.destroyOverlaysExcept(this.commandKOverlayManager);
-    await this.commandKOverlayManager.whenReady();
-    const view = this.commandKOverlayManager.getWebContentsViewInstance();
+    this.hideCurrentOverlay();
+    await this.loadOverlayUrl(COMMAND_K_WEBPACK_ENTRY);
+    this.currentOverlayType = 'command-k';
+    this.commandKOverlayManager.setView(this.sharedOverlayView);
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
-    view.setBounds(parentBounds);
-    this.browserWindowInstance.contentView.addChildView(view);
+    this.sharedOverlayView.setBounds(parentBounds);
+    this.browserWindowInstance.contentView.addChildView(this.sharedOverlayView);
     this.commandKOverlayManager.resetState();
-    view.webContents.focus();
+    this.sharedOverlayView.webContents.focus();
   }
+
   hideCommandKOverlay(): void {
-    const view = this.commandKOverlayManager?.getWebContentsViewInstance();
-    if(view && this.browserWindowInstance.contentView.children.indexOf(view) > -1){
-      this.browserWindowInstance.contentView.removeChildView(view);
+    if (this.currentOverlayType === 'command-k') {
+      this.hideCurrentOverlay();
     }
   }
 
   async showCommandOOverlay(): Promise<void> {
-    this.hideOptionsMenuOverlay();
-    this.hideCommandKOverlay();
-    const existingView = this.commandOOverlayManager.getWebContentsViewInstance();
-    if(existingView && this.browserWindowInstance.contentView.children.indexOf(existingView) > -1){
-      // Already open — toggle it closed
-      this.hideCommandOOverlay();
+    // Toggle: if already open, close it
+    if (this.currentOverlayType === 'command-o' && this.isOverlayVisible()) {
+      this.hideCurrentOverlay();
       return;
     }
-    this.destroyOverlaysExcept(this.commandOOverlayManager);
-    await this.commandOOverlayManager.whenReady();
-    const view = this.commandOOverlayManager.getWebContentsViewInstance();
+    this.hideCurrentOverlay();
+    await this.loadOverlayUrl(COMMAND_O_WEBPACK_ENTRY);
+    this.currentOverlayType = 'command-o';
+    this.commandOOverlayManager.setView(this.sharedOverlayView);
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
-    view.setBounds(parentBounds);
-    this.browserWindowInstance.contentView.addChildView(view);
+    this.sharedOverlayView.setBounds(parentBounds);
+    this.browserWindowInstance.contentView.addChildView(this.sharedOverlayView);
     this.commandOOverlayManager.resetState();
-    view.webContents.focus();
+    this.sharedOverlayView.webContents.focus();
   }
+
   hideCommandOOverlay(): void {
-    const view = this.commandOOverlayManager?.getWebContentsViewInstance();
-    if(view && this.browserWindowInstance.contentView.children.indexOf(view) > -1){
-      this.browserWindowInstance.contentView.removeChildView(view);
+    if (this.currentOverlayType === 'command-o') {
+      this.hideCurrentOverlay();
     }
   }
 
@@ -430,47 +456,51 @@ export class AppWindow {
 
   async showPermissionPromptOverlay(data: PermissionPromptData): Promise<void> {
     if (!this.permissionPromptOverlayManager || !this.browserWindowInstance) return;
-    this.destroyOverlaysExcept(this.permissionPromptOverlayManager);
-    await this.permissionPromptOverlayManager.whenReady();
-    const view = this.permissionPromptOverlayManager.getWebContentsViewInstance();
+    this.hideCurrentOverlay();
+
+    const needsLoad = this.sharedOverlayLoadedUrl !== PERMISSION_PROMPT_WEBPACK_ENTRY;
+    if (needsLoad) {
+      // Set up IPC listener BEFORE loading so we don't miss the ready signal
+      const readyPromise = this.permissionPromptOverlayManager.setupReadyListener(this.sharedOverlayView);
+      await this.loadOverlayUrl(PERMISSION_PROMPT_WEBPACK_ENTRY);
+      await readyPromise;
+    }
+
+    this.currentOverlayType = 'permission-prompt';
+    this.permissionPromptOverlayManager.setView(this.sharedOverlayView);
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
-    view.setBounds(parentBounds);
-    if (this.browserWindowInstance.contentView.children.indexOf(view) === -1) {
-      this.browserWindowInstance.contentView.addChildView(view);
+    this.sharedOverlayView.setBounds(parentBounds);
+    if (!this.isOverlayVisible()) {
+      this.browserWindowInstance.contentView.addChildView(this.sharedOverlayView);
     }
     this.permissionPromptOverlayManager.showPrompt(data);
   }
 
   hidePermissionPromptOverlay(): void {
-    const view = this.permissionPromptOverlayManager?.getWebContentsViewInstance();
-    if (view && this.browserWindowInstance &&
-        this.browserWindowInstance.contentView.children.indexOf(view) > -1) {
-      this.browserWindowInstance.contentView.removeChildView(view);
+    if (this.currentOverlayType === 'permission-prompt') {
+      this.hideCurrentOverlay();
     }
   }
 
   async showIssueReportOverlay(): Promise<void> {
     if (!this.issueReportOverlayManager || !this.browserWindowInstance) return;
-    this.hideOptionsMenuOverlay();
-    this.hideCommandKOverlay();
-    const existingView = this.issueReportOverlayManager.getWebContentsViewInstance();
-    if (existingView && this.browserWindowInstance.contentView.children.indexOf(existingView) > -1) {
+    // Already open — do nothing
+    if (this.currentOverlayType === 'issue-report' && this.isOverlayVisible()) {
       return;
     }
-    this.destroyOverlaysExcept(this.issueReportOverlayManager);
-    await this.issueReportOverlayManager.whenReady();
-    const view = this.issueReportOverlayManager.getWebContentsViewInstance();
+    this.hideCurrentOverlay();
+    await this.loadOverlayUrl(ISSUE_REPORT_WEBPACK_ENTRY);
+    this.currentOverlayType = 'issue-report';
+    this.issueReportOverlayManager.setView(this.sharedOverlayView);
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
-    view.setBounds(parentBounds);
-    this.browserWindowInstance.contentView.addChildView(view);
-    view.webContents.focus();
+    this.sharedOverlayView.setBounds(parentBounds);
+    this.browserWindowInstance.contentView.addChildView(this.sharedOverlayView);
+    this.sharedOverlayView.webContents.focus();
   }
 
   hideIssueReportOverlay(): void {
-    const view = this.issueReportOverlayManager?.getWebContentsViewInstance();
-    if (view && this.browserWindowInstance &&
-        this.browserWindowInstance.contentView.children.indexOf(view) > -1) {
-      this.browserWindowInstance.contentView.removeChildView(view);
+    if (this.currentOverlayType === 'issue-report') {
+      this.hideCurrentOverlay();
     }
   }
 
@@ -484,49 +514,43 @@ export class AppWindow {
   }
 
   private isFindInPageVisible(): boolean {
-    const view = this.findInPageManager?.getWebContentsViewInstance();
-    return view != null && this.browserWindowInstance.contentView.children.indexOf(view) > -1;
+    return this.currentOverlayType === 'find-in-page' && this.isOverlayVisible();
   }
 
   async showFindInPage(): Promise<void> {
-    this.hideOptionsMenuOverlay();
-    this.hideCommandKOverlay();
-    this.hideCommandOOverlay();
-
+    // Toggle: if already open, close it
     if (this.isFindInPageVisible()) {
-      // Already open — toggle it closed
       this.hideFindInPage();
       return;
     }
+    this.hideCurrentOverlay();
+    await this.loadOverlayUrl(FIND_IN_PAGE_WEBPACK_ENTRY);
+    this.currentOverlayType = 'find-in-page';
+    this.findInPageManager.setView(this.sharedOverlayView);
 
-    this.destroyOverlaysExcept(this.findInPageManager);
-    await this.findInPageManager.whenReady();
-
-    // Attach to the active tab's webContents (after init so the handler closure can reference the view)
+    // Attach to the active tab's webContents
     const activeTab = this.getActiveTab();
     if (activeTab) {
       this.findInPageManager.setActiveTabWebContents(activeTab.getWebContentsViewInstance().webContents);
     }
 
-    const view = this.findInPageManager.getWebContentsViewInstance();
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
     const barWidth = Math.min(520, parentBounds.width - 24);
     const barHeight = 48;
     const yOffset = 85; // below the navbar
-    view.setBounds({
+    this.sharedOverlayView.setBounds({
       x: parentBounds.width - barWidth - 12,
       y: yOffset,
       width: barWidth,
       height: barHeight,
     });
-    this.browserWindowInstance.contentView.addChildView(view);
+    this.browserWindowInstance.contentView.addChildView(this.sharedOverlayView);
     this.findInPageManager.focusInput();
   }
 
   hideFindInPage(): void {
-    if (this.isFindInPageVisible()) {
-      this.findInPageManager.stopFind();
-      this.browserWindowInstance.contentView.removeChildView(this.findInPageManager.getWebContentsViewInstance());
+    if (this.currentOverlayType === 'find-in-page') {
+      this.hideCurrentOverlay();
     }
   }
 
@@ -567,15 +591,11 @@ export class AppWindow {
   private sslInfoDismissedAt = 0;
 
   private isSSLInfoVisible(): boolean {
-    const view = this.sslInfoOverlayManager?.getWebContentsViewInstance();
-    return view != null && this.browserWindowInstance.contentView.children.indexOf(view) > -1;
+    return this.currentOverlayType === 'ssl-info' && this.isOverlayVisible();
   }
 
   async showSSLInfoOverlay(data: { sslStatus: string; sslDetails: any; url: string }): Promise<void> {
     if (!this.sslInfoOverlayManager || !this.browserWindowInstance) return;
-    this.hideOptionsMenuOverlay();
-    this.hideCommandKOverlay();
-    this.hideCommandOOverlay();
 
     if (this.isSSLInfoVisible()) {
       this.hideSSLInfoOverlay();
@@ -588,22 +608,26 @@ export class AppWindow {
       return;
     }
 
+    this.hideCurrentOverlay();
+
     this.sslInfoOverlayManager.setOnDismiss(() => this.hideSSLInfoOverlay());
 
-    this.destroyOverlaysExcept(this.sslInfoOverlayManager);
-    await this.sslInfoOverlayManager.whenReady();
-    const view = this.sslInfoOverlayManager.getWebContentsViewInstance();
+    await this.loadOverlayUrl(SSL_INFO_WEBPACK_ENTRY);
+    this.currentOverlayType = 'ssl-info';
+    this.sslInfoOverlayManager.setView(this.sharedOverlayView);
+    this.sslInfoOverlayManager.setupListeners();
+
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
     const panelWidth = Math.min(300, parentBounds.width - 24);
     const yOffset = 85;
     // Initial bounds — will be resized after content renders
-    view.setBounds({
+    this.sharedOverlayView.setBounds({
       x: 12,
       y: yOffset,
       width: panelWidth,
       height: 300,
     });
-    this.browserWindowInstance.contentView.addChildView(view);
+    this.browserWindowInstance.contentView.addChildView(this.sharedOverlayView);
     this.sslInfoOverlayManager.showInfo(data);
 
     // Resize to fit content after a short delay for rendering
@@ -612,7 +636,7 @@ export class AppWindow {
         const contentHeight = await this.sslInfoOverlayManager.getContentHeight();
         const maxHeight = parentBounds.height - yOffset - 12;
         const finalHeight = Math.min(contentHeight + 2, maxHeight);
-        this.sslInfoOverlayManager.getWebContentsViewInstance()?.setBounds({
+        this.sharedOverlayView?.setBounds({
           x: 12,
           y: yOffset,
           width: panelWidth,
@@ -625,7 +649,7 @@ export class AppWindow {
   hideSSLInfoOverlay(): void {
     if (this.isSSLInfoVisible()) {
       this.sslInfoDismissedAt = Date.now();
-      this.browserWindowInstance.contentView.removeChildView(this.sslInfoOverlayManager.getWebContentsViewInstance());
+      this.hideCurrentOverlay();
     }
   }
 
