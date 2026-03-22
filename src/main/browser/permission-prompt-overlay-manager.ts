@@ -13,18 +13,24 @@ export interface PermissionPromptData {
 }
 
 export class PermissionPromptOverlayManager {
-  private webContentsViewInstance: WebContentsView;
+  private webContentsViewInstance: WebContentsView | null = null;
   private appWindowId: string;
   private isPrivate: boolean;
   private partitionSetting: string;
-  private readyPromise: Promise<void>;
+  private readyPromise: Promise<void> | null = null;
   private pendingPromptData: PermissionPromptData | null = null;
   private rendererReady = false;
+  private initialized = false;
 
   constructor(appWindowId: string, isPrivate: boolean, partitionSetting: string) {
     this.appWindowId = appWindowId;
     this.isPrivate = isPrivate;
     this.partitionSetting = partitionSetting;
+  }
+
+  private ensureInitialized(): void {
+    if (this.initialized) return;
+    this.initialized = true;
     this.init();
   }
 
@@ -70,6 +76,7 @@ export class PermissionPromptOverlayManager {
   }
 
   whenReady(): Promise<void> {
+    this.ensureInitialized();
     return this.readyPromise;
   }
 
@@ -83,13 +90,14 @@ export class PermissionPromptOverlayManager {
   }
 
   private sendPrompt(data: PermissionPromptData): void {
+    if (!this.webContentsViewInstance) return;
     this.webContentsViewInstance.webContents.send(
       MainToRendererEventsForBrowserIPC.SHOW_PERMISSION_PROMPT,
       data
     );
   }
 
-  getWebContentsViewInstance(): WebContentsView {
+  getWebContentsViewInstance(): WebContentsView | null {
     return this.webContentsViewInstance;
   }
 }

@@ -185,15 +185,17 @@ export class AppWindow {
       this.issueReportOverlayManager,
     ];
     for (const mgr of fullSizeOverlays) {
-      if (mgr && children.includes(mgr.getWebContentsViewInstance())) {
-        mgr.getWebContentsViewInstance().setBounds(parentBounds);
+      const view = mgr?.getWebContentsViewInstance();
+      if (view && children.includes(view)) {
+        view.setBounds(parentBounds);
       }
     }
 
     // Resize find-in-page bar if visible
-    if (this.findInPageManager && children.includes(this.findInPageManager.getWebContentsViewInstance())) {
+    const findView = this.findInPageManager?.getWebContentsViewInstance();
+    if (findView && children.includes(findView)) {
       const barWidth = Math.min(520, parentBounds.width - 24);
-      this.findInPageManager.getWebContentsViewInstance().setBounds({
+      findView.setBounds({
         x: parentBounds.width - barWidth - 12,
         y: yOffset,
         width: barWidth,
@@ -315,60 +317,69 @@ export class AppWindow {
 
   async showOptionsMenuOverlay(): Promise<void> {
     this.hideCommandKOverlay();
-    if(this.browserWindowInstance.contentView.children.indexOf(this.optionsMenuManager.getWebContentsViewInstance()) > -1){
+    const existingView = this.optionsMenuManager.getWebContentsViewInstance();
+    if(existingView && this.browserWindowInstance.contentView.children.indexOf(existingView) > -1){
       //already open
       return;
     }
     await this.optionsMenuManager.whenReady();
+    const view = this.optionsMenuManager.getWebContentsViewInstance();
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
-    this.optionsMenuManager.getWebContentsViewInstance().setBounds(parentBounds);
-    this.browserWindowInstance.contentView.addChildView(this.optionsMenuManager.getWebContentsViewInstance());
+    view.setBounds(parentBounds);
+    this.browserWindowInstance.contentView.addChildView(view);
   }
   hideOptionsMenuOverlay(): void {
-    if(this.optionsMenuManager && this.browserWindowInstance.contentView.children.indexOf(this.optionsMenuManager.getWebContentsViewInstance()) > -1){
-      this.browserWindowInstance.contentView.removeChildView(this.optionsMenuManager.getWebContentsViewInstance());
+    const view = this.optionsMenuManager?.getWebContentsViewInstance();
+    if(view && this.browserWindowInstance.contentView.children.indexOf(view) > -1){
+      this.browserWindowInstance.contentView.removeChildView(view);
     }
   }
 
   async showCommandKOverlay(): Promise<void> {
     this.hideOptionsMenuOverlay();
     this.hideCommandOOverlay();
-    if(this.browserWindowInstance.contentView.children.indexOf(this.commandKOverlayManager.getWebContentsViewInstance()) > -1){
+    const existingView = this.commandKOverlayManager.getWebContentsViewInstance();
+    if(existingView && this.browserWindowInstance.contentView.children.indexOf(existingView) > -1){
       // Already open — toggle it closed
       this.hideCommandKOverlay();
       return;
     }
     await this.commandKOverlayManager.whenReady();
+    const view = this.commandKOverlayManager.getWebContentsViewInstance();
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
-    this.commandKOverlayManager.getWebContentsViewInstance().setBounds(parentBounds);
-    this.browserWindowInstance.contentView.addChildView(this.commandKOverlayManager.getWebContentsViewInstance());
+    view.setBounds(parentBounds);
+    this.browserWindowInstance.contentView.addChildView(view);
     this.commandKOverlayManager.resetState();
-    this.commandKOverlayManager.getWebContentsViewInstance().webContents.focus();
+    view.webContents.focus();
   }
   hideCommandKOverlay(): void {
-    if(this.commandKOverlayManager && this.browserWindowInstance.contentView.children.indexOf(this.commandKOverlayManager.getWebContentsViewInstance()) > -1){
-      this.browserWindowInstance.contentView.removeChildView(this.commandKOverlayManager.getWebContentsViewInstance());
+    const view = this.commandKOverlayManager?.getWebContentsViewInstance();
+    if(view && this.browserWindowInstance.contentView.children.indexOf(view) > -1){
+      this.browserWindowInstance.contentView.removeChildView(view);
     }
   }
 
   async showCommandOOverlay(): Promise<void> {
     this.hideOptionsMenuOverlay();
     this.hideCommandKOverlay();
-    if(this.browserWindowInstance.contentView.children.indexOf(this.commandOOverlayManager.getWebContentsViewInstance()) > -1){
+    const existingView = this.commandOOverlayManager.getWebContentsViewInstance();
+    if(existingView && this.browserWindowInstance.contentView.children.indexOf(existingView) > -1){
       // Already open — toggle it closed
       this.hideCommandOOverlay();
       return;
     }
     await this.commandOOverlayManager.whenReady();
+    const view = this.commandOOverlayManager.getWebContentsViewInstance();
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
-    this.commandOOverlayManager.getWebContentsViewInstance().setBounds(parentBounds);
-    this.browserWindowInstance.contentView.addChildView(this.commandOOverlayManager.getWebContentsViewInstance());
+    view.setBounds(parentBounds);
+    this.browserWindowInstance.contentView.addChildView(view);
     this.commandOOverlayManager.resetState();
-    this.commandOOverlayManager.getWebContentsViewInstance().webContents.focus();
+    view.webContents.focus();
   }
   hideCommandOOverlay(): void {
-    if(this.commandOOverlayManager && this.browserWindowInstance.contentView.children.indexOf(this.commandOOverlayManager.getWebContentsViewInstance()) > -1){
-      this.browserWindowInstance.contentView.removeChildView(this.commandOOverlayManager.getWebContentsViewInstance());
+    const view = this.commandOOverlayManager?.getWebContentsViewInstance();
+    if(view && this.browserWindowInstance.contentView.children.indexOf(view) > -1){
+      this.browserWindowInstance.contentView.removeChildView(view);
     }
   }
 
@@ -383,18 +394,20 @@ export class AppWindow {
   async showPermissionPromptOverlay(data: PermissionPromptData): Promise<void> {
     if (!this.permissionPromptOverlayManager || !this.browserWindowInstance) return;
     await this.permissionPromptOverlayManager.whenReady();
+    const view = this.permissionPromptOverlayManager.getWebContentsViewInstance();
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
-    this.permissionPromptOverlayManager.getWebContentsViewInstance().setBounds(parentBounds);
-    if (this.browserWindowInstance.contentView.children.indexOf(this.permissionPromptOverlayManager.getWebContentsViewInstance()) === -1) {
-      this.browserWindowInstance.contentView.addChildView(this.permissionPromptOverlayManager.getWebContentsViewInstance());
+    view.setBounds(parentBounds);
+    if (this.browserWindowInstance.contentView.children.indexOf(view) === -1) {
+      this.browserWindowInstance.contentView.addChildView(view);
     }
     this.permissionPromptOverlayManager.showPrompt(data);
   }
 
   hidePermissionPromptOverlay(): void {
-    if (this.permissionPromptOverlayManager && this.browserWindowInstance &&
-        this.browserWindowInstance.contentView.children.indexOf(this.permissionPromptOverlayManager.getWebContentsViewInstance()) > -1) {
-      this.browserWindowInstance.contentView.removeChildView(this.permissionPromptOverlayManager.getWebContentsViewInstance());
+    const view = this.permissionPromptOverlayManager?.getWebContentsViewInstance();
+    if (view && this.browserWindowInstance &&
+        this.browserWindowInstance.contentView.children.indexOf(view) > -1) {
+      this.browserWindowInstance.contentView.removeChildView(view);
     }
   }
 
@@ -402,20 +415,23 @@ export class AppWindow {
     if (!this.issueReportOverlayManager || !this.browserWindowInstance) return;
     this.hideOptionsMenuOverlay();
     this.hideCommandKOverlay();
-    if (this.browserWindowInstance.contentView.children.indexOf(this.issueReportOverlayManager.getWebContentsViewInstance()) > -1) {
+    const existingView = this.issueReportOverlayManager.getWebContentsViewInstance();
+    if (existingView && this.browserWindowInstance.contentView.children.indexOf(existingView) > -1) {
       return;
     }
     await this.issueReportOverlayManager.whenReady();
+    const view = this.issueReportOverlayManager.getWebContentsViewInstance();
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
-    this.issueReportOverlayManager.getWebContentsViewInstance().setBounds(parentBounds);
-    this.browserWindowInstance.contentView.addChildView(this.issueReportOverlayManager.getWebContentsViewInstance());
-    this.issueReportOverlayManager.getWebContentsViewInstance().webContents.focus();
+    view.setBounds(parentBounds);
+    this.browserWindowInstance.contentView.addChildView(view);
+    view.webContents.focus();
   }
 
   hideIssueReportOverlay(): void {
-    if (this.issueReportOverlayManager && this.browserWindowInstance &&
-        this.browserWindowInstance.contentView.children.indexOf(this.issueReportOverlayManager.getWebContentsViewInstance()) > -1) {
-      this.browserWindowInstance.contentView.removeChildView(this.issueReportOverlayManager.getWebContentsViewInstance());
+    const view = this.issueReportOverlayManager?.getWebContentsViewInstance();
+    if (view && this.browserWindowInstance &&
+        this.browserWindowInstance.contentView.children.indexOf(view) > -1) {
+      this.browserWindowInstance.contentView.removeChildView(view);
     }
   }
 
@@ -429,7 +445,8 @@ export class AppWindow {
   }
 
   private isFindInPageVisible(): boolean {
-    return this.findInPageManager && this.browserWindowInstance.contentView.children.indexOf(this.findInPageManager.getWebContentsViewInstance()) > -1;
+    const view = this.findInPageManager?.getWebContentsViewInstance();
+    return view != null && this.browserWindowInstance.contentView.children.indexOf(view) > -1;
   }
 
   async showFindInPage(): Promise<void> {
@@ -443,24 +460,26 @@ export class AppWindow {
       return;
     }
 
-    // Attach to the active tab's webContents
+    await this.findInPageManager.whenReady();
+
+    // Attach to the active tab's webContents (after init so the handler closure can reference the view)
     const activeTab = this.getActiveTab();
     if (activeTab) {
       this.findInPageManager.setActiveTabWebContents(activeTab.getWebContentsViewInstance().webContents);
     }
 
-    await this.findInPageManager.whenReady();
+    const view = this.findInPageManager.getWebContentsViewInstance();
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
     const barWidth = Math.min(520, parentBounds.width - 24);
     const barHeight = 48;
     const yOffset = 85; // below the navbar
-    this.findInPageManager.getWebContentsViewInstance().setBounds({
+    view.setBounds({
       x: parentBounds.width - barWidth - 12,
       y: yOffset,
       width: barWidth,
       height: barHeight,
     });
-    this.browserWindowInstance.contentView.addChildView(this.findInPageManager.getWebContentsViewInstance());
+    this.browserWindowInstance.contentView.addChildView(view);
     this.findInPageManager.focusInput();
   }
 
@@ -508,7 +527,8 @@ export class AppWindow {
   private sslInfoDismissedAt = 0;
 
   private isSSLInfoVisible(): boolean {
-    return this.sslInfoOverlayManager && this.browserWindowInstance.contentView.children.indexOf(this.sslInfoOverlayManager.getWebContentsViewInstance()) > -1;
+    const view = this.sslInfoOverlayManager?.getWebContentsViewInstance();
+    return view != null && this.browserWindowInstance.contentView.children.indexOf(view) > -1;
   }
 
   async showSSLInfoOverlay(data: { sslStatus: string; sslDetails: any; url: string }): Promise<void> {
@@ -531,17 +551,18 @@ export class AppWindow {
     this.sslInfoOverlayManager.setOnDismiss(() => this.hideSSLInfoOverlay());
 
     await this.sslInfoOverlayManager.whenReady();
+    const view = this.sslInfoOverlayManager.getWebContentsViewInstance();
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
     const panelWidth = Math.min(300, parentBounds.width - 24);
     const yOffset = 85;
     // Initial bounds — will be resized after content renders
-    this.sslInfoOverlayManager.getWebContentsViewInstance().setBounds({
+    view.setBounds({
       x: 12,
       y: yOffset,
       width: panelWidth,
       height: 300,
     });
-    this.browserWindowInstance.contentView.addChildView(this.sslInfoOverlayManager.getWebContentsViewInstance());
+    this.browserWindowInstance.contentView.addChildView(view);
     this.sslInfoOverlayManager.showInfo(data);
 
     // Resize to fit content after a short delay for rendering
@@ -550,7 +571,7 @@ export class AppWindow {
         const contentHeight = await this.sslInfoOverlayManager.getContentHeight();
         const maxHeight = parentBounds.height - yOffset - 12;
         const finalHeight = Math.min(contentHeight + 2, maxHeight);
-        this.sslInfoOverlayManager.getWebContentsViewInstance().setBounds({
+        this.sslInfoOverlayManager.getWebContentsViewInstance()?.setBounds({
           x: 12,
           y: yOffset,
           width: panelWidth,

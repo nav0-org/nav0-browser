@@ -2,19 +2,25 @@ import { WebContentsView } from "electron";
 import { MainToRendererEventsForBrowserIPC } from "../../constants/app-constants";
 
 export class FindInPageManager {
-  private webContentsViewInstance: WebContentsView;
+  private webContentsViewInstance: WebContentsView | null = null;
   private appWindowId: string;
   private isPrivate: boolean;
   private partitionSetting: string;
-  private readyPromise: Promise<void>;
+  private readyPromise: Promise<void> | null = null;
   private lastSearchText: string = '';
   private currentTabWebContents: Electron.WebContents | null = null;
   private foundInPageHandler: ((event: Electron.Event, result: Electron.FoundInPageResult) => void) | null = null;
+  private initialized = false;
 
   constructor(appWindowId: string, isPrivate: boolean, partitionSetting: string) {
     this.appWindowId = appWindowId;
     this.isPrivate = isPrivate;
     this.partitionSetting = partitionSetting;
+  }
+
+  private ensureInitialized(): void {
+    if (this.initialized) return;
+    this.initialized = true;
     this.init();
   }
 
@@ -45,10 +51,11 @@ export class FindInPageManager {
   }
 
   whenReady(): Promise<void> {
+    this.ensureInitialized();
     return this.readyPromise;
   }
 
-  getWebContentsViewInstance(): WebContentsView {
+  getWebContentsViewInstance(): WebContentsView | null {
     return this.webContentsViewInstance;
   }
 
@@ -65,6 +72,7 @@ export class FindInPageManager {
   private attachFoundInPageListener(): void {
     if (!this.currentTabWebContents) return;
     this.foundInPageHandler = (_event: Electron.Event, result: Electron.FoundInPageResult) => {
+      if (!this.webContentsViewInstance) return;
       this.webContentsViewInstance.webContents.send(MainToRendererEventsForBrowserIPC.FIND_IN_PAGE_RESULT, {
         activeMatchOrdinal: result.activeMatchOrdinal,
         matches: result.matches,
@@ -124,6 +132,7 @@ export class FindInPageManager {
   }
 
   resetState(): void {
+    if (!this.webContentsViewInstance) return;
     this.webContentsViewInstance.webContents.executeJavaScript(`(() => {
       if (typeof window.resetFindBar === 'function') {
         window.resetFindBar();
@@ -132,6 +141,7 @@ export class FindInPageManager {
   }
 
   focusInput(): void {
+    if (!this.webContentsViewInstance) return;
     this.webContentsViewInstance.webContents.focus();
     this.webContentsViewInstance.webContents.executeJavaScript(`(() => {
       if (typeof window.focusFindInput === 'function') {

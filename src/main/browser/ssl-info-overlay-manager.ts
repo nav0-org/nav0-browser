@@ -1,17 +1,23 @@
 import { WebContentsView } from "electron";
 
 export class SSLInfoOverlayManager {
-  private webContentsViewInstance: WebContentsView;
+  private webContentsViewInstance: WebContentsView | null = null;
   private appWindowId: string;
   private isPrivate: boolean;
   private partitionSetting: string;
-  private readyPromise: Promise<void>;
+  private readyPromise: Promise<void> | null = null;
   private onDismiss: (() => void) | null = null;
+  private initialized = false;
 
   constructor(appWindowId: string, isPrivate: boolean, partitionSetting: string) {
     this.appWindowId = appWindowId;
     this.isPrivate = isPrivate;
     this.partitionSetting = partitionSetting;
+  }
+
+  private ensureInitialized(): void {
+    if (this.initialized) return;
+    this.initialized = true;
     this.init();
   }
 
@@ -58,14 +64,16 @@ export class SSLInfoOverlayManager {
   }
 
   whenReady(): Promise<void> {
+    this.ensureInitialized();
     return this.readyPromise;
   }
 
-  getWebContentsViewInstance(): WebContentsView {
+  getWebContentsViewInstance(): WebContentsView | null {
     return this.webContentsViewInstance;
   }
 
   showInfo(data: { sslStatus: string; sslDetails: any; url: string }): void {
+    if (!this.webContentsViewInstance) return;
     const serialized = JSON.stringify(data);
     this.webContentsViewInstance.webContents.focus();
     this.webContentsViewInstance.webContents.executeJavaScript(`(() => {
@@ -76,6 +84,7 @@ export class SSLInfoOverlayManager {
   }
 
   async getContentHeight(): Promise<number> {
+    if (!this.webContentsViewInstance) return 200;
     try {
       const height = await this.webContentsViewInstance.webContents.executeJavaScript(
         `document.getElementById('ssl-info-panel').scrollHeight`

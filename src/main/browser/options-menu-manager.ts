@@ -1,16 +1,22 @@
 import { WebContentsView } from "electron";
 
 export class OptionsMenuManager {
-  private webContentsViewInstance : WebContentsView;
+  private webContentsViewInstance : WebContentsView | null = null;
   private appWindowId: string;
   private isPrivate: boolean;
   private partitionSetting: string;
-  private readyPromise: Promise<void>;
+  private readyPromise: Promise<void> | null = null;
+  private initialized = false;
 
   constructor(appWindowId: string, isPrivate: boolean, partitionSetting: string) {
     this.appWindowId = appWindowId;
     this.isPrivate = isPrivate;
     this.partitionSetting = partitionSetting;
+  }
+
+  private ensureInitialized(): void {
+    if (this.initialized) return;
+    this.initialized = true;
     this.init();
   }
 
@@ -43,10 +49,11 @@ export class OptionsMenuManager {
   }
 
   whenReady(): Promise<void> {
+    this.ensureInitialized();
     return this.readyPromise;
   }
 
-  getWebContentsViewInstance(): WebContentsView {
+  getWebContentsViewInstance(): WebContentsView | null {
     return this.webContentsViewInstance;
   }
 }
