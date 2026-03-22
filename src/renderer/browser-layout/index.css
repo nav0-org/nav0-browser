@@ -51,8 +51,8 @@ body.is-private .private-window-identifier{
   -webkit-app-region: drag;
 }
 
-/* Leave space for macOS traffic lights (close/minimize/maximize) */
-body.platform-darwin .tab-bar {
+/* Leave space for macOS traffic lights (close/minimize/maximize) — not in fullscreen */
+body.platform-darwin:not(.is-fullscreen) .tab-bar {
   padding-left: 78px;
 }
 

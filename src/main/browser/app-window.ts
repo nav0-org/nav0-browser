@@ -117,11 +117,13 @@ export class AppWindow {
         const y = Math.round((screenH - h) / 2);
         this.browserWindowInstance?.setBounds({ x, y, width: w, height: h });
         this.handleResizing();
+        this.browserWindowInstance?.webContents.send(MainToRendererEventsForBrowserIPC.FULLSCREEN_CHANGED, { isFullScreen: false });
       });
 
       this.browserWindowInstance.on('enter-full-screen', () => {
         this._desiredFullScreen = true;
         this.handleResizing();
+        this.browserWindowInstance?.webContents.send(MainToRendererEventsForBrowserIPC.FULLSCREEN_CHANGED, { isFullScreen: true });
       });
 
       this.browserWindowInstance.webContents.on('did-finish-load', async () => {

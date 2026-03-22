@@ -46,6 +46,13 @@ export class BrowserTabManager {
       document.body.classList.add(`platform-${platform}`);
     }
 
+    // Track fullscreen state — on macOS traffic lights are hidden in fullscreen,
+    // so we remove the left padding. The app starts in fullscreen mode.
+    document.body.classList.add('is-fullscreen');
+    window.BrowserAPI.onFullScreenChanged?.((data: { isFullScreen: boolean }) => {
+      document.body.classList.toggle('is-fullscreen', data.isFullScreen);
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
       this.initializeDomElements();
       this.setupEventListeners();

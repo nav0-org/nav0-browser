@@ -269,6 +269,9 @@ export function init(){
     onTabUnpinned: (callback: (data: { id: string }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.TAB_UNPINNED, (_event, data) => callback(data));
     },
+    onFullScreenChanged: (callback: (data: { isFullScreen: boolean }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.FULLSCREEN_CHANGED, (_event, data) => callback(data));
+    },
 
     // Permission system
     respondToPermissionPrompt: (appWindowId: string, requestId: string, decision: string) => {
