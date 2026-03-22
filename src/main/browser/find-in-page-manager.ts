@@ -153,4 +153,13 @@ export class FindInPageManager {
   getLastSearchText(): string {
     return this.lastSearchText;
   }
+
+  destroy(): void {
+    if (!this.initialized) return;
+    this.stopFind();
+    try { this.webContentsViewInstance?.webContents.close(); } catch { /* already closing */ }
+    this.webContentsViewInstance = null;
+    this.readyPromise = null;
+    this.initialized = false;
+  }
 }

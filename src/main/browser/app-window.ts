@@ -140,20 +140,30 @@ export class AppWindow {
   }
 
   private warmUpOverlays(): void {
-    // Stagger overlay init so renderer processes don't all spawn at once.
-    // High-frequency overlays first, rarely-used ones last.
-    const overlays = [
+    // Only pre-warm Command K (most frequently used overlay).
+    // Other overlays init on first use; their processes are torn down
+    // when a different overlay is shown to keep at most 1 alive.
+    this.commandKOverlayManager.whenReady();
+  }
+
+  // Destroy renderer processes for all overlay managers except the one
+  // being shown. Since overlays are mutually exclusive, this keeps at
+  // most 1 overlay process alive at any time.
+  private destroyOverlaysExcept(active: unknown): void {
+    const all = [
       this.commandKOverlayManager,
-      this.findInPageManager,
       this.commandOOverlayManager,
       this.optionsMenuManager,
       this.permissionPromptOverlayManager,
-      this.sslInfoOverlayManager,
+      this.findInPageManager,
       this.issueReportOverlayManager,
+      this.sslInfoOverlayManager,
     ];
-    overlays.forEach((mgr, i) => {
-      setTimeout(() => mgr.whenReady(), i * 100);
-    });
+    for (const mgr of all) {
+      if (mgr && mgr !== active) {
+        mgr.destroy();
+      }
+    }
   }
 
   public closeWindow(clearSession: boolean) {
@@ -346,6 +356,7 @@ export class AppWindow {
       //already open
       return;
     }
+    this.destroyOverlaysExcept(this.optionsMenuManager);
     await this.optionsMenuManager.whenReady();
     const view = this.optionsMenuManager.getWebContentsViewInstance();
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
@@ -368,6 +379,7 @@ export class AppWindow {
       this.hideCommandKOverlay();
       return;
     }
+    this.destroyOverlaysExcept(this.commandKOverlayManager);
     await this.commandKOverlayManager.whenReady();
     const view = this.commandKOverlayManager.getWebContentsViewInstance();
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
@@ -392,6 +404,7 @@ export class AppWindow {
       this.hideCommandOOverlay();
       return;
     }
+    this.destroyOverlaysExcept(this.commandOOverlayManager);
     await this.commandOOverlayManager.whenReady();
     const view = this.commandOOverlayManager.getWebContentsViewInstance();
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
@@ -417,6 +430,7 @@ export class AppWindow {
 
   async showPermissionPromptOverlay(data: PermissionPromptData): Promise<void> {
     if (!this.permissionPromptOverlayManager || !this.browserWindowInstance) return;
+    this.destroyOverlaysExcept(this.permissionPromptOverlayManager);
     await this.permissionPromptOverlayManager.whenReady();
     const view = this.permissionPromptOverlayManager.getWebContentsViewInstance();
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
@@ -443,6 +457,7 @@ export class AppWindow {
     if (existingView && this.browserWindowInstance.contentView.children.indexOf(existingView) > -1) {
       return;
     }
+    this.destroyOverlaysExcept(this.issueReportOverlayManager);
     await this.issueReportOverlayManager.whenReady();
     const view = this.issueReportOverlayManager.getWebContentsViewInstance();
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
@@ -484,6 +499,7 @@ export class AppWindow {
       return;
     }
 
+    this.destroyOverlaysExcept(this.findInPageManager);
     await this.findInPageManager.whenReady();
 
     // Attach to the active tab's webContents (after init so the handler closure can reference the view)
@@ -574,6 +590,7 @@ export class AppWindow {
 
     this.sslInfoOverlayManager.setOnDismiss(() => this.hideSSLInfoOverlay());
 
+    this.destroyOverlaysExcept(this.sslInfoOverlayManager);
     await this.sslInfoOverlayManager.whenReady();
     const view = this.sslInfoOverlayManager.getWebContentsViewInstance();
     const parentBounds = this.browserWindowInstance.contentView.getBounds();

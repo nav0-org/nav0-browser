@@ -21,6 +21,7 @@ export class PermissionPromptOverlayManager {
   private pendingPromptData: PermissionPromptData | null = null;
   private rendererReady = false;
   private initialized = false;
+  private readyHandler: ((event: Electron.IpcMainEvent) => void) | null = null;
 
   constructor(appWindowId: string, isPrivate: boolean, partitionSetting: string) {
     this.appWindowId = appWindowId;
@@ -53,10 +54,11 @@ export class PermissionPromptOverlayManager {
     // rather than relying on did-finish-load which may fire before the
     // webpack bundle has finished executing.
     this.readyPromise = new Promise<void>((resolve) => {
-      const handler = (event: Electron.IpcMainEvent) => {
+      this.readyHandler = (event: Electron.IpcMainEvent) => {
         if (event.sender.id === this.webContentsViewInstance.webContents.id) {
           this.rendererReady = true;
-          ipcMain.removeListener(RendererToMainEventsForBrowserIPC.PERMISSION_PROMPT_READY, handler);
+          ipcMain.removeListener(RendererToMainEventsForBrowserIPC.PERMISSION_PROMPT_READY, this.readyHandler);
+          this.readyHandler = null;
           resolve();
           // Flush any buffered prompt data
           if (this.pendingPromptData) {
@@ -65,7 +67,7 @@ export class PermissionPromptOverlayManager {
           }
         }
       };
-      ipcMain.on(RendererToMainEventsForBrowserIPC.PERMISSION_PROMPT_READY, handler);
+      ipcMain.on(RendererToMainEventsForBrowserIPC.PERMISSION_PROMPT_READY, this.readyHandler);
     });
 
     this.webContentsViewInstance.webContents.setWindowOpenHandler(() => {
@@ -99,5 +101,19 @@ export class PermissionPromptOverlayManager {
 
   getWebContentsViewInstance(): WebContentsView | null {
     return this.webContentsViewInstance;
+  }
+
+  destroy(): void {
+    if (!this.initialized) return;
+    if (this.readyHandler) {
+      ipcMain.removeListener(RendererToMainEventsForBrowserIPC.PERMISSION_PROMPT_READY, this.readyHandler);
+      this.readyHandler = null;
+    }
+    try { this.webContentsViewInstance?.webContents.close(); } catch { /* already closing */ }
+    this.webContentsViewInstance = null;
+    this.readyPromise = null;
+    this.pendingPromptData = null;
+    this.rendererReady = false;
+    this.initialized = false;
   }
 }

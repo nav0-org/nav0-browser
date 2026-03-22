@@ -56,4 +56,12 @@ export class OptionsMenuManager {
   getWebContentsViewInstance(): WebContentsView | null {
     return this.webContentsViewInstance;
   }
+
+  destroy(): void {
+    if (!this.initialized) return;
+    try { this.webContentsViewInstance?.webContents.close(); } catch { /* already closing */ }
+    this.webContentsViewInstance = null;
+    this.readyPromise = null;
+    this.initialized = false;
+  }
 }

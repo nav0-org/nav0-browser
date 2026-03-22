@@ -94,4 +94,13 @@ export class SSLInfoOverlayManager {
       return 200;
     }
   }
+
+  destroy(): void {
+    if (!this.initialized) return;
+    this.onDismiss = null;
+    try { this.webContentsViewInstance?.webContents.close(); } catch { /* already closing */ }
+    this.webContentsViewInstance = null;
+    this.readyPromise = null;
+    this.initialized = false;
+  }
 }
