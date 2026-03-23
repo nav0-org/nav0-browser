@@ -2,6 +2,7 @@ import { defineConfig } from 'vitepress'
 import { readdirSync, readFileSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import packageJson from '../../package.json'
 
 function getReleaseSidebar() {
   const releasesDir = resolve(dirname(fileURLToPath(import.meta.url)), '../releases')
@@ -144,7 +145,7 @@ export default defineConfig({
       license: 'https://opensource.org/licenses/MIT',
       isAccessibleForFree: true,
       downloadUrl: 'https://nav0.org/install',
-      softwareVersion: '0.0.9',
+      softwareVersion: packageJson.version,
       author: {
         '@type': 'Organization',
         name: 'Nav0',

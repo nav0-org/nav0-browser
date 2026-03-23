@@ -1,7 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import packageJson from '../../../../package.json'
 
-const version = ref('0.0.9')
+const version = ref(packageJson.version)
 const loading = ref(true)
 
 onMounted(async () => {
@@ -14,7 +15,7 @@ onMounted(async () => {
       version.value = tag.startsWith('v') ? tag.slice(1) : tag
     }
   } catch {
-    // keep fallback version
+    // keep fallback version from package.json
   } finally {
     loading.value = false
   }
