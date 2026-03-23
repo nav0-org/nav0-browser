@@ -1,5 +1,24 @@
 <script setup>
-const version = '0.1.0'
+import { ref, onMounted } from 'vue'
+
+const version = ref('0.0.9')
+const loading = ref(true)
+
+onMounted(async () => {
+  try {
+    const res = await fetch('https://api.github.com/repos/nav0-org/nav0-browser/releases/latest')
+    if (res.ok) {
+      const data = await res.json()
+      // tag_name is like "v0.0.9", strip the leading "v"
+      const tag = data.tag_name || ''
+      version.value = tag.startsWith('v') ? tag.slice(1) : tag
+    }
+  } catch {
+    // keep fallback version
+  } finally {
+    loading.value = false
+  }
+})
 </script>
 
 <template>
@@ -9,6 +28,7 @@ const version = '0.1.0'
       <p class="install-subtitle">
         Install nav0 on macOS, Windows, or Linux.
       </p>
+      <p class="install-version" v-if="!loading">Latest release: <strong>v{{ version }}</strong></p>
     </div>
 
     <div class="install-section">
@@ -100,6 +120,12 @@ const version = '0.1.0'
 .install-subtitle {
   font-size: 1.1rem;
   color: var(--vp-c-text-2);
+}
+
+.install-version {
+  font-size: 0.9rem;
+  color: var(--vp-c-text-2);
+  margin-top: 0.5rem;
 }
 
 .install-section {

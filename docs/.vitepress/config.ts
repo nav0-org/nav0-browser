@@ -144,7 +144,7 @@ export default defineConfig({
       license: 'https://opensource.org/licenses/MIT',
       isAccessibleForFree: true,
       downloadUrl: 'https://nav0.org/install',
-      softwareVersion: '0.1.0',
+      softwareVersion: '0.0.9',
       author: {
         '@type': 'Organization',
         name: 'Nav0',
