@@ -90,5 +90,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Signal readiness to the main process
   window.BrowserAPI.signalOverlayRendererReady();
-  window.BrowserAPI.signalPermissionPromptReady();
 });
