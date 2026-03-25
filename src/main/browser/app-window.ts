@@ -264,11 +264,12 @@ export class AppWindow {
       this.browserWindowInstance.contentView.addChildView(this.getActiveTab().getWebContentsViewInstance());
       this.getActiveTab().getWebContentsViewInstance().webContents.focus();
 
-      // Re-attach find-in-page to the new active tab if the find bar is open
+      // Re-attach find-in-page to the new active tab and replay the search
       if (this.isFindInPageVisible()) {
         this.findInPageManager.setActiveTabWebContents(
           this.getActiveTab().getWebContentsViewInstance().webContents
         );
+        this.findInPageManager.replaySearchOnActiveTab();
       }
     }
     this.browserWindowInstance?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_ACTIVATED, {

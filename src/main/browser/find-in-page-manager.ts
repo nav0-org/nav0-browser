@@ -8,6 +8,7 @@ export class FindInPageManager {
   private partitionSetting: string;
   private readyPromise: Promise<void>;
   private lastSearchText: string = '';
+  private lastMatchCase: boolean = false;
   private currentTabWebContents: Electron.WebContents | null = null;
   private foundInPageHandler: ((event: Electron.Event, result: Electron.FoundInPageResult) => void) | null = null;
 
@@ -84,6 +85,7 @@ export class FindInPageManager {
   find(text: string, options?: { matchCase?: boolean; forward?: boolean }): void {
     if (!this.currentTabWebContents || !text) return;
     this.lastSearchText = text;
+    this.lastMatchCase = options?.matchCase || false;
     this.currentTabWebContents.findInPage(text, {
       forward: options?.forward !== false,
       matchCase: options?.matchCase || false,
@@ -142,5 +144,11 @@ export class FindInPageManager {
 
   getLastSearchText(): string {
     return this.lastSearchText;
+  }
+
+  replaySearchOnActiveTab(): void {
+    if (this.lastSearchText) {
+      this.find(this.lastSearchText, { matchCase: this.lastMatchCase });
+    }
   }
 }
