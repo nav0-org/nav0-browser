@@ -263,6 +263,13 @@ export class AppWindow {
       this.getActiveTab().getWebContentsViewInstance()?.setBounds({x: 0, y: yOffset, width: parentBounds.width, height: parentBounds.height - yOffset});
       this.browserWindowInstance.contentView.addChildView(this.getActiveTab().getWebContentsViewInstance());
       this.getActiveTab().getWebContentsViewInstance().webContents.focus();
+
+      // Re-attach find-in-page to the new active tab if the find bar is open
+      if (this.isFindInPageVisible()) {
+        this.findInPageManager.setActiveTabWebContents(
+          this.getActiveTab().getWebContentsViewInstance().webContents
+        );
+      }
     }
     this.browserWindowInstance?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_ACTIVATED, {
       id: this.getActiveTab().id,
