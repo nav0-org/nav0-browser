@@ -18,11 +18,11 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  background-color: #fff;
-  border: 1px solid #e0e0e0;
+  background-color: var(--bg-light);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 4px 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
   animation: findBarSlideDown 0.15s ease-out;
   max-width: 520px;
 }
@@ -54,7 +54,7 @@
 }
 
 .find-in-page-bar .search-icon {
-  color: #999;
+  color: var(--text-light);
   flex-shrink: 0;
 }
 
@@ -62,7 +62,7 @@
   border: none;
   outline: none;
   font-size: 13px;
-  color: #333;
+  color: var(--text-color);
   background: transparent;
   min-width: 180px;
   max-width: 280px;
@@ -72,7 +72,7 @@
 }
 
 .find-in-page-bar .find-input::placeholder {
-  color: #aaa;
+  color: var(--text-light);
 }
 
 .find-in-page-bar .find-input.no-match {
@@ -81,7 +81,7 @@
 
 .find-in-page-bar .match-counter {
   font-size: 11px;
-  color: #777;
+  color: var(--text-secondary);
   white-space: nowrap;
   flex-shrink: 0;
   min-width: 48px;
@@ -103,7 +103,7 @@
 .find-in-page-bar .find-separator {
   width: 1px;
   height: 18px;
-  background-color: #e0e0e0;
+  background-color: var(--border-color);
   margin: 0 3px;
 }
 
@@ -117,7 +117,7 @@
   border: 1px solid transparent;
   border-radius: 4px;
   background: transparent;
-  color: #777;
+  color: var(--text-secondary);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -126,8 +126,8 @@
 }
 
 .find-in-page-bar .find-toggle-btn:hover {
-  background-color: #f0f0f0;
-  color: #333;
+  background-color: var(--bg-hover);
+  color: var(--text-color);
 }
 
 .find-in-page-bar .find-toggle-btn.active {
@@ -137,7 +137,7 @@
 }
 
 .find-in-page-bar .find-toggle-btn:focus-visible {
-  outline: 2px solid #000;
+  outline: 2px solid var(--text-color);
   outline-offset: 1px;
 }
 
@@ -159,15 +159,15 @@
   border: none;
   border-radius: 4px;
   background: transparent;
-  color: #555;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.15s;
   padding: 0;
 }
 
 .find-in-page-bar .find-nav-btn:hover {
-  background-color: #f0f0f0;
-  color: #000;
+  background-color: var(--bg-hover);
+  color: var(--text-color);
 }
 
 .find-in-page-bar .find-nav-btn:disabled {
@@ -177,11 +177,11 @@
 
 .find-in-page-bar .find-nav-btn:disabled:hover {
   background: transparent;
-  color: #555;
+  color: var(--text-secondary);
 }
 
 .find-in-page-bar .find-nav-btn:focus-visible {
-  outline: 2px solid #000;
+  outline: 2px solid var(--text-color);
   outline-offset: 1px;
 }
 

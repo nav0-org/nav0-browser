@@ -34,7 +34,7 @@ let footerPrivate: HTMLElement;
 let footerDragHint: HTMLElement;
 
 const COMMAND_O_HTML = `
-  <div class="overlay-container">
+  <div class="cmdo-overlay-container">
     <!-- Search bar -->
     <div class="search-bar">
       <span class="shortcut-badge">&#8984;O</span>
@@ -304,7 +304,7 @@ const handleDocumentClick = (e: Event) => {
   if (containerEl.hasAttribute('hidden')) return;
 
   const target = e.target as HTMLElement;
-  if (!target.closest('.overlay-container')) {
+  if (!target.closest('.cmdo-overlay-container')) {
     window.BrowserAPI.hideCommandOOverlay(window.BrowserAPI.appWindowId);
   }
 };

@@ -10,13 +10,6 @@ import * as permissionPromptPanel from './panels/permission-prompt/permission-pr
 import * as issueReportPanel from './panels/issue-report/issue-report';
 import * as sslInfoPanel from './panels/ssl-info/ssl-info';
 
-// Import panel CSS
-import './panels/command-k/command-k.css';
-import './panels/command-o/command-o.css';
-import './panels/options-menu/options-menu.css';
-import './panels/permission-prompt/permission-prompt.css';
-import './panels/issue-report/issue-report.css';
-import './panels/ssl-info/ssl-info.css';
 
 initTheme();
 

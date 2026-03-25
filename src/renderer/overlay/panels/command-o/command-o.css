@@ -11,7 +11,7 @@
   backdrop-filter: blur(5px);
 }
 
-.overlay-container {
+.cmdo-overlay-container {
   width: 720px;
   max-width: 90vw;
   background-color: var(--bg-light);

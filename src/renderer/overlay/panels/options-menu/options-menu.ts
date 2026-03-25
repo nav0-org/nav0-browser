@@ -325,6 +325,14 @@ export function init(container: HTMLElement): void {
   container.innerHTML = OPTIONS_MENU_HTML;
   initializeDomElements();
   setupEventListeners();
+
+  // Escape key to close
+  document.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key === 'Escape' && !containerEl.hasAttribute('hidden')) {
+      e.preventDefault();
+      window.BrowserAPI.hideOptionsMenu(window.BrowserAPI.appWindowId);
+    }
+  });
 }
 
 export function show(_data?: any): void {
