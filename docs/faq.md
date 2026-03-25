@@ -17,7 +17,7 @@ head:
             "name": "What is Nav0?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Nav0 is a free, open-source, privacy-focused desktop web browser built on Electron and Chromium. The name comes from 'navigate + zero (bloat).' It collects zero telemetry, requires no accounts, and stores all data locally on your device."
+              "text": "Nav0 (pronounced 'Nav Nought') is a free, open-source, privacy-focused desktop web browser built on Electron and Chromium. The name comes from 'navigate + nought (bloat).' It collects zero telemetry, requires no accounts, and stores all data locally on your device."
             }
           },
           {
@@ -282,7 +282,7 @@ Common questions about Nav0 and how it works.
 
 ### What is Nav0?
 
-Nav0 is a free, open-source, privacy-focused desktop web browser built on Electron and Chromium. The name comes from "navigate + zero (bloat)." It collects zero telemetry, requires no accounts, and stores all data locally on your device.
+Nav0 (pronounced "Nav Nought") is a free, open-source, privacy-focused desktop web browser built on Electron and Chromium. The name comes from "navigate + nought (bloat)." It collects zero telemetry, requires no accounts, and stores all data locally on your device.
 
 ### What platforms does Nav0 support?
 
