@@ -1,0 +1,259 @@
+/* ==========================================================================
+   Find in Page Bar Styles (embedded in browser-layout)
+   ========================================================================== */
+
+.find-in-page-bar {
+  flex-shrink: 0;
+  background-color: var(--bg-light);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.find-in-page-bar .find-bar-wrapper {
+  display: flex;
+  padding: 6px 8px;
+  justify-content: flex-end;
+}
+
+.find-in-page-bar .find-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 4px 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  animation: findBarSlideDown 0.15s ease-out;
+  max-width: 520px;
+}
+
+@keyframes findBarSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .find-in-page-bar .find-bar {
+    animation: none;
+  }
+}
+
+/* Input Group */
+.find-in-page-bar .find-input-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.find-in-page-bar .search-icon {
+  color: #999;
+  flex-shrink: 0;
+}
+
+.find-in-page-bar .find-input {
+  border: none;
+  outline: none;
+  font-size: 13px;
+  color: #333;
+  background: transparent;
+  min-width: 180px;
+  max-width: 280px;
+  width: 220px;
+  padding: 4px 0;
+  line-height: 1.4;
+}
+
+.find-in-page-bar .find-input::placeholder {
+  color: #aaa;
+}
+
+.find-in-page-bar .find-input.no-match {
+  color: #e74c3c;
+}
+
+.find-in-page-bar .match-counter {
+  font-size: 11px;
+  color: #777;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 48px;
+  text-align: right;
+}
+
+.find-in-page-bar .match-counter.no-match {
+  color: #e74c3c;
+}
+
+/* Actions */
+.find-in-page-bar .find-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.find-in-page-bar .find-separator {
+  width: 1px;
+  height: 18px;
+  background-color: #e0e0e0;
+  margin: 0 3px;
+}
+
+/* Toggle buttons (Match Case, Whole Word, Regex) */
+.find-in-page-bar .find-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: #777;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  padding: 0;
+}
+
+.find-in-page-bar .find-toggle-btn:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.find-in-page-bar .find-toggle-btn.active {
+  background-color: #e8e0f0;
+  color: #6c47b8;
+  border-color: #c4b3e0;
+}
+
+.find-in-page-bar .find-toggle-btn:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 1px;
+}
+
+.find-in-page-bar .whole-word-icon {
+  font-size: 11px;
+  border-left: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+/* Navigation buttons */
+.find-in-page-bar .find-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.15s;
+  padding: 0;
+}
+
+.find-in-page-bar .find-nav-btn:hover {
+  background-color: #f0f0f0;
+  color: #000;
+}
+
+.find-in-page-bar .find-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.find-in-page-bar .find-nav-btn:disabled:hover {
+  background: transparent;
+  color: #555;
+}
+
+.find-in-page-bar .find-nav-btn:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 1px;
+}
+
+.find-in-page-bar .find-close-btn:hover {
+  background-color: #fee;
+  color: #c00;
+}
+
+/* Dark Mode Overrides */
+[data-theme="dark"] .find-in-page-bar .find-bar {
+  background-color: #2a2a2a;
+  border-color: #4a4a4a;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .find-in-page-bar .search-icon {
+  color: #888;
+}
+
+[data-theme="dark"] .find-in-page-bar .find-input {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .find-in-page-bar .find-input::placeholder {
+  color: #666;
+}
+
+[data-theme="dark"] .find-in-page-bar .match-counter {
+  color: #999;
+}
+
+[data-theme="dark"] .find-in-page-bar .find-separator {
+  background-color: #4a4a4a;
+}
+
+[data-theme="dark"] .find-in-page-bar .find-toggle-btn {
+  color: #999;
+}
+
+[data-theme="dark"] .find-in-page-bar .find-toggle-btn:hover {
+  background-color: #3a3a3a;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .find-in-page-bar .find-toggle-btn.active {
+  background-color: #3d2f5e;
+  color: #b49be8;
+  border-color: #5a3f9e;
+}
+
+[data-theme="dark"] .find-in-page-bar .find-toggle-btn:focus-visible {
+  outline-color: #fff;
+}
+
+[data-theme="dark"] .find-in-page-bar .find-nav-btn {
+  color: #aaa;
+}
+
+[data-theme="dark"] .find-in-page-bar .find-nav-btn:hover {
+  background-color: #3a3a3a;
+  color: #fff;
+}
+
+[data-theme="dark"] .find-in-page-bar .find-nav-btn:disabled:hover {
+  color: #aaa;
+}
+
+[data-theme="dark"] .find-in-page-bar .find-nav-btn:focus-visible {
+  outline-color: #fff;
+}
+
+[data-theme="dark"] .find-in-page-bar .find-close-btn:hover {
+  background-color: #3d1f1f;
+  color: #e74c3c;
+}

@@ -84,6 +84,48 @@
       <div id="options-container"></div>
     </div>
     </div>
+    <!-- Find in Page Bar (hidden by default) -->
+    <div id="find-in-page-bar" class="find-in-page-bar" style="display: none;">
+      <div class="find-bar-wrapper">
+        <div class="find-bar" id="find-bar" role="search" aria-label="Find in page">
+          <div class="find-input-group">
+            <i data-lucide="search" class="search-icon" width="14" height="14"></i>
+            <input
+              type="text"
+              id="find-input"
+              class="find-input"
+              placeholder="Find in page"
+              autocomplete="off"
+              spellcheck="false"
+              aria-label="Search text"
+            >
+            <span class="match-counter" id="match-counter" aria-live="polite"></span>
+          </div>
+          <div class="find-actions">
+            <button class="find-toggle-btn" id="match-case-btn" title="Match Case (Alt+C)" aria-label="Match Case" aria-pressed="false">
+              Aa
+            </button>
+            <button class="find-toggle-btn" id="whole-word-btn" title="Whole Word (Alt+W)" aria-label="Whole Word" aria-pressed="false">
+              <span class="whole-word-icon">ab</span>
+            </button>
+            <button class="find-toggle-btn" id="regex-btn" title="Regular Expression (Alt+R)" aria-label="Regular Expression" aria-pressed="false">
+              .*
+            </button>
+            <div class="find-separator"></div>
+            <button class="find-nav-btn" id="prev-btn" title="Previous Match (Shift+Enter)" aria-label="Previous match">
+              <i data-lucide="chevron-up" width="16" height="16"></i>
+            </button>
+            <button class="find-nav-btn" id="next-btn" title="Next Match (Enter)" aria-label="Next match">
+              <i data-lucide="chevron-down" width="16" height="16"></i>
+            </button>
+            <div class="find-separator"></div>
+            <button class="find-nav-btn find-close-btn" id="close-btn" title="Close (Escape)" aria-label="Close find bar">
+              <i data-lucide="x" width="16" height="16"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div id="browser-view-container">
       <!-- This is where the BrowserView will be displayed -->
     </div>

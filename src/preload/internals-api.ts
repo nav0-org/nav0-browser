@@ -260,6 +260,21 @@ export function init(){
     onFindInPageResult: (callback: (data: { activeMatchOrdinal: number, matches: number, finalUpdate: boolean }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.FIND_IN_PAGE_RESULT, (_event, data) => callback(data));
     },
+    onShowFindInPageBar: (callback: () => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.SHOW_FIND_IN_PAGE_BAR, () => callback());
+    },
+    onHideFindInPageBar: (callback: () => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.HIDE_FIND_IN_PAGE_BAR, () => callback());
+    },
+    onShowOverlayPanel: (callback: (data: { type: string, data?: any }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.SHOW_OVERLAY_PANEL, (_event, data) => callback(data));
+    },
+    onHideOverlayPanel: (callback: (data: { type: string }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.HIDE_OVERLAY_PANEL, (_event, data) => callback(data));
+    },
+    signalOverlayRendererReady: () => {
+      ipcRenderer.send(RendererToMainEventsForBrowserIPC.OVERLAY_RENDERER_READY);
+    },
     onTabLoadingChanged: (callback: (data: { id: string, isLoading: boolean }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.TAB_LOADING_CHANGED, (_event, data) => callback(data));
     },

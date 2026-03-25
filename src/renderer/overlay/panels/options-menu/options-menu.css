@@ -1,0 +1,174 @@
+/* Options Menu overlay panel styles */
+
+#overlay-options-menu {
+  background-color: transparent !important;
+}
+
+/* options Dropdown */
+.options-dropdown {
+  position: absolute;
+  top: 80px;
+  right: 0;
+  width: 320px;
+  background-color: var(--bg-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 9999;
+  padding: var(--spacing-xs) 0;
+  margin-top: var(--spacing-xs);
+  display: block;
+  border: 1px solid var(--border-color);
+  text-align: left;
+  margin-right: 10px;
+}
+
+.options-dropdown.show {
+  display: block;
+}
+
+#overlay-options-menu .dropdown-item {
+  display: flex;
+  align-items: center;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+  padding-left: 16px;
+  padding-right: 10px;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  position: relative;
+  text-align: left;
+}
+
+#overlay-options-menu .divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+#overlay-options-menu .dropdown-item:hover {
+  background-color: var(--bg-hover);
+}
+
+#overlay-options-menu .dropdown-item i {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  position: relative;
+  text-align: left;
+}
+
+.dropdown-item-text {
+  padding-left: 16px;
+  padding-right: 10px;
+  flex: 1;
+  text-align: left;
+}
+
+.submenu-indicator {
+  margin-left: var(--spacing-xs);
+  color: var(--text-light);
+  flex-shrink: 0;
+}
+
+/* Submenu styling */
+.has-submenu {
+  position: relative;
+}
+
+.submenu {
+  position: absolute;
+  top: 0;
+  right: 100%;
+  width: 250px;
+  background-color: var(--bg-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-dropdown);
+  padding: var(--spacing-xs) 0;
+  display: none;
+  border: 1px solid var(--border-color);
+}
+
+.has-submenu:hover .submenu,
+.has-submenu.submenu-active .submenu {
+  display: block;
+}
+
+#overlay-options-menu .keyboard-shortcut {
+  padding-right: 6px;
+  flex-shrink: 0;
+  text-align: right;
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+#overlay-options-menu .keyboard-shortcut .keycap {
+  min-width: 14px;
+  height: 14px;
+  font-size: 9px;
+  padding: 0 3px;
+  margin: 0 1px;
+}
+
+/* History submenu */
+.history-submenu {
+  width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.submenu-section-label {
+  padding: 4px 16px;
+  font-size: 11px;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+
+.submenu-empty-state {
+  padding: 4px 16px;
+  font-size: 12px;
+  color: var(--text-light);
+  font-style: italic;
+}
+
+.closed-tab-item,
+.closed-window-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 16px;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  gap: 8px;
+}
+
+.closed-tab-item:hover,
+.closed-window-item:hover {
+  background-color: var(--bg-hover);
+}
+
+.closed-tab-favicon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border-radius: 2px;
+}
+
+.closed-tab-title,
+.closed-window-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.closed-window-tab-count {
+  font-size: 11px;
+  color: var(--text-light);
+  flex-shrink: 0;
+}

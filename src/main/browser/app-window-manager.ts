@@ -7,7 +7,7 @@ import { DatabaseManager } from "../database/database-manager";
 import { DataStoreManager } from "../database/data-store-manager";
 import { SearchEngine } from "../web/search-engine";
 import { PermissionManager, PermissionRequest } from "./permission-manager";
-import { PermissionPromptData } from "./permission-prompt-overlay-manager";
+import { PermissionPromptData } from "./overlay-handlers/permission-prompt-handler";
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";

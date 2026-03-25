@@ -92,6 +92,11 @@ declare global {
       onReaderModeAvailabilityChanged: (callback: (data: { id: string, isEligible: boolean }) => void) => void;
       onReaderModeStateChanged: (callback: (data: { id: string, isActive: boolean }) => void) => void;
       onFindInPageResult: (callback: (data: { activeMatchOrdinal: number, matches: number, finalUpdate: boolean }) => void) => void;
+      onShowFindInPageBar: (callback: () => void) => void;
+      onHideFindInPageBar: (callback: () => void) => void;
+      onShowOverlayPanel: (callback: (data: { type: string, data?: any }) => void) => void;
+      onHideOverlayPanel: (callback: (data: { type: string }) => void) => void;
+      signalOverlayRendererReady: () => void;
       onTabLoadingChanged: (callback: (data: { id: string, isLoading: boolean }) => void) => void;
       onTabPinned: (callback: (data: { id: string }) => void) => void;
       onTabUnpinned: (callback: (data: { id: string }) => void) => void;
