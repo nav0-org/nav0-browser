@@ -62,7 +62,7 @@ export abstract class AppMenuManager {
             const activeWindow = AppWindowManager.getActiveWindow();
             if (!activeWindow) return;
             const activeTab = activeWindow.getActiveTab();
-            if (activeTab) {
+            if (activeTab && activeTab.getWebContentsViewInstance()) {
               activeTab.getWebContentsViewInstance().webContents.print();
             }
           }},
@@ -127,7 +127,7 @@ export abstract class AppMenuManager {
             const activeWindow = AppWindowManager.getActiveWindow();
             if (activeWindow) {
               const activeTab = activeWindow.getActiveTab();
-              if (activeTab) {
+              if (activeTab && activeTab.getWebContentsViewInstance()) {
                 const webContents = activeTab.getWebContentsViewInstance().webContents;
                 const session = webContents.session;
                 const currentUrl = webContents.getURL();

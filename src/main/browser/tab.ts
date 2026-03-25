@@ -23,7 +23,7 @@ export class Tab {
   private url: string;
   private title: string;
   private faviconUrl: string | null = null;
-  private webContentsViewInstance : WebContentsView;
+  private webContentsViewInstance : WebContentsView | null = null;
   private partitionSetting: string;
   private preloadScript: string | null = null;
   private parentAppWindow: AppWindow | null = null;
@@ -49,6 +49,8 @@ export class Tab {
   private sslStatus: 'secure' | 'insecure' | 'internal' = 'internal';
   private sslCertificate: Electron.Certificate | null = null;
   private willDownloadHandler: ((event: Electron.Event, item: Electron.DownloadItem, webContents: Electron.WebContents) => void) | null = null;
+  private isSuspended = false;
+  private lastActivatedAt: Date = new Date();
 
   private static readonly DARK_MODE_CSS = `
     html {
@@ -86,13 +88,17 @@ export class Tab {
     }
   `;
 
-  constructor(parentAppWindow: AppWindow, url: string , partitionSetting: string) {
+  constructor(parentAppWindow: AppWindow, url: string , partitionSetting: string, options?: { suspended?: boolean; title?: string }) {
     this.parentAppWindow = parentAppWindow;
     this.id = uuid();
     this.url = url || '';
-    this.title = 'New Tab';
+    this.title = options?.title || 'New Tab';
     this.partitionSetting = partitionSetting;
-    this.loadURL();
+    if (options?.suspended) {
+      this.isSuspended = true;
+    } else {
+      this.loadURL();
+    }
   }
 
   private async loadURL(url?: string){
@@ -682,8 +688,8 @@ export class Tab {
       url: this.url,
       isBookmark: (this.bookmark? true : false),
       bookmarkId: this.bookmark ? this.bookmark.id : null,
-      canGoBack: this.webContentsViewInstance.webContents.navigationHistory.canGoBack(),
-      canGoForward: this.webContentsViewInstance.webContents.navigationHistory.canGoForward(),
+      canGoBack: this.webContentsViewInstance?.webContents.navigationHistory.canGoBack() ?? false,
+      canGoForward: this.webContentsViewInstance?.webContents.navigationHistory.canGoForward() ?? false,
       sslStatus: this.sslStatus,
       sslDetails,
     });
@@ -798,17 +804,68 @@ export class Tab {
       clearTimeout(this.readerModeCheckTimer);
       this.readerModeCheckTimer = null;
     }
-    if (this.willDownloadHandler) {
+    if (this.willDownloadHandler && this.webContentsViewInstance) {
       this.webContentsViewInstance.webContents.session.removeListener('will-download', this.willDownloadHandler);
       this.willDownloadHandler = null;
     }
   }
 
-  getWebContentsViewInstance(): WebContentsView {
+  getWebContentsViewInstance(): WebContentsView | null {
     return this.webContentsViewInstance;
   }
 
+  getIsSuspended(): boolean {
+    return this.isSuspended;
+  }
+
+  getLastActivatedAt(): Date {
+    return this.lastActivatedAt;
+  }
+
+  updateLastActivatedAt(): void {
+    this.lastActivatedAt = new Date();
+  }
+
+  suspend(): void {
+    if (this.isSuspended || this._destroyed) return;
+    // Clear timers but preserve tab identity (don't set _destroyed permanently)
+    if (this.navigationDebounceTimer) {
+      clearTimeout(this.navigationDebounceTimer);
+      this.navigationDebounceTimer = null;
+    }
+    if (this.readerModeCheckTimer) {
+      clearTimeout(this.readerModeCheckTimer);
+      this.readerModeCheckTimer = null;
+    }
+    if (this.willDownloadHandler && this.webContentsViewInstance) {
+      this.webContentsViewInstance.webContents.session.removeListener('will-download', this.willDownloadHandler);
+      this.willDownloadHandler = null;
+    }
+    if (this.webContentsViewInstance) {
+      this.webContentsViewInstance.webContents.removeAllListeners();
+      this.webContentsViewInstance.removeAllListeners();
+      this.webContentsViewInstance.webContents.close();
+      this.webContentsViewInstance = null;
+    }
+    this.readerMode = ReaderModeManager.createState();
+    this.darkModeCSSKey = null;
+    this.isSuspended = true;
+  }
+
+  async unsuspend(): Promise<void> {
+    if (!this.isSuspended) return;
+    this.isSuspended = false;
+    this._destroyed = false;
+    this.lastActivatedAt = new Date();
+    await this.loadURL();
+  }
+
   navigate(url: string): void {
+    if (this.isSuspended) {
+      this.url = url;
+      this.isSuspended = false;
+      this._destroyed = false;
+    }
     this.loadURL(url);
   }
 
