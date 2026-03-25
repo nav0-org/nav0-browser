@@ -55,7 +55,7 @@ onMounted(async () => {
     <div class="install-section">
       <h2>Windows</h2>
       <div class="download-links">
-        <a class="download-btn" :href="`https://github.com/nav0-org/nav0-browser/releases/download/v${version}/nav0-browser-${version}%20Setup.exe`">
+        <a class="download-btn" :href="`https://github.com/nav0-org/nav0-browser/releases/download/v${version}/nav0-browser-${version}.Setup.exe`">
           <span class="download-label">Windows x64</span>
           <span class="download-format">.exe installer</span>
         </a>
