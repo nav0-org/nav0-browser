@@ -66,8 +66,10 @@ The modern web browser has become bloated. What started as a simple tool to view
 We believe a browser should do one thing well: let you browse the web. That's it. No AI assistants trying to "help" you. No telemetry phoning home. No unnecessary features cluttering your interface.
 
 ```
-Nav0 = navigate + zero (bloat)
+Nav0 = navigate + nought (bloat)
 ```
+
+> **How do you pronounce Nav0?** It's **"Nav Nought"** — *nought* meaning zero, because your browser should collect nought.
 
 ### The Problem with Modern Browsers
 
