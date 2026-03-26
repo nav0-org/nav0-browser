@@ -224,11 +224,15 @@ export function showFindBar(): void {
   // Re-render lucide icons inside the find bar
   createIcons({ icons });
   findInput.focus();
+  // Trigger resize so updateBrowserViewBounds recalculates tab position
+  window.dispatchEvent(new Event('resize'));
 }
 
 export function hideFindBar(): void {
   findBarContainer.style.display = 'none';
   resetFindBar();
+  // Trigger resize so updateBrowserViewBounds recalculates tab position
+  window.dispatchEvent(new Event('resize'));
 }
 
 export function initFindInPage(): void {
