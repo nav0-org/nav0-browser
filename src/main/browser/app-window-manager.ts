@@ -749,7 +749,7 @@ export abstract class AppWindowManager {
           label: 'Duplicate Tab',
           click: () => {
             const url = tab.getUrl();
-            window.createTab(url, true);
+            window.createTab(url, false);
           },
         },
         {
