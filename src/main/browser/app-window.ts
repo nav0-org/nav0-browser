@@ -165,10 +165,23 @@ export class AppWindow {
     }
   }
 
+  private getYOffset(): number {
+    return 85 + (this.isFindInPageVisible() ? 48 : 0);
+  }
+
+  private resizeActiveTab(): void {
+    if (!this.browserWindowInstance || !this.getActiveTab()) return;
+    const parentBounds = this.browserWindowInstance.contentView.getBounds();
+    const yOffset = this.getYOffset();
+    this.getActiveTab().getWebContentsViewInstance().setBounds({
+      x: 0, y: yOffset, width: parentBounds.width, height: parentBounds.height - yOffset,
+    });
+  }
+
   private handleResizing() {
     if (!this.browserWindowInstance) return;
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
-    const yOffset = 85;
+    const yOffset = this.getYOffset();
 
     // Resize active tab
     if (this.getActiveTab()) {
@@ -245,7 +258,7 @@ export class AppWindow {
     if (this.tabs.has(id)) {
       this.activeTabId = id;
       const parentBounds = this.browserWindowInstance.contentView.getBounds();
-      const yOffset = 85;
+      const yOffset = this.getYOffset();
       this.getActiveTab().getWebContentsViewInstance()?.setBounds({x: 0, y: yOffset, width: parentBounds.width, height: parentBounds.height - yOffset});
       this.browserWindowInstance.contentView.addChildView(this.getActiveTab().getWebContentsViewInstance());
       this.getActiveTab().getWebContentsViewInstance().webContents.focus();
@@ -424,11 +437,13 @@ export class AppWindow {
     }
 
     this.findInPageManager.show();
+    this.resizeActiveTab();
   }
 
   hideFindInPage(): void {
     if (this.isFindInPageVisible()) {
       this.findInPageManager.hide();
+      this.resizeActiveTab();
     }
   }
 
