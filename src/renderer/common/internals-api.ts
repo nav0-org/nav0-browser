@@ -101,6 +101,16 @@ declare global {
       onTabPinned: (callback: (data: { id: string }) => void) => void;
       onTabUnpinned: (callback: (data: { id: string }) => void) => void;
 
+      // Permission system
+      respondToPermissionPrompt: (appWindowId: string, requestId: string, decision: string) => void;
+      onPermissionPromptShow: (callback: (data: any) => void) => void;
+      signalPermissionPromptReady: () => void;
+      onPermissionPromptHide: (callback: () => void) => void;
+      fetchPermissions: (searchTerm?: string) => Promise<any>;
+      removePermission: (permissionId: string) => Promise<any>;
+      removeAllPermissionsForOrigin: (origin: string) => Promise<any>;
+      clearAllPermissions: () => Promise<any>;
+
       // SSL info overlay
       showSSLInfo: (appWindowId: string, data: { sslStatus: string; sslDetails: any; url: string }) => void;
       hideSSLInfo: (appWindowId: string) => void;

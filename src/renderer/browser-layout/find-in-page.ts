@@ -219,10 +219,10 @@ function resetFindBar(): void {
 }
 
 export function showFindBar(): void {
-  findBarContainer.style.display = '';
+  findBarContainer.style.display = 'block';
   resetFindBar();
   // Re-render lucide icons inside the find bar
-  createIcons({ icons, nameAttr: 'data-lucide' });
+  createIcons({ icons });
   findInput.focus();
 }
 

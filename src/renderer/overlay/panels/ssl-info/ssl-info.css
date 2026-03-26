@@ -2,11 +2,17 @@
 
 #overlay-ssl-info {
   background: transparent;
-  overflow: hidden;
-  height: auto;
+  overflow: visible;
+  pointer-events: none;
 }
 
 .ssl-info-panel {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  width: 300px;
+  max-width: calc(100% - 24px);
+  pointer-events: auto;
   background-color: var(--bg-light);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
