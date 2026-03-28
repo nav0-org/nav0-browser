@@ -44,8 +44,8 @@ export class PermissionManager {
   private static db: DatabaseType;
   private static sessionPermissions = new Map<string, SessionDecision>();
   private static initializedSessions = new Set<string>();
-  private static pendingQueue: PermissionRequest[] = [];
-  private static activePrompt: PermissionRequest | null = null;
+  private static activePrompts: Map<string, PermissionRequest> = new Map(); // per-tab active prompt
+  private static pendingQueues: Map<string, PermissionRequest[]> = new Map(); // per-tab queue
   private static requestTimestamps = new Map<string, number[]>();
 
   // Callbacks set by the integration layer
@@ -186,31 +186,41 @@ export class PermissionManager {
   // ─── Request Queue ───────────────────────────────────────────────
 
   private static enqueueRequest(request: PermissionRequest): void {
-    if (PermissionManager.activePrompt) {
-      PermissionManager.pendingQueue.push(request);
+    const tabId = request.tabId;
+    if (PermissionManager.activePrompts.has(tabId)) {
+      // Same tab already has an active prompt — queue for that tab
+      const queue = PermissionManager.pendingQueues.get(tabId) || [];
+      queue.push(request);
+      PermissionManager.pendingQueues.set(tabId, queue);
     } else {
       PermissionManager.showPromptForRequest(request);
     }
   }
 
   private static showPromptForRequest(request: PermissionRequest): void {
-    PermissionManager.activePrompt = request;
+    PermissionManager.activePrompts.set(request.tabId, request);
     PermissionManager.showPromptCallback?.(request.appWindowId, request);
   }
 
-  private static processNextInQueue(): void {
-    if (PermissionManager.pendingQueue.length === 0) return;
-    const next = PermissionManager.pendingQueue.shift()!;
+  private static processNextInQueue(tabId: string): void {
+    const queue = PermissionManager.pendingQueues.get(tabId);
+    if (!queue || queue.length === 0) return;
+    const next = queue.shift()!;
+    if (queue.length === 0) PermissionManager.pendingQueues.delete(tabId);
     PermissionManager.showPromptForRequest(next);
   }
 
   // ─── Prompt Response ─────────────────────────────────────────────
 
   static handlePromptResponse(requestId: string, decision: string): void {
-    const request = PermissionManager.activePrompt;
-    if (!request || request.id !== requestId) return;
+    // Find the active prompt by requestId across all tabs
+    let request: PermissionRequest | null = null;
+    for (const [, prompt] of PermissionManager.activePrompts) {
+      if (prompt.id === requestId) { request = prompt; break; }
+    }
+    if (!request) return;
 
-    PermissionManager.activePrompt = null;
+    PermissionManager.activePrompts.delete(request.tabId);
     const { tabId, origin, permission, callback, isPrivate } = request;
     const sessionKey = PermissionManager.sessionKey(tabId, origin, permission);
 
@@ -222,7 +232,6 @@ export class PermissionManager {
 
       case 'always_allow':
         if (isPrivate) {
-          // In private mode, downgrade to session-only
           PermissionManager.sessionPermissions.set(sessionKey, 'allowed_session');
         } else {
           PermissionManager.storePersistentDecision(origin, permission, 'allowed_persistent');
@@ -249,11 +258,12 @@ export class PermissionManager {
         break;
     }
 
-    // Hide the prompt overlay
+    // Hide the prompt
     PermissionManager.hidePromptCallback?.(request.appWindowId);
 
-    // Process next queued request
-    setTimeout(() => PermissionManager.processNextInQueue(), 100);
+    // Process next queued request for this tab
+    const respondedTabId = request.tabId;
+    setTimeout(() => PermissionManager.processNextInQueue(respondedTabId), 100);
   }
 
   // ─── Flood Detection ─────────────────────────────────────────────
@@ -312,23 +322,19 @@ export class PermissionManager {
   }
 
   private static cancelRequestsForTab(tabId: string): void {
-    const cancelled: PermissionRequest[] = [];
-    PermissionManager.pendingQueue = PermissionManager.pendingQueue.filter((req: PermissionRequest) => {
-      if (req.tabId === tabId) {
-        cancelled.push(req);
-        return false;
-      }
-      return true;
-    });
-    cancelled.forEach((req: PermissionRequest) => req.callback(false));
+    // Cancel pending queue for this tab
+    const queue = PermissionManager.pendingQueues.get(tabId);
+    if (queue) {
+      queue.forEach((req: PermissionRequest) => req.callback(false));
+      PermissionManager.pendingQueues.delete(tabId);
+    }
 
-    // If active prompt is for this tab, auto-deny
-    if (PermissionManager.activePrompt?.tabId === tabId) {
-      const active = PermissionManager.activePrompt;
-      PermissionManager.activePrompt = null;
+    // Cancel active prompt for this tab
+    const active = PermissionManager.activePrompts.get(tabId);
+    if (active) {
+      PermissionManager.activePrompts.delete(tabId);
       active.callback(false);
       PermissionManager.hidePromptCallback?.(active.appWindowId);
-      setTimeout(() => PermissionManager.processNextInQueue(), 100);
     }
   }
 
@@ -442,6 +448,8 @@ export class PermissionManager {
   static clearMemoryPermissions(): void {
     PermissionManager.sessionPermissions.clear();
     PermissionManager.requestTimestamps.clear();
+    PermissionManager.activePrompts.clear();
+    PermissionManager.pendingQueues.clear();
   }
 
   // ─── Helpers ─────────────────────────────────────────────────────

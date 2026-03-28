@@ -221,14 +221,14 @@ function resetFindBar(): void {
 export function showFindBar(data?: { searchText?: string }): void {
   findBarContainer.style.display = 'block';
   if (data?.searchText) {
-    // Restore previous search state
     findInput.value = data.searchText;
     triggerSearch();
   } else {
     resetFindBar();
   }
   createIcons({ icons });
-  findInput.focus();
+  // Delay focus to ensure it wins the race against Electron's tab resize focus steal
+  setTimeout(() => findInput.focus(), 50);
   window.dispatchEvent(new Event('resize'));
 }
 
