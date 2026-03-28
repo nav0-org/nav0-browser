@@ -122,6 +122,16 @@ export function init(container: HTMLElement): void {
     window.BrowserAPI.hideSSLInfo(window.BrowserAPI.appWindowId);
   });
 
+  // Click outside the panel = dismiss
+  container.addEventListener('click', () => {
+    window.BrowserAPI.hideSSLInfo(window.BrowserAPI.appWindowId);
+  });
+  // Prevent clicks on the panel itself from bubbling to the container
+  const panel = container.querySelector('.ssl-info-panel') as HTMLElement;
+  panel.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+
   document.addEventListener('keydown', (e: KeyboardEvent) => {
     // Only handle events when this panel is visible
     if (containerEl.hasAttribute('hidden')) return;

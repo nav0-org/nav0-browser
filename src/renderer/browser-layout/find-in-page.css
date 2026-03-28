@@ -11,7 +11,6 @@
 .find-in-page-bar .find-bar-wrapper {
   display: flex;
   padding: 6px 8px;
-  justify-content: flex-end;
 }
 
 .find-in-page-bar .find-bar {
@@ -19,12 +18,9 @@
   align-items: center;
   gap: 4px;
   background-color: var(--bg-light);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
   padding: 4px 8px;
-  box-shadow: var(--shadow-md);
   animation: findBarSlideDown 0.15s ease-out;
-  max-width: 520px;
+  flex: 1;
 }
 
 @keyframes findBarSlideDown {
@@ -64,9 +60,8 @@
   font-size: 13px;
   color: var(--text-color);
   background: transparent;
-  min-width: 180px;
-  max-width: 280px;
-  width: 220px;
+  flex: 1;
+  min-width: 120px;
   padding: 4px 0;
   line-height: 1.4;
 }

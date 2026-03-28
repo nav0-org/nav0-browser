@@ -266,6 +266,12 @@ export function init(){
     onHideFindInPageBar: (callback: () => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.HIDE_FIND_IN_PAGE_BAR, () => callback());
     },
+    onShowPermissionStrip: (callback: (data: any) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.SHOW_PERMISSION_STRIP, (_event, data) => callback(data));
+    },
+    onHidePermissionStrip: (callback: () => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.HIDE_PERMISSION_STRIP, () => callback());
+    },
     onShowOverlayPanel: (callback: (data: { type: string, data?: any }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.SHOW_OVERLAY_PANEL, (_event, data) => callback(data));
     },

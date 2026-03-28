@@ -94,6 +94,8 @@ declare global {
       onFindInPageResult: (callback: (data: { activeMatchOrdinal: number, matches: number, finalUpdate: boolean }) => void) => void;
       onShowFindInPageBar: (callback: () => void) => void;
       onHideFindInPageBar: (callback: () => void) => void;
+      onShowPermissionStrip: (callback: (data: any) => void) => void;
+      onHidePermissionStrip: (callback: () => void) => void;
       onShowOverlayPanel: (callback: (data: { type: string, data?: any }) => void) => void;
       onHideOverlayPanel: (callback: (data: { type: string }) => void) => void;
       signalOverlayRendererReady: () => void;

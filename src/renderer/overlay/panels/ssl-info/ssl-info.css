@@ -3,7 +3,8 @@
 #overlay-ssl-info {
   background: transparent;
   overflow: visible;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: default;
 }
 
 .ssl-info-panel {

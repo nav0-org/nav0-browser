@@ -201,6 +201,8 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly HIDE_FIND_IN_PAGE_BAR = "browser:hide-find-in-page-bar";
   public static readonly SHOW_PERMISSION_PROMPT = "browser:show-permission-prompt";
   public static readonly HIDE_PERMISSION_PROMPT = "browser:hide-permission-prompt";
+  public static readonly SHOW_PERMISSION_STRIP = "browser:show-permission-strip";
+  public static readonly HIDE_PERMISSION_STRIP = "browser:hide-permission-strip";
 
   // Unified overlay
   public static readonly SHOW_OVERLAY_PANEL = "overlay:show-panel";

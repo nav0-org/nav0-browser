@@ -1,0 +1,148 @@
+/* ==========================================================================
+   Permission Strip Styles (embedded in browser-layout)
+   ========================================================================== */
+
+.permission-strip {
+  flex-shrink: 0;
+  background-color: var(--bg-light);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.permission-strip-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.permission-strip-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.perm-icon-secure {
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+.perm-icon-insecure {
+  color: #dc2626;
+  flex-shrink: 0;
+}
+
+.perm-origin {
+  font-weight: 600;
+  color: var(--text-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+.perm-separator {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.perm-label {
+  font-weight: 600;
+  color: var(--text-color);
+  flex-shrink: 0;
+}
+
+.permission-strip-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.perm-btn {
+  padding: 4px 10px;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.perm-btn:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+}
+
+.perm-btn-allow {
+  background-color: var(--primary-color);
+  color: #fff;
+  border-color: var(--primary-color);
+}
+
+.perm-btn-allow:hover {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+.perm-btn-always-allow {
+  background-color: transparent;
+  color: var(--text-color);
+  border-color: var(--border-color-dark);
+  font-size: 11px;
+}
+
+.perm-btn-always-allow:hover {
+  background-color: var(--bg-color);
+  border-color: var(--primary-color);
+}
+
+.perm-btn-deny {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  border-color: var(--border-color);
+}
+
+.perm-btn-deny:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--border-color-dark);
+}
+
+.perm-btn-always-deny {
+  background-color: transparent;
+  color: var(--text-secondary);
+  border-color: var(--border-color);
+  font-size: 11px;
+}
+
+.perm-btn-always-deny:hover {
+  background-color: rgba(220, 38, 38, 0.06);
+  color: #dc2626;
+  border-color: #dc2626;
+}
+
+.perm-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.permission-strip-notes {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.perm-note {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.perm-note-danger {
+  color: #dc2626;
+  font-weight: 500;
+}

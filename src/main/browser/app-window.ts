@@ -6,10 +6,18 @@ import { DownloadManager } from "./download-manager";
 import { PermissionManager } from "./permission-manager";
 import { FindInPageManager } from "./find-in-page-manager";
 import { UnifiedOverlayManager, OverlayType } from "./unified-overlay-manager";
-import { PermissionPromptData } from "./overlay-handlers/permission-prompt-handler";
 import type { Database as DB } from 'better-sqlite3';
 
-export { PermissionPromptData };
+export interface PermissionPromptData {
+  requestId: string;
+  origin: string;
+  permissions: Array<{ type: string; label: string; icon: string }>;
+  isSecure: boolean;
+  isPrivate: boolean;
+  faviconUrl: string | null;
+  isInsecureBlocked: boolean;
+  isFloodBlocked: boolean;
+}
 
 export class AppWindow {
   public readonly id: string = uuid();
@@ -166,7 +174,7 @@ export class AppWindow {
   }
 
   private getYOffset(): number {
-    return 85 + (this.isFindInPageVisible() ? 48 : 0);
+    return 85 + (this.permissionStripVisible ? 48 : 0) + (this.isFindInPageVisible() ? 48 : 0);
   }
 
   private resizeActiveTab(): void {
@@ -252,6 +260,10 @@ export class AppWindow {
   }
 
   activateTab(id: string, isUserInitiated = true): void {
+    // Dismiss tab-specific strips when switching tabs
+    this.hideFindInPage();
+    this.hidePermissionPrompt();
+
     if(this.activeTabId && this.getActiveTab()){
       this.browserWindowInstance.contentView.removeChildView(this.getActiveTab().getWebContentsViewInstance());
     }
@@ -375,18 +387,26 @@ export class AppWindow {
     });
   }
 
-  async showPermissionPromptOverlay(data: PermissionPromptData): Promise<void> {
-    if (!this.unifiedOverlayManager || !this.browserWindowInstance) return;
-    await this.unifiedOverlayManager.whenReady();
-    this.ensureOverlayViewAdded();
-    this.unifiedOverlayManager.showPermissionPrompt(data);
+  // Permission prompt — rendered as a strip in browser_layout
+  private permissionStripVisible = false;
+
+  async showPermissionPrompt(data: PermissionPromptData): Promise<void> {
+    if (!this.browserWindowInstance) return;
+    this.permissionStripVisible = true;
+    this.browserWindowInstance.webContents.send(
+      MainToRendererEventsForBrowserIPC.SHOW_PERMISSION_STRIP,
+      data
+    );
+    this.resizeActiveTab();
   }
 
-  hidePermissionPromptOverlay(): void {
-    if (this.unifiedOverlayManager?.isVisible('permission-prompt')) {
-      this.unifiedOverlayManager.hideOverlay('permission-prompt');
-      this.removeOverlayViewIfEmpty();
-    }
+  hidePermissionPrompt(): void {
+    if (!this.permissionStripVisible) return;
+    this.permissionStripVisible = false;
+    this.browserWindowInstance?.webContents.send(
+      MainToRendererEventsForBrowserIPC.HIDE_PERMISSION_STRIP
+    );
+    this.resizeActiveTab();
   }
 
   async showIssueReportOverlay(): Promise<void> {

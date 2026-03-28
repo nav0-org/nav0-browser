@@ -6,20 +6,17 @@ import { createIcons, icons } from 'lucide';
 import * as commandKPanel from './panels/command-k/command-k';
 import * as commandOPanel from './panels/command-o/command-o';
 import * as optionsMenuPanel from './panels/options-menu/options-menu';
-import * as permissionPromptPanel from './panels/permission-prompt/permission-prompt';
 import * as issueReportPanel from './panels/issue-report/issue-report';
 import * as sslInfoPanel from './panels/ssl-info/ssl-info';
 
-
 initTheme();
 
-type PanelName = 'command-k' | 'command-o' | 'options-menu' | 'permission-prompt' | 'issue-report' | 'ssl-info';
+type PanelName = 'command-k' | 'command-o' | 'options-menu' | 'issue-report' | 'ssl-info';
 
 const panels: Record<PanelName, { init: (container: HTMLElement) => void; show: (data?: any) => void; hide: () => void }> = {
   'command-k': commandKPanel,
   'command-o': commandOPanel,
   'options-menu': optionsMenuPanel,
-  'permission-prompt': permissionPromptPanel,
   'issue-report': issueReportPanel,
   'ssl-info': sslInfoPanel,
 };
@@ -60,24 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (container) {
         container.setAttribute('hidden', '');
       }
-    }
-  });
-
-  // Permission prompt uses its own existing IPC channels
-  window.BrowserAPI.onPermissionPromptShow((data: any) => {
-    const container = document.getElementById('overlay-permission-prompt');
-    if (container) {
-      container.removeAttribute('hidden');
-    }
-    permissionPromptPanel.show(data);
-    createIcons({ icons });
-  });
-
-  window.BrowserAPI.onPermissionPromptHide(() => {
-    permissionPromptPanel.hide();
-    const container = document.getElementById('overlay-permission-prompt');
-    if (container) {
-      container.setAttribute('hidden', '');
     }
   });
 
