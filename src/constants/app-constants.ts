@@ -210,6 +210,7 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly TAB_LOADING_CHANGED = "browser:tab-loading-changed";
   public static readonly TAB_PINNED = "browser:tab-pinned";
   public static readonly TAB_UNPINNED = "browser:tab-unpinned";
+  public static readonly FULLSCREEN_CHANGED = "browser:fullscreen-changed";
 }
 
 export abstract class DataStoreConstants {

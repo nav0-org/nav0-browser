@@ -54,6 +54,9 @@ export class AppWindow {
       this.partitionSetting = 'persist:browsertabs';
     }
     PermissionManager.setupSession(this.partitionSetting);
+    const isMac = process.platform === 'darwin';
+    const isWindows = process.platform === 'win32';
+
     this.browserWindowInstance = new BrowserWindow({
       width: 1200,
       height: 800,
@@ -61,11 +64,20 @@ export class AppWindow {
       show: false,
       title : AppConstants.APP_NAME,
       icon: '../../renderer/assets/logo.png',
+      titleBarStyle: isMac ? 'hiddenInset' : 'hidden',
+      ...(isWindows ? {
+        titleBarOverlay: {
+          color: '#ffffff',
+          symbolColor: '#333333',
+          height: 38,
+        },
+      } : {}),
+      trafficLightPosition: isMac ? { x: 12, y: 10 } : undefined,
       webPreferences: {
         preload: BROWSER_LAYOUT_PRELOAD_WEBPACK_ENTRY,
         nodeIntegration: false,
         contextIsolation: true,
-        additionalArguments: [`--app-window-id=${this.id}`, `--is-private=${this.isPrivate}`],
+        additionalArguments: [`--app-window-id=${this.id}`, `--is-private=${this.isPrivate}`, `--platform=${process.platform}`],
         sandbox: true,
         webSecurity: true,
         allowRunningInsecureContent: false,
@@ -103,11 +115,13 @@ export class AppWindow {
         const y = Math.round((screenH - h) / 2);
         this.browserWindowInstance?.setBounds({ x, y, width: w, height: h });
         this.handleResizing();
+        this.browserWindowInstance?.webContents.send(MainToRendererEventsForBrowserIPC.FULLSCREEN_CHANGED, { isFullScreen: false });
       });
 
       this.browserWindowInstance.on('enter-full-screen', () => {
         this._desiredFullScreen = true;
         this.handleResizing();
+        this.browserWindowInstance?.webContents.send(MainToRendererEventsForBrowserIPC.FULLSCREEN_CHANGED, { isFullScreen: true });
       });
 
       this.browserWindowInstance.webContents.on('did-finish-load', async () => {

@@ -48,6 +48,21 @@ body.is-private .private-window-identifier{
   padding: 0 var(--spacing-xs);
   border-bottom: 2px solid var(--primary-color);
   background-color: var(--bg-color);
+  -webkit-app-region: drag;
+}
+
+/* Leave space for macOS traffic lights (close/minimize/maximize) — not in fullscreen */
+body.platform-darwin:not(.is-fullscreen) .tab-bar {
+  padding-left: 78px;
+}
+
+/* All interactive elements inside tab bar must be non-draggable */
+.tab-bar button,
+.tab-bar .tab,
+.tab-bar .tabs-container,
+.tab-bar .private-window-identifier,
+.tab-bar #controls-wrapper {
+  -webkit-app-region: no-drag;
 }
 
 .tabs-container {
