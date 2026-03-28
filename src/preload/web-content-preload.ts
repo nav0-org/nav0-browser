@@ -21,6 +21,11 @@ contextBridge.exposeInMainWorld('__Nav0Geo', {
     ipcRenderer.invoke('get-ip-geolocation'),
 });
 
+contextBridge.exposeInMainWorld('__Nav0Share', {
+  share: (data: { title?: string; text?: string; url?: string }): Promise<{ success: boolean; error?: string }> =>
+    ipcRenderer.invoke('web-share', data),
+});
+
 const POLYFILL_CODE = `
 (function() {
   if (window.__Nav0GeolocationPatched) return;
@@ -88,10 +93,73 @@ const POLYFILL_CODE = `
 })();
 `;
 
+const SHARE_POLYFILL_CODE = `
+(function() {
+  if (window.__Nav0SharePatched) return;
+  window.__Nav0SharePatched = true;
+
+  navigator.canShare = function(data) {
+    if (!data) return false;
+    if (data.files && data.files.length > 0) return false;
+    if (!data.title && !data.text && !data.url) return false;
+    if (data.url) {
+      try { new URL(data.url); } catch(e) {
+        try { new URL(data.url, location.href); } catch(e2) { return false; }
+      }
+    }
+    return true;
+  };
+
+  navigator.share = function(data) {
+    if (!data || typeof data !== 'object') {
+      return Promise.reject(new TypeError('Invalid share data'));
+    }
+    if (data.files && data.files.length > 0) {
+      return Promise.reject(new TypeError('File sharing is not supported'));
+    }
+    if (!data.title && !data.text && !data.url) {
+      return Promise.reject(new TypeError('Share data must have at least one of: title, text, url'));
+    }
+    var shareData = { title: data.title, text: data.text, url: data.url };
+    if (shareData.url) {
+      try {
+        shareData.url = new URL(shareData.url, location.href).href;
+      } catch(e) {
+        return Promise.reject(new TypeError('Invalid URL: ' + shareData.url));
+      }
+    }
+    if (!window.__Nav0Share || !window.__Nav0Share.share) {
+      return Promise.reject(new DOMException('Share API unavailable', 'AbortError'));
+    }
+    return window.__Nav0Share.share(shareData).then(function(result) {
+      if (!result || !result.success) {
+        throw new DOMException(result && result.error || 'Share failed', 'AbortError');
+      }
+      try {
+        var toast = document.createElement('div');
+        toast.textContent = 'Copied to clipboard';
+        toast.setAttribute('style',
+          'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);' +
+          'background:rgba(0,0,0,0.8);color:#fff;padding:8px 16px;border-radius:8px;' +
+          'font-size:14px;z-index:2147483647;pointer-events:none;' +
+          'animation:nav0-share-fade 2s forwards;font-family:system-ui,sans-serif;'
+        );
+        var style = document.createElement('style');
+        style.textContent = '@keyframes nav0-share-fade{0%{opacity:1}70%{opacity:1}100%{opacity:0}}';
+        document.body.appendChild(style);
+        document.body.appendChild(toast);
+        setTimeout(function() { toast.remove(); style.remove(); }, 2000);
+      } catch(e) {}
+      return undefined;
+    });
+  };
+})();
+`;
+
 function injectPolyfill(): void {
   try {
     const script = document.createElement('script');
-    script.textContent = POLYFILL_CODE;
+    script.textContent = POLYFILL_CODE + SHARE_POLYFILL_CODE;
     (document.head || document.documentElement).appendChild(script);
     script.remove();
   } catch {
