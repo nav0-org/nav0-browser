@@ -376,6 +376,16 @@ export abstract class AppWindowManager {
       AppWindowManager.closeWindow(appWindowId);
     });
 
+    ipcMain.on(RendererToMainEventsForBrowserIPC.MINIMIZE_WINDOW, (event, appWindowId: string) => {
+      const window = AppWindowManager.getWindowById(appWindowId);
+      window?.getBrowserWindowInstance()?.minimize();
+    });
+
+    ipcMain.on(RendererToMainEventsForBrowserIPC.TOGGLE_FULLSCREEN, (event, appWindowId: string) => {
+      const window = AppWindowManager.getWindowById(appWindowId);
+      window?.toggleFullScreen();
+    });
+
     ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_OPTIONS_MENU, async (event, appWindowId: string) => {
       let window: AppWindow | null = null;
       if (appWindowId) {
