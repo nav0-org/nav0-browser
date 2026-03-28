@@ -28,7 +28,7 @@ export class AppWindow {
   private partitionSetting: string;
   private unifiedOverlayManager: UnifiedOverlayManager | null = null;
   private findInPageManager: FindInPageManager | null = null;
-  private findInPageTabs: Set<string> = new Set(); // tabs with find bar open
+  private findInPageState: Map<string, { searchText: string }> = new Map(); // per-tab find state
   private permissionTabId: string | null = null; // tab with active permission prompt
   private pendingPermissionData: PermissionPromptData | null = null;
   private database: DB;
@@ -249,7 +249,7 @@ export class AppWindow {
       tab.clearPendingTimers();
       PermissionManager.clearSessionPermissionsForTab(id);
       // Clean up per-tab strip state
-      this.findInPageTabs.delete(id);
+      this.findInPageState.delete(id);
       if (this.permissionTabId === id) {
         this.permissionTabId = null;
         this.pendingPermissionData = null;
@@ -269,8 +269,11 @@ export class AppWindow {
   }
 
   activateTab(id: string, isUserInitiated = true): void {
-    // Hide current strips visually (without clearing per-tab state)
-    if (this.isFindInPageVisible()) {
+    // Save current find-in-page state before switching
+    if (this.isFindInPageVisible() && this.activeTabId) {
+      this.findInPageState.set(this.activeTabId, {
+        searchText: this.findInPageManager.getLastSearchText(),
+      });
       this.findInPageManager.hide();
     }
     if (this.permissionStripVisible) {
@@ -285,12 +288,13 @@ export class AppWindow {
       this.activeTabId = id;
 
       // Restore per-tab strip state for the new tab BEFORE calculating offset
-      if (this.findInPageTabs.has(id)) {
+      const findState = this.findInPageState.get(id);
+      if (findState) {
         const activeTab = this.getActiveTab();
         if (activeTab) {
           this.findInPageManager.setActiveTabWebContents(activeTab.getWebContentsViewInstance().webContents);
         }
-        this.findInPageManager.show();
+        this.findInPageManager.show(findState.searchText);
       }
       if (this.permissionTabId === id && this.pendingPermissionData) {
         this.permissionStripVisible = true;
@@ -491,14 +495,14 @@ export class AppWindow {
       this.findInPageManager.setActiveTabWebContents(activeTab.getWebContentsViewInstance().webContents);
     }
 
-    if (this.activeTabId) this.findInPageTabs.add(this.activeTabId);
+    if (this.activeTabId) this.findInPageState.set(this.activeTabId, { searchText: '' });
     this.findInPageManager.show();
     this.resizeActiveTab();
   }
 
   hideFindInPage(): void {
     if (this.isFindInPageVisible()) {
-      if (this.activeTabId) this.findInPageTabs.delete(this.activeTabId);
+      if (this.activeTabId) this.findInPageState.delete(this.activeTabId);
       this.findInPageManager.hide();
       this.resizeActiveTab();
     }

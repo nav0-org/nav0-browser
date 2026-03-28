@@ -218,13 +218,17 @@ function resetFindBar(): void {
   nextBtn.disabled = true;
 }
 
-export function showFindBar(): void {
+export function showFindBar(data?: { searchText?: string }): void {
   findBarContainer.style.display = 'block';
-  resetFindBar();
-  // Re-render lucide icons inside the find bar
+  if (data?.searchText) {
+    // Restore previous search state
+    findInput.value = data.searchText;
+    triggerSearch();
+  } else {
+    resetFindBar();
+  }
   createIcons({ icons });
   findInput.focus();
-  // Trigger resize so updateBrowserViewBounds recalculates tab position
   window.dispatchEvent(new Event('resize'));
 }
 
@@ -241,8 +245,8 @@ export function initFindInPage(): void {
   initElements();
   bindEvents();
 
-  window.BrowserAPI.onShowFindInPageBar(() => {
-    showFindBar();
+  window.BrowserAPI.onShowFindInPageBar((data?: { searchText?: string }) => {
+    showFindBar(data);
   });
 
   window.BrowserAPI.onHideFindInPageBar(() => {

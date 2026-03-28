@@ -92,7 +92,7 @@ declare global {
       onReaderModeAvailabilityChanged: (callback: (data: { id: string, isEligible: boolean }) => void) => void;
       onReaderModeStateChanged: (callback: (data: { id: string, isActive: boolean }) => void) => void;
       onFindInPageResult: (callback: (data: { activeMatchOrdinal: number, matches: number, finalUpdate: boolean }) => void) => void;
-      onShowFindInPageBar: (callback: () => void) => void;
+      onShowFindInPageBar: (callback: (data?: { searchText?: string }) => void) => void;
       onHideFindInPageBar: (callback: () => void) => void;
       onShowPermissionStrip: (callback: (data: any) => void) => void;
       onHidePermissionStrip: (callback: () => void) => void;

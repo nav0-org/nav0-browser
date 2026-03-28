@@ -21,9 +21,9 @@ export class FindInPageManager {
     return this._isVisible;
   }
 
-  show(): void {
+  show(searchText?: string): void {
     this._isVisible = true;
-    this.browserWindowWebContents?.send(MainToRendererEventsForBrowserIPC.SHOW_FIND_IN_PAGE_BAR);
+    this.browserWindowWebContents?.send(MainToRendererEventsForBrowserIPC.SHOW_FIND_IN_PAGE_BAR, { searchText });
   }
 
   hide(): void {

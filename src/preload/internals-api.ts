@@ -260,8 +260,8 @@ export function init(){
     onFindInPageResult: (callback: (data: { activeMatchOrdinal: number, matches: number, finalUpdate: boolean }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.FIND_IN_PAGE_RESULT, (_event, data) => callback(data));
     },
-    onShowFindInPageBar: (callback: () => void) => {
-      ipcRenderer.on(MainToRendererEventsForBrowserIPC.SHOW_FIND_IN_PAGE_BAR, () => callback());
+    onShowFindInPageBar: (callback: (data?: { searchText?: string }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.SHOW_FIND_IN_PAGE_BAR, (_event, data) => callback(data));
     },
     onHideFindInPageBar: (callback: () => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.HIDE_FIND_IN_PAGE_BAR, () => callback());

@@ -18,7 +18,6 @@
   align-items: center;
   gap: 4px;
   background-color: var(--bg-light);
-  padding: 4px 8px;
   animation: findBarSlideDown 0.15s ease-out;
   flex: 1;
 }
