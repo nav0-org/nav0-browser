@@ -7,7 +7,7 @@ import { DatabaseManager } from "../database/database-manager";
 import { DataStoreManager } from "../database/data-store-manager";
 import { SearchEngine } from "../web/search-engine";
 import { PermissionManager, PermissionRequest } from "./permission-manager";
-import { PermissionPromptData } from "./permission-prompt-overlay-manager";
+import { PermissionPromptData } from "./app-window";
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
@@ -30,6 +30,7 @@ export abstract class AppWindowManager {
         if (window) {
           const promptData: PermissionPromptData = {
             requestId: request.id,
+            tabId: request.tabId,
             origin: request.origin,
             permissions: request.permissions,
             isSecure: request.isSecure,
@@ -38,13 +39,13 @@ export abstract class AppWindowManager {
             isInsecureBlocked: request.isInsecureBlocked,
             isFloodBlocked: request.isFloodBlocked,
           };
-          window.showPermissionPromptOverlay(promptData);
+          window.showPermissionPrompt(promptData);
         }
       },
       (appWindowId: string) => {
         const window = AppWindowManager.getWindowById(appWindowId);
         if (window) {
-          window.hidePermissionPromptOverlay();
+          window.hidePermissionPrompt();
         }
       },
       (webContentsId: number) => {

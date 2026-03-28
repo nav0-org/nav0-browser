@@ -1,59 +1,38 @@
-import { WebContentsView } from "electron";
+import { BrowserWindow } from "electron";
 import { MainToRendererEventsForBrowserIPC } from "../../constants/app-constants";
 
 export class FindInPageManager {
-  private webContentsViewInstance: WebContentsView;
   private appWindowId: string;
-  private isPrivate: boolean;
-  private partitionSetting: string;
-  private readyPromise: Promise<void>;
   private lastSearchText: string = '';
   private currentTabWebContents: Electron.WebContents | null = null;
+  private browserWindowWebContents: Electron.WebContents | null = null;
   private foundInPageHandler: ((event: Electron.Event, result: Electron.FoundInPageResult) => void) | null = null;
+  private _isVisible = false;
 
-  constructor(appWindowId: string, isPrivate: boolean, partitionSetting: string) {
+  constructor(appWindowId: string) {
     this.appWindowId = appWindowId;
-    this.isPrivate = isPrivate;
-    this.partitionSetting = partitionSetting;
-    this.init();
   }
 
-  private init() {
-    this.webContentsViewInstance = new WebContentsView({
-      webPreferences: {
-        preload: FIND_IN_PAGE_PRELOAD_WEBPACK_ENTRY,
-        nodeIntegration: false,
-        contextIsolation: true,
-        sandbox: true,
-        webSecurity: true,
-        allowRunningInsecureContent: false,
-        partition: this.partitionSetting,
-        additionalArguments: [`--app-window-id=${this.appWindowId}`, `--is-private=${this.isPrivate}`],
-        transparent: true,
-      }
-    });
-
-    this.readyPromise = new Promise<void>((resolve) => {
-      this.webContentsViewInstance.webContents.once('did-finish-load', () => resolve());
-    });
-
-    this.webContentsViewInstance.webContents.loadURL(FIND_IN_PAGE_WEBPACK_ENTRY);
-
-    this.webContentsViewInstance.webContents.setWindowOpenHandler(() => {
-      return { action: 'deny' };
-    });
+  setBrowserWindow(browserWindow: BrowserWindow): void {
+    this.browserWindowWebContents = browserWindow.webContents;
   }
 
-  whenReady(): Promise<void> {
-    return this.readyPromise;
+  get isVisible(): boolean {
+    return this._isVisible;
   }
 
-  getWebContentsViewInstance(): WebContentsView {
-    return this.webContentsViewInstance;
+  show(searchText?: string): void {
+    this._isVisible = true;
+    this.browserWindowWebContents?.send(MainToRendererEventsForBrowserIPC.SHOW_FIND_IN_PAGE_BAR, { searchText });
+  }
+
+  hide(): void {
+    this._isVisible = false;
+    this.stopFind();
+    this.browserWindowWebContents?.send(MainToRendererEventsForBrowserIPC.HIDE_FIND_IN_PAGE_BAR);
   }
 
   setActiveTabWebContents(webContents: Electron.WebContents | null): void {
-    // Skip if already attached to the same webContents
     if (this.currentTabWebContents === webContents && this.foundInPageHandler) return;
     this.detachFoundInPageListener();
     this.currentTabWebContents = webContents;
@@ -65,7 +44,7 @@ export class FindInPageManager {
   private attachFoundInPageListener(): void {
     if (!this.currentTabWebContents) return;
     this.foundInPageHandler = (_event: Electron.Event, result: Electron.FoundInPageResult) => {
-      this.webContentsViewInstance.webContents.send(MainToRendererEventsForBrowserIPC.FIND_IN_PAGE_RESULT, {
+      this.browserWindowWebContents?.send(MainToRendererEventsForBrowserIPC.FIND_IN_PAGE_RESULT, {
         activeMatchOrdinal: result.activeMatchOrdinal,
         matches: result.matches,
         finalUpdate: result.finalUpdate,
@@ -121,23 +100,6 @@ export class FindInPageManager {
     this.clearHighlights();
     this.detachFoundInPageListener();
     this.currentTabWebContents = null;
-  }
-
-  resetState(): void {
-    this.webContentsViewInstance.webContents.executeJavaScript(`(() => {
-      if (typeof window.resetFindBar === 'function') {
-        window.resetFindBar();
-      }
-    })()`).catch(() => {});
-  }
-
-  focusInput(): void {
-    this.webContentsViewInstance.webContents.focus();
-    this.webContentsViewInstance.webContents.executeJavaScript(`(() => {
-      if (typeof window.focusFindInput === 'function') {
-        window.focusFindInput();
-      }
-    })()`).catch(() => {});
   }
 
   getLastSearchText(): string {

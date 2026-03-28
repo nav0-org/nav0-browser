@@ -167,6 +167,7 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly REMOVE_ALL_PERMISSIONS_FOR_ORIGIN = "browser:remove-all-permissions-for-origin";
   public static readonly CLEAR_ALL_PERMISSIONS = "browser:clear-all-permissions";
   public static readonly PERMISSION_PROMPT_READY = "browser:permission-prompt-ready";
+  public static readonly OVERLAY_RENDERER_READY = "overlay:renderer-ready";
   public static readonly SHOW_TAB_CONTEXT_MENU = "browser:show-tab-context-menu";
   public static readonly PRINT_PAGE = "browser:print-page";
   public static readonly PIN_TAB = "browser:pin-tab";
@@ -196,8 +197,16 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly READER_MODE_AVAILABILITY_CHANGED = "browser:reader-mode-availability-changed";
   public static readonly READER_MODE_STATE_CHANGED = "browser:reader-mode-state-changed";
   public static readonly FIND_IN_PAGE_RESULT = "browser:find-in-page-result";
+  public static readonly SHOW_FIND_IN_PAGE_BAR = "browser:show-find-in-page-bar";
+  public static readonly HIDE_FIND_IN_PAGE_BAR = "browser:hide-find-in-page-bar";
   public static readonly SHOW_PERMISSION_PROMPT = "browser:show-permission-prompt";
   public static readonly HIDE_PERMISSION_PROMPT = "browser:hide-permission-prompt";
+  public static readonly SHOW_PERMISSION_STRIP = "browser:show-permission-strip";
+  public static readonly HIDE_PERMISSION_STRIP = "browser:hide-permission-strip";
+
+  // Unified overlay
+  public static readonly SHOW_OVERLAY_PANEL = "overlay:show-panel";
+  public static readonly HIDE_OVERLAY_PANEL = "overlay:hide-panel";
   public static readonly TAB_LOADING_CHANGED = "browser:tab-loading-changed";
   public static readonly TAB_PINNED = "browser:tab-pinned";
   public static readonly TAB_UNPINNED = "browser:tab-unpinned";

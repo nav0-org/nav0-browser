@@ -1,9 +1,6 @@
 declare const BROWSER_LAYOUT_WEBPACK_ENTRY: string;
 declare const BROWSER_LAYOUT_PRELOAD_WEBPACK_ENTRY: string;
 
-declare const OPTIONS_MENU_WEBPACK_ENTRY: string;
-declare const OPTIONS_MENU_PRELOAD_WEBPACK_ENTRY: string;
-
 declare const ABOUT_WEBPACK_ENTRY: string;
 declare const ABOUT_PRELOAD_WEBPACK_ENTRY: string;
 
@@ -13,20 +10,8 @@ declare const BOOKMARKS_PRELOAD_WEBPACK_ENTRY: string;
 declare const BROWSER_SETTINGS_WEBPACK_ENTRY: string;
 declare const BROWSER_SETTINGS_PRELOAD_WEBPACK_ENTRY: string;
 
-declare const COMMAND_K_WEBPACK_ENTRY: string;
-declare const COMMAND_K_PRELOAD_WEBPACK_ENTRY: string;
-
-declare const COMMAND_O_WEBPACK_ENTRY: string;
-declare const COMMAND_O_PRELOAD_WEBPACK_ENTRY: string;
-
 declare const DOWNLOADS_WEBPACK_ENTRY: string;
 declare const DOWNLOADS_PRELOAD_WEBPACK_ENTRY: string;
-
-declare const EULA_WEBPACK_ENTRY: string;
-declare const EULA_PRELOAD_WEBPACK_ENTRY: string;
-
-declare const HELP_CENTER_WEBPACK_ENTRY: string;
-declare const HELP_CENTER_PRELOAD_WEBPACK_ENTRY: string;
 
 declare const HISTORY_WEBPACK_ENTRY: string;
 declare const HISTORY_PRELOAD_WEBPACK_ENTRY: string;
@@ -34,23 +19,8 @@ declare const HISTORY_PRELOAD_WEBPACK_ENTRY: string;
 declare const NEW_TAB_WEBPACK_ENTRY: string;
 declare const NEW_TAB_PRELOAD_WEBPACK_ENTRY: string;
 
-declare const PRIVACY_POLICY_WEBPACK_ENTRY: string;
-declare const PRIVACY_POLICY_PRELOAD_WEBPACK_ENTRY: string;
-
-declare const REPORT_ISSUE_WEBPACK_ENTRY: string;
-declare const REPORT_ISSUE_PRELOAD_WEBPACK_ENTRY: string;
-
-declare const ISSUE_REPORT_WEBPACK_ENTRY: string;
-declare const ISSUE_REPORT_PRELOAD_WEBPACK_ENTRY: string;
-
-declare const PERMISSION_PROMPT_WEBPACK_ENTRY: string;
-declare const PERMISSION_PROMPT_PRELOAD_WEBPACK_ENTRY: string;
-
 declare const WEB_CONTENT_WEBPACK_ENTRY: string;
 declare const WEB_CONTENT_PRELOAD_WEBPACK_ENTRY: string;
 
-declare const FIND_IN_PAGE_WEBPACK_ENTRY: string;
-declare const FIND_IN_PAGE_PRELOAD_WEBPACK_ENTRY: string;
-
-declare const SSL_INFO_WEBPACK_ENTRY: string;
-declare const SSL_INFO_PRELOAD_WEBPACK_ENTRY: string;
+declare const OVERLAY_WEBPACK_ENTRY: string;
+declare const OVERLAY_PRELOAD_WEBPACK_ENTRY: string;

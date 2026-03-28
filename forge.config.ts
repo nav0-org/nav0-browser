@@ -71,14 +71,8 @@ const config: ForgeConfig = {
               js: './src/preload/internals-api.ts',
             },
           },
-          {
-            html: './src/renderer/options-menu/index.html',
-            js: './src/renderer/options-menu/index.ts',
-            name: 'options_menu',
-            preload: {
-              js: './src/preload/internals-api.ts',
-            },
-          },
+          // options_menu, command_k, command_o, permission_prompt, issue_report, ssl_info
+          // entries removed — now consolidated into the unified 'overlay' entry below
           {
             html: './src/renderer/pages/bookmarks/index.html',
             js: './src/renderer/pages/bookmarks/index.ts',
@@ -95,22 +89,7 @@ const config: ForgeConfig = {
               js: './src/preload/internals-api.ts',
             },
           },
-          {
-            html: './src/renderer/pages/command-k/index.html',
-            js: './src/renderer/pages/command-k/index.ts',
-            name: 'command_k',
-            preload: {
-              js: './src/preload/internals-api.ts',
-            },
-          },
-          {
-            html: './src/renderer/pages/command-o/index.html',
-            js: './src/renderer/pages/command-o/index.ts',
-            name: 'command_o',
-            preload: {
-              js: './src/preload/internals-api.ts',
-            },
-          },
+          // command_k and command_o entries removed — consolidated into overlay
           {
             html: './src/renderer/pages/downloads/index.html',
             js: './src/renderer/pages/downloads/index.ts',
@@ -143,22 +122,7 @@ const config: ForgeConfig = {
               js: './src/preload/internals-api.ts',
             },
           },
-          {
-            html: './src/renderer/permission-prompt/index.html',
-            js: './src/renderer/permission-prompt/index.ts',
-            name: 'permission_prompt',
-            preload: {
-              js: './src/preload/internals-api.ts',
-            },
-          },
-          {
-            html: './src/renderer/issue-report/index.html',
-            js: './src/renderer/issue-report/index.ts',
-            name: 'issue_report',
-            preload: {
-              js: './src/preload/internals-api.ts',
-            },
-          },
+          // permission_prompt and issue_report entries removed — consolidated into overlay
           {
             html: './src/renderer/web-content/index.html',
             js: './src/renderer/web-content/index.ts',
@@ -167,18 +131,12 @@ const config: ForgeConfig = {
               js: './src/preload/web-content-preload.ts',
             },
           },
+          // find_in_page entry removed — now embedded in browser_layout
+          // ssl_info entry removed — consolidated into overlay
           {
-            html: './src/renderer/find-in-page/index.html',
-            js: './src/renderer/find-in-page/index.ts',
-            name: 'find_in_page',
-            preload: {
-              js: './src/preload/internals-api.ts',
-            },
-          },
-          {
-            html: './src/renderer/ssl-info/index.html',
-            js: './src/renderer/ssl-info/index.ts',
-            name: 'ssl_info',
+            html: './src/renderer/overlay/index.html',
+            js: './src/renderer/overlay/index.ts',
+            name: 'overlay',
             preload: {
               js: './src/preload/internals-api.ts',
             },
