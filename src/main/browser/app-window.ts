@@ -198,7 +198,7 @@ export class AppWindow {
     if (!this.browserWindowInstance || !this.getActiveTab()) return;
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
     const yOffset = this.getYOffset();
-    this.getActiveTab().getWebContentsViewInstance().setBounds({
+    this.getActiveTab().getWebContentsViewInstance()?.setBounds({
       x: 0, y: yOffset, width: parentBounds.width, height: parentBounds.height - yOffset,
     });
   }
@@ -210,7 +210,7 @@ export class AppWindow {
 
     // Resize active tab
     if (this.getActiveTab()) {
-      this.getActiveTab().getWebContentsViewInstance().setBounds({
+      this.getActiveTab().getWebContentsViewInstance()?.setBounds({
         x: 0,
         y: yOffset,
         width: parentBounds.width,
@@ -245,6 +245,19 @@ export class AppWindow {
     return tab;
   }
 
+  createSuspendedTab(url: string, title: string): Tab {
+    const tab = new Tab(this, url, this.partitionSetting, { suspended: true, title });
+    this.tabs.set(tab.getId(), tab);
+
+    this.browserWindowInstance?.webContents.send(MainToRendererEventsForBrowserIPC.NEW_TAB_CREATED, {
+      id: tab.id,
+      title: tab.getTitle(),
+      url: tab.getUrl()
+    });
+
+    return tab;
+  }
+
   closeTab(id: string, isUserInitiated = true): ClosedTabRecord | null {
     const tab = this.tabs.get(id);
     let closedRecord: ClosedTabRecord | null = null;
@@ -265,9 +278,12 @@ export class AppWindow {
       // Clean up per-tab strip state
       this.findInPageState.delete(id);
       this.permissionPrompts.delete(id);
-      tab.getWebContentsViewInstance().webContents.removeAllListeners();
-      tab.getWebContentsViewInstance().removeAllListeners();
-      tab.getWebContentsViewInstance().webContents.close();
+      const view = tab.getWebContentsViewInstance();
+      if (view) {
+        view.webContents.removeAllListeners();
+        view.removeAllListeners();
+        view.webContents.close();
+      }
     }
     this.tabs.delete(id);
     if (this.activeTabId === id) {
@@ -279,7 +295,7 @@ export class AppWindow {
     return closedRecord;
   }
 
-  activateTab(id: string, isUserInitiated = true): void {
+  async activateTab(id: string, isUserInitiated = true): Promise<void> {
     // Save current find-in-page state before switching
     if (this.isFindInPageVisible() && this.activeTabId) {
       this.findInPageState.set(this.activeTabId, {
@@ -293,17 +309,26 @@ export class AppWindow {
     }
 
     if(this.activeTabId && this.getActiveTab()){
-      this.browserWindowInstance.contentView.removeChildView(this.getActiveTab().getWebContentsViewInstance());
+      const prevView = this.getActiveTab().getWebContentsViewInstance();
+      if (prevView) {
+        this.browserWindowInstance.contentView.removeChildView(prevView);
+      }
     }
     if (this.tabs.has(id)) {
       this.activeTabId = id;
+      const tab = this.getActiveTab();
+
+      // Unsuspend hibernated tabs on activation
+      if (tab.getIsSuspended()) {
+        await tab.unsuspend();
+      }
+      tab.updateLastActivatedAt();
 
       // Restore per-tab strip state for the new tab BEFORE calculating offset
       const findState = this.findInPageState.get(id);
       if (findState) {
-        const activeTab = this.getActiveTab();
-        if (activeTab) {
-          this.findInPageManager.setActiveTabWebContents(activeTab.getWebContentsViewInstance().webContents);
+        if (tab && tab.getWebContentsViewInstance()) {
+          this.findInPageManager.setActiveTabWebContents(tab.getWebContentsViewInstance().webContents);
         }
         this.findInPageManager.show(findState.searchText);
       }
@@ -318,11 +343,11 @@ export class AppWindow {
 
       const parentBounds = this.browserWindowInstance.contentView.getBounds();
       const yOffset = this.getYOffset();
-      this.getActiveTab().getWebContentsViewInstance()?.setBounds({x: 0, y: yOffset, width: parentBounds.width, height: parentBounds.height - yOffset});
-      this.browserWindowInstance.contentView.addChildView(this.getActiveTab().getWebContentsViewInstance());
+      tab.getWebContentsViewInstance()?.setBounds({x: 0, y: yOffset, width: parentBounds.width, height: parentBounds.height - yOffset});
+      this.browserWindowInstance.contentView.addChildView(tab.getWebContentsViewInstance());
       // Only focus tab if find bar is not visible (find bar needs input focus)
       if (!this.isFindInPageVisible()) {
-        this.getActiveTab().getWebContentsViewInstance().webContents.focus();
+        tab.getWebContentsViewInstance()?.webContents.focus();
       }
     }
     this.browserWindowInstance?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_ACTIVATED, {
@@ -370,7 +395,7 @@ export class AppWindow {
 
   updateViewBounds(bounds: { x: number, y: number, width: number, height: number }): void {
     if (this.getActiveTab()) {
-      this.getActiveTab().getWebContentsViewInstance().setBounds(bounds);
+      this.getActiveTab().getWebContentsViewInstance()?.setBounds(bounds);
     }
   }
 
@@ -489,7 +514,8 @@ export class AppWindow {
 
   findTabByWebContentsId(webContentsId: number): Tab | null {
     for (const tab of this.tabs.values()) {
-      if (tab.getWebContentsViewInstance().webContents.id === webContentsId) {
+      const view = tab.getWebContentsViewInstance();
+      if (view && view.webContents.id === webContentsId) {
         return tab;
       }
     }
@@ -513,7 +539,7 @@ export class AppWindow {
     }
 
     const activeTab = this.getActiveTab();
-    if (activeTab) {
+    if (activeTab && activeTab.getWebContentsViewInstance()) {
       this.findInPageManager.setActiveTabWebContents(activeTab.getWebContentsViewInstance().webContents);
     }
 

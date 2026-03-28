@@ -18,6 +18,9 @@ export abstract class AppWindowManager {
   private static readonly MAX_CLOSED_WINDOWS = 3;
   private static closedTabs: ClosedTabRecord[] = [];
   private static readonly MAX_CLOSED_TABS = 10;
+  private static hibernationTimer: ReturnType<typeof setInterval> | null = null;
+  private static readonly HIBERNATION_CHECK_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
+  private static readonly HIBERNATION_THRESHOLD_MS = 72 * 60 * 60 * 1000; // 72 hours
 
   public static async init() {
     AppWindowManager.windows = new Map();
@@ -61,6 +64,7 @@ export abstract class AppWindowManager {
     AppWindowManager.createWindow();
     AppWindowManager.initIPCHandlers();
     AppMenuManager.init();
+    AppWindowManager.startHibernationChecker();
   }
   static createWindow(isPrivate = false): AppWindow {
     const window = new AppWindow(isPrivate, DatabaseManager.getDatabase(isPrivate));
@@ -90,6 +94,29 @@ export abstract class AppWindowManager {
 
     return window;
   }
+
+  private static startHibernationChecker(): void {
+    AppWindowManager.hibernationTimer = setInterval(() => {
+      AppWindowManager.checkAndHibernateTabs();
+    }, AppWindowManager.HIBERNATION_CHECK_INTERVAL_MS);
+  }
+
+  private static checkAndHibernateTabs(): void {
+    const now = Date.now();
+    for (const window of AppWindowManager.windows.values()) {
+      const activeTabId = window.getActiveTabId();
+      for (const tab of window.getTabs()) {
+        if (tab.getId() === activeTabId) continue;
+        if (tab.getIsSuspended()) continue;
+        const url = tab.getUrl();
+        if (!url || url === '' || url.startsWith('Nav0://')) continue;
+        if (now - tab.getLastActivatedAt().getTime() > AppWindowManager.HIBERNATION_THRESHOLD_MS) {
+          tab.suspend();
+        }
+      }
+    }
+  }
+
 
   private static recordWindowTabs(window: AppWindow): void {
     if (window.isPrivate) return;
@@ -278,7 +305,7 @@ export abstract class AppWindowManager {
         tab = appWindow.getActiveTab(); 
       }
 
-      if (tab?.getWebContentsViewInstance().webContents.navigationHistory.canGoBack()) {
+      if (tab?.getWebContentsViewInstance()?.webContents.navigationHistory.canGoBack()) {
         return tab.getWebContentsViewInstance().webContents.navigationHistory.goBack();
       }
     });
@@ -294,10 +321,10 @@ export abstract class AppWindowManager {
       if(appWindow && tabId){
         tab = AppWindowManager.getWindowById(appWindowId).getTabById(tabId);
       } else if (appWindow){
-        tab = appWindow.getActiveTab(); 
+        tab = appWindow.getActiveTab();
       }
-      
-      if (tab?.getWebContentsViewInstance().webContents.navigationHistory.canGoForward()) {
+
+      if (tab?.getWebContentsViewInstance()?.webContents.navigationHistory.canGoForward()) {
         return tab.getWebContentsViewInstance().webContents.navigationHistory.goForward();
       }
     });
@@ -316,7 +343,7 @@ export abstract class AppWindowManager {
         tab = appWindow.getActiveTab();
       }
 
-      if (tab) {
+      if (tab && tab.getWebContentsViewInstance()) {
         return tab.getWebContentsViewInstance().webContents.reload();
       }
     });
@@ -335,7 +362,7 @@ export abstract class AppWindowManager {
         tab = appWindow.getActiveTab();
       }
 
-      if (tab) {
+      if (tab && tab.getWebContentsViewInstance()) {
         const webContents = tab.getWebContentsViewInstance().webContents;
         const session = webContents.session;
         const currentUrl = webContents.getURL();
@@ -704,9 +731,9 @@ export abstract class AppWindowManager {
       if (defaultTabs.length > 0) {
         defaultTabs[0].navigate(restoredUrls[0].url);
       }
-      // Create additional tabs for the remaining URLs
+      // Create remaining tabs in suspended state — they load only when activated
       for (let i = 1; i < restoredUrls.length; i++) {
-        await newWindow.createTab(restoredUrls[i].url, false);
+        newWindow.createSuspendedTab(restoredUrls[i].url, restoredUrls[i].title || 'Restored Tab');
       }
       return { ok: true };
     });
@@ -715,7 +742,7 @@ export abstract class AppWindowManager {
       const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
       if (!window) return;
       const activeTab = window.getActiveTab();
-      if (!activeTab) return;
+      if (!activeTab || !activeTab.getWebContentsViewInstance()) return;
       activeTab.getWebContentsViewInstance().webContents.print();
     });
 
@@ -725,7 +752,9 @@ export abstract class AppWindowManager {
       const tab = window.getTabById(tabId);
       if (!tab) return;
 
-      const webContents = tab.getWebContentsViewInstance().webContents;
+      const view = tab.getWebContentsViewInstance();
+      if (!view) return; // Tab is suspended
+      const webContents = view.webContents;
       const isMuted = webContents.isAudioMuted();
 
       const template: Electron.MenuItemConstructorOptions[] = [
