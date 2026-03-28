@@ -30,6 +30,7 @@ export abstract class AppWindowManager {
         if (window) {
           const promptData: PermissionPromptData = {
             requestId: request.id,
+            tabId: request.tabId,
             origin: request.origin,
             permissions: request.permissions,
             isSecure: request.isSecure,

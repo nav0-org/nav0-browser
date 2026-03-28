@@ -10,6 +10,7 @@ import type { Database as DB } from 'better-sqlite3';
 
 export interface PermissionPromptData {
   requestId: string;
+  tabId?: string;
   origin: string;
   permissions: Array<{ type: string; label: string; icon: string }>;
   isSecure: boolean;
@@ -29,8 +30,7 @@ export class AppWindow {
   private unifiedOverlayManager: UnifiedOverlayManager | null = null;
   private findInPageManager: FindInPageManager | null = null;
   private findInPageState: Map<string, { searchText: string }> = new Map(); // per-tab find state
-  private permissionTabId: string | null = null; // tab with active permission prompt
-  private pendingPermissionData: PermissionPromptData | null = null;
+  private permissionPrompts: Map<string, PermissionPromptData> = new Map(); // per-tab permission data
   private database: DB;
   private readyPromise: Promise<void>;
   private resolveReady: () => void;
@@ -250,10 +250,7 @@ export class AppWindow {
       PermissionManager.clearSessionPermissionsForTab(id);
       // Clean up per-tab strip state
       this.findInPageState.delete(id);
-      if (this.permissionTabId === id) {
-        this.permissionTabId = null;
-        this.pendingPermissionData = null;
-      }
+      this.permissionPrompts.delete(id);
       tab.getWebContentsViewInstance().webContents.removeAllListeners();
       tab.getWebContentsViewInstance().removeAllListeners();
       tab.getWebContentsViewInstance().webContents.close();
@@ -296,11 +293,12 @@ export class AppWindow {
         }
         this.findInPageManager.show(findState.searchText);
       }
-      if (this.permissionTabId === id && this.pendingPermissionData) {
+      const permData = this.permissionPrompts.get(id);
+      if (permData) {
         this.permissionStripVisible = true;
         this.browserWindowInstance?.webContents.send(
           MainToRendererEventsForBrowserIPC.SHOW_PERMISSION_STRIP,
-          this.pendingPermissionData
+          permData
         );
       }
 
@@ -308,7 +306,10 @@ export class AppWindow {
       const yOffset = this.getYOffset();
       this.getActiveTab().getWebContentsViewInstance()?.setBounds({x: 0, y: yOffset, width: parentBounds.width, height: parentBounds.height - yOffset});
       this.browserWindowInstance.contentView.addChildView(this.getActiveTab().getWebContentsViewInstance());
-      this.getActiveTab().getWebContentsViewInstance().webContents.focus();
+      // Only focus tab if find bar is not visible (find bar needs input focus)
+      if (!this.isFindInPageVisible()) {
+        this.getActiveTab().getWebContentsViewInstance().webContents.focus();
+      }
     }
     this.browserWindowInstance?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_ACTIVATED, {
       id: this.getActiveTab().id,
@@ -422,26 +423,33 @@ export class AppWindow {
     });
   }
 
-  // Permission prompt — rendered as a strip in browser_layout
+  // Permission prompt — rendered as a strip in browser_layout (per-tab)
   private permissionStripVisible = false;
 
   async showPermissionPrompt(data: PermissionPromptData): Promise<void> {
     if (!this.browserWindowInstance) return;
-    this.permissionStripVisible = true;
-    this.permissionTabId = this.activeTabId;
-    this.pendingPermissionData = data;
-    this.browserWindowInstance.webContents.send(
-      MainToRendererEventsForBrowserIPC.SHOW_PERMISSION_STRIP,
-      data
-    );
-    this.resizeActiveTab();
+    const tabId = data.tabId || this.activeTabId;
+    if (!tabId) return;
+    this.permissionPrompts.set(tabId, data);
+
+    // Only show the strip visually if this is the active tab
+    if (tabId === this.activeTabId) {
+      this.permissionStripVisible = true;
+      this.browserWindowInstance.webContents.send(
+        MainToRendererEventsForBrowserIPC.SHOW_PERMISSION_STRIP,
+        data
+      );
+      this.resizeActiveTab();
+    }
   }
 
   hidePermissionPrompt(): void {
+    // Remove the active tab's permission data
+    if (this.activeTabId) {
+      this.permissionPrompts.delete(this.activeTabId);
+    }
     if (!this.permissionStripVisible) return;
     this.permissionStripVisible = false;
-    this.permissionTabId = null;
-    this.pendingPermissionData = null;
     this.browserWindowInstance?.webContents.send(
       MainToRendererEventsForBrowserIPC.HIDE_PERMISSION_STRIP
     );
