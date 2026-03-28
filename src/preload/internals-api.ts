@@ -105,14 +105,8 @@ export function init(){
     updateBrowserViewBounds: async (appWindowId: string, bounds: { x: number, y: number, width: number, height: number }) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.UPDATE_BROWSER_VIEW_BOUNDS, appWindowId, bounds);
     },
-    closeAppWindow: async (appWindowId: string) => {
+    closeAppWindow: async (appWindowId: string) => { 
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.CLOSE_WINDOW, appWindowId);
-    },
-    minimizeWindow: (appWindowId: string) => {
-      ipcRenderer.send(RendererToMainEventsForBrowserIPC.MINIMIZE_WINDOW, appWindowId);
-    },
-    toggleFullScreen: (appWindowId: string) => {
-      ipcRenderer.send(RendererToMainEventsForBrowserIPC.TOGGLE_FULLSCREEN, appWindowId);
     },
     showOptionsMenu: async (appWindowId: string) => { 
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_OPTIONS_MENU, appWindowId);

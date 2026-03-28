@@ -56,68 +56,11 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
   padding-left: 78px;
 }
 
-/* Custom window controls — hidden by default, shown in fullscreen on macOS */
-.window-controls {
-  display: none;
-  align-items: center;
-  gap: 8px;
-  margin-right: 10px;
-  margin-left: 4px;
-  -webkit-app-region: no-drag;
-}
-
-body.platform-darwin.is-fullscreen .window-controls {
-  display: flex;
-}
-
-.window-control-btn {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  color: transparent;
-  transition: color 0.15s;
-}
-
-.window-controls:hover .window-control-btn {
-  color: rgba(0, 0, 0, 0.6);
-}
-
-.window-control-close {
-  background-color: #ff5f57;
-}
-
-.window-control-minimize {
-  background-color: #febc2e;
-}
-
-.window-control-fullscreen {
-  background-color: #28c840;
-}
-
-.window-control-close:hover {
-  background-color: #e0443e;
-}
-
-.window-control-minimize:hover {
-  background-color: #dea123;
-}
-
-.window-control-fullscreen:hover {
-  background-color: #1eab32;
-}
-
 /* All interactive elements inside tab bar must be non-draggable */
 .tab-bar button,
 .tab-bar .tab,
 .tab-bar .tabs-container,
 .tab-bar .private-window-identifier,
-.tab-bar .window-controls,
 .tab-bar #controls-wrapper {
   -webkit-app-region: no-drag;
 }

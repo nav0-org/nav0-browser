@@ -44,8 +44,6 @@ declare global {
 
       updateBrowserViewBounds: (appWindowId: string, bounds: { x: number, y: number, width: number, height: number }) => Promise<any>;
       closeAppWindow: (appWindowId: string) => Promise<any>;
-      minimizeWindow: (appWindowId: string) => void;
-      toggleFullScreen: (appWindowId: string) => void;
       createNewAppWindow: () => Promise<any>;
       createNewPrivateAppWindow: () => Promise<any>;
 

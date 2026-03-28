@@ -97,17 +97,6 @@ export class BrowserTabManager {
   }
 
   private setupEventListeners(): void {
-    // Custom window control buttons (visible in fullscreen on macOS)
-    document.getElementById('window-control-close')?.addEventListener('click', () => {
-      window.BrowserAPI.closeAppWindow(this.appWindowId);
-    });
-    document.getElementById('window-control-minimize')?.addEventListener('click', () => {
-      window.BrowserAPI.minimizeWindow(this.appWindowId);
-    });
-    document.getElementById('window-control-fullscreen')?.addEventListener('click', () => {
-      window.BrowserAPI.toggleFullScreen(this.appWindowId);
-    });
-
     // New tab button
     this.newTabButton.addEventListener('click', async () => {
       window.BrowserAPI.createTab(this.appWindowId, InAppUrls.NEW_TAB, true);
