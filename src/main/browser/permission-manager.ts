@@ -1,4 +1,4 @@
-import { session, WebContents, ipcMain, net } from 'electron';
+import { session, WebContents, ipcMain, net, clipboard } from 'electron';
 import { v4 as uuid } from 'uuid';
 import { RendererToMainEventsForBrowserIPC } from '../../constants/app-constants';
 import type { Database as DatabaseType } from 'better-sqlite3';
@@ -578,6 +578,28 @@ export class PermissionManager {
         }
       }
       return null;
+    });
+
+    ipcMain.handle('web-share', async (
+      _event: Electron.IpcMainInvokeEvent,
+      data: { title?: string; text?: string; url?: string }
+    ) => {
+      try {
+        const parts: string[] = [];
+        if (data.title) parts.push(data.title);
+        if (data.text) parts.push(data.text);
+        if (data.url) parts.push(data.url);
+
+        const textToCopy = parts.join('\n');
+        if (!textToCopy) {
+          return { success: false, error: 'Nothing to share' };
+        }
+
+        clipboard.writeText(textToCopy);
+        return { success: true };
+      } catch {
+        return { success: false, error: 'Failed to copy to clipboard' };
+      }
     });
   }
 }
