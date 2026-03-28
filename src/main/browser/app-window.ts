@@ -28,6 +28,9 @@ export class AppWindow {
   private partitionSetting: string;
   private unifiedOverlayManager: UnifiedOverlayManager | null = null;
   private findInPageManager: FindInPageManager | null = null;
+  private findInPageTabs: Set<string> = new Set(); // tabs with find bar open
+  private permissionTabId: string | null = null; // tab with active permission prompt
+  private pendingPermissionData: PermissionPromptData | null = null;
   private database: DB;
   private readyPromise: Promise<void>;
   private resolveReady: () => void;
@@ -245,6 +248,12 @@ export class AppWindow {
       }
       tab.clearPendingTimers();
       PermissionManager.clearSessionPermissionsForTab(id);
+      // Clean up per-tab strip state
+      this.findInPageTabs.delete(id);
+      if (this.permissionTabId === id) {
+        this.permissionTabId = null;
+        this.pendingPermissionData = null;
+      }
       tab.getWebContentsViewInstance().webContents.removeAllListeners();
       tab.getWebContentsViewInstance().removeAllListeners();
       tab.getWebContentsViewInstance().webContents.close();
@@ -260,15 +269,37 @@ export class AppWindow {
   }
 
   activateTab(id: string, isUserInitiated = true): void {
-    // Dismiss tab-specific strips when switching tabs
-    this.hideFindInPage();
-    this.hidePermissionPrompt();
+    // Hide current strips visually (without clearing per-tab state)
+    if (this.isFindInPageVisible()) {
+      this.findInPageManager.hide();
+    }
+    if (this.permissionStripVisible) {
+      this.permissionStripVisible = false;
+      this.browserWindowInstance?.webContents.send(MainToRendererEventsForBrowserIPC.HIDE_PERMISSION_STRIP);
+    }
 
     if(this.activeTabId && this.getActiveTab()){
       this.browserWindowInstance.contentView.removeChildView(this.getActiveTab().getWebContentsViewInstance());
     }
     if (this.tabs.has(id)) {
       this.activeTabId = id;
+
+      // Restore per-tab strip state for the new tab BEFORE calculating offset
+      if (this.findInPageTabs.has(id)) {
+        const activeTab = this.getActiveTab();
+        if (activeTab) {
+          this.findInPageManager.setActiveTabWebContents(activeTab.getWebContentsViewInstance().webContents);
+        }
+        this.findInPageManager.show();
+      }
+      if (this.permissionTabId === id && this.pendingPermissionData) {
+        this.permissionStripVisible = true;
+        this.browserWindowInstance?.webContents.send(
+          MainToRendererEventsForBrowserIPC.SHOW_PERMISSION_STRIP,
+          this.pendingPermissionData
+        );
+      }
+
       const parentBounds = this.browserWindowInstance.contentView.getBounds();
       const yOffset = this.getYOffset();
       this.getActiveTab().getWebContentsViewInstance()?.setBounds({x: 0, y: yOffset, width: parentBounds.width, height: parentBounds.height - yOffset});
@@ -393,6 +424,8 @@ export class AppWindow {
   async showPermissionPrompt(data: PermissionPromptData): Promise<void> {
     if (!this.browserWindowInstance) return;
     this.permissionStripVisible = true;
+    this.permissionTabId = this.activeTabId;
+    this.pendingPermissionData = data;
     this.browserWindowInstance.webContents.send(
       MainToRendererEventsForBrowserIPC.SHOW_PERMISSION_STRIP,
       data
@@ -403,6 +436,8 @@ export class AppWindow {
   hidePermissionPrompt(): void {
     if (!this.permissionStripVisible) return;
     this.permissionStripVisible = false;
+    this.permissionTabId = null;
+    this.pendingPermissionData = null;
     this.browserWindowInstance?.webContents.send(
       MainToRendererEventsForBrowserIPC.HIDE_PERMISSION_STRIP
     );
@@ -456,12 +491,14 @@ export class AppWindow {
       this.findInPageManager.setActiveTabWebContents(activeTab.getWebContentsViewInstance().webContents);
     }
 
+    if (this.activeTabId) this.findInPageTabs.add(this.activeTabId);
     this.findInPageManager.show();
     this.resizeActiveTab();
   }
 
   hideFindInPage(): void {
     if (this.isFindInPageVisible()) {
+      if (this.activeTabId) this.findInPageTabs.delete(this.activeTabId);
       this.findInPageManager.hide();
       this.resizeActiveTab();
     }
