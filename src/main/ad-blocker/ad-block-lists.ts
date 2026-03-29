@@ -650,11 +650,23 @@ export const AD_BLOCK_EARLY_SCRIPT = `
   if (window.__Nav0AdBlockEarly) return;
   window.__Nav0AdBlockEarly = true;
 
+  // Detect known video/streaming platforms where IMA mocking breaks playback
+  var hostname = window.location.hostname.toLowerCase();
+  var videoSites = ['youtube.com', 'youtu.be', 'youtube-nocookie.com',
+                    'spotify.com', 'netflix.com', 'hulu.com',
+                    'disneyplus.com', 'twitch.tv', 'vimeo.com', 'dailymotion.com',
+                    'crunchyroll.com', 'primevideo.com', 'peacocktv.com'];
+  var skipIMA = videoSites.some(function(site) {
+    return hostname === site || hostname.endsWith('.' + site);
+  });
+
   // ============================================================
   // 1. Google IMA SDK Mock
   //    Replaces the Google Interactive Media Ads SDK with a no-op
   //    stub so video players skip ads and play content directly.
+  //    Skipped on known video platforms to avoid breaking playback.
   // ============================================================
+  if (!skipIMA) {
   function NoopFn() {}
   function EventTarget() { this._handlers = {}; }
   EventTarget.prototype.addEventListener = function(e, fn) {
@@ -827,6 +839,7 @@ export const AD_BLOCK_EARLY_SCRIPT = `
       configurable: false
     });
   } catch(e) {}
+  } // end if (!skipIMA)
 
   // ============================================================
   // 2. HTMLMediaElement.prototype.play hook
@@ -844,6 +857,13 @@ export const AD_BLOCK_EARLY_SCRIPT = `
     try {
       var video = this;
       var src = (video.src || video.currentSrc || '').toLowerCase();
+
+      // Don't intercept same-origin videos (e.g. YouTube serving its own content)
+      try {
+        if (src && new URL(src).hostname === window.location.hostname) {
+          return originalPlay.apply(video, arguments);
+        }
+      } catch(e) {}
 
       // Check source URL for ad patterns
       for (var i = 0; i < adDomainPatterns.length; i++) {
@@ -1152,19 +1172,6 @@ export const AD_BLOCK_SCRIPT = `
       el = el.parentElement;
     }
 
-    // Duration heuristic: short videos (< 60s) in ad-like context
-    if (video.duration && video.duration > 0 && video.duration < 60) {
-      var p = video.parentElement;
-      for (var k = 0; k < 4 && p; k++) {
-        var pCls = (p.className && typeof p.className === 'string') ? p.className.toLowerCase() : '';
-        var pId = (p.id || '').toLowerCase();
-        if (pCls.match(/ad|ads|advertisement|commercial|promo|sponsor/i) ||
-            pId.match(/ad|ads|advertisement|commercial|promo|sponsor/i)) {
-          return true;
-        }
-        p = p.parentElement;
-      }
-    }
 
     return false;
   }

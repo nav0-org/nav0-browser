@@ -135,11 +135,22 @@ export abstract class SettingsEnforcer {
     }
   }
 
+  private static readonly MULTI_PART_TLDS = new Set([
+    'co.uk', 'co.jp', 'co.kr', 'co.nz', 'co.za', 'co.in', 'co.id',
+    'com.au', 'com.br', 'com.cn', 'com.mx', 'com.tw', 'com.sg', 'com.hk',
+    'org.uk', 'org.au', 'net.au', 'net.br',
+    'ac.uk', 'gov.uk', 'gov.au',
+    'ne.jp', 'or.jp', 'ac.jp',
+  ]);
+
   private static getRegistrableDomain(hostname: string): string {
-    // Simplified eTLD+1 extraction
     const parts = hostname.split('.');
     if (parts.length <= 2) return hostname;
-    return parts.slice(-2).join('.');
+    const lastTwo = parts.slice(-2).join('.');
+    if (SettingsEnforcer.MULTI_PART_TLDS.has(lastTwo) && parts.length > 2) {
+      return parts.slice(-3).join('.');
+    }
+    return lastTwo;
   }
 
   // ---- Proxy Settings ----
