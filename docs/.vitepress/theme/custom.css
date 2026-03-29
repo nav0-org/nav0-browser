@@ -79,10 +79,8 @@
   }
 
   .VPHero .VPImage.image-src {
-    border-radius: 16px;
-    /* width: 100% !important; */
-    max-width: 100% !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    max-width: 320px !important;
+    margin: 0 auto;
   }
 
   .VPHero .image-bg {
@@ -99,8 +97,8 @@
   }
 
   .VPHero .VPImage {
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    max-width: 240px !important;
+    margin: 0 auto;
   }
 }
 
