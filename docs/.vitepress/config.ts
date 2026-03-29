@@ -14,11 +14,11 @@ function getReleaseSidebar() {
     if (!match) return null
 
     const frontmatter = match[1]
-    const titleMatch = frontmatter.match(/title:\s*["'](.+?)["']/)
+    const titleMatch = frontmatter.match(/title:\s*(["'])(.+?)\1/)
     const dateMatch = frontmatter.match(/date:\s*(\S+)/)
 
     return {
-      text: titleMatch?.[1] || file.replace('.md', ''),
+      text: titleMatch?.[2] || file.replace('.md', ''),
       date: dateMatch?.[1] || '',
       link: `/releases/${file.replace('.md', '')}`
     }
@@ -47,11 +47,11 @@ function getBlogSidebar() {
     if (!match) return null
 
     const frontmatter = match[1]
-    const titleMatch = frontmatter.match(/title:\s*["'](.+?)["']/)
+    const titleMatch = frontmatter.match(/title:\s*(["'])(.+?)\1/)
     const dateMatch = frontmatter.match(/date:\s*(\S+)/)
 
     return {
-      text: titleMatch?.[1] || file.replace('.md', ''),
+      text: titleMatch?.[2] || file.replace('.md', ''),
       date: dateMatch?.[1] || '',
       link: `/blog/${file.replace('.md', '')}`
     }
