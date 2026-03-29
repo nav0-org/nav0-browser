@@ -17,6 +17,7 @@
         <li><a href="#privacy" class="sidebar-link" data-section="privacy"><i data-lucide="shield" width="16" height="16"></i> Privacy &amp; Security</a></li>
         <li><a href="#network" class="sidebar-link" data-section="network"><i data-lucide="globe" width="16" height="16"></i> Network</a></li>
         <li><a href="#shortcuts" class="sidebar-link" data-section="shortcuts"><i data-lucide="keyboard" width="16" height="16"></i> Keyboard Shortcuts</a></li>
+        <li><a href="#developer" class="sidebar-link" data-section="developer"><i data-lucide="code" width="16" height="16"></i> Developer</a></li>
       </ul>
     </nav>
 
@@ -482,6 +483,25 @@
 
           <div class="mt-md" style="text-align: right;">
             <button class="btn btn-sm btn-secondary" id="reset-all-shortcuts-btn"><i data-lucide="rotate-ccw" width="14" height="14"></i> Reset All to Defaults</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== DEVELOPER SECTION ====== -->
+      <section id="section-developer" class="settings-section" data-keywords="developer devtools dev tools inspect element console debug chromium">
+        <h2 class="section-title">Developer</h2>
+
+        <!-- Developer Tools Toggle -->
+        <div class="setting-group">
+          <div class="setting-toggle-row">
+            <div>
+              <label class="setting-label">Enable Developer Tools</label>
+              <p class="setting-description">Allow opening Chromium Developer Tools to inspect pages, debug JavaScript, and monitor network activity. Use <kbd>F12</kbd> or the View menu to toggle.</p>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="devtools-toggle">
+              <span class="toggle-slider"></span>
+            </label>
           </div>
         </div>
       </section>

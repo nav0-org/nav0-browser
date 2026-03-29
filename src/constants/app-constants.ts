@@ -175,6 +175,9 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly SHOW_SSL_INFO = "browser:show-ssl-info";
   public static readonly HIDE_SSL_INFO = "browser:hide-ssl-info";
 
+  // Developer Tools
+  public static readonly TOGGLE_DEV_TOOLS = "browser:toggle-dev-tools";
+
   // Issue report
   public static readonly SHOW_ISSUE_REPORT = "browser:show-issue-report";
   public static readonly HIDE_ISSUE_REPORT = "browser:hide-issue-report";

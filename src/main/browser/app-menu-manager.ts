@@ -1,6 +1,8 @@
 import { app, dialog, Menu, shell } from "electron";
-import { AppConstants, InAppUrls } from "../../constants/app-constants";
+import { AppConstants, DataStoreConstants, InAppUrls } from "../../constants/app-constants";
 import { AppWindowManager } from "./app-window-manager";
+import { DataStoreManager } from "../database/data-store-manager";
+import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
 
 
 export abstract class AppMenuManager {
@@ -146,8 +148,18 @@ export abstract class AppMenuManager {
         label: 'View',
         submenu: [
           // { role: 'reload' as const},
-          // { role: 'toggleDevTools' as const},
-          // { type: 'separator' as const},
+          { label: 'Toggle Developer Tools', accelerator: 'F12', click: () => {
+            const settings = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as BrowserSettings;
+            const merged = { ...DEFAULT_BROWSER_SETTINGS, ...settings };
+            if (!merged.devToolsEnabled) return;
+            const activeWindow = AppWindowManager.getActiveWindow();
+            if (!activeWindow) return;
+            const activeTab = activeWindow.getActiveTab();
+            if (activeTab && activeTab.getWebContentsViewInstance()) {
+              activeTab.getWebContentsViewInstance().webContents.toggleDevTools();
+            }
+          }},
+          { type: 'separator' as const},
           { role: 'resetZoom' as const},
           { role: 'zoomIn' as const, accelerator: 'CmdOrCtrl+Shift+=',},
           { role: 'zoomOut' as const, accelerator: 'CmdOrCtrl+Shift+-',},

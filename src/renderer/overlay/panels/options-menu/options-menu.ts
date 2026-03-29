@@ -126,6 +126,12 @@ const OPTIONS_MENU_HTML = `
         </div>
       </div>
 
+      <div class="dropdown-item" id="om-devtools-option">
+        <i data-lucide="code" width="16" height="16"></i>
+        <span class="dropdown-item-text">Developer Tools</span>
+        <span id="om-devtools-shortcut" class="keyboard-shortcut"></span>
+      </div>
+
       <div class="divider"></div>
 
       <div class="dropdown-item" id="om-settings-option">
@@ -155,6 +161,7 @@ function initializeDomElements(): void {
   setShortcut('om-history-shortcut', [modKey, 'Shift', 'H']);
   setShortcut('om-bookmarks-shortcut', [modKey, 'Shift', 'B']);
   setShortcut('om-browser-settings-shortcut', [modKey, 'Shift', ',']);
+  setShortcut('om-devtools-shortcut', ['F12']);
 
   // Populate history submenu when hovering
   const historyContainer = containerEl.querySelector('#om-history-submenu-container');
@@ -287,6 +294,11 @@ function setupEventListeners(): void {
 
   optionsElement?.querySelector('#om-bookmarks-option')?.addEventListener('click', async () => {
     await window.BrowserAPI.createTab(appWindowId, InAppUrls.BOOKMARKS, true);
+  });
+
+  optionsElement?.querySelector('#om-devtools-option')?.addEventListener('click', async () => {
+    await window.BrowserAPI.toggleDevTools(appWindowId);
+    await window.BrowserAPI.hideOptionsMenu(appWindowId);
   });
 
   optionsElement?.querySelector('#om-settings-option')?.addEventListener('click', async () => {

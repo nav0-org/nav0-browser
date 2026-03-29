@@ -80,6 +80,9 @@ export interface BrowserSettings {
 
   // Keyboard Shortcuts
   keyboardShortcuts: Record<string, string>;
+
+  // Developer Tools
+  devToolsEnabled: boolean;
 }
 
 export const DEFAULT_SEARCH_ENGINES: SearchEngineConfig[] = [
@@ -271,4 +274,7 @@ export const DEFAULT_BROWSER_SETTINGS: BrowserSettings = {
 
   // Keyboard Shortcuts (empty = use defaults)
   keyboardShortcuts: {},
+
+  // Developer Tools (off by default — minimal philosophy)
+  devToolsEnabled: false,
 };
