@@ -10,6 +10,14 @@ Thoughts on privacy, browsers, and the open web.
 ---
 
 <div class="blog-post-item">
+  <a href="/blog/nav0-vs-vivaldi">
+    <h2>Nav0 vs Vivaldi: When Your Browser Tries to Be Everything</h2>
+  </a>
+  <div class="post-meta">By Nav0 Team &middot; March 29, 2026 &middot; 10 min read &middot; Comparison</div>
+  <p class="post-excerpt">Vivaldi is the most customizable browser ever built — mail client, calendar, RSS reader, note-taking, and hundreds of settings. Nav0 takes the opposite approach: do less, perfectly. Here's why a browser that does everything may not do the one thing you need it to.</p>
+</div>
+
+<div class="blog-post-item">
   <a href="/blog/nav0-vs-arc">
     <h2>Nav0 vs Arc: Rethinking the Browser vs. Stripping It Down</h2>
   </a>
