@@ -4,7 +4,7 @@
 
 Nav0 is a minimal, privacy-focused web browser built on Electron. The philosophy is **"Browse. Nothing More."** — a lightweight, open-source browser with zero telemetry, zero tracking, and zero data collection.
 
-- **Version**: 0.0.9
+- **Version**: 0.1.0
 - **License**: MIT
 - **Author**: Ketan Patil
 - **Repo**: https://github.com/nav0-org/nav0-browser
