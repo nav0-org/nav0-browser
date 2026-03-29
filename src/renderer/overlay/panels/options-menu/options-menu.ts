@@ -161,7 +161,8 @@ function initializeDomElements(): void {
   setShortcut('om-history-shortcut', [modKey, 'Shift', 'H']);
   setShortcut('om-bookmarks-shortcut', [modKey, 'Shift', 'B']);
   setShortcut('om-browser-settings-shortcut', [modKey, 'Shift', ',']);
-  setShortcut('om-devtools-shortcut', ['F12']);
+  const devtoolsMod = window.BrowserAPI.platform === 'darwin' ? 'Opt' : 'Shift';
+  setShortcut('om-devtools-shortcut', [modKey, devtoolsMod, 'I']);
 
   // Populate history submenu when hovering
   const historyContainer = containerEl.querySelector('#om-history-submenu-container');

@@ -214,7 +214,7 @@ export const DEFAULT_KEYBOARD_SHORTCUTS: KeyboardShortcutAction[] = [
   { id: 'open-history', label: 'Open History', category: 'Utilities', defaultShortcut: 'mod+Shift+H', currentShortcut: 'mod+Shift+H' },
   { id: 'bookmark-page', label: 'Bookmark Page', category: 'Bookmarks', defaultShortcut: 'mod+D', currentShortcut: 'mod+D' },
   { id: 'open-bookmarks', label: 'Open Bookmarks', category: 'Bookmarks', defaultShortcut: 'mod+Shift+B', currentShortcut: 'mod+Shift+B' },
-  { id: 'toggle-devtools', label: 'Toggle DevTools', category: 'Developer', defaultShortcut: 'F12', currentShortcut: 'F12' },
+  { id: 'toggle-devtools', label: 'Toggle DevTools', category: 'Developer', defaultShortcut: 'mod+Shift+I', currentShortcut: 'mod+Shift+I' },
   { id: 'zoom-in', label: 'Zoom In', category: 'View', defaultShortcut: 'mod+Shift+=', currentShortcut: 'mod+Shift+=' },
   { id: 'zoom-out', label: 'Zoom Out', category: 'View', defaultShortcut: 'mod+Shift+-', currentShortcut: 'mod+Shift+-' },
   { id: 'reset-zoom', label: 'Reset Zoom', category: 'View', defaultShortcut: 'mod+0', currentShortcut: 'mod+0' },

@@ -148,7 +148,7 @@ export abstract class AppMenuManager {
         label: 'View',
         submenu: [
           // { role: 'reload' as const},
-          { label: 'Toggle Developer Tools', accelerator: 'F12', click: () => {
+          { label: 'Toggle Developer Tools', accelerator: isMac ? 'Cmd+Alt+I' : 'Ctrl+Shift+I', click: () => {
             const settings = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as BrowserSettings;
             const merged = { ...DEFAULT_BROWSER_SETTINGS, ...settings };
             if (!merged.devToolsEnabled) return;
