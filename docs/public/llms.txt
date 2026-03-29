@@ -1,8 +1,8 @@
-# nav0
+# Nav0
 
 > A minimal, privacy-focused web browser. No data collection. No bloat. No AI gimmicks. Just clean, safe browsing.
 
-nav0 is a free, open-source desktop web browser built on Electron and Chromium. It is designed for users who want a fast, lightweight browser that respects their privacy. nav0 collects zero telemetry, requires no accounts, and stores all data locally on the user's device.
+Nav0 is a free, open-source desktop web browser built on Electron and Chromium. It is designed for users who want a fast, lightweight browser that respects their privacy. Nav0 collects zero telemetry, requires no accounts, and stores all data locally on the user's device.
 
 ## Key Facts
 
@@ -18,7 +18,7 @@ nav0 is a free, open-source desktop web browser built on Electron and Chromium. 
 
 ## Core Principles
 
-1. **Zero Data Collection**: nav0 does not collect, store, transmit, or process any user data. No telemetry, no analytics, no crash reports.
+1. **Zero Data Collection**: Nav0 does not collect, store, transmit, or process any user data. No telemetry, no analytics, no crash reports.
 2. **Local-Only Storage**: Bookmarks, history, settings, and downloads stay on the user's device. No cloud sync. No account required.
 3. **Minimal by Design**: Only essential browsing features. No AI assistants, no news feeds, no crypto wallets, no built-in VPNs, no shopping tools.
 4. **Open Source Transparency**: Full source code is public and auditable. Users can build from source for maximum trust.
@@ -54,7 +54,7 @@ nav0 is a free, open-source desktop web browser built on Electron and Chromium. 
 - No idle network requests
 - No pre-loading of suggested content
 
-## What nav0 Does NOT Include (By Design)
+## What Nav0 Does NOT Include (By Design)
 
 - No AI assistant or chatbot
 - No news feed or content recommendations
@@ -67,7 +67,7 @@ nav0 is a free, open-source desktop web browser built on Electron and Chromium. 
 
 ## Comparison with Other Browsers
 
-Unlike Chrome, Edge, Opera, and other mainstream browsers, nav0:
+Unlike Chrome, Edge, Opera, and other mainstream browsers, Nav0:
 - Does not send browsing data to any server
 - Does not require or encourage sign-in
 - Does not include advertising or monetization features

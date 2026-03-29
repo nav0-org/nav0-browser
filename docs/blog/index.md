@@ -22,7 +22,7 @@ Thoughts on privacy, browsers, and the open web.
     <h2>Nav0 vs Arc: Rethinking the Browser vs. Stripping It Down</h2>
   </a>
   <div class="post-meta">By Nav0 Team &middot; March 21, 2026 &middot; 10 min read &middot; Comparison</div>
-  <p class="post-excerpt">Arc and nav0 both reject Chrome's status quo, but from opposite directions. Arc adds more UI — Spaces, Easels, AI features, split views. Nav0 removes UI. This is maximalism vs. minimalism, and only one approach doesn't require your data.</p>
+  <p class="post-excerpt">Arc and Nav0 both reject Chrome's status quo, but from opposite directions. Arc adds more UI — Spaces, Easels, AI features, split views. Nav0 removes UI. This is maximalism vs. minimalism, and only one approach doesn't require your data.</p>
 </div>
 
 <div class="blog-post-item">

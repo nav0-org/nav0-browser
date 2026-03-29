@@ -265,7 +265,7 @@ export const DEFAULT_BROWSER_SETTINGS: BrowserSettings = {
   popupAllowedSites: [],
   popupBlockedSites: [],
 
-  // User Agent (nav0-browser by default)
+  // User Agent (Nav0 browser by default)
   userAgentPreset: 'electron-default',
   userAgentCustomValue: '',
 

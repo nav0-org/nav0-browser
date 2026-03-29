@@ -38,7 +38,7 @@
   <line x1="50" y1="270" x2="750" y2="270" stroke="#4a4a6a" stroke-width="1" stroke-dasharray="5,5"/>
   <text x="400" y="295" fill="#4CAF50" font-size="14" font-weight="bold" text-anchor="middle">What a privacy-first browser sends: nothing.</text>
   <rect x="200" y="310" width="400" height="45" fill="#1a3a1a" stroke="#4CAF50" stroke-width="1" rx="8"/>
-  <text x="400" y="332" fill="#4CAF50" font-size="12" text-anchor="middle">nav0: Zero telemetry. Zero sync servers.</text>
+  <text x="400" y="332" fill="#4CAF50" font-size="12" text-anchor="middle">Nav0: Zero telemetry. Zero sync servers.</text>
   <text x="400" y="347" fill="#4CAF50" font-size="12" text-anchor="middle">Your data stays on YOUR machine.</text>
   <!-- Arrow markers -->
   <defs>
