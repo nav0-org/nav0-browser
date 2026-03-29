@@ -18,9 +18,8 @@ hero:
   text: Browse. Nothing More.
   tagline: A minimal, privacy-focused web browser. No data collection. No bloat. No AI gimmicks. Just clean, safe browsing.
   image:
-    light: /hero-light.webp
-    dark: /hero-dark.webp
-    alt: "Nav0 browser on desktop — minimal dark mode interface with address bar and tab strip"
+    src: /logo.webp
+    alt: "Nav0 logo"
   actions:
     - theme: brand
       text: Get Started
