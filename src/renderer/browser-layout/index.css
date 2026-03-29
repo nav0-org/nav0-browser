@@ -248,10 +248,6 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
-[data-theme="dark"] .address-bar:focus-within {
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
-}
-
 /* SSL Indicator */
 .ssl-indicator {
   color: var(--text-secondary);

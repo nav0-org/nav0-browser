@@ -198,9 +198,6 @@ export function init(){
     toggleReaderMode: async (appWindowId: string, tabId: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.TOGGLE_READER_MODE, appWindowId, tabId);
     },
-    setDarkMode: (appWindowId: string, enabled: boolean) => {
-      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SET_DARK_MODE, appWindowId, enabled);
-    },
     applySettings: async () => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.APPLY_SETTINGS);
     },
@@ -293,10 +290,6 @@ export function init(){
     onFullScreenChanged: (callback: (data: { isFullScreen: boolean }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.FULLSCREEN_CHANGED, (_event, data) => callback(data));
     },
-    onDarkModeChanged: (callback: (enabled: boolean) => void) => {
-      ipcRenderer.on(MainToRendererEventsForBrowserIPC.DARK_MODE_CHANGED, (_event, enabled) => callback(enabled));
-    },
-
     // Permission system
     respondToPermissionPrompt: (appWindowId: string, requestId: string, decision: string) => {
       ipcRenderer.send(RendererToMainEventsForBrowserIPC.PERMISSION_PROMPT_RESPONSE, appWindowId, requestId, decision);

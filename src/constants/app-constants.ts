@@ -146,7 +146,6 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly SHOW_ABOUT_PANEL = "browser:show-about-panel";
   public static readonly GET_ABOUT_INFO = "browser:get-about-info";
   public static readonly TOGGLE_READER_MODE = "browser:toggle-reader-mode";
-  public static readonly SET_DARK_MODE = "browser:set-dark-mode";
   public static readonly SHOW_FIND_IN_PAGE = "browser:show-find-in-page";
   public static readonly HIDE_FIND_IN_PAGE = "browser:hide-find-in-page";
   public static readonly FIND_IN_PAGE = "browser:find-in-page";
@@ -211,7 +210,6 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly TAB_PINNED = "browser:tab-pinned";
   public static readonly TAB_UNPINNED = "browser:tab-unpinned";
   public static readonly FULLSCREEN_CHANGED = "browser:fullscreen-changed";
-  public static readonly DARK_MODE_CHANGED = "browser:dark-mode-changed";
 }
 
 export abstract class DataStoreConstants {

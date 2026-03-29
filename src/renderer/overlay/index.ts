@@ -1,5 +1,4 @@
 import './index.css';
-import { initTheme } from '../common/theme';
 import { createIcons, icons } from 'lucide';
 
 // Import panel modules
@@ -8,8 +7,6 @@ import * as commandOPanel from './panels/command-o/command-o';
 import * as optionsMenuPanel from './panels/options-menu/options-menu';
 import * as issueReportPanel from './panels/issue-report/issue-report';
 import * as sslInfoPanel from './panels/ssl-info/ssl-info';
-
-initTheme();
 
 type PanelName = 'command-k' | 'command-o' | 'options-menu' | 'issue-report' | 'ssl-info';
 

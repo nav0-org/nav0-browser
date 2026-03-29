@@ -1,13 +1,11 @@
 
 import { HtmlUtils } from '../../../renderer/common/html-utils';
 import './index.css';
-import { initTheme } from '../../../renderer/common/theme';
 
 import { createIcons, icons } from 'lucide';
 import { FormatUtils } from '../../../renderer/common/format-utils';
 import { DownloadRecord } from '../../../types/download-record';
 createIcons({ icons });
-initTheme();
 
 const PAGE_SIZE = 50;
 let currentOffset = 0;
