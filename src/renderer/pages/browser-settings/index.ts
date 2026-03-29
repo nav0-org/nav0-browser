@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initUserAgentSettings();
   initNetworkSettings();
   initKeyboardShortcuts();
+  initDeveloperSettings();
   initSettingsSearch();
   createIcons({ icons });
 });
@@ -71,6 +72,19 @@ function activateSection(sectionId: string) {
   const link = document.querySelector(`.sidebar-link[data-section="${sectionId}"]`);
   if (section) section.classList.add('active');
   if (link) link.classList.add('active');
+}
+
+// ---- Developer Settings ----
+function initDeveloperSettings() {
+  const toggle = document.getElementById('devtools-toggle') as HTMLInputElement;
+  if (!toggle) return;
+  toggle.checked = settings.devToolsEnabled || false;
+
+  toggle.addEventListener('change', () => {
+    settings.devToolsEnabled = toggle.checked;
+    saveSettings();
+    showToast(toggle.checked ? 'Developer Tools enabled' : 'Developer Tools disabled');
+  });
 }
 
 // ---- Settings Search ----
