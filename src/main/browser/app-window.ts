@@ -28,6 +28,7 @@ export class AppWindow {
   public isPrivate = false;
   private partitionSetting: string;
   private unifiedOverlayManager: UnifiedOverlayManager | null = null;
+  private overlayInitPromise: Promise<void>;
   private findInPageManager: FindInPageManager | null = null;
   private findInPageState: Map<string, { searchText: string }> = new Map(); // per-tab find state
   private permissionPrompts: Map<string, PermissionPromptData> = new Map(); // per-tab permission data
@@ -85,7 +86,12 @@ export class AppWindow {
       },
     });
 
-    this.unifiedOverlayManager = new UnifiedOverlayManager(this.id, this.isPrivate, this.partitionSetting);
+    this.overlayInitPromise = new Promise<void>((resolve) => {
+      setTimeout(() => {
+        this.unifiedOverlayManager = new UnifiedOverlayManager(this.id, this.isPrivate, this.partitionSetting);
+        resolve();
+      }, 500);
+    });
     this.findInPageManager = new FindInPageManager(this.id);
     this.findInPageManager.setBrowserWindow(this.browserWindowInstance);
 
@@ -403,6 +409,7 @@ export class AppWindow {
 
   async showOptionsMenuOverlay(): Promise<void> {
     this.hideCommandKOverlay();
+    await this.overlayInitPromise;
     if (this.unifiedOverlayManager.isVisible('options-menu')) return;
     await this.unifiedOverlayManager.whenReady();
     this.ensureOverlayViewAdded();
@@ -419,6 +426,7 @@ export class AppWindow {
   async showCommandKOverlay(): Promise<void> {
     this.hideOptionsMenuOverlay();
     this.hideCommandOOverlay();
+    await this.overlayInitPromise;
     if (this.unifiedOverlayManager.isVisible('command-k')) {
       this.hideCommandKOverlay();
       return;
@@ -438,6 +446,7 @@ export class AppWindow {
   async showCommandOOverlay(): Promise<void> {
     this.hideOptionsMenuOverlay();
     this.hideCommandKOverlay();
+    await this.overlayInitPromise;
     if (this.unifiedOverlayManager.isVisible('command-o')) {
       this.hideCommandOOverlay();
       return;
@@ -496,9 +505,10 @@ export class AppWindow {
   }
 
   async showIssueReportOverlay(): Promise<void> {
-    if (!this.unifiedOverlayManager || !this.browserWindowInstance) return;
+    if (!this.browserWindowInstance) return;
     this.hideOptionsMenuOverlay();
     this.hideCommandKOverlay();
+    await this.overlayInitPromise;
     if (this.unifiedOverlayManager.isVisible('issue-report')) return;
     await this.unifiedOverlayManager.whenReady();
     this.ensureOverlayViewAdded();
@@ -580,10 +590,12 @@ export class AppWindow {
   private sslInfoDismissedAt = 0;
 
   async showSSLInfoOverlay(data: { sslStatus: string; sslDetails: any; url: string }): Promise<void> {
-    if (!this.unifiedOverlayManager || !this.browserWindowInstance) return;
+    if (!this.browserWindowInstance) return;
     this.hideOptionsMenuOverlay();
     this.hideCommandKOverlay();
     this.hideCommandOOverlay();
+
+    await this.overlayInitPromise;
 
     if (this.unifiedOverlayManager.isVisible('ssl-info')) {
       this.hideSSLInfoOverlay();
