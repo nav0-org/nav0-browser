@@ -275,6 +275,6 @@ export const DEFAULT_BROWSER_SETTINGS: BrowserSettings = {
   // Keyboard Shortcuts (empty = use defaults)
   keyboardShortcuts: {},
 
-  // Developer Tools (off by default — minimal philosophy)
-  devToolsEnabled: false,
+  // Developer Tools
+  devToolsEnabled: true,
 };
