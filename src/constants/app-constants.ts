@@ -211,6 +211,7 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly TAB_PINNED = "browser:tab-pinned";
   public static readonly TAB_UNPINNED = "browser:tab-unpinned";
   public static readonly FULLSCREEN_CHANGED = "browser:fullscreen-changed";
+  public static readonly DARK_MODE_CHANGED = "browser:dark-mode-changed";
 }
 
 export abstract class DataStoreConstants {
@@ -255,5 +256,5 @@ export abstract class ImageBase64Strings {
 }
 
 export abstract class AppConstants {
-  public static readonly APP_NAME = "Nav0 Browser";
+  public static readonly APP_NAME = "Nav0";
 }

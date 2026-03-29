@@ -157,8 +157,8 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
 }
 
 .tab-favicon {
-  height: 16px;
-  width: 16px;
+  height: 18px;
+  width: 18px;
   margin-left: 5px;
   margin-right: 5px;
   flex-shrink: 0;
@@ -313,6 +313,9 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
 
 /* Reader Mode Button */
 .reader-mode-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #9CA3AF;
   transition: color 0.2s ease, background-color 0.2s ease;
 }

@@ -1162,6 +1162,21 @@ export class Tab {
       { label: 'Reload', click: () => {
         this.webContentsViewInstance.webContents.reload();
       }},
+      { label: 'Hard Reload', click: async () => {
+        const webContents = this.webContentsViewInstance.webContents;
+        const webSession = webContents.session;
+        const currentUrl = webContents.getURL();
+        try {
+          const origin = new URL(currentUrl).origin;
+          await webSession.clearStorageData({ origin });
+          await webSession.clearCache();
+          await webSession.clearCodeCaches({});
+        } catch (e) {
+          await webSession.clearCache();
+          await webSession.clearCodeCaches({});
+        }
+        webContents.reloadIgnoringCache();
+      }},
       { type: 'separator' },
       { label: 'Print...', click: () => {
         this.webContentsViewInstance.webContents.print();
