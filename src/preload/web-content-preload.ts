@@ -158,8 +158,24 @@ const SHARE_POLYFILL_CODE = `
 
 function injectPolyfill(): void {
   try {
+    const code = POLYFILL_CODE + SHARE_POLYFILL_CODE;
     const script = document.createElement('script');
-    script.textContent = POLYFILL_CODE + SHARE_POLYFILL_CODE;
+
+    // Use Trusted Types policy if the page enforces Trusted Types CSP
+    if (typeof window.trustedTypes !== 'undefined' && window.trustedTypes.createPolicy) {
+      try {
+        const policy = window.trustedTypes.createPolicy('nav0-polyfill', {
+          createScript: (s: string) => s,
+        });
+        script.textContent = policy.createScript(code) as unknown as string;
+      } catch {
+        // Policy creation may fail if 'nav0-polyfill' already exists; fall back
+        script.textContent = code;
+      }
+    } else {
+      script.textContent = code;
+    }
+
     (document.head || document.documentElement).appendChild(script);
     script.remove();
   } catch {

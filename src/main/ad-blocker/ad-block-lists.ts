@@ -311,7 +311,8 @@ export const AD_BLOCK_DOMAINS: string[] = [
   'lemmadigital.com',
 
   // Consent / Cookie Wall (tracking-related)
-  'cdn.cookielaw.org',
+  // Note: cdn.cookielaw.org removed — blocking it breaks sites like Spotify
+  // that depend on OneTrust for initialization
   'consent.cookiebot.com',
   'quantcast.mgr.consensu.org',
   'cmpv2.ad.gt',
