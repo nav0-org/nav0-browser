@@ -20,9 +20,6 @@ export class BrowserTabManager {
   private downloadProgressRing: SVGElement;
   private downloadProgressFill: SVGCircleElement;
   private readerModeButton: HTMLButtonElement;
-  private darkModeButton: HTMLButtonElement;
-  private darkModeIconMoon: HTMLElement;
-  private darkModeIconSun: HTMLElement;
   private sslIndicator: HTMLButtonElement;
 
   // State
@@ -87,12 +84,8 @@ export class BrowserTabManager {
     this.downloadProgressRing = document.getElementById('download-progress-ring') as unknown as SVGElement;
     this.downloadProgressFill = document.querySelector('.download-progress-ring-fill') as unknown as SVGCircleElement;
     this.readerModeButton = document.getElementById('reader-mode-button') as HTMLButtonElement;
-    this.darkModeButton = document.getElementById('dark-mode-button') as HTMLButtonElement;
-    this.darkModeIconMoon = document.getElementById('dark-mode-icon-moon') as HTMLElement;
-    this.darkModeIconSun = document.getElementById('dark-mode-icon-sun') as HTMLElement;
     this.sslIndicator = document.getElementById('ssl-indicator') as HTMLButtonElement;
 
-    this.initDarkMode();
     this.setupSSLIndicator();
   }
 
@@ -152,10 +145,6 @@ export class BrowserTabManager {
       window.BrowserAPI.createTab(this.appWindowId, InAppUrls.DOWNLOADS, true);
     });
 
-    this.darkModeButton.addEventListener('click', () => {
-      this.toggleDarkMode();
-    });
-
     this.optionsButton.addEventListener('click', async() => {
       await window.BrowserAPI.showOptionsMenu(this.appWindowId);
     });
@@ -175,21 +164,6 @@ export class BrowserTabManager {
   }
 
   private setupIpcListeners(): void {
-    // Listen for dark mode changes from other windows
-    window.BrowserAPI.onDarkModeChanged?.((enabled: boolean) => {
-      if (enabled) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        localStorage.setItem('theme', 'dark');
-        this.darkModeIconMoon.style.display = 'none';
-        this.darkModeIconSun.style.display = 'block';
-      } else {
-        document.documentElement.removeAttribute('data-theme');
-        localStorage.setItem('theme', 'light');
-        this.darkModeIconMoon.style.display = 'block';
-        this.darkModeIconSun.style.display = 'none';
-      }
-    });
-
     window.BrowserAPI.onNewTabCreated((tab: {id: string, url: string, title: string}) => {
       if(!this.getTabById(tab.id)){
         this.tabs.push(new Tab(tab.id, tab.url, tab.title));
@@ -417,34 +391,6 @@ export class BrowserTabManager {
     const circumference = 2 * Math.PI * 14; // 87.9646
     const offset = circumference * (1 - progress);
     this.downloadProgressFill.style.strokeDashoffset = offset.toString();
-  }
-
-  private initDarkMode(): void {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      this.darkModeIconMoon.style.display = 'none';
-      this.darkModeIconSun.style.display = 'block';
-      // Sync dark mode state to main process for web page injection
-      window.BrowserAPI.setDarkMode(this.appWindowId, true);
-    }
-  }
-
-  private toggleDarkMode(): void {
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    if (isDark) {
-      document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('theme', 'light');
-      this.darkModeIconMoon.style.display = 'block';
-      this.darkModeIconSun.style.display = 'none';
-      window.BrowserAPI.setDarkMode(this.appWindowId, false);
-    } else {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('theme', 'dark');
-      this.darkModeIconMoon.style.display = 'none';
-      this.darkModeIconSun.style.display = 'block';
-      window.BrowserAPI.setDarkMode(this.appWindowId, true);
-    }
   }
 
   private updateTabScrollButtons(): void {

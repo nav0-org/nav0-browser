@@ -24,10 +24,6 @@
   overflow: hidden;
 }
 
-[data-theme="dark"] .ssl-info-panel {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-}
-
 .ssl-info-header {
   display: flex;
   align-items: center;
@@ -112,10 +108,6 @@
   font-weight: 600;
   padding: 6px 12px;
   border-bottom: 1px solid rgba(220, 38, 38, 0.12);
-}
-
-[data-theme="dark"] .ssl-info-warning-banner {
-  background-color: rgba(220, 38, 38, 0.12);
 }
 
 .ssl-info-protocol {

@@ -638,14 +638,4 @@ export class AppWindow {
     }));
   }
 
-  async setDarkMode(enabled: boolean): Promise<void> {
-    Tab.setDarkModeEnabled(enabled);
-    for (const tab of this.tabs.values()) {
-      if (enabled) {
-        await tab.injectDarkModeCSS();
-      } else {
-        await tab.removeDarkModeCSS();
-      }
-    }
-  }
 }

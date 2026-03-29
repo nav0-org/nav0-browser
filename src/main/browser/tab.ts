@@ -41,8 +41,6 @@ export class Tab {
   private popupTimestamps: number[] = [];
   private static readonly MAX_POPUPS = 3;
   private static readonly POPUP_WINDOW_MS = 60_000;
-  private darkModeCSSKey: string | null = null;
-  private static darkModeEnabled = false;
   private _destroyed = false;
   private showingSSLWarning = false;
   private pendingError: NavigationError | null = null;
@@ -51,42 +49,6 @@ export class Tab {
   private willDownloadHandler: ((event: Electron.Event, item: Electron.DownloadItem, webContents: Electron.WebContents) => void) | null = null;
   private isSuspended = false;
   private lastActivatedAt: Date = new Date();
-
-  private static readonly DARK_MODE_CSS = `
-    html {
-      filter: invert(1) hue-rotate(180deg) !important;
-      background-color: #111 !important;
-    }
-    /* Re-invert media so images/videos look normal */
-    img, video, picture, canvas, svg image,
-    [style*="background-image"],
-    embed, object {
-      filter: invert(1) hue-rotate(180deg) !important;
-    }
-    iframe {
-      filter: invert(1) hue-rotate(180deg) !important;
-    }
-    /* Re-invert common icon systems used by LinkedIn, Reddit, etc. */
-    svg:not(svg svg), i[class*="icon"], [data-icon], [role="img"],
-    [class*="emoji"], [class*="avatar"], [class*="Avatar"],
-    [class*="logo"], [class*="Logo"],
-    [class*="thumbnail"], [class*="Thumbnail"] {
-      filter: invert(1) hue-rotate(180deg) !important;
-    }
-    /* Force dark backgrounds on stubborn container elements */
-    [style*="background-color: rgb(255"], [style*="background-color: #fff"],
-    [style*="background-color: #FFF"], [style*="background-color: white"],
-    [style*="background: rgb(255"], [style*="background: #fff"],
-    [style*="background: #FFF"], [style*="background: white"],
-    [style*="background-color:#fff"], [style*="background-color:#FFF"] {
-      background-color: inherit !important;
-    }
-    /* Override inline white/light backgrounds on deeply nested elements */
-    [style*="background-color: rgb(2"], [style*="background-color: rgb(24"],
-    [style*="background-color: rgb(23"], [style*="background-color: rgb(22"] {
-      background-color: inherit !important;
-    }
-  `;
 
   constructor(parentAppWindow: AppWindow, url: string , partitionSetting: string, options?: { suspended?: boolean; title?: string }) {
     this.parentAppWindow = parentAppWindow;
@@ -257,8 +219,6 @@ export class Tab {
       }
       // Clear any pending error on successful navigation
       this.pendingError = null;
-      // Reset dark mode CSS key on navigation so it can be re-injected on DOM_READY
-      this.darkModeCSSKey = null;
       // Reset SSL status for new navigation (will be re-evaluated in sendTabUrlUpdate)
       try {
         const hostname = new URL(url).hostname;
@@ -277,7 +237,6 @@ export class Tab {
       if (this._destroyed) return;
       this.debouncedHandleNavigationCompletion(url);
       // Re-apply dark mode for back/forward in-page navigations (bfcache restores)
-      this.applyDarkModeIfEnabled();
     });
 
     // Cosmetic ad filtering and DOM cleanup once the DOM is ready
@@ -288,7 +247,6 @@ export class Tab {
         return;
       }
       this.injectAdBlockDOMScript();
-      this.applyDarkModeIfEnabled();
     });
 
     this.willDownloadHandler = async (event: Electron.Event, item: Electron.DownloadItem, downloadWebContents: Electron.WebContents) => {
@@ -848,7 +806,6 @@ export class Tab {
       this.webContentsViewInstance = null;
     }
     this.readerMode = ReaderModeManager.createState();
-    this.darkModeCSSKey = null;
     this.isSuspended = true;
   }
 
@@ -972,65 +929,6 @@ export class Tab {
 
   private isExternalPage(): boolean {
     return !this.url.startsWith(InAppUrls.PREFIX) && this.url !== '' && !this.url.startsWith('file://');
-  }
-
-  private applyDarkModeIfEnabled(): void {
-    if (!Tab.darkModeEnabled || !this.isExternalPage()) return;
-    this.injectDarkModeCSS();
-  }
-
-  async injectDarkModeCSS(): Promise<void> {
-    if (!this.isExternalPage()) return;
-    // Remove stale key before re-injecting (page may have changed via bfcache)
-    if (this.darkModeCSSKey) {
-      try {
-        await this.webContentsViewInstance.webContents.removeInsertedCSS(this.darkModeCSSKey);
-      } catch { /* old page gone */ }
-      this.darkModeCSSKey = null;
-    }
-    try {
-      this.darkModeCSSKey = await this.webContentsViewInstance.webContents.insertCSS(Tab.DARK_MODE_CSS);
-    } catch {
-      // Page may not be ready
-    }
-    // Strip inline background colors that fight the invert filter
-    this.webContentsViewInstance.webContents.executeJavaScript(`
-      (function() {
-        try {
-          var els = document.querySelectorAll('[style*="background"]');
-          els.forEach(function(el) {
-            var bg = el.style.backgroundColor;
-            if (!bg) return;
-            var m = bg.match(/\\d+/g);
-            if (m && m.length >= 3) {
-              var r = parseInt(m[0]), g = parseInt(m[1]), b = parseInt(m[2]);
-              // If the inline bg is light (brightness > 180), clear it
-              if ((r * 299 + g * 587 + b * 114) / 1000 > 180) {
-                el.style.backgroundColor = 'transparent';
-              }
-            }
-          });
-        } catch(e) {}
-      })();
-    `).catch(() => {});
-  }
-
-  async removeDarkModeCSS(): Promise<void> {
-    if (!this.darkModeCSSKey) return;
-    try {
-      await this.webContentsViewInstance.webContents.removeInsertedCSS(this.darkModeCSSKey);
-    } catch {
-      // Page may be closed
-    }
-    this.darkModeCSSKey = null;
-  }
-
-  static setDarkModeEnabled(enabled: boolean): void {
-    Tab.darkModeEnabled = enabled;
-  }
-
-  static isDarkModeEnabled(): boolean {
-    return Tab.darkModeEnabled;
   }
 
   private isLocalhost(url: string): boolean {

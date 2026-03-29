@@ -1,9 +1,7 @@
 import './index.css';
-import { initTheme } from '../../../renderer/common/theme';
 import { createIcons, icons } from 'lucide';
 
 createIcons({ icons });
-initTheme();
 
 const PLATFORM_NAMES: Record<string, string> = {
   'darwin': 'macOS',

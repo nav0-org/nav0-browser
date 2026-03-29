@@ -74,8 +74,6 @@ declare global {
       fetchClosedWindows: () => Promise<Array<{tabCount: number, tabs: Array<{url: string, title: string}>, closedAt: number}>>;
       restoreClosedWindow: (index: number) => Promise<{ok: boolean} | null>;
       toggleReaderMode: (appWindowId: string, tabId: string) => Promise<any>;
-      setDarkMode: (appWindowId: string, enabled: boolean) => void;
-
       // Event listeners
       onNewTabCreated: (callback: (tab: {id: string, url: string, title: string}) => void) => void;
       onTabActivated: (callback: (tab: {id: string, url: string}) => void) => void;
@@ -103,8 +101,6 @@ declare global {
       onTabPinned: (callback: (data: { id: string }) => void) => void;
       onTabUnpinned: (callback: (data: { id: string }) => void) => void;
       onFullScreenChanged: (callback: (data: { isFullScreen: boolean }) => void) => void;
-      onDarkModeChanged: (callback: (enabled: boolean) => void) => void;
-
       // Permission system
       respondToPermissionPrompt: (appWindowId: string, requestId: string, decision: string) => void;
       onPermissionPromptShow: (callback: (data: any) => void) => void;
