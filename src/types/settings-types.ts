@@ -75,7 +75,7 @@ export interface BrowserSettings {
   popupBlockedSites: string[];
 
   // User Agent
-  userAgentPreset: 'default' | 'chrome-windows' | 'chrome-mac' | 'safari-mac' | 'firefox-windows' | 'firefox-mac' | 'edge-windows' | 'custom';
+  userAgentPreset: 'electron-default' | 'default' | 'chrome-windows' | 'chrome-mac' | 'safari-mac' | 'firefox-windows' | 'firefox-mac' | 'edge-windows' | 'custom';
   userAgentCustomValue: string;
 
   // Keyboard Shortcuts
