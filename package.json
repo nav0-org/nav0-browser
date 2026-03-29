@@ -1,6 +1,6 @@
 {
   "name": "nav0-browser",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "A minimal, privacy-focused web browser built on Electron",
   "private": true,
   "main": ".webpack/main",
