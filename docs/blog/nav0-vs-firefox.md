@@ -28,7 +28,7 @@ head:
       content: telemetry
   - - meta
     - name: keywords
-      content: "nav0 vs firefox, firefox privacy, firefox telemetry, mozilla data collection, firefox bloat, firefox sponsored shortcuts, firefox pocket, private browser comparison, minimal browser vs firefox, firefox about config privacy"
+      content: "Nav0 vs firefox, firefox privacy, firefox telemetry, mozilla data collection, firefox bloat, firefox sponsored shortcuts, firefox pocket, private browser comparison, minimal browser vs firefox, firefox about config privacy"
   - - script
     - type: application/ld+json
     - |
@@ -41,7 +41,7 @@ head:
         "author": { "@type": "Organization", "name": "Nav0" },
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/nav0-vs-firefox",
-        "keywords": ["nav0 vs firefox", "firefox privacy", "firefox telemetry", "mozilla data collection", "firefox pocket", "minimal browser", "private browser comparison"]
+        "keywords": ["Nav0 vs firefox", "firefox privacy", "firefox telemetry", "mozilla data collection", "firefox pocket", "minimal browser", "private browser comparison"]
       }
 ---
 
@@ -140,7 +140,7 @@ This has tangible effects:
 - **Strategic independence is constrained.** Mozilla can advocate for privacy and open web standards, but it can't push so hard that Google pulls the deal. The relationship creates a ceiling on how aggressively Mozilla can challenge Google's business practices.
 - **Revenue pressure shapes product decisions.** Features like Firefox Suggest (which includes sponsored suggestions) and new tab page sponsored content exist because Mozilla needs to diversify revenue beyond the Google deal. The browser becomes a monetization surface out of financial necessity.
 
-Nav0 has no search engine deals. No revenue dependencies. No corporate relationships that constrain product decisions. When you search from nav0's address bar, you use whatever search engine you've configured — with no financial incentive behind the default.
+Nav0 has no search engine deals. No revenue dependencies. No corporate relationships that constrain product decisions. When you search from Nav0's address bar, you use whatever search engine you've configured — with no financial incentive behind the default.
 
 ## The about:config Argument
 
@@ -172,32 +172,32 @@ But engine choice and privacy are separate concerns. You can support Gecko and s
 
 ## What You Give Up
 
-Choosing nav0 over Firefox means giving up:
+Choosing Nav0 over Firefox means giving up:
 
 - **Cross-device sync.** Firefox Sync, despite requiring an account, is well-implemented and genuinely useful. Nav0 has nothing comparable.
 - **The extensions ecosystem.** Firefox has a mature, well-curated extensions ecosystem with strong APIs. Nav0 doesn't support extensions.
 - **Mobile browsing.** Firefox is available on iOS and Android. Nav0 is desktop-only.
-- **Engine diversity.** By using nav0 instead of Firefox, you're not supporting Gecko. This has real implications for the open web.
+- **Engine diversity.** By using Nav0 instead of Firefox, you're not supporting Gecko. This has real implications for the open web.
 - **Containers and tab isolation.** Firefox's Multi-Account Containers are a genuinely innovative privacy feature that allows you to isolate browsing contexts. Nav0 doesn't have an equivalent.
 - **Mature developer tools.** Firefox's DevTools are world-class. Nav0's are basic.
 - **Firefox's anti-tracking technology.** Enhanced Tracking Protection, Total Cookie Protection, and fingerprinting protection in Firefox are industry-leading. Nav0's protections are simpler.
 
 These are significant tradeoffs. Firefox is a more capable browser by almost every functional measure. If you need extensions, sync, mobile support, or sophisticated developer tools, Firefox is the better choice.
 
-The question nav0 answers is different: what if you don't need all that? What if you just want a browser that loads pages, doesn't collect your data, and doesn't try to be anything more? What if "less" is actually what you want?
+The question Nav0 answers is different: what if you don't need all that? What if you just want a browser that loads pages, doesn't collect your data, and doesn't try to be anything more? What if "less" is actually what you want?
 
 ## The Respect Paradox
 
 Here's the uncomfortable truth: we recommend Firefox more than any other mainstream browser. If someone asks us "what should I use instead of Chrome?" and they need extensions, mobile support, or sync — the answer is Firefox. It's not close.
 
-Mozilla does more for the open web than any other browser vendor. Their advocacy for web standards, their push for privacy legislation, their resistance to Google's dominance — these things matter, and they benefit everyone, including nav0 users.
+Mozilla does more for the open web than any other browser vendor. Their advocacy for web standards, their push for privacy legislation, their resistance to Google's dominance — these things matter, and they benefit everyone, including Nav0 users.
 
 But respect for an organization doesn't mean accepting its defaults uncritically. Firefox is the best mainstream browser for privacy. Nav0 is for people who think "mainstream" is the problem.
 
 Firefox proves that a privacy-respecting browser can be built. Nav0 asks: what if you went all the way?
 
-[Download nav0 — private by default, not by configuration](/guide/getting-started).
+[Download Nav0 — private by default, not by configuration](/guide/getting-started).
 
 ---
 
-*nav0 is a minimal, open-source browser built on one principle: your browser should work for you, not for an ad company. Zero telemetry. Zero bloat. Zero BS. [Learn more](/guide/philosophy).*
+*Nav0 is a minimal, open-source browser built on one principle: your browser should work for you, not for an ad company. Zero telemetry. Zero bloat. Zero BS. [Learn more](/guide/philosophy).*

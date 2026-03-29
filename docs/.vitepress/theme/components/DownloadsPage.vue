@@ -25,16 +25,16 @@ onMounted(async () => {
 <template>
   <div class="install-page">
     <div class="install-hero">
-      <h1>Install nav0</h1>
+      <h1>Install Nav0</h1>
       <p class="install-subtitle">
-        Install nav0 on macOS, Windows, or Linux.
+        Install Nav0 on macOS, Windows, or Linux.
       </p>
       <p class="install-version" v-if="!loading">Latest release: <strong>v{{ version }}</strong></p>
     </div>
 
     <div class="install-section">
       <h2>macOS</h2>
-      <p>Run this command in Terminal to install nav0:</p>
+      <p>Run this command in Terminal to install Nav0:</p>
       <div class="code-block">
         <code>curl -fsSL https://raw.githubusercontent.com/nav0-org/nav0-browser/main/install.sh | bash</code>
       </div>
@@ -47,7 +47,7 @@ onMounted(async () => {
         <code>brew install --cask nav0-org/nav0/nav0-browser</code>
       </div>
       <p class="install-note">
-        Requires Homebrew. To update nav0, run <code>brew upgrade --cask nav0-browser</code>.
+        Requires Homebrew. To update Nav0, run <code>brew upgrade --cask nav0-browser</code>.
       </p>
       -->
     </div>
@@ -78,7 +78,7 @@ onMounted(async () => {
 
     <div class="install-section">
       <h2>Build from Source</h2>
-      <p>nav0 can be built from source on Windows, macOS, and Linux. This is recommended for maximum trust.</p>
+      <p>Nav0 can be built from source on Windows, macOS, and Linux. This is recommended for maximum trust.</p>
       <div class="code-block">
         <code>git clone https://github.com/nav0-org/nav0-browser.git</code>
         <code>cd nav0-browser</code>
@@ -93,7 +93,7 @@ onMounted(async () => {
 
     <div class="install-footer">
       <p>
-        nav0 is open-source under the
+        Nav0 is open-source under the
         <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT License</a>.
         View the source on <a href="https://github.com/nav0-org/nav0-browser" target="_blank" rel="noopener">GitHub</a>.
       </p>

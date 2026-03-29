@@ -1,6 +1,6 @@
 ---
 title: "Nav0 vs Arc: Rethinking the Browser vs. Stripping It Down"
-description: "Arc and nav0 both reject Chrome's status quo, but from opposite directions. Arc adds more UI — Spaces, Easels, AI features, split views. Nav0 removes UI. This is maximalism vs. minimalism, and only one approach doesn't require your data."
+description: "Arc and Nav0 both reject Chrome's status quo, but from opposite directions. Arc adds more UI — Spaces, Easels, AI features, split views. Nav0 removes UI. This is maximalism vs. minimalism, and only one approach doesn't require your data."
 date: 2026-03-21
 author: Nav0 Team
 tags: [arc, comparison, privacy, minimalism, ai, bloat]
@@ -28,7 +28,7 @@ head:
       content: minimalism
   - - meta
     - name: keywords
-      content: "nav0 vs arc, arc browser privacy, arc browser review, the browser company, arc browser data collection, arc browser account required, arc AI features, arc vs minimal browser, arc browser closed source, arc spaces"
+      content: "Nav0 vs arc, arc browser privacy, arc browser review, the browser company, arc browser data collection, arc browser account required, arc AI features, arc vs minimal browser, arc browser closed source, arc spaces"
   - - script
     - type: application/ld+json
     - |
@@ -36,12 +36,12 @@ head:
         "@context": "https://schema.org",
         "@type": "Article",
         "headline": "Nav0 vs Arc: Rethinking the Browser vs. Stripping It Down",
-        "description": "Arc and nav0 both reject Chrome's status quo, but from opposite directions. Arc adds more — Spaces, Easels, AI features, split views. Nav0 removes. This is maximalism vs. minimalism.",
+        "description": "Arc and Nav0 both reject Chrome's status quo, but from opposite directions. Arc adds more — Spaces, Easels, AI features, split views. Nav0 removes. This is maximalism vs. minimalism.",
         "datePublished": "2026-03-21",
         "author": { "@type": "Organization", "name": "Nav0" },
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/nav0-vs-arc",
-        "keywords": ["nav0 vs arc", "arc browser privacy", "arc browser review", "the browser company", "arc closed source", "arc AI", "minimal browser"]
+        "keywords": ["Nav0 vs arc", "arc browser privacy", "arc browser review", "the browser company", "arc closed source", "arc AI", "minimal browser"]
       }
 ---
 
@@ -49,7 +49,7 @@ head:
 
 <p style="color: var(--vp-c-text-2); font-size: 0.9rem;">By Nav0 Team &middot; March 21, 2026 &middot; 10 min read</p>
 
-Arc and nav0 agree on one thing: Chrome is not the answer.
+Arc and Nav0 agree on one thing: Chrome is not the answer.
 
 After that, we diverge completely.
 
@@ -100,7 +100,7 @@ This account enables Arc's sync features — your Spaces, pinned tabs, Easels, a
 - **Your browsing data lives on Arc's servers.** Synced data — your tab organization, your workspaces, your collected content in Easels — exists on infrastructure you don't control.
 - **You can't opt out.** Unlike Firefox, where accounts are optional, Arc's account is mandatory. If you're not comfortable with a persistent identity tied to your browser, you can't use Arc.
 
-Nav0 has no accounts. No sign-in. No opt-in. No opt-out necessary. You download the browser, open it, and browse. No identity. No persistent profile. No data on anyone's servers. Your relationship with nav0 is completely anonymous — we don't know you exist, and we have no mechanism to find out.
+Nav0 has no accounts. No sign-in. No opt-in. No opt-out necessary. You download the browser, open it, and browse. No identity. No persistent profile. No data on anyone's servers. Your relationship with Nav0 is completely anonymous — we don't know you exist, and we have no mechanism to find out.
 
 ## The AI Problem
 
@@ -137,7 +137,7 @@ None of these options are inherently evil. But each one introduces incentives th
 
 The Browser Company has been transparent about exploring their business model. They've discussed premium tiers and enterprise features. But the fundamental tension remains: the company needs to generate returns on $50+ million in investment, and the primary asset they have is a browser through which millions of people access the internet.
 
-Nav0 has no investors. No venture capital. No pressure to monetize. The browser is free, open source, and maintained by people who build it because they want a browser that doesn't compromise. The absence of a funding obligation means nav0 can make decisions that a VC-backed company can't — like choosing to never collect data, never show ads, and never sell the project.
+Nav0 has no investors. No venture capital. No pressure to monetize. The browser is free, open source, and maintained by people who build it because they want a browser that doesn't compromise. The absence of a funding obligation means Nav0 can make decisions that a VC-backed company can't — like choosing to never collect data, never show ads, and never sell the project.
 
 ## Complexity as Attack Surface
 
@@ -151,19 +151,19 @@ Nav0's minimal feature set means a minimal attack surface. There's no custom cod
 
 ## Target Audience: Different Browsers for Different Needs
 
-Let's be fair: Arc and nav0 are built for different people.
+Let's be fair: Arc and Nav0 are built for different people.
 
 Arc is for power users who want their browser to be a productivity hub. People who work with dozens of tabs across multiple projects. People who want their browser to organize, categorize, and manage their online life. People who find Chrome's interface too simple, not too complex.
 
 Nav0 is for people who want their browser to disappear. People who open a browser to look at a website and then close it. People who don't want their browser to be smart, organized, or integrated with anything. People who find Chrome too complex, not too simple.
 
-If you need Spaces, split views, and AI-powered tab management, nav0 isn't for you. We don't pretend otherwise.
+If you need Spaces, split views, and AI-powered tab management, Nav0 isn't for you. We don't pretend otherwise.
 
-But if you've ever opened a browser and thought "I just want to see a web page without all this stuff," nav0 was built for that feeling.
+But if you've ever opened a browser and thought "I just want to see a web page without all this stuff," Nav0 was built for that feeling.
 
 ## What You Give Up
 
-Choosing nav0 over Arc means giving up:
+Choosing Nav0 over Arc means giving up:
 
 - **Workspace organization.** Spaces is genuinely innovative for managing multiple projects. Nav0 has tabs. That's it.
 - **Split views.** Side-by-side browsing is useful for research and comparison work. Nav0 doesn't support it.
@@ -190,7 +190,7 @@ Open-source projects don't always survive. But when they die, they leave their c
 
 ## The Bottom Line
 
-Arc and nav0 represent the two extremes of the "post-Chrome" browser landscape. One says the browser should do everything better. The other says the browser should do almost nothing.
+Arc and Nav0 represent the two extremes of the "post-Chrome" browser landscape. One says the browser should do everything better. The other says the browser should do almost nothing.
 
 Arc is the browser reimagined — more features, more intelligence, more integration, more design. It's impressive software that requires your identity, your data, and your trust in a VC-funded closed-source company.
 
@@ -198,8 +198,8 @@ Nav0 is the browser remembered — what it was supposed to be before it became a
 
 Arc reimagined the browser. Nav0 remembered what it was supposed to be.
 
-[Download nav0 — free, open source, and uncomplicated](/guide/getting-started).
+[Download Nav0 — free, open source, and uncomplicated](/guide/getting-started).
 
 ---
 
-*nav0 is a minimal, open-source browser built on one principle: your browser should work for you, not for an ad company. Zero telemetry. Zero bloat. Zero BS. [Learn more](/guide/philosophy).*
+*Nav0 is a minimal, open-source browser built on one principle: your browser should work for you, not for an ad company. Zero telemetry. Zero bloat. Zero BS. [Learn more](/guide/philosophy).*

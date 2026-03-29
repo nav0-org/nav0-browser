@@ -45,7 +45,7 @@
 
   <!-- Tab bar -->
   <rect x="96" y="18" width="120" height="28" rx="6" fill="#2a2a4a" stroke="#ffffff" stroke-width="1"/>
-  <text x="118" y="36" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#ffffff" font-weight="600">nav0</text>
+  <text x="118" y="36" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#ffffff" font-weight="600">Nav0</text>
   <rect x="220" y="18" width="100" height="28" rx="6" fill="#1e1e3a" stroke="#333355" stroke-width="0.5"/>
   <text x="240" y="36" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#666688">New Tab</text>
 
@@ -61,7 +61,7 @@
   <!-- Content area -->
   <rect x="24" y="96" width="472" height="262" rx="6" fill="#0d0d20"/>
 
-  <!-- Page content: nav0 landing page mockup -->
+  <!-- Page content: Nav0 landing page mockup -->
   <!-- Nav bar inside page -->
   <rect x="36" y="106" width="448" height="24" rx="4" fill="#141430"/>
   <rect x="46" y="113" width="40" height="8" rx="2" fill="#ffffff" opacity="0.8"/>

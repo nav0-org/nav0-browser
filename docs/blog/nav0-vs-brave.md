@@ -28,7 +28,7 @@ head:
       content: ads
   - - meta
     - name: keywords
-      content: "nav0 vs brave, brave browser privacy, brave ads, brave crypto wallet, BAT token, brave bloat, brave Leo AI, private browser comparison, brave VPN, minimal browser vs brave"
+      content: "Nav0 vs brave, brave browser privacy, brave ads, brave crypto wallet, BAT token, brave bloat, brave Leo AI, private browser comparison, brave VPN, minimal browser vs brave"
   - - script
     - type: application/ld+json
     - |
@@ -41,7 +41,7 @@ head:
         "author": { "@type": "Organization", "name": "Nav0" },
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/nav0-vs-brave",
-        "keywords": ["nav0 vs brave", "brave browser privacy", "brave ads", "BAT token", "brave crypto wallet", "private browser", "minimal browser"]
+        "keywords": ["Nav0 vs brave", "brave browser privacy", "brave ads", "BAT token", "brave crypto wallet", "private browser", "minimal browser"]
       }
 ---
 
@@ -138,7 +138,7 @@ This isn't a spectrum where both browsers are "privacy-focused" at different lev
 
 ## Open Source: Both Transparent, Different Complexity
 
-Both Brave and nav0 are open source. This is genuinely good — it means anyone can audit the code and verify the privacy claims.
+Both Brave and Nav0 are open source. This is genuinely good — it means anyone can audit the code and verify the privacy claims.
 
 But auditability isn't just about access to source code. It's about the complexity of what you're auditing. Brave is a fork of Chromium with extensive modifications. Its codebase is massive. Auditing Brave's ad-matching system, crypto wallet, AI integration, VPN implementation, and reward system requires specialized expertise across multiple domains.
 
@@ -152,17 +152,17 @@ Brave's business model requires users to engage with its ecosystem. The company 
 
 A privacy browser that makes money from advertising — even "privacy-respecting" advertising — faces a permanent tension between user privacy and revenue growth. As the company scales, as investors expect returns, the pressure to extract more value from users increases. This is true of every company, and Brave is no exception.
 
-Nav0 has no advertising revenue. No subscription revenue. No cryptocurrency. No investors expecting returns. Nav0 is a free, open-source tool maintained by people who wanted a browser that just browses. The absence of a business model isn't a weakness — it's the reason nav0 can make decisions that a revenue-driven company can't.
+Nav0 has no advertising revenue. No subscription revenue. No cryptocurrency. No investors expecting returns. Nav0 is a free, open-source tool maintained by people who wanted a browser that just browses. The absence of a business model isn't a weakness — it's the reason Nav0 can make decisions that a revenue-driven company can't.
 
-When Brave decides whether to add a new monetization feature, they're balancing user privacy against business needs. When nav0 decides whether to add a feature, we ask one question: does this help someone browse the web? If not, it doesn't get built.
+When Brave decides whether to add a new monetization feature, they're balancing user privacy against business needs. When Nav0 decides whether to add a feature, we ask one question: does this help someone browse the web? If not, it doesn't get built.
 
 ## What You Give Up
 
 We're honest about tradeoffs.
 
-By choosing nav0 over Brave, you give up:
+By choosing Nav0 over Brave, you give up:
 
-- **Cross-device sync.** Nav0 has no accounts and no sync. Your bookmarks, history, and settings live on one device. If that's a dealbreaker, nav0 isn't for you today.
+- **Cross-device sync.** Nav0 has no accounts and no sync. Your bookmarks, history, and settings live on one device. If that's a dealbreaker, Nav0 isn't for you today.
 - **The extensions ecosystem.** Nav0 doesn't support Chrome extensions. Brave does. If you depend on specific extensions, that matters.
 - **Mobile browsing.** Nav0 is desktop-only. Brave has mobile apps for iOS and Android.
 - **Built-in ad-blocker sophistication.** Brave Shields is one of the best ad blockers available. Nav0's built-in blocker is effective but simpler.
@@ -177,8 +177,8 @@ Nav0 didn't set out to fix advertising. We set out to build a browser that brows
 
 Brave traded one ad company for another. Nav0 traded ads for nothing.
 
-[Download nav0 — free, open source, and free of conflicts](/guide/getting-started).
+[Download Nav0 — free, open source, and free of conflicts](/guide/getting-started).
 
 ---
 
-*nav0 is a minimal, open-source browser built on one principle: your browser should work for you, not for an ad company. Zero telemetry. Zero bloat. Zero BS. [Learn more](/guide/philosophy).*
+*Nav0 is a minimal, open-source browser built on one principle: your browser should work for you, not for an ad company. Zero telemetry. Zero bloat. Zero BS. [Learn more](/guide/philosophy).*
