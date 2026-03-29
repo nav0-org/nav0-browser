@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const appWindowId = window.BrowserAPI.appWindowId;
 
   document.getElementById('link-release-notes')?.addEventListener('click', () => {
-    window.BrowserAPI.createTab(appWindowId, 'https://github.com/nav0-org/nav0-browser/releases', true);
+    window.BrowserAPI.createTab(appWindowId, 'https://nav0.org/releases/', true);
   });
 
   document.getElementById('link-source-code')?.addEventListener('click', () => {
@@ -49,10 +49,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   document.getElementById('link-report-issue')?.addEventListener('click', () => {
-    window.BrowserAPI.createTab(appWindowId, 'https://github.com/nav0-org/nav0-browser/issues', true);
+    window.BrowserAPI.showIssueReport(appWindowId);
   });
 
   document.getElementById('link-license')?.addEventListener('click', () => {
-    window.BrowserAPI.createTab(appWindowId, 'https://github.com/nav0-org/nav0-browser/blob/main/LICENSE', true);
+    window.BrowserAPI.createTab(appWindowId, 'https://github.com/nav0-org/nav0-browser/blob/main/LICENSE.md', true);
   });
 });

@@ -175,6 +175,21 @@ export class BrowserTabManager {
   }
 
   private setupIpcListeners(): void {
+    // Listen for dark mode changes from other windows
+    window.BrowserAPI.onDarkModeChanged?.((enabled: boolean) => {
+      if (enabled) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+        this.darkModeIconMoon.style.display = 'none';
+        this.darkModeIconSun.style.display = 'block';
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+        this.darkModeIconMoon.style.display = 'block';
+        this.darkModeIconSun.style.display = 'none';
+      }
+    });
+
     window.BrowserAPI.onNewTabCreated((tab: {id: string, url: string, title: string}) => {
       if(!this.getTabById(tab.id)){
         this.tabs.push(new Tab(tab.id, tab.url, tab.title));

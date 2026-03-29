@@ -186,13 +186,19 @@ export abstract class SettingsEnforcer {
     const browsingSes = session.fromPartition('persist:browsertabs');
     const privateSes = session.fromPartition('persist:private');
 
-    const preset = settings.userAgentPreset || 'default';
+    const preset = settings.userAgentPreset || 'electron-default';
+
+    // When using electron-default, don't override the user agent — let Electron use its built-in UA
+    if (preset === 'electron-default') return;
+
     let userAgent: string;
 
     if (preset === 'custom') {
-      userAgent = settings.userAgentCustomValue || 'nav0-browser';
+      userAgent = settings.userAgentCustomValue || '';
+      if (!userAgent) return;
     } else {
-      userAgent = USER_AGENT_PRESETS[preset]?.value || 'nav0-browser';
+      userAgent = USER_AGENT_PRESETS[preset]?.value || '';
+      if (!userAgent) return;
     }
 
     browsingSes.setUserAgent(userAgent);

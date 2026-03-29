@@ -293,6 +293,9 @@ export function init(){
     onFullScreenChanged: (callback: (data: { isFullScreen: boolean }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.FULLSCREEN_CHANGED, (_event, data) => callback(data));
     },
+    onDarkModeChanged: (callback: (enabled: boolean) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.DARK_MODE_CHANGED, (_event, enabled) => callback(enabled));
+    },
 
     // Permission system
     respondToPermissionPrompt: (appWindowId: string, requestId: string, decision: string) => {

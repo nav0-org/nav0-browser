@@ -67,6 +67,37 @@ export abstract class AppMenuManager {
             }
           }},
           {type: 'separator' as const},
+          {label: 'Reload', accelerator: 'CmdOrCtrl+R', click: async() => {
+            const activeWindow = AppWindowManager.getActiveWindow();
+            if (activeWindow) {
+              const activeTab = activeWindow.getActiveTab();
+              if (activeTab && activeTab.getWebContentsViewInstance()) {
+                activeTab.getWebContentsViewInstance().webContents.reload();
+              }
+            }
+          }},
+          {label: 'Hard Reload', accelerator: 'CmdOrCtrl+Shift+R', click: async() => {
+            const activeWindow = AppWindowManager.getActiveWindow();
+            if (activeWindow) {
+              const activeTab = activeWindow.getActiveTab();
+              if (activeTab && activeTab.getWebContentsViewInstance()) {
+                const webContents = activeTab.getWebContentsViewInstance().webContents;
+                const session = webContents.session;
+                const currentUrl = webContents.getURL();
+                try {
+                  const origin = new URL(currentUrl).origin;
+                  await session.clearStorageData({ origin });
+                  await session.clearCache();
+                  await session.clearCodeCaches({});
+                } catch (e) {
+                  await session.clearCache();
+                  await session.clearCodeCaches({});
+                }
+                webContents.reloadIgnoringCache();
+              }
+            }
+          }},
+          {type: 'separator' as const},
           {label: 'Close Tab', click: async() => { AppWindowManager.getActiveWindow().closeTab(AppWindowManager.getActiveWindow().getActiveTabId(), true); }},
           {label: 'Close Window', click: async() => { AppWindowManager.closeWindow(AppWindowManager.getActiveWindowId()); }},
         ]
@@ -122,28 +153,6 @@ export abstract class AppMenuManager {
           { role: 'zoomOut' as const, accelerator: 'CmdOrCtrl+Shift+-',},
           { type: 'separator' as const},
           { label: 'Toggle Full Screen', accelerator: isMac ? 'Ctrl+Command+F' : 'F11', click: () => { AppWindowManager.getActiveWindow()?.toggleFullScreen(); }},
-          { type: 'separator' as const},
-          {label: 'Hard Reload', accelerator: 'CmdOrCtrl+Shift+R', click: async() => {
-            const activeWindow = AppWindowManager.getActiveWindow();
-            if (activeWindow) {
-              const activeTab = activeWindow.getActiveTab();
-              if (activeTab && activeTab.getWebContentsViewInstance()) {
-                const webContents = activeTab.getWebContentsViewInstance().webContents;
-                const session = webContents.session;
-                const currentUrl = webContents.getURL();
-                try {
-                  const origin = new URL(currentUrl).origin;
-                  await session.clearStorageData({ origin });
-                  await session.clearCache();
-                  await session.clearCodeCaches({});
-                } catch (e) {
-                  await session.clearCache();
-                  await session.clearCodeCaches({});
-                }
-                webContents.reloadIgnoringCache();
-              }
-            }
-          }},
           { type: 'separator' as const},
           {label: 'Toggle Reader Mode', click: async() => {
             const activeWindow = AppWindowManager.getActiveWindow();

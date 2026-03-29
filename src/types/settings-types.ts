@@ -160,9 +160,9 @@ export const DEFAULT_FILTER_LISTS: FilterListConfig[] = [
 ];
 
 export const USER_AGENT_PRESETS: Record<string, { label: string; value: string }> = {
-  'default': {
-    label: 'nav0-browser (Default)',
-    value: 'nav0-browser',
+  'electron-default': {
+    label: 'Default (Electron)',
+    value: '',
   },
   'chrome-windows': {
     label: 'Chrome on Windows',
@@ -222,7 +222,7 @@ export const DEFAULT_BROWSER_SETTINGS: BrowserSettings = {
   settings_version: 1,
 
   // Search - DuckDuckGo as default (privacy-aligned)
-  primarySearchEngine: 'DuckDuckGo',
+  primarySearchEngine: 'Google',
   customSearchEngines: [],
   showSearchSuggestions: false,
 
@@ -266,7 +266,7 @@ export const DEFAULT_BROWSER_SETTINGS: BrowserSettings = {
   popupBlockedSites: [],
 
   // User Agent (nav0-browser by default)
-  userAgentPreset: 'default',
+  userAgentPreset: 'electron-default',
   userAgentCustomValue: '',
 
   // Keyboard Shortcuts (empty = use defaults)

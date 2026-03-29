@@ -107,20 +107,20 @@ const OPTIONS_MENU_HTML = `
             <span class="dropdown-item-text">About Nav0</span>
           </div>
           <div class="dropdown-item" id="om-privacy-policy-option">
-            <i data-lucide="shield" width="16" height="16"></i>
+            <i data-lucide="shield-check" width="16" height="16"></i>
             <span class="dropdown-item-text">Privacy Policy</span>
           </div>
           <div class="dropdown-item" id="om-terms-of-use-option">
-            <i data-lucide="file-text" width="16" height="16"></i>
+            <i data-lucide="scale" width="16" height="16"></i>
             <span class="dropdown-item-text">Terms of Use</span>
           </div>
           <div class="dropdown-item" id="om-disclaimer-option">
-            <i data-lucide="scroll-text" width="16" height="16"></i>
+            <i data-lucide="triangle-alert" width="16" height="16"></i>
             <span class="dropdown-item-text">Disclaimer</span>
           </div>
           <div class="divider"></div>
           <div class="dropdown-item" id="om-report-issue-option">
-            <i data-lucide="bug" width="16" height="16"></i>
+            <i data-lucide="message-square-warning" width="16" height="16"></i>
             <span class="dropdown-item-text">Report an Issue</span>
           </div>
         </div>

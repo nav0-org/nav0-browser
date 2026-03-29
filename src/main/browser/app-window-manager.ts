@@ -658,6 +658,8 @@ export abstract class AppWindowManager {
       for (const w of AppWindowManager.windows.values()) {
         if (w.id !== window?.id) {
           await w.setDarkMode(enabled);
+          // Notify the renderer to update its dark mode icon
+          w.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.DARK_MODE_CHANGED, enabled);
         }
       }
     });
@@ -773,6 +775,23 @@ export abstract class AppWindowManager {
           label: 'Reload Tab',
           click: () => {
             webContents.reload();
+          },
+        },
+        {
+          label: 'Hard Reload Tab',
+          click: async () => {
+            const webSession = webContents.session;
+            const currentUrl = webContents.getURL();
+            try {
+              const origin = new URL(currentUrl).origin;
+              await webSession.clearStorageData({ origin });
+              await webSession.clearCache();
+              await webSession.clearCodeCaches({});
+            } catch (e) {
+              await webSession.clearCache();
+              await webSession.clearCodeCaches({});
+            }
+            webContents.reloadIgnoringCache();
           },
         },
         {

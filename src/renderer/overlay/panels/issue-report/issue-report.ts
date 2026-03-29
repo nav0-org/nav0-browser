@@ -77,15 +77,25 @@ const ISSUE_REPORT_HTML = `
   </div>
 `;
 
-function getSystemInfo(): string {
+async function getSystemInfo(): Promise<string> {
   const platform = window.BrowserAPI?.platform || navigator.platform;
-  const userAgent = navigator.userAgent;
-  const electronMatch = userAgent.match(/Electron\/([\d.]+)/);
-  const chromeMatch = userAgent.match(/Chrome\/([\d.]+)/);
+  let electronVersion = 'unknown';
+  let chromeVersion = 'unknown';
+  try {
+    const info = await window.BrowserAPI.getAboutInfo();
+    electronVersion = info.electronVersion || 'unknown';
+    chromeVersion = info.chromiumVersion || 'unknown';
+  } catch {
+    const userAgent = navigator.userAgent;
+    const electronMatch = userAgent.match(/Electron\/([\d.]+)/);
+    const chromeMatch = userAgent.match(/Chrome\/([\d.]+)/);
+    electronVersion = electronMatch ? electronMatch[1] : 'unknown';
+    chromeVersion = chromeMatch ? chromeMatch[1] : 'unknown';
+  }
   const lines = [
     `Platform: ${platform}`,
-    `Electron: ${electronMatch ? electronMatch[1] : 'unknown'}`,
-    `Chrome: ${chromeMatch ? chromeMatch[1] : 'unknown'}`,
+    `Electron: ${electronVersion}`,
+    `Chrome: ${chromeVersion}`,
   ];
   return lines.join('\n');
 }
@@ -314,7 +324,8 @@ async function submitIssue(): Promise<void> {
     mimeType: img.mimeType,
   }));
 
-  const body = `**Type:** ${typeLabel}\n\n**Description:**\n${description}\n\n---\n**System Info:**\n\`\`\`\n${getSystemInfo()}\n\`\`\`\n\n*Submitted from Nav0 Browser in-app issue reporter*`;
+  const sysInfo = await getSystemInfo();
+  const body = `**Type:** ${typeLabel}\n\n**Description:**\n${description}\n\n---\n**System Info:**\n\`\`\`\n${sysInfo}\n\`\`\`\n\n*Submitted from Nav0 Browser in-app issue reporter*`;
 
   try {
     const response = await fetch(WORKER_URL, {
@@ -362,7 +373,7 @@ export function init(container: HTMLElement): void {
   // Populate system info preview
   const sysinfoEl = container.querySelector('#ir-sysinfo-preview') as HTMLElement;
   if (sysinfoEl) {
-    sysinfoEl.textContent = getSystemInfo();
+    getSystemInfo().then(info => { sysinfoEl.textContent = info; });
   }
 
   // Attachment file input
@@ -415,7 +426,7 @@ export function show(_data?: any): void {
   // Re-populate system info
   const sysinfoEl = containerEl.querySelector('#ir-sysinfo-preview') as HTMLElement;
   if (sysinfoEl) {
-    sysinfoEl.textContent = getSystemInfo();
+    getSystemInfo().then(info => { sysinfoEl.textContent = info; });
   }
 
   // Re-create icons
