@@ -193,10 +193,10 @@ export default defineConfig({
       { text: 'Guide', link: '/guide/getting-started' },
       { text: 'Install', link: '/install' },
       { text: 'Blog', link: '/blog/' },
+      { text: 'Release Notes', link: '/releases/' },
       {
         text: 'Links',
         items: [
-          { text: 'Releases', link: '/releases/' },
           { text: 'FAQ', link: '/faq' },
           { text: 'Privacy Policy', link: '/privacy-policy' },
           { text: 'Terms of Use', link: '/terms-of-use' },
