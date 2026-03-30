@@ -162,9 +162,11 @@ function injectPolyfill(): void {
     const script = document.createElement('script');
 
     // Use Trusted Types policy if the page enforces Trusted Types CSP
-    if (typeof window.trustedTypes !== 'undefined' && window.trustedTypes.createPolicy) {
+    const win = window as unknown as Record<string, unknown>;
+    if (typeof win.trustedTypes !== 'undefined' && (win.trustedTypes as { createPolicy?: unknown })?.createPolicy) {
       try {
-        const policy = window.trustedTypes.createPolicy('nav0-polyfill', {
+        const tt = win.trustedTypes as { createPolicy: (name: string, rules: { createScript: (s: string) => string }) => { createScript: (s: string) => unknown } };
+        const policy = tt.createPolicy('nav0-polyfill', {
           createScript: (s: string) => s,
         });
         script.textContent = policy.createScript(code) as unknown as string;
