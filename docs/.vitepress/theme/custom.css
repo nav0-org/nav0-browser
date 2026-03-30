@@ -902,3 +902,74 @@
     padding: 3rem 1rem 4rem;
   }
 }
+
+/* ============================================
+   Nav0 — Trade Winds Background
+   ============================================ */
+
+/* ---- Container ---- */
+.nav0-bg {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+}
+
+/* ---- Pattern Layer ---- */
+.nav0-bg-pattern {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+}
+
+/* ---- Vignette Layer ---- */
+.nav0-bg-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* ---- Content ---- */
+.nav0-bg > *:not(.nav0-bg-pattern):not(.nav0-bg-vignette) {
+  position: relative;
+  z-index: 2;
+}
+
+/* ---- Dark Theme ---- */
+html.dark .nav0-bg {
+  background-color: #0a0a0a;
+}
+
+html.dark .nav0-bg .nav0-bg-pattern {
+  background-image: url('./trade-winds-dark.svg');
+}
+
+html.dark .nav0-bg .nav0-bg-vignette {
+  background: radial-gradient(
+    ellipse 70% 60% at 50% 50%,
+    transparent 40%,
+    #0a0a0a 100%
+  );
+}
+
+/* ---- Light Theme ---- */
+html:not(.dark) .nav0-bg {
+  background-color: #fafafa;
+}
+
+html:not(.dark) .nav0-bg .nav0-bg-pattern {
+  background-image: url('./trade-winds-light.svg');
+}
+
+html:not(.dark) .nav0-bg .nav0-bg-vignette {
+  background: radial-gradient(
+    ellipse 70% 60% at 50% 50%,
+    transparent 40%,
+    #fafafa 100%
+  );
+}
