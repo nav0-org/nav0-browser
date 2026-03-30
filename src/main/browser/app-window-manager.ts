@@ -8,6 +8,7 @@ import { DataStoreManager } from "../database/data-store-manager";
 import { SearchEngine } from "../web/search-engine";
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
 import { PermissionManager, PermissionRequest } from "./permission-manager";
+import { NotificationManager } from "./notification-manager";
 import { PermissionPromptData } from "./app-window";
 import fs from "fs";
 import path from "path";
@@ -60,6 +61,29 @@ export abstract class AppWindowManager {
           }
         }
         return null;
+      }
+    );
+    NotificationManager.init();
+    NotificationManager.setCallbacks(
+      (webContentsId: number) => {
+        for (const window of AppWindowManager.windows.values()) {
+          const tab = window.findTabByWebContentsId(webContentsId);
+          if (tab) {
+            return { appWindowId: window.id, tabId: tab.id, isPrivate: window.isPrivate };
+          }
+        }
+        return null;
+      },
+      (appWindowId: string, tabId: string) => {
+        const window = AppWindowManager.getWindowById(appWindowId);
+        if (window) {
+          const bw = window.getBrowserWindowInstance();
+          if (bw) {
+            if (bw.isMinimized()) bw.restore();
+            bw.focus();
+          }
+          window.activateTab(tabId);
+        }
       }
     );
     AppWindowManager.createWindow();
