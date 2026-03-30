@@ -973,3 +973,11 @@ html:not(.dark) .nav0-bg .nav0-bg-vignette {
     #fafafa 100%
   );
 }
+
+/* ---- Transparent sidebar & nav so pattern shows through ---- */
+.nav0-bg {
+  --vp-sidebar-bg-color: transparent;
+  --vp-nav-bg-color: transparent;
+  --vp-nav-screen-bg-color: transparent;
+  --vp-local-nav-bg-color: transparent;
+}
