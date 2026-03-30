@@ -22,6 +22,16 @@ const domainPattern = /^[^\s]+\.[^\s]+$/;
 // common app deep-links (slack, zoom, teams, discord, vscode, etc.)
 const EXTERNAL_PROTOCOL_RE = /^(mailto|tel|callto|sms|facetime|webcal|slack|zoommtg|zoomus|msteams|discord|spotify|vscode|vscode-insiders|obsidian|notion|figma|linear|raycast):/i;
 
+// Streaming sites where JS and CSS ad blocking should be completely skipped.
+// Network-level blocking (settings-enforcer.ts) still applies.
+const STREAMING_SITES = [
+  'youtube.com', 'youtu.be', 'youtube-nocookie.com',
+  'spotify.com', 'netflix.com', 'hulu.com',
+  'disneyplus.com', 'twitch.tv', 'vimeo.com', 'dailymotion.com',
+  'crunchyroll.com', 'primevideo.com', 'peacocktv.com',
+  'music.apple.com', 'tv.apple.com',
+];
+
 export class Tab {
   public readonly id: string = uuid();
   private url: string;
@@ -601,6 +611,7 @@ export class Tab {
    */
   private injectAdBlockEarlyScript(url: string): void {
     if (!this.isAdBlockAllowed(url)) return;
+    if (Tab.isStreamingSite(url)) return;
     const wc = this.webContentsViewInstance.webContents;
     wc.executeJavaScript(AD_BLOCK_EARLY_SCRIPT).catch(() => {});
   }
@@ -611,9 +622,19 @@ export class Tab {
    */
   private injectAdBlockDOMScript(): void {
     if (!this.isAdBlockAllowed()) return;
+    if (Tab.isStreamingSite(this.url)) return;
     const wc = this.webContentsViewInstance.webContents;
     wc.insertCSS(COSMETIC_FILTER_CSS).catch(() => {});
     wc.executeJavaScript(AD_BLOCK_SCRIPT).catch(() => {});
+  }
+
+  private static isStreamingSite(url: string): boolean {
+    try {
+      const hostname = new URL(url).hostname.toLowerCase();
+      return STREAMING_SITES.some(site => hostname === site || hostname.endsWith('.' + site));
+    } catch {
+      return false;
+    }
   }
 
   private injectCustomErrorPage(error: NavigationError): void {
