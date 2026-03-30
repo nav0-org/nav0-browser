@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, Menu, MenuItem, WebContentsView } from "electron";
+import { app, BrowserWindow, dialog, Menu, MenuItem, shell, WebContentsView } from "electron";
 import { InAppUrls, DataStoreConstants, MainToRendererEventsForBrowserIPC, WebContentsEvents } from "../../constants/app-constants";
 import { v4 as uuid } from "uuid";
 import { AppWindow } from "./app-window";
@@ -17,6 +17,7 @@ import { COSMETIC_FILTER_CSS, AD_BLOCK_EARLY_SCRIPT, AD_BLOCK_SCRIPT } from "../
 import { SSLManager } from "./ssl-manager";
 import { buildErrorPageScript, NavigationError } from "./error-page/error-page";
 const domainPattern = /^[^\s]+\.[^\s]+$/;
+const EXTERNAL_PROTOCOL_RE = /^(mailto|tel|callto|sms|facetime|webcal):/i;
 
 export class Tab {
   public readonly id: string = uuid();
@@ -94,6 +95,10 @@ export class Tab {
       urlToLoad = ABOUT_WEBPACK_ENTRY;
       preloadScriptToLoad = ABOUT_PRELOAD_WEBPACK_ENTRY;
       isInternalPage = true;
+    } else if (EXTERNAL_PROTOCOL_RE.test(this.url)) {
+      // Hand off mailto:, tel:, etc. to the OS default handler
+      shell.openExternal(this.url).catch(() => {});
+      return;
     } else if (this.url.startsWith('file://')) {
       urlToLoad = this.url;
       preloadScriptToLoad = null;
@@ -205,6 +210,15 @@ export class Tab {
   }
 
   private initEventHandlers() {
+    // Intercept navigations to external protocols (mailto:, tel:, etc.)
+    // and hand them off to the OS default handler instead of navigating.
+    this.webContentsViewInstance.webContents.on('will-navigate', (event, url) => {
+      if (EXTERNAL_PROTOCOL_RE.test(url)) {
+        event.preventDefault();
+        shell.openExternal(url).catch(() => {});
+      }
+    });
+
     //for hard navigation (debounced)
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE, async (event, url: string) => {
       if (this._destroyed) return;
@@ -366,6 +380,12 @@ export class Tab {
     });
 
     this.webContentsViewInstance.webContents.setWindowOpenHandler(({ url, disposition }) => {
+      // Hand off external protocols to the OS (mailto:, tel:, etc.)
+      if (EXTERNAL_PROTOCOL_RE.test(url)) {
+        shell.openExternal(url).catch(() => {});
+        return { action: 'deny' };
+      }
+
       const now = Date.now();
       this.popupTimestamps = this.popupTimestamps.filter(t => now - t < Tab.POPUP_WINDOW_MS);
 
@@ -1003,6 +1023,19 @@ export class Tab {
       // }
     }
     if (linkURL) { //for clicking on hyperlinks
+      if (EXTERNAL_PROTOCOL_RE.test(linkURL)) {
+        template.push(
+          { label: 'Open in default app', click: () => {
+            shell.openExternal(linkURL).catch(() => {});
+          }},
+          { label: 'Copy link address', click: () => {
+            this.webContentsViewInstance.webContents.executeJavaScript(`
+              navigator.clipboard.writeText("${linkURL}");
+            `);
+          }},
+          { type: 'separator' as const }
+        );
+      } else {
       template.push(
         { label: 'Open link in new tab', click: () => {
           parentAppWindow.createTab(linkURL, false);
@@ -1017,6 +1050,7 @@ export class Tab {
         }},
         { type:  'separator'}
       );
+      }
     }
     if (srcURL) { //for clicking on image
       template.push(
