@@ -973,3 +973,18 @@ html:not(.dark) .nav0-bg .nav0-bg-vignette {
     #fafafa 100%
   );
 }
+
+/* ---- Semi-transparent sidebar & nav so pattern shows through ---- */
+html:not(.dark) .nav0-bg {
+  --vp-sidebar-bg-color: rgba(246, 246, 247, 0.85);
+  --vp-nav-bg-color: rgba(246, 246, 247, 0.85);
+  --vp-nav-screen-bg-color: rgba(246, 246, 247, 0.85);
+  --vp-local-nav-bg-color: rgba(246, 246, 247, 0.85);
+}
+
+html.dark .nav0-bg {
+  --vp-sidebar-bg-color: rgba(22, 22, 24, 0.85);
+  --vp-nav-bg-color: rgba(22, 22, 24, 0.85);
+  --vp-nav-screen-bg-color: rgba(22, 22, 24, 0.85);
+  --vp-local-nav-bg-color: rgba(22, 22, 24, 0.85);
+}
