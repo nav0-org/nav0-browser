@@ -230,7 +230,8 @@ export const AD_BLOCK_DOMAINS: string[] = [
   'evadav.com',
   'pushwoosh.com',
   'pushengage.com',
-  'onesignal.com',
+  // Note: onesignal.com removed — it's a legitimate push notification
+  // service used by many sites, not an ad network
   'pushcrew.com',
   'subscribers.com',
 
@@ -426,11 +427,20 @@ div[class*="gpt_ad"],
 .advertising,
 [data-ad-format],
 
-/* Broader ad pattern matching */
-[class*="-ad-"],
-[class*="-ads-"],
-[id*="-ad-"],
-[id*="-ads-"],
+/* Broader ad pattern matching — use specific prefixes to avoid
+   false-positives on legitimate classes like "upload-addon", "breadcrumb-addon",
+   "spread-admin", etc. */
+[class*="banner-ad"],
+[class*="sidebar-ad"],
+[class*="google-ad"],
+[class*="display-ad"],
+[class*="native-ad"],
+[class*="sticky-ad"],
+[class*="inline-ad"],
+[id*="banner-ad"],
+[id*="sidebar-ad"],
+[id*="google-ad"],
+[id*="display-ad"],
 
 /* Ad iframes by generic src patterns */
 iframe[src*="ad."],

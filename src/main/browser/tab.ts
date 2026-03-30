@@ -17,7 +17,10 @@ import { COSMETIC_FILTER_CSS, AD_BLOCK_EARLY_SCRIPT, AD_BLOCK_SCRIPT } from "../
 import { SSLManager } from "./ssl-manager";
 import { buildErrorPageScript, NavigationError } from "./error-page/error-page";
 const domainPattern = /^[^\s]+\.[^\s]+$/;
-const EXTERNAL_PROTOCOL_RE = /^(mailto|tel|callto|sms|facetime|webcal):/i;
+// Protocols that should be handed off to the OS default handler.
+// Covers communication (mailto, tel, sms), calendar (webcal), and
+// common app deep-links (slack, zoom, teams, discord, vscode, etc.)
+const EXTERNAL_PROTOCOL_RE = /^(mailto|tel|callto|sms|facetime|webcal|slack|zoommtg|zoomus|msteams|discord|spotify|vscode|vscode-insiders|obsidian|notion|figma|linear|raycast):/i;
 
 export class Tab {
   public readonly id: string = uuid();
