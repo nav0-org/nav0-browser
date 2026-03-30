@@ -10,7 +10,8 @@ export const AD_BLOCK_DOMAINS: string[] = [
   'googlesyndication.com',
   'googleadservices.com',
   'google-analytics.com',
-  'googletagmanager.com',
+  // Note: googletagmanager.com removed — some sites (e.g. Spotify) use GTM
+  // to bootstrap critical app configuration, not just analytics
   'googletagservices.com',
   'pagead2.googlesyndication.com',
   'adservice.google.com',
