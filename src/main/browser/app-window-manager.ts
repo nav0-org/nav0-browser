@@ -659,6 +659,16 @@ export abstract class AppWindowManager {
       }
     });
 
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.DOWNLOAD_CURRENT_PDF, async (event, appWindowId: string, tabId: string) => {
+      const window = AppWindowManager.getWindowById(appWindowId);
+      if (window) {
+        const tab = tabId ? window.getTabById(tabId) : window.getActiveTab();
+        if (tab) {
+          tab.downloadCurrentPdf();
+        }
+      }
+    });
+
     ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_OPEN_TABS, async (event, appWindowId: string) => {
       let window: AppWindow | null = null;
       if (appWindowId) {

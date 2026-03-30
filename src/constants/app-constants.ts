@@ -146,6 +146,7 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly SHOW_ABOUT_PANEL = "browser:show-about-panel";
   public static readonly GET_ABOUT_INFO = "browser:get-about-info";
   public static readonly TOGGLE_READER_MODE = "browser:toggle-reader-mode";
+  public static readonly DOWNLOAD_CURRENT_PDF = "browser:download-current-pdf";
   public static readonly SHOW_FIND_IN_PAGE = "browser:show-find-in-page";
   public static readonly HIDE_FIND_IN_PAGE = "browser:hide-find-in-page";
   public static readonly FIND_IN_PAGE = "browser:find-in-page";

@@ -20,6 +20,7 @@ export class BrowserTabManager {
   private downloadProgressRing: SVGElement;
   private downloadProgressFill: SVGCircleElement;
   private readerModeButton: HTMLButtonElement;
+  private pdfDownloadButton: HTMLButtonElement;
   private sslIndicator: HTMLButtonElement;
 
   // State
@@ -84,6 +85,7 @@ export class BrowserTabManager {
     this.downloadProgressRing = document.getElementById('download-progress-ring') as unknown as SVGElement;
     this.downloadProgressFill = document.querySelector('.download-progress-ring-fill') as unknown as SVGCircleElement;
     this.readerModeButton = document.getElementById('reader-mode-button') as HTMLButtonElement;
+    this.pdfDownloadButton = document.getElementById('pdf-download-button') as HTMLButtonElement;
     this.sslIndicator = document.getElementById('ssl-indicator') as HTMLButtonElement;
 
     this.setupSSLIndicator();
@@ -132,6 +134,11 @@ export class BrowserTabManager {
     // Reader mode button
     this.readerModeButton.addEventListener('click', () => {
       window.BrowserAPI.toggleReaderMode(this.appWindowId, this.activeTabId);
+    });
+
+    // PDF download button
+    this.pdfDownloadButton.addEventListener('click', () => {
+      window.BrowserAPI.downloadCurrentPdf(this.appWindowId, this.activeTabId);
     });
 
     // URL input - navigate on Enter key
@@ -225,6 +232,7 @@ export class BrowserTabManager {
         this.forwardButton.disabled = !data.canGoForward;
         this.handleBookmark();
         this.updateSSLIndicator();
+        this.updatePdfDownloadButton();
       }
     });
 
@@ -327,6 +335,18 @@ export class BrowserTabManager {
     }
   }
 
+  private updatePdfDownloadButton(): void {
+    const activeTab = this.getTabById(this.activeTabId);
+    if (!activeTab || !activeTab.url) {
+      this.pdfDownloadButton.style.display = 'none';
+      return;
+    }
+    // Detect PDF by URL extension or Chrome's built-in PDF viewer URL
+    const url = activeTab.url.toLowerCase();
+    const isPdf = url.endsWith('.pdf') || url.includes('.pdf?') || url.includes('.pdf#') || url.includes('content-type=application/pdf');
+    this.pdfDownloadButton.style.display = isPdf ? 'block' : 'none';
+  }
+
   private removeTab(tabId: string): void {
     const tabToBeClosed = this.getTabById(tabId);
     this.tabs = this.tabs.filter(tab => tab.id !== tabId);
@@ -359,6 +379,7 @@ export class BrowserTabManager {
         this.handleBookmark();
         this.backButton.disabled = !activeTab.canGoBack;
         this.forwardButton.disabled = !activeTab.canGoForward;
+        this.updatePdfDownloadButton();
       }
     }
 

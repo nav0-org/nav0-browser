@@ -51,6 +51,7 @@ export class Tab {
   private sslStatus: 'secure' | 'insecure' | 'internal' = 'internal';
   private sslCertificate: Electron.Certificate | null = null;
   private willDownloadHandler: ((event: Electron.Event, item: Electron.DownloadItem, webContents: Electron.WebContents) => void) | null = null;
+  private pdfDownloadBypass = false;
   private isSuspended = false;
   private lastActivatedAt: Date = new Date();
 
@@ -273,14 +274,20 @@ export class Tab {
       const fileName = item.getFilename();
       const mimeType = item.getMimeType();
 
-      // Intercept PDF downloads and open them in-tab instead
+      // Intercept PDF downloads and open them in-tab instead,
+      // unless the user explicitly requested a PDF download.
       if (mimeType === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf')) {
-        const pdfUrl = item.getURL();
-        item.cancel();
-        if (pdfUrl) {
-          this.navigate(pdfUrl);
+        if (this.pdfDownloadBypass) {
+          this.pdfDownloadBypass = false;
+          // Fall through to handleDownload below
+        } else {
+          const pdfUrl = item.getURL();
+          item.cancel();
+          if (pdfUrl) {
+            this.navigate(pdfUrl);
+          }
+          return;
         }
-        return;
       }
 
       await this.handleDownload(item);
@@ -895,6 +902,14 @@ export class Tab {
     } catch {
       // Window may be closed
     }
+  }
+
+  downloadCurrentPdf(): void {
+    if (!this.webContentsViewInstance) return;
+    const url = this.webContentsViewInstance.webContents.getURL();
+    if (!url) return;
+    this.pdfDownloadBypass = true;
+    this.webContentsViewInstance.webContents.downloadURL(url);
   }
 
   async toggleReaderMode(): Promise<void> {

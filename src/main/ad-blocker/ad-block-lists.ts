@@ -28,8 +28,9 @@ export const AD_BLOCK_DOMAINS: string[] = [
   'px.moatads.com',
 
   // Facebook / Meta
-  'facebook.net',
-  'connect.facebook.net',
+  // Note: facebook.net and connect.facebook.net removed — blocking them
+  // breaks "Login with Facebook" on third-party sites. Tracking is still
+  // mitigated by third-party cookie blocking.
   'pixel.facebook.com',
   'an.facebook.com',
 
