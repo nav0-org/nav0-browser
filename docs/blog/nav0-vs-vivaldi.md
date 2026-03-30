@@ -28,7 +28,7 @@ head:
       content: bloat
   - - meta
     - name: keywords
-      content: "nav0 vs vivaldi, vivaldi browser privacy, vivaldi bloat, vivaldi telemetry, vivaldi mail calendar, vivaldi customization, minimal browser vs vivaldi, private browser comparison"
+      content: "Nav0 vs vivaldi, vivaldi browser privacy, vivaldi bloat, vivaldi telemetry, vivaldi mail calendar, vivaldi customization, minimal browser vs vivaldi, private browser comparison"
   - - script
     - type: application/ld+json
     - |
@@ -41,7 +41,7 @@ head:
         "author": { "@type": "Organization", "name": "Nav0" },
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/nav0-vs-vivaldi",
-        "keywords": ["nav0 vs vivaldi", "vivaldi browser privacy", "vivaldi bloat", "vivaldi mail calendar", "minimal browser", "private browser"]
+        "keywords": ["Nav0 vs vivaldi", "vivaldi browser privacy", "vivaldi bloat", "vivaldi mail calendar", "minimal browser", "private browser"]
       }
 ---
 
@@ -126,7 +126,7 @@ Vivaldi's UI layer is proprietary. The browser is built on Chromium (which is op
 
 Vivaldi's team has explained this decision as a defense against competitors copying their work (as happened with Opera). That's a reasonable business concern. But it means that every privacy claim Vivaldi makes must be taken on trust. You can't verify that the unique ID system works the way they say it does. You can't audit the sync encryption. You can't check what the mail client does with your credentials.
 
-Nav0 is fully open source under the MIT license. Every line of code is auditable. Every IPC channel, every database query, every network request is visible in the source. When we say nav0 collects zero data, you don't have to trust us — you can read the code and verify it yourself.
+Nav0 is fully open source under the MIT license. Every line of code is auditable. Every IPC channel, every database query, every network request is visible in the source. When we say Nav0 collects zero data, you don't have to trust us — you can read the code and verify it yourself.
 
 Open source isn't a guarantee of security. But it's a prerequisite for verifiable privacy claims. Closed source plus "trust us" is exactly the model that Big Tech uses. Vivaldi is more trustworthy than Google, but they're asking you to make the same leap of faith.
 
@@ -152,7 +152,7 @@ Nav0 is for people who want a browser that does one thing: browse the web. Fast,
 
 ## What You Give Up
 
-Choosing nav0 over Vivaldi means giving up:
+Choosing Nav0 over Vivaldi means giving up:
 
 - **Cross-device sync.** Nav0 has no accounts and no sync. Your data stays on one device.
 - **The extensions ecosystem.** Vivaldi supports Chrome extensions. Nav0 doesn't.
@@ -175,7 +175,7 @@ The web doesn't need more software that tries to replace every other tool on you
 
 Nav0 browses the web. Nothing more. And that's exactly enough.
 
-[Download nav0 — free, open source, and zero bloat](/guide/getting-started).
+[Download Nav0 — free, open source, and zero bloat](/guide/getting-started).
 
 ---
 

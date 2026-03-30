@@ -64,6 +64,7 @@ declare global {
       findInPagePrevious: (appWindowId: string, text: string, options?: { matchCase?: boolean }) => Promise<any>;
       stopFindInPage: (appWindowId: string) => Promise<any>;
       printPage: (appWindowId: string) => Promise<any>;
+      toggleDevTools: (appWindowId: string) => Promise<any>;
       showTabContextMenu: (appWindowId: string, tabId: string, isPinned: boolean) => void;
       showAboutPanel: () => Promise<any>;
       getSearchUrl: (searchTerm: string) => Promise<string>;

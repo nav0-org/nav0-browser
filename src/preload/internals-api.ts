@@ -159,6 +159,9 @@ export function init(){
     printPage: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.PRINT_PAGE, appWindowId);
     },
+    toggleDevTools: async (appWindowId: string) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.TOGGLE_DEV_TOOLS, appWindowId);
+    },
     showTabContextMenu: (appWindowId: string, tabId: string, isPinned: boolean) => {
       ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_TAB_CONTEXT_MENU, appWindowId, tabId, isPinned);
     },

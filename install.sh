@@ -5,7 +5,7 @@ REPO="nav0-org/nav0-browser"
 APP_NAME="nav0-browser"
 INSTALL_DIR="/Applications"
 
-echo "Installing nav0 browser..."
+echo "Installing Nav0 browser..."
 
 # Detect architecture
 ARCH=$(uname -m)
@@ -18,11 +18,11 @@ case "$ARCH" in
     ;;
 esac
 
-# Check if nav0 is currently running and ask the user to close it
+# Check if Nav0 is currently running and ask the user to close it
 if pgrep -f "$APP_NAME" >/dev/null 2>&1; then
   echo ""
   echo "Nav0 is currently running. Please close it before upgrading."
-  echo "Press Enter once you've closed nav0 (or Ctrl+C to cancel)..."
+  echo "Press Enter once you've closed Nav0 (or Ctrl+C to cancel)..."
   read -r
   if pgrep -f "$APP_NAME" >/dev/null 2>&1; then
     echo "Error: Nav0 is still running. Please close it and try again."
@@ -77,7 +77,7 @@ fi
 if [ -d "$INSTALL_DIR/$APP_NAME.app" ]; then
   if ! rm -rf "$INSTALL_DIR/$APP_NAME.app"; then
     echo "Error: Failed to remove existing $APP_NAME.app. Is it still running?"
-    echo "Please close nav0 and try again."
+    echo "Please close Nav0 and try again."
     hdiutil detach "$MOUNT_POINT" -quiet 2>/dev/null || true
     exit 1
   fi
@@ -98,6 +98,6 @@ hdiutil detach "$MOUNT_POINT" -quiet 2>/dev/null || true
 xattr -cr "$INSTALL_DIR/$APP_NAME.app"
 
 echo ""
-echo "nav0 browser $VERSION ($ARCH_SUFFIX) installed to $INSTALL_DIR"
-echo "Launching nav0..."
+echo "Nav0 browser $VERSION ($ARCH_SUFFIX) installed to $INSTALL_DIR"
+echo "Launching Nav0..."
 open "$INSTALL_DIR/$APP_NAME.app"

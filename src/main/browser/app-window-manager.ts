@@ -6,6 +6,7 @@ import { Tab } from "./tab";
 import { DatabaseManager } from "../database/database-manager";
 import { DataStoreManager } from "../database/data-store-manager";
 import { SearchEngine } from "../web/search-engine";
+import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
 import { PermissionManager, PermissionRequest } from "./permission-manager";
 import { PermissionPromptData } from "./app-window";
 import fs from "fs";
@@ -741,6 +742,17 @@ export abstract class AppWindowManager {
       const activeTab = window.getActiveTab();
       if (!activeTab || !activeTab.getWebContentsViewInstance()) return;
       activeTab.getWebContentsViewInstance().webContents.print();
+    });
+
+    ipcMain.on(RendererToMainEventsForBrowserIPC.TOGGLE_DEV_TOOLS, async (event, appWindowId: string) => {
+      const settings = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as BrowserSettings;
+      const merged = { ...DEFAULT_BROWSER_SETTINGS, ...settings };
+      if (!merged.devToolsEnabled) return;
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (!window) return;
+      const activeTab = window.getActiveTab();
+      if (!activeTab || !activeTab.getWebContentsViewInstance()) return;
+      activeTab.getWebContentsViewInstance().webContents.toggleDevTools();
     });
 
     ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_TAB_CONTEXT_MENU, async (event, appWindowId: string, tabId: string, isPinned: boolean) => {

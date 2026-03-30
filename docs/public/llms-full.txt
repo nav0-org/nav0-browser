@@ -1,8 +1,8 @@
-# nav0 — Complete Documentation
+# Nav0 — Complete Documentation
 
 > A minimal, privacy-focused web browser. No data collection. No bloat. No AI gimmicks. Just clean, safe browsing.
 
-nav0 is a free, open-source desktop web browser built on Electron and Chromium. It is designed for users who want a fast, lightweight browser that respects their privacy. nav0 collects zero telemetry, requires no accounts, and stores all data locally on the user's device.
+Nav0 is a free, open-source desktop web browser built on Electron and Chromium. It is designed for users who want a fast, lightweight browser that respects their privacy. Nav0 collects zero telemetry, requires no accounts, and stores all data locally on the user's device.
 
 Website: https://nav0.org
 Source Code: https://github.com/nav0-org/nav0-browser
@@ -13,7 +13,7 @@ License: MIT
 
 ## Getting Started
 
-nav0 is a minimal web browser built on Electron that prioritizes your privacy and system resources.
+Nav0 is a minimal web browser built on Electron that prioritizes your privacy and system resources.
 
 ### macOS (Homebrew)
 
@@ -42,7 +42,7 @@ Requires Node.js 22+ and npm. The built app will be in the out/ directory.
 
 ### First Launch
 
-When you first open nav0, nothing asks for your data:
+When you first open Nav0, nothing asks for your data:
 - No account creation prompts
 - No "personalization" setup
 - No telemetry consent dialogs
@@ -61,7 +61,7 @@ When you first open nav0, nothing asks for your data:
 
 ### Configuration
 
-nav0 stores its configuration locally on your machine. No cloud sync, no account needed.
+Nav0 stores its configuration locally on your machine. No cloud sync, no account needed.
 
 Configuration locations:
 - Windows: %APPDATA%/nav0/
@@ -72,7 +72,7 @@ Configuration locations:
 
 ## Features
 
-nav0 includes only the features essential for a clean browsing experience.
+Nav0 includes only the features essential for a clean browsing experience.
 
 ### Tab Management
 - Open unlimited tabs
@@ -153,13 +153,13 @@ nav0 includes only the features essential for a clean browsing experience.
 
 ## Privacy Policy
 
-Privacy is not a feature in nav0—it is the foundation.
+Privacy is not a feature in Nav0—it is the foundation.
 
 ### The Complete Policy
 
-nav0 does not collect, store, transmit, or process any user data. Period.
+Nav0 does not collect, store, transmit, or process any user data. Period.
 
-### What nav0 Does NOT Collect
+### What Nav0 Does NOT Collect
 
 Telemetry: No usage statistics, no crash reports, no feature usage tracking, no A/B testing data.
 Personal Information: No names, no emails, no accounts, no identifiers.
@@ -167,26 +167,26 @@ Browsing Data: No URLs visited, no search queries, no browsing history, no bookm
 Device Information: No hardware specs, no OS details, no screen resolution, no installed software.
 Network Data: No IP addresses, no location data, no connection information, no ISP details.
 
-### How nav0 Achieves This
+### How Nav0 Achieves This
 
 No Accounts: No sign-in means no profile to build.
 No Cloud Services: Data stays on your device—bookmarks, history, settings, downloads are all stored locally.
-No Phone Home: nav0 makes no unsolicited network requests. No analytics pings, no heartbeat checks, no "anonymous" usage data, no background sync.
+No Phone Home: Nav0 makes no unsolicited network requests. No analytics pings, no heartbeat checks, no "anonymous" usage data, no background sync.
 Open Source: Full source code available for auditing. Hidden tracking is impossible when anyone can read the code.
 
 ### Data Requests
 
-If law enforcement requests user data: nav0 has nothing to provide. nav0 does not have user data. nav0 cannot give what it does not have.
+If law enforcement requests user data: Nav0 has nothing to provide. Nav0 does not have user data. Nav0 cannot give what it does not have.
 
 ---
 
 ## Philosophy
 
-nav0 exists because modern browsers have lost their way. What was once a tool to view web pages has become a data harvesting platform, an advertising delivery system, and a feature showcase for engagement metrics.
+Nav0 exists because modern browsers have lost their way. What was once a tool to view web pages has become a data harvesting platform, an advertising delivery system, and a feature showcase for engagement metrics.
 
 ### Core Principles
 
-1. Do One Thing Well: nav0 browses the web. It does not try to be an AI assistant, a news source, a password manager, a cryptocurrency wallet, or a shopping companion.
+1. Do One Thing Well: Nav0 browses the web. It does not try to be an AI assistant, a news source, a password manager, a cryptocurrency wallet, or a shopping companion.
 
 2. Absence Over Presence: The best feature is often no feature. Every feature has costs—code complexity, security surface, maintenance burden, user confusion, and potential for misuse.
 
@@ -194,53 +194,53 @@ nav0 exists because modern browsers have lost their way. What was once a tool to
 
 4. Transparent Over Proprietary: Source code, development, roadmap, and decisions are all public. If you cannot see how it works, you cannot trust it.
 
-5. User Over User Data: nav0 values users, not user data. Success means users have a fast browser and maintain their privacy—not collecting metrics or building profiles.
+5. User Over User Data: Nav0 values users, not user data. Success means users have a fast browser and maintain their privacy—not collecting metrics or building profiles.
 
 ---
 
 ## Frequently Asked Questions
 
-### What is nav0?
-nav0 (pronounced "Nav Nought") is a free, open-source, privacy-focused desktop web browser built on Electron and Chromium. The name comes from "navigate + nought (bloat)."
+### What is Nav0?
+Nav0 (pronounced "Nav Nought") is a free, open-source, privacy-focused desktop web browser built on Electron and Chromium. The name comes from "navigate + nought (bloat)."
 
-### What platforms does nav0 support?
+### What platforms does Nav0 support?
 Windows (x64), macOS (Intel x64 and Apple Silicon ARM64), and Linux (x64). On macOS, install via Homebrew: brew install --cask nav0-org/nav0/nav0-browser. On Windows and Linux, download installers from GitHub Releases. On all platforms, you can build from source.
 
-### Does nav0 collect any data?
-No. Zero. nav0 collects no telemetry, no usage statistics, no crash reports, no browsing data, no personal information, and no device information.
+### Does Nav0 collect any data?
+No. Zero. Nav0 collects no telemetry, no usage statistics, no crash reports, no browsing data, no personal information, and no device information.
 
-### Does nav0 require an account?
-No. nav0 works fully without any sign-up, sign-in, or registration.
+### Does Nav0 require an account?
+No. Nav0 works fully without any sign-up, sign-in, or registration.
 
-### Is nav0 open source?
-Yes. nav0 is fully open source under the MIT License. The source code is available at https://github.com/nav0-org/nav0-browser.
+### Is Nav0 open source?
+Yes. Nav0 is fully open source under the MIT License. The source code is available at https://github.com/nav0-org/nav0-browser.
 
-### What browser engine does nav0 use?
-nav0 uses Chromium via Electron, giving it compatibility with the modern web.
+### What browser engine does Nav0 use?
+Nav0 uses Chromium via Electron, giving it compatibility with the modern web.
 
-### Does nav0 support browser extensions?
-nav0 supports extensions. Users should review extension permissions and prefer open-source extensions.
+### Does Nav0 support browser extensions?
+Nav0 supports extensions. Users should review extension permissions and prefer open-source extensions.
 
-### How does nav0 make money?
-nav0 is a community project. It does not monetize users.
+### How does Nav0 make money?
+Nav0 is a community project. It does not monetize users.
 
-### Why doesn't nav0 have an AI assistant?
-nav0 does not include AI because it is not what a browser is for. AI features typically require sending page content and queries to cloud servers, which contradicts nav0's privacy principles.
+### Why doesn't Nav0 have an AI assistant?
+Nav0 does not include AI because it is not what a browser is for. AI features typically require sending page content and queries to cloud servers, which contradicts Nav0's privacy principles.
 
-### Why doesn't nav0 have a built-in VPN?
+### Why doesn't Nav0 have a built-in VPN?
 Browser VPNs create conflicts of interest and give users a false sense of security. A browser that collects zero data is already more private than any browser-plus-VPN combination.
 
-### How does nav0 improve without telemetry?
+### How does Nav0 improve without telemetry?
 Through voluntary bug reports, GitHub issues, community feedback, and the developers' own usage.
 
-### What if nav0 gets acquired?
+### What if Nav0 gets acquired?
 The code is open source under the MIT License. Even if the project changes hands, the community can fork it. Users can always build from a trusted commit.
 
-### How is nav0 different from Brave?
-While Brave has meaningful privacy protections, its business model depends on an advertising network and it ships with a cryptocurrency wallet and affiliate link injection. nav0 has no advertising, no crypto features, and no business model that depends on user data.
+### How is Nav0 different from Brave?
+While Brave has meaningful privacy protections, its business model depends on an advertising network and it ships with a cryptocurrency wallet and affiliate link injection. Nav0 has no advertising, no crypto features, and no business model that depends on user data.
 
-### How is nav0 different from Firefox?
-Firefox receives approximately 80-85% of its revenue from Google search engine deals, creating a financial dependency. Firefox has also been adding AI-powered features. nav0 has no search engine deals and no AI features.
+### How is Nav0 different from Firefox?
+Firefox receives approximately 80-85% of its revenue from Google search engine deals, creating a financial dependency. Firefox has also been adding AI-powered features. Nav0 has no search engine deals and no AI features.
 
 ---
 
