@@ -662,23 +662,27 @@ export const AD_BLOCK_EARLY_SCRIPT = `
   if (window.__Nav0AdBlockEarly) return;
   window.__Nav0AdBlockEarly = true;
 
-  // Detect known video/streaming platforms where IMA mocking breaks playback
+  // Detect known video/streaming platforms where ad blocking scripts
+  // (IMA mock, play() hook, script interception) break playback.
+  // Network-level ad blocking in settings-enforcer.ts still applies.
   var hostname = window.location.hostname.toLowerCase();
-  var videoSites = ['youtube.com', 'youtu.be', 'youtube-nocookie.com',
+  var streamingSites = ['youtube.com', 'youtu.be', 'youtube-nocookie.com',
                     'spotify.com', 'netflix.com', 'hulu.com',
                     'disneyplus.com', 'twitch.tv', 'vimeo.com', 'dailymotion.com',
-                    'crunchyroll.com', 'primevideo.com', 'peacocktv.com'];
-  var skipIMA = videoSites.some(function(site) {
+                    'crunchyroll.com', 'primevideo.com', 'peacocktv.com',
+                    'music.apple.com', 'tv.apple.com'];
+  var isStreamingSite = streamingSites.some(function(site) {
     return hostname === site || hostname.endsWith('.' + site);
   });
+
+  // Skip ALL ad blocking script hooks on streaming sites
+  if (isStreamingSite) return;
 
   // ============================================================
   // 1. Google IMA SDK Mock
   //    Replaces the Google Interactive Media Ads SDK with a no-op
   //    stub so video players skip ads and play content directly.
-  //    Skipped on known video platforms to avoid breaking playback.
   // ============================================================
-  if (!skipIMA) {
   function NoopFn() {}
   function EventTarget() { this._handlers = {}; }
   EventTarget.prototype.addEventListener = function(e, fn) {
@@ -851,7 +855,6 @@ export const AD_BLOCK_EARLY_SCRIPT = `
       configurable: false
     });
   } catch(e) {}
-  } // end if (!skipIMA)
 
   // ============================================================
   // 2. HTMLMediaElement.prototype.play hook
@@ -1025,6 +1028,18 @@ export const AD_BLOCK_SCRIPT = `
   'use strict';
   if (window.__Nav0AdBlockerDOM) return;
   window.__Nav0AdBlockerDOM = true;
+
+  // Skip DOM-level ad cleanup on streaming platforms (same list as early script)
+  var hostname = window.location.hostname.toLowerCase();
+  var streamingSites = ['youtube.com', 'youtu.be', 'youtube-nocookie.com',
+                    'spotify.com', 'netflix.com', 'hulu.com',
+                    'disneyplus.com', 'twitch.tv', 'vimeo.com', 'dailymotion.com',
+                    'crunchyroll.com', 'primevideo.com', 'peacocktv.com',
+                    'music.apple.com', 'tv.apple.com'];
+  var isStreamingSite = streamingSites.some(function(site) {
+    return hostname === site || hostname.endsWith('.' + site);
+  });
+  if (isStreamingSite) return;
 
   var adSelectors = [
     'ins.adsbygoogle',
