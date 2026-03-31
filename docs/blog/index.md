@@ -10,6 +10,14 @@ Thoughts on privacy, browsers, and the open web.
 ---
 
 <div class="blog-post-item">
+  <a href="/blog/nav0-vs-safari">
+    <h2>Nav0 vs Safari: Privacy by Default vs. Privacy by Apple's Terms</h2>
+  </a>
+  <div class="post-meta">By Nav0 Team &middot; March 31, 2026 &middot; 11 min read &middot; Comparison</div>
+  <p class="post-excerpt">Safari is the most privacy-friendly mainstream browser — but it's still controlled by Apple, tied to iCloud, and locked to one ecosystem. Nav0 takes Safari's privacy ideals and removes the strings attached.</p>
+</div>
+
+<div class="blog-post-item">
   <a href="/blog/nav0-vs-vivaldi">
     <h2>Nav0 vs Vivaldi: When Your Browser Tries to Be Everything</h2>
   </a>
