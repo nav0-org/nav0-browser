@@ -1,5 +1,5 @@
 import { app, BrowserWindow, dialog, Menu, MenuItem, shell, WebContentsView } from "electron";
-import { InAppUrls, DataStoreConstants, MainToRendererEventsForBrowserIPC, WebContentsEvents } from "../../constants/app-constants";
+import { InAppUrls, DataStoreConstants, MainToRendererEventsForBrowserIPC, WebContentsEvents, STREAMING_SITES } from "../../constants/app-constants";
 import { v4 as uuid } from "uuid";
 import { AppWindow } from "./app-window";
 import { BookmarkManager } from "./bookmark-manager";
@@ -21,16 +21,6 @@ const domainPattern = /^[^\s]+\.[^\s]+$/;
 // Covers communication (mailto, tel, sms), calendar (webcal), and
 // common app deep-links (slack, zoom, teams, discord, vscode, etc.)
 const EXTERNAL_PROTOCOL_RE = /^(mailto|tel|callto|sms|facetime|webcal|slack|zoommtg|zoomus|msteams|discord|spotify|vscode|vscode-insiders|obsidian|notion|figma|linear|raycast):/i;
-
-// Streaming sites where JS and CSS ad blocking should be completely skipped.
-// Network-level blocking (settings-enforcer.ts) still applies.
-const STREAMING_SITES = [
-  'youtube.com', 'youtu.be', 'youtube-nocookie.com',
-  'spotify.com', 'netflix.com', 'hulu.com',
-  'disneyplus.com', 'twitch.tv', 'vimeo.com', 'dailymotion.com',
-  'crunchyroll.com', 'primevideo.com', 'peacocktv.com',
-  'music.apple.com', 'tv.apple.com',
-];
 
 export class Tab {
   public readonly id: string = uuid();

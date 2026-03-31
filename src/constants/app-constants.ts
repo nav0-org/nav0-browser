@@ -243,6 +243,30 @@ export abstract class RendererToMainEventsForDataStoreIPC {
 }
 
 
+/**
+ * Streaming/video sites where JS and CSS ad blocking is skipped.
+ * Network-level ad blocking (domain and URL pattern blocking) still applies.
+ */
+export const STREAMING_SITES: readonly string[] = [
+  'youtube.com', 'youtu.be', 'youtube-nocookie.com',
+  'spotify.com', 'netflix.com', 'hulu.com',
+  'disneyplus.com', 'twitch.tv', 'vimeo.com', 'dailymotion.com',
+  'crunchyroll.com', 'primevideo.com', 'peacocktv.com',
+  'music.apple.com', 'tv.apple.com',
+];
+
+/**
+ * Known multi-part country-code TLDs for correct eTLD+1 extraction.
+ * Used by cookie third-party detection to avoid misclassifying subdomains.
+ */
+export const MULTI_PART_TLDS: ReadonlySet<string> = new Set([
+  'co.uk', 'co.jp', 'co.kr', 'co.nz', 'co.za', 'co.in', 'co.id',
+  'com.au', 'com.br', 'com.cn', 'com.mx', 'com.tw', 'com.sg', 'com.hk',
+  'org.uk', 'org.au', 'net.au', 'net.br',
+  'ac.uk', 'gov.uk', 'gov.au',
+  'ne.jp', 'or.jp', 'ac.jp',
+]);
+
 export abstract class InAppUrls {
   public static readonly PREFIX = "Nav0://";
   public static readonly DOWNLOADS = "Nav0://downloads";

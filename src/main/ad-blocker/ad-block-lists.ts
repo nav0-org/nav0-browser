@@ -3,6 +3,12 @@
  * cosmetic filtering, and dynamic ad removal.
  */
 
+import { STREAMING_SITES } from '../../constants/app-constants';
+
+// Serialize the streaming sites list into a JS array literal for injection
+// into template-literal scripts that run in the renderer context.
+const STREAMING_SITES_JS = JSON.stringify(STREAMING_SITES as unknown as string[]);
+
 // Well-known ad and tracking domains
 export const AD_BLOCK_DOMAINS: string[] = [
   // Google Ads & Analytics
@@ -667,11 +673,7 @@ export const AD_BLOCK_EARLY_SCRIPT = `
   // (IMA mock, play() hook, script interception) break playback.
   // Network-level ad blocking in settings-enforcer.ts still applies.
   var hostname = window.location.hostname.toLowerCase();
-  var streamingSites = ['youtube.com', 'youtu.be', 'youtube-nocookie.com',
-                    'spotify.com', 'netflix.com', 'hulu.com',
-                    'disneyplus.com', 'twitch.tv', 'vimeo.com', 'dailymotion.com',
-                    'crunchyroll.com', 'primevideo.com', 'peacocktv.com',
-                    'music.apple.com', 'tv.apple.com'];
+  var streamingSites = ${STREAMING_SITES_JS};
   var isStreamingSite = streamingSites.some(function(site) {
     return hostname === site || hostname.endsWith('.' + site);
   });
@@ -1032,11 +1034,7 @@ export const AD_BLOCK_SCRIPT = `
 
   // Skip DOM-level ad cleanup on streaming platforms (same list as early script)
   var hostname = window.location.hostname.toLowerCase();
-  var streamingSites = ['youtube.com', 'youtu.be', 'youtube-nocookie.com',
-                    'spotify.com', 'netflix.com', 'hulu.com',
-                    'disneyplus.com', 'twitch.tv', 'vimeo.com', 'dailymotion.com',
-                    'crunchyroll.com', 'primevideo.com', 'peacocktv.com',
-                    'music.apple.com', 'tv.apple.com'];
+  var streamingSites = ${STREAMING_SITES_JS};
   var isStreamingSite = streamingSites.some(function(site) {
     return hostname === site || hostname.endsWith('.' + site);
   });

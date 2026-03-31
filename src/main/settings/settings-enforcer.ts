@@ -1,5 +1,5 @@
 import { session, ipcMain, app, webContents } from "electron";
-import { DataStoreConstants, RendererToMainEventsForBrowserIPC } from "../../constants/app-constants";
+import { DataStoreConstants, RendererToMainEventsForBrowserIPC, MULTI_PART_TLDS } from "../../constants/app-constants";
 import { DataStoreManager } from "../database/data-store-manager";
 import { DatabaseManager } from "../database/database-manager";
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS, USER_AGENT_PRESETS } from "../../types/settings-types";
@@ -135,19 +135,11 @@ export abstract class SettingsEnforcer {
     }
   }
 
-  private static readonly MULTI_PART_TLDS = new Set([
-    'co.uk', 'co.jp', 'co.kr', 'co.nz', 'co.za', 'co.in', 'co.id',
-    'com.au', 'com.br', 'com.cn', 'com.mx', 'com.tw', 'com.sg', 'com.hk',
-    'org.uk', 'org.au', 'net.au', 'net.br',
-    'ac.uk', 'gov.uk', 'gov.au',
-    'ne.jp', 'or.jp', 'ac.jp',
-  ]);
-
   private static getRegistrableDomain(hostname: string): string {
     const parts = hostname.split('.');
     if (parts.length <= 2) return hostname;
     const lastTwo = parts.slice(-2).join('.');
-    if (SettingsEnforcer.MULTI_PART_TLDS.has(lastTwo) && parts.length > 2) {
+    if (MULTI_PART_TLDS.has(lastTwo) && parts.length > 2) {
       return parts.slice(-3).join('.');
     }
     return lastTwo;
