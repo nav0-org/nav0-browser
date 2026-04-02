@@ -390,23 +390,16 @@ export abstract class AppWindowManager {
       if (tab && tab.getWebContentsViewInstance()) {
         const webContents = tab.getWebContentsViewInstance().webContents;
         const session = webContents.session;
-        const currentUrl = webContents.getURL();
 
         try {
-          // Extract origin from the current URL for site-specific clearing
-          const origin = new URL(currentUrl).origin;
-
-          // Clear all storage data (cookies, localStorage, sessionStorage, indexedDB, service workers, cache storage) for this origin
-          await session.clearStorageData({ origin });
-
-          // Clear HTTP cache and code caches globally (Electron doesn't support per-origin HTTP cache clearing)
+          const currentUrl = webContents.getURL();
+          try {
+            const origin = new URL(currentUrl).origin;
+            await session.clearStorageData({ origin });
+          } catch (_) { /* origin may not be parseable */ }
           await session.clearCache();
           await session.clearCodeCaches({});
-        } catch (e) {
-          // If URL parsing fails (e.g. about: pages), clear all caches
-          await session.clearCache();
-          await session.clearCodeCaches({});
-        }
+        } catch (_) { /* ignore cache clearing errors */ }
 
         // Reload ignoring any remaining in-memory cache
         return webContents.reloadIgnoringCache();
@@ -802,16 +795,15 @@ export abstract class AppWindowManager {
           label: 'Hard Reload Tab',
           click: async () => {
             const webSession = webContents.session;
-            const currentUrl = webContents.getURL();
             try {
-              const origin = new URL(currentUrl).origin;
-              await webSession.clearStorageData({ origin });
+              const currentUrl = webContents.getURL();
+              try {
+                const origin = new URL(currentUrl).origin;
+                await webSession.clearStorageData({ origin });
+              } catch (_) { /* origin may not be parseable */ }
               await webSession.clearCache();
               await webSession.clearCodeCaches({});
-            } catch (e) {
-              await webSession.clearCache();
-              await webSession.clearCodeCaches({});
-            }
+            } catch (_) { /* ignore cache clearing errors */ }
             webContents.reloadIgnoringCache();
           },
         },
