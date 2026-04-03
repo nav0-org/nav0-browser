@@ -23,4 +23,15 @@ export const rendererConfig: Configuration = {
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.css'],
   },
+  devServer: {
+    client: {
+      overlay: {
+        runtimeErrors: (error: Error) => {
+          // Suppress harmless ResizeObserver error that YouTube and many sites trigger
+          if (error.message?.includes('ResizeObserver loop')) return false;
+          return true;
+        },
+      },
+    },
+  },
 };
