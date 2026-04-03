@@ -58,6 +58,7 @@ export class PermissionManager {
     'fullscreen',
     'clipboard-sanitized-write',
     'pointer-lock',
+    'mediaKeySystem',
   ]);
 
   // Sensitive permissions that require HTTPS

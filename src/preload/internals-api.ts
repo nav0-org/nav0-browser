@@ -201,6 +201,9 @@ export function init(){
     toggleReaderMode: async (appWindowId: string, tabId: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.TOGGLE_READER_MODE, appWindowId, tabId);
     },
+    downloadCurrentPdf: async (appWindowId: string, tabId: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.DOWNLOAD_CURRENT_PDF, appWindowId, tabId);
+    },
     applySettings: async () => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.APPLY_SETTINGS);
     },

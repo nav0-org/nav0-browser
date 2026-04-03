@@ -3,6 +3,12 @@
  * cosmetic filtering, and dynamic ad removal.
  */
 
+import { STREAMING_SITES } from '../../constants/app-constants';
+
+// Serialize the streaming sites list into a JS array literal for injection
+// into template-literal scripts that run in the renderer context.
+const STREAMING_SITES_JS = JSON.stringify(STREAMING_SITES as unknown as string[]);
+
 // Well-known ad and tracking domains
 export const AD_BLOCK_DOMAINS: string[] = [
   // Google Ads & Analytics
@@ -10,7 +16,8 @@ export const AD_BLOCK_DOMAINS: string[] = [
   'googlesyndication.com',
   'googleadservices.com',
   'google-analytics.com',
-  'googletagmanager.com',
+  // Note: googletagmanager.com removed — some sites (e.g. Spotify) use GTM
+  // to bootstrap critical app configuration, not just analytics
   'googletagservices.com',
   'pagead2.googlesyndication.com',
   'adservice.google.com',
@@ -28,8 +35,9 @@ export const AD_BLOCK_DOMAINS: string[] = [
   'px.moatads.com',
 
   // Facebook / Meta
-  'facebook.net',
-  'connect.facebook.net',
+  // Note: facebook.net and connect.facebook.net removed — blocking them
+  // breaks "Login with Facebook" on third-party sites. Tracking is still
+  // mitigated by third-party cookie blocking.
   'pixel.facebook.com',
   'an.facebook.com',
 
@@ -230,7 +238,8 @@ export const AD_BLOCK_DOMAINS: string[] = [
   'evadav.com',
   'pushwoosh.com',
   'pushengage.com',
-  'onesignal.com',
+  // Note: onesignal.com removed — it's a legitimate push notification
+  // service used by many sites, not an ad network
   'pushcrew.com',
   'subscribers.com',
 
@@ -311,7 +320,8 @@ export const AD_BLOCK_DOMAINS: string[] = [
   'lemmadigital.com',
 
   // Consent / Cookie Wall (tracking-related)
-  'cdn.cookielaw.org',
+  // Note: cdn.cookielaw.org removed — blocking it breaks sites like Spotify
+  // that depend on OneTrust for initialization
   'consent.cookiebot.com',
   'quantcast.mgr.consensu.org',
   'cmpv2.ad.gt',
@@ -425,11 +435,20 @@ div[class*="gpt_ad"],
 .advertising,
 [data-ad-format],
 
-/* Broader ad pattern matching */
-[class*="-ad-"],
-[class*="-ads-"],
-[id*="-ad-"],
-[id*="-ads-"],
+/* Broader ad pattern matching — use specific prefixes to avoid
+   false-positives on legitimate classes like "upload-addon", "breadcrumb-addon",
+   "spread-admin", etc. */
+[class*="banner-ad"],
+[class*="sidebar-ad"],
+[class*="google-ad"],
+[class*="display-ad"],
+[class*="native-ad"],
+[class*="sticky-ad"],
+[class*="inline-ad"],
+[id*="banner-ad"],
+[id*="sidebar-ad"],
+[id*="google-ad"],
+[id*="display-ad"],
 
 /* Ad iframes by generic src patterns */
 iframe[src*="ad."],
@@ -650,6 +669,18 @@ export const AD_BLOCK_EARLY_SCRIPT = `
   if (window.__Nav0AdBlockEarly) return;
   window.__Nav0AdBlockEarly = true;
 
+  // Detect known video/streaming platforms where ad blocking scripts
+  // (IMA mock, play() hook, script interception) break playback.
+  // Network-level ad blocking in settings-enforcer.ts still applies.
+  var hostname = window.location.hostname.toLowerCase();
+  var streamingSites = ${STREAMING_SITES_JS};
+  var isStreamingSite = streamingSites.some(function(site) {
+    return hostname === site || hostname.endsWith('.' + site);
+  });
+
+  // Skip ALL ad blocking script hooks on streaming sites
+  if (isStreamingSite) return;
+
   // ============================================================
   // 1. Google IMA SDK Mock
   //    Replaces the Google Interactive Media Ads SDK with a no-op
@@ -845,6 +876,13 @@ export const AD_BLOCK_EARLY_SCRIPT = `
       var video = this;
       var src = (video.src || video.currentSrc || '').toLowerCase();
 
+      // Don't intercept same-origin videos (e.g. YouTube serving its own content)
+      try {
+        if (src && new URL(src).hostname === window.location.hostname) {
+          return originalPlay.apply(video, arguments);
+        }
+      } catch(e) {}
+
       // Check source URL for ad patterns
       for (var i = 0; i < adDomainPatterns.length; i++) {
         if (src.indexOf(adDomainPatterns[i]) > -1) {
@@ -993,6 +1031,14 @@ export const AD_BLOCK_SCRIPT = `
   'use strict';
   if (window.__Nav0AdBlockerDOM) return;
   window.__Nav0AdBlockerDOM = true;
+
+  // Skip DOM-level ad cleanup on streaming platforms (same list as early script)
+  var hostname = window.location.hostname.toLowerCase();
+  var streamingSites = ${STREAMING_SITES_JS};
+  var isStreamingSite = streamingSites.some(function(site) {
+    return hostname === site || hostname.endsWith('.' + site);
+  });
+  if (isStreamingSite) return;
 
   var adSelectors = [
     'ins.adsbygoogle',
@@ -1152,19 +1198,6 @@ export const AD_BLOCK_SCRIPT = `
       el = el.parentElement;
     }
 
-    // Duration heuristic: short videos (< 60s) in ad-like context
-    if (video.duration && video.duration > 0 && video.duration < 60) {
-      var p = video.parentElement;
-      for (var k = 0; k < 4 && p; k++) {
-        var pCls = (p.className && typeof p.className === 'string') ? p.className.toLowerCase() : '';
-        var pId = (p.id || '').toLowerCase();
-        if (pCls.match(/ad|ads|advertisement|commercial|promo|sponsor/i) ||
-            pId.match(/ad|ads|advertisement|commercial|promo|sponsor/i)) {
-          return true;
-        }
-        p = p.parentElement;
-      }
-    }
 
     return false;
   }

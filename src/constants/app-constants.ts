@@ -146,6 +146,7 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly SHOW_ABOUT_PANEL = "browser:show-about-panel";
   public static readonly GET_ABOUT_INFO = "browser:get-about-info";
   public static readonly TOGGLE_READER_MODE = "browser:toggle-reader-mode";
+  public static readonly DOWNLOAD_CURRENT_PDF = "browser:download-current-pdf";
   public static readonly SHOW_FIND_IN_PAGE = "browser:show-find-in-page";
   public static readonly HIDE_FIND_IN_PAGE = "browser:hide-find-in-page";
   public static readonly FIND_IN_PAGE = "browser:find-in-page";
@@ -241,6 +242,30 @@ export abstract class RendererToMainEventsForDataStoreIPC {
   public static readonly STORE_UNWATCH = "store:unwatch";
 }
 
+
+/**
+ * Streaming/video sites where JS and CSS ad blocking is skipped.
+ * Network-level ad blocking (domain and URL pattern blocking) still applies.
+ */
+export const STREAMING_SITES: readonly string[] = [
+  'youtube.com', 'youtu.be', 'youtube-nocookie.com',
+  'spotify.com', 'netflix.com', 'hulu.com',
+  'disneyplus.com', 'twitch.tv', 'vimeo.com', 'dailymotion.com',
+  'crunchyroll.com', 'primevideo.com', 'peacocktv.com',
+  'music.apple.com', 'tv.apple.com',
+];
+
+/**
+ * Known multi-part country-code TLDs for correct eTLD+1 extraction.
+ * Used by cookie third-party detection to avoid misclassifying subdomains.
+ */
+export const MULTI_PART_TLDS: ReadonlySet<string> = new Set([
+  'co.uk', 'co.jp', 'co.kr', 'co.nz', 'co.za', 'co.in', 'co.id',
+  'com.au', 'com.br', 'com.cn', 'com.mx', 'com.tw', 'com.sg', 'com.hk',
+  'org.uk', 'org.au', 'net.au', 'net.br',
+  'ac.uk', 'gov.uk', 'gov.au',
+  'ne.jp', 'or.jp', 'ac.jp',
+]);
 
 export abstract class InAppUrls {
   public static readonly PREFIX = "Nav0://";

@@ -316,10 +316,34 @@ const SHARE_POLYFILL_CODE = `
 
 function injectPolyfill(): void {
   try {
+    // Skip injection on pages with strict CSP that blocks inline scripts.
+    // Check for a meta CSP tag; server-sent CSP headers can't be read from
+    // the preload, but the try/catch below handles that case silently.
+    const cspMeta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+    if (cspMeta) {
+      const content = cspMeta.getAttribute('content') || '';
+      if (content.includes('script-src') && !content.includes("'unsafe-inline'")) {
+        return; // CSP would block inline script injection
+      }
+    }
+
+    const code = POLYFILL_CODE + SHARE_POLYFILL_CODE + NOTIFICATION_POLYFILL_CODE;
+
+    // Use a blob URL instead of inline script to avoid CSP violations.
+    // Blob URLs are allowed by most CSPs that include 'blob:' in script-src.
+    const blob = new Blob([code], { type: 'application/javascript' });
+    const blobUrl = URL.createObjectURL(blob);
     const script = document.createElement('script');
-    script.textContent = POLYFILL_CODE + SHARE_POLYFILL_CODE + NOTIFICATION_POLYFILL_CODE;
+    script.src = blobUrl;
+    script.onload = () => {
+      URL.revokeObjectURL(blobUrl);
+      script.remove();
+    };
+    script.onerror = () => {
+      URL.revokeObjectURL(blobUrl);
+      script.remove();
+    };
     (document.head || document.documentElement).appendChild(script);
-    script.remove();
   } catch {
     // Ignore injection errors
   }

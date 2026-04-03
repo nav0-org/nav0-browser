@@ -1,5 +1,5 @@
 import { session, ipcMain, app, webContents } from "electron";
-import { DataStoreConstants, RendererToMainEventsForBrowserIPC } from "../../constants/app-constants";
+import { DataStoreConstants, RendererToMainEventsForBrowserIPC, MULTI_PART_TLDS } from "../../constants/app-constants";
 import { DataStoreManager } from "../database/data-store-manager";
 import { DatabaseManager } from "../database/database-manager";
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS, USER_AGENT_PRESETS } from "../../types/settings-types";
@@ -136,10 +136,13 @@ export abstract class SettingsEnforcer {
   }
 
   private static getRegistrableDomain(hostname: string): string {
-    // Simplified eTLD+1 extraction
     const parts = hostname.split('.');
     if (parts.length <= 2) return hostname;
-    return parts.slice(-2).join('.');
+    const lastTwo = parts.slice(-2).join('.');
+    if (MULTI_PART_TLDS.has(lastTwo) && parts.length > 2) {
+      return parts.slice(-3).join('.');
+    }
+    return lastTwo;
   }
 
   // ---- Proxy Settings ----

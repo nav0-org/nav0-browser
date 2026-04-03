@@ -1,5 +1,5 @@
-import { app, BrowserWindow, dialog, Menu, MenuItem, WebContentsView } from "electron";
-import { InAppUrls, DataStoreConstants, MainToRendererEventsForBrowserIPC, WebContentsEvents } from "../../constants/app-constants";
+import { app, BrowserWindow, dialog, Menu, MenuItem, shell, WebContentsView } from "electron";
+import { InAppUrls, DataStoreConstants, MainToRendererEventsForBrowserIPC, WebContentsEvents, STREAMING_SITES } from "../../constants/app-constants";
 import { v4 as uuid } from "uuid";
 import { AppWindow } from "./app-window";
 import { BookmarkManager } from "./bookmark-manager";
@@ -17,6 +17,10 @@ import { COSMETIC_FILTER_CSS, AD_BLOCK_EARLY_SCRIPT, AD_BLOCK_SCRIPT } from "../
 import { SSLManager } from "./ssl-manager";
 import { buildErrorPageScript, NavigationError } from "./error-page/error-page";
 const domainPattern = /^[^\s]+\.[^\s]+$/;
+// Protocols that should be handed off to the OS default handler.
+// Covers communication (mailto, tel, sms), calendar (webcal), and
+// common app deep-links (slack, zoom, teams, discord, vscode, etc.)
+const EXTERNAL_PROTOCOL_RE = /^(mailto|tel|callto|sms|facetime|webcal|slack|zoommtg|zoomus|msteams|discord|spotify|vscode|vscode-insiders|obsidian|notion|figma|linear|raycast):/i;
 
 export class Tab {
   public readonly id: string = uuid();
@@ -47,6 +51,7 @@ export class Tab {
   private sslStatus: 'secure' | 'insecure' | 'internal' = 'internal';
   private sslCertificate: Electron.Certificate | null = null;
   private willDownloadHandler: ((event: Electron.Event, item: Electron.DownloadItem, webContents: Electron.WebContents) => void) | null = null;
+  private pdfDownloadBypass = false;
   private isSuspended = false;
   private lastActivatedAt: Date = new Date();
 
@@ -94,6 +99,10 @@ export class Tab {
       urlToLoad = ABOUT_WEBPACK_ENTRY;
       preloadScriptToLoad = ABOUT_PRELOAD_WEBPACK_ENTRY;
       isInternalPage = true;
+    } else if (EXTERNAL_PROTOCOL_RE.test(this.url)) {
+      // Hand off mailto:, tel:, etc. to the OS default handler
+      shell.openExternal(this.url).catch(() => {});
+      return;
     } else if (this.url.startsWith('file://')) {
       urlToLoad = this.url;
       preloadScriptToLoad = null;
@@ -205,6 +214,15 @@ export class Tab {
   }
 
   private initEventHandlers() {
+    // Intercept navigations to external protocols (mailto:, tel:, etc.)
+    // and hand them off to the OS default handler instead of navigating.
+    this.webContentsViewInstance.webContents.on('will-navigate', (event, url) => {
+      if (EXTERNAL_PROTOCOL_RE.test(url)) {
+        event.preventDefault();
+        shell.openExternal(url).catch(() => {});
+      }
+    });
+
     //for hard navigation (debounced)
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE, async (event, url: string) => {
       if (this._destroyed) return;
@@ -256,14 +274,20 @@ export class Tab {
       const fileName = item.getFilename();
       const mimeType = item.getMimeType();
 
-      // Intercept PDF downloads and open them in-tab instead
+      // Intercept PDF downloads and open them in-tab instead,
+      // unless the user explicitly requested a PDF download.
       if (mimeType === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf')) {
-        const pdfUrl = item.getURL();
-        item.cancel();
-        if (pdfUrl) {
-          this.navigate(pdfUrl);
+        if (this.pdfDownloadBypass) {
+          this.pdfDownloadBypass = false;
+          // Fall through to handleDownload below
+        } else {
+          const pdfUrl = item.getURL();
+          item.cancel();
+          if (pdfUrl) {
+            this.navigate(pdfUrl);
+          }
+          return;
         }
-        return;
       }
 
       await this.handleDownload(item);
@@ -366,6 +390,12 @@ export class Tab {
     });
 
     this.webContentsViewInstance.webContents.setWindowOpenHandler(({ url, disposition }) => {
+      // Hand off external protocols to the OS (mailto:, tel:, etc.)
+      if (EXTERNAL_PROTOCOL_RE.test(url)) {
+        shell.openExternal(url).catch(() => {});
+        return { action: 'deny' };
+      }
+
       const now = Date.now();
       this.popupTimestamps = this.popupTimestamps.filter(t => now - t < Tab.POPUP_WINDOW_MS);
 
@@ -571,6 +601,7 @@ export class Tab {
    */
   private injectAdBlockEarlyScript(url: string): void {
     if (!this.isAdBlockAllowed(url)) return;
+    if (Tab.isStreamingSite(url)) return;
     const wc = this.webContentsViewInstance.webContents;
     wc.executeJavaScript(AD_BLOCK_EARLY_SCRIPT).catch(() => {});
   }
@@ -581,9 +612,19 @@ export class Tab {
    */
   private injectAdBlockDOMScript(): void {
     if (!this.isAdBlockAllowed()) return;
+    if (Tab.isStreamingSite(this.url)) return;
     const wc = this.webContentsViewInstance.webContents;
     wc.insertCSS(COSMETIC_FILTER_CSS).catch(() => {});
     wc.executeJavaScript(AD_BLOCK_SCRIPT).catch(() => {});
+  }
+
+  private static isStreamingSite(url: string): boolean {
+    try {
+      const hostname = new URL(url).hostname.toLowerCase();
+      return STREAMING_SITES.some(site => hostname === site || hostname.endsWith('.' + site));
+    } catch {
+      return false;
+    }
   }
 
   private injectCustomErrorPage(error: NavigationError): void {
@@ -874,6 +915,14 @@ export class Tab {
     }
   }
 
+  downloadCurrentPdf(): void {
+    if (!this.webContentsViewInstance) return;
+    const url = this.webContentsViewInstance.webContents.getURL();
+    if (!url) return;
+    this.pdfDownloadBypass = true;
+    this.webContentsViewInstance.webContents.downloadURL(url);
+  }
+
   async toggleReaderMode(): Promise<void> {
     // Prevent rapid toggling
     if (this.readerModeToggleLock) return;
@@ -1003,6 +1052,19 @@ export class Tab {
       // }
     }
     if (linkURL) { //for clicking on hyperlinks
+      if (EXTERNAL_PROTOCOL_RE.test(linkURL)) {
+        template.push(
+          { label: 'Open in default app', click: () => {
+            shell.openExternal(linkURL).catch(() => {});
+          }},
+          { label: 'Copy link address', click: () => {
+            this.webContentsViewInstance.webContents.executeJavaScript(`
+              navigator.clipboard.writeText("${linkURL}");
+            `);
+          }},
+          { type: 'separator' as const }
+        );
+      } else {
       template.push(
         { label: 'Open link in new tab', click: () => {
           parentAppWindow.createTab(linkURL, false);
@@ -1017,6 +1079,7 @@ export class Tab {
         }},
         { type:  'separator'}
       );
+      }
     }
     if (srcURL) { //for clicking on image
       template.push(
