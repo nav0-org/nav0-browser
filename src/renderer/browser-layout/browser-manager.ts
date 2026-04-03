@@ -107,9 +107,13 @@ export class BrowserTabManager {
       window.BrowserAPI.goForward(this.appWindowId, this.activeTabId);
     });
 
-    // Refresh button
-    this.refreshButton.addEventListener('click', () => {
-      window.BrowserAPI.refreshTab(this.appWindowId, this.activeTabId);
+    // Refresh button (shift+click for hard reload)
+    this.refreshButton.addEventListener('click', (e: MouseEvent) => {
+      if (e.shiftKey) {
+        window.BrowserAPI.hardReloadTab(this.appWindowId, this.activeTabId);
+      } else {
+        window.BrowserAPI.refreshTab(this.appWindowId, this.activeTabId);
+      }
     });
 
     this.commandKButton.addEventListener('click', () => {
