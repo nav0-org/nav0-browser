@@ -189,7 +189,7 @@ export abstract class SettingsEnforcer {
     const browsingSes = session.fromPartition('persist:browsertabs');
     const privateSes = session.fromPartition('persist:private');
 
-    const preset = settings.userAgentPreset || 'firefox-windows';
+    const preset = settings.userAgentPreset || (process.platform === 'darwin' ? 'firefox-mac' : process.platform === 'linux' ? 'firefox-linux' : 'firefox-windows');
 
     let userAgent: string;
 
