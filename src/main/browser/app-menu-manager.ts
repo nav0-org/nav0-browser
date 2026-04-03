@@ -12,7 +12,7 @@ export abstract class AppMenuManager {
     app.setAboutPanelOptions({
       applicationName: AppConstants.APP_NAME,
       applicationVersion: app.getVersion(),
-      copyright: 'Copyright (c) 2025 Ketan Patil. MIT License.',
+      copyright: 'MIT License',
     });
 
     const isMac = process.platform === 'darwin';
