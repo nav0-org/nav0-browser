@@ -78,22 +78,20 @@ export abstract class AppMenuManager {
               }
             }
           }},
-          {label: 'Hard Reload', accelerator: 'CmdOrCtrl+Shift+R', click: async() => {
+          {label: 'Hard Reload', accelerator: 'CmdOrCtrl+Shift+R', click: () => {
             const activeWindow = AppWindowManager.getActiveWindow();
             if (activeWindow) {
               const activeTab = activeWindow.getActiveTab();
               if (activeTab && activeTab.getWebContentsViewInstance()) {
                 const webContents = activeTab.getWebContentsViewInstance().webContents;
                 const session = webContents.session;
+                const currentUrl = webContents.getURL();
                 try {
-                  const currentUrl = webContents.getURL();
-                  try {
-                    const origin = new URL(currentUrl).origin;
-                    await session.clearStorageData({ origin });
-                  } catch (_) { /* origin may not be parseable */ }
-                  await session.clearCache();
-                  await session.clearCodeCaches({});
-                } catch (_) { /* ignore cache clearing errors */ }
+                  const origin = new URL(currentUrl).origin;
+                  session.clearStorageData({ origin }).catch(() => {});
+                } catch (_) { /* origin may not be parseable */ }
+                session.clearCache().catch(() => {});
+                session.clearCodeCaches({}).catch(() => {});
                 webContents.reloadIgnoringCache();
               }
             }

@@ -391,17 +391,17 @@ export abstract class AppWindowManager {
         const webContents = tab.getWebContentsViewInstance().webContents;
         const session = webContents.session;
 
+        // Fire cache clearing without awaiting — reloadIgnoringCache already
+        // bypasses the HTTP cache at the network level. Awaiting these can hang
+        // and prevent the reload from ever executing.
+        const currentUrl = webContents.getURL();
         try {
-          const currentUrl = webContents.getURL();
-          try {
-            const origin = new URL(currentUrl).origin;
-            await session.clearStorageData({ origin });
-          } catch (_) { /* origin may not be parseable */ }
-          await session.clearCache();
-          await session.clearCodeCaches({});
-        } catch (_) { /* ignore cache clearing errors */ }
+          const origin = new URL(currentUrl).origin;
+          session.clearStorageData({ origin }).catch(() => {});
+        } catch (_) { /* origin may not be parseable */ }
+        session.clearCache().catch(() => {});
+        session.clearCodeCaches({}).catch(() => {});
 
-        // Reload ignoring any remaining in-memory cache
         return webContents.reloadIgnoringCache();
       }
     });
@@ -793,17 +793,15 @@ export abstract class AppWindowManager {
         },
         {
           label: 'Hard Reload Tab',
-          click: async () => {
+          click: () => {
             const webSession = webContents.session;
+            const currentUrl = webContents.getURL();
             try {
-              const currentUrl = webContents.getURL();
-              try {
-                const origin = new URL(currentUrl).origin;
-                await webSession.clearStorageData({ origin });
-              } catch (_) { /* origin may not be parseable */ }
-              await webSession.clearCache();
-              await webSession.clearCodeCaches({});
-            } catch (_) { /* ignore cache clearing errors */ }
+              const origin = new URL(currentUrl).origin;
+              webSession.clearStorageData({ origin }).catch(() => {});
+            } catch (_) { /* origin may not be parseable */ }
+            webSession.clearCache().catch(() => {});
+            webSession.clearCodeCaches({}).catch(() => {});
             webContents.reloadIgnoringCache();
           },
         },
