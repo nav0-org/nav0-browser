@@ -238,7 +238,7 @@ export default defineConfig({
 
     footer: {
       message: 'Released under the MIT License.',
-      copyright: 'Copyright Nav0 Contributors'
+      copyright: 'Copyright Ketan Patil'
     },
 
     search: {
