@@ -26,6 +26,39 @@ contextBridge.exposeInMainWorld('__Nav0Share', {
     ipcRenderer.invoke('web-share', data),
 });
 
+// ─── Notification API Bridge ───────────────────────────────────────
+// Bridges web content Notification API to Electron's native notifications
+// via the main process NotificationManager.
+
+let notifEventCallback: ((data: { id: string; type: string }) => void) | null = null;
+
+contextBridge.exposeInMainWorld('__Nav0Notify', {
+  show: (data: {
+    id: string;
+    title: string;
+    body: string;
+    icon: string;
+    tag: string;
+    silent: boolean;
+    requireInteraction: boolean;
+  }): Promise<{ success?: boolean; error?: string }> =>
+    ipcRenderer.invoke('notification:show', data),
+  close: (id: string): void => {
+    ipcRenderer.send('notification:close', id);
+  },
+  getPermissionSync: (): string =>
+    ipcRenderer.sendSync('notification:check-permission'),
+  requestPermission: (): Promise<string> =>
+    ipcRenderer.invoke('notification:request-permission'),
+  onEvent: (callback: (data: { id: string; type: string }) => void): void => {
+    notifEventCallback = callback;
+  },
+});
+
+ipcRenderer.on('notification:event', (_event, data: { id: string; type: string }) => {
+  if (notifEventCallback) notifEventCallback(data);
+});
+
 const POLYFILL_CODE = `
 (function() {
   if (window.__Nav0GeolocationPatched) return;
@@ -90,6 +123,131 @@ const POLYFILL_CODE = `
     }, opts);
     return watchId;
   };
+})();
+`;
+
+const NOTIFICATION_POLYFILL_CODE = `
+(function() {
+  if (window.__Nav0NotificationPatched) return;
+  window.__Nav0NotificationPatched = true;
+  if (!window.__Nav0Notify) return;
+
+  var _permission = window.__Nav0Notify.getPermissionSync() || 'default';
+  var _instances = {};
+
+  function Nav0Notification(title, options) {
+    if (!(this instanceof Nav0Notification)) {
+      throw new TypeError("Failed to construct 'Notification': Please use the 'new' operator.");
+    }
+    if (arguments.length === 0) {
+      throw new TypeError("Failed to construct 'Notification': 1 argument required, but only 0 present.");
+    }
+
+    options = options || {};
+    var self = this;
+
+    this._id = 'n-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+    this.title = String(title);
+    this.body = options.body != null ? String(options.body) : '';
+    this.icon = options.icon != null ? String(options.icon) : '';
+    this.tag = options.tag != null ? String(options.tag) : '';
+    this.data = options.data !== undefined ? options.data : null;
+    this.silent = !!options.silent;
+    this.requireInteraction = !!options.requireInteraction;
+    this.dir = options.dir || 'auto';
+    this.lang = options.lang || '';
+    this.badge = options.badge != null ? String(options.badge) : '';
+    this.image = options.image != null ? String(options.image) : '';
+    this.timestamp = options.timestamp || Date.now();
+
+    this.onclick = null;
+    this.onclose = null;
+    this.onerror = null;
+    this.onshow = null;
+
+    this._listeners = {};
+
+    _instances[this._id] = this;
+
+    window.__Nav0Notify.show({
+      id: this._id,
+      title: this.title,
+      body: this.body,
+      icon: this.icon,
+      tag: this.tag,
+      silent: this.silent,
+      requireInteraction: this.requireInteraction,
+    }).then(function(result) {
+      if (result && result.error) {
+        var evt = new Event('error');
+        self.dispatchEvent(evt);
+      }
+    }).catch(function() {
+      var evt = new Event('error');
+      self.dispatchEvent(evt);
+    });
+  }
+
+  Nav0Notification.prototype.close = function() {
+    window.__Nav0Notify.close(this._id);
+    delete _instances[this._id];
+  };
+
+  Nav0Notification.prototype.addEventListener = function(type, listener) {
+    if (typeof listener !== 'function') return;
+    if (!this._listeners[type]) this._listeners[type] = [];
+    this._listeners[type].push(listener);
+  };
+
+  Nav0Notification.prototype.removeEventListener = function(type, listener) {
+    if (!this._listeners[type]) return;
+    this._listeners[type] = this._listeners[type].filter(function(l) { return l !== listener; });
+  };
+
+  Nav0Notification.prototype.dispatchEvent = function(event) {
+    var listeners = this._listeners[event.type] || [];
+    for (var i = 0; i < listeners.length; i++) {
+      try { listeners[i].call(this, event); } catch(e) { console.error(e); }
+    }
+    var handler = this['on' + event.type];
+    if (typeof handler === 'function') {
+      try { handler.call(this, event); } catch(e) { console.error(e); }
+    }
+    return true;
+  };
+
+  Object.defineProperty(Nav0Notification, 'permission', {
+    get: function() { return _permission; },
+    configurable: true,
+    enumerable: true,
+  });
+
+  Object.defineProperty(Nav0Notification, 'maxActions', {
+    get: function() { return 0; },
+    configurable: true,
+    enumerable: true,
+  });
+
+  Nav0Notification.requestPermission = function(callback) {
+    return window.__Nav0Notify.requestPermission().then(function(result) {
+      _permission = result;
+      if (typeof callback === 'function') callback(result);
+      return result;
+    });
+  };
+
+  // Route events from main process to notification instances
+  window.__Nav0Notify.onEvent(function(data) {
+    var notif = _instances[data.id];
+    if (!notif) return;
+    var event = new Event(data.type);
+    notif.dispatchEvent(event);
+    if (data.type === 'close') {
+      delete _instances[data.id];
+    }
+  });
+
+  window.Notification = Nav0Notification;
 })();
 `;
 
@@ -169,7 +327,7 @@ function injectPolyfill(): void {
       }
     }
 
-    const code = POLYFILL_CODE + SHARE_POLYFILL_CODE;
+    const code = POLYFILL_CODE + SHARE_POLYFILL_CODE + NOTIFICATION_POLYFILL_CODE;
 
     // Use a blob URL instead of inline script to avoid CSP violations.
     // Blob URLs are allowed by most CSPs that include 'blob:' in script-src.

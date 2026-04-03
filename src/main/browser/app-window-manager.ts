@@ -8,6 +8,7 @@ import { DataStoreManager } from "../database/data-store-manager";
 import { SearchEngine } from "../web/search-engine";
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
 import { PermissionManager, PermissionRequest } from "./permission-manager";
+import { NotificationManager } from "./notification-manager";
 import { PermissionPromptData } from "./app-window";
 import fs from "fs";
 import path from "path";
@@ -60,6 +61,29 @@ export abstract class AppWindowManager {
           }
         }
         return null;
+      }
+    );
+    NotificationManager.init();
+    NotificationManager.setCallbacks(
+      (webContentsId: number) => {
+        for (const window of AppWindowManager.windows.values()) {
+          const tab = window.findTabByWebContentsId(webContentsId);
+          if (tab) {
+            return { appWindowId: window.id, tabId: tab.id, isPrivate: window.isPrivate };
+          }
+        }
+        return null;
+      },
+      (appWindowId: string, tabId: string) => {
+        const window = AppWindowManager.getWindowById(appWindowId);
+        if (window) {
+          const bw = window.getBrowserWindowInstance();
+          if (bw) {
+            if (bw.isMinimized()) bw.restore();
+            bw.focus();
+          }
+          window.activateTab(tabId);
+        }
       }
     );
     AppWindowManager.createWindow();
@@ -366,23 +390,16 @@ export abstract class AppWindowManager {
       if (tab && tab.getWebContentsViewInstance()) {
         const webContents = tab.getWebContentsViewInstance().webContents;
         const session = webContents.session;
-        const currentUrl = webContents.getURL();
 
         try {
-          // Extract origin from the current URL for site-specific clearing
-          const origin = new URL(currentUrl).origin;
-
-          // Clear all storage data (cookies, localStorage, sessionStorage, indexedDB, service workers, cache storage) for this origin
-          await session.clearStorageData({ origin });
-
-          // Clear HTTP cache and code caches globally (Electron doesn't support per-origin HTTP cache clearing)
+          const currentUrl = webContents.getURL();
+          try {
+            const origin = new URL(currentUrl).origin;
+            await session.clearStorageData({ origin });
+          } catch (_) { /* origin may not be parseable */ }
           await session.clearCache();
           await session.clearCodeCaches({});
-        } catch (e) {
-          // If URL parsing fails (e.g. about: pages), clear all caches
-          await session.clearCache();
-          await session.clearCodeCaches({});
-        }
+        } catch (_) { /* ignore cache clearing errors */ }
 
         // Reload ignoring any remaining in-memory cache
         return webContents.reloadIgnoringCache();
@@ -788,16 +805,15 @@ export abstract class AppWindowManager {
           label: 'Hard Reload Tab',
           click: async () => {
             const webSession = webContents.session;
-            const currentUrl = webContents.getURL();
             try {
-              const origin = new URL(currentUrl).origin;
-              await webSession.clearStorageData({ origin });
+              const currentUrl = webContents.getURL();
+              try {
+                const origin = new URL(currentUrl).origin;
+                await webSession.clearStorageData({ origin });
+              } catch (_) { /* origin may not be parseable */ }
               await webSession.clearCache();
               await webSession.clearCodeCaches({});
-            } catch (e) {
-              await webSession.clearCache();
-              await webSession.clearCodeCaches({});
-            }
+            } catch (_) { /* ignore cache clearing errors */ }
             webContents.reloadIgnoringCache();
           },
         },

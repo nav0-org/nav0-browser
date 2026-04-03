@@ -85,16 +85,15 @@ export abstract class AppMenuManager {
               if (activeTab && activeTab.getWebContentsViewInstance()) {
                 const webContents = activeTab.getWebContentsViewInstance().webContents;
                 const session = webContents.session;
-                const currentUrl = webContents.getURL();
                 try {
-                  const origin = new URL(currentUrl).origin;
-                  await session.clearStorageData({ origin });
+                  const currentUrl = webContents.getURL();
+                  try {
+                    const origin = new URL(currentUrl).origin;
+                    await session.clearStorageData({ origin });
+                  } catch (_) { /* origin may not be parseable */ }
                   await session.clearCache();
                   await session.clearCodeCaches({});
-                } catch (e) {
-                  await session.clearCache();
-                  await session.clearCodeCaches({});
-                }
+                } catch (_) { /* ignore cache clearing errors */ }
                 webContents.reloadIgnoringCache();
               }
             }

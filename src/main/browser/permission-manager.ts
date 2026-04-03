@@ -453,6 +453,90 @@ export class PermissionManager {
     PermissionManager.pendingQueues.clear();
   }
 
+  // ─── Programmatic Permission API ──────────────────────────────────
+
+  /**
+   * Check the current permission state for a given webContents and permission type.
+   * Returns 'granted', 'denied', or 'default'.
+   */
+  static checkPermissionState(webContentsId: number, origin: string, permission: string): string {
+    const tabInfo = PermissionManager.findTabCallback?.(webContentsId);
+    if (!tabInfo) return 'denied';
+
+    const { tabId, isPrivate } = tabInfo;
+
+    if (!isPrivate) {
+      const persistent = PermissionManager.getPersistentDecision(origin, permission);
+      if (persistent === 'allowed_persistent') return 'granted';
+      if (persistent === 'denied_persistent') return 'denied';
+    }
+
+    const sessionKey = PermissionManager.sessionKey(tabId, origin, permission);
+    const sessionDecision = PermissionManager.sessionPermissions.get(sessionKey);
+    if (sessionDecision === 'allowed_session') return 'granted';
+    if (sessionDecision === 'denied_session') return 'denied';
+
+    return 'default';
+  }
+
+  /**
+   * Programmatically request a permission (e.g. for notifications from polyfill).
+   * Creates a PermissionRequest and enqueues it through the normal prompt flow.
+   */
+  static programmaticPermissionRequest(
+    webContentsId: number,
+    origin: string,
+    permission: string,
+    callback: (granted: boolean) => void,
+  ): void {
+    const tabInfo = PermissionManager.findTabCallback?.(webContentsId);
+    if (!tabInfo) { callback(false); return; }
+
+    const { appWindowId, tabId, isPrivate } = tabInfo;
+    const isSecure = PermissionManager.isSecureOrigin(origin);
+    const isInsecureBlocked = !isSecure && PermissionManager.SENSITIVE_PERMISSIONS.has(permission);
+
+    // Check existing persistent decisions
+    if (!isPrivate && !isInsecureBlocked) {
+      const persistent = PermissionManager.getPersistentDecision(origin, permission);
+      if (persistent === 'allowed_persistent') {
+        PermissionManager.touchPersistentDecision(origin, permission);
+        callback(true);
+        return;
+      }
+      if (persistent === 'denied_persistent') { callback(false); return; }
+    }
+
+    // Check session decisions
+    const sessionKey = PermissionManager.sessionKey(tabId, origin, permission);
+    const sessionDecision = PermissionManager.sessionPermissions.get(sessionKey);
+    if (sessionDecision === 'allowed_session') { callback(true); return; }
+    if (sessionDecision === 'denied_session') { callback(false); return; }
+
+    const isFloodBlocked = PermissionManager.isFlooding(origin);
+    const permInfo = PermissionManager.getPermissionInfo(permission);
+
+    const request: PermissionRequest = {
+      id: uuid(),
+      webContentsId,
+      tabId,
+      appWindowId,
+      origin,
+      permission,
+      permissions: [permInfo],
+      isSecure,
+      isPrivate,
+      faviconUrl: null,
+      callback,
+      timestamp: Date.now(),
+      isInsecureBlocked,
+      isFloodBlocked,
+    };
+
+    PermissionManager.trackRequestTimestamp(origin);
+    PermissionManager.enqueueRequest(request);
+  }
+
   // ─── Helpers ─────────────────────────────────────────────────────
 
   private static extractOrigin(url: string): string {

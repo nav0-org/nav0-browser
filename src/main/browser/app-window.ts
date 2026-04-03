@@ -4,6 +4,7 @@ import { Tab } from "./tab";
 import { AppConstants, ClosedTabRecord, InAppUrls, MainToRendererEventsForBrowserIPC } from "../../constants/app-constants";
 import { DownloadManager } from "./download-manager";
 import { PermissionManager } from "./permission-manager";
+import { NotificationManager } from "./notification-manager";
 import { FindInPageManager } from "./find-in-page-manager";
 import { UnifiedOverlayManager, OverlayType } from "./unified-overlay-manager";
 import type { Database as DB } from 'better-sqlite3';
@@ -281,6 +282,11 @@ export class AppWindow {
       }
       tab.clearPendingTimers();
       PermissionManager.clearSessionPermissionsForTab(id);
+      // Clean up notifications for this tab's webContents
+      const tabView = tab.getWebContentsViewInstance();
+      if (tabView) {
+        NotificationManager.clearNotificationsForWebContents(tabView.webContents.id);
+      }
       // Clean up per-tab strip state
       this.findInPageState.delete(id);
       this.permissionPrompts.delete(id);
