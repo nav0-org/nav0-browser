@@ -664,7 +664,8 @@ function initUserAgentSettings() {
   const preview = document.getElementById('ua-preview');
 
   // Set initial values
-  select.value = settings.userAgentPreset || 'electron-default';
+  const defaultPreset = process.platform === 'darwin' ? 'firefox-mac' : process.platform === 'linux' ? 'firefox-linux' : 'firefox-windows';
+  select.value = settings.userAgentPreset || defaultPreset;
   customInput.value = settings.userAgentCustomValue || '';
   customContainer.style.display = select.value === 'custom' ? '' : 'none';
   updateUAPreview();
@@ -687,9 +688,7 @@ function initUserAgentSettings() {
   function updateUAPreview() {
     const preset = select.value;
     let ua: string;
-    if (preset === 'electron-default') {
-      ua = navigator.userAgent;
-    } else if (preset === 'custom') {
+    if (preset === 'custom') {
       ua = customInput.value || navigator.userAgent;
     } else {
       ua = USER_AGENT_PRESETS[preset]?.value || navigator.userAgent;
