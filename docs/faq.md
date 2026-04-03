@@ -25,7 +25,7 @@ head:
             "name": "What platforms does Nav0 support?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Nav0 supports Windows (x64), macOS (Intel x64 and Apple Silicon ARM64), and Linux (x64). On macOS, install via Homebrew: brew install --cask nav0-org/Nav0/nav0-browser. On Windows and Linux, download installers from GitHub Releases. On all platforms, you can build from source."
+              "text": "Nav0 supports Windows (x64), macOS (Intel x64 and Apple Silicon ARM64), and Linux (x64). On macOS, install via Homebrew: brew install --cask nav0-org/nav0/nav0. On Windows and Linux, download installers from GitHub Releases. On all platforms, you can build from source."
             }
           },
           {
@@ -49,7 +49,7 @@ head:
             "name": "How do I update Nav0?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Download the latest release from GitHub Releases or, on macOS, run brew upgrade nav0-browser. Nav0 never forces updates — you control when and how you update."
+              "text": "Download the latest release from GitHub Releases or, on macOS, run brew upgrade nav0. Nav0 never forces updates — you control when and how you update."
             }
           },
           {
@@ -288,7 +288,7 @@ Nav0 (pronounced "Nav Nought") is a free, open-source, privacy-focused desktop w
 
 Nav0 supports **Windows** (x64), **macOS** (Intel x64 and Apple Silicon ARM64), and **Linux** (x64).
 
-On macOS, install via [Homebrew](https://brew.sh): `brew install --cask nav0-org/Nav0/nav0-browser`. On Windows and Linux, download installers from [GitHub Releases](https://github.com/nav0-org/nav0-browser/releases). On all platforms, you can [build from source](/guide/getting-started).
+On macOS, install via [Homebrew](https://brew.sh): `brew install --cask nav0-org/nav0/nav0`. On Windows and Linux, download installers from [GitHub Releases](https://github.com/nav0-org/nav0-browser/releases). On all platforms, you can [build from source](/guide/getting-started).
 
 ### What browser engine does Nav0 use?
 
@@ -300,7 +300,7 @@ Yes. Nav0 is fully open source under the **MIT License**. The complete source co
 
 ### How do I update Nav0?
 
-Download the latest release from [GitHub Releases](https://github.com/nav0-org/nav0-browser/releases) or, on macOS, run `brew upgrade nav0-browser`. Nav0 never forces updates — you control when and how you update.
+Download the latest release from [GitHub Releases](https://github.com/nav0-org/nav0-browser/releases) or, on macOS, run `brew upgrade nav0`. Nav0 never forces updates — you control when and how you update.
 
 ---
 

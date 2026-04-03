@@ -44,10 +44,10 @@ onMounted(async () => {
       <!-- Homebrew option temporarily hidden
       <p>Or install with <a href="https://brew.sh" target="_blank" rel="noopener">Homebrew</a>:</p>
       <div class="code-block">
-        <code>brew install --cask nav0-org/nav0/nav0-browser</code>
+        <code>brew install --cask nav0-org/nav0/nav0</code>
       </div>
       <p class="install-note">
-        Requires Homebrew. To update Nav0, run <code>brew upgrade --cask nav0-browser</code>.
+        Requires Homebrew. To update Nav0, run <code>brew upgrade --cask nav0</code>.
       </p>
       -->
     </div>
@@ -55,7 +55,7 @@ onMounted(async () => {
     <div class="install-section">
       <h2>Windows</h2>
       <div class="download-links">
-        <a class="download-btn" :href="`https://github.com/nav0-org/nav0-browser/releases/download/v${version}/nav0-browser-${version}.Setup.exe`">
+        <a class="download-btn" :href="`https://github.com/nav0-org/nav0-browser/releases/download/v${version}/Nav0-${version}.Setup.exe`">
           <span class="download-label">Windows x64</span>
           <span class="download-format">.exe installer</span>
         </a>
@@ -65,11 +65,11 @@ onMounted(async () => {
     <div class="install-section">
       <h2>Linux</h2>
       <div class="download-links">
-        <a class="download-btn" :href="`https://github.com/nav0-org/nav0-browser/releases/download/v${version}/nav0-browser_${version}_amd64.deb`">
+        <a class="download-btn" :href="`https://github.com/nav0-org/nav0-browser/releases/download/v${version}/Nav0_${version}_amd64.deb`">
           <span class="download-label">Debian / Ubuntu</span>
           <span class="download-format">.deb package</span>
         </a>
-        <a class="download-btn" :href="`https://github.com/nav0-org/nav0-browser/releases/download/v${version}/nav0-browser-${version}-1.x86_64.rpm`">
+        <a class="download-btn" :href="`https://github.com/nav0-org/nav0-browser/releases/download/v${version}/Nav0-${version}-1.x86_64.rpm`">
           <span class="download-label">Fedora / RHEL</span>
           <span class="download-format">.rpm package</span>
         </a>

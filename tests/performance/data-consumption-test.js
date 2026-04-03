@@ -232,18 +232,16 @@ const CHROME_BIN = process.env.CHROME_BIN || findChromeBinary();
 function findNav0Binary() {
   const candidates = IS_MAC
     ? [
-        '/Applications/nav0-browser.app/Contents/MacOS/nav0-browser',
-        '/Applications/Nav0 Browser.app/Contents/MacOS/Nav0 Browser',
         '/Applications/Nav0.app/Contents/MacOS/Nav0',
-        `${os.homedir()}/Applications/nav0-browser.app/Contents/MacOS/nav0-browser`,
-        `${os.homedir()}/Desktop/nav0-browser.app/Contents/MacOS/nav0-browser`,
+        `${os.homedir()}/Applications/Nav0.app/Contents/MacOS/Nav0`,
+        `${os.homedir()}/Desktop/Nav0.app/Contents/MacOS/Nav0`,
       ]
     : [
-        '/usr/bin/nav0-browser',
-        '/usr/local/bin/nav0-browser',
-        `${os.homedir()}/.local/bin/nav0-browser`,
-        `${os.homedir()}/Desktop/nav0-browser`,
-        `${os.homedir()}/Desktop/nav0-browser.AppImage`,
+        '/usr/bin/Nav0',
+        '/usr/local/bin/Nav0',
+        `${os.homedir()}/.local/bin/Nav0`,
+        `${os.homedir()}/Desktop/Nav0`,
+        `${os.homedir()}/Desktop/Nav0.AppImage`,
       ];
 
   for (const candidate of candidates) {
@@ -256,7 +254,7 @@ function findNav0Binary() {
   // Try which on Linux
   if (IS_LINUX) {
     try {
-      const resolved = execSync('which nav0-browser 2>/dev/null', { encoding: 'utf-8' }).trim();
+      const resolved = execSync('which Nav0 2>/dev/null', { encoding: 'utf-8' }).trim();
       if (resolved) return resolved;
     } catch {}
   }

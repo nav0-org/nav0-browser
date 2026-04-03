@@ -23,13 +23,13 @@ curl -fsSL https://raw.githubusercontent.com/nav0-org/nav0-browser/main/install.
 Alternatively, install via [Homebrew](https://brew.sh):
 
 ```bash
-brew install --cask nav0-org/Nav0/nav0-browser
+brew install --cask nav0-org/nav0/nav0
 ```
 
 To update:
 
 ```bash
-brew upgrade --cask nav0-browser
+brew upgrade --cask nav0
 ```
 -->
 

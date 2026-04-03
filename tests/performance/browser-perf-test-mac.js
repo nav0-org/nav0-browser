@@ -31,8 +31,8 @@ const REPORT_DIR = path.join(__dirname, 'reports');
 // App paths — auto-detected; override with env vars CHROME_BIN / NAV0_BIN
 const CHROME_BIN = process.env.CHROME_BIN || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const NAV0_CANDIDATES = [
-  path.join(os.homedir(), 'Desktop/nav0-browser.app/Contents/MacOS/nav0-browser'),
-  '/Applications/nav0-browser.app/Contents/MacOS/nav0-browser',
+  path.join(os.homedir(), 'Desktop/Nav0.app/Contents/MacOS/Nav0'),
+  '/Applications/Nav0.app/Contents/MacOS/Nav0',
 ];
 const NAV0_BIN = process.env.NAV0_BIN || NAV0_CANDIDATES.find(p => fs.existsSync(p)) || NAV0_CANDIDATES[1];
 

@@ -240,9 +240,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.get_version.outputs.version }}
-          name: Nav0 Browser ${{ steps.get_version.outputs.version }}
+          name: Nav0 ${{ steps.get_version.outputs.version }}
           body: |
-            ## Nav0 Browser ${{ steps.get_version.outputs.version }}
+            ## Nav0 ${{ steps.get_version.outputs.version }}
 
             A minimal, privacy-focused web browser built on Electron.
 
@@ -255,7 +255,7 @@ jobs:
             Or via Homebrew:
 
             ```
-            brew install --cask nav0-org/nav0/nav0-browser
+            brew install --cask nav0-org/nav0/nav0
             ```
 
             ### Windows
@@ -342,8 +342,8 @@ jobs:
           cd tap
           mkdir -p Casks
 
-          cat > Casks/nav0-browser.rb << CASK
-          cask "nav0-browser" do
+          cat > Casks/nav0.rb << CASK
+          cask "nav0" do
             version "${VERSION}"
 
             on_arm do
@@ -367,17 +367,17 @@ jobs:
               strategy :github_latest
             end
 
-            app "nav0-browser.app"
+            app "Nav0.app"
           end
           CASK
 
           # Remove leading whitespace from heredoc
-          sed -i 's/^          //' Casks/nav0-browser.rb
+          sed -i 's/^          //' Casks/nav0.rb
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add Casks/nav0-browser.rb
-          git commit -m "Update nav0-browser to ${VERSION}"
+          git add Casks/nav0.rb
+          git commit -m "Update Nav0 to ${VERSION}"
           git push
 
   cleanup:

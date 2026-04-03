@@ -24,7 +24,7 @@ const config: ForgeConfig = {
   },
   makers: [
     new MakerSquirrel({
-      name: 'nav0-browser',
+      name: 'Nav0',
     }),
     new MakerZIP({}, ['darwin']),
     new MakerDeb({
