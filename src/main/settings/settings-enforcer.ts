@@ -189,10 +189,7 @@ export abstract class SettingsEnforcer {
     const browsingSes = session.fromPartition('persist:browsertabs');
     const privateSes = session.fromPartition('persist:private');
 
-    const preset = settings.userAgentPreset || 'electron-default';
-
-    // When using electron-default, don't override the user agent — let Electron use its built-in UA
-    if (preset === 'electron-default') return;
+    const preset = settings.userAgentPreset || 'firefox-windows';
 
     let userAgent: string;
 

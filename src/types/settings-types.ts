@@ -75,7 +75,7 @@ export interface BrowserSettings {
   popupBlockedSites: string[];
 
   // User Agent
-  userAgentPreset: 'electron-default' | 'default' | 'chrome-windows' | 'chrome-mac' | 'safari-mac' | 'firefox-windows' | 'firefox-mac' | 'edge-windows' | 'custom';
+  userAgentPreset: 'chrome-windows' | 'chrome-mac' | 'safari-mac' | 'firefox-windows' | 'firefox-mac' | 'firefox-linux' | 'edge-windows' | 'custom';
   userAgentCustomValue: string;
 
   // Keyboard Shortcuts
@@ -163,14 +163,6 @@ export const DEFAULT_FILTER_LISTS: FilterListConfig[] = [
 ];
 
 export const USER_AGENT_PRESETS: Record<string, { label: string; value: string }> = {
-  'electron-default': {
-    label: 'Default (Electron)',
-    value: '',
-  },
-  'default': {
-    label: 'Default (Compatible)',
-    value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
-  },
   'chrome-windows': {
     label: 'Chrome on Windows',
     value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
@@ -190,6 +182,10 @@ export const USER_AGENT_PRESETS: Record<string, { label: string; value: string }
   'firefox-mac': {
     label: 'Firefox on macOS',
     value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:138.0) Gecko/20100101 Firefox/138.0',
+  },
+  'firefox-linux': {
+    label: 'Firefox on Linux',
+    value: 'Mozilla/5.0 (X11; Linux x86_64; rv:138.0) Gecko/20100101 Firefox/138.0',
   },
   'edge-windows': {
     label: 'Edge on Windows',
@@ -272,8 +268,8 @@ export const DEFAULT_BROWSER_SETTINGS: BrowserSettings = {
   popupAllowedSites: [],
   popupBlockedSites: [],
 
-  // User Agent (compatible Chrome UA by default)
-  userAgentPreset: 'default',
+  // User Agent (Firefox UA by default)
+  userAgentPreset: 'firefox-windows',
   userAgentCustomValue: '',
 
   // Keyboard Shortcuts (empty = use defaults)
