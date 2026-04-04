@@ -28,7 +28,7 @@ head:
       content: comparison
   - - meta
     - name: keywords
-      content: "Nav0 vs edge, microsoft edge privacy, edge telemetry, edge copilot, edge bloat, edge tracking, bing browser, minimal browser vs edge, private browser comparison"
+      content: "Nav0 vs edge, microsoft edge privacy, edge telemetry, edge copilot, edge bloat, edge tracking, bing browser, minimal browser vs edge, private browser comparison, is microsoft edge safe, edge data collection, edge hardware UUID, edge vs private browser, best browser without telemetry, microsoft edge alternative 2026, edge sends data to microsoft, browser without microsoft account"
   - - script
     - type: application/ld+json
     - |
@@ -41,7 +41,56 @@ head:
         "author": { "@type": "Organization", "name": "Nav0" },
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/nav0-vs-edge",
-        "keywords": ["Nav0 vs edge", "microsoft edge privacy", "edge telemetry", "edge copilot", "edge bloat", "minimal browser", "private browser"]
+        "keywords": ["Nav0 vs edge", "microsoft edge privacy", "edge telemetry", "edge copilot", "edge bloat", "edge tracking", "minimal browser", "private browser", "edge alternative"]
+      }
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Does Microsoft Edge track your browsing?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. A 2020 Trinity College Dublin study found Edge to be the worst browser for telemetry among six major browsers. Edge sends hardware UUIDs (persistent, non-resettable device identifiers), browsing data, and crash telemetry to Microsoft's servers. Even the 'optional diagnostic data' setting still transmits browsing data. Nav0 collects zero data — no identifiers, no telemetry, no browsing data sent anywhere."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is the difference between Nav0 and Microsoft Edge?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Edge is a feature-heavy Chromium browser with 15+ built-in features (Copilot AI, shopping assistant, news feed, games, VPN) that collects extensive telemetry including hardware UUIDs. Nav0 is a minimal, open-source browser with zero telemetry, zero AI features, and zero data collection. Edge serves Microsoft's business interests; Nav0 serves the user."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Edge Copilot read your browsing data?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. When you use Copilot in Edge, the content of the page you're viewing is sent to Microsoft's AI infrastructure for processing. Your browsing context — what you're reading, researching, or shopping for — becomes input for Microsoft's AI systems. Nav0 has zero AI features and never sends page content anywhere."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is Edge InPrivate mode actually private?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. Edge's InPrivate mode only prevents browsing history from being saved locally. Your IP address remains visible, your ISP can see your activity, websites can still track you, and Microsoft continues to collect telemetry including hardware UUIDs regardless of InPrivate mode. Nav0's normal browsing mode sends zero data to any vendor — making it more private than Edge's InPrivate mode by default."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is a good alternative to Microsoft Edge for privacy?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Nav0 is a minimal, open-source browser that collects zero data. Unlike Edge, it has no telemetry, no Microsoft account integration, no AI features reading your pages, and no advertising-driven business model. It's fully auditable under the MIT license, runs on macOS, Windows, and Linux, and focuses solely on browsing the web privately."
+            }
+          }
+        ]
       }
 ---
 
@@ -54,6 +103,23 @@ Microsoft Edge is the browser that came pre-installed on your Windows PC and imm
 Nav0 is a browser that opens to a blank tab and waits for you to type a URL.
 
 Edge is Chromium with Microsoft's business strategy bolted on. It's fast, capable, and deeply integrated with Microsoft's ecosystem. It's also one of the most aggressive data collectors in the browser market — and that's saying something in a market that includes Chrome.
+
+## Nav0 vs Edge: Quick Comparison
+
+| Feature | Nav0 | Microsoft Edge |
+|---------|------|----------------|
+| **Telemetry** | Zero | Extensive (hardware UUID, browsing data, crash reports) |
+| **AI features** | None | Copilot AI (reads page content) |
+| **Built-in features** | 7 (essential browsing only) | 15+ (shopping, games, news, AI, VPN) |
+| **Account required** | No | Pushed aggressively (Microsoft account) |
+| **Data sent to vendor** | Zero bytes | Hardware UUIDs, browsing data, diagnostics |
+| **Default search** | DuckDuckGo | Bing (with resistance to changing) |
+| **New tab page** | Blank | News feed, ads, trending searches |
+| **Open source** | Yes (MIT license) | No (closed source) |
+| **Ad blocker** | Built-in (EasyList, EasyPrivacy) | None built-in |
+| **Business model** | None (free, open source) | Advertising, subscriptions, data |
+| **Extensions** | None | Chrome Web Store |
+| **Platforms** | macOS, Windows, Linux | Windows, macOS, iOS, Android |
 
 ## The Telemetry Problem
 
@@ -176,6 +242,28 @@ Choosing Nav0 over Edge means giving up:
 These are real tradeoffs. Edge is a capable, feature-rich browser. If you need deep Microsoft ecosystem integration or Chrome extension support, Edge delivers that.
 
 But every one of those features comes with a data cost. Sync means your data on Microsoft's servers. Extensions mean Chrome Web Store interaction. AI means your page content sent to Microsoft. The question isn't whether Edge's features are useful — it's whether they're worth the privacy you surrender to use them.
+
+## Frequently Asked Questions
+
+### Does Microsoft Edge send your hardware ID to Microsoft?
+
+Yes. Edge sends a persistent, non-resettable hardware UUID to Microsoft's servers. Unlike browser identifiers that can be reset, your hardware UUID is tied to your physical machine. This means Microsoft can potentially link your browsing activity to your specific device even after clearing cookies, resetting identifiers, or creating a new browser profile.
+
+### Is Edge more private than Chrome?
+
+Not significantly. The Trinity College Dublin study found Edge to be the worst of six major browsers for telemetry. Edge sends hardware identifiers that even Chrome doesn't transmit. Both browsers are Chromium-based and serve their parent company's advertising business. Nav0 sends zero telemetry data to any server.
+
+### Does Edge Copilot send your page content to Microsoft?
+
+Yes. When you use Copilot in Edge's sidebar, the content of the web page you're viewing is sent to Microsoft's AI infrastructure for processing. Your browsing context — articles you read, products you research, code you review — becomes input for Microsoft's AI systems, processed and stored under Microsoft's data policies.
+
+### Can you disable Edge telemetry completely?
+
+Not fully. Even with "optional diagnostic data" selected (the least invasive option), Edge still sends browsing data to Microsoft. The hardware UUID is transmitted regardless of your diagnostic settings. Nav0 has no telemetry to disable — the data collection code simply doesn't exist.
+
+### What's a good privacy-focused alternative to Microsoft Edge?
+
+Nav0 is a minimal, open-source browser that collects zero data. No telemetry, no Microsoft account, no AI reading your pages, no hardware identifiers. It's fully auditable under the MIT license, focuses on essential browsing features, and has no business model creating incentives to collect your data.
 
 ## The Bottom Line
 
