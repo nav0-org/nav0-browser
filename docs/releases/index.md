@@ -10,10 +10,18 @@ What's new in every release of Nav0 Browser.
 ---
 
 <div class="release-list-item">
+  <a href="/releases/v0.1.2">
+    <h2>v0.1.2</h2>
+  </a>
+  <div class="release-meta">April 4, 2026 <span class="release-badge latest">Latest</span></div>
+  <p class="release-excerpt">Renamed application from nav0-browser to Nav0 across package identity, installers, CI pipeline, download page, performance tests, and documentation.</p>
+</div>
+
+<div class="release-list-item">
   <a href="/releases/v0.1.1">
     <h2>v0.1.1</h2>
   </a>
-  <div class="release-meta">April 3, 2026 <span class="release-badge latest">Latest</span></div>
+  <div class="release-meta">April 3, 2026</div>
   <p class="release-excerpt">Browser notifications, Firefox user agent default, built-in Developer Tools, streaming site compatibility fixes, external protocol handlers, and hard reload fix.</p>
 </div>
 
