@@ -55,7 +55,7 @@ head:
             "name": "What is the difference between Nav0 and Tor Browser?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Tor Browser provides network-level anonymity by routing traffic through three encrypted relays, hiding your IP address from websites and your ISP. Nav0 is a minimal, zero-telemetry browser that protects you from browser-level data collection. Tor is for anonymity; Nav0 is for privacy from your browser itself. They serve different threat models and can be used together."
+              "text": "Tor Browser provides network-level anonymity by routing traffic through three encrypted relays, hiding your IP address from websites and your ISP. Nav0 is a privacy-focused, zero-telemetry browser that protects you from browser-level data collection. Tor is for anonymity; Nav0 is for privacy from your browser itself. They serve different threat models and can be used together."
             }
           },
           {
@@ -100,7 +100,7 @@ head:
 
 Tor Browser routes your traffic through three encrypted relays across the globe, making it nearly impossible for anyone to trace your browsing back to you. It's the most powerful anonymity tool available to ordinary users. Journalists, activists, and whistleblowers depend on it.
 
-Nav0 is a minimal, privacy-focused browser that collects zero data. It doesn't route your traffic through anything. It doesn't anonymize you from your ISP. It just doesn't spy on you.
+Nav0 is a privacy-focused, open-source browser that collects zero data. It doesn't route your traffic through anything. It doesn't anonymize you from your ISP. It just doesn't spy on you.
 
 These are different tools for different threat models. One protects you from governments and surveillance networks. The other protects you from your browser itself. Understanding the difference matters.
 
@@ -223,7 +223,7 @@ This isn't actually a competition. Tor Browser and Nav0 serve different purposes
 - You want a daily-driver browser that doesn't collect your data
 - You want fast, unrestricted browsing with zero telemetry
 - Your threat model is browser-level tracking, not network-level surveillance
-- You want a minimal, distraction-free browsing experience
+- You want a clean, distraction-free browsing experience
 - You want verifiable, open-source privacy without performance penalties
 
 Many privacy-conscious users should use both: Nav0 for daily browsing, Tor for situations that require anonymity. They're complementary, not competing.
@@ -276,4 +276,4 @@ For the times when "enough" isn't enough, use Tor.
 
 ---
 
-*Nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started).*
+*Nav0 is a privacy-focused browser that collects zero data. It's open source, free, and built for people who believe their browser shouldn't spy on them. [Get started](/guide/getting-started).*

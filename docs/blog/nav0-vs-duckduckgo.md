@@ -63,7 +63,7 @@ head:
             "name": "What is the difference between Nav0 and DuckDuckGo browser?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "DuckDuckGo's browser is a privacy-branded browser backed by an ad-supported business (Microsoft ad partnership), with remote configuration, AI chat integration, and platform-varying implementations. Nav0 is a minimal, open-source browser with zero telemetry, zero business partnerships, no remote configuration, no AI features, and consistent behavior across all platforms. Nav0 has no revenue stream that could create privacy exceptions."
+              "text": "DuckDuckGo's browser is a privacy-branded browser backed by an ad-supported business (Microsoft ad partnership), with remote configuration, AI chat integration, and platform-varying implementations. Nav0 is a privacy-focused, open-source browser with zero telemetry, zero business partnerships, no remote configuration, no AI features, and consistent behavior across all platforms. Nav0 has no revenue stream that could create privacy exceptions."
             }
           },
           {
@@ -100,7 +100,7 @@ head:
 
 DuckDuckGo built its reputation on a search engine that doesn't track you. Then they built a browser with the same promise. On the surface, it's a compelling story: the privacy search company making a privacy browser.
 
-Nav0 is a minimal browser that collects zero data. No brand story. No business behind it. Just a browser that doesn't spy on you.
+Nav0 is a privacy-focused, open-source browser that collects zero data. No brand story. No business behind it. Just a browser that doesn't spy on you.
 
 DuckDuckGo's browser is genuinely better than Chrome or Edge on privacy. But "better than Chrome" is a low bar. When you dig into the details — the Microsoft tracking exception, the remote configuration system, the AI chat integration, the ad-supported business model — the picture gets more complicated. Privacy brands and privacy tools are not the same thing.
 
@@ -249,4 +249,4 @@ Nav0 is architectural privacy. No exceptions.
 
 ---
 
-*Nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started).*
+*Nav0 is a privacy-focused browser that collects zero data. It's open source, free, and built for people who believe their browser shouldn't spy on them. [Get started](/guide/getting-started).*

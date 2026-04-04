@@ -35,10 +35,10 @@ Thoughts on privacy, browsers, and the open web.
 
 <div class="blog-post-item">
   <a href="/blog/nav0-vs-comet">
-    <h2>Nav0 vs Comet Browser: Two Minimal Browsers, Different Philosophies</h2>
+    <h2>Nav0 vs Comet Browser: Two Privacy Browsers, Different Trust Models</h2>
   </a>
   <div class="post-meta">By Nav0 Team &middot; April 4, 2026 &middot; 8 min read &middot; Comparison</div>
-  <p class="post-excerpt">Comet Browser and Nav0 both promise minimal, fast browsing. But minimal can mean very different things — from closed-source simplicity to open-source, zero-telemetry privacy. Here's how they compare.</p>
+  <p class="post-excerpt">Comet Browser and Nav0 both promise fast, private browsing. But one is closed source and the other is fully auditable. When it comes to privacy, verifiability is what separates promises from proof.</p>
 </div>
 
 <div class="blog-post-item">

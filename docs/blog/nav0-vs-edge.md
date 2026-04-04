@@ -63,7 +63,7 @@ head:
             "name": "What is the difference between Nav0 and Microsoft Edge?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Edge is a feature-heavy Chromium browser with 15+ built-in features (Copilot AI, shopping assistant, news feed, games, VPN) that collects extensive telemetry including hardware UUIDs. Nav0 is a minimal, open-source browser with zero telemetry, zero AI features, and zero data collection. Edge serves Microsoft's business interests; Nav0 serves the user."
+              "text": "Edge is a feature-heavy Chromium browser with 15+ built-in features (Copilot AI, shopping assistant, news feed, games, VPN) that collects extensive telemetry including hardware UUIDs. Nav0 is a privacy-focused, open-source browser with zero telemetry, zero AI features, and zero data collection. Edge serves Microsoft's business interests; Nav0 serves the user."
             }
           },
           {
@@ -87,7 +87,7 @@ head:
             "name": "What is a good alternative to Microsoft Edge for privacy?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Nav0 is a minimal, open-source browser that collects zero data. Unlike Edge, it has no telemetry, no Microsoft account integration, no AI features reading your pages, and no advertising-driven business model. It's fully auditable under the MIT license, runs on macOS, Windows, and Linux, and focuses solely on browsing the web privately."
+              "text": "Nav0 is a privacy-focused, open-source browser that collects zero data. Unlike Edge, it has no telemetry, no Microsoft account integration, no AI features reading your pages, and no advertising-driven business model. It's fully auditable under the MIT license and runs on macOS, Windows, and Linux."
             }
           }
         ]
@@ -177,7 +177,7 @@ Beyond shopping, here's what Microsoft has crammed into Edge:
 
 That's fifteen features on top of a web browser. Each one is code running in your browser process, each one is a potential data collection vector, and each one makes the browser slower and more complex.
 
-Nav0 ships with tabs, bookmarks, history, downloads, an ad blocker, reader mode, and a PDF viewer. That's the complete feature list. Every feature exists because it helps you browse the web. Nothing exists because it helps a corporation sell advertising or AI subscriptions.
+Nav0 ships with tabs, bookmarks, history, downloads, an ad blocker, reader mode, and a PDF viewer. Every feature exists because it helps you browse the web. Nothing exists because it helps a corporation sell advertising or AI subscriptions.
 
 ## Microsoft Account Integration
 
@@ -263,7 +263,7 @@ Not fully. Even with "optional diagnostic data" selected (the least invasive opt
 
 ### What's a good privacy-focused alternative to Microsoft Edge?
 
-Nav0 is a minimal, open-source browser that collects zero data. No telemetry, no Microsoft account, no AI reading your pages, no hardware identifiers. It's fully auditable under the MIT license, focuses on essential browsing features, and has no business model creating incentives to collect your data.
+Nav0 is a privacy-focused, open-source browser that collects zero data. No telemetry, no Microsoft account, no AI reading your pages, no hardware identifiers. It's fully auditable under the MIT license, and has no business model creating incentives to collect your data.
 
 ## The Bottom Line
 
@@ -277,4 +277,4 @@ Edge is Microsoft's browser. Nav0 is your browser.
 
 ---
 
-*Nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started).*
+*Nav0 is a privacy-focused browser that collects zero data. It's open source, free, and built for people who believe their browser shouldn't spy on them. [Get started](/guide/getting-started).*
