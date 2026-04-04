@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO="nav0-org/nav0-browser"
-APP_NAME="nav0-browser"
+APP_NAME="Nav0"
 INSTALL_DIR="/Applications"
 
 echo "Installing Nav0 browser..."

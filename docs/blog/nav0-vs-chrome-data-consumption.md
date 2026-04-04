@@ -195,7 +195,7 @@ In other words: Nav0 loads more of the actual content you came for and less of t
 - **Machine:** MacBook Pro with Apple M1 chip, 8 CPU cores, 16 GB RAM
 - **OS:** macOS (Darwin arm64)
 - **Chrome:** Launched at `/Applications/Google Chrome.app` with default settings
-- **Nav0:** Launched at `/Applications/nav0-browser.app` with default settings
+- **Nav0:** Launched at `/Applications/Nav0.app` with default settings
 
 ### How We Measured
 

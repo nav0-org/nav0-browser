@@ -18,7 +18,7 @@ Nav0 is a minimal web browser built on Electron that prioritizes your privacy an
 ### macOS (Homebrew)
 
 ```bash
-brew install --cask nav0-org/nav0/nav0-browser
+brew install --cask nav0-org/nav0/nav0
 ```
 
 ### Windows
@@ -204,7 +204,7 @@ Nav0 exists because modern browsers have lost their way. What was once a tool to
 Nav0 (pronounced "Nav Nought") is a free, open-source, privacy-focused desktop web browser built on Electron and Chromium. The name comes from "navigate + nought (bloat)."
 
 ### What platforms does Nav0 support?
-Windows (x64), macOS (Intel x64 and Apple Silicon ARM64), and Linux (x64). On macOS, install via Homebrew: brew install --cask nav0-org/nav0/nav0-browser. On Windows and Linux, download installers from GitHub Releases. On all platforms, you can build from source.
+Windows (x64), macOS (Intel x64 and Apple Silicon ARM64), and Linux (x64). On macOS, install via Homebrew: brew install --cask nav0-org/nav0/nav0. On Windows and Linux, download installers from GitHub Releases. On all platforms, you can build from source.
 
 ### Does Nav0 collect any data?
 No. Zero. Nav0 collects no telemetry, no usage statistics, no crash reports, no browsing data, no personal information, and no device information.

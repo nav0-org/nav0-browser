@@ -1,5 +1,5 @@
 {
-  "name": "nav0-browser",
+  "name": "Nav0",
   "version": "0.1.1",
   "description": "A minimal, privacy-focused web browser built on Electron",
   "private": true,
