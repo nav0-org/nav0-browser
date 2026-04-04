@@ -20,6 +20,18 @@ head:
   - - meta
     - property: article:tag
       content: benchmark
+  - - meta
+    - property: article:tag
+      content: chrome
+  - - meta
+    - property: article:tag
+      content: memory
+  - - meta
+    - property: article:tag
+      content: update
+  - - meta
+    - name: keywords
+      content: "Nav0 v0.1.2 performance, Nav0 vs chrome 2026, browser performance benchmark update, chrome memory usage 50 tabs, Nav0 memory improvement, lightweight browser macos, chrome RAM usage, browser CPU benchmark M1, Nav0 browser update, best low memory browser 2026, chrome too many processes, browser benchmark macos M1, Nav0 vs chrome memory, electron browser performance, chrome high memory usage fix"
   - - script
     - type: application/ld+json
     - |
@@ -32,7 +44,56 @@ head:
         "author": { "@type": "Organization", "name": "Nav0" },
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/nav0-v012-performance-update",
-        "keywords": ["Nav0 performance", "browser benchmark update", "Nav0 v0.1.2", "chrome memory usage", "lightweight browser"]
+        "keywords": ["Nav0 v0.1.2 performance", "browser benchmark update", "Nav0 vs chrome", "chrome memory usage", "lightweight browser", "browser CPU benchmark"]
+      }
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How much memory does Nav0 v0.1.2 use compared to Chrome?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "In our benchmark on a MacBook Pro M1, Nav0 v0.1.2 used an average of 2,948 MB across tests with 10 to 50 tabs, while Chrome used 5,402 MB — Nav0 uses 45.4% less memory. At 50 tabs, Chrome consumed over 10 GB while Nav0 used 4,287 MB, saving nearly 6 GB of RAM."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Did Nav0 v0.1.2 improve performance over v0.0.6?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. On the same MacBook Pro M1 hardware, Nav0 v0.1.2 uses up to 21% less memory (928 MB savings at 40 tabs), up to 36% less CPU, and spawns fewer processes than v0.0.6. Average CPU dropped from 13.1% to 10.3% across all tab counts."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How much CPU does Nav0 use compared to Chrome with 50 tabs?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "With 50 tabs open on a MacBook Pro M1, Chrome used 118% CPU (saturating more than one full core) while Nav0 v0.1.2 used just 20%. On average across all tab counts, Nav0 used 77.1% less CPU than Chrome."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is Nav0 getting faster with each release?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Between v0.0.6 and v0.1.2, Nav0 improved memory usage at every tab count tested (10 through 50), reduced CPU usage by up to 36%, and decreased process counts. These improvements were measured on the same M1 hardware using the same benchmark methodology."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is the best lightweight browser for MacBook in 2026?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Nav0 v0.1.2 uses 45% less memory and 77% less CPU than Chrome in head-to-head benchmarks on a MacBook Pro M1. It has zero telemetry, a built-in ad blocker, and is fully open source. It is designed to be the lightest full-featured browser for macOS."
+            }
+          }
+        ]
       }
 ---
 
@@ -142,6 +203,28 @@ The margins vs Chrome shifted slightly because Chrome itself improved in newer v
 More importantly, Nav0 itself got measurably better. Less memory, less CPU, fewer processes — on the same hardware, running the same test, one month later.
 
 We'll keep running these benchmarks with each release. The test script is [open source in our repository](https://github.com/nav0-org/nav0-browser/blob/main/tests/performance/browser-perf-test-mac.js) — run it yourself and let us know what you find.
+
+## Frequently Asked Questions
+
+### How much memory does Nav0 v0.1.2 use compared to Chrome?
+
+In our benchmark on a MacBook Pro M1, Nav0 v0.1.2 used an average of 2,948 MB across tests with 10 to 50 tabs, while Chrome used 5,402 MB — Nav0 uses 45.4% less memory. At 50 tabs, Chrome consumed over 10 GB while Nav0 used 4,287 MB, saving nearly 6 GB of RAM. The full methodology is described in our [original benchmark post](/blog/nav0-vs-chrome-performance-benchmark).
+
+### Did Nav0 v0.1.2 improve performance over v0.0.6?
+
+Yes. On the same MacBook Pro M1 hardware, Nav0 v0.1.2 uses up to 21% less memory (928 MB savings at 40 tabs), up to 36% less CPU, and spawns fewer processes than v0.0.6. Average CPU dropped from 13.1% to 10.3% across all tab counts. Memory improved at every tab count tested.
+
+### How much CPU does Nav0 use compared to Chrome with 50 tabs?
+
+With 50 tabs open on a MacBook Pro M1, Chrome used 118% CPU — saturating more than one full core just to keep idle tabs alive. Nav0 v0.1.2 used just 20%. On average across all tab counts, Nav0 used 77.1% less CPU than Chrome. At 10 and 20 tabs, Nav0's CPU usage was under 6%.
+
+### Is Nav0 getting faster with each release?
+
+Yes. Between v0.0.6 (March 2026) and v0.1.2 (April 2026), Nav0 improved memory usage at every tab count tested (10 through 50), reduced CPU usage by up to 36%, and decreased process counts. These improvements were measured on the same M1 hardware using the same benchmark methodology, ensuring an apples-to-apples comparison.
+
+### What is the best lightweight browser for MacBook in 2026?
+
+Nav0 v0.1.2 uses 45% less memory and 77% less CPU than Chrome in head-to-head benchmarks on a MacBook Pro M1. It has zero telemetry, a built-in ad blocker, and is fully open source under the MIT license. It is designed to be the lightest full-featured browser for macOS while still rendering the modern web effectively.
 
 [Download Nav0 — free, open source, and light on your system](/guide/getting-started).
 
