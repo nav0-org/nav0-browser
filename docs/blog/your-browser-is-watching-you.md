@@ -35,7 +35,56 @@ head:
         "author": { "@type": "Organization", "name": "Nav0" },
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/your-browser-is-watching-you",
-        "keywords": ["privacy", "browsers", "data collection", "browser tracking", "web privacy"]
+        "keywords": ["privacy", "browsers", "data collection", "browser tracking", "web privacy", "what data does my browser collect", "does chrome track you", "browser surveillance", "how to stop browser tracking", "browser data breach risk", "browser fingerprinting explained", "private browser no telemetry", "browser sync privacy risk", "does edge send data to microsoft", "zero data collection browser", "open source privacy browser", "browser watching you"]
+      }
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What data does my browser collect about me?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Most mainstream browsers can observe and record your complete browsing history, keystrokes and form data, location via GPS and IP geolocation, your unique device fingerprint from screen resolution, fonts, GPU and other signals, and your full network activity including DNS requests. Much of this data is synced to cloud servers tied to your account."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Google Chrome track your browsing activity?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Chrome syncs browsing history, bookmarks, passwords, open tabs, and autofill data to Google servers by default when signed in. It participates in Google's advertising ecosystem through the Topics API for ad targeting, and its Enhanced Safe Browsing mode sends full URLs to Google for analysis."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How can I stop my browser from tracking me?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "You can disable sync features and telemetry in settings, avoid signing into your browser, and turn off search suggestions that send keystrokes to remote servers. However, the most effective approach is to use a privacy-focused browser that collects nothing by default rather than trying to opt out of a browser designed to collect data."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is browser fingerprinting and why does it matter?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Browser fingerprinting uses your browser configuration, screen resolution, installed fonts, GPU model, timezone, language settings, and dozens of other signals to create a unique identifier that can track you across websites even without cookies. It is extremely difficult to prevent with mainstream browsers."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Why is local-only data storage more private than cloud sync?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "When bookmarks, history, and passwords stay on your device, there is nothing to breach on remote servers, nothing to sell to third parties, and nothing to subpoena. Local storage is faster, more reliable, and eliminates the risk of your browsing profile being exposed in data breaches that have leaked billions of records."
+            }
+          }
+        ]
       }
 ---
 
@@ -148,6 +197,28 @@ If you're concerned about browser privacy, here are concrete steps:
 4. **Check the source.** If your browser isn't open source, you can't verify its privacy claims. Trust, but verify. Or better yet, just verify.
 
 5. **Reduce your browser's surface area.** Remove extensions you don't actively use. Each extension has access to your browsing data and introduces risk.
+
+## Frequently Asked Questions
+
+### What data does my browser collect about me?
+
+Most mainstream browsers can observe and record your complete browsing history, keystrokes and form data, location via GPS and IP geolocation, your unique device fingerprint from screen resolution, fonts, GPU and other signals, and your full network activity including DNS requests. Much of this data is synced to cloud servers tied to your account.
+
+### Does Google Chrome track your browsing activity?
+
+Yes. Chrome syncs browsing history, bookmarks, passwords, open tabs, and autofill data to Google servers by default when signed in. It participates in Google's advertising ecosystem through the Topics API for ad targeting, and its Enhanced Safe Browsing mode sends full URLs to Google for analysis.
+
+### How can I stop my browser from tracking me?
+
+You can disable sync features and telemetry in settings, avoid signing into your browser, and turn off search suggestions that send keystrokes to remote servers. However, the most effective approach is to use a privacy-focused browser that collects nothing by default rather than trying to opt out of a browser designed to collect data.
+
+### What is browser fingerprinting and why does it matter?
+
+Browser fingerprinting uses your browser configuration, screen resolution, installed fonts, GPU model, timezone, language settings, and dozens of other signals to create a unique identifier that can track you across websites even without cookies. It is extremely difficult to prevent with mainstream browsers.
+
+### Why is local-only data storage more private than cloud sync?
+
+When bookmarks, history, and passwords stay on your device, there is nothing to breach on remote servers, nothing to sell to third parties, and nothing to subpoena. Local storage is faster, more reliable, and eliminates the risk of your browsing profile being exposed in data breaches that have leaked billions of records.
 
 ## The Bigger Picture
 

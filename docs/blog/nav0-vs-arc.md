@@ -28,7 +28,7 @@ head:
       content: minimalism
   - - meta
     - name: keywords
-      content: "Nav0 vs arc, arc browser privacy, arc browser review, the browser company, arc browser data collection, arc browser account required, arc AI features, arc vs minimal browser, arc browser closed source, arc spaces"
+      content: "Nav0 vs arc, arc browser privacy, arc browser review, the browser company, arc browser data collection, arc browser account required, arc AI features, arc vs minimal browser, arc browser closed source, arc spaces, is arc browser safe for privacy, arc browser telemetry, arc browser alternative, arc browser open source, does arc browser collect data, arc browser VC funding, best private browser alternative to arc, arc browser security risks, arc browser vs privacy browser, minimal browser no tracking, lightweight browser no account"
   - - script
     - type: application/ld+json
     - |
@@ -42,6 +42,55 @@ head:
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/nav0-vs-arc",
         "keywords": ["Nav0 vs arc", "arc browser privacy", "arc browser review", "the browser company", "arc closed source", "arc AI", "minimal browser"]
+      }
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Is Arc browser safe for privacy?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Arc is a closed-source browser that requires a mandatory account to use, meaning every browsing session is tied to your identity. Arc's AI features — including page previews, tab renaming, and Browse for Me — send your browsing data to external AI servers. Your synced data (Spaces, Easels, pinned tabs) lives on The Browser Company's servers. Because the code is closed source, you cannot independently verify Arc's privacy claims."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Arc browser collect your data?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Arc requires a mandatory account, which ties your browsing to your identity. Arc's sync features store your tab organization, workspaces, and Easels on The Browser Company's servers. AI features like five-second previews, Ask on Page, Tidy Tab Titles, and Browse for Me send page content and browsing context to external AI providers for processing."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is Arc browser open source?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. Arc is entirely closed source. You cannot read, audit, or fork the code. You cannot verify what data Arc collects or how it handles your browsing information. Nav0, by contrast, is fully open source under the MIT license, and every line of code is publicly available for inspection."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do you need an account to use Arc browser?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Arc requires a mandatory account — there is no way to use Arc without signing up. This means every browsing session is identified and tied to your account. Nav0 has no accounts, no sign-in, and no identity requirement. You download it and browse anonymously."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is a good privacy alternative to Arc browser?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Nav0 is a privacy-focused alternative to Arc that is fully open source, collects zero telemetry, requires no account, has no AI features that send data to external servers, and stores all browsing data locally. While Nav0 does not have Arc's productivity features like Spaces and Easels, it provides a clean, minimal browsing experience with zero data collection."
+            }
+          }
+        ]
       }
 ---
 
@@ -58,6 +107,23 @@ Arc looked at Chrome and thought: the browser needs a better interface. More org
 Nav0 looked at Chrome and thought: the browser needs to do less. Strip out the bloat. Remove the tracking. Stop trying to be a platform. Let the browser be a window to the web and nothing more.
 
 These are two fundamentally different answers to the same problem. Arc is maximalism — add more, do more, be more. Nav0 is minimalism — remove more, do less, be less. Both are honest responses to the failure of mainstream browsers. Only one of them doesn't require your data to function.
+
+## Nav0 vs Arc: Quick Comparison
+
+| Feature | Nav0 | Arc |
+|---|---|---|
+| **Telemetry** | Zero | Unknown (closed source) |
+| **Open Source** | Yes (MIT license) | No (fully closed source) |
+| **Account Required** | No | Yes (mandatory) |
+| **Cloud Sync** | None — all data local | Mandatory sync via The Browser Company servers |
+| **AI Features** | None | Arc Max (page previews, tab renaming, Browse for Me) |
+| **Data Sent to Third Parties** | None | Browsing data sent to AI providers |
+| **Business Model** | Free, community-maintained open source | VC-funded ($50M+), monetization TBD |
+| **Cross-Platform** | macOS, Windows, Linux | macOS, Windows, iOS, Android |
+| **Extensions** | None (privacy by design) | Chrome extensions supported |
+| **UI Philosophy** | Minimal — tabs, URL bar, web page | Maximalist — Spaces, sidebar, Easels, split views |
+| **Ad Blocker** | Built-in (EasyList, EasyPrivacy, Peter Lowe) | No built-in blocker |
+| **Attack Surface** | Minimal feature set, minimal code | Large feature set with custom JS injection (Boosts) |
 
 ## Addition vs. Subtraction
 
@@ -187,6 +253,28 @@ Arc's sustainability depends on The Browser Company finding a viable business mo
 Nav0's sustainability depends on a community of contributors maintaining an open-source project. This model has its own risks — contributor burnout, funding for infrastructure, keeping pace with Chromium updates. But the code can't disappear. If the current maintainers step away, anyone can fork the project and continue it. Your browser can't be acquired, pivoted, or shut down by a board decision.
 
 Open-source projects don't always survive. But when they die, they leave their code behind. When VC-backed companies die, they take everything with them.
+
+## Frequently Asked Questions
+
+### Is Arc browser safe for privacy?
+
+Arc is a closed-source browser that requires a mandatory account to use, meaning every browsing session is tied to your identity. Arc's AI features — including page previews, tab renaming, and Browse for Me — send your browsing data to external AI servers for processing. Your synced data (Spaces, Easels, pinned tabs) lives on The Browser Company's servers. Because the code is closed source, you cannot independently verify Arc's privacy claims or audit its data collection practices.
+
+### Does Arc browser collect your data?
+
+Arc requires a mandatory account, which ties your browsing to your identity. Arc's sync features store your tab organization, workspaces, and Easels on The Browser Company's servers. AI features like five-second previews, Ask on Page, Tidy Tab Titles, and Browse for Me send page content and browsing context to external AI providers for processing. Because Arc is closed source, the full extent of its data collection cannot be independently verified.
+
+### Is Arc browser open source?
+
+No. Arc is entirely closed source. You cannot read, audit, or fork the code. You cannot verify what data Arc collects or how it handles your browsing information. Nav0, by contrast, is fully open source under the MIT license, and every line of code is publicly available for inspection on GitHub.
+
+### Do you need an account to use Arc browser?
+
+Yes. Arc requires a mandatory account — there is no way to use Arc without signing up. This means every browsing session is identified and tied to your account. Unlike Firefox, where accounts are optional, Arc offers no way to opt out of the account requirement. Nav0 has no accounts, no sign-in, and no identity requirement. You download it and browse with complete anonymity.
+
+### What is a good privacy alternative to Arc browser?
+
+Nav0 is a privacy-focused alternative to Arc that is fully open source, collects zero telemetry, requires no account, has no AI features that send data to external servers, and stores all browsing data locally in a SQLite database. While Nav0 does not have Arc's productivity features like Spaces, Easels, and split views, it provides a clean, minimal browsing experience with zero data collection and a built-in ad blocker.
 
 ## The Bottom Line
 

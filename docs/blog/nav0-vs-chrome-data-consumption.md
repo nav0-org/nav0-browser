@@ -28,7 +28,7 @@ head:
       content: chrome
   - - meta
     - name: keywords
-      content: "Nav0 vs chrome, browser data usage, chrome data consumption, browser bandwidth, tracker blocking, chrome background requests, lightweight browser, browser privacy, chrome telemetry, Nav0 browser data"
+      content: "Nav0 vs chrome, browser data usage, chrome data consumption, browser bandwidth, tracker blocking, chrome background requests, lightweight browser, browser privacy, chrome telemetry, Nav0 browser data, chrome idle background traffic, browser tracker blocking built in, chrome third party requests, best browser for metered connection, browser that blocks trackers without extensions, how much data does chrome send to advertisers"
   - - script
     - type: application/ld+json
     - |
@@ -42,6 +42,55 @@ head:
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/nav0-vs-chrome-data-consumption",
         "keywords": ["Nav0 vs chrome", "browser data usage", "chrome data consumption", "tracker blocking", "browser bandwidth", "browser privacy", "lightweight browser"]
+      }
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How much data does Chrome send in the background?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "In our test, Chrome made 29 background requests in just 20 seconds of idle time, transferring 37.55 KB received and 11.14 KB sent. These requests went to ad networks, analytics trackers, and data brokers — all without any user interaction. Nav0 produced zero background network traffic during the same idle period."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Nav0 have a built-in ad and tracker blocker?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Nav0 includes a built-in tracker and ad blocker that runs natively in the browser with no extensions required. In our benchmark across 15 websites, Nav0 blocked 25 tracker requests outright and reduced total tracker data from 2.63 MB (Chrome) to 137.64 KB — a 95% reduction in tracker payloads."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How much less data does Nav0 use compared to Chrome?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Across 15 real-world websites, Nav0 transferred 36.22 MB compared to Chrome's 44.02 MB — 17.7% less total data. Nav0 also made 29.1% fewer HTTP requests (828 vs 1,168) and sent 37.6% less data upstream to third-party servers."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is Nav0 a good browser for metered or limited internet connections?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Nav0 uses 17.7% less bandwidth than Chrome by blocking trackers and third-party scripts that add no value to the user. It also produces zero idle background traffic, meaning it never wastes bandwidth when you are not actively browsing. This makes it well-suited for mobile hotspots, satellite internet, and travel roaming."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Chrome send your browsing data to advertisers?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Chrome itself does not directly send your data to advertisers, but it loads third-party tracker and ad scripts embedded in websites without blocking them. In our test, Chrome loaded 104 tracker requests totaling 2.63 MB and made 935 third-party requests across 15 sites. These third-party scripts collect browsing behavior, build profiles, and report to ad networks and data brokers."
+            }
+          }
+        ]
       }
 ---
 
@@ -248,6 +297,28 @@ Data consumption isn't just an abstract privacy concern. It has real, tangible c
 **Background traffic means background surveillance.** Those 29 idle requests Chrome made in 20 seconds weren't loading content for you. They were reporting on you — your behavior, your viewing patterns, your engagement metrics — to companies whose business model is selling that information.
 
 **Request volume means attack surface.** Every third-party request is a trust decision. You trust the site you're visiting, but do you trust the 935 third-party domains it connects to? Each one is a potential vector for malvertising, cryptojacking, or drive-by downloads. Fewer requests means fewer opportunities for things to go wrong.
+
+## Frequently Asked Questions
+
+### How much data does Chrome send in the background?
+
+In our test, Chrome made 29 background requests in just 20 seconds of idle time, transferring 37.55 KB received and 11.14 KB sent. These requests went to ad networks like `ad.doubleclick.net` and `ad-delivery.net`, analytics services like `chartbeat.net` and `scorecardresearch.com`, and experimentation platforms like `optimizely.com`. All of this happened with zero user interaction. Nav0 produced exactly zero background network traffic during the same idle period — because when the page is loaded and you are not interacting, there is nothing to do.
+
+### Does Nav0 have a built-in ad and tracker blocker?
+
+Yes. Nav0 includes a built-in tracker and ad blocker that runs natively in the browser — no extensions to install, configure, or keep updated. In our benchmark across 15 real-world websites, Nav0 blocked 25 tracker requests outright and reduced total tracker data from 2.63 MB (what Chrome loaded) to just 137.64 KB. That is a 95% reduction in tracker payloads. The blocker also contributed to Nav0 making 29.1% fewer total HTTP requests than Chrome.
+
+### How much less data does Nav0 use compared to Chrome?
+
+Across 15 real-world websites, Nav0 transferred 36.22 MB compared to Chrome's 44.02 MB — 17.7% less total data. Nav0 also made 828 requests versus Chrome's 1,168 — 29.1% fewer. The savings were largest on heavy, ad-laden pages: 52.8% less data on BBC News, 53.6% less on CNN Lite, and 30.2% less on Stack Overflow. On lightweight pages with minimal third-party scripts, both browsers transferred nearly identical amounts.
+
+### Is Nav0 a good browser for metered or limited internet connections?
+
+Yes. Nav0 uses 17.7% less bandwidth than Chrome by blocking trackers, ad scripts, and unnecessary third-party requests that consume data without benefiting the user. It also produces zero idle background traffic, meaning it never wastes bandwidth when you are not actively browsing. For users on mobile hotspots, satellite internet, capped data plans, or travel roaming, this translates directly to cost savings and longer usable browsing sessions.
+
+### Does Chrome send your browsing data to advertisers?
+
+Chrome itself does not directly transmit your data to advertisers, but it loads all third-party tracker and ad scripts embedded in websites without blocking any of them. In our test, Chrome loaded 104 tracker requests totaling 2.63 MB and made 935 third-party requests across 15 sites. These third-party scripts — from domains like `doubleclick.net`, `adsafeprotected.com`, and `scorecardresearch.com` — collect browsing behavior, build user profiles, and report data to ad networks and data brokers. Chrome provides no built-in protection against this; users must install a third-party extension like uBlock Origin to get blocking that Nav0 provides out of the box.
 
 ## The Bottom Line
 
