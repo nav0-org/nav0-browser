@@ -23,6 +23,9 @@ head:
   - - meta
     - property: article:tag
       content: incognito
+  - - meta
+    - name: keywords
+      content: "is incognito mode private, does incognito hide from ISP, chrome incognito tracking, private browsing myth, incognito mode what does it do, does incognito mode protect from hackers, can employer see incognito browsing, incognito mode vs VPN, does private browsing hide your IP address, browser fingerprinting incognito, google tracks incognito mode, is private browsing really private, incognito mode limitations, what does incognito mode actually hide"
   - - script
     - type: application/ld+json
     - |
@@ -36,6 +39,55 @@ head:
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/incognito-mode-is-not-private",
         "keywords": ["privacy", "incognito mode", "private browsing", "browser privacy", "online tracking"]
+      }
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Is incognito mode actually private?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. Incognito mode only prevents your browser from saving browsing history, cookies, and site data to your local device after you close the window. It does not hide your activity from your ISP, employer, the websites you visit, or the browser vendor itself."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can your ISP see what you do in incognito mode?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Your ISP can see every domain you connect to, when you connected, how long you stayed, and how much data you transferred — regardless of whether you use incognito mode. HTTPS encrypts page content but not the destination domain."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does incognito mode prevent browser fingerprinting?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. Browser fingerprinting uses your device's inherent properties — screen resolution, timezone, language settings, installed fonts, and more — to identify you. Incognito mode does nothing to change these signals, so your fingerprint remains the same across all sessions."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can Google still track you in incognito mode?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Google's advertising tools — Google Analytics and Google Ads — run on over 70% of the top million websites. These scripts execute in incognito mode and can collect your IP address, fingerprint, and behavior patterns. Google settled a $5 billion lawsuit over collecting data from incognito sessions."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What should I use instead of incognito mode for real privacy?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "For genuine privacy, use a browser that blocks trackers by default in every mode, resists fingerprinting, encrypts DNS queries, collects zero telemetry, and treats privacy as the baseline rather than a special mode. Incognito mode in mainstream browsers is not a substitute for a privacy-first browser."
+            }
+          }
+        ]
       }
 ---
 
@@ -152,6 +204,28 @@ If the browser itself is sending data about your activity to its vendor, it does
 ### Make privacy the default, not a mode
 
 The entire concept of a "private mode" is an admission that the browser's normal mode isn't private. If you have to remember to open a special window to avoid tracking, the browser has failed. Privacy should be the baseline, not an option.
+
+## Frequently Asked Questions
+
+### Is incognito mode actually private?
+
+No. Incognito mode only prevents your browser from saving browsing history, cookies, and site data to your local device after you close the window. It does not hide your activity from your ISP, employer, the websites you visit, or the browser vendor itself. It is a local housekeeping feature, not a privacy tool.
+
+### Can your ISP see what you do in incognito mode?
+
+Yes. Your ISP can see every domain you connect to, when you connected, how long you stayed, and how much data you transferred — regardless of whether you use incognito mode. HTTPS encrypts the content of your connection, but the destination domain remains visible. In many countries, ISPs are legally required to retain this data.
+
+### Does incognito mode prevent browser fingerprinting?
+
+No. Browser fingerprinting uses your device's inherent properties — screen resolution, timezone, language settings, installed fonts, and more — to identify you. A Mozilla study found that 80.2% of browser configurations produce a unique fingerprint. Incognito mode does nothing to change these signals, so your fingerprint remains the same across all sessions.
+
+### Can Google still track you in incognito mode?
+
+Yes. Google's advertising tools — Google Analytics and Google Ads — run on over 70% of the top million websites. These scripts execute in incognito mode and can collect your IP address, fingerprint, and behavior patterns. Google settled a $5 billion lawsuit in 2024 over collecting data from incognito sessions and had to delete billions of records.
+
+### What should I use instead of incognito mode for real privacy?
+
+For genuine privacy, use a browser that blocks trackers by default in every mode, resists fingerprinting, encrypts DNS queries, collects zero telemetry, and treats privacy as the baseline rather than a special mode. A privacy-first browser like Nav0 provides these protections without requiring you to remember to open a special window.
 
 ## The Question You Should Ask
 

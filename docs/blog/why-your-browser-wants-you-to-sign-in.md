@@ -23,6 +23,9 @@ head:
   - - meta
     - property: article:tag
       content: accounts
+  - - meta
+    - name: keywords
+      content: "why browser wants sign in, browser account privacy, chrome sign in tracking, should I sign into my browser, browser sync privacy risk, what happens when you sign into chrome, edge sign in data collection, cross device tracking browser, browser sign in dark patterns, do I need a browser account, browser data sync privacy, is browser sync safe, how to browse without signing in, chrome auto sign in"
   - - script
     - type: application/ld+json
     - |
@@ -36,6 +39,55 @@ head:
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/why-your-browser-wants-you-to-sign-in",
         "keywords": ["browser sign in", "browser accounts", "privacy", "cross-device tracking", "data collection"]
+      }
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Why does my browser keep asking me to sign in?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Browser vendors want you to sign in because it ties your browsing activity to your real identity — your email, phone number, and name. This allows them to build detailed profiles for advertising, cross-device tracking, and ecosystem lock-in. The sign-in prompts are designed as dark patterns to make staying signed out feel like friction."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What data does my browser collect when I sign in?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "When you sign into your browser, synced data can include your complete browsing history with timestamps, saved passwords, autofill data (names, addresses, credit cards), open tabs across devices, extensions and settings, and bookmarks. Together these form one of the most detailed profiles of a person that any company could build."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is browser sync data actually encrypted and private?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Browser vendors advertise encryption, but in most cases they hold the encryption keys and can decrypt your data whenever they want or when a government requests it. Chrome sync data is encrypted but Google can access it. You can set a custom passphrase for true end-to-end encryption, but almost nobody does because it is buried in settings."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do I need a browser account to browse the web?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. The web worked fine for decades before browser accounts existed. Bookmarks can be exported as HTML files, passwords belong in a dedicated password manager like Bitwarden or KeePass, and browsing history rarely needs to be synced across devices. The convenience of sync is real but marginal, while the privacy cost is significant."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is there a browser that does not require sign-in or collect data?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Nav0 has no accounts, no sign-in, no cloud sync, and no data collection. Your bookmarks, history, and settings stay on your device with no server to upload them to. This is a deliberate design choice — your browsing data belongs on your machine, not on a vendor's servers."
+            }
+          }
+        ]
       }
 ---
 
@@ -148,6 +200,28 @@ This isn't a missing feature — it's a deliberate design choice. We believe you
 If you want to move your bookmarks to another device, you can export them as an HTML file and import them.  It's manual. It's a little old school. And it means nobody  else ever has a copy of your data.
 
 We think that tradeoff is worth it.
+
+## Frequently Asked Questions
+
+### Why does my browser keep asking me to sign in?
+
+Browser vendors want you to sign in because it ties your browsing activity to your real identity — your email, phone number, and name. This allows them to build detailed user profiles for advertising, enable cross-device tracking, and create ecosystem lock-in. The persistent sign-in prompts are deliberately designed as dark patterns to make staying signed out feel like friction and signing in feel like the natural default.
+
+### What data does my browser collect when I sign in?
+
+When you sign into your browser, synced data can include your complete browsing history with timestamps, saved passwords for every site, autofill data such as names, addresses, and credit card numbers, a real-time snapshot of your open tabs across devices, your extensions and settings, and your bookmarks. Together, these form one of the most detailed profiles of a person that any company could ask for — all tied to your real identity.
+
+### Is browser sync data actually encrypted and private?
+
+Browser vendors advertise encryption, but in most cases they hold the encryption keys and can decrypt your data whenever they want or when a government requests it. Google's Chrome sync data is encrypted, but Google can access it. You can optionally set a custom passphrase for true end-to-end encryption, but almost nobody does because it is buried in settings and Google does not promote it. Apple is better here with end-to-end encryption for iCloud Keychain, but this is the exception rather than the rule.
+
+### Do I need a browser account to browse the web?
+
+No. The web worked fine for decades before browser accounts existed. Bookmarks can be exported and imported as simple HTML files. Passwords belong in a dedicated password manager like Bitwarden or KeePass, not in the same application that tracks your browsing behavior. Browsing history rarely needs to be synced across devices. The convenience of sync is real but marginal, while the privacy cost is significant.
+
+### Is there a browser that does not require sign-in or collect data?
+
+Yes. Nav0 has no accounts, no sign-in screen, no cloud sync, and no data collection whatsoever. Your bookmarks, history, and settings stay on your device with no server to upload them to and no account to link them to. This is a deliberate design choice — your browsing data belongs on your machine, not on a vendor's servers that could be breached, subpoenaed, or sold.
 
 ## What You Can Do
 

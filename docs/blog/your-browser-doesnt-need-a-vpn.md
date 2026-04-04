@@ -35,7 +35,56 @@ head:
         "author": { "@type": "Organization", "name": "Nav0" },
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/your-browser-doesnt-need-a-vpn",
-        "keywords": ["browser VPN", "VPN security", "Opera VPN", "Edge VPN", "privacy", "security theater"]
+        "keywords": ["browser VPN", "VPN security", "Opera VPN", "Edge VPN", "privacy", "security theater", "is browser VPN safe", "built-in VPN privacy risk", "chrome VPN vs standalone VPN", "does a VPN make you anonymous", "free VPN data collection", "browser VPN vs system VPN", "VPN does not protect from browser tracking", "do I need a VPN for browsing", "Opera free VPN privacy", "Edge secure network privacy", "Google One VPN Chrome", "minimal browser no VPN"]
+      }
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Are built-in browser VPNs safe to use?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Built-in browser VPNs create a false sense of security. They route your traffic through the browser vendor's servers while the browser itself continues to collect your data independently. The VPN encrypts traffic from external observers, but the browser is inside the tunnel with you and sees everything regardless."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does a VPN make you anonymous online?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. A VPN shifts trust from your ISP to the VPN provider, but does not eliminate tracking. It does not protect you from malware, phishing, tracking cookies, or browser fingerprinting. The VPN provider sees all your traffic instead of your ISP, and browser-level data collection continues unaffected."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Why is a standalone VPN better than a browser VPN?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "A standalone VPN operates at the system level, protecting all traffic from all applications, not just the browser. Its provider's entire business depends on privacy reputation, unlike browser vendors whose VPN is a side feature. Standalone VPNs can also be independently audited, whereas browser VPNs are bundled inside a closed application you cannot separate or verify."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Chrome still track you when using Google One VPN?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. When using Chrome with Google's VPN, Chrome still sends URLs to Safe Browsing servers, syncs data to your Google account if signed in, reports crash data and usage statistics, and runs the Topics API for ad interest categorization. The VPN does not protect you from the browser's own data collection."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What should I use instead of a browser VPN for privacy?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Use a standalone reputable VPN provider with a verified no-logs policy at the system level, combined with a minimal browser that collects no data. A browser with zero telemetry paired with a system-level VPN provides genuine privacy, unlike a browser VPN from a company that also collects your browsing data."
+            }
+          }
+        ]
       }
 ---
 
@@ -144,6 +193,28 @@ If you genuinely need a VPN, here's what works:
 3. **Understand your threat model.** Most people don't need a VPN for everyday browsing. HTTPS already encrypts your connection to individual websites. A VPN matters most on untrusted networks, when you need to mask your IP from specific services, or when you want to prevent ISP logging.
 
 4. **Don't confuse a VPN with privacy.** A VPN is one tool in a privacy toolkit. It's not a substitute for a browser that doesn't track you, an ad blocker, or sensible browsing habits.
+
+## Frequently Asked Questions
+
+### Are built-in browser VPNs safe to use?
+
+Built-in browser VPNs create a false sense of security. They route your traffic through the browser vendor's servers while the browser itself continues to collect your data independently. The VPN encrypts traffic from external observers, but the browser is inside the tunnel with you and sees everything regardless.
+
+### Does a VPN make you anonymous online?
+
+No. A VPN shifts trust from your ISP to the VPN provider, but does not eliminate tracking. It does not protect you from malware, phishing, tracking cookies, or browser fingerprinting. The VPN provider sees all your traffic instead of your ISP, and browser-level data collection continues unaffected.
+
+### Why is a standalone VPN better than a browser VPN?
+
+A standalone VPN operates at the system level, protecting all traffic from all applications, not just the browser. Its provider's entire business depends on privacy reputation, unlike browser vendors whose VPN is a side feature. Standalone VPNs can also be independently audited, whereas browser VPNs are bundled inside a closed application you cannot separate or verify.
+
+### Does Chrome still track you when using Google One VPN?
+
+Yes. When using Chrome with Google's VPN, Chrome still sends URLs to Safe Browsing servers, syncs data to your Google account if signed in, reports crash data and usage statistics, and runs the Topics API for ad interest categorization. The VPN does not protect you from the browser's own data collection.
+
+### What should I use instead of a browser VPN for privacy?
+
+Use a standalone reputable VPN provider with a verified no-logs policy at the system level, combined with a minimal browser that collects no data. A browser with zero telemetry paired with a system-level VPN provides genuine privacy, unlike a browser VPN from a company that also collects your browsing data.
 
 ## Nav0's Approach: Don't Bundle, Don't Pretend
 

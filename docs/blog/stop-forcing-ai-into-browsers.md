@@ -35,7 +35,56 @@ head:
         "author": { "@type": "Organization", "name": "Nav0" },
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/stop-forcing-ai-into-browsers",
-        "keywords": ["AI in browsers", "browser bloat", "privacy", "browser AI features", "Copilot"]
+        "keywords": ["AI in browsers", "browser bloat", "privacy", "browser AI features", "Copilot", "disable AI in browser", "chrome AI features privacy", "edge copilot data collection", "browser without AI", "why browsers have AI now", "AI sidebar browser privacy risk", "minimal browser no AI", "browser feature creep", "stop browser AI tracking", "AI summarize page privacy", "lightweight browser no bloat", "browser AI sends data to cloud"]
+      }
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Why are browsers adding AI features?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Browser vendors are adding AI features not because users demanded them, but because AI is the current industry hype cycle and no tech company wants to be left behind. These features also serve business interests by keeping users in the vendor's ecosystem and generating data that feeds their AI models and ad networks."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do browser AI features send my data to the cloud?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, most browser AI features send your data to cloud servers for processing. When Edge Copilot reads a page, the content goes to Microsoft's servers. When Chrome's AI organizes tabs, Google sees every tab you have open. Page content, your queries, and browsing context are transmitted to remote servers to power these features."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I disable AI features in Chrome and Edge?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "You can disable AI features by digging through browser settings and turning off Copilot, Help Me Write, AI suggestions, and similar features. However, the underlying processes often continue running even after closing the sidebar, and new AI features appear with every update, each with its own toggles buried in different settings pages."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do browser AI features slow down my computer?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Browser AI models consume significant memory and CPU resources. Edge's Copilot sidebar adds measurable memory overhead, and Chrome's prediction and pre-rendering features consume bandwidth and processing power speculatively. Users on older hardware or budget laptops experience noticeable performance degradation from these features."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is there a browser without AI features or bloat?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Nav0 is a minimal, privacy-focused browser with zero AI features, zero telemetry, and zero bloat. It does not include chatbots, AI sidebars, smart features, or any functionality that phones home to cloud servers. If you want to use AI tools, you can visit them in a tab like any other website."
+            }
+          }
+        ]
       }
 ---
 
@@ -126,6 +175,28 @@ We don't include AI in Nav0 for the same reason we don't include a built-in word
 If you want to use AI tools, you can visit them in a tab, like any other website. Your browser doesn't need to embed them. Your browser doesn't need to mediate your interaction with them. And your browser certainly doesn't need to send your browsing data to them automatically.
 
 The best browser is one that gets out of your way. It loads pages fast, keeps you safe, and doesn't try to be anything more than what it is: a tool for accessing the web.
+
+## Frequently Asked Questions
+
+### Why are browsers adding AI features?
+
+Browser vendors are adding AI features not because users demanded them, but because AI is the current industry hype cycle and no tech company wants to be left behind. These features also serve business interests by keeping users in the vendor's ecosystem and generating data that feeds their AI models and ad networks.
+
+### Do browser AI features send my data to the cloud?
+
+Yes, most browser AI features send your data to cloud servers for processing. When Edge Copilot reads a page, the content goes to Microsoft's servers. When Chrome's AI organizes tabs, Google sees every tab you have open. Page content, your queries, and browsing context are transmitted to remote servers to power these features.
+
+### How do I disable AI features in Chrome and Edge?
+
+You can disable AI features by digging through browser settings and turning off Copilot, Help Me Write, AI suggestions, and similar features. However, the underlying processes often continue running even after closing the sidebar, and new AI features appear with every update, each with its own toggles buried in different settings pages.
+
+### Do browser AI features slow down my computer?
+
+Yes. Browser AI models consume significant memory and CPU resources. Edge's Copilot sidebar adds measurable memory overhead, and Chrome's prediction and pre-rendering features consume bandwidth and processing power speculatively. Users on older hardware or budget laptops experience noticeable performance degradation from these features.
+
+### Is there a browser without AI features or bloat?
+
+Yes. Nav0 is a minimal, privacy-focused browser with zero AI features, zero telemetry, and zero bloat. It does not include chatbots, AI sidebars, smart features, or any functionality that phones home to cloud servers. If you want to use AI tools, you can visit them in a tab like any other website.
 
 ## What You Can Do
 

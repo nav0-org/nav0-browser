@@ -38,7 +38,56 @@ head:
         "author": { "@type": "Organization", "name": "Nav0" },
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/browser-extensions-wont-save-your-privacy",
-        "keywords": ["privacy", "browser extensions", "security", "browser privacy", "extension permissions"]
+        "keywords": ["privacy", "browser extensions", "security", "browser privacy", "extension permissions", "are browser extensions safe", "privacy extensions risk", "extension data collection", "browser extension sold malware", "do extensions protect privacy", "chrome extension security risks", "browser attack surface extensions", "manifest v3 ad blockers", "open source browser no extensions", "built-in privacy browser", "extension permissions danger", "browser extension ownership change"]
+      }
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Are privacy browser extensions safe to use?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Privacy extensions carry significant risks. They require broad permissions including access to all your browsing data, they can be sold to new owners who inject tracking code, and they increase your browser's attack surface. While many are built by principled developers, the trust model is inherently fragile."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can browser extensions steal my data?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Extensions with 'access to all your data on all websites' permission can read every page you visit, monitor browsing patterns, modify page content, and make network requests to external servers. Compromised extensions like The Great Suspender and Stylish have been caught collecting data from millions of users."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What happens when a browser extension is sold to a new owner?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "When an extension changes ownership, the new owner can push updates that add tracking code, inject affiliate links, or collect browsing history. No new permission prompt appears because the extension already had the permissions it needed. Users are rarely notified of ownership changes."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do browser extensions make you easier to track?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ironically, yes. Your specific combination of extensions, their configurations, and their effects on page behavior create a unique fingerprint that tracking scripts can detect. Research has shown that websites can identify installed extensions through timing attacks and DOM modifications, making privacy extension users more uniquely identifiable."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is a better alternative to using privacy extensions?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "A browser with privacy built into its core architecture is more effective than bolting on extensions. Built-in tracking protection, HTTPS upgrades, and fingerprinting resistance work reliably without adding third-party code to your attack surface and cannot be broken by extension API changes like Manifest V3."
+            }
+          }
+        ]
       }
 ---
 
@@ -164,6 +213,28 @@ If you're using a browser that requires extensions for basic privacy, at minimum
 4. **Watch for ownership changes.** If an extension is acquired by a new company, re-evaluate whether you trust the new owner. This information is rarely publicized.
 
 5. **Understand that extensions are a patch, not a solution.** They reduce some risks while introducing others. The net privacy improvement is smaller than most people assume.
+
+## Frequently Asked Questions
+
+### Are privacy browser extensions safe to use?
+
+Privacy extensions carry significant risks. They require broad permissions including access to all your browsing data, they can be sold to new owners who inject tracking code, and they increase your browser's attack surface. While many are built by principled developers, the trust model is inherently fragile.
+
+### Can browser extensions steal my data?
+
+Yes. Extensions with "access to all your data on all websites" permission can read every page you visit, monitor browsing patterns, modify page content, and make network requests to external servers. Compromised extensions like The Great Suspender and Stylish have been caught collecting data from millions of users.
+
+### What happens when a browser extension is sold to a new owner?
+
+When an extension changes ownership, the new owner can push updates that add tracking code, inject affiliate links, or collect browsing history. No new permission prompt appears because the extension already had the permissions it needed. Users are rarely notified of ownership changes.
+
+### Do browser extensions make you easier to track?
+
+Ironically, yes. Your specific combination of extensions, their configurations, and their effects on page behavior create a unique fingerprint that tracking scripts can detect. Research has shown that websites can identify installed extensions through timing attacks and DOM modifications, making privacy extension users more uniquely identifiable.
+
+### What is a better alternative to using privacy extensions?
+
+A browser with privacy built into its core architecture is more effective than bolting on extensions. Built-in tracking protection, HTTPS upgrades, and fingerprinting resistance work reliably without adding third-party code to your attack surface and cannot be broken by extension API changes like Manifest V3.
 
 ## The Uncomfortable Truth
 

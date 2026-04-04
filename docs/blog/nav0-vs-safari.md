@@ -28,7 +28,7 @@ head:
       content: apple
   - - meta
     - name: keywords
-      content: "Nav0 vs Safari, Safari privacy, Safari tracking, Apple browser privacy, Safari iCloud, Safari telemetry, private browser comparison, minimal browser vs Safari, Safari ecosystem lock-in, open source browser"
+      content: "Nav0 vs Safari, Safari privacy, Safari tracking, Apple browser privacy, Safari iCloud, Safari telemetry, private browser comparison, minimal browser vs Safari, Safari ecosystem lock-in, open source browser, does Safari track you, is Safari really private, Safari vs privacy browser, Safari data collection, best private browser Mac, Safari alternative privacy, Safari Google search deal, Safari closed source, Safari iCloud sync privacy, Apple browser alternative, browser without telemetry Mac"
   - - script
     - type: application/ld+json
     - |
@@ -43,6 +43,55 @@ head:
         "mainEntityOfPage": "https://nav0.org/blog/nav0-vs-safari",
         "keywords": ["Nav0 vs Safari", "Safari privacy", "Apple browser", "Safari iCloud", "Safari telemetry", "private browser", "minimal browser", "open source browser"]
       }
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Does Safari track you?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Safari does not track you in the same way Chrome does, but it is not tracking-free. Safari contacts Apple servers for Safe Browsing checks, Siri Suggestions, iCloud sync, software updates, and certificate validation. Safari also defaults to Google as its search engine, sending your queries and IP address to Google. Apple receives an estimated $20 billion per year from Google for this default placement."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is Safari open source?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Safari's rendering engine, WebKit, is open source. However, the Safari browser application itself — including its UI, sync infrastructure, tracking prevention logic, and telemetry systems — is closed source. You cannot audit what Safari does on your machine or verify Apple's privacy claims by reading the code."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Safari send data to Apple?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Safari sends data to Apple for software updates, Safe Browsing checks (via a proxy), iCloud sync of bookmarks, tabs, history, and passwords, Siri Suggestions in the address bar, and certificate validation. Safari's Privacy Report does not disclose these requests to Apple's own servers."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I use Safari on Windows or Linux?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. Safari is only available on Apple platforms: macOS, iOS, and iPadOS. Apple discontinued Safari for Windows in 2012. If you use Windows or Linux, Safari is not an option. Nav0 runs on macOS, Windows, and Linux."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is a good privacy-focused alternative to Safari on Mac?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Nav0 is a privacy-focused alternative to Safari that runs on macOS, Windows, and Linux. It is fully open source, collects zero telemetry, stores all data locally, has no cloud sync or account requirement, defaults to DuckDuckGo, and includes a built-in ad blocker. Unlike Safari, Nav0's code can be audited by anyone."
+            }
+          }
+        ]
+      }
 ---
 
 # Nav0 vs Safari: Privacy by Default vs. Privacy by Apple's Terms
@@ -54,6 +103,23 @@ Safari is the browser that privacy-conscious users point to when someone says, "
 Nav0 respects what Safari has accomplished. Of all the major browsers, Safari is the one we disagree with least.
 
 But "best of the mainstream" isn't the same as "private." Safari is still Apple's browser, built to serve Apple's ecosystem, controlled by Apple's decisions, and available only on Apple's platforms. The privacy it offers comes with conditions — and those conditions matter more than most people realize.
+
+## Nav0 vs Safari: Quick Comparison
+
+| Feature | Nav0 | Safari |
+|---|---|---|
+| **Telemetry** | Zero | Contacts Apple servers (updates, Safe Browsing, Siri Suggestions) |
+| **Open Source** | Yes (MIT license) | WebKit only; browser is closed source |
+| **Default Search Engine** | DuckDuckGo | Google ($20B/year deal with Apple) |
+| **Account Required** | No | Apple ID required for sync features |
+| **Cloud Sync** | None — all data local | iCloud sync (bookmarks, tabs, history, passwords) |
+| **Cross-Platform** | macOS, Windows, Linux | macOS, iOS, iPadOS only |
+| **Ad Blocker** | Built-in (EasyList, EasyPrivacy, Peter Lowe) | Content blockers via App Store extensions |
+| **AI Features** | None | Apple Intelligence integration (expanding) |
+| **Extensions** | None (privacy by design) | App Store only ($99/year developer fee) |
+| **Business Model** | Free, community-maintained open source | Bundled with Apple hardware; Google search revenue |
+| **Data Storage** | Local SQLite database only | Local + iCloud servers |
+| **Financial Integration** | None | Apple Pay built in |
 
 ## Intelligent Tracking Prevention: Good, but Apple's Version of Good
 
@@ -192,6 +258,28 @@ Apple has been a better steward of user privacy than Google, Microsoft, or Meta.
 Nav0 doesn't ask you to evaluate whether a corporation's incentives are sufficiently aligned with your interests. It removes the corporation from the equation entirely. Open source. Local data. Zero telemetry. No deals, no ecosystem, no platform lock-in.
 
 Safari offers privacy by Apple's terms. Nav0 offers privacy by default.
+
+## Frequently Asked Questions
+
+### Does Safari track you?
+
+Safari does not track you in the same way Chrome does, but it is not tracking-free. Safari contacts Apple servers for Safe Browsing checks, Siri Suggestions, iCloud sync, software updates, and certificate validation. Safari also defaults to Google as its search engine, sending your queries and IP address to Google. Apple receives an estimated $20 billion per year from Google for this default placement. Safari's Privacy Report shows blocked third-party trackers but does not disclose Safari's own requests to Apple's servers.
+
+### Is Safari open source?
+
+Safari's rendering engine, WebKit, is open source. However, the Safari browser application itself — including its UI, sync infrastructure, tracking prevention logic, and telemetry systems — is closed source. You cannot audit what Safari does on your machine or verify Apple's privacy claims by reading the code. Nav0 is fully open source under the MIT license, and every line of code is publicly auditable.
+
+### Does Safari send data to Apple?
+
+Yes. Safari sends data to Apple for software updates, Safe Browsing checks (via a proxy), iCloud sync of bookmarks, tabs, history, and passwords, Siri Suggestions in the address bar, and certificate validation. Safari's Privacy Report does not disclose these requests to Apple's own servers. Nav0 makes zero unsolicited network requests to any server.
+
+### Can I use Safari on Windows or Linux?
+
+No. Safari is only available on Apple platforms: macOS, iOS, and iPadOS. Apple discontinued Safari for Windows in 2012. If you use Windows or Linux, Safari is not an option. Nav0 runs on macOS, Windows, and Linux, so your browser works wherever you do, regardless of your hardware ecosystem.
+
+### What is a good privacy-focused alternative to Safari on Mac?
+
+Nav0 is a privacy-focused alternative to Safari that runs on macOS, Windows, and Linux. It is fully open source, collects zero telemetry, stores all data locally in a SQLite database, has no cloud sync or account requirement, defaults to DuckDuckGo, and includes a built-in ad blocker with EasyList, EasyPrivacy, and Peter Lowe's lists. Unlike Safari, Nav0's code can be audited by anyone.
 
 ## The Bottom Line
 

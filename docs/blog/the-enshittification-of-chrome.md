@@ -28,7 +28,7 @@ head:
       content: google
   - - meta
     - name: keywords
-      content: "chrome enshittification, google chrome bloat, chrome privacy issues, chrome data collection, manifest v3, chrome alternatives, why chrome is bad, chrome RAM usage, google tracking, browser privacy"
+      content: "chrome enshittification, google chrome bloat, chrome privacy issues, chrome data collection, manifest v3, chrome alternatives, why chrome is bad, chrome RAM usage, google tracking, browser privacy, chrome topics API, chrome telemetry, is chrome spyware, why is chrome so slow, chrome uses too much memory, google chrome privacy sandbox, switch from chrome"
   - - script
     - type: application/ld+json
     - |
@@ -42,6 +42,55 @@ head:
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/the-enshittification-of-chrome",
         "keywords": ["chrome enshittification", "google chrome bloat", "chrome privacy", "manifest v3", "chrome alternatives", "browser privacy", "google tracking", "chrome data collection"]
+      }
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is the enshittification of Chrome?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Enshittification describes the pattern where Chrome started as a fast, minimal browser to attract users, then gradually degraded the experience to serve Google's advertising business — adding bloat, restricting ad blockers via Manifest V3, cramming in AI features, and collecting extensive user data through systems like the Topics API."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Why does Chrome use so much RAM?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Chrome runs each tab in its own process and has added numerous background processes over the years — pre-rendering, prediction services, AI features, and telemetry. What started as a lightweight browser now routinely uses 1.5 GB or more with just a few tabs open, draining battery life and system resources."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does Manifest V3 affect ad blockers?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Manifest V3 is Google's new extension framework that severely limits the network request interception capabilities that ad blockers rely on. This forced uBlock Origin to be rewritten as uBlock Origin Lite, which is less effective than the original. Critics argue this directly benefits Google's advertising business."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What data does Chrome collect about users?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Chrome collects URLs you visit via Safe Browsing, search queries as you type them keystroke by keystroke, browsing interests via the Topics API, hardware identifiers that persist across sessions, usage patterns including when and how long you browse, and crash reports that can contain page content fragments."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is a good alternative to Chrome that respects privacy?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "A genuine Chrome alternative should not be controlled by an advertising company, should be fully open source for transparency, should be minimal with zero bloat, and should collect absolutely zero telemetry. Nav0 meets all of these criteria — it collects no data, has no sign-in or accounts, and includes no AI features or unnecessary extras."
+            }
+          }
+        ]
       }
 ---
 
@@ -168,6 +217,28 @@ A real alternative needs to be:
 - **Transparent** — open source so you can actually verify privacy claims instead of just trusting pinky promises
 - **Minimal** — the fewer features, the fewer ways to collect data and the less bloat weighing things down
 - **Zero telemetry** — not "anonymized" telemetry, not "optional" telemetry. Zero. None. Nothing phoning home, period.
+
+## Frequently Asked Questions
+
+### What is the enshittification of Chrome?
+
+Enshittification describes the pattern where Chrome started as a fast, minimal browser to attract users, then gradually degraded the experience to serve Google's advertising business. This has included adding bloat and AI features nobody asked for, restricting ad blockers via Manifest V3, and collecting extensive user data through systems like the Topics API and Privacy Sandbox — all while maintaining dominant market share through defaults and ecosystem lock-in.
+
+### Why does Chrome use so much RAM?
+
+Chrome runs each tab in its own process and has added numerous background processes over the years — pre-rendering, prediction services, AI features, and telemetry. What started as a lightweight browser now routinely uses 1.5 GB or more with just a few tabs open, draining battery life and system resources. Every update seems to add more background processes rather than fewer.
+
+### How does Manifest V3 affect ad blockers?
+
+Manifest V3 is Google's new extension framework that severely limits the network request interception capabilities that ad blockers rely on. This forced uBlock Origin to be completely rewritten as uBlock Origin Lite, which is less effective than the original due to artificial limitations Google baked into the new API. Critics argue this directly benefits Google's core advertising business.
+
+### What data does Chrome collect about users?
+
+Chrome collects URLs you visit via Safe Browsing, search queries as you type them keystroke by keystroke, browsing interests via the Topics API, hardware identifiers that persist across sessions, usage patterns including when and how long you browse, and crash reports that can contain fragments of page content. This data feeds directly into Google's advertising targeting machine.
+
+### What is a good alternative to Chrome that respects privacy?
+
+A genuine Chrome alternative should not be controlled by an advertising company, should be fully open source for transparency, should be minimal with zero bloat, and should collect absolutely zero telemetry — not "anonymized" telemetry, not "optional" telemetry, but none at all. Nav0 meets all of these criteria, with no sign-in, no accounts, no AI features, and no data collection of any kind.
 
 ## Why We Built Nav0
 

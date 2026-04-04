@@ -35,7 +35,56 @@ head:
         "author": { "@type": "Organization", "name": "Nav0" },
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/big-tech-owns-your-browser",
-        "keywords": ["big tech", "browser monopoly", "Chrome", "Edge", "Safari", "open web", "Chromium"]
+        "keywords": ["big tech", "browser monopoly", "Chrome", "Edge", "Safari", "open web", "Chromium", "who owns Chrome browser", "does Google control the web", "why is Chrome free", "big tech browser data collection", "Chromium browser engine monopoly", "independent browser alternative", "browser without ads or tracking", "Google Chrome advertising business model", "Microsoft Edge telemetry", "Apple Safari App Store conflict of interest", "Mozilla Google funding dependency", "open source browser no big tech", "browser vendor conflict of interest"]
+      }
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Why is Google Chrome free to use?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Chrome is free because you are the product. Google's revenue exceeds $340 billion annually, primarily from advertising. Chrome funnels user attention and data back to Google Search and Google Ads. The browser's default search engine, homepage, and integrated services all serve Google's advertising business model."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Google control the web through Chromium?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Effectively, yes. Chromium powers Chrome, Edge, Opera, Brave, Vivaldi, Samsung Internet, and dozens of other browsers, accounting for roughly 80-85% of all web browsing. When Google changes how Chromium handles extensions, ads, or web standards, the entire ecosystem follows. Google sets the architecture, priorities, and direction of the dominant web engine."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Why does Microsoft make it so hard to change the default browser on Windows?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Microsoft uses its control of Windows to maintain Edge's market share. Links in Microsoft apps open in Edge regardless of your system default, and the default apps settings have become progressively more confusing with each update. This is a deliberate strategy to keep users in Microsoft's ecosystem, where Edge drives Bing search revenue and advertising."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is Mozilla Firefox truly independent from Google?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Not entirely. Mozilla receives approximately 80-85% of its revenue from search engine deals, primarily with Google, which pays around $500 million annually to be the default search engine in Firefox. This financial dependency means Firefox's survival depends on Google, creating a conflict of interest with its mission to counterbalance Google's dominance."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is an independent browser and why does it matter?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "An independent browser is one built without conflicting business interests like ad networks, app stores, or platform ecosystems. It matters because when your browser maker does not run an advertising business, there is no incentive to weaken privacy protections, collect your data, or shape web standards to favor their revenue model. Open-source independent browsers let you verify their claims rather than relying on trust."
+            }
+          }
+        ]
       }
 ---
 
@@ -158,6 +207,28 @@ Nav0 is open source, so you can verify every claim we make. It collects zero tel
 The browser you use determines how you experience the entire internet. It should answer to you, not to shareholders, advertisers, or platform strategists.
 
 Choose a browser that's on your side. [Get started with Nav0](/guide/getting-started).
+
+## Frequently Asked Questions
+
+### Why is Google Chrome free to use?
+
+Chrome is free because you are the product. Google's revenue exceeds $340 billion annually, primarily from advertising. Chrome funnels user attention and data back to Google Search and Google Ads. The browser's default search engine, homepage, and integrated services all serve Google's advertising business model.
+
+### Does Google control the web through Chromium?
+
+Effectively, yes. Chromium powers Chrome, Edge, Opera, Brave, Vivaldi, Samsung Internet, and dozens of other browsers, accounting for roughly 80-85% of all web browsing. When Google changes how Chromium handles extensions, ads, or web standards, the entire ecosystem follows. Google sets the architecture, priorities, and direction of the dominant web engine.
+
+### Why does Microsoft make it so hard to change the default browser on Windows?
+
+Microsoft uses its control of Windows to maintain Edge's market share. Links in Microsoft apps open in Edge regardless of your system default, and the default apps settings have become progressively more confusing with each update. This is a deliberate strategy to keep users in Microsoft's ecosystem, where Edge drives Bing search revenue and advertising.
+
+### Is Mozilla Firefox truly independent from Google?
+
+Not entirely. Mozilla receives approximately 80-85% of its revenue from search engine deals, primarily with Google, which pays around $500 million annually to be the default search engine in Firefox. This financial dependency means Firefox's survival depends on Google, creating a conflict of interest with its mission to counterbalance Google's dominance.
+
+### What is an independent browser and why does it matter?
+
+An independent browser is one built without conflicting business interests like ad networks, app stores, or platform ecosystems. It matters because when your browser maker does not run an advertising business, there is no incentive to weaken privacy protections, collect your data, or shape web standards to favor their revenue model. Open-source independent browsers let you verify their claims rather than relying on trust.
 
 ---
 

@@ -28,7 +28,7 @@ head:
       content: telemetry
   - - meta
     - name: keywords
-      content: "Nav0 vs firefox, firefox privacy, firefox telemetry, mozilla data collection, firefox bloat, firefox sponsored shortcuts, firefox pocket, private browser comparison, minimal browser vs firefox, firefox about config privacy"
+      content: "Nav0 vs firefox, firefox privacy, firefox telemetry, mozilla data collection, firefox bloat, firefox sponsored shortcuts, firefox pocket, private browser comparison, minimal browser vs firefox, firefox about config privacy, does firefox collect data, firefox sponsored new tab, mozilla google deal, firefox vs nav0 privacy, is firefox really private, best private browser 2026, browser without telemetry, firefox hardening alternative"
   - - script
     - type: application/ld+json
     - |
@@ -43,6 +43,55 @@ head:
         "mainEntityOfPage": "https://nav0.org/blog/nav0-vs-firefox",
         "keywords": ["Nav0 vs firefox", "firefox privacy", "firefox telemetry", "mozilla data collection", "firefox pocket", "minimal browser", "private browser comparison"]
       }
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Does Firefox collect your data by default?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. On a fresh install, Firefox sends telemetry to Mozilla by default, including usage statistics, technical data about your hardware and OS, interaction data on UI clicks and toolbar usage, and IP-based location data. You can opt out in settings, but fewer than 5% of users ever change default settings, so most Firefox users send telemetry without knowing it."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is Nav0 more private than Firefox?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Nav0 takes a stricter approach to privacy than Firefox. Firefox ships with telemetry enabled by default, sponsored shortcuts and Pocket stories on the new tab page, and nudges users to create Mozilla accounts for sync. Nav0 has zero telemetry, no sponsored content, no accounts, and no data collection of any kind. The code to collect and transmit usage data simply does not exist in Nav0."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Why does Firefox show sponsored content on the new tab page?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Firefox displays sponsored shortcuts and sponsored Pocket stories on the new tab page because Mozilla needs revenue to fund development. Google pays Mozilla roughly $450 million per year for default search placement, and sponsored new tab content provides additional revenue diversification. These can be disabled in settings, but they are enabled by default."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can you make Firefox as private as Nav0 with about:config?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Firefox can be hardened significantly through about:config changes — projects like arkenfox/user.js maintain lists of hundreds of settings to toggle. However, this requires technical knowledge, ongoing maintenance as settings change between Firefox versions, and configurations can break after updates. Nav0 is private by default with no configuration needed because the telemetry and sponsored content code simply does not exist."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What do you lose by choosing Nav0 over Firefox?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Choosing Nav0 over Firefox means giving up cross-device sync, the extensions ecosystem, mobile browsing (iOS/Android), support for the Gecko rendering engine (which helps web engine diversity), Multi-Account Containers for tab isolation, mature developer tools, and Firefox's advanced anti-tracking features like Total Cookie Protection. Nav0 is for users who prioritize zero data collection and minimal bloat over these capabilities."
+            }
+          }
+        ]
+      }
 ---
 
 # Nav0 vs Firefox: When "Good Enough" Privacy Isn't Good Enough
@@ -56,6 +105,23 @@ Firefox is the browser we respect most. Mozilla has been fighting for the open w
 But "better than Chrome" is a low bar. And when you look closely at what Firefox actually does on a fresh install — the telemetry it sends, the accounts it pushes, the sponsored content it displays, the features it keeps adding — there's a gap between Firefox's principles and its defaults.
 
 Nav0 exists in that gap.
+
+| Feature | Nav0 | Firefox |
+|---------|------|---------|
+| Telemetry | None — zero data collection | On by default (usage stats, technical data, interaction data, location) |
+| Open Source | Yes (MIT license, small auditable codebase) | Yes (MPL 2.0, large complex codebase) |
+| Built-in Ad Blocker | Yes | No (requires extensions like uBlock Origin) |
+| Sponsored Content | None | Yes (sponsored shortcuts, Pocket stories on new tab) |
+| User Accounts | None — all data stays local | Mozilla Account for sync (bookmarks, history, passwords) |
+| AI Features | None | Experimental (chatbot integrations, content recommendations) |
+| VPN | None | Mozilla VPN (paid subscription) |
+| Browser Extensions | Not supported | Full extensions ecosystem (WebExtensions API) |
+| Cross-Device Sync | None | Yes (via Mozilla Account, end-to-end encrypted) |
+| Mobile App | Desktop only | iOS and Android |
+| Rendering Engine | Chromium (via Electron) | Gecko (independent engine, supports web diversity) |
+| Business Model | Free, open source, no monetization | Google search deal (~$450M/yr), sponsored content, VPN subscriptions |
+| New Tab Page | Blank — zero network requests | Sponsored shortcuts, Pocket recommendations, Google search bar |
+| Configuration for Privacy | Private by default, nothing to configure | Requires about:config hardening (200+ settings) for full privacy |
 
 ## Telemetry: On by Default
 
@@ -185,6 +251,28 @@ Choosing Nav0 over Firefox means giving up:
 These are significant tradeoffs. Firefox is a more capable browser by almost every functional measure. If you need extensions, sync, mobile support, or sophisticated developer tools, Firefox is the better choice.
 
 The question Nav0 answers is different: what if you don't need all that? What if you just want a browser that loads pages, doesn't collect your data, and doesn't try to be anything more? What if "less" is actually what you want?
+
+## Frequently Asked Questions
+
+### Does Firefox collect your data by default?
+
+Yes. On a fresh install, Firefox sends telemetry to Mozilla by default, including usage statistics (how long you use the browser, which features you interact with), technical data (OS, hardware, installed add-ons, crash reports), interaction data (clicks on Firefox UI elements, toolbar customization), and IP-based location data. You can opt out in settings, but studies show fewer than 5% of users ever change default settings.
+
+### Is Nav0 more private than Firefox?
+
+Nav0 takes a stricter approach to privacy than Firefox. Firefox ships with telemetry enabled by default, sponsored shortcuts and Pocket stories on the new tab page, and nudges users to create Mozilla accounts for sync. Nav0 has zero telemetry, no sponsored content, no accounts, and no data collection of any kind. The code to collect and transmit usage data simply does not exist in Nav0. The tradeoff is that Nav0 lacks extensions, sync, mobile support, and Firefox's advanced anti-tracking features.
+
+### Why does Firefox show sponsored content on the new tab page?
+
+Firefox displays sponsored shortcuts and sponsored Pocket stories on the new tab page because Mozilla needs revenue to fund development. Google pays Mozilla roughly $450 million per year for default search placement, and sponsored new tab content provides additional revenue diversification. These can be disabled in settings, but they are enabled by default because they generate revenue.
+
+### Can you make Firefox as private as Nav0 with about:config?
+
+Firefox can be hardened significantly through about:config changes — projects like arkenfox/user.js maintain lists of hundreds of settings to toggle. However, this requires technical knowledge most users do not have, ongoing maintenance as settings change between Firefox versions, and configurations can break after updates. Nav0 is private by default with no configuration needed because the telemetry and sponsored content code simply does not exist in the codebase.
+
+### What do you lose by choosing Nav0 over Firefox?
+
+Choosing Nav0 over Firefox means giving up cross-device sync, the full extensions ecosystem (including uBlock Origin and other privacy add-ons), mobile browsing on iOS and Android, support for the Gecko rendering engine (which helps maintain web engine diversity against Chromium dominance), Multi-Account Containers for tab isolation, mature developer tools, and Firefox's advanced anti-tracking features like Total Cookie Protection and Enhanced Tracking Protection.
 
 ## The Respect Paradox
 
