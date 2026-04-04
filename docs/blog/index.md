@@ -10,6 +10,38 @@ Thoughts on privacy, browsers, and the open web.
 ---
 
 <div class="blog-post-item">
+  <a href="/blog/nav0-vs-tor-browser">
+    <h2>Nav0 vs Tor Browser: Maximum Anonymity vs. Maximum Simplicity</h2>
+  </a>
+  <div class="post-meta">By Nav0 Team &middot; April 4, 2026 &middot; 10 min read &middot; Comparison</div>
+  <p class="post-excerpt">Tor Browser is the gold standard for online anonymity, routing your traffic through encrypted relays worldwide. Nav0 takes a different approach: zero data collection without the performance tradeoffs. Here's when you need Tor — and when Nav0 is enough.</p>
+</div>
+
+<div class="blog-post-item">
+  <a href="/blog/nav0-vs-edge">
+    <h2>Nav0 vs Microsoft Edge: The Browser That Reports Everything to Redmond</h2>
+  </a>
+  <div class="post-meta">By Nav0 Team &middot; April 4, 2026 &middot; 11 min read &middot; Comparison</div>
+  <p class="post-excerpt">Microsoft Edge ships with more telemetry than almost any browser on the market. It sends your browsing data to Microsoft, pushes Bing, Copilot AI, shopping tools, and news feeds you never asked for. Nav0 sends nothing to anyone.</p>
+</div>
+
+<div class="blog-post-item">
+  <a href="/blog/nav0-vs-duckduckgo">
+    <h2>Nav0 vs DuckDuckGo Browser: When Your Privacy Brand Has a Microsoft Exception</h2>
+  </a>
+  <div class="post-meta">By Nav0 Team &middot; April 4, 2026 &middot; 10 min read &middot; Comparison</div>
+  <p class="post-excerpt">DuckDuckGo's browser is a solid privacy option — until you learn about the Microsoft tracking exception, the remote config system, and the AI features. Nav0 takes the simpler path: collect nothing, period.</p>
+</div>
+
+<div class="blog-post-item">
+  <a href="/blog/nav0-vs-comet">
+    <h2>Nav0 vs Comet Browser: Two Minimal Browsers, Different Philosophies</h2>
+  </a>
+  <div class="post-meta">By Nav0 Team &middot; April 4, 2026 &middot; 8 min read &middot; Comparison</div>
+  <p class="post-excerpt">Comet Browser and Nav0 both promise minimal, fast browsing. But minimal can mean very different things — from closed-source simplicity to open-source, zero-telemetry privacy. Here's how they compare.</p>
+</div>
+
+<div class="blog-post-item">
   <a href="/blog/nav0-vs-safari">
     <h2>Nav0 vs Safari: Privacy by Default vs. Privacy by Apple's Terms</h2>
   </a>
