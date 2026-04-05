@@ -58,80 +58,121 @@ export abstract class SettingsEnforcer {
     });
   }
 
-  // ---- Cookie Policy Enforcement ----
+  // ---- Cookie Policy & Response Header Enforcement ----
+  // This single onHeadersReceived handler manages both cookie policy
+  // and PDF inline display to avoid conflicting listeners on the same session.
   private static applyCookiePolicy(settings: BrowserSettings) {
-    const ses = session.fromPartition('persist:browsertabs');
-    // Remove existing listeners to prevent duplicates
-    ses.webRequest.onBeforeSendHeaders(null);
-    ses.webRequest.onHeadersReceived(null);
+    const sessions = [
+      session.fromPartition('persist:browsertabs'),
+      session.fromPartition('persist:private'),
+    ];
 
-    if (settings.blockAllCookies) {
-      // Block all cookies
-      ses.webRequest.onBeforeSendHeaders((details, callback) => {
-        const headers = { ...details.requestHeaders };
-        delete headers['Cookie'];
-        callback({ requestHeaders: headers });
-      });
-      ses.webRequest.onHeadersReceived((details, callback) => {
-        const headers = { ...details.responseHeaders };
-        delete headers['set-cookie'];
-        delete headers['Set-Cookie'];
-        callback({ responseHeaders: headers });
-      });
-      return;
-    }
+    for (const ses of sessions) {
+      // Remove existing listeners to prevent duplicates
+      ses.webRequest.onBeforeSendHeaders(null);
+      ses.webRequest.onHeadersReceived(null);
 
-    if (settings.cookiePolicy === 'block-all-third-party' || settings.cookiePolicy === 'block-with-exceptions') {
+      if (settings.blockAllCookies) {
+        // Block all cookies
+        ses.webRequest.onBeforeSendHeaders((details, callback) => {
+          const headers = { ...details.requestHeaders };
+          delete headers['Cookie'];
+          callback({ requestHeaders: headers });
+        });
+        ses.webRequest.onHeadersReceived((details, callback) => {
+          const headers = { ...details.responseHeaders };
+          if (!headers) { callback({}); return; }
+          delete headers['set-cookie'];
+          delete headers['Set-Cookie'];
+          // Also handle PDF inline display
+          SettingsEnforcer.applyPdfInlineHeaders(headers);
+          callback({ responseHeaders: headers });
+        });
+        continue;
+      }
+
+      const blockThirdParty = settings.cookiePolicy === 'block-all-third-party' || settings.cookiePolicy === 'block-with-exceptions';
+
+      // Always register onHeadersReceived so PDF inline display works
+      // regardless of cookie policy setting
       ses.webRequest.onHeadersReceived((details, callback) => {
         if (!details.responseHeaders) {
           callback({});
           return;
         }
 
-        const setCookieHeaders = details.responseHeaders['set-cookie'] || details.responseHeaders['Set-Cookie'];
-        if (!setCookieHeaders) {
-          callback({ responseHeaders: details.responseHeaders });
-          return;
-        }
+        let headers = details.responseHeaders;
 
-        // Determine if this is a third-party request
-        const requestUrl = new URL(details.url);
-        const frameUrl = details.frame?.url || details.referrer || '';
-        let isThirdParty = false;
+        // --- Third-party cookie blocking ---
+        if (blockThirdParty) {
+          const setCookieHeaders = headers['set-cookie'] || headers['Set-Cookie'];
+          if (setCookieHeaders) {
+            const requestUrl = new URL(details.url);
+            const frameUrl = details.frame?.url || details.referrer || '';
+            let isThirdParty = false;
 
-        if (frameUrl) {
-          try {
-            const frameUrlObj = new URL(frameUrl);
-            const requestDomain = SettingsEnforcer.getRegistrableDomain(requestUrl.hostname);
-            const frameDomain = SettingsEnforcer.getRegistrableDomain(frameUrlObj.hostname);
-            isThirdParty = requestDomain !== frameDomain;
-          } catch {
-            // If we can't parse, allow it
-          }
-        }
+            if (frameUrl) {
+              try {
+                const frameUrlObj = new URL(frameUrl);
+                const requestDomain = SettingsEnforcer.getRegistrableDomain(requestUrl.hostname);
+                const frameDomain = SettingsEnforcer.getRegistrableDomain(frameUrlObj.hostname);
+                isThirdParty = requestDomain !== frameDomain;
+              } catch {
+                // If we can't parse, allow it
+              }
+            }
 
-        if (isThirdParty) {
-          // Check exceptions
-          if (settings.cookiePolicy === 'block-with-exceptions') {
-            const requestDomain = requestUrl.hostname.toLowerCase();
-            const isExempt = settings.cookieExceptions.some(exception => {
-              const exDomain = exception.toLowerCase().trim();
-              return requestDomain === exDomain || requestDomain.endsWith('.' + exDomain);
-            });
-            if (isExempt) {
-              callback({ responseHeaders: details.responseHeaders });
-              return;
+            if (isThirdParty) {
+              // Check exceptions
+              let isExempt = false;
+              if (settings.cookiePolicy === 'block-with-exceptions') {
+                const requestDomain = requestUrl.hostname.toLowerCase();
+                isExempt = settings.cookieExceptions.some(exception => {
+                  const exDomain = exception.toLowerCase().trim();
+                  return requestDomain === exDomain || requestDomain.endsWith('.' + exDomain);
+                });
+              }
+
+              if (!isExempt) {
+                headers = { ...headers };
+                delete headers['set-cookie'];
+                delete headers['Set-Cookie'];
+              }
             }
           }
-          // Block third-party cookies
-          const headers = { ...details.responseHeaders };
-          delete headers['set-cookie'];
-          delete headers['Set-Cookie'];
-          callback({ responseHeaders: headers });
-        } else {
-          callback({ responseHeaders: details.responseHeaders });
         }
+
+        // --- PDF inline display ---
+        SettingsEnforcer.applyPdfInlineHeaders(headers);
+
+        callback({ responseHeaders: headers });
       });
+    }
+  }
+
+  /**
+   * Removes Content-Disposition headers from PDF responses so they display
+   * inline in the browser instead of triggering a download.
+   * Mutates the headers object in place.
+   */
+  private static applyPdfInlineHeaders(headers: Record<string, string[]>): void {
+    let isPdf = false;
+    for (const key of Object.keys(headers)) {
+      if (key.toLowerCase() === 'content-type') {
+        const value = (headers[key]?.[0] || '').toLowerCase();
+        if (value.includes('application/pdf')) {
+          isPdf = true;
+        }
+        break;
+      }
+    }
+
+    if (isPdf) {
+      for (const key of Object.keys(headers)) {
+        if (key.toLowerCase() === 'content-disposition') {
+          delete headers[key];
+        }
+      }
     }
   }
 

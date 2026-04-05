@@ -41,7 +41,6 @@ export class Tab {
   private readerMode: ReaderModeState = ReaderModeManager.createState();
   private readerModeCheckTimer: ReturnType<typeof setTimeout> | null = null;
   private readerModeToggleLock = false;
-  private static pdfSessionsRegistered = new Set<string>();
   private popupTimestamps: number[] = [];
   private static readonly MAX_POPUPS = 3;
   private static readonly POPUP_WINDOW_MS = 60_000;
@@ -164,53 +163,9 @@ export class Tab {
       }
     });
     // User agent is set at the session level by SettingsEnforcer.applyUserAgent()
+    // PDF inline display is handled by SettingsEnforcer.applyCookiePolicy()
     // this.webContentsViewInstance.webContents.openDevTools({mode : 'detach'});
-    this.registerPdfHandler();
     this.initEventHandlers();
-  }
-
-  /**
-   * Registers a session-level handler that forces PDF responses to display inline
-   * instead of triggering a download. Only registers once per session partition.
-   */
-  private registerPdfHandler(): void {
-    if (Tab.pdfSessionsRegistered.has(this.partitionSetting)) return;
-    Tab.pdfSessionsRegistered.add(this.partitionSetting);
-
-    this.webContentsViewInstance.webContents.session.webRequest.onHeadersReceived(
-      (details, callback) => {
-        const headers = details.responseHeaders;
-        if (!headers) {
-          callback({});
-          return;
-        }
-
-        // Find content-type header (case-insensitive)
-        let isPdf = false;
-        for (const key of Object.keys(headers)) {
-          if (key.toLowerCase() === 'content-type') {
-            const value = (headers[key]?.[0] || '').toLowerCase();
-            if (value.includes('application/pdf')) {
-              isPdf = true;
-            }
-            break;
-          }
-        }
-
-        if (isPdf) {
-          // Remove Content-Disposition header to force inline display
-          const newHeaders = { ...headers };
-          for (const key of Object.keys(newHeaders)) {
-            if (key.toLowerCase() === 'content-disposition') {
-              delete newHeaders[key];
-            }
-          }
-          callback({ responseHeaders: newHeaders });
-        } else {
-          callback({ responseHeaders: headers });
-        }
-      }
-    );
   }
 
   private initEventHandlers() {
