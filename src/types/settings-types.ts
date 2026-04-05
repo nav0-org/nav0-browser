@@ -269,7 +269,7 @@ export const DEFAULT_BROWSER_SETTINGS: BrowserSettings = {
   popupBlockedSites: [],
 
   // User Agent (Firefox UA matching the user's OS by default)
-  userAgentPreset: process.platform === 'darwin' ? 'firefox-mac' : process.platform === 'linux' ? 'firefox-linux' : 'firefox-windows',
+  userAgentPreset: typeof process !== 'undefined' && process.platform === 'darwin' ? 'firefox-mac' : typeof process !== 'undefined' && process.platform === 'linux' ? 'firefox-linux' : 'firefox-windows',
   userAgentCustomValue: '',
 
   // Keyboard Shortcuts (empty = use defaults)
