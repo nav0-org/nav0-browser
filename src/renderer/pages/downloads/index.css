@@ -111,11 +111,14 @@
 
 /* Type-specific active colors */
 .type-pill.active[data-type="document"] { background: #6366f1; }
+.type-pill.active[data-type="spreadsheet"] { background: #6366f1; }
+.type-pill.active[data-type="presentation"] { background: #6366f1; }
 .type-pill.active[data-type="image"] { background: #06b6d4; }
-.type-pill.active[data-type="executable"] { background: #f59e0b; }
+.type-pill.active[data-type="video"] { background: #06b6d4; }
+.type-pill.active[data-type="installer"] { background: #f59e0b; }
 .type-pill.active[data-type="archive"] { background: #8b5cf6; }
 .type-pill.active[data-type="audio"] { background: #ec4899; }
-.type-pill.active[data-type="file"] { background: #10b981; }
+.type-pill.active[data-type="code"] { background: #10b981; }
 .type-pill.active[data-type="other"] { background: #a1a1aa; }
 
 /* --------------------------------------------------------------------------

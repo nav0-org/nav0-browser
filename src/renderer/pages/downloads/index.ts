@@ -26,12 +26,55 @@ const activeDownloads: Map<string, { receivedBytes: number; totalBytes: number; 
 // Type colors matching the mock-up
 const TYPE_COLORS: Record<string, string> = {
   document: '#6366f1',
+  spreadsheet: '#6366f1',
+  presentation: '#6366f1',
   image: '#06b6d4',
-  executable: '#f59e0b',
+  video: '#06b6d4',
+  installer: '#f59e0b',
   archive: '#8b5cf6',
   audio: '#ec4899',
-  file: '#10b981',
+  code: '#10b981',
   other: '#a1a1aa',
+};
+
+// Derive a display type from file extension for richer categorization
+const EXTENSION_TYPE_MAP: Record<string, string> = {
+  // Documents
+  pdf: 'document', doc: 'document', docx: 'document', txt: 'document',
+  rtf: 'document', odt: 'document', md: 'document', pages: 'document',
+  // Spreadsheets
+  csv: 'spreadsheet', xlsx: 'spreadsheet', xls: 'spreadsheet',
+  ods: 'spreadsheet', numbers: 'spreadsheet',
+  // Presentations
+  ppt: 'presentation', pptx: 'presentation', odp: 'presentation',
+  // Images
+  jpg: 'image', jpeg: 'image', png: 'image', gif: 'image', svg: 'image',
+  bmp: 'image', webp: 'image', tiff: 'image', ico: 'image', psd: 'image', ai: 'image',
+  // Audio
+  mp3: 'audio', wav: 'audio', ogg: 'audio', flac: 'audio', aac: 'audio',
+  m4a: 'audio', wma: 'audio', aiff: 'audio', opus: 'audio',
+  // Video
+  mp4: 'video', mov: 'video', avi: 'video', mkv: 'video',
+  wmv: 'video', flv: 'video', webm: 'video',
+  // Archives
+  zip: 'archive', rar: 'archive', '7z': 'archive', tar: 'archive',
+  gz: 'archive', bz2: 'archive', xz: 'archive', iso: 'archive',
+  // Installers / executables
+  exe: 'installer', dmg: 'installer', msi: 'installer', app: 'installer',
+  pkg: 'installer', deb: 'installer', rpm: 'installer',
+  sh: 'installer', bat: 'installer', cmd: 'installer',
+  com: 'installer', gadget: 'installer', jar: 'installer',
+  // Code / data
+  py: 'code', js: 'code', ts: 'code', json: 'code', xml: 'code',
+  yaml: 'code', toml: 'code', ini: 'code', cfg: 'code', conf: 'code',
+  sql: 'code', log: 'document', dat: 'other',
+};
+
+const getDisplayType = (item: DownloadRecord): string => {
+  const ext = item.fileExtension.startsWith('.')
+    ? item.fileExtension.slice(1).toLowerCase()
+    : item.fileExtension.toLowerCase();
+  return EXTENSION_TYPE_MAP[ext] || 'other';
 };
 
 // ---------------------------------------------------------------------------
@@ -203,7 +246,8 @@ const loadDownloadsPage = async (): Promise<void> => {
 const renderTypeFilters = (): void => {
   const typeCounts: Record<string, number> = {};
   allLoadedItems.forEach(d => {
-    typeCounts[d.fileType] = (typeCounts[d.fileType] || 0) + 1;
+    const displayType = getDisplayType(d);
+    typeCounts[displayType] = (typeCounts[displayType] || 0) + 1;
   });
 
   const types = Object.keys(typeCounts).sort();
@@ -271,7 +315,8 @@ const applyTypeFilter = (): void => {
 const updateStorageGauge = (): void => {
   const byType: Record<string, number> = {};
   allLoadedItems.forEach(d => {
-    byType[d.fileType] = (byType[d.fileType] || 0) + d.fileSize;
+    const displayType = getDisplayType(d);
+    byType[displayType] = (byType[displayType] || 0) + d.fileSize;
   });
 
   const total = Object.values(byType).reduce((a, b) => a + b, 0);
@@ -308,9 +353,11 @@ const updateStorageGauge = (): void => {
 
 const appendDownloadItems = (items: DownloadRecord[]): void => {
   items.forEach((item, index) => {
+    const displayType = getDisplayType(item);
+
     const wrapper = document.createElement('div');
     wrapper.className = 'download-item-wrapper';
-    wrapper.dataset.fileType = item.fileType;
+    wrapper.dataset.fileType = displayType;
     wrapper.dataset.recordId = item.id;
 
     const downloadItem = document.createElement('div');
@@ -331,7 +378,7 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
       if (isPaused) downloadItem.classList.add('paused');
     }
 
-    const color = TYPE_COLORS[item.fileType] || '#a1a1aa';
+    const color = TYPE_COLORS[displayType] || '#a1a1aa';
     const iconName = getFileIcon(item.fileExtension);
     const sourceHost = extractHostname(item.url);
 
@@ -500,12 +547,13 @@ const toggleDetailPanel = (item: DownloadRecord, wrapper: HTMLElement, sourceHos
   selectedItemId = item.id;
   wrapper.querySelector('.download-item')?.classList.add('selected');
 
-  const color = TYPE_COLORS[item.fileType] || '#a1a1aa';
+  const displayType = getDisplayType(item);
+  const color = TYPE_COLORS[displayType] || '#a1a1aa';
   const iconName = getFileIcon(item.fileExtension);
 
   const panel = document.createElement('div');
   panel.className = 'detail-panel';
-  panel.dataset.fileType = item.fileType;
+  panel.dataset.fileType = displayType;
 
   panel.innerHTML = `
     <div class="detail-inner">
@@ -519,7 +567,7 @@ const toggleDetailPanel = (item: DownloadRecord, wrapper: HTMLElement, sourceHos
         </div>
         <div class="detail-field">
           <span class="detail-field-label">Type</span>
-          <span class="detail-field-value">${item.fileType}</span>
+          <span class="detail-field-value">${displayType}</span>
         </div>
         <div class="detail-field">
           <span class="detail-field-label">Size</span>
