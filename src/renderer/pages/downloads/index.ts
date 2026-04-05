@@ -105,7 +105,7 @@ const EXTENSION_TYPE_MAP: Record<string, string> = {
 
   // Code / programming
   py: 'code', js: 'code', jsx: 'code', mjs: 'code', cjs: 'code',
-  ts: 'code', tsx: 'code', json: 'code', xml: 'code',
+  tsx: 'code', json: 'code', xml: 'code',
   yaml: 'code', yml: 'code', toml: 'code', ini: 'code',
   cfg: 'code', conf: 'code', sql: 'code', dat: 'code',
   c: 'code', cpp: 'code', cc: 'code', cxx: 'code', h: 'code', hpp: 'code',
