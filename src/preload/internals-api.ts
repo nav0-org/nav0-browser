@@ -87,6 +87,9 @@ export function init(){
     openDownloadedFile: async (filePath: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.OPEN_DOWNLOADED_FILE, filePath);
     },
+    showItemInFolder: async (filePath: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.SHOW_ITEM_IN_FOLDER, filePath);
+    },
     removeBrowsingHistory: async (appWindowId: string, historyId: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.REMOVE_BROWSING_HISTORY, appWindowId, historyId);
     },

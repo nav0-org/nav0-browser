@@ -231,6 +231,10 @@ export abstract class DownloadManager {
     ipcMain.handle(RendererToMainEventsForBrowserIPC.OPEN_DOWNLOADED_FILE, async (event, filePath: string) => {
       return await shell.openPath(filePath);
     });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.SHOW_ITEM_IN_FOLDER, (event, filePath: string) => {
+      shell.showItemInFolder(filePath);
+    });
   }
 
   /** Broadcast an event to all browser windows and their tabs. */
