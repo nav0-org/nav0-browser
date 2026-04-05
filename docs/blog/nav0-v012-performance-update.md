@@ -1,7 +1,7 @@
 ---
 title: "Nav0 v0.1.2 Performance Update: Even Lighter on the Same Hardware"
 description: "We re-ran our Nav0 vs Chrome performance benchmark on the same MacBook Pro M1 with Nav0 v0.1.2. Memory dropped up to 21%, CPU dropped up to 36%, and Nav0 still uses 45% less memory and 77% less CPU than Chrome."
-date: 2026-04-04
+date: 2026-04-05
 author: Nav0 Team
 tags: [performance, benchmark, chrome, memory, cpu, macos, update]
 head:
@@ -10,7 +10,7 @@ head:
       content: article
   - - meta
     - property: article:published_time
-      content: "2026-04-04"
+      content: "2026-04-05"
   - - meta
     - property: article:author
       content: Nav0 Team
@@ -40,7 +40,7 @@ head:
         "@type": "Article",
         "headline": "Nav0 v0.1.2 Performance Update: Even Lighter on the Same Hardware",
         "description": "We re-ran our Nav0 vs Chrome performance benchmark on the same MacBook Pro M1 with Nav0 v0.1.2. Memory dropped up to 21%, CPU dropped up to 36%, and Nav0 still uses 45% less memory and 77% less CPU than Chrome.",
-        "datePublished": "2026-04-04",
+        "datePublished": "2026-04-05",
         "author": { "@type": "Organization", "name": "Nav0" },
         "publisher": { "@type": "Organization", "name": "Nav0", "url": "https://nav0.org", "logo": { "@type": "ImageObject", "url": "https://nav0.org/logo.svg" } },
         "mainEntityOfPage": "https://nav0.org/blog/nav0-v012-performance-update",
@@ -99,7 +99,7 @@ head:
 
 # Nav0 v0.1.2 Performance Update: Even Lighter on the Same Hardware
 
-<p style="color: var(--vp-c-text-2); font-size: 0.9rem;">By Nav0 Team &middot; April 4, 2026 &middot; 4 min read</p>
+<p style="color: var(--vp-c-text-2); font-size: 0.9rem;">By Nav0 Team &middot; April 5, 2026 &middot; 4 min read</p>
 
 A month ago, we published a [head-to-head performance benchmark](/blog/nav0-vs-chrome-performance-benchmark) comparing Nav0 v0.0.6 against Google Chrome on a MacBook Pro M1. Nav0 used 48.5% less memory and 86.3% less CPU.
 

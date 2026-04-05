@@ -13,7 +13,7 @@ Thoughts on privacy, browsers, and the open web.
   <a href="/blog/nav0-v012-performance-update">
     <h2>Nav0 v0.1.2 Performance Update: Even Lighter on the Same Hardware</h2>
   </a>
-  <div class="post-meta">By Nav0 Team &middot; April 4, 2026 &middot; 4 min read &middot; Performance</div>
+  <div class="post-meta">By Nav0 Team &middot; April 5, 2026 &middot; 4 min read &middot; Performance</div>
   <p class="post-excerpt">We re-ran our Nav0 vs Chrome benchmark on the same MacBook Pro M1 with Nav0 v0.1.2. Memory dropped up to 21%, CPU dropped up to 36%, and Nav0 still uses 45% less memory and 77% less CPU than Chrome.</p>
 </div>
 
