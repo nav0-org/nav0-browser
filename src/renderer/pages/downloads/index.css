@@ -381,6 +381,16 @@
   width: 0%;
 }
 
+/* Indeterminate progress: sliding bar when total size is unknown */
+.download-progress.indeterminate .download-progress-fill {
+  animation: indeterminate 1.5s ease-in-out infinite;
+}
+
+@keyframes indeterminate {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(900%); }
+}
+
 /* Active download row styling */
 .download-item.downloading {
   opacity: 0.85;

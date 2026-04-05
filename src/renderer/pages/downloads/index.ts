@@ -516,10 +516,14 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
 
     // Progress bar for active downloads
     let progressHtml = '';
-    if ((isActive && !isPaused) || (isActive && isPaused)) {
+    if (isActive) {
+      const hasTotal = activeInfo.totalBytes > 0;
+      const barWidth = hasTotal ? `${pct}%` : '30%';
+      const barColor = isPaused ? '#d4d4d8' : color;
+      const indeterminateClass = hasTotal ? '' : ' indeterminate';
       progressHtml = `
-        <div class="download-progress">
-          <div class="download-progress-fill" style="width: ${pct}%; background: ${isPaused ? '#d4d4d8' : color}"></div>
+        <div class="download-progress${indeterminateClass}">
+          <div class="download-progress-fill" style="width: ${barWidth}; background: ${barColor}"></div>
         </div>`;
     }
 
@@ -701,16 +705,32 @@ const updateProgressBar = (fileName: string, receivedBytes: number, totalBytes: 
   if (!row) return;
   row.classList.add('downloading');
   row.classList.remove('paused');
+
+  const progressEl = row.querySelector('.download-progress') as HTMLElement;
   let bar = row.querySelector('.download-progress-fill') as HTMLElement;
   if (!bar) {
-    const progressEl = document.createElement('div');
-    progressEl.className = 'download-progress';
-    progressEl.innerHTML = '<div class="download-progress-fill" style="width: 0%"></div>';
-    row.querySelector('.download-content')?.appendChild(progressEl);
-    bar = progressEl.querySelector('.download-progress-fill') as HTMLElement;
+    const newProgressEl = document.createElement('div');
+    newProgressEl.className = 'download-progress';
+    newProgressEl.innerHTML = '<div class="download-progress-fill" style="width: 0%"></div>';
+    row.querySelector('.download-content')?.appendChild(newProgressEl);
+    bar = newProgressEl.querySelector('.download-progress-fill') as HTMLElement;
   }
-  const pct = totalBytes > 0 ? Math.round((receivedBytes / totalBytes) * 100) : 0;
-  bar.style.width = `${pct}%`;
+
+  // Get the type color for this row
+  const fileType = row.closest('.download-item-wrapper')?.getAttribute('data-file-type') || 'other';
+  const color = TYPE_COLORS[fileType] || '#a1a1aa';
+  bar.style.background = color;
+
+  if (totalBytes > 0) {
+    // Determinate: show actual percentage
+    const pct = Math.round((receivedBytes / totalBytes) * 100);
+    bar.style.width = `${pct}%`;
+    if (progressEl) progressEl.classList.remove('indeterminate');
+  } else {
+    // Indeterminate: animate a sliding bar when total size is unknown
+    bar.style.width = '30%';
+    if (progressEl) progressEl.classList.add('indeterminate');
+  }
 
   // Update file size display
   const sizeEl = row.querySelector('.download-size') as HTMLElement;
