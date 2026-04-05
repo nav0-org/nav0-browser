@@ -11,7 +11,7 @@ Nav0 includes only the features essential for a clean browsing experience. Nothi
 
 ### Tab Management
 
-Full-featured tab handling:
+Full-featured tab handling. [Read the full Tab Management guide →](/guide/tab-management)
 
 - Open unlimited tabs
 - Tab preview on hover
@@ -114,7 +114,7 @@ Native share support for web pages that use navigator.share.
 
 ### Ad Blocker
 
-Built-in ad blocking:
+Built-in ad blocking. [Read the full Ad Blocker guide →](/guide/ad-blocker)
 
 - Domain blocking and URL pattern matching
 - Cosmetic filtering
@@ -125,7 +125,7 @@ Built-in ad blocking:
 
 ### Tracking Protection
 
-Built-in protection against common trackers:
+Built-in protection against common trackers. [Read the full Privacy & Tracking Protection guide →](/guide/privacy-protection)
 
 - Block third-party cookies by default
 - Three cookie modes: block third-party (default), block with per-domain exceptions, or allow all
@@ -143,7 +143,7 @@ Per-site popup controls:
 
 ### Private Browsing
 
-Enhanced private mode:
+Enhanced private mode. [Read the full Private Browsing guide →](/guide/private-browsing)
 
 - No history saved
 - Cookies cleared on close
@@ -160,7 +160,7 @@ Automatic security:
 
 ### Customizable User Agent
 
-Mask your browser identity:
+Mask your browser identity. [See all presets →](/guide/privacy-protection#user-agent-spoofing)
 
 - Eight presets: Chrome, Safari, Firefox, and Edge across platforms — Firefox is the default
 - Custom user agent string option
@@ -232,7 +232,7 @@ IP-based geolocation fallback for Linux — no Google location services required
 
 ### Proxy Configuration
 
-Full proxy support:
+Full proxy support. [See details →](/guide/privacy-protection#proxy-configuration)
 
 - Direct connection, system proxy, or manual configuration
 - HTTP, HTTPS, SOCKS4, and SOCKS5 proxy protocols
@@ -241,7 +241,7 @@ Full proxy support:
 
 ### Data Retention & Auto-Delete
 
-Control how long your data is kept:
+Control how long your data is kept. [See details →](/guide/privacy-protection#data-retention-auto-delete)
 
 - Configurable retention periods for history, downloads, cookies, cache, and autofill
 - Auto-delete scheduler runs in the background
@@ -271,7 +271,7 @@ We deliberately exclude:
 ### Settings You Control
 
 - Default search engine (6 built-in: Google, DuckDuckGo, Bing, Brave Search, Startpage, Ecosia — or add your own)
-- Keyboard shortcuts (22 remappable shortcuts)
+- [Keyboard shortcuts](/guide/keyboard-shortcuts) (22 remappable shortcuts)
 - Proxy configuration
 - Data retention periods and auto-delete schedules
 - Cookie policy

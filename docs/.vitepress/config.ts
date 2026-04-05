@@ -154,15 +154,26 @@ export default defineConfig({
       featureList: [
         'Zero telemetry',
         'No data collection',
+        'Built-in ad blocker',
         'Tracker blocking',
         'Third-party cookie blocking',
         'HTTPS auto-upgrade',
         'Fingerprint protection',
+        'User agent spoofing',
         'Private browsing mode',
+        'Tab hibernation',
+        'Tab pinning',
+        'Customizable keyboard shortcuts',
+        'Data retention and auto-delete',
+        'Proxy configuration',
         'Process sandboxing',
         'Tab management',
         'Local bookmarks',
         'Download manager',
+        'Reader mode',
+        'PDF viewer',
+        'Find in page with regex',
+        'Browser notifications',
         'Open source',
         'Chromium engine',
         'Chrome DevTools'
@@ -212,6 +223,16 @@ export default defineConfig({
           items: [
             { text: 'Getting Started', link: '/guide/getting-started' },
             { text: 'Features', link: '/guide/features' }
+          ]
+        },
+        {
+          text: 'Feature Guides',
+          items: [
+            { text: 'Ad Blocker', link: '/guide/ad-blocker' },
+            { text: 'Privacy & Tracking Protection', link: '/guide/privacy-protection' },
+            { text: 'Private Browsing', link: '/guide/private-browsing' },
+            { text: 'Tab Management', link: '/guide/tab-management' },
+            { text: 'Keyboard Shortcuts', link: '/guide/keyboard-shortcuts' }
           ]
         },
         {
