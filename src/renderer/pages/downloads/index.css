@@ -196,8 +196,7 @@
 }
 
 .downloads-list {
-  max-height: calc(100vh - 200px);
-  overflow-y: auto;
+  /* No inner scroll — uses page scroll */
 }
 
 .no-downloads {

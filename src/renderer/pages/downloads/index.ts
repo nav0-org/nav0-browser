@@ -144,6 +144,14 @@ const getDisplayType = (item: DownloadRecord): string => {
   return EXTENSION_TYPE_MAP[ext] || 'other';
 };
 
+// Convert hex color to rgba string
+const hexToRgba = (hex: string, alpha: number): string => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
 // ---------------------------------------------------------------------------
 // DOM references
 // ---------------------------------------------------------------------------
@@ -193,10 +201,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   }, 300);
   searchInput.addEventListener('input', debouncedSearchHandler);
 
-  // Infinite scroll
-  downloadsListElement.addEventListener('scroll', () => {
+  // Infinite scroll via page scroll
+  window.addEventListener('scroll', () => {
     if (isLoading || !hasMore) return;
-    const { scrollTop, scrollHeight, clientHeight } = downloadsListElement;
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight;
+    const clientHeight = window.innerHeight;
     if (scrollTop + clientHeight >= scrollHeight - 100) {
       loadDownloadsPage();
     }
@@ -515,7 +525,7 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
 
     downloadItem.innerHTML = `
       <div class="download-time">${FormatUtils.getFriendlyDateString(item.createdDate)}</div>
-      <div class="download-type-icon" style="background: ${color}14">
+      <div class="download-type-icon" style="background: ${hexToRgba(color, 0.08)}">
         <i data-lucide="${iconName}" style="color: ${color}" width="16" height="16"></i>
       </div>
       <div class="download-content">
@@ -624,7 +634,7 @@ const toggleDetailPanel = (item: DownloadRecord, wrapper: HTMLElement, sourceHos
 
   panel.innerHTML = `
     <div class="detail-inner">
-      <div class="detail-preview" style="background: linear-gradient(135deg, ${color}12, ${color}28); border: 1px solid ${color}18">
+      <div class="detail-preview" style="background: linear-gradient(135deg, ${hexToRgba(color, 0.07)}, ${hexToRgba(color, 0.16)}); border: 1px solid ${hexToRgba(color, 0.09)}">
         <i data-lucide="${iconName}" style="color: ${color}" width="32" height="32"></i>
       </div>
       <div class="detail-metadata">
