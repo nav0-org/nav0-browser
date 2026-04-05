@@ -25,6 +25,7 @@ Full-featured tab handling:
 - Scrollable tab strip — tabs scroll horizontally with a minimum readable width
 - Loading spinner in the favicon area while pages load
 - New tabs open in the background without stealing focus
+- Tab hibernation — tabs inactive for 72+ hours are automatically suspended to save memory
 
 ### Cmd+O Tab Switcher
 
@@ -76,7 +77,10 @@ Full download management:
 
 ### Find in Page
 
-Search any page with Ctrl+F / Cmd+F.
+Search any page with Ctrl+F / Cmd+F:
+
+- Case-sensitive, regex, and whole word matching
+- Navigate between matches with match counter
 
 ### Reader Mode
 
@@ -86,14 +90,6 @@ Distraction-free reading powered by Readability.js — strip away clutter and fo
 
 Open PDFs inline in browser tabs. Also available via File > Open PDF (Ctrl+Shift+O).
 
-### Dark Mode
-
-Apply dark CSS to any website:
-
-- Dark mode toggle in the browser navbar
-- Improved coverage for sites like LinkedIn and Reddit
-- Persists across back/forward navigation
-
 ### Print Page
 
 Print from the File menu, Options menu, or right-click context menu.
@@ -101,6 +97,18 @@ Print from the File menu, Options menu, or right-click context menu.
 ### Hard Reload
 
 Cmd+Shift+R clears the site's cache and performs a fresh reload.
+
+### Browser Notifications
+
+Desktop notifications with per-site permission control — no external notification services involved.
+
+### External Protocol Links
+
+Handles mailto:, tel:, and other external protocol links (Slack, Zoom, Discord, etc.) by opening them in the appropriate app.
+
+### Web Share API
+
+Native share support for web pages that use navigator.share.
 
 ## Privacy Features
 
@@ -111,12 +119,17 @@ Built-in ad blocking:
 - Domain blocking and URL pattern matching
 - Cosmetic filtering
 - Video ad blocking with IMA SDK mock and early script injection
+- Four built-in filter lists: EasyList, EasyPrivacy, Peter Lowe's Ad Server List, and Fanboy's Annoyances
+- Per-site whitelist — disable ad blocking for specific sites
+- Streaming site compatibility — smart exceptions for YouTube, Netflix, Spotify, and other streaming services
 
 ### Tracking Protection
 
 Built-in protection against common trackers:
 
 - Block third-party cookies by default
+- Three cookie modes: block third-party (default), block with per-domain exceptions, or allow all
+- Clear cookies on close option
 - Fingerprinting protection
 - Referrer trimming
 - No tracking of your tracking protection usage
@@ -147,7 +160,11 @@ Automatic security:
 
 ### Customizable User Agent
 
-Choose from presets or enter a custom user agent string. Changes apply to all open tabs immediately.
+Mask your browser identity:
+
+- Eight presets: Chrome, Safari, Firefox, and Edge across platforms — Firefox is the default
+- Custom user agent string option
+- Changes apply to all open tabs immediately
 
 ## Security Features
 
@@ -201,11 +218,35 @@ Full settings UI with enforcement — configure the browser to work the way you 
 
 ### Site Permission Handling
 
-Granular permission system with custom in-browser UI for camera, microphone, location, and more.
+Granular permission system with custom in-browser UI for camera, microphone, location, and more:
+
+- Flood protection — blocks rapid permission spam from sites
+- Blocks sensitive permissions on insecure (HTTP) connections
+- Private browsing indicators on permission prompts
 
 ### Geolocation
 
 IP-based geolocation fallback for Linux — no Google location services required.
+
+## Network & Proxy
+
+### Proxy Configuration
+
+Full proxy support:
+
+- Direct connection, system proxy, or manual configuration
+- HTTP, HTTPS, SOCKS4, and SOCKS5 proxy protocols
+- PAC (Proxy Auto-Config) URL support
+- Configurable bypass rules for local addresses
+
+### Data Retention & Auto-Delete
+
+Control how long your data is kept:
+
+- Configurable retention periods for history, downloads, cookies, cache, and autofill
+- Auto-delete scheduler runs in the background
+- Clear-on-close options for history, cookies, and cache
+- Manual clear by time range: last hour, 24 hours, 7 days, 30 days, or all time
 
 ## In-App Issue Reporting
 
@@ -229,13 +270,14 @@ We deliberately exclude:
 
 ### Settings You Control
 
-- Default search engine
-- Start page
-- Download location
+- Default search engine (6 built-in: Google, DuckDuckGo, Bing, Brave Search, Startpage, Ecosia — or add your own)
+- Keyboard shortcuts (22 remappable shortcuts)
+- Proxy configuration
+- Data retention periods and auto-delete schedules
 - Cookie policy
-- JavaScript enable/disable per site
 - User agent string
-- Dark mode per site
+- Download location
+- Start page
 
 ### Settings We Don't Include
 
@@ -245,23 +287,16 @@ We deliberately exclude:
 
 ## Performance
 
-### Resource Usage
+### Tab Hibernation
 
-Nav0 is designed to be light:
+Tabs inactive for 72+ hours are automatically suspended, freeing memory while preserving your session. Tabs reload on demand when you return to them.
 
-- Minimal background processes
-- No pre-loading of "suggested" content
-- No idle network requests
-- Efficient memory management
+### Lightweight by Design
 
-### Startup Time
-
-Fast launch:
-
-- No account check on startup
-- No sync on startup
-- No news/feed loading
-- Just the browser, ready to go
+- No pre-loading of suggested content
+- No idle network requests or background sync
+- No account checks or news feeds on startup
+- Fast cold start — just the browser, ready to go
 
 ## Developer Features
 
