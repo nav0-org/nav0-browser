@@ -159,7 +159,10 @@ export abstract class DownloadManager {
   public static updateRecordStatus(appWindowId: string, recordId: string, status: string, receivedBytes?: number): void {
     const db = DatabaseManager.getDatabase(AppWindowManager.getWindowById(appWindowId)?.isPrivate ?? false);
     if (receivedBytes !== undefined) {
-      db.prepare("UPDATE download SET status = ?, receivedBytes = ? WHERE id = ?;").run(status, receivedBytes, recordId);
+      // Also backfill fileSize when completing — getTotalBytes() may have returned 0
+      // at download start if the server didn't send Content-Length.
+      db.prepare("UPDATE download SET status = ?, receivedBytes = ?, fileSize = CASE WHEN fileSize = 0 THEN ? ELSE fileSize END WHERE id = ?;")
+        .run(status, receivedBytes, receivedBytes, recordId);
     } else {
       db.prepare("UPDATE download SET status = ? WHERE id = ?;").run(status, recordId);
     }
