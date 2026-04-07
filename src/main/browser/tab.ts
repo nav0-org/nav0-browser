@@ -498,6 +498,7 @@ export class Tab {
 
     // Check if this is a cross-session resume (triggered by createInterruptedDownload)
     let dbRecordId = DownloadManager.checkResuming(downloadId);
+    const isCrossSessionResume = !!dbRecordId;
 
     if (dbRecordId) {
       // Resuming from previous session – update existing record
@@ -571,6 +572,13 @@ export class Tab {
       browserWindow.webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED, completedData);
       this.parentAppWindow.broadcastToTabs(MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED, completedData);
     });
+
+    // createInterruptedDownload produces a DownloadItem in the 'interrupted'
+    // state — it won't begin downloading until we explicitly resume it.
+    if (isCrossSessionResume && item.canResume()) {
+      item.resume();
+    }
+
     console.log('Download started:', downloadPath);
   }
 
