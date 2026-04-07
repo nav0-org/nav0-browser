@@ -160,7 +160,17 @@ export class Tab {
         plugins: true,
         additionalArguments: [`--app-window-id=${this.parentAppWindow.id}`, `--is-private=${this.parentAppWindow.isPrivate}`, `--tab-id=${this.id}`],
         allowRunningInsecureContent: false,
-        partition: this.partitionSetting
+        partition: this.partitionSetting,
+        defaultFontFamily: {
+          standard: 'Times New Roman',
+          serif: 'Times New Roman',
+          sansSerif: 'Arial',
+          monospace: 'Courier New',
+          cursive: 'Comic Sans MS',
+          fantasy: 'Impact',
+        },
+        defaultFontSize: 16,
+        defaultMonospaceFontSize: 13,
       }
     });
     // User agent is set at the session level by SettingsEnforcer.applyUserAgent()
