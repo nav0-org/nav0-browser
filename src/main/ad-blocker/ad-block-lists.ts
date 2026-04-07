@@ -1028,6 +1028,25 @@ export const AD_BLOCK_EARLY_SCRIPT = `
 
     return el;
   };
+
+  // ============================================================
+  // 4. Preserve native toString() for overridden functions
+  //    Bot-detection scripts call fn.toString() and check for
+  //    "[native code]". Patch Function.prototype.toString so our
+  //    overrides pass that check.
+  // ============================================================
+  try {
+    var nativeToString = Function.prototype.toString;
+    var toStringOverrides = new Map();
+    toStringOverrides.set(document.createElement, 'function createElement() { [native code] }');
+    toStringOverrides.set(HTMLMediaElement.prototype.play, 'function play() { [native code] }');
+    Function.prototype.toString = function() {
+      if (toStringOverrides.has(this)) return toStringOverrides.get(this);
+      return nativeToString.call(this);
+    };
+    // Hide the toString override itself
+    toStringOverrides.set(Function.prototype.toString, 'function toString() { [native code] }');
+  } catch(e) {}
 })();
 `;
 

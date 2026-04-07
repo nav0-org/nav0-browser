@@ -75,7 +75,7 @@ export interface BrowserSettings {
   popupBlockedSites: string[];
 
   // User Agent
-  userAgentPreset: 'chrome-windows' | 'chrome-mac' | 'safari-mac' | 'firefox-windows' | 'firefox-mac' | 'firefox-linux' | 'edge-windows' | 'custom';
+  userAgentPreset: 'chrome-windows' | 'chrome-mac' | 'chrome-linux' | 'safari-mac' | 'firefox-windows' | 'firefox-mac' | 'firefox-linux' | 'edge-windows' | 'custom';
   userAgentCustomValue: string;
 
   // Keyboard Shortcuts
@@ -170,6 +170,10 @@ export const USER_AGENT_PRESETS: Record<string, { label: string; value: string }
   'chrome-mac': {
     label: 'Chrome on macOS',
     value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+  },
+  'chrome-linux': {
+    label: 'Chrome on Linux',
+    value: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
   },
   'safari-mac': {
     label: 'Safari on macOS',
@@ -268,8 +272,9 @@ export const DEFAULT_BROWSER_SETTINGS: BrowserSettings = {
   popupAllowedSites: [],
   popupBlockedSites: [],
 
-  // User Agent (Firefox UA matching the user's OS by default)
-  userAgentPreset: typeof process !== 'undefined' && process.platform === 'darwin' ? 'firefox-mac' : typeof process !== 'undefined' && process.platform === 'linux' ? 'firefox-linux' : 'firefox-windows',
+  // User Agent (Chrome UA matching the user's OS — must match the actual Chromium
+  // engine to avoid bot-detection fingerprint mismatches)
+  userAgentPreset: typeof process !== 'undefined' && process.platform === 'darwin' ? 'chrome-mac' : typeof process !== 'undefined' && process.platform === 'linux' ? 'chrome-linux' : 'chrome-windows',
   userAgentCustomValue: '',
 
   // Keyboard Shortcuts (empty = use defaults)
