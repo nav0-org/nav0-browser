@@ -11,6 +11,45 @@ const PAGE_SIZE = 100;
 const SESSION_GAP_MS = 1800000; // 30 minutes
 const HEATMAP_LEVELS = ['#f0f0f0', '#d4d4d4', '#a3a3a3', '#525252', '#171717'];
 
+// Domain-to-category mapping for the pie chart
+const DOMAIN_CATEGORIES: Record<string, string> = {
+  'github.com': 'dev', 'gitlab.com': 'dev', 'stackoverflow.com': 'dev',
+  'npmjs.com': 'dev', 'developer.mozilla.org': 'dev', 'docs.python.org': 'dev',
+  'crates.io': 'dev', 'pkg.go.dev': 'dev', 'pypi.org': 'dev',
+  'vercel.com': 'dev', 'netlify.com': 'dev', 'heroku.com': 'dev',
+  'linear.app': 'dev', 'jira.atlassian.com': 'dev', 'bitbucket.org': 'dev',
+  'twitter.com': 'social', 'x.com': 'social', 'facebook.com': 'social',
+  'reddit.com': 'social', 'instagram.com': 'social', 'linkedin.com': 'social',
+  'threads.net': 'social', 'mastodon.social': 'social', 'discord.com': 'social',
+  'youtube.com': 'media', 'twitch.tv': 'media', 'vimeo.com': 'media',
+  'netflix.com': 'media', 'spotify.com': 'media', 'soundcloud.com': 'media',
+  'news.ycombinator.com': 'news', 'techcrunch.com': 'news', 'medium.com': 'news',
+  'bbc.com': 'news', 'nytimes.com': 'news', 'theguardian.com': 'news',
+  'cnn.com': 'news', 'reuters.com': 'news', 'arstechnica.com': 'news',
+  'google.com': 'search', 'bing.com': 'search', 'duckduckgo.com': 'search',
+  'gmail.com': 'productivity', 'outlook.com': 'productivity', 'notion.so': 'productivity',
+  'calendar.google.com': 'productivity', 'docs.google.com': 'productivity',
+  'drive.google.com': 'productivity', 'slack.com': 'productivity',
+  'amazon.com': 'shopping', 'ebay.com': 'shopping', 'etsy.com': 'shopping',
+  'wikipedia.org': 'reference', 'arxiv.org': 'reference', 'mdn.io': 'reference',
+  'figma.com': 'design', 'dribbble.com': 'design', 'behance.net': 'design',
+};
+
+const CATEGORY_COLORS: Record<string, string> = {
+  dev: '#171717', social: '#404040', media: '#525252', news: '#737373',
+  search: '#8a8a8a', productivity: '#a3a3a3', shopping: '#bdbdbd',
+  reference: '#d4d4d4', design: '#e0e0e0', other: '#f0f0f0',
+};
+
+function getCategoryForDomain(domain: string): string {
+  if (DOMAIN_CATEGORIES[domain]) return DOMAIN_CATEGORIES[domain];
+  // Check if any key is a suffix match (e.g. "sub.github.com" → "github.com")
+  for (const [d, cat] of Object.entries(DOMAIN_CATEGORIES)) {
+    if (domain.endsWith('.' + d)) return cat;
+  }
+  return 'other';
+}
+
 // --- State ---
 let allEntries: BrowsingHistoryRecord[] = [];
 let currentOffset = 0;
@@ -18,20 +57,18 @@ let isLoading = false;
 let hasMore = true;
 let currentSearchTerm = '';
 let currentTimeRange = 'all';
-const selectedIds = new Set<string>();
 
 // --- DOM refs ---
 const historyList = document.getElementById('history-list') as HTMLElement;
 const searchInput = document.getElementById('search-input') as HTMLInputElement;
 const searchClear = document.getElementById('search-clear') as HTMLElement;
-const deleteSelectedBtn = document.getElementById('delete-selected') as HTMLElement;
-const deleteSelectedCount = document.getElementById('delete-selected-count') as HTMLElement;
 const deleteAllBtn = document.getElementById('delete-all') as HTMLElement;
 const noHistory = document.getElementById('no-history') as HTMLElement;
 const statsLabel = document.getElementById('history-stats') as HTMLElement;
 const heatmapContainer = document.getElementById('heatmap-container') as HTMLElement;
 const sparklineContainer = document.getElementById('sparkline-container') as HTMLElement;
 const domainChartContainer = document.getElementById('domain-chart-container') as HTMLElement;
+const categoryContainer = document.getElementById('category-container') as HTMLElement;
 
 // --- Init ---
 document.addEventListener('DOMContentLoaded', async () => {
@@ -61,19 +98,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   deleteAllBtn?.addEventListener('click', async () => {
     await window.BrowserAPI.removeAllBrowsingHistory(window.BrowserAPI.appWindowId);
     allEntries = [];
-    selectedIds.clear();
     renderAll();
   });
 
-  deleteSelectedBtn?.addEventListener('click', deleteSelected);
-
-  historyList?.addEventListener('scroll', () => {
-    if (isLoading || !hasMore) return;
-    const { scrollTop, scrollHeight, clientHeight } = historyList;
-    if (scrollTop + clientHeight >= scrollHeight - 100) {
-      loadHistoryPage();
-    }
-  });
+  // Infinite scroll via IntersectionObserver on sentinel element
+  const sentinel = document.getElementById('scroll-sentinel');
+  if (sentinel) {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !isLoading && hasMore) {
+        loadHistoryPage();
+      }
+    }, { rootMargin: '200px' });
+    observer.observe(sentinel);
+  }
 });
 
 // --- Data loading ---
@@ -87,7 +124,6 @@ function resetAndReload(): void {
   currentOffset = 0;
   hasMore = true;
   allEntries = [];
-  selectedIds.clear();
   historyList.innerHTML = '';
   loadHistoryPage();
 }
@@ -108,7 +144,6 @@ async function loadHistoryPage(): Promise<void> {
 
   if (data.length < PAGE_SIZE) hasMore = false;
 
-  // Apply client-side time range filter
   const filtered = filterByTimeRange(data);
   allEntries = allEntries.concat(filtered);
   currentOffset += data.length;
@@ -135,8 +170,8 @@ function renderAll(): void {
   renderHistoryList();
   renderSparkline();
   renderDomainChart();
+  renderCategoryChart();
   updateStats();
-  updateSelectionUI();
 
   const hasEntries = allEntries.length > 0;
   noHistory.style.display = hasEntries ? 'none' : 'block';
@@ -149,25 +184,6 @@ function updateStats(): void {
   statsLabel.textContent = `${allEntries.length.toLocaleString()} pages \u00b7 ${totalDomains} sites \u00b7 ${FormatUtils.formatDuration(totalActive)} active`;
 }
 
-function updateSelectionUI(): void {
-  if (selectedIds.size > 0) {
-    deleteSelectedBtn.style.display = 'inline-flex';
-    deleteSelectedCount.textContent = `delete ${selectedIds.size} selected`;
-  } else {
-    deleteSelectedBtn.style.display = 'none';
-  }
-}
-
-async function deleteSelected(): Promise<void> {
-  const ids = Array.from(selectedIds);
-  for (const id of ids) {
-    await window.BrowserAPI.removeBrowsingHistory(window.BrowserAPI.appWindowId, id);
-  }
-  allEntries = allEntries.filter(e => !selectedIds.has(e.id));
-  selectedIds.clear();
-  renderAll();
-}
-
 // --- Session grouping ---
 interface Session { entries: BrowsingHistoryRecord[] }
 interface DateGroup { label: string; dateKey: string; sessions: Session[] }
@@ -175,7 +191,6 @@ interface DateGroup { label: string; dateKey: string; sessions: Session[] }
 function groupIntoSessions(entries: BrowsingHistoryRecord[]): DateGroup[] {
   if (entries.length === 0) return [];
 
-  // Group by date first
   const dateMap = new Map<string, BrowsingHistoryRecord[]>();
   for (const entry of entries) {
     const d = new Date(entry.createdDate);
@@ -186,10 +201,8 @@ function groupIntoSessions(entries: BrowsingHistoryRecord[]): DateGroup[] {
 
   const dateGroups: DateGroup[] = [];
   for (const [dateKey, dayEntries] of dateMap) {
-    // Sort descending within day
     dayEntries.sort((a, b) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime());
 
-    // Group into sessions by 30-min gap
     const sessions: Session[] = [];
     let currentSession: BrowsingHistoryRecord[] = [dayEntries[0]];
 
@@ -219,13 +232,11 @@ function renderHistoryList(): void {
   const dateGroups = groupIntoSessions(allEntries);
 
   for (const dg of dateGroups) {
-    // Date label
     const dateLabel = document.createElement('div');
     dateLabel.className = 'date-group-label';
     dateLabel.textContent = dg.label;
     historyList.appendChild(dateLabel);
 
-    // Sessions
     for (const session of dg.sessions) {
       renderSession(session, historyList);
     }
@@ -242,14 +253,12 @@ function renderSession(session: Session, container: HTMLElement): void {
   const sessionActive = session.entries.reduce((a, e) => a + (e.activeDuration || 0), 0);
   const uniqueDomains = [...new Set(session.entries.map(e => e.topLevelDomain))];
 
-  // Session header
   const header = document.createElement('div');
   header.className = 'session-header';
   let expanded = true;
 
   const startTime = new Date(lastEntry.createdDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  // Build domain badges HTML
   const domainBadgesHtml = uniqueDomains.slice(0, 6).map(domain => {
     const faviconUrl = `https://${domain}/favicon.ico`;
     return `<span class="session-domain-badge"><img src="${faviconUrl}" onerror="this.parentElement.innerHTML='&#x1F310;'" width="16" height="16"></span>`;
@@ -282,19 +291,17 @@ function renderSession(session: Session, container: HTMLElement): void {
     }
     const ids = new Set(session.entries.map(e => e.id));
     allEntries = allEntries.filter(e => !ids.has(e.id));
-    ids.forEach(id => selectedIds.delete(id));
     wrapper.remove();
     renderSparkline();
     renderDomainChart();
+    renderCategoryChart();
     updateStats();
-    updateSelectionUI();
     if (allEntries.length === 0) {
       noHistory.style.display = 'block';
       deleteAllBtn.style.display = 'none';
     }
   });
 
-  // Render entries
   for (const entry of session.entries) {
     entriesDiv.appendChild(renderEntry(entry));
   }
@@ -312,7 +319,6 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
   const faviconUrl = entry.faviconUrl || `https://${entry.topLevelDomain}/favicon.ico`;
 
   row.innerHTML = `
-    <input type="checkbox" ${selectedIds.has(entry.id) ? 'checked' : ''} />
     <span class="entry-time">${time}</span>
     <span class="entry-favicon"><img src="${faviconUrl}" width="14" height="14" onerror="this.parentElement.innerHTML='<span class=\\'entry-favicon-fallback\\'>&#x1F310;</span>'"></span>
     <span class="entry-title" title="${escapeHtml(entry.title)}">${escapeHtml(entry.title)}</span>
@@ -324,12 +330,6 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
     <button class="entry-delete-btn"><i data-lucide="x" width="12" height="12"></i></button>
   `;
 
-  row.querySelector('input[type="checkbox"]')?.addEventListener('change', () => {
-    if (selectedIds.has(entry.id)) selectedIds.delete(entry.id);
-    else selectedIds.add(entry.id);
-    updateSelectionUI();
-  });
-
   row.querySelector('.entry-title')?.addEventListener('click', () => {
     window.BrowserAPI.createTab(window.BrowserAPI.appWindowId, entry.url, true);
   });
@@ -338,12 +338,11 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
     e.stopPropagation();
     await window.BrowserAPI.removeBrowsingHistory(window.BrowserAPI.appWindowId, entry.id);
     allEntries = allEntries.filter(item => item.id !== entry.id);
-    selectedIds.delete(entry.id);
     row.remove();
     renderSparkline();
     renderDomainChart();
+    renderCategoryChart();
     updateStats();
-    updateSelectionUI();
     if (allEntries.length === 0) {
       noHistory.style.display = 'block';
       deleteAllBtn.style.display = 'none';
@@ -353,7 +352,7 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
   return row;
 }
 
-// --- Heatmap ---
+// --- Heatmap (responsive SVG via viewBox) ---
 function renderHeatmap(stats: Array<{ date: string; count: number; activeDuration: number }>): void {
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -361,13 +360,11 @@ function renderHeatmap(stats: Array<{ date: string; count: number; activeDuratio
   const startDate = new Date(todayStart);
   startDate.setDate(startDate.getDate() - (52 * 7 + currentDow));
 
-  // Build day map from stats
   const dayMap = new Map<string, { count: number; active: number }>();
   for (const s of stats) {
     dayMap.set(s.date, { count: s.count, active: s.activeDuration });
   }
 
-  // Build weeks
   type DayCell = { date: Date; dow: number; count: number; active: number; label: string };
   const weeks: DayCell[][] = [];
   let currentWeek: DayCell[] = [];
@@ -416,14 +413,14 @@ function renderHeatmap(stats: Array<{ date: string; count: number; activeDuratio
 
   const cellSize = 11;
   const cellGap = 2;
-  const dayLabelW = 24;
+  const dayLabelW = 28;
   const topPad = 18;
   const gridW = weeks.length * (cellSize + cellGap);
   const gridH = 7 * (cellSize + cellGap);
-  const dayLabels = ['', 'mon', '', 'wed', '', 'fri', ''];
+  const dayLabels = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
   function getLevel(count: number): number {
-    if (count === 0) return 0;
+    if (count === 0 || maxCount === 0) return 0;
     const ratio = count / maxCount;
     if (ratio <= 0.25) return 1;
     if (ratio <= 0.5) return 2;
@@ -431,7 +428,6 @@ function renderHeatmap(stats: Array<{ date: string; count: number; activeDuratio
     return 4;
   }
 
-  // Build HTML
   let svgContent = '';
 
   // Month labels
@@ -439,11 +435,9 @@ function renderHeatmap(stats: Array<{ date: string; count: number; activeDuratio
     svgContent += `<text x="${dayLabelW + m.weekIndex * (cellSize + cellGap)}" y="12" font-size="9" fill="var(--text-secondary)">${m.month}</text>`;
   }
 
-  // Day labels
+  // Day labels — show all 7 days
   for (let i = 0; i < dayLabels.length; i++) {
-    if (dayLabels[i]) {
-      svgContent += `<text x="0" y="${topPad + i * (cellSize + cellGap) + cellSize - 1}" font-size="8" fill="var(--text-secondary)">${dayLabels[i]}</text>`;
-    }
+    svgContent += `<text x="0" y="${topPad + i * (cellSize + cellGap) + cellSize - 1}" font-size="8" fill="var(--text-secondary)">${dayLabels[i]}</text>`;
   }
 
   // Cells
@@ -457,7 +451,7 @@ function renderHeatmap(stats: Array<{ date: string; count: number; activeDuratio
     }
   }
 
-  const svgW = dayLabelW + gridW + 8;
+  const svgW = dayLabelW + gridW + 4;
   const svgH = topPad + gridH + 4;
 
   heatmapContainer.innerHTML = `
@@ -468,8 +462,8 @@ function renderHeatmap(stats: Array<{ date: string; count: number; activeDuratio
         <span><span class="stat-value">${FormatUtils.formatDuration(totalActive)}</span> active time</span>
       </div>
     </div>
-    <div style="position:relative;overflow-x:auto;overflow-y:visible;">
-      <svg width="${svgW}" height="${svgH}" style="display:block;">${svgContent}</svg>
+    <div class="heatmap-scroll-area">
+      <svg viewBox="0 0 ${svgW} ${svgH}" preserveAspectRatio="xMinYMid meet">${svgContent}</svg>
       <div class="heatmap-legend">
         <span class="heatmap-legend-label">less</span>
         ${HEATMAP_LEVELS.map(c => `<div class="heatmap-legend-cell" style="background:${c}"></div>`).join('')}
@@ -480,7 +474,7 @@ function renderHeatmap(stats: Array<{ date: string; count: number; activeDuratio
 
   // Tooltip behavior
   const svgEl = heatmapContainer.querySelector('svg')!;
-  const tooltipContainer = heatmapContainer.querySelector('div[style*="position:relative"]') as HTMLElement;
+  const scrollArea = heatmapContainer.querySelector('.heatmap-scroll-area') as HTMLElement;
   let tooltip: HTMLElement | null = null;
 
   svgEl.addEventListener('mouseover', (e) => {
@@ -490,15 +484,15 @@ function renderHeatmap(stats: Array<{ date: string; count: number; activeDuratio
     const count = parseInt(target.getAttribute('data-count') || '0');
     const active = parseInt(target.getAttribute('data-active') || '0');
     const rect = target.getBoundingClientRect();
-    const cr = tooltipContainer.getBoundingClientRect();
+    const cr = scrollArea.getBoundingClientRect();
 
     if (!tooltip) {
       tooltip = document.createElement('div');
       tooltip.className = 'heatmap-tooltip';
-      tooltipContainer.appendChild(tooltip);
+      scrollArea.appendChild(tooltip);
     }
     tooltip.innerHTML = `<div class="heatmap-tooltip-title">${label}</div><div class="heatmap-tooltip-sub">${count === 0 ? 'no activity' : `${count} pages \u00b7 ${FormatUtils.formatDuration(active)} active`}</div>`;
-    tooltip.style.left = `${rect.left - cr.left + cellSize / 2}px`;
+    tooltip.style.left = `${rect.left - cr.left + rect.width / 2}px`;
     tooltip.style.top = `${rect.top - cr.top - 4}px`;
     tooltip.style.display = 'block';
   });
@@ -511,9 +505,8 @@ function renderHeatmap(stats: Array<{ date: string; count: number; activeDuratio
   });
 }
 
-// --- Sparkline ---
+// --- Sparkline (responsive, fills card) ---
 function renderSparkline(): void {
-  // Compute daily page counts for last 14 days
   const dailyData: { date: Date; count: number; active: number; label: string }[] = [];
   for (let i = 13; i >= 0; i--) {
     const d = new Date(Date.now() - i * 86400000);
@@ -532,16 +525,23 @@ function renderSparkline(): void {
     dailyData.push({ date: d, count, active, label });
   }
 
-  const maxActive = Math.max(...dailyData.map(d => d.active), 1);
-  const w = 280, h = 48;
+  // Use page count if all active durations are 0
+  const hasActiveData = dailyData.some(d => d.active > 0);
+  const values = dailyData.map(d => hasActiveData ? d.active : d.count);
+  const maxVal = Math.max(...values, 1);
+
+  // Use viewBox coordinates; actual size determined by CSS width:100%
+  const vw = 300, vh = 80;
+  const padTop = 8, padBot = 20, padX = 4;
+  const chartH = vh - padTop - padBot;
 
   const points = dailyData.map((d, i) => ({
-    x: (i / (dailyData.length - 1)) * w,
-    y: h - (d.active / maxActive) * (h - 8) - 4,
+    x: padX + (i / (dailyData.length - 1)) * (vw - padX * 2),
+    y: padTop + chartH - (values[i] / maxVal) * chartH,
     ...d,
   }));
 
-  // Build smooth curve
+  // Smooth curve
   let pathD = `M ${points[0].x} ${points[0].y}`;
   for (let i = 1; i < points.length; i++) {
     const prev = points[i - 1];
@@ -550,24 +550,26 @@ function renderSparkline(): void {
     pathD += ` C ${cpx} ${prev.y}, ${cpx} ${p.y}, ${p.x} ${p.y}`;
   }
 
+  const fillPath = `${pathD} L ${points[points.length - 1].x} ${padTop + chartH} L ${points[0].x} ${padTop + chartH} Z`;
+
   let dotsAndLabels = '';
   for (let i = 0; i < points.length; i++) {
     const p = points[i];
-    dotsAndLabels += `<circle cx="${p.x}" cy="${p.y}" r="2.5" fill="var(--bg-light)" stroke="var(--primary-color)" stroke-width="1.5" />`;
+    dotsAndLabels += `<circle cx="${p.x}" cy="${p.y}" r="3" fill="var(--bg-light)" stroke="var(--primary-color)" stroke-width="1.5" />`;
     if (i === 0 || i === points.length - 1 || i === 7) {
-      dotsAndLabels += `<text x="${p.x}" y="${h + 14}" text-anchor="middle" font-size="8" fill="var(--text-secondary)">${p.label}</text>`;
+      dotsAndLabels += `<text x="${p.x}" y="${vh - 2}" text-anchor="middle" font-size="9" fill="var(--text-secondary)">${p.label}</text>`;
     }
   }
 
   sparklineContainer.innerHTML = `
-    <svg class="sparkline-svg" width="${w}" height="${h + 16}" viewBox="0 0 ${w} ${h + 16}" style="overflow:visible">
+    <svg class="sparkline-svg" viewBox="0 0 ${vw} ${vh}" preserveAspectRatio="xMidYMid meet">
       <defs>
         <linearGradient id="spark-fill" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="var(--primary-color)" stop-opacity="0.1" />
           <stop offset="100%" stop-color="var(--primary-color)" stop-opacity="0" />
         </linearGradient>
       </defs>
-      <path d="${pathD} L ${w} ${h + 4} L 0 ${h + 4} Z" fill="url(#spark-fill)" />
+      <path d="${fillPath}" fill="url(#spark-fill)" />
       <path d="${pathD}" fill="none" stroke="var(--primary-color)" stroke-width="1.5" />
       ${dotsAndLabels}
     </svg>
@@ -576,7 +578,6 @@ function renderSparkline(): void {
 
 // --- Domain Chart ---
 function renderDomainChart(): void {
-  // Aggregate by domain
   const map = new Map<string, { domain: string; visits: number; active: number; faviconUrl: string }>();
   for (const e of allEntries) {
     const existing = map.get(e.topLevelDomain);
@@ -609,6 +610,48 @@ function renderDomainChart(): void {
       <span class="domain-duration">${FormatUtils.formatDuration(d.active)}</span>
     </div>
   `).join('');
+}
+
+// --- Category Pie Chart ---
+function renderCategoryChart(): void {
+  const catMap = new Map<string, number>();
+  for (const e of allEntries) {
+    const cat = getCategoryForDomain(e.topLevelDomain);
+    catMap.set(cat, (catMap.get(cat) || 0) + (e.activeDuration || 0));
+  }
+
+  const total = Array.from(catMap.values()).reduce((a, b) => a + b, 0) || 1;
+  const cats = Array.from(catMap.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([cat, dur]) => ({ cat, dur, pct: (dur / total) * 100 }));
+
+  // SVG donut chart
+  const radius = 32, circ = 2 * Math.PI * radius;
+  let accum = 0;
+  let slices = '';
+  for (const c of cats) {
+    const color = CATEGORY_COLORS[c.cat] || CATEGORY_COLORS.other;
+    const dashLen = (c.pct / 100) * circ;
+    const offset = -(accum / 100) * circ;
+    slices += `<circle cx="40" cy="40" r="${radius}" fill="none" stroke="${color}" stroke-width="10" stroke-dasharray="${dashLen} ${circ}" stroke-dashoffset="${offset}" />`;
+    accum += c.pct;
+  }
+
+  const legendHtml = cats.map(c => {
+    const color = CATEGORY_COLORS[c.cat] || CATEGORY_COLORS.other;
+    return `<div class="category-legend-item">
+      <div class="category-legend-dot" style="background:${color}"></div>
+      <span class="category-legend-name">${c.cat}</span>
+      <span class="category-legend-pct">${Math.round(c.pct)}%</span>
+    </div>`;
+  }).join('');
+
+  categoryContainer.innerHTML = `
+    <div class="category-chart-wrapper">
+      <svg width="80" height="80" viewBox="0 0 80 80">${slices}</svg>
+      <div class="category-legend">${legendHtml}</div>
+    </div>
+  `;
 }
 
 // --- Helpers ---
