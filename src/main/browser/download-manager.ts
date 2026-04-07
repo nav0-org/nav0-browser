@@ -154,6 +154,11 @@ export abstract class DownloadManager {
     return dbRecordId;
   }
 
+  /** Non-destructive check: is this downloadId a pending cross-session resume? */
+  public static isResuming(downloadId: string): boolean {
+    return this.resumingDownloads.has(downloadId);
+  }
+
   // ── DB helpers ──
 
   public static updateRecordStatus(appWindowId: string, recordId: string, status: string, receivedBytes?: number): void {

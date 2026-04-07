@@ -268,15 +268,19 @@ export class Tab {
     });
 
     this.willDownloadHandler = async (event: Electron.Event, item: Electron.DownloadItem, downloadWebContents: Electron.WebContents) => {
-      // Only handle downloads initiated by this tab's webContents
-      if (downloadWebContents !== this.webContentsViewInstance.webContents) return;
+      // Allow cross-session resumes triggered by createInterruptedDownload
+      // (their downloadWebContents won't match any tab's webContents)
+      const downloadId = item.getStartTime().toString() + '_' + item.getFilename();
+      const isCrossSessionResume = DownloadManager.isResuming(downloadId);
+      if (!isCrossSessionResume && downloadWebContents !== this.webContentsViewInstance.webContents) return;
 
       const fileName = item.getFilename();
       const mimeType = item.getMimeType();
 
       // Intercept PDF downloads and open them in-tab instead,
-      // unless the user explicitly requested a PDF download.
-      if (mimeType === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf')) {
+      // unless the user explicitly requested a PDF download
+      // or this is a cross-session resume.
+      if (!isCrossSessionResume && (mimeType === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf'))) {
         if (this.pdfDownloadBypass) {
           this.pdfDownloadBypass = false;
           // Fall through to handleDownload below
