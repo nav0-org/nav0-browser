@@ -6,6 +6,7 @@ import { BookmarkManager } from "./bookmark-manager";
 import { BookmarkRecord } from "../../types/bookmark-record";
 import { BrowsingHistoryManager } from "./browsing-history-manager";
 import { DownloadManager } from "./download-manager";
+import * as fs from "fs";
 import path from "path";
 import { Utils } from "../browser/utils";
 import { SearchEngine } from "../web/search-engine";
@@ -554,6 +555,14 @@ export class Tab {
         }
       } else {
         console.error(`Download failed: ${state}`);
+      }
+
+      // Clean up the .nav0resume backup when a download finishes normally
+      if (!DownloadManager.isShuttingDown()) {
+        try {
+          const backupPath = downloadPath + '.nav0resume';
+          if (fs.existsSync(backupPath)) fs.unlinkSync(backupPath);
+        } catch (_) { /* best-effort */ }
       }
 
       const browserWindow = this.parentAppWindow.getBrowserWindowInstance();
