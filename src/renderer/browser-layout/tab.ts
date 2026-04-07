@@ -112,9 +112,13 @@ export class Tab {
       this.faviconUrl = faviconUrl;
     }
     if (this.tabElement) {
-      const faviconElement = this.tabElement.querySelector('.tab-favicon');
+      const faviconElement = this.tabElement.querySelector('.tab-favicon') as HTMLImageElement;
       if (faviconElement) {
-        faviconElement.setAttribute('src', faviconUrl);
+        faviconElement.onerror = () => {
+          faviconElement.onerror = null;
+          faviconElement.src = ImageBase64Strings.FAVICON;
+        };
+        faviconElement.src = faviconUrl;
       }
     }
   }
