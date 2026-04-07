@@ -33,6 +33,21 @@ export const BrowsingHistorySchema: TableSchema = {
       name: 'faviconUrl',
       columnType: { type: 'standard', sqlType: 'TEXT' }
       // No notNull constraint since it's optional
+    },
+    {
+      name: 'totalDuration',
+      columnType: { type: 'standard', sqlType: 'INTEGER' },
+      defaultValue: 0
+    },
+    {
+      name: 'activeDuration',
+      columnType: { type: 'standard', sqlType: 'INTEGER' },
+      defaultValue: 0
+    },
+    {
+      name: 'outTimestamp',
+      columnType: { type: 'timestamp' }
+      // Nullable — set when user navigates away or closes tab
     }
   ],
   indices: [
