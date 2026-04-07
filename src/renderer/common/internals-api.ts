@@ -37,6 +37,7 @@ declare global {
       resumeDownload: (downloadId: string, appWindowId: string) => Promise<boolean>;
       cancelDownload: (downloadId: string, appWindowId: string) => Promise<boolean>;
       openDownloadedFile: (filePath: string) => Promise<string>;
+      showItemInFolder: (filePath: string) => Promise<void>;
       removeBrowsingHistory: (appWindowId: string, historyId: string) => Promise<any>;
       removeAllBrowsingHistory: (appWindowId: string) => Promise<any>;
       fetchBrowsingHistory: (appWindowId: string, searchTerm: string, limit: number, offset: number) => Promise<any>;

@@ -541,7 +541,7 @@ export class Tab {
 
       // Update DB record status
       if (state === 'completed') {
-        DownloadManager.updateRecordStatus(this.parentAppWindow.id, dbRecordId, 'completed', item.getTotalBytes());
+        DownloadManager.updateRecordStatus(this.parentAppWindow.id, dbRecordId, 'completed', item.getTotalBytes() || item.getReceivedBytes());
       } else if (state === 'cancelled') {
         // During shutdown, downloads are auto-cancelled after being paused by
         // pauseAllDownloads() – don't overwrite the 'paused' status in the DB
