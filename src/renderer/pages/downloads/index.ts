@@ -5,7 +5,7 @@ import './index.css';
 import { createIcons, icons } from 'lucide';
 import { FormatUtils } from '../../../renderer/common/format-utils';
 import { DownloadRecord } from '../../../types/download-record';
-import { TYPE_COLORS, getDisplayTypeFromExtension, getTypeColor, hexToRgba } from '../../../renderer/common/file-type-utils';
+import { TYPE_COLORS, getDisplayTypeFromExtension, hexToRgba, getFileIcon } from '../../../renderer/common/file-type-utils';
 createIcons({ icons });
 
 // ---------------------------------------------------------------------------
@@ -732,106 +732,3 @@ const extractHostname = (url: string): string => {
   }
 };
 
-// Get appropriate icon based on file extension (keeping existing lucide icons)
-const getFileIcon = (fileType: string): string => {
-  const extension = fileType.startsWith('.') ? fileType.slice(1) : fileType;
-  const iconMap: Record<string, string> = {
-    // Documents - Text
-    'pdf': 'file-text',
-    'doc': 'file-text',
-    'docx': 'file-text',
-    'txt': 'file-text',
-    'rtf': 'file-text',
-    'odt': 'file-text',
-    'md': 'file-text',
-    'pages': 'file-text',
-
-    // Spreadsheets
-    'csv': 'file-spreadsheet',
-    'xlsx': 'file-spreadsheet',
-    'xls': 'file-spreadsheet',
-    'ods': 'file-spreadsheet',
-    'numbers': 'file-spreadsheet',
-
-    // Presentations
-    'ppt': 'file-presentation',
-    'pptx': 'file-presentation',
-    'odp': 'file-presentation',
-
-    // Images
-    'jpg': 'image',
-    'jpeg': 'image',
-    'png': 'image',
-    'gif': 'image',
-    'svg': 'image',
-    'bmp': 'image',
-    'webp': 'image',
-    'tiff': 'image',
-    'ico': 'image',
-    'psd': 'image',
-    'ai': 'image',
-
-    // Audio files
-    'mp3': 'music',
-    'wav': 'music',
-    'ogg': 'music',
-    'flac': 'music',
-    'aac': 'music',
-    'm4a': 'music',
-    'wma': 'music',
-    'aiff': 'music',
-    'opus': 'music',
-
-    // Video files
-    'mp4': 'video',
-    'mov': 'video',
-    'avi': 'video',
-    'mkv': 'video',
-    'wmv': 'video',
-    'flv': 'video',
-    'webm': 'video',
-
-    // Archives
-    'zip': 'file-archive',
-    'rar': 'file-archive',
-    '7z': 'file-archive',
-    'tar': 'file-archive',
-    'gz': 'file-archive',
-    'bz2': 'file-archive',
-    'xz': 'file-archive',
-    'iso': 'file-archive',
-
-    // Executable/installable
-    'exe': 'download',
-    'dmg': 'download',
-    'msi': 'download',
-    'app': 'download',
-    'sh': 'terminal',
-    'bat': 'terminal',
-    'cmd': 'terminal',
-    'com': 'download',
-    'gadget': 'download',
-    'jar': 'download',
-    'deb': 'download',
-    'rpm': 'download',
-    'pkg': 'download',
-
-    // Programming/scripts
-    'py': 'code',
-    'js': 'code',
-
-    // General data files
-    'json': 'file-code',
-    'xml': 'file-code',
-    'yaml': 'file-code',
-    'toml': 'file-code',
-    'ini': 'settings',
-    'cfg': 'settings',
-    'conf': 'settings',
-    'log': 'file-text',
-    'sql': 'database',
-    'dat': 'file'
-  };
-
-  return iconMap[extension.toLowerCase()] || 'file';
-};

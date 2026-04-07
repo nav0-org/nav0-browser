@@ -137,3 +137,117 @@ export const hexToRgba = (hex: string, alpha: number): string => {
   const b = parseInt(hex.slice(5, 7), 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
+
+/** Maps file extensions to Lucide icon names. */
+const FILE_ICON_MAP: Record<string, string> = {
+  // Documents - Text
+  pdf: 'file-text', doc: 'file-text', docx: 'file-text', txt: 'file-text',
+  rtf: 'file-text', odt: 'file-text', md: 'file-text', pages: 'file-text',
+  tex: 'file-text', latex: 'file-text', epub: 'file-text', mobi: 'file-text',
+  djvu: 'file-text', xps: 'file-text', oxps: 'file-text', wp: 'file-text',
+  wpd: 'file-text', wps: 'file-text', hwp: 'file-text', hwpx: 'file-text',
+  nfo: 'file-text', readme: 'file-text', log: 'file-text',
+
+  // Spreadsheets
+  csv: 'file-spreadsheet', xlsx: 'file-spreadsheet', xls: 'file-spreadsheet',
+  ods: 'file-spreadsheet', numbers: 'file-spreadsheet', tsv: 'file-spreadsheet',
+  xlsm: 'file-spreadsheet', xlsb: 'file-spreadsheet', xltx: 'file-spreadsheet',
+
+  // Presentations
+  ppt: 'file-presentation', pptx: 'file-presentation', odp: 'file-presentation',
+  pptm: 'file-presentation', key: 'file-presentation', ppsx: 'file-presentation',
+
+  // Images
+  jpg: 'image', jpeg: 'image', png: 'image', gif: 'image', svg: 'image',
+  bmp: 'image', webp: 'image', tiff: 'image', tif: 'image', ico: 'image',
+  psd: 'image', ai: 'image', eps: 'image', raw: 'image', cr2: 'image',
+  nef: 'image', orf: 'image', sr2: 'image', arw: 'image', dng: 'image',
+  heic: 'image', heif: 'image', avif: 'image', jxl: 'image',
+  xcf: 'image', sketch: 'image', fig: 'image', indd: 'image',
+
+  // Audio
+  mp3: 'music', wav: 'music', ogg: 'music', flac: 'music', aac: 'music',
+  m4a: 'music', wma: 'music', aiff: 'music', opus: 'music', mid: 'music',
+  midi: 'music', ape: 'music', alac: 'music', dsf: 'music', dff: 'music',
+  wv: 'music', mka: 'music', ac3: 'music', dts: 'music', pcm: 'music',
+  amr: 'music', ra: 'music', caf: 'music',
+
+  // Video
+  mp4: 'video', mov: 'video', avi: 'video', mkv: 'video',
+  wmv: 'video', flv: 'video', webm: 'video', m4v: 'video',
+  mpg: 'video', mpeg: 'video', '3gp': 'video', '3g2': 'video',
+  ts: 'video', mts: 'video', m2ts: 'video', vob: 'video',
+  ogv: 'video', rm: 'video', rmvb: 'video', asf: 'video',
+  divx: 'video', f4v: 'video', swf: 'video',
+
+  // Archives
+  zip: 'file-archive', rar: 'file-archive', '7z': 'file-archive',
+  tar: 'file-archive', gz: 'file-archive', bz2: 'file-archive',
+  xz: 'file-archive', zst: 'file-archive', iso: 'file-archive',
+  lz: 'file-archive', lzma: 'file-archive', lz4: 'file-archive',
+  cab: 'file-archive', z: 'file-archive', tgz: 'file-archive',
+  tbz2: 'file-archive', txz: 'file-archive', ace: 'file-archive',
+  arj: 'file-archive', sit: 'file-archive', sitx: 'file-archive',
+  war: 'file-archive', ear: 'file-archive', cpio: 'file-archive',
+
+  // Disk images
+  img: 'disc', dmg: 'disc', vhd: 'disc', vhdx: 'disc',
+  vmdk: 'disc', qcow2: 'disc',
+
+  // Installers / executables
+  exe: 'download', msi: 'download', app: 'download',
+  pkg: 'download', deb: 'download', rpm: 'download',
+  snap: 'download', flatpak: 'download', appimage: 'download',
+  apk: 'download', ipa: 'download', xapk: 'download', aab: 'download',
+  com: 'download', gadget: 'download', jar: 'download',
+  run: 'download', bin: 'download', bundle: 'download',
+
+  // Scripts / shell
+  sh: 'terminal', bat: 'terminal', cmd: 'terminal', ps1: 'terminal',
+  psm1: 'terminal', bash: 'terminal', zsh: 'terminal', fish: 'terminal',
+  csh: 'terminal',
+
+  // Code / programming
+  py: 'code', js: 'code', jsx: 'code', mjs: 'code', cjs: 'code',
+  tsx: 'code', c: 'code', cpp: 'code', cc: 'code', cxx: 'code',
+  h: 'code', hpp: 'code', java: 'code', kt: 'code', kts: 'code',
+  scala: 'code', groovy: 'code', cs: 'code', fs: 'code', vb: 'code',
+  go: 'code', rs: 'code', swift: 'code', m: 'code', mm: 'code',
+  rb: 'code', pl: 'code', pm: 'code', php: 'code', phtml: 'code',
+  lua: 'code', r: 'code', jl: 'code', dart: 'code', zig: 'code',
+  nim: 'code', v: 'code', ex: 'code', exs: 'code', erl: 'code',
+  hs: 'code', ml: 'code', clj: 'code', cljs: 'code', lisp: 'code',
+  vue: 'code', svelte: 'code', wasm: 'code',
+
+  // Data / config / markup
+  json: 'file-code', xml: 'file-code', yaml: 'file-code', yml: 'file-code',
+  toml: 'file-code', proto: 'file-code', graphql: 'file-code', gql: 'file-code',
+  html: 'file-code', htm: 'file-code', css: 'file-code', scss: 'file-code',
+  sass: 'file-code', less: 'file-code',
+  ini: 'settings', cfg: 'settings', conf: 'settings',
+  dockerfile: 'file-code', makefile: 'file-code', cmake: 'file-code',
+  gradle: 'file-code', sbt: 'file-code', pom: 'file-code',
+  sql: 'database', dat: 'file',
+
+  // Fonts
+  ttf: 'type', otf: 'type', woff: 'type', woff2: 'type', eot: 'type',
+
+  // 3D / CAD
+  stl: 'box', obj: 'box', fbx: 'box', gltf: 'box', glb: 'box',
+  blend: 'box', dwg: 'box', dxf: 'box', step: 'box', stp: 'box',
+
+  // Database
+  db: 'database', sqlite: 'database', sqlite3: 'database',
+  mdb: 'database', accdb: 'database',
+};
+
+/**
+ * Get the Lucide icon name for a file extension.
+ * Accepts extensions with or without leading dot (e.g. ".pdf" or "pdf").
+ */
+export const getFileIcon = (fileExtension: string): string => {
+  const ext = fileExtension.startsWith('.')
+    ? fileExtension.slice(1).toLowerCase()
+    : fileExtension.toLowerCase();
+  return FILE_ICON_MAP[ext] || 'file';
+};
