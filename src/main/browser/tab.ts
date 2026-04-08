@@ -6,6 +6,7 @@ import { BookmarkManager } from "./bookmark-manager";
 import { BookmarkRecord } from "../../types/bookmark-record";
 import { BrowsingHistoryManager } from "./browsing-history-manager";
 import { DownloadManager } from "./download-manager";
+import * as fs from "fs";
 import path from "path";
 import { Utils } from "../browser/utils";
 import { SearchEngine } from "../web/search-engine";
@@ -268,15 +269,19 @@ export class Tab {
     });
 
     this.willDownloadHandler = async (event: Electron.Event, item: Electron.DownloadItem, downloadWebContents: Electron.WebContents) => {
-      // Only handle downloads initiated by this tab's webContents
-      if (downloadWebContents !== this.webContentsViewInstance.webContents) return;
+      // Allow cross-session resumes triggered by createInterruptedDownload
+      // (their downloadWebContents won't match any tab's webContents)
+      const downloadId = item.getStartTime().toString() + '_' + item.getFilename();
+      const isCrossSessionResume = DownloadManager.isResuming(downloadId);
+      if (!isCrossSessionResume && downloadWebContents !== this.webContentsViewInstance.webContents) return;
 
       const fileName = item.getFilename();
       const mimeType = item.getMimeType();
 
       // Intercept PDF downloads and open them in-tab instead,
-      // unless the user explicitly requested a PDF download.
-      if (mimeType === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf')) {
+      // unless the user explicitly requested a PDF download
+      // or this is a cross-session resume.
+      if (!isCrossSessionResume && (mimeType === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf'))) {
         if (this.pdfDownloadBypass) {
           this.pdfDownloadBypass = false;
           // Fall through to handleDownload below
@@ -493,6 +498,7 @@ export class Tab {
 
     // Check if this is a cross-session resume (triggered by createInterruptedDownload)
     let dbRecordId = DownloadManager.checkResuming(downloadId);
+    const isCrossSessionResume = !!dbRecordId;
 
     if (dbRecordId) {
       // Resuming from previous session – update existing record
@@ -552,12 +558,27 @@ export class Tab {
         console.error(`Download failed: ${state}`);
       }
 
+      // Clean up the .nav0resume backup when a download finishes normally
+      if (!DownloadManager.isShuttingDown()) {
+        try {
+          const backupPath = downloadPath + '.nav0resume';
+          if (fs.existsSync(backupPath)) fs.unlinkSync(backupPath);
+        } catch (_) { /* best-effort */ }
+      }
+
       const browserWindow = this.parentAppWindow.getBrowserWindowInstance();
       if (!browserWindow?.webContents) return;
       const completedData = { downloadId, state, fileName: item.getFilename(), dbRecordId };
       browserWindow.webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED, completedData);
       this.parentAppWindow.broadcastToTabs(MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED, completedData);
     });
+
+    // createInterruptedDownload produces a DownloadItem in the 'interrupted'
+    // state — it won't begin downloading until we explicitly resume it.
+    if (isCrossSessionResume && item.canResume()) {
+      item.resume();
+    }
+
     console.log('Download started:', downloadPath);
   }
 
