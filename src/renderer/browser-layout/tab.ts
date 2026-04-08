@@ -118,7 +118,7 @@ export class Tab {
       if (faviconElement) {
         faviconElement.onerror = () => {
           faviconElement.onerror = null;
-          faviconElement.style.display = 'none';
+          faviconElement.src = ImageBase64Strings.FAVICON;
         };
         faviconElement.src = faviconUrl;
         if (!this.isLoading) {
