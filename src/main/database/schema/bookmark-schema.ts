@@ -28,6 +28,11 @@ export const BookmarksSchema: TableSchema = {
       name: 'faviconUrl',
       columnType: { type: 'standard', sqlType: 'TEXT' },
       // No notNull constraint since it's optional
+    },
+    {
+      name: 'type',
+      columnType: { type: 'standard', sqlType: 'TEXT' },
+      defaultValue: 'reference',
     }
   ],
   indices: [
@@ -38,6 +43,10 @@ export const BookmarksSchema: TableSchema = {
     {
       name: 'idxBookmarkCreatedDate',
       columns: ['createdDate']
+    },
+    {
+      name: 'idxBookmarkType',
+      columns: ['type']
     }
   ]
 };

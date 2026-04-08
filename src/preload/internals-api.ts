@@ -51,17 +51,23 @@ export function init(){
     hardReloadTab: async (appWindowId: string, tabId: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.HARD_RELOAD, appWindowId, tabId);
     },
-    addBookmark: async (appWindowId: string, title: string, url: string, faviconUrl: string) => {
-      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.ADD_BOOKMARK, appWindowId, title, url, faviconUrl);
+    addBookmark: async (appWindowId: string, title: string, url: string, faviconUrl: string, type?: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.ADD_BOOKMARK, appWindowId, title, url, faviconUrl, type);
     },
     removeBookmark: async (appWindowId: string, bookmarkId: string) => {
-      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.REMOVE_BOOKMARK,appWindowId, bookmarkId);
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.REMOVE_BOOKMARK, appWindowId, bookmarkId);
     },
-    removeAllBookmarks: async (appWindowId: string, ) => {
+    removeAllBookmarks: async (appWindowId: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.REMOVE_ALL_BOOKMARKS, appWindowId);
     },
     fetchBookmarks: async (appWindowId: string, searchTerm: string, limit: number, offset: number) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.FETCH_BOOKMARK, appWindowId, searchTerm, limit, offset);
+    },
+    updateBookmarkType: async (appWindowId: string, bookmarkId: string, type: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.UPDATE_BOOKMARK_TYPE, appWindowId, bookmarkId, type);
+    },
+    fetchBookmarksWithStats: async (appWindowId: string, type: string, searchTerm: string, limit: number, offset: number) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.FETCH_BOOKMARKS_WITH_STATS, appWindowId, type, searchTerm, limit, offset);
     },
     removeDownload: async (appWindowId: string, downloadId: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.REMOVE_DOWNLOAD, appWindowId, downloadId);
@@ -236,7 +242,7 @@ export function init(){
     onTabFaviconUpdated: (callback: (data: { id: string, faviconUrl: string }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.TAB_FAVICON_UPDATED, (_event, data) => callback(data));
     },
-    onTabUrlUpdated: (callback: (data: { id: string, url: string, isBookmark: boolean, bookmarkId: string | null, canGoBack: boolean, canGoForward: boolean }) => void) => {
+    onTabUrlUpdated: (callback: (data: { id: string, url: string, isBookmark: boolean, bookmarkId: string | null, bookmarkType: 'reference' | 'queue' | null, canGoBack: boolean, canGoForward: boolean }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.TAB_URL_UPDATED, (_event, data) => callback(data));
     },
     onNavigationFailed: (callback: (data: { id: string }) => void) => {

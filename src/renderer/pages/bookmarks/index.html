@@ -5,37 +5,62 @@
   <title>Bookmarks</title>
 </head>
 <body>
-  <!-- Hero Section -->
-    <section class="hero-section">
-      <div class="container text-center">
-          <h1 class="mb-sm">Bookmarks</h1>
-          <p>Your favorite sites organized in one place</p>
+  <div class="bookmarks-page">
+    <!-- Header -->
+    <div class="bk-header">
+      <div class="bk-header-row">
+        <i data-lucide="compass" class="bk-compass-icon" width="20" height="20"></i>
+        <span class="bk-title">bookmarks</span>
       </div>
-  </section>
+      <div class="bk-subtitle">your map of the internet</div>
+    </div>
 
-  <!-- Main Content -->
-  <main class="container">
-      <!-- Search Bar -->
-      <div class="search-container">
-          <input type="text" id="search-input" class="search-input" placeholder="Search bookmarks...">
-          <i data-lucide="search" class="search-icon" width="16" height="16"></i>
-      </div>
+    <!-- Search -->
+    <div class="bk-search-wrap">
+      <input type="text" id="search-input" class="bk-search-input" placeholder="search bookmarks — titles, urls, domains...">
+    </div>
 
-      <!-- Bookmarks Container -->
-      <div class="bookmarks-container">
-          <div id="bookmarks-list" class="bookmarks-list">
-              <!-- Bookmark items will be dynamically inserted here -->
-          </div>
-          <div id="no-bookmarks" class="no-bookmarks">
-            No bookmarks saved yet.
-          </div>
-      </div>
+    <!-- Tabs -->
+    <div class="bk-tabs" id="bk-tabs">
+      <button class="bk-tab active" id="tab-queue" data-tab="queue">
+        reading queue (<span id="queue-count">0</span>)
+      </button>
+      <button class="bk-tab" id="tab-reference" data-tab="reference">
+        reference (<span id="reference-count">0</span>)
+      </button>
+    </div>
 
-      <div style="text-align: center;">
-        <button class="btn delete-all-button" id="delete-all">
-          Clear all bookmarks?
-        </button>
+    <!-- Category pills -->
+    <div class="bk-categories" id="bk-categories"></div>
+
+    <!-- Stale bookmarks alert (reference tab only) -->
+    <div class="bk-stale-bar" id="stale-bar" style="display: none;">
+      <span class="bk-stale-text" id="stale-text"></span>
+      <button class="bk-stale-btn" id="stale-review-btn">review</button>
+    </div>
+
+    <!-- Stale review panel -->
+    <div class="bk-stale-review" id="stale-review" style="display: none;">
+      <div class="bk-stale-review-header">
+        <span>dormant bookmarks — keep or let go?</span>
+        <button class="bk-stale-btn" id="stale-done-btn">done</button>
       </div>
-  </main>
+      <div id="stale-review-list"></div>
+    </div>
+
+    <!-- Bookmarks list -->
+    <div class="bk-list-container">
+      <div id="bookmarks-list" class="bk-list"></div>
+      <div id="empty-state" class="bk-empty" style="display: none;">
+        nothing here yet
+      </div>
+      <div id="loading-indicator" class="bk-loading" style="display: none;">loading...</div>
+    </div>
+
+    <!-- Footer -->
+    <div class="bk-footer">
+      nav0 · your web, your map
+    </div>
+  </div>
 </body>
 </html>

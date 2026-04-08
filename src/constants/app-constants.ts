@@ -107,6 +107,8 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly REMOVE_BOOKMARK = "browser:remove-bookmark";
   public static readonly REMOVE_ALL_BOOKMARKS = "browser:remove-all-bookmarks";
   public static readonly FETCH_BOOKMARK = "browser:fetch-bookmark";
+  public static readonly UPDATE_BOOKMARK_TYPE = "browser:update-bookmark-type";
+  public static readonly FETCH_BOOKMARKS_WITH_STATS = "browser:fetch-bookmarks-with-stats";
   // public static readonly ADD_DOWNLOAD = "browser:add-download";
   public static readonly REMOVE_DOWNLOAD = "browser:remove-download";
   public static readonly REMOVE_ALL_DOWNLOADS = "browser:remove-all-downloads";
