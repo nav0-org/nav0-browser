@@ -322,6 +322,27 @@ const BROWSER_IDENTITY_PATCH = `
   if (window.__Nav0IdentityPatched) return;
   window.__Nav0IdentityPatched = true;
 
+  // Ensure window.chrome exists. Electron does not expose this object,
+  // but real Chrome always has it. Its absence is a basic bot detection signal.
+  try {
+    if (!window.chrome) {
+      window.chrome = {};
+    }
+    if (!window.chrome.runtime) {
+      window.chrome.runtime = {
+        connect: function() { return { onMessage: { addListener: function(){} }, postMessage: function(){}, onDisconnect: { addListener: function(){} } }; },
+        sendMessage: function() {},
+        id: undefined
+      };
+    }
+    if (!window.chrome.csi) {
+      window.chrome.csi = function() { return { startE: Date.now(), onloadT: Date.now(), pageT: Date.now() - performance.timing.navigationStart, tran: 15 }; };
+    }
+    if (!window.chrome.loadTimes) {
+      window.chrome.loadTimes = function() { return { commitLoadTime: Date.now() / 1000, connectionInfo: 'h2', finishDocumentLoadTime: Date.now() / 1000, finishLoadTime: Date.now() / 1000, firstPaintAfterLoadTime: 0, firstPaintTime: Date.now() / 1000, navigationType: 'Other', npnNegotiatedProtocol: 'h2', requestTime: Date.now() / 1000 - 0.1, startLoadTime: Date.now() / 1000 - 0.1, wasAlternateProtocolAvailable: false, wasFetchedViaSpdy: true, wasNpnNegotiated: true }; };
+    }
+  } catch(e) {}
+
   // Patch navigator.userAgentData to report Chrome instead of Electron.
   // Electron includes "Electron" in the brands list, which bot-detection
   // scripts (Cloudflare Turnstile, etc.) flag as non-standard.
