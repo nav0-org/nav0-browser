@@ -1,13 +1,10 @@
 @import url("../../styles/global.css");
 
-/* Page layout */
+/* Page layout — inherits font from global.css */
 .history-page {
   min-height: 100vh;
   background: var(--bg-color);
   color: var(--text-color);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-size: var(--font-sm);
-  line-height: 1.5;
 }
 
 .history-container {
@@ -51,7 +48,6 @@
 .btn-clear-all {
   padding: 4px 10px;
   font-size: var(--font-xs);
-  font-family: inherit;
   background: var(--bg-light);
   color: var(--text-secondary);
   border: 1px solid var(--border-color);
@@ -172,15 +168,22 @@
 }
 
 .analytics-card {
-  min-height: 120px;
+  min-height: 140px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Sparkline */
+/* Sparkline — fills available card space */
+#sparkline-container {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+}
+
 .sparkline-svg {
   display: block;
   width: 100%;
-  height: auto;
 }
 
 /* Domain chart */
@@ -321,7 +324,6 @@
   border: none;
   background: transparent;
   font-size: var(--font-sm);
-  font-family: inherit;
   color: var(--text-color);
   outline: none;
 }
@@ -347,8 +349,7 @@
 
 .time-range-btn {
   padding: 4px 10px;
-  font-size: 10px;
-  font-family: inherit;
+  font-size: var(--font-xs);
   background: transparent;
   color: var(--text-secondary);
   border: none;

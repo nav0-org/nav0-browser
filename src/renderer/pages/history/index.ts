@@ -389,7 +389,7 @@ function renderHeatmap(stats: Array<{ date: string; count: number; activeDuratio
     const m = cursor.getMonth();
     if (m !== lastMonth) {
       monthLabels.push({
-        month: cursor.toLocaleDateString([], { month: 'short' }).toLowerCase(),
+        month: cursor.toLocaleDateString([], { month: 'short' }),
         weekIndex: weeks.length,
       });
       lastMonth = m;
@@ -400,7 +400,7 @@ function renderHeatmap(stats: Array<{ date: string; count: number; activeDuratio
       dow: cursor.getDay(),
       count: data.count,
       active: data.active,
-      label: cursor.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }).toLowerCase(),
+      label: cursor.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }),
     });
 
     if (cursor.getDay() === 6 || cursor.getTime() === todayStart.getTime()) {
@@ -417,7 +417,7 @@ function renderHeatmap(stats: Array<{ date: string; count: number; activeDuratio
   const topPad = 18;
   const gridW = weeks.length * (cellSize + cellGap);
   const gridH = 7 * (cellSize + cellGap);
-  const dayLabels = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+  const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   function getLevel(count: number): number {
     if (count === 0 || maxCount === 0) return 0;
@@ -430,9 +430,14 @@ function renderHeatmap(stats: Array<{ date: string; count: number; activeDuratio
 
   let svgContent = '';
 
-  // Month labels
+  // Month labels — skip labels that are too close together
+  let lastLabelX = -Infinity;
+  const minLabelGap = 30;
   for (const m of monthLabels) {
-    svgContent += `<text x="${dayLabelW + m.weekIndex * (cellSize + cellGap)}" y="12" font-size="9" fill="var(--text-secondary)">${m.month}</text>`;
+    const x = dayLabelW + m.weekIndex * (cellSize + cellGap);
+    if (x - lastLabelX < minLabelGap) continue;
+    svgContent += `<text x="${x}" y="12" font-size="9" fill="var(--text-secondary)">${m.month}</text>`;
+    lastLabelX = x;
   }
 
   // Day labels — show all 7 days
@@ -521,7 +526,7 @@ function renderSparkline(): void {
         active += e.activeDuration || 0;
       }
     }
-    const label = i === 0 ? 'today' : i === 1 ? 'yday' : d.toLocaleDateString([], { month: 'short', day: 'numeric' }).toLowerCase();
+    const label = i === 0 ? 'Today' : i === 1 ? 'Yday' : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
     dailyData.push({ date: d, count, active, label });
   }
 
@@ -614,16 +619,27 @@ function renderDomainChart(): void {
 
 // --- Category Pie Chart ---
 function renderCategoryChart(): void {
-  const catMap = new Map<string, number>();
-  for (const e of allEntries) {
-    const cat = getCategoryForDomain(e.topLevelDomain);
-    catMap.set(cat, (catMap.get(cat) || 0) + (e.activeDuration || 0));
+  if (allEntries.length === 0) {
+    categoryContainer.innerHTML = '';
+    return;
   }
 
+  // Aggregate by active duration; fall back to visit count if all durations are 0
+  const durationMap = new Map<string, number>();
+  const countMap = new Map<string, number>();
+  for (const e of allEntries) {
+    const cat = getCategoryForDomain(e.topLevelDomain);
+    durationMap.set(cat, (durationMap.get(cat) || 0) + (e.activeDuration || 0));
+    countMap.set(cat, (countMap.get(cat) || 0) + 1);
+  }
+
+  const totalDuration = Array.from(durationMap.values()).reduce((a, b) => a + b, 0);
+  const useDuration = totalDuration > 0;
+  const catMap = useDuration ? durationMap : countMap;
   const total = Array.from(catMap.values()).reduce((a, b) => a + b, 0) || 1;
   const cats = Array.from(catMap.entries())
     .sort((a, b) => b[1] - a[1])
-    .map(([cat, dur]) => ({ cat, dur, pct: (dur / total) * 100 }));
+    .map(([cat, val]) => ({ cat, dur: val, pct: (val / total) * 100 }));
 
   // SVG donut chart
   const radius = 32, circ = 2 * Math.PI * radius;
