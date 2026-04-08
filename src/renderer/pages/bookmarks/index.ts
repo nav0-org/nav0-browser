@@ -1,56 +1,29 @@
 import { HtmlUtils } from '../../../renderer/common/html-utils';
 import { BookmarkWithStats } from '../../../types/bookmark-record';
+import { BOOKMARK_CATEGORY_MAP, BOOKMARK_CATEGORY_COLORS } from '../../../constants/app-constants';
 import './index.css';
 
 import { createIcons, icons } from 'lucide';
 createIcons({ icons });
 
-// --- Category mapping (domain → category) ---
-const DOMAIN_CATEGORY_MAP: Record<string, string> = {
-  'github.com': 'dev',
-  'gitlab.com': 'dev',
-  'stackoverflow.com': 'dev',
-  'developer.mozilla.org': 'dev',
-  'electronjs.org': 'dev',
-  'nodejs.org': 'dev',
-  'npmjs.com': 'dev',
-  'vitepress.dev': 'dev',
-  'source.chromium.org': 'dev',
-  'caniuse.com': 'dev',
-  'css-tricks.com': 'dev',
-  'web.dev': 'dev',
-  'medium.com': 'dev',
-  'dev.to': 'dev',
-  'logrocket.com': 'dev',
-  'hackernews.com': 'news',
-  'news.ycombinator.com': 'news',
-  'arstechnica.com': 'news',
-  'theverge.com': 'news',
-  'techcrunch.com': 'news',
-  'wired.com': 'news',
-  'privacyguides.org': 'news',
-  'blog.privacyguides.org': 'news',
-  'eff.org': 'news',
-  'youtube.com': 'media',
-  'vimeo.com': 'media',
-  'spotify.com': 'media',
-  'brave.com': 'media',
-};
-
 function getCategoryForUrl(url: string): string {
   try {
     const hostname = new URL(url).hostname.replace(/^www\./, '');
-    if (DOMAIN_CATEGORY_MAP[hostname]) return DOMAIN_CATEGORY_MAP[hostname];
+    if (BOOKMARK_CATEGORY_MAP[hostname]) return BOOKMARK_CATEGORY_MAP[hostname];
     // Check parent domains (e.g., blog.privacyguides.org → privacyguides.org)
     const parts = hostname.split('.');
     if (parts.length > 2) {
       const parent = parts.slice(1).join('.');
-      if (DOMAIN_CATEGORY_MAP[parent]) return DOMAIN_CATEGORY_MAP[parent];
+      if (BOOKMARK_CATEGORY_MAP[parent]) return BOOKMARK_CATEGORY_MAP[parent];
     }
     return 'other';
   } catch {
     return 'other';
   }
+}
+
+function getCategoryColor(category: string): string {
+  return BOOKMARK_CATEGORY_COLORS[category] || BOOKMARK_CATEGORY_COLORS.other;
 }
 
 function getDomain(url: string): string {
@@ -86,6 +59,7 @@ function freshnessOpacity(item: BookmarkWithStats): number {
 }
 
 function heatColor(visits: number): string {
+  // Indigo scale matching downloads TYPE_COLORS.document (#6366f1)
   if (visits >= 200) return '#4338ca';
   if (visits >= 100) return '#6366f1';
   if (visits >= 50) return '#818cf8';
@@ -96,10 +70,10 @@ function heatColor(visits: number): string {
 
 function queueAgeLabel(createdDate: string): { label: string; color: string } {
   const days = daysSince(createdDate);
-  if (days < 7) return { label: 'this week', color: '#16a34a' };
-  if (days < 30) return { label: `${Math.floor(days / 7)}w ago`, color: '#78716c' };
-  if (days < 90) return { label: `${Math.floor(days / 30)}mo ago`, color: '#f59e0b' };
-  return { label: `${Math.floor(days / 30)}mo — still reading this?`, color: '#dc2626' };
+  if (days < 7) return { label: 'this week', color: '#10b981' };   // green — matches downloads code type
+  if (days < 30) return { label: `${Math.floor(days / 7)}w ago`, color: '#a1a1aa' };  // gray — matches downloads other type
+  if (days < 90) return { label: `${Math.floor(days / 30)}mo ago`, color: '#f59e0b' }; // amber — matches downloads installer type
+  return { label: `${Math.floor(days / 30)}mo — still reading this?`, color: '#e74c3c' }; // error-color from global.css
 }
 
 // --- State ---
@@ -306,7 +280,8 @@ function renderBookmarkItems(items: BookmarkWithStats[]): void {
       }
     }
 
-    metaHtml += `<span class="bk-cat-tag">${category}</span>`;
+    const catColor = getCategoryColor(category);
+    metaHtml += `<span class="bk-cat-tag" style="color: ${catColor}; border-color: ${catColor}">${category}</span>`;
 
     // Actions
     const moveLabel = item.type === 'queue' ? '→ move to reference' : '→ move to queue';

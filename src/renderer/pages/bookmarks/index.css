@@ -1,19 +1,10 @@
 @import url("../../styles/global.css");
 
-/* Bookmarks page accent variables */
+/* Bookmarks page accent — uses same indigo as downloads TYPE_COLORS.document (#6366f1) */
 :root {
-  --bk-accent: #4338ca;
-  --bk-accent-light: #6366f1;
-  --bk-accent-subtle: #a5b4fc;
+  --bk-accent: #6366f1;
   --bk-accent-faint: #c7d2fe;
   --bk-accent-bg: #eef2ff;
-  --bk-stale-color: #dc2626;
-  --bk-stale-bg: #fef2f2;
-  --bk-warn-color: #92400e;
-  --bk-warn-bg: #fffbeb;
-  --bk-warn-border: #fde68a;
-  --bk-green: #16a34a;
-  --bk-amber: #f59e0b;
 }
 
 .bookmarks-page {
@@ -69,7 +60,7 @@
 }
 
 .bk-search-input:focus {
-  border-color: var(--bk-accent-light);
+  border-color: var(--bk-accent);
 }
 
 .bk-search-input::placeholder {
@@ -126,7 +117,7 @@
 }
 
 .bk-cat-pill:hover {
-  border-color: var(--bk-accent-subtle);
+  border-color: var(--border-color-dark);
   color: var(--text-color);
 }
 
@@ -140,8 +131,8 @@
 .bk-stale-bar {
   margin: 0 0 var(--spacing-lg) 0;
   padding: 12px var(--spacing-md);
-  background: var(--bk-warn-bg);
-  border: 1px solid var(--bk-warn-border);
+  background: var(--warning-light);
+  border: 1px solid var(--warning-color);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
@@ -150,21 +141,22 @@
 
 .bk-stale-text {
   font-size: var(--font-sm);
-  color: var(--bk-warn-color);
+  color: var(--text-color);
 }
 
 .bk-stale-btn {
   font-size: var(--font-xs);
   padding: var(--spacing-xs) var(--spacing-sm);
-  border: 1px solid var(--bk-amber);
+  border: 1px solid var(--warning-color);
   border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--bk-warn-color);
+  color: var(--text-color);
   cursor: pointer;
 }
 
 .bk-stale-btn:hover {
-  background: var(--bk-warn-border);
+  background: var(--warning-color);
+  color: var(--bg-light);
 }
 
 /* Stale review panel */
@@ -174,7 +166,7 @@
 
 .bk-stale-review-header {
   font-size: var(--font-sm);
-  color: var(--bk-warn-color);
+  color: var(--text-color);
   margin-bottom: var(--spacing-sm);
   display: flex;
   justify-content: space-between;
@@ -186,7 +178,7 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--bk-warn-bg);
+  background: var(--warning-light);
   border-radius: var(--radius-sm);
   margin-bottom: var(--spacing-xs);
 }
@@ -298,8 +290,8 @@
 
 .bk-stale-indicator {
   font-size: var(--font-xs);
-  color: var(--bk-stale-color);
-  background: var(--bk-stale-bg);
+  color: var(--error-color);
+  background: var(--error-light);
   padding: 1px 6px;
   border-radius: var(--radius-sm);
 }
@@ -342,21 +334,21 @@
 }
 
 .bk-action-btn.remove {
-  border: 1px solid var(--bk-stale-color);
-  color: var(--bk-stale-color);
+  border: 1px solid var(--error-color);
+  color: var(--error-color);
 }
 
 .bk-action-btn.remove:hover {
-  background: var(--bk-stale-bg);
+  background: var(--error-light);
 }
 
 .bk-action-btn.keep {
-  border: 1px solid var(--bk-green);
-  color: var(--bk-green);
+  border: 1px solid var(--success-color);
+  color: var(--success-color);
 }
 
 .bk-action-btn.keep:hover {
-  background: #f0fdf4;
+  background: var(--success-light);
 }
 
 /* Visit count (reference) */
