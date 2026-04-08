@@ -36,6 +36,11 @@ export abstract class SettingsEnforcer {
   }
 
   private static initIPCHandlers() {
+    // Synchronous check used by the preload script to skip polyfill injection
+    // on Cloudflare/CAPTCHA challenge pages.
+    ipcMain.on('is-challenge-page', (event) => {
+      event.returnValue = SettingsEnforcer.isChallengePage(event.sender.id);
+    });
     ipcMain.handle(RendererToMainEventsForBrowserIPC.APPLY_SETTINGS, async () => {
       const settings = SettingsEnforcer.getSettings();
       SettingsEnforcer.applyCookiePolicy(settings);

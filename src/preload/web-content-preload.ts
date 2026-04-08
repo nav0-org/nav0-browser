@@ -316,6 +316,12 @@ const SHARE_POLYFILL_CODE = `
 
 function injectPolyfill(): void {
   try {
+    // Skip injection on Cloudflare/CAPTCHA challenge pages so Turnstile's
+    // environment integrity checks see an unmodified browser environment.
+    try {
+      if (ipcRenderer.sendSync('is-challenge-page')) return;
+    } catch { /* ignore — fall through to inject */ }
+
     // Skip injection on pages with strict CSP that blocks inline scripts.
     // Check for a meta CSP tag; server-sent CSP headers can't be read from
     // the preload, but the try/catch below handles that case silently.
