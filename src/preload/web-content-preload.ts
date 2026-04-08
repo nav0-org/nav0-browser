@@ -319,8 +319,8 @@ const SHARE_POLYFILL_CODE = `
 // because it corrects a browser identity mismatch, not adds new functionality.
 const BROWSER_IDENTITY_PATCH = `
 (function() {
-  if (window.__Nav0IdentityPatched) return;
-  window.__Nav0IdentityPatched = true;
+  if (window.__nav0IdP) return;
+  window.__nav0IdP = 1;
 
   // Ensure window.chrome exists. Electron does not expose this object,
   // but real Chrome always has it. Its absence is a basic bot detection signal.
@@ -412,7 +412,19 @@ function injectPolyfill(): void {
     // Skip functionality polyfills on Cloudflare/CAPTCHA challenge pages so
     // Turnstile's environment integrity checks see unmodified native APIs.
     try {
-      if (ipcRenderer.sendSync('is-challenge-page')) return;
+      if (ipcRenderer.sendSync('is-challenge-page')) {
+        // Clean up non-standard __Nav0* bridge objects exposed by contextBridge
+        // so Turnstile doesn't see custom properties on window.
+        injectScript(`(function(){
+          var props = ['__Nav0Geo','__Nav0Share','__Nav0Notify','__nav0IdP',
+                       '__Nav0GeolocationPatched','__Nav0NotificationPatched','__Nav0SharePatched'];
+          for (var i = 0; i < props.length; i++) {
+            try { Object.defineProperty(window, props[i], {value:undefined,writable:true,configurable:true}); } catch(e) {}
+            try { delete window[props[i]]; } catch(e) {}
+          }
+        })();`);
+        return;
+      }
     } catch { /* ignore — fall through to inject */ }
 
     // Skip injection on pages with strict CSP that blocks inline scripts.
