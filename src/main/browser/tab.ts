@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, Menu, MenuItem, shell, WebContentsView } from "electron";
+import { app, BrowserWindow, dialog, Menu, MenuItem, net, shell, WebContentsView } from "electron";
 import { InAppUrls, DataStoreConstants, MainToRendererEventsForBrowserIPC, WebContentsEvents, STREAMING_SITES } from "../../constants/app-constants";
 import { v4 as uuid } from "uuid";
 import { AppWindow } from "./app-window";
@@ -327,14 +327,38 @@ export class Tab {
     this.webContentsViewInstance.webContents.on(WebContentsEvents.PAGE_FAVICON_UPDATED, async (event, faviconUrls: string[]) => {
       if (this._destroyed) return;
       if(!this.url.startsWith(InAppUrls.PREFIX) && this.url !== '') {
-        this.faviconUrl = faviconUrls[faviconUrls.length - 1];
+        const faviconUrl = faviconUrls[faviconUrls.length - 1];
+        this.faviconUrl = faviconUrl;
+
+        // Fetch the favicon from the main process using net.fetch to avoid
+        // Sec-Fetch-Site/Sec-Fetch-Dest headers that CDNs (e.g. Cloudflare)
+        // use to block cross-site image requests from the renderer's <img> tag.
+        let faviconToSend = faviconUrl;
+        try {
+          if (faviconUrl.startsWith('http')) {
+            const response = await (net.fetch as (input: string, init?: Record<string, unknown>) => Promise<Response>)(
+              faviconUrl,
+              { session: this.webContentsViewInstance?.webContents.session }
+            );
+            if (response.ok) {
+              const contentType = response.headers.get('content-type') || 'image/x-icon';
+              const buffer = Buffer.from(await response.arrayBuffer());
+              faviconToSend = `data:${contentType};base64,${buffer.toString('base64')}`;
+              this.faviconUrl = faviconToSend;
+            }
+          }
+        } catch {
+          // Fall back to the original URL — renderer onerror will handle failures
+        }
+
+        if (this._destroyed) return;
         this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_FAVICON_UPDATED, {
           id: this.id,
-          faviconUrl: this.faviconUrl
+          faviconUrl: faviconToSend
         });
         // Update the history record with the actual favicon
         if(this.lastHistoryRecordId) {
-          await BrowsingHistoryManager.updateRecordFavicon(this.parentAppWindow.id, this.lastHistoryRecordId, this.faviconUrl);
+          await BrowsingHistoryManager.updateRecordFavicon(this.parentAppWindow.id, this.lastHistoryRecordId, faviconToSend);
         }
       }
     });
