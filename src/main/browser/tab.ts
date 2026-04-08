@@ -331,9 +331,10 @@ export class Tab {
         let faviconToSend = faviconUrl;
         try {
           if (faviconUrl.startsWith('http')) {
-            const response = await net.fetch(faviconUrl, {
-              session: this.webContentsViewInstance?.webContents.session
-            });
+            const response = await (net.fetch as (input: string, init?: Record<string, unknown>) => Promise<Response>)(
+              faviconUrl,
+              { session: this.webContentsViewInstance?.webContents.session }
+            );
             if (response.ok) {
               const contentType = response.headers.get('content-type') || 'image/x-icon';
               const buffer = Buffer.from(await response.arrayBuffer());
