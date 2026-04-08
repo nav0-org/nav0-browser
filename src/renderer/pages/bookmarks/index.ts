@@ -221,7 +221,7 @@ async function loadBookmarks(): Promise<void> {
 
   if (allLoadedItems.length === 0 && currentOffset > 0 || (currentOffset === 0 && items.length === 0)) {
     emptyState.style.display = 'block';
-    emptyState.textContent = currentSearchTerm ? `no bookmarks matching "${currentSearchTerm}"` : 'nothing here yet';
+    emptyState.textContent = currentSearchTerm ? `No bookmarks matching "${currentSearchTerm}"` : 'Nothing here yet';
   } else {
     emptyState.style.display = 'none';
   }
@@ -269,14 +269,14 @@ function renderBookmarkItems(items: BookmarkWithStats[]): void {
 
     if (item.type === 'queue') {
       const age = queueAgeLabel(item.createdDate as unknown as string);
-      metaHtml += `<span class="bk-queue-age" style="color: ${age.color}">saved ${age.label}</span>`;
+      metaHtml += `<span class="bk-queue-age" style="color: ${age.color}">Saved ${age.label}</span>`;
     }
 
     if (item.type === 'reference') {
       const daysAgo = daysSince(item.lastVisited);
       if (daysAgo >= 90) {
         const months = Math.floor(daysAgo / 30);
-        metaHtml += `<span class="bk-stale-indicator">${months}mo dormant</span>`;
+        metaHtml += `<span class="bk-stale-indicator">${months}mo Dormant</span>`;
       }
     }
 
@@ -284,11 +284,11 @@ function renderBookmarkItems(items: BookmarkWithStats[]): void {
     metaHtml += `<span class="bk-cat-tag" style="color: ${catColor}; border-color: ${catColor}">${category}</span>`;
 
     // Actions
-    const moveLabel = item.type === 'queue' ? '→ move to reference' : '→ move to queue';
+    const moveLabel = item.type === 'queue' ? 'Move to Reference' : 'Move to Queue';
     const actionsHtml = `
       <div class="bk-row-actions">
         <button class="bk-action-btn move" data-action="move">${moveLabel}</button>
-        <button class="bk-action-btn remove" data-action="remove">remove</button>
+        <button class="bk-action-btn remove" data-action="remove">Remove</button>
       </div>
     `;
 
@@ -353,7 +353,7 @@ function renderBookmarkItems(items: BookmarkWithStats[]): void {
 function updateEmptyState(): void {
   if (allLoadedItems.length === 0) {
     emptyState.style.display = 'block';
-    emptyState.textContent = currentSearchTerm ? `no bookmarks matching "${currentSearchTerm}"` : 'nothing here yet';
+    emptyState.textContent = currentSearchTerm ? `No bookmarks matching "${currentSearchTerm}"` : 'Nothing here yet';
   } else {
     emptyState.style.display = 'none';
   }
@@ -387,8 +387,8 @@ async function showStaleReview(): Promise<void> {
         </div>
       </div>
       <div class="bk-stale-item-actions">
-        <button class="bk-action-btn keep" data-action="keep">keep</button>
-        <button class="bk-action-btn remove" data-action="remove">remove</button>
+        <button class="bk-action-btn keep" data-action="keep">Keep</button>
+        <button class="bk-action-btn remove" data-action="remove">Remove</button>
       </div>
     `;
 
