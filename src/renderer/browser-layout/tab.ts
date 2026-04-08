@@ -61,6 +61,12 @@ export class Tab {
       window.BrowserAPI.showTabContextMenu(appWindowId, this.id, this.isPinned);
     });
 
+    // Set default favicon so the <img> never shows a broken image icon
+    const faviconElement = this.tabElement.querySelector('.tab-favicon') as HTMLImageElement;
+    if (faviconElement) {
+      faviconElement.src = ImageBase64Strings.FAVICON;
+    }
+
     setTimeout(() => {
       createIcons({icons});
     }, 10);
@@ -91,16 +97,14 @@ export class Tab {
   setLoading(isLoading: boolean): void {
     this.isLoading = isLoading;
     if (this.tabElement) {
-      const faviconElement = this.tabElement.querySelector('.tab-favicon') as HTMLImageElement;
+      const faviconElement = this.tabElement.querySelector('.tab-favicon') as HTMLElement;
       const loaderElement = this.tabElement.querySelector('.tab-loader') as HTMLElement;
       if (faviconElement && loaderElement) {
         if (isLoading) {
           faviconElement.style.display = 'none';
           loaderElement.style.display = 'block';
         } else {
-          // Only show the favicon if it has a src set, otherwise keep it hidden
-          // to avoid showing the browser's broken image icon
-          faviconElement.style.display = faviconElement.src ? '' : 'none';
+          faviconElement.style.display = '';
           loaderElement.style.display = 'none';
         }
       }
@@ -121,9 +125,6 @@ export class Tab {
           faviconElement.src = ImageBase64Strings.FAVICON;
         };
         faviconElement.src = faviconUrl;
-        if (!this.isLoading) {
-          faviconElement.style.display = '';
-        }
       }
     }
   }
