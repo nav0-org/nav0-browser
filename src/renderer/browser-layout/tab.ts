@@ -118,7 +118,7 @@ export class Tab {
       if (faviconElement) {
         faviconElement.onerror = () => {
           faviconElement.onerror = null;
-          faviconElement.src = ImageBase64Strings.FAVICON;
+          faviconElement.src = "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>";
         };
         faviconElement.src = faviconUrl;
         if (!this.isLoading) {
