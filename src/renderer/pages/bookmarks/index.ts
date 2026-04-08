@@ -6,11 +6,12 @@ import './index.css';
 import { createIcons, icons } from 'lucide';
 createIcons({ icons });
 
+// --- Category helpers ---
+
 function getCategoryForUrl(url: string): string {
   try {
     const hostname = new URL(url).hostname.replace(/^www\./, '');
     if (BOOKMARK_CATEGORY_MAP[hostname]) return BOOKMARK_CATEGORY_MAP[hostname];
-    // Check parent domains (e.g., blog.privacyguides.org → privacyguides.org)
     const parts = hostname.split('.');
     if (parts.length > 2) {
       const parent = parts.slice(1).join('.');
@@ -34,12 +35,11 @@ function getDomain(url: string): string {
   }
 }
 
-// --- Freshness logic ---
+// --- Freshness / age helpers ---
+
 function daysSince(dateStr: string | null): number {
   if (!dateStr) return Infinity;
-  const now = new Date();
-  const then = new Date(dateStr);
-  return Math.floor((now.getTime() - then.getTime()) / (1000 * 60 * 60 * 24));
+  return Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
 }
 
 function freshnessOpacity(item: BookmarkWithStats): number {
@@ -59,7 +59,6 @@ function freshnessOpacity(item: BookmarkWithStats): number {
 }
 
 function heatColor(visits: number): string {
-  // Indigo scale matching downloads TYPE_COLORS.document (#6366f1)
   if (visits >= 200) return '#4338ca';
   if (visits >= 100) return '#6366f1';
   if (visits >= 50) return '#818cf8';
@@ -68,15 +67,22 @@ function heatColor(visits: number): string {
   return '#e0e7ff';
 }
 
-function queueAgeLabel(createdDate: string): { label: string; color: string } {
+function queueAgeText(createdDate: string): { text: string; color: string } {
   const days = daysSince(createdDate);
-  if (days < 7) return { label: 'this week', color: '#10b981' };   // green — matches downloads code type
-  if (days < 30) return { label: `${Math.floor(days / 7)}w ago`, color: '#a1a1aa' };  // gray — matches downloads other type
-  if (days < 90) return { label: `${Math.floor(days / 30)}mo ago`, color: '#f59e0b' }; // amber — matches downloads installer type
-  return { label: `${Math.floor(days / 30)}mo — still reading this?`, color: '#e74c3c' }; // error-color from global.css
+  if (days < 7) return { text: 'This week', color: '#10b981' };
+  if (days < 30) return { text: `${Math.floor(days / 7)}w ago`, color: '#a1a1aa' };
+  if (days < 90) return { text: `${Math.floor(days / 30)}mo ago`, color: '#f59e0b' };
+  return { text: `${Math.floor(days / 30)}mo ago`, color: '#e74c3c' };
+}
+
+function escapeHtml(str: string): string {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }
 
 // --- State ---
+
 const PAGE_SIZE = 50;
 let activeTab: 'queue' | 'reference' = 'queue';
 let currentSearchTerm = '';
@@ -88,26 +94,33 @@ let allLoadedItems: BookmarkWithStats[] = [];
 let maxVisits = 1;
 
 // --- DOM refs ---
+
+const page = document.getElementById('bookmarks-page') as HTMLElement;
 const bookmarksList = document.getElementById('bookmarks-list') as HTMLElement;
 const searchInput = document.getElementById('search-input') as HTMLInputElement;
-const emptyState = document.getElementById('empty-state') as HTMLElement;
-const loadingIndicator = document.getElementById('loading-indicator') as HTMLElement;
+const noBookmarks = document.getElementById('no-bookmarks') as HTMLElement;
 const queueCountEl = document.getElementById('queue-count') as HTMLElement;
 const referenceCountEl = document.getElementById('reference-count') as HTMLElement;
 const tabQueueBtn = document.getElementById('tab-queue') as HTMLButtonElement;
 const tabReferenceBtn = document.getElementById('tab-reference') as HTMLButtonElement;
-const categoriesContainer = document.getElementById('bk-categories') as HTMLElement;
+const categoryFilters = document.getElementById('category-filters') as HTMLElement;
 const staleBar = document.getElementById('stale-bar') as HTMLElement;
 const staleText = document.getElementById('stale-text') as HTMLElement;
 const staleReviewBtn = document.getElementById('stale-review-btn') as HTMLButtonElement;
 const staleReview = document.getElementById('stale-review') as HTMLElement;
 const staleReviewList = document.getElementById('stale-review-list') as HTMLElement;
 const staleDoneBtn = document.getElementById('stale-done-btn') as HTMLButtonElement;
+const bookmarksFooter = document.getElementById('bookmarks-footer') as HTMLElement;
+const deleteAllBtn = document.getElementById('delete-all') as HTMLButtonElement;
 
 // --- Init ---
+
 document.addEventListener('DOMContentLoaded', async () => {
   await updateCounts();
   await loadBookmarks();
+
+  // Fade in (matches downloads page pattern)
+  requestAnimationFrame(() => page.classList.add('loaded'));
 
   // Tab switching
   tabQueueBtn.addEventListener('click', () => switchTab('queue'));
@@ -120,34 +133,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   }, 300);
   searchInput.addEventListener('input', debouncedSearch);
 
-  // Infinite scroll
-  bookmarksList.addEventListener('scroll', () => {
-    if (isLoading || !hasMore) return;
-    const { scrollTop, scrollHeight, clientHeight } = bookmarksList;
-    if (scrollTop + clientHeight >= scrollHeight - 100) {
-      loadBookmarks();
-    }
-  });
-
   // Stale review
   staleReviewBtn.addEventListener('click', () => showStaleReview());
   staleDoneBtn.addEventListener('click', () => hideStaleReview());
 
-  searchInput.focus();
+  // Clear all
+  deleteAllBtn.addEventListener('click', async () => {
+    await window.BrowserAPI.removeAllBookmarks(window.BrowserAPI.appWindowId);
+    allLoadedItems = [];
+    bookmarksList.innerHTML = '';
+    updateVisibility();
+    updateCounts();
+  });
 });
 
-// --- Functions ---
+// --- Core functions ---
 
 async function updateCounts(): Promise<void> {
-  // Fetch small batch from each type to get total counts
-  // We'll use a large limit to count, but the real count comes from fetching all
-  // Actually, we need a proper count. Let's fetch one item per type to check emptiness,
-  // then use the counts from fetchBookmarksWithStats pagination behavior.
-  // For a proper count, we'll do two fetches with limit=1 and check if results come back.
-  // Better: fetch both types with large limit to count... but that's wasteful.
-  // The cleanest approach: fetch a COUNT from the DB. But we don't have that IPC.
-  // Use the existing fetchBookmarks and count results...
-  // Actually, let's fetch all with a large limit just for counts. This is on a local SQLite DB, so it's fast.
   const queueItems = await window.BrowserAPI.fetchBookmarksWithStats(
     window.BrowserAPI.appWindowId, 'queue', '', 10000, 0
   );
@@ -157,12 +159,12 @@ async function updateCounts(): Promise<void> {
   queueCountEl.textContent = String(queueItems.length);
   referenceCountEl.textContent = String(refItems.length);
 
-  // Check for stale bookmarks (reference items not visited in 6+ months)
+  // Show stale alert for reference tab
   if (activeTab === 'reference') {
     const staleItems = refItems.filter((b: BookmarkWithStats) => daysSince(b.lastVisited) > 180);
     if (staleItems.length > 0) {
-      staleText.textContent = `${staleItems.length} bookmark${staleItems.length > 1 ? 's' : ''} you haven't visited in 6+ months`;
-      staleBar.style.display = 'flex';
+      staleText.textContent = `${staleItems.length} bookmark${staleItems.length > 1 ? 's' : ''} not visited in 6+ months`;
+      staleBar.style.display = 'block';
     } else {
       staleBar.style.display = 'none';
     }
@@ -193,19 +195,13 @@ function resetAndReload(): void {
 async function loadBookmarks(): Promise<void> {
   if (isLoading || !hasMore) return;
   isLoading = true;
-  loadingIndicator.style.display = 'block';
 
   const items: BookmarkWithStats[] = await window.BrowserAPI.fetchBookmarksWithStats(
     window.BrowserAPI.appWindowId, activeTab, currentSearchTerm, PAGE_SIZE, currentOffset
   );
 
-  loadingIndicator.style.display = 'none';
+  if (items.length < PAGE_SIZE) hasMore = false;
 
-  if (items.length < PAGE_SIZE) {
-    hasMore = false;
-  }
-
-  // Filter by category client-side
   let filtered = items;
   if (selectedCategory) {
     filtered = items.filter(b => getCategoryForUrl(b.url) === selectedCategory);
@@ -214,150 +210,157 @@ async function loadBookmarks(): Promise<void> {
   allLoadedItems = allLoadedItems.concat(filtered);
   currentOffset += items.length;
 
-  // Update max visits for heat bar scaling
   for (const item of allLoadedItems) {
     if (item.visits > maxVisits) maxVisits = item.visits;
   }
 
-  if (allLoadedItems.length === 0 && currentOffset > 0 || (currentOffset === 0 && items.length === 0)) {
-    emptyState.style.display = 'block';
-    emptyState.textContent = currentSearchTerm ? `No bookmarks matching "${currentSearchTerm}"` : 'Nothing here yet';
-  } else {
-    emptyState.style.display = 'none';
-  }
-
+  updateVisibility();
   renderBookmarkItems(filtered);
-  updateCategories();
+  updateCategoryPills();
   isLoading = false;
 }
 
-function updateCategories(): void {
+function updateVisibility(): void {
+  if (allLoadedItems.length === 0) {
+    noBookmarks.style.display = 'block';
+    noBookmarks.textContent = currentSearchTerm
+      ? `No bookmarks matching "${currentSearchTerm}".`
+      : 'No bookmarks saved yet.';
+    bookmarksFooter.style.display = 'none';
+  } else {
+    noBookmarks.style.display = 'none';
+    bookmarksFooter.style.display = 'block';
+  }
+}
+
+function updateCategoryPills(): void {
   const cats = new Set<string>();
   allLoadedItems.forEach(b => cats.add(getCategoryForUrl(b.url)));
   const sorted = [...cats].sort();
 
-  categoriesContainer.innerHTML = '';
+  categoryFilters.innerHTML = '';
   for (const cat of sorted) {
     const pill = document.createElement('button');
-    pill.className = 'bk-cat-pill' + (selectedCategory === cat ? ' active' : '');
+    pill.className = 'cat-pill' + (selectedCategory === cat ? ' active' : '');
     pill.textContent = cat;
+    // Set active color to category color
+    if (selectedCategory === cat) {
+      pill.style.background = getCategoryColor(cat);
+    }
     pill.addEventListener('click', () => {
       selectedCategory = selectedCategory === cat ? '' : cat;
       resetAndReload();
     });
-    categoriesContainer.appendChild(pill);
+    categoryFilters.appendChild(pill);
   }
 }
 
-function renderBookmarkItems(items: BookmarkWithStats[]): void {
-  for (const item of items) {
-    const row = document.createElement('div');
-    row.className = 'bk-row';
-    const opacity = freshnessOpacity(item);
-    row.style.opacity = String(opacity);
+// --- Render bookmark rows ---
 
+function renderBookmarkItems(items: BookmarkWithStats[]): void {
+  items.forEach((item, i) => {
+    const row = document.createElement('div');
+    row.className = 'bookmark-item';
+    row.style.transitionDelay = `${i * 0.03}s`;
+
+    const opacity = freshnessOpacity(item);
     const domain = getDomain(item.url);
     const category = getCategoryForUrl(item.url);
+    const catColor = getCategoryColor(category);
 
     // Favicon
     const faviconHtml = item.faviconUrl
       ? `<img src="${item.faviconUrl}" alt="" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>'">`
       : `<i data-lucide="globe" width="16" height="16"></i>`;
 
-    // Meta line
-    let metaHtml = `<span class="bk-row-domain">${domain}</span>`;
-
+    // Title row badges
+    let badgesHtml = '';
     if (item.type === 'queue') {
-      const age = queueAgeLabel(item.createdDate as unknown as string);
-      metaHtml += `<span class="bk-queue-age" style="color: ${age.color}">Saved ${age.label}</span>`;
+      const age = queueAgeText(item.createdDate as unknown as string);
+      badgesHtml += `<span class="badge badge-queue-age" style="background: ${age.color}20; color: ${age.color}">${age.text}</span>`;
     }
-
     if (item.type === 'reference') {
       const daysAgo = daysSince(item.lastVisited);
       if (daysAgo >= 90) {
         const months = Math.floor(daysAgo / 30);
-        metaHtml += `<span class="bk-stale-indicator">${months}mo Dormant</span>`;
+        badgesHtml += `<span class="badge badge-stale">${months}mo dormant</span>`;
       }
     }
-
-    const catColor = getCategoryColor(category);
-    metaHtml += `<span class="bk-cat-tag" style="color: ${catColor}; border-color: ${catColor}">${category}</span>`;
-
-    // Actions
-    const moveLabel = item.type === 'queue' ? 'Move to Reference' : 'Move to Queue';
-    const actionsHtml = `
-      <div class="bk-row-actions">
-        <button class="bk-action-btn move" data-action="move">${moveLabel}</button>
-        <button class="bk-action-btn remove" data-action="remove">Remove</button>
-      </div>
-    `;
+    badgesHtml += `<span class="badge badge-category" style="background: ${catColor}18; color: ${catColor}">${category}</span>`;
 
     // Visit count (reference only)
-    const visitHtml = item.type === 'reference'
-      ? `<span class="bk-visit-count" style="color: ${heatColor(item.visits)}">${item.visits} visits</span>`
+    const visitsHtml = item.type === 'reference'
+      ? `<span class="bookmark-visits" style="color: ${heatColor(item.visits)}">${item.visits} visits</span>`
       : '';
 
     // Heat bar (reference only)
-    const heatBarWidth = item.type === 'reference'
+    const heatWidth = item.type === 'reference'
       ? Math.max(4, (item.visits / maxVisits) * 100)
       : 0;
     const heatBarHtml = item.type === 'reference'
-      ? `<div class="bk-heat-bar" style="width: ${heatBarWidth}%"></div>`
+      ? `<div class="bookmark-heat-bar" style="width: ${heatWidth}%"></div>`
       : '';
 
+    // Move tooltip
+    const moveTitle = item.type === 'queue' ? 'Move to Reference' : 'Move to Queue';
+    const moveIcon = item.type === 'queue' ? 'archive' : 'book-open';
+
     row.innerHTML = `
-      <div class="bk-favicon">${faviconHtml}</div>
-      <div class="bk-row-content">
-        <div class="bk-row-title">${escapeHtml(item.title)}</div>
-        <div class="bk-row-meta">${metaHtml}</div>
-        ${actionsHtml}
+      <div class="bk-favicon" style="opacity: ${opacity}">
+        ${faviconHtml}
       </div>
-      ${visitHtml}
+      <div class="bookmark-content" style="opacity: ${opacity}">
+        <div class="bookmark-title-row">
+          <span class="bookmark-title">${escapeHtml(item.title)}</span>
+          ${badgesHtml}
+        </div>
+        <div class="bookmark-meta">${domain}</div>
+      </div>
+      ${visitsHtml}
+      <div class="bookmark-actions">
+        <button class="action-btn move-btn" title="${moveTitle}" data-action="move">
+          <i data-lucide="${moveIcon}" width="12" height="12"></i>
+        </button>
+        <button class="action-btn remove-btn" title="Remove" data-action="remove">
+          <i data-lucide="x" width="12" height="12"></i>
+        </button>
+      </div>
       ${heatBarHtml}
     `;
 
-    // Event: click content to open
-    row.querySelector('.bk-row-content')?.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      if (target.closest('.bk-action-btn')) return;
+    // Click content → open
+    row.querySelector('.bookmark-content')?.addEventListener('click', () => {
       window.BrowserAPI.createTab(window.BrowserAPI.appWindowId, item.url, true);
     });
 
-    // Event: move
+    // Move
     row.querySelector('[data-action="move"]')?.addEventListener('click', async (e) => {
       e.stopPropagation();
       const newType = item.type === 'queue' ? 'reference' : 'queue';
       await window.BrowserAPI.updateBookmarkType(window.BrowserAPI.appWindowId, item.id, newType);
       row.remove();
       allLoadedItems = allLoadedItems.filter(b => b.id !== item.id);
-      updateEmptyState();
+      updateVisibility();
       updateCounts();
     });
 
-    // Event: remove
+    // Remove
     row.querySelector('[data-action="remove"]')?.addEventListener('click', async (e) => {
       e.stopPropagation();
       await window.BrowserAPI.removeBookmark(window.BrowserAPI.appWindowId, item.id);
       row.remove();
       allLoadedItems = allLoadedItems.filter(b => b.id !== item.id);
-      updateEmptyState();
+      updateVisibility();
       updateCounts();
     });
 
     bookmarksList.appendChild(row);
-  }
+  });
 
   createIcons({ icons });
 }
 
-function updateEmptyState(): void {
-  if (allLoadedItems.length === 0) {
-    emptyState.style.display = 'block';
-    emptyState.textContent = currentSearchTerm ? `No bookmarks matching "${currentSearchTerm}"` : 'Nothing here yet';
-  } else {
-    emptyState.style.display = 'none';
-  }
-}
+// --- Stale review ---
 
 async function showStaleReview(): Promise<void> {
   staleBar.style.display = 'none';
@@ -373,22 +376,24 @@ async function showStaleReview(): Promise<void> {
     const domain = getDomain(item.url);
     const daysAgo = daysSince(item.lastVisited);
     const el = document.createElement('div');
-    el.className = 'bk-stale-item';
+    el.className = 'stale-review-item';
     el.innerHTML = `
-      <div class="bk-stale-item-left">
-        <div class="bk-favicon">
-          ${item.faviconUrl
-            ? `<img src="${item.faviconUrl}" alt="" style="width:16px;height:16px" onerror="this.parentElement.textContent='🌐'">`
-            : '<span>🌐</span>'}
-        </div>
-        <div class="bk-stale-item-info">
-          <div class="bk-stale-item-title">${escapeHtml(item.title)}</div>
-          <div class="bk-stale-item-meta">${domain} · ${item.visits} visits · last visited ${daysAgo === Infinity ? 'never' : daysAgo + ' days ago'}</div>
-        </div>
+      <div class="bk-favicon">
+        ${item.faviconUrl
+          ? `<img src="${item.faviconUrl}" alt="" style="width:16px;height:16px" onerror="this.parentElement.textContent='🌐'">`
+          : '<i data-lucide="globe" width="16" height="16"></i>'}
       </div>
-      <div class="bk-stale-item-actions">
-        <button class="bk-action-btn keep" data-action="keep">Keep</button>
-        <button class="bk-action-btn remove" data-action="remove">Remove</button>
+      <div class="stale-review-content">
+        <div class="stale-review-title">${escapeHtml(item.title)}</div>
+        <div class="stale-review-meta">${domain} · ${item.visits} visits · last visited ${daysAgo === Infinity ? 'never' : daysAgo + ' days ago'}</div>
+      </div>
+      <div class="stale-review-actions">
+        <button class="action-btn" title="Keep" data-action="keep">
+          <i data-lucide="check" width="12" height="12"></i>
+        </button>
+        <button class="action-btn" title="Remove" data-action="remove">
+          <i data-lucide="x" width="12" height="12"></i>
+        </button>
       </div>
     `;
 
@@ -401,21 +406,17 @@ async function showStaleReview(): Promise<void> {
       await window.BrowserAPI.removeBookmark(window.BrowserAPI.appWindowId, item.id);
       el.remove();
       allLoadedItems = allLoadedItems.filter(b => b.id !== item.id);
-      updateEmptyState();
+      updateVisibility();
       updateCounts();
       if (staleReviewList.children.length === 0) hideStaleReview();
     });
 
     staleReviewList.appendChild(el);
   }
+
+  createIcons({ icons });
 }
 
 function hideStaleReview(): void {
   staleReview.style.display = 'none';
-}
-
-function escapeHtml(str: string): string {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
 }

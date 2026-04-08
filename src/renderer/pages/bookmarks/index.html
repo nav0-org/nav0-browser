@@ -5,62 +5,65 @@
   <title>Bookmarks</title>
 </head>
 <body>
-  <div class="bookmarks-page">
+
+<div id="bookmarks-page" class="bookmarks-page">
+  <div class="bookmarks-wrapper">
+
     <!-- Header -->
-    <div class="bk-header">
-      <div class="bk-header-row">
-        <i data-lucide="compass" class="bk-compass-icon" width="20" height="20"></i>
-        <span class="bk-title">Bookmarks</span>
-      </div>
-      <div class="bk-subtitle">Your map of the internet</div>
-    </div>
+    <h1 class="bookmarks-title">Bookmarks</h1>
+    <p class="bookmarks-subtitle">Your saved pages, organized</p>
 
     <!-- Search -->
-    <div class="bk-search-wrap">
-      <input type="text" id="search-input" class="bk-search-input" placeholder="Search bookmarks...">
+    <div class="search-container">
+      <input type="text" id="search-input" class="search-input" placeholder="Search bookmarks...">
+      <i data-lucide="search" class="search-icon" width="16" height="16"></i>
     </div>
 
-    <!-- Tabs -->
-    <div class="bk-tabs" id="bk-tabs">
-      <button class="bk-tab active" id="tab-queue" data-tab="queue">
+    <!-- Tab pills (queue / reference) -->
+    <div class="tab-filters" id="tab-filters">
+      <button class="tab-pill active" id="tab-queue" data-tab="queue">
         Reading Queue (<span id="queue-count">0</span>)
       </button>
-      <button class="bk-tab" id="tab-reference" data-tab="reference">
+      <button class="tab-pill" id="tab-reference" data-tab="reference">
         Reference (<span id="reference-count">0</span>)
       </button>
     </div>
 
-    <!-- Category pills -->
-    <div class="bk-categories" id="bk-categories"></div>
+    <!-- Category filter pills -->
+    <div id="category-filters" class="category-filters"></div>
 
     <!-- Stale bookmarks alert (reference tab only) -->
-    <div class="bk-stale-bar" id="stale-bar" style="display: none;">
-      <span class="bk-stale-text" id="stale-text"></span>
-      <button class="bk-stale-btn" id="stale-review-btn">Review</button>
+    <div class="stale-gauge" id="stale-bar" style="display: none;">
+      <div class="stale-header">
+        <span class="stale-label" id="stale-text"></span>
+        <button class="stale-review-btn" id="stale-review-btn">Review</button>
+      </div>
     </div>
 
     <!-- Stale review panel -->
-    <div class="bk-stale-review" id="stale-review" style="display: none;">
-      <div class="bk-stale-review-header">
+    <div class="stale-review-panel" id="stale-review" style="display: none;">
+      <div class="stale-review-header">
         <span>Dormant bookmarks — keep or let go?</span>
-        <button class="bk-stale-btn" id="stale-done-btn">Done</button>
+        <button class="stale-review-btn" id="stale-done-btn">Done</button>
       </div>
       <div id="stale-review-list"></div>
     </div>
 
     <!-- Bookmarks list -->
-    <div class="bk-list-container">
-      <div id="bookmarks-list" class="bk-list"></div>
-      <div id="empty-state" class="bk-empty" style="display: none;">
-        Nothing here yet
+    <div class="bookmarks-container">
+      <div id="bookmarks-list" class="bookmarks-list"></div>
+      <div id="no-bookmarks" class="no-bookmarks">
+        No bookmarks match your search.
       </div>
-      <div id="loading-indicator" class="bk-loading" style="display: none;">Loading...</div>
     </div>
 
-    <!-- Footer -->
-    <div class="bk-footer">
-      Nav0 · Your web, your map
+    <!-- Clear All -->
+    <div class="bookmarks-footer" id="bookmarks-footer">
+      <button id="delete-all" class="btn-clear-all">Clear All</button>
     </div>
+
   </div>
+</div>
+
 </body>
 </html>

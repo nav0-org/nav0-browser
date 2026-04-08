@@ -1,253 +1,308 @@
 @import url("../../styles/global.css");
 
-/* Bookmarks page accent — uses same indigo as downloads TYPE_COLORS.document (#6366f1) */
-:root {
-  --bk-accent: #6366f1;
-  --bk-accent-faint: #c7d2fe;
-  --bk-accent-bg: #eef2ff;
-}
+/* ==========================================================================
+   Bookmarks Page — Matches Downloads page design scheme
+   ========================================================================== */
 
 .bookmarks-page {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 40px 24px;
-  min-height: 100vh;
-}
-
-/* Header */
-.bk-header {
-  margin-bottom: var(--spacing-lg);
-}
-
-.bk-header-row {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-xs);
-}
-
-.bk-compass-icon {
-  color: var(--text-secondary);
-  flex-shrink: 0;
-}
-
-.bk-title {
-  font-size: var(--font-xxl);
-  font-weight: 600;
-}
-
-.bk-subtitle {
-  font-size: var(--font-sm);
-  color: var(--text-secondary);
-}
-
-/* Search */
-.bk-search-wrap {
-  margin-bottom: var(--spacing-md);
-}
-
-.bk-search-input {
-  width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md);
-  font-size: var(--font-sm);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  outline: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: var(--bg-light);
+  min-height: 100vh;
   color: var(--text-color);
-  transition: border-color var(--transition-fast);
+  opacity: 0;
+  transition: opacity var(--transition-medium) ease;
+}
+
+.bookmarks-page.loaded {
+  opacity: 1;
+}
+
+.bookmarks-wrapper {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 48px 24px 60px;
+}
+
+/* --------------------------------------------------------------------------
+   Header
+   -------------------------------------------------------------------------- */
+.bookmarks-title {
+  font-size: 28px;
+  font-weight: 600;
+  text-align: center;
+  margin: 0 0 6px;
+  color: var(--primary-dark);
+  letter-spacing: -0.3px;
+}
+
+.bookmarks-subtitle {
+  font-size: var(--font-md);
+  color: var(--text-light);
+  text-align: center;
+  margin: 0 0 32px;
+}
+
+/* --------------------------------------------------------------------------
+   Search
+   -------------------------------------------------------------------------- */
+.search-container {
+  position: relative;
+  max-width: 520px;
+  margin: 0 auto 28px;
+}
+
+.search-input {
+  width: 100%;
   box-sizing: border-box;
+  font-size: var(--font-md);
+  padding: 10px 16px 10px 40px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  outline: none;
+  color: var(--text-color);
+  background: var(--bg-light);
+  transition: border-color var(--transition-fast);
 }
 
-.bk-search-input:focus {
-  border-color: var(--bk-accent);
+.search-input:focus {
+  border-color: var(--primary-color);
 }
 
-.bk-search-input::placeholder {
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
   color: var(--text-secondary);
 }
 
-/* Tabs */
-.bk-tabs {
+/* --------------------------------------------------------------------------
+   Tab Filter Pills (Queue / Reference)
+   -------------------------------------------------------------------------- */
+.tab-filters {
   display: flex;
-  gap: 0;
-  margin-bottom: var(--spacing-md);
-  border-bottom: 1px solid var(--border-color);
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
-.bk-tab {
-  padding: var(--spacing-sm) var(--spacing-md);
+.tab-pill {
   font-size: var(--font-sm);
   font-weight: 400;
   color: var(--text-secondary);
-  background: none;
+  background: var(--bg-color);
   border: none;
-  border-bottom: 2px solid transparent;
+  padding: 5px 14px;
+  border-radius: 20px;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-fast) ease;
 }
 
-.bk-tab:hover {
-  color: var(--text-color);
+.tab-pill:hover {
+  background: var(--border-color);
 }
 
-.bk-tab.active {
-  font-weight: 600;
-  color: var(--bk-accent);
-  border-bottom-color: var(--bk-accent);
+.tab-pill.active {
+  font-weight: 500;
+  color: var(--bg-light);
+  background: var(--primary-color);
 }
 
-/* Categories */
-.bk-categories {
+/* --------------------------------------------------------------------------
+   Category Filter Pills
+   -------------------------------------------------------------------------- */
+.category-filters {
   display: flex;
   gap: 6px;
+  justify-content: center;
+  margin-bottom: 28px;
   flex-wrap: wrap;
-  margin-bottom: var(--spacing-md);
 }
 
-.bk-cat-pill {
-  padding: var(--spacing-xs) var(--spacing-sm);
-  font-size: var(--font-xs);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.bk-cat-pill:hover {
-  border-color: var(--border-color-dark);
-  color: var(--text-color);
-}
-
-.bk-cat-pill.active {
-  border-color: var(--bk-accent);
-  background: var(--bk-accent-bg);
-  color: var(--bk-accent);
-}
-
-/* Stale bookmarks bar */
-.bk-stale-bar {
-  margin: 0 0 var(--spacing-lg) 0;
-  padding: 12px var(--spacing-md);
-  background: var(--warning-light);
-  border: 1px solid var(--warning-color);
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.bk-stale-text {
+.cat-pill {
   font-size: var(--font-sm);
-  color: var(--text-color);
-}
-
-.bk-stale-btn {
-  font-size: var(--font-xs);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border: 1px solid var(--warning-color);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--text-color);
+  font-weight: 400;
+  color: var(--text-secondary);
+  background: var(--bg-color);
+  border: none;
+  padding: 5px 14px;
+  border-radius: 20px;
   cursor: pointer;
+  transition: all var(--transition-fast) ease;
 }
 
-.bk-stale-btn:hover {
-  background: var(--warning-color);
+.cat-pill:hover {
+  background: var(--border-color);
+}
+
+.cat-pill.active {
+  font-weight: 500;
   color: var(--bg-light);
 }
 
-/* Stale review panel */
-.bk-stale-review {
-  margin-bottom: var(--spacing-lg);
+/* --------------------------------------------------------------------------
+   Stale Bookmarks Gauge
+   -------------------------------------------------------------------------- */
+.stale-gauge {
+  margin-bottom: 28px;
+  padding: 14px 20px;
+  background: var(--bg-color);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
 }
 
-.bk-stale-review-header {
+.stale-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stale-label {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+}
+
+.stale-review-btn {
   font-size: var(--font-sm);
   color: var(--text-color);
-  margin-bottom: var(--spacing-sm);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  background: var(--bg-light);
+  border: 1px solid var(--border-color);
+  padding: 5px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
 }
 
-.bk-stale-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--warning-light);
-  border-radius: var(--radius-sm);
-  margin-bottom: var(--spacing-xs);
+.stale-review-btn:hover {
+  background: var(--bg-color);
 }
 
-.bk-stale-item-left {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  min-width: 0;
-  flex: 1;
+/* --------------------------------------------------------------------------
+   Stale Review Panel
+   -------------------------------------------------------------------------- */
+.stale-review-panel {
+  margin-bottom: 28px;
 }
 
-.bk-stale-item-info {
-  min-width: 0;
-}
-
-.bk-stale-item-title {
+.stale-review-header {
   font-size: var(--font-sm);
-  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stale-review-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.stale-review-item .bk-favicon {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: var(--bg-color);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stale-review-item .bk-favicon img {
+  width: 16px;
+  height: 16px;
+}
+
+.stale-review-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.stale-review-title {
+  font-size: var(--font-md);
+  color: var(--text-color);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.bk-stale-item-meta {
-  font-size: var(--font-xs);
+.stale-review-meta {
+  font-size: var(--font-sm);
   color: var(--text-secondary);
+  margin-top: 2px;
 }
 
-.bk-stale-item-actions {
+.stale-review-actions {
   display: flex;
-  gap: var(--spacing-xs);
+  gap: 4px;
   flex-shrink: 0;
 }
 
-/* Bookmark list */
-.bk-list-container {
-  min-height: 200px;
+/* --------------------------------------------------------------------------
+   Bookmarks List
+   -------------------------------------------------------------------------- */
+.bookmarks-container {
+  border-top: 1px solid var(--border-color);
 }
 
-.bk-list {
-  max-height: calc(100vh - 350px);
-  overflow-y: auto;
+.bookmarks-list {
+  /* No inner scroll — uses page scroll like downloads */
 }
 
-/* Bookmark row */
-.bk-row {
+.no-bookmarks {
+  text-align: center;
+  padding: 60px 0;
+  color: var(--text-secondary);
+  font-size: var(--font-md);
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Bookmark Row
+   -------------------------------------------------------------------------- */
+.bookmark-item {
   display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-sm);
-  padding: 12px var(--spacing-md);
-  border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
+  align-items: center;
+  gap: 14px;
+  padding: 13px 4px;
   cursor: pointer;
+  background: transparent;
+  border-bottom: 1px solid var(--border-color);
+  transition: background var(--transition-fast) ease;
   position: relative;
 }
 
-.bk-row:hover {
-  background: var(--bg-hover);
+.bookmark-item:hover {
+  background: #fcfcfc;
 }
 
+/* Stagger animation */
+.bookmark-item {
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.25s ease, transform 0.25s ease, background var(--transition-fast) ease;
+}
+
+.bookmarks-page.loaded .bookmark-item {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Favicon icon box — matches download-type-icon */
 .bk-favicon {
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  margin-top: 2px;
+  background: var(--bg-color);
 }
 
 .bk-favicon img {
@@ -256,144 +311,162 @@
   border-radius: 2px;
 }
 
-.bk-row-content {
+.bk-favicon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Content area */
+.bookmark-content {
   flex: 1;
   min-width: 0;
 }
 
-.bk-row-title {
-  font-size: var(--font-sm);
-  font-weight: 500;
+.bookmark-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bookmark-title {
+  font-size: var(--font-md);
   color: var(--text-color);
-  line-height: 1.4;
-  margin-bottom: 2px;
+  font-weight: 400;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.bk-row-meta {
+.bookmark-meta {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  margin-top: 2px;
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: 8px;
   flex-wrap: wrap;
 }
 
-.bk-row-domain {
-  font-size: var(--font-xs);
-  color: var(--text-secondary);
-}
-
-.bk-queue-age {
-  font-size: var(--font-xs);
-}
-
-.bk-stale-indicator {
-  font-size: var(--font-xs);
-  color: var(--error-color);
-  background: var(--error-light);
-  padding: 1px 6px;
-  border-radius: var(--radius-sm);
-}
-
-.bk-cat-tag {
+/* Badges — same as downloads */
+.badge {
   font-size: 10px;
-  color: var(--text-secondary);
-  border: 1px solid var(--border-color);
-  padding: 0 5px;
-  border-radius: 2px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
-/* Hover actions */
-.bk-row-actions {
-  display: none;
-  margin-top: var(--spacing-xs);
-  gap: var(--spacing-xs);
-}
-
-.bk-row:hover .bk-row-actions {
-  display: flex;
-}
-
-.bk-action-btn {
-  font-size: var(--font-xs);
-  padding: 2px var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  cursor: pointer;
-  transition: background var(--transition-fast);
-}
-
-.bk-action-btn.move {
-  border: 1px solid var(--bk-accent);
-  color: var(--bk-accent);
-}
-
-.bk-action-btn.move:hover {
-  background: var(--bk-accent-bg);
-}
-
-.bk-action-btn.remove {
-  border: 1px solid var(--error-color);
+.badge-stale {
+  background: var(--error-light);
   color: var(--error-color);
 }
 
-.bk-action-btn.remove:hover {
-  background: var(--error-light);
+.badge-queue-age {
+  font-weight: 500;
 }
 
-.bk-action-btn.keep {
-  border: 1px solid var(--success-color);
-  color: var(--success-color);
+.badge-category {
+  font-weight: 500;
 }
 
-.bk-action-btn.keep:hover {
-  background: var(--success-light);
-}
-
-/* Visit count (reference) */
-.bk-visit-count {
-  font-size: var(--font-xs);
-  font-weight: 600;
-  min-width: 48px;
-  text-align: right;
+/* Visit count column — matches download-size */
+.bookmark-visits {
   flex-shrink: 0;
-  margin-top: 2px;
+  text-align: right;
+  min-width: 80px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 600;
 }
 
-/* Heat bar */
-.bk-heat-bar {
+/* Row actions — matches download-actions */
+.bookmark-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.action-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-light);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--text-secondary);
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.action-btn:hover {
+  color: var(--text-color);
+  border-color: var(--border-color-dark);
+}
+
+.action-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Hide actions until hover */
+.action-btn.move-btn,
+.action-btn.remove-btn {
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.bookmark-item:hover .action-btn.move-btn,
+.bookmark-item:hover .action-btn.remove-btn {
+  opacity: 1;
+}
+
+/* Heat bar — thin gradient at bottom of reference rows */
+.bookmark-heat-bar {
   position: absolute;
   left: 0;
   bottom: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--bk-accent-faint), var(--bk-accent));
+  background: linear-gradient(90deg, #c7d2fe, #6366f1);
   border-radius: 1px;
   transition: width var(--transition-medium) ease;
 }
 
-/* Empty state */
-.bk-empty {
+/* --------------------------------------------------------------------------
+   Clear All Footer
+   -------------------------------------------------------------------------- */
+.bookmarks-footer {
   text-align: center;
-  padding: var(--spacing-xxl) var(--spacing-md);
-  color: var(--text-secondary);
-  font-size: var(--font-sm);
+  margin-top: 28px;
+  display: none;
 }
 
-/* Loading */
-.bk-loading {
+.btn-clear-all {
+  font-size: 13px;
+  color: var(--text-color);
+  background: var(--bg-light);
+  border: 1px solid var(--border-color);
+  padding: 8px 28px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.btn-clear-all:hover {
+  background: var(--bg-color);
+}
+
+/* --------------------------------------------------------------------------
+   Loading Indicator
+   -------------------------------------------------------------------------- */
+.loading-indicator {
   text-align: center;
   padding: var(--spacing-sm);
   color: var(--text-secondary);
   font-size: var(--font-sm);
-}
-
-/* Footer */
-.bk-footer {
-  margin-top: var(--spacing-xxl);
-  padding-top: var(--spacing-md);
-  border-top: 1px solid var(--border-color);
-  font-size: var(--font-xs);
-  color: var(--border-color);
-  text-align: center;
 }
