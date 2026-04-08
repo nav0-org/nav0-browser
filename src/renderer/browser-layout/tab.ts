@@ -91,14 +91,16 @@ export class Tab {
   setLoading(isLoading: boolean): void {
     this.isLoading = isLoading;
     if (this.tabElement) {
-      const faviconElement = this.tabElement.querySelector('.tab-favicon') as HTMLElement;
+      const faviconElement = this.tabElement.querySelector('.tab-favicon') as HTMLImageElement;
       const loaderElement = this.tabElement.querySelector('.tab-loader') as HTMLElement;
       if (faviconElement && loaderElement) {
         if (isLoading) {
           faviconElement.style.display = 'none';
           loaderElement.style.display = 'block';
         } else {
-          faviconElement.style.display = '';
+          // Only show the favicon if it has a src set, otherwise keep it hidden
+          // to avoid showing the browser's broken image icon
+          faviconElement.style.display = faviconElement.src ? '' : 'none';
           loaderElement.style.display = 'none';
         }
       }
@@ -119,6 +121,9 @@ export class Tab {
           faviconElement.src = ImageBase64Strings.FAVICON;
         };
         faviconElement.src = faviconUrl;
+        if (!this.isLoading) {
+          faviconElement.style.display = '';
+        }
       }
     }
   }
