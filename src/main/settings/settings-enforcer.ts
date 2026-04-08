@@ -9,6 +9,15 @@ export abstract class SettingsEnforcer {
   private static autoDeleteInterval: ReturnType<typeof setInterval> | null = null;
   private static readonly AUTO_DELETE_CHECK_MS = 6 * 60 * 60 * 1000; // 6 hours
 
+  // Tracks webContentsIds whose current main-frame navigation is a
+  // Cloudflare/CAPTCHA challenge page. Ad-blocker injection is skipped
+  // for these pages so the verification scripts can run unmodified.
+  private static challengePageIds = new Set<number>();
+
+  /** Returns true if the given webContents is currently on a challenge page. */
+  public static isChallengePage(webContentsId: number): boolean {
+    return SettingsEnforcer.challengePageIds.has(webContentsId);
+  }
 
   public static async init() {
     SettingsEnforcer.initIPCHandlers();
@@ -85,8 +94,8 @@ export abstract class SettingsEnforcer {
           if (!headers) { callback({}); return; }
           delete headers['set-cookie'];
           delete headers['Set-Cookie'];
-          // Also handle PDF inline display
           SettingsEnforcer.applyPdfInlineHeaders(headers);
+          SettingsEnforcer.detectChallengePage(details, headers);
           callback({ responseHeaders: headers });
         });
         continue;
@@ -154,6 +163,9 @@ export abstract class SettingsEnforcer {
         // --- PDF inline display ---
         SettingsEnforcer.applyPdfInlineHeaders(headers);
 
+        // --- Challenge page detection ---
+        SettingsEnforcer.detectChallengePage(details, headers);
+
         callback({ responseHeaders: headers });
       });
     }
@@ -164,6 +176,28 @@ export abstract class SettingsEnforcer {
    * inline in the browser instead of triggering a download.
    * Mutates the headers object in place.
    */
+  /**
+   * Detects Cloudflare/CAPTCHA challenge pages from main-frame responses and
+   * tracks them so the ad-blocker can skip script injection on those pages.
+   */
+  private static detectChallengePage(
+    details: { resourceType?: string; webContentsId?: number; statusCode?: number },
+    headers: Record<string, string[]>
+  ): void {
+    if (details.resourceType === 'mainFrame' && details.webContentsId) {
+      SettingsEnforcer.challengePageIds.delete(details.webContentsId);
+      if (details.statusCode === 403 || details.statusCode === 503) {
+        const serverValues = headers['server'] || headers['Server'] || [];
+        const cfMitigated = headers['cf-mitigated'] || headers['Cf-Mitigated'] || [];
+        const isCloudflare = serverValues.some(v => v.toLowerCase().includes('cloudflare'));
+        const isChallengeResponse = cfMitigated.length > 0;
+        if (isCloudflare || isChallengeResponse) {
+          SettingsEnforcer.challengePageIds.add(details.webContentsId);
+        }
+      }
+    }
+  }
+
   private static applyPdfInlineHeaders(headers: Record<string, string[]>): void {
     let isPdf = false;
     for (const key of Object.keys(headers)) {

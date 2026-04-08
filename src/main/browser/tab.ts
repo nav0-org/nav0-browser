@@ -13,6 +13,7 @@ import { PermissionManager } from "./permission-manager";
 import { ReaderModeManager, ReaderModeState } from "./reader-mode-manager";
 import { DataStoreManager } from "../database/data-store-manager";
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
+import { SettingsEnforcer } from "../settings/settings-enforcer";
 import { COSMETIC_FILTER_CSS, AD_BLOCK_EARLY_SCRIPT, AD_BLOCK_SCRIPT } from "../ad-blocker/ad-block-lists";
 import { SSLManager } from "./ssl-manager";
 import { buildErrorPageScript, NavigationError } from "./error-page/error-page";
@@ -557,6 +558,7 @@ export class Tab {
   private injectAdBlockEarlyScript(url: string): void {
     if (!this.isAdBlockAllowed(url)) return;
     if (Tab.isStreamingSite(url)) return;
+    if (SettingsEnforcer.isChallengePage(this.webContentsViewInstance.webContents.id)) return;
     const wc = this.webContentsViewInstance.webContents;
     wc.executeJavaScript(AD_BLOCK_EARLY_SCRIPT).catch(() => {});
   }
@@ -568,6 +570,7 @@ export class Tab {
   private injectAdBlockDOMScript(): void {
     if (!this.isAdBlockAllowed()) return;
     if (Tab.isStreamingSite(this.url)) return;
+    if (SettingsEnforcer.isChallengePage(this.webContentsViewInstance.webContents.id)) return;
     const wc = this.webContentsViewInstance.webContents;
     wc.insertCSS(COSMETIC_FILTER_CSS).catch(() => {});
     wc.executeJavaScript(AD_BLOCK_SCRIPT).catch(() => {});
