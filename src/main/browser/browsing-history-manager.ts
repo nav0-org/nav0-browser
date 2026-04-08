@@ -48,7 +48,7 @@ export abstract class BrowsingHistoryManager {
     const stmt = db.prepare("INSERT INTO browsingHistory (id, url, title, createdDate, topLevelDomain, faviconUrl) VALUES (?, ?, ?, ?, ?, ?);");
     const id = uuid();
     const result = await stmt.run(id, url, title, new Date().toISOString(), topLevelDomain, faviconUrl);
-    const newlyCreatedRecord: BrowsingHistoryRecord = { id: id, url, title, createdDate: new Date(), topLevelDomain, faviconUrl };
+    const newlyCreatedRecord: BrowsingHistoryRecord = { id: id, url, title, createdDate: new Date(), topLevelDomain, faviconUrl, totalDuration: 0, activeDuration: 0 };
     return newlyCreatedRecord;
   }
 
@@ -74,7 +74,7 @@ export abstract class BrowsingHistoryManager {
       }
       const id = uuid();
       insertStmt.run(id, url, title, now, topLevelDomain, faviconUrl);
-      return { id, url, title, createdDate: new Date(now), topLevelDomain, faviconUrl } as BrowsingHistoryRecord;
+      return { id, url, title, createdDate: new Date(now), topLevelDomain, faviconUrl, totalDuration: 0, activeDuration: 0 } as BrowsingHistoryRecord;
     });
 
     return upsert(url, title, topLevelDomain, faviconUrl);
