@@ -341,15 +341,20 @@
           <label class="setting-label">User Agent</label>
           <p class="setting-description">Controls how this browser identifies itself to websites. Some sites may serve different content based on the browser identity.</p>
           <select id="user-agent-select" class="form-select">
+            <option value="chrome-windows">Chrome on Windows</option>
+            <option value="chrome-mac">Chrome on macOS</option>
+            <option value="chrome-linux">Chrome on Linux</option>
             <option value="firefox-windows">Firefox on Windows</option>
             <option value="firefox-mac">Firefox on macOS</option>
             <option value="firefox-linux">Firefox on Linux</option>
-            <option value="chrome-windows">Chrome on Windows</option>
-            <option value="chrome-mac">Chrome on macOS</option>
             <option value="safari-mac">Safari on macOS</option>
             <option value="edge-windows">Edge on Windows</option>
             <option value="custom">Custom...</option>
           </select>
+          <div class="alert alert-warning" id="ua-warning" style="display: none; margin-top: 8px;">
+            Choosing a user agent that doesn't match the browser engine (Chromium) may cause websites to break or trigger bot detection on some sites.
+          </div>
+          <button id="ua-restore-default" class="btn btn-secondary" style="display: none; margin-top: 8px;">Restore to default</button>
           <div id="custom-ua-container" class="sub-setting" style="display: none;">
             <label class="setting-label">Custom User Agent String</label>
             <input type="text" id="custom-ua-input" class="form-input" placeholder="Enter your custom user agent string...">

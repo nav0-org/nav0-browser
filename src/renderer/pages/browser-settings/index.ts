@@ -662,18 +662,23 @@ function initUserAgentSettings() {
   const customContainer = document.getElementById('custom-ua-container');
   const customInput = document.getElementById('custom-ua-input') as HTMLInputElement;
   const preview = document.getElementById('ua-preview');
+  const warning = document.getElementById('ua-warning');
+  const restoreBtn = document.getElementById('ua-restore-default') as HTMLButtonElement;
+
+  const defaultPreset = process.platform === 'darwin' ? 'chrome-mac' : process.platform === 'linux' ? 'chrome-linux' : 'chrome-windows';
 
   // Set initial values
-  const defaultPreset = process.platform === 'darwin' ? 'firefox-mac' : process.platform === 'linux' ? 'firefox-linux' : 'firefox-windows';
   select.value = settings.userAgentPreset || defaultPreset;
   customInput.value = settings.userAgentCustomValue || '';
   customContainer.style.display = select.value === 'custom' ? '' : 'none';
   updateUAPreview();
+  updateUAWarning();
 
   select.addEventListener('change', () => {
     settings.userAgentPreset = select.value as BrowserSettings['userAgentPreset'];
     customContainer.style.display = select.value === 'custom' ? '' : 'none';
     updateUAPreview();
+    updateUAWarning();
     saveSettings();
     showToast('User agent updated');
   });
@@ -685,6 +690,16 @@ function initUserAgentSettings() {
     showToast('Custom user agent saved');
   });
 
+  restoreBtn.addEventListener('click', () => {
+    select.value = defaultPreset;
+    settings.userAgentPreset = defaultPreset as BrowserSettings['userAgentPreset'];
+    customContainer.style.display = 'none';
+    updateUAPreview();
+    updateUAWarning();
+    saveSettings();
+    showToast('User agent restored to default');
+  });
+
   function updateUAPreview() {
     const preset = select.value;
     let ua: string;
@@ -694,6 +709,14 @@ function initUserAgentSettings() {
       ua = USER_AGENT_PRESETS[preset]?.value || navigator.userAgent;
     }
     preview.textContent = `Current: ${ua}`;
+  }
+
+  function updateUAWarning() {
+    const preset = select.value;
+    const isDefault = preset === defaultPreset;
+    const isChromiumCompatible = preset.startsWith('chrome-') || preset === 'edge-windows';
+    warning.style.display = !isChromiumCompatible && preset !== 'custom' ? '' : 'none';
+    restoreBtn.style.display = isDefault ? 'none' : '';
   }
 }
 
