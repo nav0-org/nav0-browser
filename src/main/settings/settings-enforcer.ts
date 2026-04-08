@@ -191,12 +191,20 @@ export abstract class SettingsEnforcer {
   ): void {
     if (details.resourceType === 'mainFrame' && details.webContentsId) {
       SettingsEnforcer.challengePageIds.delete(details.webContentsId);
+
+      // Check for cf-mitigated header (set on any Cloudflare challenge, regardless of status code)
+      const cfMitigated = headers['cf-mitigated'] || headers['Cf-Mitigated'] || [];
+      if (cfMitigated.some(v => v.toLowerCase().includes('challenge'))) {
+        SettingsEnforcer.challengePageIds.add(details.webContentsId);
+        return;
+      }
+
+      // Check for Cloudflare challenge responses (403/503 from Cloudflare)
       if (details.statusCode === 403 || details.statusCode === 503) {
         const serverValues = headers['server'] || headers['Server'] || [];
-        const cfMitigated = headers['cf-mitigated'] || headers['Cf-Mitigated'] || [];
-        const isCloudflare = serverValues.some(v => v.toLowerCase().includes('cloudflare'));
-        const isChallengeResponse = cfMitigated.length > 0;
-        if (isCloudflare || isChallengeResponse) {
+        const cfRay = headers['cf-ray'] || headers['Cf-Ray'] || headers['CF-RAY'] || [];
+        const isCloudflare = serverValues.some(v => v.toLowerCase().includes('cloudflare')) || cfRay.length > 0;
+        if (isCloudflare) {
           SettingsEnforcer.challengePageIds.add(details.webContentsId);
         }
       }
