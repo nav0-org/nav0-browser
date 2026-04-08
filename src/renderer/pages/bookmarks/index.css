@@ -4,11 +4,9 @@
 :root {
   --bk-accent: #4338ca;
   --bk-accent-light: #6366f1;
-  --bk-accent-lighter: #818cf8;
   --bk-accent-subtle: #a5b4fc;
   --bk-accent-faint: #c7d2fe;
   --bk-accent-bg: #eef2ff;
-  --bk-accent-ghost: #e0e7ff;
   --bk-stale-color: #dc2626;
   --bk-stale-bg: #fef2f2;
   --bk-warn-color: #92400e;
@@ -16,29 +14,25 @@
   --bk-warn-border: #fde68a;
   --bk-green: #16a34a;
   --bk-amber: #f59e0b;
-  --bk-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', ui-monospace, monospace;
 }
 
 .bookmarks-page {
-  font-family: var(--bk-mono);
   max-width: 800px;
   margin: 0 auto;
   padding: 40px 24px;
-  background: var(--bg-color);
   min-height: 100vh;
-  color: var(--text-color);
 }
 
 /* Header */
 .bk-header {
-  margin-bottom: 32px;
+  margin-bottom: var(--spacing-lg);
 }
 
 .bk-header-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 6px;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
 }
 
 .bk-compass-icon {
@@ -47,36 +41,30 @@
 }
 
 .bk-title {
-  font-size: var(--font-md);
+  font-size: var(--font-xxl);
   font-weight: 600;
-  letter-spacing: 1.5px;
-  text-transform: lowercase;
-  color: var(--text-color);
 }
 
 .bk-subtitle {
-  font-size: var(--font-xs);
+  font-size: var(--font-sm);
   color: var(--text-secondary);
-  letter-spacing: 0.5px;
 }
 
 /* Search */
 .bk-search-wrap {
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-md);
 }
 
 .bk-search-input {
   width: 100%;
-  padding: 12px 16px;
-  font-size: 13px;
-  font-family: var(--bk-mono);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-sm);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   outline: none;
   background: var(--bg-light);
   color: var(--text-color);
-  letter-spacing: 0.3px;
-  transition: border-color 0.2s;
+  transition: border-color var(--transition-fast);
   box-sizing: border-box;
 }
 
@@ -92,23 +80,20 @@
 .bk-tabs {
   display: flex;
   gap: 0;
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-md);
   border-bottom: 1px solid var(--border-color);
 }
 
 .bk-tab {
-  padding: 10px 20px;
-  font-size: var(--font-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-sm);
   font-weight: 400;
-  letter-spacing: 1px;
-  text-transform: lowercase;
   color: var(--text-secondary);
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
   cursor: pointer;
-  font-family: var(--bk-mono);
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
 }
 
 .bk-tab:hover {
@@ -126,20 +111,18 @@
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-md);
 }
 
 .bk-cat-pill {
-  padding: 3px 10px;
-  font-size: 10px;
-  font-family: var(--bk-mono);
-  letter-spacing: 0.5px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-xs);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all var(--transition-fast);
 }
 
 .bk-cat-pill:hover {
@@ -155,8 +138,8 @@
 
 /* Stale bookmarks bar */
 .bk-stale-bar {
-  margin: 0 0 24px 0;
-  padding: 14px 18px;
+  margin: 0 0 var(--spacing-lg) 0;
+  padding: 12px var(--spacing-md);
   background: var(--bk-warn-bg);
   border: 1px solid var(--bk-warn-border);
   border-radius: var(--radius-md);
@@ -166,21 +149,18 @@
 }
 
 .bk-stale-text {
-  font-size: var(--font-xs);
+  font-size: var(--font-sm);
   color: var(--bk-warn-color);
-  letter-spacing: 0.3px;
 }
 
 .bk-stale-btn {
-  font-size: 10px;
-  font-family: var(--bk-mono);
-  padding: 4px 12px;
+  font-size: var(--font-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
   border: 1px solid var(--bk-amber);
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--bk-warn-color);
   cursor: pointer;
-  letter-spacing: 0.5px;
 }
 
 .bk-stale-btn:hover {
@@ -189,14 +169,13 @@
 
 /* Stale review panel */
 .bk-stale-review {
-  margin-bottom: 24px;
+  margin-bottom: var(--spacing-lg);
 }
 
 .bk-stale-review-header {
-  font-size: var(--font-xs);
+  font-size: var(--font-sm);
   color: var(--bk-warn-color);
-  margin-bottom: 12px;
-  letter-spacing: 0.3px;
+  margin-bottom: var(--spacing-sm);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -206,16 +185,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
+  padding: var(--spacing-sm) var(--spacing-md);
   background: var(--bk-warn-bg);
   border-radius: var(--radius-sm);
-  margin-bottom: 4px;
+  margin-bottom: var(--spacing-xs);
 }
 
 .bk-stale-item-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--spacing-sm);
   min-width: 0;
   flex: 1;
 }
@@ -233,13 +212,13 @@
 }
 
 .bk-stale-item-meta {
-  font-size: 10px;
+  font-size: var(--font-xs);
   color: var(--text-secondary);
 }
 
 .bk-stale-item-actions {
   display: flex;
-  gap: 4px;
+  gap: var(--spacing-xs);
   flex-shrink: 0;
 }
 
@@ -257,16 +236,16 @@
 .bk-row {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 14px 16px;
+  gap: var(--spacing-sm);
+  padding: 12px var(--spacing-md);
   border-radius: var(--radius-md);
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
   cursor: pointer;
   position: relative;
 }
 
 .bk-row:hover {
-  background: var(--primary-light);
+  background: var(--bg-hover);
 }
 
 .bk-favicon {
@@ -291,11 +270,11 @@
 }
 
 .bk-row-title {
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 500;
   color: var(--text-color);
   line-height: 1.4;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -304,46 +283,40 @@
 .bk-row-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-sm);
   flex-wrap: wrap;
 }
 
 .bk-row-domain {
-  font-size: 10px;
+  font-size: var(--font-xs);
   color: var(--text-secondary);
-  letter-spacing: 0.3px;
 }
 
 .bk-queue-age {
-  font-size: 10px;
-  font-family: var(--bk-mono);
-  letter-spacing: 0.3px;
+  font-size: var(--font-xs);
 }
 
 .bk-stale-indicator {
-  font-size: 10px;
-  font-family: var(--bk-mono);
+  font-size: var(--font-xs);
   color: var(--bk-stale-color);
   background: var(--bk-stale-bg);
   padding: 1px 6px;
   border-radius: var(--radius-sm);
-  letter-spacing: 0.5px;
 }
 
 .bk-cat-tag {
-  font-size: 9px;
+  font-size: 10px;
   color: var(--text-secondary);
   border: 1px solid var(--border-color);
   padding: 0 5px;
   border-radius: 2px;
-  letter-spacing: 0.3px;
 }
 
 /* Hover actions */
 .bk-row-actions {
   display: none;
-  margin-top: 6px;
-  gap: 4px;
+  margin-top: var(--spacing-xs);
+  gap: var(--spacing-xs);
 }
 
 .bk-row:hover .bk-row-actions {
@@ -351,14 +324,12 @@
 }
 
 .bk-action-btn {
-  font-size: 9px;
-  font-family: var(--bk-mono);
-  padding: 2px 8px;
+  font-size: var(--font-xs);
+  padding: 2px var(--spacing-sm);
   border-radius: var(--radius-sm);
   background: transparent;
   cursor: pointer;
-  letter-spacing: 0.5px;
-  transition: background 0.15s;
+  transition: background var(--transition-fast);
 }
 
 .bk-action-btn.move {
@@ -390,8 +361,7 @@
 
 /* Visit count (reference) */
 .bk-visit-count {
-  font-size: 10px;
-  font-family: var(--bk-mono);
+  font-size: var(--font-xs);
   font-weight: 600;
   min-width: 48px;
   text-align: right;
@@ -407,16 +377,15 @@
   height: 2px;
   background: linear-gradient(90deg, var(--bk-accent-faint), var(--bk-accent));
   border-radius: 1px;
-  transition: width 0.3s ease;
+  transition: width var(--transition-medium) ease;
 }
 
 /* Empty state */
 .bk-empty {
   text-align: center;
-  padding: 60px 20px;
+  padding: var(--spacing-xxl) var(--spacing-md);
   color: var(--text-secondary);
   font-size: var(--font-sm);
-  letter-spacing: 0.5px;
 }
 
 /* Loading */
@@ -429,12 +398,10 @@
 
 /* Footer */
 .bk-footer {
-  margin-top: 48px;
-  padding-top: 16px;
+  margin-top: var(--spacing-xxl);
+  padding-top: var(--spacing-md);
   border-top: 1px solid var(--border-color);
-  font-size: 10px;
+  font-size: var(--font-xs);
   color: var(--border-color);
-  letter-spacing: 1px;
   text-align: center;
-  text-transform: lowercase;
 }
