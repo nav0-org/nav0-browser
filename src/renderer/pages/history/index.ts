@@ -317,16 +317,21 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
 
   const time = new Date(entry.createdDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const faviconUrl = entry.faviconUrl || `https://${entry.topLevelDomain}/favicon.ico`;
+  const hasDuration = (entry.activeDuration || 0) > 0 || (entry.totalDuration || 0) > 0;
+
+  const durationHtml = hasDuration
+    ? `<div class="entry-duration">
+        <span class="entry-active-dur" title="active time">${FormatUtils.formatDuration(entry.activeDuration || 0)}</span>
+        <span class="entry-total-dur" title="total time">${FormatUtils.formatDuration(entry.totalDuration || 0)}</span>
+      </div>`
+    : '';
 
   row.innerHTML = `
     <span class="entry-time">${time}</span>
     <span class="entry-favicon"><img src="${faviconUrl}" width="14" height="14" onerror="this.parentElement.innerHTML='<span class=\\'entry-favicon-fallback\\'>&#x1F310;</span>'"></span>
     <span class="entry-title" title="${escapeHtml(entry.title)}">${escapeHtml(entry.title)}</span>
     <span class="entry-domain">${escapeHtml(entry.topLevelDomain)}</span>
-    <div class="entry-duration">
-      <span class="entry-active-dur" title="active time">${FormatUtils.formatDuration(entry.activeDuration || 0)}</span>
-      <span class="entry-total-dur" title="total time">${FormatUtils.formatDuration(entry.totalDuration || 0)}</span>
-    </div>
+    ${durationHtml}
     <button class="entry-delete-btn"><i data-lucide="x" width="12" height="12"></i></button>
   `;
 
@@ -535,6 +540,9 @@ function renderSparkline(): void {
   const values = dailyData.map(d => hasActiveData ? d.active : d.count);
   const maxVal = Math.max(...values, 1);
 
+  const sparkLabel = document.getElementById('sparkline-label');
+  if (sparkLabel) sparkLabel.textContent = hasActiveData ? 'active time \u00b7 14 days' : 'page visits \u00b7 14 days';
+
   // Use viewBox coordinates; actual size determined by CSS width:100%
   const vw = 300, vh = 80;
   const padTop = 8, padBot = 20, padX = 4;
@@ -599,22 +607,31 @@ function renderDomainChart(): void {
     }
   }
 
+  const totalActive = Array.from(map.values()).reduce((a, d) => a + d.active, 0);
+  const useTime = totalActive > 0;
+
   const sorted = Array.from(map.values())
-    .sort((a, b) => b.active - a.active)
+    .sort((a, b) => useTime ? b.active - a.active : b.visits - a.visits)
     .slice(0, 8);
 
-  const maxActive = Math.max(...sorted.map(d => d.active), 1);
+  const label = document.getElementById('domain-chart-label');
+  if (label) label.textContent = useTime ? 'top sites \u00b7 active time' : 'top sites \u00b7 visits';
 
-  domainChartContainer.innerHTML = sorted.map(d => `
+  const maxVal = Math.max(...sorted.map(d => useTime ? d.active : d.visits), 1);
+
+  domainChartContainer.innerHTML = sorted.map(d => {
+    const val = useTime ? d.active : d.visits;
+    const valLabel = useTime ? FormatUtils.formatDuration(d.active) : `${d.visits}`;
+    return `
     <div class="domain-row">
       <span class="domain-favicon"><img src="${d.faviconUrl}" width="14" height="14" onerror="this.parentElement.className='domain-favicon-fallback';this.parentElement.innerHTML='&#x1F310;'"></span>
       <span class="domain-name">${escapeHtml(d.domain)}</span>
       <div class="domain-bar-track">
-        <div class="domain-bar-fill" style="width:${(d.active / maxActive) * 100}%"></div>
+        <div class="domain-bar-fill" style="width:${(val / maxVal) * 100}%"></div>
       </div>
-      <span class="domain-duration">${FormatUtils.formatDuration(d.active)}</span>
-    </div>
-  `).join('');
+      <span class="domain-duration">${valLabel}</span>
+    </div>`;
+  }).join('');
 }
 
 // --- Category Pie Chart ---
@@ -640,6 +657,9 @@ function renderCategoryChart(): void {
   const cats = Array.from(catMap.entries())
     .sort((a, b) => b[1] - a[1])
     .map(([cat, val]) => ({ cat, dur: val, pct: (val / total) * 100 }));
+
+  const catLabel = document.getElementById('category-label');
+  if (catLabel) catLabel.textContent = useDuration ? 'time by category' : 'visits by category';
 
   // SVG donut chart
   const radius = 32, circ = 2 * Math.PI * radius;
