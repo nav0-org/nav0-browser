@@ -9,17 +9,6 @@ export abstract class SettingsEnforcer {
   private static autoDeleteInterval: ReturnType<typeof setInterval> | null = null;
   private static readonly AUTO_DELETE_CHECK_MS = 6 * 60 * 60 * 1000; // 6 hours
 
-  // Verification / CAPTCHA domains whose cookies must always be allowed as
-  // third-party so that challenge iframes can complete successfully.
-  private static readonly VERIFICATION_COOKIE_DOMAINS: string[] = [
-    'challenges.cloudflare.com',    // Cloudflare Turnstile
-    'cloudflare.com',               // Cloudflare general verification
-    'hcaptcha.com',                 // hCaptcha
-    'google.com',                   // reCAPTCHA
-    'recaptcha.net',                // reCAPTCHA alternate domain
-    'gstatic.com',                  // reCAPTCHA resources
-    'token.awswaf.com',             // AWS WAF Bot Control
-  ];
 
   public static async init() {
     SettingsEnforcer.initIPCHandlers();
@@ -137,14 +126,15 @@ export abstract class SettingsEnforcer {
             if (isThirdParty) {
               const requestDomain = requestUrl.hostname.toLowerCase();
 
-              // Always allow cookies from verification/CAPTCHA domains so
-              // challenge iframes (Turnstile, reCAPTCHA, hCaptcha, etc.) work
-              const isVerificationDomain = SettingsEnforcer.VERIFICATION_COOKIE_DOMAINS.some(d =>
-                requestDomain === d || requestDomain.endsWith('.' + d)
-              );
+              // Check the always-allow list (verification/CAPTCHA domains)
+              const alwaysAllow = (settings.cookieAlwaysAllowDomains || []);
+              const isAlwaysAllowed = alwaysAllow.some(d => {
+                const domain = d.toLowerCase().trim();
+                return requestDomain === domain || requestDomain.endsWith('.' + domain);
+              });
 
-              // Check user-configured exceptions
-              let isExempt = isVerificationDomain;
+              // Check user-configured exceptions (block-with-exceptions mode)
+              let isExempt = isAlwaysAllowed;
               if (!isExempt && settings.cookiePolicy === 'block-with-exceptions') {
                 isExempt = settings.cookieExceptions.some(exception => {
                   const exDomain = exception.toLowerCase().trim();

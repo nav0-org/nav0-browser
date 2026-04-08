@@ -96,6 +96,17 @@
             </label>
           </div>
 
+          <!-- Always Allow List -->
+          <div id="cookie-always-allow-container" class="sub-setting" style="display: none;">
+            <label class="setting-label">Always Allow List</label>
+            <p class="setting-description">Cookies from these domains are always allowed, even as third-party. This ensures verification challenges (CAPTCHAs) and login flows work correctly.</p>
+            <div id="cookie-always-allow-list" class="items-list"></div>
+            <div class="add-item-form">
+              <input type="text" id="cookie-always-allow-input" class="form-input" placeholder="e.g., accounts.google.com">
+              <button class="btn btn-sm btn-secondary" id="add-cookie-always-allow-btn"><i data-lucide="plus" width="14" height="14"></i> Add</button>
+            </div>
+          </div>
+
           <!-- Cookie Exceptions -->
           <div id="cookie-exceptions-container" class="sub-setting" style="display: none;">
             <label class="setting-label">Cookie Exceptions</label>

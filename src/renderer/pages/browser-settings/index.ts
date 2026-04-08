@@ -232,6 +232,7 @@ function renderCustomEngines() {
 function initCookieSettings() {
   const radios = document.querySelectorAll('input[name="cookie-policy"]') as NodeListOf<HTMLInputElement>;
   const exceptionsContainer = document.getElementById('cookie-exceptions-container');
+  const alwaysAllowContainer = document.getElementById('cookie-always-allow-container');
   const blockAllToggle = document.getElementById('block-all-cookies-toggle') as HTMLInputElement;
   const clearOnCloseToggle = document.getElementById('clear-cookies-close-toggle') as HTMLInputElement;
   const clearCookiesBtn = document.getElementById('clear-cookies-btn');
@@ -241,15 +242,19 @@ function initCookieSettings() {
   blockAllToggle.checked = settings.blockAllCookies || false;
   clearOnCloseToggle.checked = settings.clearCookiesOnClose || false;
 
-  // Show/hide exceptions
-  if (settings.cookiePolicy === 'block-with-exceptions') {
-    exceptionsContainer.style.display = '';
-  }
+  // Show/hide sub-lists based on policy
+  const showCookieSublists = () => {
+    const policy = settings.cookiePolicy;
+    const blocksThirdParty = policy === 'block-all-third-party' || policy === 'block-with-exceptions';
+    alwaysAllowContainer.style.display = blocksThirdParty ? '' : 'none';
+    exceptionsContainer.style.display = policy === 'block-with-exceptions' ? '' : 'none';
+  };
+  showCookieSublists();
 
   radios.forEach(radio => {
     radio.addEventListener('change', () => {
       settings.cookiePolicy = radio.value as BrowserSettings['cookiePolicy'];
-      exceptionsContainer.style.display = radio.value === 'block-with-exceptions' ? '' : 'none';
+      showCookieSublists();
       saveSettings();
       showToast('Cookie policy updated');
     });
@@ -263,6 +268,22 @@ function initCookieSettings() {
   clearOnCloseToggle.addEventListener('change', () => {
     settings.clearCookiesOnClose = clearOnCloseToggle.checked;
     saveSettings();
+  });
+
+  // Always-allow list
+  renderCookieAlwaysAllow();
+
+  document.getElementById('add-cookie-always-allow-btn')?.addEventListener('click', () => {
+    const input = document.getElementById('cookie-always-allow-input') as HTMLInputElement;
+    const domain = input.value.trim();
+    if (!domain) return;
+    if (!settings.cookieAlwaysAllowDomains) settings.cookieAlwaysAllowDomains = [...DEFAULT_BROWSER_SETTINGS.cookieAlwaysAllowDomains];
+    if (settings.cookieAlwaysAllowDomains.indexOf(domain) === -1) {
+      settings.cookieAlwaysAllowDomains.push(domain);
+      saveSettings();
+      input.value = '';
+      renderCookieAlwaysAllow();
+    }
   });
 
   // Cookie exceptions
@@ -310,6 +331,38 @@ async function updateCookieCount() {
       display.textContent = `${result.count} cookies stored.`;
     }
   } catch { /* ignore */ }
+}
+
+function renderCookieAlwaysAllow() {
+  const container = document.getElementById('cookie-always-allow-list');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const defaults = DEFAULT_BROWSER_SETTINGS.cookieAlwaysAllowDomains;
+  const domains = settings.cookieAlwaysAllowDomains || [...defaults];
+
+  domains.forEach((domain, idx) => {
+    const isBuiltIn = defaults.indexOf(domain) !== -1;
+    const item = document.createElement('div');
+    item.className = 'list-item';
+    item.innerHTML = `
+      <div class="list-item-content">
+        <span class="list-item-text">${domain}</span>
+        ${isBuiltIn ? '<span class="list-item-description">Built-in</span>' : ''}
+      </div>
+      <div class="list-item-actions">
+        <button class="list-item-btn" title="Remove"><i data-lucide="x" width="14" height="14"></i></button>
+      </div>
+    `;
+    item.querySelector('.list-item-btn')?.addEventListener('click', () => {
+      settings.cookieAlwaysAllowDomains.splice(idx, 1);
+      saveSettings();
+      renderCookieAlwaysAllow();
+    });
+    container.appendChild(item);
+  });
+
+  createIcons({ icons });
 }
 
 function renderCookieExceptions() {

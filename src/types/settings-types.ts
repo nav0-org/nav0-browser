@@ -38,6 +38,7 @@ export interface BrowserSettings {
   // Privacy - Cookies
   cookiePolicy: 'block-all-third-party' | 'block-with-exceptions' | 'allow-all';
   cookieExceptions: string[];
+  cookieAlwaysAllowDomains: string[];
   blockAllCookies: boolean;
   clearCookiesOnClose: boolean;
 
@@ -236,6 +237,15 @@ export const DEFAULT_BROWSER_SETTINGS: BrowserSettings = {
   // Privacy - Cookies (strict by default)
   cookiePolicy: 'block-all-third-party',
   cookieExceptions: [],
+  cookieAlwaysAllowDomains: [
+    'challenges.cloudflare.com',    // Cloudflare Turnstile
+    'cloudflare.com',               // Cloudflare general verification
+    'hcaptcha.com',                 // hCaptcha
+    'google.com',                   // reCAPTCHA
+    'recaptcha.net',                // reCAPTCHA alternate domain
+    'gstatic.com',                  // reCAPTCHA resources
+    'token.awswaf.com',             // AWS WAF Bot Control
+  ],
   blockAllCookies: false,
   clearCookiesOnClose: false,
 
