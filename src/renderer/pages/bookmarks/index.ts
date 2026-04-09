@@ -151,10 +151,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function updateCounts(): Promise<void> {
   const queueItems = await window.BrowserAPI.fetchBookmarksWithStats(
-    window.BrowserAPI.appWindowId, 'queue', '', 10000, 0
+    window.BrowserAPI.appWindowId, 'queue', currentSearchTerm, 10000, 0
   );
   const refItems = await window.BrowserAPI.fetchBookmarksWithStats(
-    window.BrowserAPI.appWindowId, 'reference', '', 10000, 0
+    window.BrowserAPI.appWindowId, 'reference', currentSearchTerm, 10000, 0
   );
   queueCountEl.textContent = String(queueItems.length);
   referenceCountEl.textContent = String(refItems.length);
@@ -190,6 +190,7 @@ function resetAndReload(): void {
   maxVisits = 1;
   bookmarksList.innerHTML = '';
   loadBookmarks();
+  updateCounts();
 }
 
 async function loadBookmarks(): Promise<void> {
@@ -241,11 +242,17 @@ function updateCategoryPills(): void {
   categoryFilters.innerHTML = '';
   for (const cat of sorted) {
     const pill = document.createElement('button');
-    pill.className = 'cat-pill' + (selectedCategory === cat ? ' active' : '');
+    const catColor = getCategoryColor(cat);
+    const isActive = selectedCategory === cat;
+    pill.className = 'cat-pill' + (isActive ? ' active' : '');
     pill.textContent = cat;
-    // Set active color to category color
-    if (selectedCategory === cat) {
-      pill.style.background = getCategoryColor(cat);
+    // Always show category color — active: white on color, inactive: color on tinted bg
+    if (isActive) {
+      pill.style.background = catColor;
+      pill.style.color = '#fff';
+    } else {
+      pill.style.background = catColor + '15';
+      pill.style.color = catColor;
     }
     pill.addEventListener('click', () => {
       selectedCategory = selectedCategory === cat ? '' : cat;
