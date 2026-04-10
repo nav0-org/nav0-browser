@@ -314,8 +314,119 @@ const SHARE_POLYFILL_CODE = `
 })();
 `;
 
+// Browser identity patch: makes navigator.userAgentData report Chrome brands
+// instead of Electron. This is always injected (including on challenge pages)
+// because it corrects a browser identity mismatch, not adds new functionality.
+const BROWSER_IDENTITY_PATCH = `
+(function() {
+  if (window.__nav0IdP) return;
+  window.__nav0IdP = 1;
+
+  // Ensure window.chrome exists. Electron does not expose this object,
+  // but real Chrome always has it. Its absence is a basic bot detection signal.
+  try {
+    if (!window.chrome) {
+      window.chrome = {};
+    }
+    if (!window.chrome.runtime) {
+      window.chrome.runtime = {
+        connect: function() { return { onMessage: { addListener: function(){} }, postMessage: function(){}, onDisconnect: { addListener: function(){} } }; },
+        sendMessage: function() {},
+        id: undefined
+      };
+    }
+    if (!window.chrome.csi) {
+      window.chrome.csi = function() { return { startE: Date.now(), onloadT: Date.now(), pageT: Date.now() - performance.timing.navigationStart, tran: 15 }; };
+    }
+    if (!window.chrome.loadTimes) {
+      window.chrome.loadTimes = function() { return { commitLoadTime: Date.now() / 1000, connectionInfo: 'h2', finishDocumentLoadTime: Date.now() / 1000, finishLoadTime: Date.now() / 1000, firstPaintAfterLoadTime: 0, firstPaintTime: Date.now() / 1000, navigationType: 'Other', npnNegotiatedProtocol: 'h2', requestTime: Date.now() / 1000 - 0.1, startLoadTime: Date.now() / 1000 - 0.1, wasAlternateProtocolAvailable: false, wasFetchedViaSpdy: true, wasNpnNegotiated: true }; };
+    }
+  } catch(e) {}
+
+  // Patch navigator.userAgentData to report Chrome instead of Electron.
+  // Electron includes "Electron" in the brands list, which bot-detection
+  // scripts (Cloudflare Turnstile, etc.) flag as non-standard.
+  try {
+    var ua = navigator.userAgent || '';
+    var chromeMatch = ua.match(/Chrome\\/(\\d+)/);
+    if (chromeMatch && navigator.userAgentData) {
+      var majorVersion = chromeMatch[1];
+      var fakeBrands = [
+        { brand: 'Chromium', version: majorVersion },
+        { brand: 'Google Chrome', version: majorVersion },
+        { brand: 'Not-A.Brand', version: '99' }
+      ];
+      var fakeMobile = navigator.userAgentData.mobile || false;
+      var fakePlatform = navigator.userAgentData.platform || 'Unknown';
+
+      Object.defineProperty(navigator, 'userAgentData', {
+        get: function() {
+          return {
+            brands: fakeBrands,
+            mobile: fakeMobile,
+            platform: fakePlatform,
+            getHighEntropyValues: function(hints) {
+              return Promise.resolve({
+                brands: fakeBrands,
+                mobile: fakeMobile,
+                platform: fakePlatform,
+                uaFullVersion: majorVersion + '.0.0.0',
+                fullVersionList: fakeBrands.map(function(b) { return { brand: b.brand, version: b.version + '.0.0.0' }; }),
+                architecture: 'x86',
+                bitness: '64',
+                model: '',
+                platformVersion: '10.0.0',
+                wow64: false
+              });
+            },
+            toJSON: function() {
+              return { brands: fakeBrands, mobile: fakeMobile, platform: fakePlatform };
+            }
+          };
+        },
+        configurable: true
+      });
+    }
+  } catch(e) {}
+})();
+`;
+
+function injectScript(code: string): void {
+  try {
+    const blob = new Blob([code], { type: 'application/javascript' });
+    const blobUrl = URL.createObjectURL(blob);
+    const script = document.createElement('script');
+    script.src = blobUrl;
+    script.onload = () => { URL.revokeObjectURL(blobUrl); script.remove(); };
+    script.onerror = () => { URL.revokeObjectURL(blobUrl); script.remove(); };
+    (document.head || document.documentElement).appendChild(script);
+  } catch { /* ignore */ }
+}
+
 function injectPolyfill(): void {
   try {
+    // Always inject browser identity patches (including on challenge pages)
+    // to correct Electron's userAgentData which exposes "Electron" in brands.
+    injectScript(BROWSER_IDENTITY_PATCH);
+
+    // Skip functionality polyfills on Cloudflare/CAPTCHA challenge pages so
+    // Turnstile's environment integrity checks see unmodified native APIs.
+    try {
+      if (ipcRenderer.sendSync('is-challenge-page')) {
+        // Clean up non-standard __Nav0* bridge objects exposed by contextBridge
+        // so Turnstile doesn't see custom properties on window.
+        injectScript(`(function(){
+          var props = ['__Nav0Geo','__Nav0Share','__Nav0Notify','__nav0IdP',
+                       '__Nav0GeolocationPatched','__Nav0NotificationPatched','__Nav0SharePatched'];
+          for (var i = 0; i < props.length; i++) {
+            try { Object.defineProperty(window, props[i], {value:undefined,writable:true,configurable:true}); } catch(e) {}
+            try { delete window[props[i]]; } catch(e) {}
+          }
+        })();`);
+        return;
+      }
+    } catch { /* ignore — fall through to inject */ }
+
     // Skip injection on pages with strict CSP that blocks inline scripts.
     // Check for a meta CSP tag; server-sent CSP headers can't be read from
     // the preload, but the try/catch below handles that case silently.
@@ -328,22 +439,7 @@ function injectPolyfill(): void {
     }
 
     const code = POLYFILL_CODE + SHARE_POLYFILL_CODE + NOTIFICATION_POLYFILL_CODE;
-
-    // Use a blob URL instead of inline script to avoid CSP violations.
-    // Blob URLs are allowed by most CSPs that include 'blob:' in script-src.
-    const blob = new Blob([code], { type: 'application/javascript' });
-    const blobUrl = URL.createObjectURL(blob);
-    const script = document.createElement('script');
-    script.src = blobUrl;
-    script.onload = () => {
-      URL.revokeObjectURL(blobUrl);
-      script.remove();
-    };
-    script.onerror = () => {
-      URL.revokeObjectURL(blobUrl);
-      script.remove();
-    };
-    (document.head || document.documentElement).appendChild(script);
+    injectScript(code);
   } catch {
     // Ignore injection errors
   }

@@ -9,6 +9,16 @@ export abstract class SettingsEnforcer {
   private static autoDeleteInterval: ReturnType<typeof setInterval> | null = null;
   private static readonly AUTO_DELETE_CHECK_MS = 6 * 60 * 60 * 1000; // 6 hours
 
+  // Tracks webContentsIds whose current main-frame navigation is a
+  // Cloudflare/CAPTCHA challenge page. Ad-blocker injection is skipped
+  // for these pages so the verification scripts can run unmodified.
+  private static challengePageIds = new Set<number>();
+
+  /** Returns true if the given webContents is currently on a challenge page. */
+  public static isChallengePage(webContentsId: number): boolean {
+    return SettingsEnforcer.challengePageIds.has(webContentsId);
+  }
+
   public static async init() {
     SettingsEnforcer.initIPCHandlers();
     const settings = SettingsEnforcer.getSettings();
@@ -26,6 +36,11 @@ export abstract class SettingsEnforcer {
   }
 
   private static initIPCHandlers() {
+    // Synchronous check used by the preload script to skip polyfill injection
+    // on Cloudflare/CAPTCHA challenge pages.
+    ipcMain.on('is-challenge-page', (event) => {
+      event.returnValue = SettingsEnforcer.isChallengePage(event.sender.id);
+    });
     ipcMain.handle(RendererToMainEventsForBrowserIPC.APPLY_SETTINGS, async () => {
       const settings = SettingsEnforcer.getSettings();
       SettingsEnforcer.applyCookiePolicy(settings);
@@ -58,80 +73,162 @@ export abstract class SettingsEnforcer {
     });
   }
 
-  // ---- Cookie Policy Enforcement ----
+  // ---- Cookie Policy & Response Header Enforcement ----
+  // This single onHeadersReceived handler manages both cookie policy
+  // and PDF inline display to avoid conflicting listeners on the same session.
   private static applyCookiePolicy(settings: BrowserSettings) {
-    const ses = session.fromPartition('persist:browsertabs');
-    // Remove existing listeners to prevent duplicates
-    ses.webRequest.onBeforeSendHeaders(null);
-    ses.webRequest.onHeadersReceived(null);
+    const sessions = [
+      session.fromPartition('persist:browsertabs'),
+      session.fromPartition('persist:private'),
+    ];
 
-    if (settings.blockAllCookies) {
-      // Block all cookies
-      ses.webRequest.onBeforeSendHeaders((details, callback) => {
-        const headers = { ...details.requestHeaders };
-        delete headers['Cookie'];
-        callback({ requestHeaders: headers });
-      });
-      ses.webRequest.onHeadersReceived((details, callback) => {
-        const headers = { ...details.responseHeaders };
-        delete headers['set-cookie'];
-        delete headers['Set-Cookie'];
-        callback({ responseHeaders: headers });
-      });
-      return;
-    }
+    for (const ses of sessions) {
+      // Remove existing listeners to prevent duplicates
+      ses.webRequest.onBeforeSendHeaders(null);
+      ses.webRequest.onHeadersReceived(null);
 
-    if (settings.cookiePolicy === 'block-all-third-party' || settings.cookiePolicy === 'block-with-exceptions') {
+      if (settings.blockAllCookies) {
+        // Block all cookies
+        ses.webRequest.onBeforeSendHeaders((details, callback) => {
+          const headers = { ...details.requestHeaders };
+          delete headers['Cookie'];
+          callback({ requestHeaders: headers });
+        });
+        ses.webRequest.onHeadersReceived((details, callback) => {
+          const headers = { ...details.responseHeaders };
+          if (!headers) { callback({}); return; }
+          delete headers['set-cookie'];
+          delete headers['Set-Cookie'];
+          SettingsEnforcer.applyPdfInlineHeaders(headers);
+          SettingsEnforcer.detectChallengePage(details, headers);
+          callback({ responseHeaders: headers });
+        });
+        continue;
+      }
+
+      const blockThirdParty = settings.cookiePolicy === 'block-all-third-party' || settings.cookiePolicy === 'block-with-exceptions';
+
+      // Always register onHeadersReceived so PDF inline display works
+      // regardless of cookie policy setting
       ses.webRequest.onHeadersReceived((details, callback) => {
         if (!details.responseHeaders) {
           callback({});
           return;
         }
 
-        const setCookieHeaders = details.responseHeaders['set-cookie'] || details.responseHeaders['Set-Cookie'];
-        if (!setCookieHeaders) {
-          callback({ responseHeaders: details.responseHeaders });
-          return;
-        }
+        let headers = details.responseHeaders;
 
-        // Determine if this is a third-party request
-        const requestUrl = new URL(details.url);
-        const frameUrl = details.frame?.url || details.referrer || '';
-        let isThirdParty = false;
+        // --- Third-party cookie blocking ---
+        if (blockThirdParty) {
+          const setCookieHeaders = headers['set-cookie'] || headers['Set-Cookie'];
+          if (setCookieHeaders) {
+            const requestUrl = new URL(details.url);
+            const frameUrl = details.frame?.url || details.referrer || '';
+            let isThirdParty = false;
 
-        if (frameUrl) {
-          try {
-            const frameUrlObj = new URL(frameUrl);
-            const requestDomain = SettingsEnforcer.getRegistrableDomain(requestUrl.hostname);
-            const frameDomain = SettingsEnforcer.getRegistrableDomain(frameUrlObj.hostname);
-            isThirdParty = requestDomain !== frameDomain;
-          } catch {
-            // If we can't parse, allow it
-          }
-        }
+            if (frameUrl) {
+              try {
+                const frameUrlObj = new URL(frameUrl);
+                const requestDomain = SettingsEnforcer.getRegistrableDomain(requestUrl.hostname);
+                const frameDomain = SettingsEnforcer.getRegistrableDomain(frameUrlObj.hostname);
+                isThirdParty = requestDomain !== frameDomain;
+              } catch {
+                // If we can't parse, allow it
+              }
+            }
 
-        if (isThirdParty) {
-          // Check exceptions
-          if (settings.cookiePolicy === 'block-with-exceptions') {
-            const requestDomain = requestUrl.hostname.toLowerCase();
-            const isExempt = settings.cookieExceptions.some(exception => {
-              const exDomain = exception.toLowerCase().trim();
-              return requestDomain === exDomain || requestDomain.endsWith('.' + exDomain);
-            });
-            if (isExempt) {
-              callback({ responseHeaders: details.responseHeaders });
-              return;
+            if (isThirdParty) {
+              const requestDomain = requestUrl.hostname.toLowerCase();
+
+              // Check the always-allow list (verification/CAPTCHA domains)
+              const alwaysAllow = (settings.cookieAlwaysAllowDomains || []);
+              const isAlwaysAllowed = alwaysAllow.some(d => {
+                const domain = d.toLowerCase().trim();
+                return requestDomain === domain || requestDomain.endsWith('.' + domain);
+              });
+
+              // Check user-configured exceptions (block-with-exceptions mode)
+              let isExempt = isAlwaysAllowed;
+              if (!isExempt && settings.cookiePolicy === 'block-with-exceptions') {
+                isExempt = settings.cookieExceptions.some(exception => {
+                  const exDomain = exception.toLowerCase().trim();
+                  return requestDomain === exDomain || requestDomain.endsWith('.' + exDomain);
+                });
+              }
+
+              if (!isExempt) {
+                headers = { ...headers };
+                delete headers['set-cookie'];
+                delete headers['Set-Cookie'];
+              }
             }
           }
-          // Block third-party cookies
-          const headers = { ...details.responseHeaders };
-          delete headers['set-cookie'];
-          delete headers['Set-Cookie'];
-          callback({ responseHeaders: headers });
-        } else {
-          callback({ responseHeaders: details.responseHeaders });
         }
+
+        // --- PDF inline display ---
+        SettingsEnforcer.applyPdfInlineHeaders(headers);
+
+        // --- Challenge page detection ---
+        SettingsEnforcer.detectChallengePage(details, headers);
+
+        callback({ responseHeaders: headers });
       });
+    }
+  }
+
+  /**
+   * Removes Content-Disposition headers from PDF responses so they display
+   * inline in the browser instead of triggering a download.
+   * Mutates the headers object in place.
+   */
+  /**
+   * Detects Cloudflare/CAPTCHA challenge pages from main-frame responses and
+   * tracks them so the ad-blocker can skip script injection on those pages.
+   */
+  private static detectChallengePage(
+    details: { resourceType?: string; webContentsId?: number; statusCode?: number },
+    headers: Record<string, string[]>
+  ): void {
+    if (details.resourceType === 'mainFrame' && details.webContentsId) {
+      SettingsEnforcer.challengePageIds.delete(details.webContentsId);
+
+      // Check for cf-mitigated header (set on any Cloudflare challenge, regardless of status code)
+      const cfMitigated = headers['cf-mitigated'] || headers['Cf-Mitigated'] || [];
+      if (cfMitigated.some(v => v.toLowerCase().includes('challenge'))) {
+        SettingsEnforcer.challengePageIds.add(details.webContentsId);
+        return;
+      }
+
+      // Check for Cloudflare challenge responses (403/503 from Cloudflare)
+      if (details.statusCode === 403 || details.statusCode === 503) {
+        const serverValues = headers['server'] || headers['Server'] || [];
+        const cfRay = headers['cf-ray'] || headers['Cf-Ray'] || headers['CF-RAY'] || [];
+        const isCloudflare = serverValues.some(v => v.toLowerCase().includes('cloudflare')) || cfRay.length > 0;
+        if (isCloudflare) {
+          SettingsEnforcer.challengePageIds.add(details.webContentsId);
+        }
+      }
+    }
+  }
+
+  private static applyPdfInlineHeaders(headers: Record<string, string[]>): void {
+    let isPdf = false;
+    for (const key of Object.keys(headers)) {
+      if (key.toLowerCase() === 'content-type') {
+        const value = (headers[key]?.[0] || '').toLowerCase();
+        if (value.includes('application/pdf')) {
+          isPdf = true;
+        }
+        break;
+      }
+    }
+
+    if (isPdf) {
+      for (const key of Object.keys(headers)) {
+        if (key.toLowerCase() === 'content-disposition') {
+          delete headers[key];
+        }
+      }
     }
   }
 

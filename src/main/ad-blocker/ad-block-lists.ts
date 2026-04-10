@@ -646,9 +646,18 @@ div[class*="ima-"],
 [id*="clmb"],
 [class*="clmb"],
 
-/* Generic high z-index overlays (ad wrappers) */
-[style*="z-index: 2147483647"],
-[style*="z-index:2147483647"] {
+/* Generic high z-index overlays (ad wrappers) — only target elements with ad-related classes.
+   Avoid hiding legitimate overlays (CAPTCHA, verification challenges, etc.) */
+[style*="z-index: 2147483647"][class*="ad-"],
+[style*="z-index: 2147483647"][class*="ad_"],
+[style*="z-index: 2147483647"][class*="ads-"],
+[style*="z-index: 2147483647"][id*="ad-"],
+[style*="z-index: 2147483647"][id*="ad_"],
+[style*="z-index:2147483647"][class*="ad-"],
+[style*="z-index:2147483647"][class*="ad_"],
+[style*="z-index:2147483647"][class*="ads-"],
+[style*="z-index:2147483647"][id*="ad-"],
+[style*="z-index:2147483647"][id*="ad_"] {
   display: none !important;
   height: 0 !important;
   min-height: 0 !important;
@@ -1019,6 +1028,25 @@ export const AD_BLOCK_EARLY_SCRIPT = `
 
     return el;
   };
+
+  // ============================================================
+  // 4. Preserve native toString() for overridden functions
+  //    Bot-detection scripts call fn.toString() and check for
+  //    "[native code]". Patch Function.prototype.toString so our
+  //    overrides pass that check.
+  // ============================================================
+  try {
+    var nativeToString = Function.prototype.toString;
+    var toStringOverrides = new Map();
+    toStringOverrides.set(document.createElement, 'function createElement() { [native code] }');
+    toStringOverrides.set(HTMLMediaElement.prototype.play, 'function play() { [native code] }');
+    Function.prototype.toString = function() {
+      if (toStringOverrides.has(this)) return toStringOverrides.get(this);
+      return nativeToString.call(this);
+    };
+    // Hide the toString override itself
+    toStringOverrides.set(Function.prototype.toString, 'function toString() { [native code] }');
+  } catch(e) {}
 })();
 `;
 
@@ -1272,11 +1300,18 @@ export const AD_BLOCK_SCRIPT = `
           if (rect.width > window.innerWidth * 0.4 && rect.height > window.innerHeight * 0.25) {
             var id = (el.id || '').toLowerCase();
             var cls = (el.className && typeof el.className === 'string') ? el.className.toLowerCase() : '';
-            // Skip legitimate modals
+            // Skip legitimate modals and verification/CAPTCHA overlays
             if (cls.indexOf('cookie') > -1 || cls.indexOf('consent') > -1 ||
                 cls.indexOf('login') > -1 || cls.indexOf('signup') > -1 || cls.indexOf('paywall') > -1 ||
+                cls.indexOf('captcha') > -1 || cls.indexOf('challenge') > -1 ||
+                cls.indexOf('verification') > -1 || cls.indexOf('turnstile') > -1 ||
+                cls.indexOf('hcaptcha') > -1 || cls.indexOf('recaptcha') > -1 ||
+                cls.indexOf('cf-') > -1 || cls.indexOf('awswaf') > -1 ||
                 id.indexOf('cookie') > -1 || id.indexOf('consent') > -1 ||
-                id.indexOf('login') > -1) continue;
+                id.indexOf('login') > -1 ||
+                id.indexOf('captcha') > -1 || id.indexOf('challenge') > -1 ||
+                id.indexOf('verification') > -1 || id.indexOf('turnstile') > -1 ||
+                id.indexOf('cf-') > -1 || id.indexOf('awswaf') > -1) continue;
             hideElement(el);
             // Also remove any backdrop/scrim behind it
             if (el.previousElementSibling) {
