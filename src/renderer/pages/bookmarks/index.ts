@@ -86,7 +86,8 @@ function escapeHtml(str: string): string {
 const PAGE_SIZE = 50;
 let activeTab: 'queue' | 'reference' = 'queue';
 let currentSearchTerm = '';
-let selectedCategory = '';
+let selectedCategories: Set<string> = new Set();
+let availableCategories: string[] = [];
 let currentOffset = 0;
 let isLoading = false;
 let hasMore = true;
@@ -159,6 +160,13 @@ async function updateCounts(): Promise<void> {
   queueCountEl.textContent = String(queueItems.length);
   referenceCountEl.textContent = String(refItems.length);
 
+  // Derive available categories from the full unfiltered result set for the active tab
+  const sourceItems = activeTab === 'queue' ? queueItems : refItems;
+  const cats = new Set<string>();
+  sourceItems.forEach((b: BookmarkWithStats) => cats.add(getCategoryForUrl(b.url)));
+  availableCategories = [...cats].sort();
+  renderCategoryPills();
+
   // Show stale alert for reference tab
   if (activeTab === 'reference') {
     const staleItems = refItems.filter((b: BookmarkWithStats) => daysSince(b.lastVisited) > 180);
@@ -177,7 +185,7 @@ function switchTab(tab: 'queue' | 'reference'): void {
   activeTab = tab;
   tabQueueBtn.classList.toggle('active', tab === 'queue');
   tabReferenceBtn.classList.toggle('active', tab === 'reference');
-  selectedCategory = '';
+  selectedCategories.clear();
   hideStaleReview();
   resetAndReload();
   updateCounts();
@@ -204,8 +212,8 @@ async function loadBookmarks(): Promise<void> {
   if (items.length < PAGE_SIZE) hasMore = false;
 
   let filtered = items;
-  if (selectedCategory) {
-    filtered = items.filter(b => getCategoryForUrl(b.url) === selectedCategory);
+  if (selectedCategories.size > 0) {
+    filtered = items.filter(b => selectedCategories.has(getCategoryForUrl(b.url)));
   }
 
   allLoadedItems = allLoadedItems.concat(filtered);
@@ -217,7 +225,6 @@ async function loadBookmarks(): Promise<void> {
 
   updateVisibility();
   renderBookmarkItems(filtered);
-  updateCategoryPills();
   isLoading = false;
 }
 
@@ -234,16 +241,12 @@ function updateVisibility(): void {
   }
 }
 
-function updateCategoryPills(): void {
-  const cats = new Set<string>();
-  allLoadedItems.forEach(b => cats.add(getCategoryForUrl(b.url)));
-  const sorted = [...cats].sort();
-
+function renderCategoryPills(): void {
   categoryFilters.innerHTML = '';
-  for (const cat of sorted) {
+  for (const cat of availableCategories) {
     const pill = document.createElement('button');
     const catColor = getCategoryColor(cat);
-    const isActive = selectedCategory === cat;
+    const isActive = selectedCategories.has(cat);
     pill.className = 'cat-pill' + (isActive ? ' active' : '');
     pill.textContent = cat;
     // Always show category color — active: white on color, inactive: color on tinted bg
@@ -255,7 +258,12 @@ function updateCategoryPills(): void {
       pill.style.color = catColor;
     }
     pill.addEventListener('click', () => {
-      selectedCategory = selectedCategory === cat ? '' : cat;
+      if (selectedCategories.has(cat)) {
+        selectedCategories.delete(cat);
+      } else {
+        selectedCategories.add(cat);
+      }
+      renderCategoryPills();
       resetAndReload();
     });
     categoryFilters.appendChild(pill);
