@@ -5,37 +5,65 @@
   <title>Bookmarks</title>
 </head>
 <body>
-  <!-- Hero Section -->
-    <section class="hero-section">
-      <div class="container text-center">
-          <h1 class="mb-sm">Bookmarks</h1>
-          <p>Your favorite sites organized in one place</p>
-      </div>
-  </section>
 
-  <!-- Main Content -->
-  <main class="container">
-      <!-- Search Bar -->
-      <div class="search-container">
-          <input type="text" id="search-input" class="search-input" placeholder="Search bookmarks...">
-          <i data-lucide="search" class="search-icon" width="16" height="16"></i>
-      </div>
+<div id="bookmarks-page" class="bookmarks-page">
+  <div class="bookmarks-wrapper">
 
-      <!-- Bookmarks Container -->
-      <div class="bookmarks-container">
-          <div id="bookmarks-list" class="bookmarks-list">
-              <!-- Bookmark items will be dynamically inserted here -->
-          </div>
-          <div id="no-bookmarks" class="no-bookmarks">
-            No bookmarks saved yet.
-          </div>
-      </div>
+    <!-- Header -->
+    <h1 class="bookmarks-title">Bookmarks</h1>
+    <p class="bookmarks-subtitle">Your saved pages, organized</p>
 
-      <div style="text-align: center;">
-        <button class="btn delete-all-button" id="delete-all">
-          Clear all bookmarks?
-        </button>
+    <!-- Search -->
+    <div class="search-container">
+      <input type="text" id="search-input" class="search-input" placeholder="Search bookmarks...">
+      <i data-lucide="search" class="search-icon" width="16" height="16"></i>
+    </div>
+
+    <!-- Tab pills (queue / reference) -->
+    <div class="tab-filters" id="tab-filters">
+      <button class="tab-pill active" id="tab-queue" data-tab="queue">
+        Reading Queue (<span id="queue-count">0</span>)
+      </button>
+      <button class="tab-pill" id="tab-reference" data-tab="reference">
+        Reference (<span id="reference-count">0</span>)
+      </button>
+    </div>
+
+    <!-- Category filter pills -->
+    <div id="category-filters" class="category-filters"></div>
+
+    <!-- Stale bookmarks alert (reference tab only) -->
+    <div class="stale-gauge" id="stale-bar" style="display: none;">
+      <div class="stale-header">
+        <span class="stale-label" id="stale-text"></span>
+        <button class="stale-review-btn" id="stale-review-btn">Review</button>
       </div>
-  </main>
+    </div>
+
+    <!-- Stale review panel -->
+    <div class="stale-review-panel" id="stale-review" style="display: none;">
+      <div class="stale-review-header">
+        <span>Dormant bookmarks — keep or let go?</span>
+        <button class="stale-review-btn" id="stale-done-btn">Done</button>
+      </div>
+      <div id="stale-review-list"></div>
+    </div>
+
+    <!-- Bookmarks list -->
+    <div class="bookmarks-container">
+      <div id="bookmarks-list" class="bookmarks-list"></div>
+      <div id="no-bookmarks" class="no-bookmarks">
+        No bookmarks match your search.
+      </div>
+    </div>
+
+    <!-- Clear All -->
+    <div class="bookmarks-footer" id="bookmarks-footer">
+      <button id="delete-all" class="btn-clear-all">Clear All</button>
+    </div>
+
+  </div>
+</div>
+
 </body>
 </html>

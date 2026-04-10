@@ -17,6 +17,7 @@ export class Tab {
   public isLoading = false;
   public isBookmark = false;
   public bookmarkId: string | null = null;
+  public bookmarkType: 'reference' | 'queue' | null = null;
   public isReaderModeEligible = false;
   public isReaderModeActive = false;
   public isPinned = false;
@@ -87,10 +88,11 @@ export class Tab {
     }
   }
 
-  handleUrlChange(url: string, isBookmark: boolean, bookmarkId: string | null, canGoBack: boolean, canGoForward: boolean): void {
+  handleUrlChange(url: string, isBookmark: boolean, bookmarkId: string | null, bookmarkType: 'reference' | 'queue' | null, canGoBack: boolean, canGoForward: boolean): void {
     this.url = url;
     this.isBookmark = isBookmark;
     this.bookmarkId = bookmarkId;
+    this.bookmarkType = bookmarkType;
     this.canGoBack = canGoBack;
     this.canGoForward = canGoForward;
     if(this.url.startsWith(InAppUrls.PREFIX)) {

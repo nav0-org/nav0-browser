@@ -16,6 +16,7 @@ export class BrowserTabManager {
   private optionsButton: HTMLButtonElement;
   private bookmarkButton: HTMLButtonElement;
   private unbookmarkButton: HTMLButtonElement;
+  private readinglistButton: HTMLButtonElement;
   private downloadsButton: HTMLButtonElement;
   private downloadProgressRing: SVGElement;
   private downloadProgressFill: SVGCircleElement;
@@ -81,6 +82,7 @@ export class BrowserTabManager {
     this.optionsButton = document.getElementById('options-button') as HTMLButtonElement;
     this.bookmarkButton = document.getElementById('bookmark-button') as HTMLButtonElement;
     this.unbookmarkButton = document.getElementById('unbookmark-button') as HTMLButtonElement;
+    this.readinglistButton = document.getElementById('readinglist-button') as HTMLButtonElement;
     this.downloadsButton = document.getElementById('downloads-button') as HTMLButtonElement;
     this.downloadProgressRing = document.getElementById('download-progress-ring') as unknown as SVGElement;
     this.downloadProgressFill = document.querySelector('.download-progress-ring-fill') as unknown as SVGCircleElement;
@@ -120,18 +122,29 @@ export class BrowserTabManager {
       window.BrowserAPI.showCommandKOverlay(this.appWindowId);
     });
 
+    // Click 1: Not bookmarked → add as reference bookmark
     this.bookmarkButton.addEventListener('click', async () => {
       const activeTab = this.getTabById(this.activeTabId);
-      const record = await window.BrowserAPI.addBookmark(this.appWindowId,  activeTab.title, activeTab.url, activeTab.faviconUrl);
+      const record = await window.BrowserAPI.addBookmark(this.appWindowId, activeTab.title, activeTab.url, activeTab.faviconUrl, 'reference');
       activeTab.isBookmark = true;
       activeTab.bookmarkId = record.id;
+      activeTab.bookmarkType = 'reference';
       this.handleBookmark();
     });
+    // Click 2: Reference bookmark → change to reading list (queue)
     this.unbookmarkButton.addEventListener('click', async () => {
       const activeTab = this.getTabById(this.activeTabId);
-      await window.BrowserAPI.removeBookmark(this.appWindowId,  activeTab.bookmarkId);
+      await window.BrowserAPI.updateBookmarkType(this.appWindowId, activeTab.bookmarkId, 'queue');
+      activeTab.bookmarkType = 'queue';
+      this.handleBookmark();
+    });
+    // Click 3: Reading list → remove entirely
+    this.readinglistButton.addEventListener('click', async () => {
+      const activeTab = this.getTabById(this.activeTabId);
+      await window.BrowserAPI.removeBookmark(this.appWindowId, activeTab.bookmarkId);
       activeTab.isBookmark = false;
       activeTab.bookmarkId = null;
+      activeTab.bookmarkType = null;
       this.handleBookmark();
     });
 
@@ -223,10 +236,10 @@ export class BrowserTabManager {
     });
 
     // Tab URL updated
-    window.BrowserAPI.onTabUrlUpdated((data: { id: string, url: string, isBookmark: boolean, bookmarkId: string | null, canGoBack: boolean, canGoForward: boolean, sslStatus?: string, sslDetails?: { issuer: string; validFrom: string; validTo: string; subjectName: string } | null }) => {
+    window.BrowserAPI.onTabUrlUpdated((data: { id: string, url: string, isBookmark: boolean, bookmarkId: string | null, bookmarkType: 'reference' | 'queue' | null, canGoBack: boolean, canGoForward: boolean, sslStatus?: string, sslDetails?: { issuer: string; validFrom: string; validTo: string; subjectName: string } | null }) => {
       const tab = this.getTabById(data.id);
       if (tab) {
-        tab.handleUrlChange(data.url, data.isBookmark, data.bookmarkId, data.canGoBack, data.canGoForward);
+        tab.handleUrlChange(data.url, data.isBookmark, data.bookmarkId, data.bookmarkType, data.canGoBack, data.canGoForward);
         tab.sslStatus = (data.sslStatus as 'secure' | 'insecure' | 'internal') || 'internal';
         tab.sslDetails = data.sslDetails || null;
       }
@@ -313,12 +326,21 @@ export class BrowserTabManager {
   private handleBookmark(): void {
     const activeTab = this.getTabById(this.activeTabId);
     if (activeTab) {
-      if (activeTab.isBookmark) {
+      if (activeTab.isBookmark && activeTab.bookmarkType === 'queue') {
+        // State 3: Reading list — show reading list button
+        this.bookmarkButton.style.display = 'none';
+        this.unbookmarkButton.style.display = 'none';
+        this.readinglistButton.style.display = 'block';
+      } else if (activeTab.isBookmark) {
+        // State 2: Bookmarked (reference) — show unbookmark button
         this.bookmarkButton.style.display = 'none';
         this.unbookmarkButton.style.display = 'block';
+        this.readinglistButton.style.display = 'none';
       } else {
+        // State 1: Not bookmarked — show bookmark button
         this.bookmarkButton.style.display = 'block';
         this.unbookmarkButton.style.display = 'none';
+        this.readinglistButton.style.display = 'none';
       }
     }
   }

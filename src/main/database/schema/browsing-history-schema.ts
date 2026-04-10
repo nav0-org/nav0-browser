@@ -33,6 +33,11 @@ export const BrowsingHistorySchema: TableSchema = {
       name: 'faviconUrl',
       columnType: { type: 'standard', sqlType: 'TEXT' }
       // No notNull constraint since it's optional
+    },
+    {
+      name: 'visitCount',
+      columnType: { type: 'standard', sqlType: 'INTEGER' },
+      defaultValue: 1,
     }
   ],
   indices: [

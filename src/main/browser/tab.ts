@@ -732,6 +732,7 @@ export class Tab {
       url: this.url,
       isBookmark: (this.bookmark? true : false),
       bookmarkId: this.bookmark ? this.bookmark.id : null,
+      bookmarkType: this.bookmark ? this.bookmark.type : null,
       canGoBack: this.webContentsViewInstance?.webContents.navigationHistory.canGoBack() ?? false,
       canGoForward: this.webContentsViewInstance?.webContents.navigationHistory.canGoForward() ?? false,
       sslStatus: this.sslStatus,

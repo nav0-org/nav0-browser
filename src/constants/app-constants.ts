@@ -107,6 +107,8 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly REMOVE_BOOKMARK = "browser:remove-bookmark";
   public static readonly REMOVE_ALL_BOOKMARKS = "browser:remove-all-bookmarks";
   public static readonly FETCH_BOOKMARK = "browser:fetch-bookmark";
+  public static readonly UPDATE_BOOKMARK_TYPE = "browser:update-bookmark-type";
+  public static readonly FETCH_BOOKMARKS_WITH_STATS = "browser:fetch-bookmarks-with-stats";
   // public static readonly ADD_DOWNLOAD = "browser:add-download";
   public static readonly REMOVE_DOWNLOAD = "browser:remove-download";
   public static readonly REMOVE_ALL_DOWNLOADS = "browser:remove-all-downloads";
@@ -255,6 +257,146 @@ export const STREAMING_SITES: readonly string[] = [
   'crunchyroll.com', 'primevideo.com', 'peacocktv.com',
   'music.apple.com', 'tv.apple.com',
 ];
+
+/**
+ * Bookmark category colors — same palette as download TYPE_COLORS.
+ */
+export const BOOKMARK_CATEGORY_COLORS: Record<string, string> = {
+  dev: '#6366f1',       // indigo (matches document/code in downloads)
+  news: '#06b6d4',      // cyan (matches image/video in downloads)
+  media: '#ec4899',     // pink (matches audio in downloads)
+  social: '#8b5cf6',    // purple (matches archive in downloads)
+  tools: '#f59e0b',     // amber (matches installer in downloads)
+  finance: '#10b981',   // green (matches code in downloads)
+  shopping: '#f97316',  // orange
+  reference: '#6366f1', // indigo
+  other: '#a1a1aa',     // gray (matches other in downloads)
+};
+
+/**
+ * Domain → bookmark category mapping.
+ * Used by the bookmarks page to auto-categorise bookmarks.
+ */
+export const BOOKMARK_CATEGORY_MAP: Record<string, string> = {
+  // Dev
+  'github.com': 'dev',
+  'gitlab.com': 'dev',
+  'bitbucket.org': 'dev',
+  'stackoverflow.com': 'dev',
+  'stackexchange.com': 'dev',
+  'developer.mozilla.org': 'dev',
+  'electronjs.org': 'dev',
+  'nodejs.org': 'dev',
+  'npmjs.com': 'dev',
+  'pypi.org': 'dev',
+  'crates.io': 'dev',
+  'vitepress.dev': 'dev',
+  'vitejs.dev': 'dev',
+  'source.chromium.org': 'dev',
+  'caniuse.com': 'dev',
+  'css-tricks.com': 'dev',
+  'web.dev': 'dev',
+  'dev.to': 'dev',
+  'medium.com': 'dev',
+  'hashnode.dev': 'dev',
+  'codepen.io': 'dev',
+  'jsfiddle.net': 'dev',
+  'replit.com': 'dev',
+  'logrocket.com': 'dev',
+  'smashingmagazine.com': 'dev',
+  'freecodecamp.org': 'dev',
+  'typescriptlang.org': 'dev',
+  'rust-lang.org': 'dev',
+  'go.dev': 'dev',
+  'docs.python.org': 'dev',
+  'reactjs.org': 'dev',
+  'vuejs.org': 'dev',
+  'svelte.dev': 'dev',
+  'angular.io': 'dev',
+  'webpack.js.org': 'dev',
+  'vercel.com': 'dev',
+  'netlify.com': 'dev',
+  'docker.com': 'dev',
+  'kubernetes.io': 'dev',
+
+  // News
+  'news.ycombinator.com': 'news',
+  'arstechnica.com': 'news',
+  'theverge.com': 'news',
+  'techcrunch.com': 'news',
+  'wired.com': 'news',
+  'bbc.com': 'news',
+  'reuters.com': 'news',
+  'nytimes.com': 'news',
+  'theguardian.com': 'news',
+  'washingtonpost.com': 'news',
+  'apnews.com': 'news',
+  'bloomberg.com': 'news',
+  'engadget.com': 'news',
+  'zdnet.com': 'news',
+  'theregister.com': 'news',
+  'privacyguides.org': 'news',
+  'eff.org': 'news',
+  'torrentfreak.com': 'news',
+
+  // Media
+  'youtube.com': 'media',
+  'vimeo.com': 'media',
+  'spotify.com': 'media',
+  'soundcloud.com': 'media',
+  'twitch.tv': 'media',
+  'netflix.com': 'media',
+  'disneyplus.com': 'media',
+  'podcasts.apple.com': 'media',
+  'music.apple.com': 'media',
+  'bandcamp.com': 'media',
+  'dailymotion.com': 'media',
+  'imgur.com': 'media',
+  'flickr.com': 'media',
+  'unsplash.com': 'media',
+
+  // Social
+  'reddit.com': 'social',
+  'twitter.com': 'social',
+  'x.com': 'social',
+  'mastodon.social': 'social',
+  'linkedin.com': 'social',
+  'facebook.com': 'social',
+  'instagram.com': 'social',
+  'discord.com': 'social',
+  'slack.com': 'social',
+  'lobste.rs': 'social',
+
+  // Tools
+  'notion.so': 'tools',
+  'figma.com': 'tools',
+  'canva.com': 'tools',
+  'trello.com': 'tools',
+  'docs.google.com': 'tools',
+  'drive.google.com': 'tools',
+  'sheets.google.com': 'tools',
+  'translate.google.com': 'tools',
+  'excalidraw.com': 'tools',
+  'regex101.com': 'tools',
+  'jsonformatter.org': 'tools',
+
+  // Finance
+  'finance.yahoo.com': 'finance',
+  'coinmarketcap.com': 'finance',
+  'tradingview.com': 'finance',
+
+  // Shopping
+  'amazon.com': 'shopping',
+  'ebay.com': 'shopping',
+  'etsy.com': 'shopping',
+
+  // Reference
+  'wikipedia.org': 'reference',
+  'en.wikipedia.org': 'reference',
+  'wikimedia.org': 'reference',
+  'archive.org': 'reference',
+  'wolframalpha.com': 'reference',
+};
 
 /**
  * Known multi-part country-code TLDs for correct eTLD+1 extraction.

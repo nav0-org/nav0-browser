@@ -58,8 +58,8 @@ export abstract class BrowsingHistoryManager {
     if (!db) return null;
 
     const findStmt = db.prepare("SELECT * FROM browsingHistory WHERE url = ? ORDER BY createdDate DESC LIMIT 1;");
-    const updateStmt = db.prepare("UPDATE browsingHistory SET createdDate = ? WHERE id = ?;");
-    const insertStmt = db.prepare("INSERT INTO browsingHistory (id, url, title, createdDate, topLevelDomain, faviconUrl) VALUES (?, ?, ?, ?, ?, ?);");
+    const updateStmt = db.prepare("UPDATE browsingHistory SET createdDate = ?, visitCount = COALESCE(visitCount, 0) + 1 WHERE id = ?;");
+    const insertStmt = db.prepare("INSERT INTO browsingHistory (id, url, title, createdDate, topLevelDomain, faviconUrl, visitCount) VALUES (?, ?, ?, ?, ?, ?, 1);");
 
     const upsert = db.transaction((url: string, title: string, topLevelDomain: string, faviconUrl: string) => {
       const existing = findStmt.get(url) as BrowsingHistoryRecord | undefined;
