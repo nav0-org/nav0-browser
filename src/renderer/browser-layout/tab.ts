@@ -2,6 +2,10 @@ import { createIcons, icons } from 'lucide';
 import TabTemplate from './tab.html';
 import { ImageBase64Strings, InAppUrls } from '../../constants/app-constants';
 
+const EMPTY_FAVICON = 'data:image/svg+xml,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><rect x="0.5" y="0.5" width="15" height="15" rx="2" fill="none" stroke="#ccc" stroke-width="1"/></svg>'
+);
+
 export class Tab {
   public id: string;
   public url: string;
@@ -13,6 +17,7 @@ export class Tab {
   public isLoading = false;
   public isBookmark = false;
   public bookmarkId: string | null = null;
+  public bookmarkType: 'reference' | 'queue' | null = null;
   public isReaderModeEligible = false;
   public isReaderModeActive = false;
   public isPinned = false;
@@ -61,6 +66,12 @@ export class Tab {
       window.BrowserAPI.showTabContextMenu(appWindowId, this.id, this.isPinned);
     });
 
+    // Set default favicon so the <img> never shows a broken image icon
+    const faviconElement = this.tabElement.querySelector('.tab-favicon') as HTMLImageElement;
+    if (faviconElement) {
+      faviconElement.src = EMPTY_FAVICON;
+    }
+
     setTimeout(() => {
       createIcons({icons});
     }, 10);
@@ -77,10 +88,11 @@ export class Tab {
     }
   }
 
-  handleUrlChange(url: string, isBookmark: boolean, bookmarkId: string | null, canGoBack: boolean, canGoForward: boolean): void {
+  handleUrlChange(url: string, isBookmark: boolean, bookmarkId: string | null, bookmarkType: 'reference' | 'queue' | null, canGoBack: boolean, canGoForward: boolean): void {
     this.url = url;
     this.isBookmark = isBookmark;
     this.bookmarkId = bookmarkId;
+    this.bookmarkType = bookmarkType;
     this.canGoBack = canGoBack;
     this.canGoForward = canGoForward;
     if(this.url.startsWith(InAppUrls.PREFIX)) {
@@ -112,9 +124,13 @@ export class Tab {
       this.faviconUrl = faviconUrl;
     }
     if (this.tabElement) {
-      const faviconElement = this.tabElement.querySelector('.tab-favicon');
+      const faviconElement = this.tabElement.querySelector('.tab-favicon') as HTMLImageElement;
       if (faviconElement) {
-        faviconElement.setAttribute('src', faviconUrl);
+        faviconElement.onerror = () => {
+          faviconElement.onerror = null;
+          faviconElement.src = EMPTY_FAVICON;
+        };
+        faviconElement.src = faviconUrl;
       }
     }
   }

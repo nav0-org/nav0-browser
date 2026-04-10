@@ -1,4 +1,5 @@
 import { ipcMain, session, shell } from "electron";
+import * as fs from "fs";
 import { MainToRendererEventsForBrowserIPC, RendererToMainEventsForBrowserIPC } from "../../constants/app-constants";
 import { DownloadRecord } from "../../types/download-record";
 import { DatabaseManager } from "../database/database-manager";
@@ -107,6 +108,17 @@ export abstract class DownloadManager {
               .run(receivedBytes, urlChain, eTag, lastModified, startTime, entry.dbRecordId);
           } catch (_) { /* record may not exist in this DB */ }
         }
+        // Preserve the partial file: Electron's session cleanup auto-cancels
+        // paused DownloadItems on quit, which deletes partial files. Create a
+        // hard link so the data survives even if the original path is removed.
+        const savePath = item.getSavePath();
+        if (savePath && receivedBytes > 0) {
+          try {
+            const backupPath = savePath + '.nav0resume';
+            if (fs.existsSync(backupPath)) fs.unlinkSync(backupPath);
+            fs.linkSync(savePath, backupPath);
+          } catch (_) { /* best-effort: hard links may not be supported */ }
+        }
       } catch (_) { /* best-effort */ }
     }
 
@@ -125,6 +137,19 @@ export abstract class DownloadManager {
     const db = DatabaseManager.getDatabase(isPrivate);
     const record = db.prepare("SELECT * FROM download WHERE id = ? AND status = 'paused';").get(recordId) as DownloadRecord | undefined;
     if (!record) return false;
+
+    // Restore the partial file from the backup created during shutdown
+    // (Electron's cleanup deletes the original partial file on quit)
+    const backupPath = record.fileLocation + '.nav0resume';
+    try {
+      if (fs.existsSync(backupPath)) {
+        if (!fs.existsSync(record.fileLocation)) {
+          fs.renameSync(backupPath, record.fileLocation);
+        } else {
+          fs.unlinkSync(backupPath);
+        }
+      }
+    } catch (_) { /* best-effort */ }
 
     const urlChain: string[] = JSON.parse(record.urlChain || '[]');
     if (urlChain.length === 0) urlChain.push(record.url);
@@ -154,12 +179,20 @@ export abstract class DownloadManager {
     return dbRecordId;
   }
 
+  /** Non-destructive check: is this downloadId a pending cross-session resume? */
+  public static isResuming(downloadId: string): boolean {
+    return this.resumingDownloads.has(downloadId);
+  }
+
   // ── DB helpers ──
 
   public static updateRecordStatus(appWindowId: string, recordId: string, status: string, receivedBytes?: number): void {
     const db = DatabaseManager.getDatabase(AppWindowManager.getWindowById(appWindowId)?.isPrivate ?? false);
     if (receivedBytes !== undefined) {
-      db.prepare("UPDATE download SET status = ?, receivedBytes = ? WHERE id = ?;").run(status, receivedBytes, recordId);
+      // Also backfill fileSize when completing — getTotalBytes() may have returned 0
+      // at download start if the server didn't send Content-Length.
+      db.prepare("UPDATE download SET status = ?, receivedBytes = ?, fileSize = CASE WHEN fileSize = 0 THEN ? ELSE fileSize END WHERE id = ?;")
+        .run(status, receivedBytes, receivedBytes, recordId);
     } else {
       db.prepare("UPDATE download SET status = ? WHERE id = ?;").run(status, recordId);
     }
@@ -230,6 +263,10 @@ export abstract class DownloadManager {
 
     ipcMain.handle(RendererToMainEventsForBrowserIPC.OPEN_DOWNLOADED_FILE, async (event, filePath: string) => {
       return await shell.openPath(filePath);
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.SHOW_ITEM_IN_FOLDER, (event, filePath: string) => {
+      shell.showItemInFolder(filePath);
     });
   }
 

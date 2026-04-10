@@ -1,153 +1,469 @@
 @import url("../../styles/global.css");
 
-.hero-section {
-  background-color: var(--primary-light);
-  padding: var(--spacing-sm) 0;
-  margin-bottom: var(--spacing-md);
+/* ==========================================================================
+   Bookmarks Page — Matches Downloads page design scheme
+   ========================================================================== */
+
+.bookmarks-page {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-light);
+  min-height: 100vh;
+  color: var(--text-color);
+  opacity: 0;
+  transition: opacity var(--transition-medium) ease;
 }
 
-.hero-section h1 {
-  font-size: var(--font-xxl);
-  margin-bottom: 2px;
+.bookmarks-page.loaded {
+  opacity: 1;
 }
 
-.hero-section p {
-  font-size: var(--font-sm);
-  margin-bottom: var(--spacing-xs);
+.bookmarks-wrapper {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 48px 24px 60px;
 }
 
+/* --------------------------------------------------------------------------
+   Header
+   -------------------------------------------------------------------------- */
+.bookmarks-title {
+  font-size: 28px;
+  font-weight: 600;
+  text-align: center;
+  margin: 0 0 6px;
+  color: var(--primary-dark);
+  letter-spacing: -0.3px;
+}
+
+.bookmarks-subtitle {
+  font-size: var(--font-md);
+  color: var(--text-light);
+  text-align: center;
+  margin: 0 0 32px;
+}
+
+/* --------------------------------------------------------------------------
+   Search
+   -------------------------------------------------------------------------- */
 .search-container {
-  max-width: 600px;
-  margin: 0 auto var(--spacing-md);
   position: relative;
+  max-width: 520px;
+  margin: 0 auto 28px;
 }
 
 .search-input {
   width: 100%;
-  padding: 8px var(--spacing-md) 8px 32px;
+  box-sizing: border-box;
+  font-size: var(--font-md);
+  padding: 10px 16px 10px 40px;
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  font-size: var(--font-sm);
+  border-radius: 10px;
+  outline: none;
+  color: var(--text-color);
+  background: var(--bg-light);
+  transition: border-color var(--transition-fast);
 }
 
 .search-input:focus {
-  outline: none;
   border-color: var(--primary-color);
 }
 
 .search-icon {
   position: absolute;
-  left: var(--spacing-sm);
+  left: 14px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-secondary);
 }
 
-.bookmarks-container {
-  background-color: var(--bg-light);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-}
-
-.bookmarks-list {
-  max-height: calc(100vh - 200px);
-  overflow-y: auto;
-}
-
-.bookmark-item {
-  display: grid;
-  grid-template-columns: 20px 1fr 36px;
-  gap: var(--spacing-xs);
-  padding: 4px 12px;
-  border-bottom: 1px solid var(--border-color);
-  align-items: center;
-  cursor: pointer;
-  transition: background-color var(--transition-fast);
-}
-
-.bookmark-item:hover {
-  background-color: var(--bg-hover);
-}
-
-.bookmark-favicon {
-  width: 14px;
-  height: 14px;
-  margin: 0 auto;
-}
-
-.bookmark-content {
+/* --------------------------------------------------------------------------
+   Tab Filter Pills (Queue / Reference)
+   -------------------------------------------------------------------------- */
+.tab-filters {
   display: flex;
-  flex-direction: column;
-  min-width: 0;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
-.bookmark-title {
-  font-weight: 500;
+.tab-pill {
   font-size: var(--font-sm);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.3;
-}
-
-.bookmark-domain {
+  font-weight: 400;
   color: var(--text-secondary);
-  font-size: var(--font-xs);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.2;
+  background: var(--bg-color);
+  border: none;
+  padding: 5px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all var(--transition-fast) ease;
 }
 
-.bookmark-button {
-  background-color: transparent;
-  color: var(--primary-color);
+.tab-pill:hover {
+  background: var(--border-color);
+}
+
+.tab-pill.active {
+  font-weight: 500;
+  color: var(--bg-light);
+  background: var(--primary-color);
+}
+
+/* --------------------------------------------------------------------------
+   Category Filter Pills
+   -------------------------------------------------------------------------- */
+.category-filters {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.cat-pill {
+  font-size: var(--font-sm);
+  font-weight: 400;
+  color: var(--text-secondary);
+  background: var(--bg-color);
   border: none;
+  padding: 5px 14px;
+  border-radius: 20px;
   cursor: pointer;
-  opacity: 0;
-  transition: opacity var(--transition-fast);
+  transition: all var(--transition-fast) ease;
+}
+
+.cat-pill:hover {
+  background: var(--border-color);
+}
+
+.cat-pill.active {
+  font-weight: 500;
+  color: var(--bg-light);
+}
+
+/* --------------------------------------------------------------------------
+   Stale Bookmarks Gauge
+   -------------------------------------------------------------------------- */
+.stale-gauge {
+  margin-bottom: 28px;
+  padding: 14px 20px;
+  background: var(--bg-color);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+}
+
+.stale-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stale-label {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+}
+
+.stale-review-btn {
+  font-size: var(--font-sm);
+  color: var(--text-color);
+  background: var(--bg-light);
+  border: 1px solid var(--border-color);
+  padding: 5px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.stale-review-btn:hover {
+  background: var(--bg-color);
+}
+
+/* --------------------------------------------------------------------------
+   Stale Review Panel
+   -------------------------------------------------------------------------- */
+.stale-review-panel {
+  margin-bottom: 28px;
+}
+
+.stale-review-header {
+  font-size: var(--font-sm);
+  color: var(--text-color);
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stale-review-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.stale-review-item .bk-favicon {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: var(--bg-color);
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2px;
-  border-radius: var(--radius-sm);
 }
 
-.bookmark-item:hover .bookmark-button {
-  opacity: 0.6;
+.stale-review-item .bk-favicon img {
+  width: 16px;
+  height: 16px;
 }
 
-.bookmark-button:hover {
-  opacity: 1 !important;
+.stale-review-content {
+  flex: 1;
+  min-width: 0;
 }
 
-.empty-state {
-  padding: var(--spacing-md);
-  text-align: center;
-  color: var(--text-secondary);
+.stale-review-title {
+  font-size: var(--font-md);
+  color: var(--text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.bookmarks-stats {
-  margin-top: var(--spacing-md);
-  color: var(--text-secondary);
+.stale-review-meta {
   font-size: var(--font-sm);
-  text-align: center;
+  color: var(--text-secondary);
+  margin-top: 2px;
 }
 
-.delete-all-button {
-  margin: var(--spacing-md) auto !important;
-  text-align: center !important;
-  font-size: var(--font-sm) !important;
+.stale-review-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Bookmarks List
+   -------------------------------------------------------------------------- */
+.bookmarks-container {
+  border-top: 1px solid var(--border-color);
+}
+
+.bookmarks-list {
+  /* No inner scroll — uses page scroll like downloads */
 }
 
 .no-bookmarks {
-  padding: var(--spacing-md) !important;
-  text-align: center !important;
+  text-align: center;
+  padding: 60px 0;
   color: var(--text-secondary);
-  font-size: var(--font-sm);
+  font-size: var(--font-md);
+  display: none;
 }
 
+/* --------------------------------------------------------------------------
+   Bookmark Row
+   -------------------------------------------------------------------------- */
+.bookmark-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 4px;
+  cursor: pointer;
+  background: transparent;
+  border-bottom: 1px solid var(--border-color);
+  transition: background var(--transition-fast) ease;
+  position: relative;
+}
+
+.bookmark-item:hover {
+  background: #fcfcfc;
+}
+
+/* Stagger animation */
+.bookmark-item {
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.25s ease, transform 0.25s ease, background var(--transition-fast) ease;
+}
+
+.bookmarks-page.loaded .bookmark-item {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Favicon icon box — matches download-type-icon */
+.bk-favicon {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-color);
+}
+
+.bk-favicon img {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+}
+
+.bk-favicon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Content area */
+.bookmark-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.bookmark-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bookmark-title {
+  font-size: var(--font-md);
+  color: var(--text-color);
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bookmark-meta {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Badges — same as downloads */
+.badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.badge-stale {
+  background: var(--error-light);
+  color: var(--error-color);
+}
+
+.badge-queue-age {
+  font-weight: 500;
+}
+
+.badge-category {
+  font-weight: 500;
+}
+
+/* Visit count column — matches download-size */
+.bookmark-visits {
+  flex-shrink: 0;
+  text-align: right;
+  min-width: 80px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* Row actions — matches download-actions */
+.bookmark-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.action-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-light);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--text-secondary);
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.action-btn:hover {
+  color: var(--text-color);
+  border-color: var(--border-color-dark);
+}
+
+.action-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Hide actions until hover */
+.action-btn.move-btn,
+.action-btn.remove-btn {
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.bookmark-item:hover .action-btn.move-btn,
+.bookmark-item:hover .action-btn.remove-btn {
+  opacity: 1;
+}
+
+/* Heat bar — thin gradient at bottom of reference rows */
+.bookmark-heat-bar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #c7d2fe, #6366f1);
+  border-radius: 1px;
+  transition: width var(--transition-medium) ease;
+}
+
+/* --------------------------------------------------------------------------
+   Clear All Footer
+   -------------------------------------------------------------------------- */
+.bookmarks-footer {
+  text-align: center;
+  margin-top: 28px;
+  display: none;
+}
+
+.btn-clear-all {
+  font-size: 13px;
+  color: var(--text-color);
+  background: var(--bg-light);
+  border: 1px solid var(--border-color);
+  padding: 8px 28px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.btn-clear-all:hover {
+  background: var(--bg-color);
+}
+
+/* --------------------------------------------------------------------------
+   Loading Indicator
+   -------------------------------------------------------------------------- */
 .loading-indicator {
   text-align: center;
   padding: var(--spacing-sm);

@@ -6,39 +6,53 @@
 </head>
 <body>
 
-  <!-- Hero Section -->
-  <section class="hero-section">
-    <div class="container text-center">
-        <h1 class="mb-sm">Downloads</h1>
-        <p>View and manage your downloaded files</p>
-    </div>
-</section>
+<div id="downloads-page" class="downloads-page">
+  <div class="downloads-wrapper">
 
-<!-- Main Content -->
-<main class="container">
-    <!-- Search Bar -->
+    <!-- Header -->
+    <h1 class="downloads-title">Downloads</h1>
+    <p class="downloads-subtitle">View and manage your downloaded files</p>
+
+    <!-- Search -->
     <div class="search-container">
-        <input type="text" id="search-input" class="search-input" placeholder="Search downloads...">
-        <i data-lucide="search" class="search-icon" width="16" height="16"></i>
+      <input type="text" id="search-input" class="search-input" placeholder="Search downloads...">
+      <i data-lucide="search" class="search-icon" width="16" height="16"></i>
     </div>
-    
-    <!-- Downloads Container -->
+
+    <!-- Type filter pills -->
+    <div id="type-filters" class="type-filters">
+      <!-- Populated dynamically -->
+    </div>
+
+    <!-- Storage gauge -->
+    <!-- NOTE: Storage breakdown is computed from loaded download records only.
+         There is no backend API for total disk usage or per-type storage stats. -->
+    <div id="storage-gauge" class="storage-gauge">
+      <div class="storage-header">
+        <span class="storage-label">Storage</span>
+        <span id="storage-total" class="storage-total"></span>
+      </div>
+      <div id="storage-bar" class="storage-bar"></div>
+      <div id="storage-legend" class="storage-legend"></div>
+    </div>
+
+    <!-- Downloads list -->
     <div class="downloads-container">
-        <div id="downloads-list" class="downloads-list">
-            <!-- Download items will be dynamically inserted here -->
-        </div>
-        <div id="no-downloads" class="no-downloads">
-					No downloads yet.
-				</div>
+      <div id="downloads-list" class="downloads-list">
+        <!-- Download items will be dynamically inserted here -->
+      </div>
+      <div id="no-downloads" class="no-downloads">
+        No downloads match your search.
+      </div>
     </div>
-    
-    <!-- Downloads Stats -->
-    <div class="downloads-stats">
-      <div class="text-center">
-				<button id="delete-all" class="btn clear-all-button">Clear All</button>
-			</div>
+
+    <!-- Clear All -->
+    <div class="downloads-footer">
+      <button id="delete-all" class="btn-clear-all">Clear All</button>
     </div>
-</main>
+
+  </div>
+</div>
 
 </body>
 </html>

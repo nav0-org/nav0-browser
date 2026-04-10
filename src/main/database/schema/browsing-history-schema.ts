@@ -48,6 +48,11 @@ export const BrowsingHistorySchema: TableSchema = {
       name: 'outTimestamp',
       columnType: { type: 'timestamp' }
       // Nullable — set when user navigates away or closes tab
+      },
+    {
+      name: 'visitCount',
+      columnType: { type: 'standard', sqlType: 'INTEGER' },
+      defaultValue: 1,
     }
   ],
   indices: [

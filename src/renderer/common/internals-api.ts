@@ -25,10 +25,12 @@ declare global {
       goForward: (appWindowId: string, tabId: string) => Promise<any>;
       refreshTab: (appWindowId: string, tabId: string) => Promise<any>;
       hardReloadTab: (appWindowId: string, tabId: string) => Promise<any>;
-      addBookmark: (appWindowId: string, title: string, url: string, faviconUrl: string) => Promise<any>;
+      addBookmark: (appWindowId: string, title: string, url: string, faviconUrl: string, type?: string) => Promise<any>;
       removeBookmark: (appWindowId: string, bookmarkId: string) => Promise<any>;
       removeAllBookmarks: (appWindowId: string) => Promise<any>;
       fetchBookmarks: (appWindowId: string, searchTerm: string, limit: number, offset: number) => Promise<any>;
+      updateBookmarkType: (appWindowId: string, bookmarkId: string, type: string) => Promise<any>;
+      fetchBookmarksWithStats: (appWindowId: string, type: string, searchTerm: string, limit: number, offset: number) => Promise<any>;
       removeDownload: (appWindowId: string, downloadId: string) => Promise<any>;
       removeAllDownloads: (appWindowId: string) => Promise<any>;
       fetchDownloads: (appWindowId: string, searchTerm: string, limit: number, offset: number) => Promise<any>;
@@ -37,6 +39,7 @@ declare global {
       resumeDownload: (downloadId: string, appWindowId: string) => Promise<boolean>;
       cancelDownload: (downloadId: string, appWindowId: string) => Promise<boolean>;
       openDownloadedFile: (filePath: string) => Promise<string>;
+      showItemInFolder: (filePath: string) => Promise<void>;
       removeBrowsingHistory: (appWindowId: string, historyId: string) => Promise<any>;
       removeAllBrowsingHistory: (appWindowId: string) => Promise<any>;
       fetchBrowsingHistory: (appWindowId: string, searchTerm: string, limit: number, offset: number) => Promise<any>;
@@ -83,7 +86,7 @@ declare global {
       onTabActivated: (callback: (tab: {id: string, url: string}) => void) => void;
       onTabClosed: (callback: (data: { id: string }) => void) => void;
       onTabTitleUpdated: (callback: (data: { id: string, title: string }) => void) => void;
-      onTabUrlUpdated: (callback: (data: { id: string, url: string, isBookmark: boolean, bookmarkId: string | null, canGoBack: boolean, canGoForward: boolean }) => void) => void;
+      onTabUrlUpdated: (callback: (data: { id: string, url: string, isBookmark: boolean, bookmarkId: string | null, bookmarkType: 'reference' | 'queue' | null, canGoBack: boolean, canGoForward: boolean }) => void) => void;
       onTabFaviconUpdated: (callback: (data: { id: string, faviconUrl: string }) => void) => void;
       onNavigationFailed: (callback: (data: { id: string }) => void) => void;
       onDownloadStarted: (callback: (data: { downloadId: string, dbRecordId: string, fileName: string, totalBytes: number }) => void) => void;

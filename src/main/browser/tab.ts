@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, Menu, MenuItem, shell, WebContentsView } from "electron";
+import { app, BrowserWindow, dialog, Menu, MenuItem, net, shell, WebContentsView } from "electron";
 import { InAppUrls, DataStoreConstants, MainToRendererEventsForBrowserIPC, WebContentsEvents, STREAMING_SITES } from "../../constants/app-constants";
 import { v4 as uuid } from "uuid";
 import { AppWindow } from "./app-window";
@@ -6,6 +6,7 @@ import { BookmarkManager } from "./bookmark-manager";
 import { BookmarkRecord } from "../../types/bookmark-record";
 import { BrowsingHistoryManager } from "./browsing-history-manager";
 import { DownloadManager } from "./download-manager";
+import * as fs from "fs";
 import path from "path";
 import { Utils } from "../browser/utils";
 import { SearchEngine } from "../web/search-engine";
@@ -273,15 +274,19 @@ export class Tab {
     });
 
     this.willDownloadHandler = async (event: Electron.Event, item: Electron.DownloadItem, downloadWebContents: Electron.WebContents) => {
-      // Only handle downloads initiated by this tab's webContents
-      if (downloadWebContents !== this.webContentsViewInstance.webContents) return;
+      // Allow cross-session resumes triggered by createInterruptedDownload
+      // (their downloadWebContents won't match any tab's webContents)
+      const downloadId = item.getStartTime().toString() + '_' + item.getFilename();
+      const isCrossSessionResume = DownloadManager.isResuming(downloadId);
+      if (!isCrossSessionResume && downloadWebContents !== this.webContentsViewInstance.webContents) return;
 
       const fileName = item.getFilename();
       const mimeType = item.getMimeType();
 
       // Intercept PDF downloads and open them in-tab instead,
-      // unless the user explicitly requested a PDF download.
-      if (mimeType === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf')) {
+      // unless the user explicitly requested a PDF download
+      // or this is a cross-session resume.
+      if (!isCrossSessionResume && (mimeType === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf'))) {
         if (this.pdfDownloadBypass) {
           this.pdfDownloadBypass = false;
           // Fall through to handleDownload below
@@ -327,14 +332,38 @@ export class Tab {
     this.webContentsViewInstance.webContents.on(WebContentsEvents.PAGE_FAVICON_UPDATED, async (event, faviconUrls: string[]) => {
       if (this._destroyed) return;
       if(!this.url.startsWith(InAppUrls.PREFIX) && this.url !== '') {
-        this.faviconUrl = faviconUrls[faviconUrls.length - 1];
+        const faviconUrl = faviconUrls[faviconUrls.length - 1];
+        this.faviconUrl = faviconUrl;
+
+        // Fetch the favicon from the main process using net.fetch to avoid
+        // Sec-Fetch-Site/Sec-Fetch-Dest headers that CDNs (e.g. Cloudflare)
+        // use to block cross-site image requests from the renderer's <img> tag.
+        let faviconToSend = faviconUrl;
+        try {
+          if (faviconUrl.startsWith('http')) {
+            const response = await (net.fetch as (input: string, init?: Record<string, unknown>) => Promise<Response>)(
+              faviconUrl,
+              { session: this.webContentsViewInstance?.webContents.session }
+            );
+            if (response.ok) {
+              const contentType = response.headers.get('content-type') || 'image/x-icon';
+              const buffer = Buffer.from(await response.arrayBuffer());
+              faviconToSend = `data:${contentType};base64,${buffer.toString('base64')}`;
+              this.faviconUrl = faviconToSend;
+            }
+          }
+        } catch {
+          // Fall back to the original URL — renderer onerror will handle failures
+        }
+
+        if (this._destroyed) return;
         this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_FAVICON_UPDATED, {
           id: this.id,
-          faviconUrl: this.faviconUrl
+          faviconUrl: faviconToSend
         });
         // Update the history record with the actual favicon
         if(this.lastHistoryRecordId) {
-          await BrowsingHistoryManager.updateRecordFavicon(this.parentAppWindow.id, this.lastHistoryRecordId, this.faviconUrl);
+          await BrowsingHistoryManager.updateRecordFavicon(this.parentAppWindow.id, this.lastHistoryRecordId, faviconToSend);
         }
       }
     });
@@ -498,6 +527,7 @@ export class Tab {
 
     // Check if this is a cross-session resume (triggered by createInterruptedDownload)
     let dbRecordId = DownloadManager.checkResuming(downloadId);
+    const isCrossSessionResume = !!dbRecordId;
 
     if (dbRecordId) {
       // Resuming from previous session – update existing record
@@ -546,7 +576,7 @@ export class Tab {
 
       // Update DB record status
       if (state === 'completed') {
-        DownloadManager.updateRecordStatus(this.parentAppWindow.id, dbRecordId, 'completed', item.getTotalBytes());
+        DownloadManager.updateRecordStatus(this.parentAppWindow.id, dbRecordId, 'completed', item.getTotalBytes() || item.getReceivedBytes());
       } else if (state === 'cancelled') {
         // During shutdown, downloads are auto-cancelled after being paused by
         // pauseAllDownloads() – don't overwrite the 'paused' status in the DB
@@ -557,12 +587,27 @@ export class Tab {
         console.error(`Download failed: ${state}`);
       }
 
+      // Clean up the .nav0resume backup when a download finishes normally
+      if (!DownloadManager.isShuttingDown()) {
+        try {
+          const backupPath = downloadPath + '.nav0resume';
+          if (fs.existsSync(backupPath)) fs.unlinkSync(backupPath);
+        } catch (_) { /* best-effort */ }
+      }
+
       const browserWindow = this.parentAppWindow.getBrowserWindowInstance();
       if (!browserWindow?.webContents) return;
       const completedData = { downloadId, state, fileName: item.getFilename(), dbRecordId };
       browserWindow.webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED, completedData);
       this.parentAppWindow.broadcastToTabs(MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED, completedData);
     });
+
+    // createInterruptedDownload produces a DownloadItem in the 'interrupted'
+    // state — it won't begin downloading until we explicitly resume it.
+    if (isCrossSessionResume && item.canResume()) {
+      item.resume();
+    }
+
     console.log('Download started:', downloadPath);
   }
 
@@ -692,6 +737,7 @@ export class Tab {
       url: this.url,
       isBookmark: (this.bookmark? true : false),
       bookmarkId: this.bookmark ? this.bookmark.id : null,
+      bookmarkType: this.bookmark ? this.bookmark.type : null,
       canGoBack: this.webContentsViewInstance?.webContents.navigationHistory.canGoBack() ?? false,
       canGoForward: this.webContentsViewInstance?.webContents.navigationHistory.canGoForward() ?? false,
       sslStatus: this.sslStatus,

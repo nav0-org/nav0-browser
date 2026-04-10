@@ -15,7 +15,7 @@ function getReleaseSidebar() {
 
     const frontmatter = match[1]
     const titleMatch = frontmatter.match(/title:\s*(["'])(.+?)\1/)
-    const dateMatch = frontmatter.match(/date:\s*(\S+)/)
+    const dateMatch = frontmatter.match(/^date:\s*(\S+)/m)
 
     return {
       text: titleMatch?.[2] || file.replace('.md', ''),
@@ -48,7 +48,7 @@ function getBlogSidebar() {
 
     const frontmatter = match[1]
     const titleMatch = frontmatter.match(/title:\s*(["'])(.+?)\1/)
-    const dateMatch = frontmatter.match(/date:\s*(\S+)/)
+    const dateMatch = frontmatter.match(/^date:\s*(\S+)/m)
 
     return {
       text: titleMatch?.[2] || file.replace('.md', ''),
