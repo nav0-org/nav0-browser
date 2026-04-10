@@ -61,11 +61,12 @@ export abstract class BookmarkManager {
 
     const stmt = db.prepare(`
       SELECT b.*,
-        COALESCE(h.visitCount, 0) as visits,
-        h.createdDate as lastVisited
+        COUNT(h.id) as visits,
+        MAX(h.createdDate) as lastVisited
       FROM bookmark b
       LEFT JOIN browsingHistory h ON b.url = h.url
       WHERE b.type = ? AND (b.url LIKE ? OR b.title LIKE ?)
+      GROUP BY b.id
       ORDER BY ${orderBy}
       LIMIT ? OFFSET ?;
     `);

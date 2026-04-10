@@ -42,42 +42,19 @@ export abstract class BrowsingHistoryManager {
     return records;
   }
 
-  public static async addRecord(appWindowId: string, url: string, title: string, topLevelDomain: string, faviconUrl: string): Promise<BrowsingHistoryRecord | null>{
-    const db = BrowsingHistoryManager.getDb(appWindowId);
-    if (!db) return null;
-    const stmt = db.prepare("INSERT INTO browsingHistory (id, url, title, createdDate, topLevelDomain, faviconUrl) VALUES (?, ?, ?, ?, ?, ?);");
-    const id = uuid();
-    const result = await stmt.run(id, url, title, new Date().toISOString(), topLevelDomain, faviconUrl);
-    const newlyCreatedRecord: BrowsingHistoryRecord = { id: id, url, title, createdDate: new Date(), topLevelDomain, faviconUrl, totalDuration: 0, activeDuration: 0 };
-    return newlyCreatedRecord;
-  }
-
   /**
-   * Atomically finds an existing record by URL and updates its timestamp,
-   * or inserts a new record if none exists. Uses a synchronous transaction
-   * to prevent duplicate entries from concurrent async calls.
+   * Inserts a new history record for a single visit. One row per visit —
+   * revisiting the same URL always creates a new row so the history
+   * timeline and per-visit time tracking are preserved.
    */
-  public static upsertRecord(appWindowId: string, url: string, title: string, topLevelDomain: string, faviconUrl: string): BrowsingHistoryRecord | null {
+  public static insertRecord(appWindowId: string, url: string, title: string, topLevelDomain: string, faviconUrl: string): BrowsingHistoryRecord | null {
     const db = BrowsingHistoryManager.getDb(appWindowId);
     if (!db) return null;
-
-    const findStmt = db.prepare("SELECT * FROM browsingHistory WHERE url = ? ORDER BY createdDate DESC LIMIT 1;");
-    const updateStmt = db.prepare("UPDATE browsingHistory SET createdDate = ?, visitCount = COALESCE(visitCount, 0) + 1 WHERE id = ?;");
-    const insertStmt = db.prepare("INSERT INTO browsingHistory (id, url, title, createdDate, topLevelDomain, faviconUrl, visitCount) VALUES (?, ?, ?, ?, ?, ?, 1);");
-
-    const upsert = db.transaction((url: string, title: string, topLevelDomain: string, faviconUrl: string) => {
-      const existing = findStmt.get(url) as BrowsingHistoryRecord | undefined;
-      const now = new Date().toISOString();
-      if (existing) {
-        updateStmt.run(now, existing.id);
-        return { ...existing, createdDate: new Date(now) } as BrowsingHistoryRecord;
-      }
-      const id = uuid();
-      insertStmt.run(id, url, title, now, topLevelDomain, faviconUrl);
-      return { id, url, title, createdDate: new Date(now), topLevelDomain, faviconUrl, totalDuration: 0, activeDuration: 0 } as BrowsingHistoryRecord;
-    });
-
-    return upsert(url, title, topLevelDomain, faviconUrl);
+    const id = uuid();
+    const createdDate = new Date();
+    const stmt = db.prepare("INSERT INTO browsingHistory (id, url, title, createdDate, topLevelDomain, faviconUrl) VALUES (?, ?, ?, ?, ?, ?);");
+    stmt.run(id, url, title, createdDate.toISOString(), topLevelDomain, faviconUrl);
+    return { id, url, title, createdDate, topLevelDomain, faviconUrl, totalDuration: 0, activeDuration: 0 };
   }
 
   public static async updateRecordTitle(appWindowId: string, recordId: string, title: string): Promise<void>{
@@ -92,21 +69,6 @@ export abstract class BrowsingHistoryManager {
     if (!db) return;
     const stmt = db.prepare("UPDATE browsingHistory SET faviconUrl = ? WHERE id = ?;");
     await stmt.run(faviconUrl, recordId);
-  }
-
-  public static async findLastRecordByUrl(appWindowId: string, url: string): Promise<BrowsingHistoryRecord | null>{
-    const db = BrowsingHistoryManager.getDb(appWindowId);
-    if (!db) return null;
-    const stmt = db.prepare("SELECT * FROM browsingHistory WHERE url = ? ORDER BY createdDate DESC LIMIT 1;");
-    const record = stmt.get(url) as BrowsingHistoryRecord | undefined;
-    return record || null;
-  }
-
-  public static async updateRecordTimestamp(appWindowId: string, recordId: string): Promise<void>{
-    const db = BrowsingHistoryManager.getDb(appWindowId);
-    if (!db) return;
-    const stmt = db.prepare("UPDATE browsingHistory SET createdDate = ? WHERE id = ?;");
-    await stmt.run(new Date().toISOString(), recordId);
   }
 
   public static async removeRecord(appWindowId: string, recordId: string): Promise<boolean>{
