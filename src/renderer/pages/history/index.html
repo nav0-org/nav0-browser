@@ -5,38 +5,70 @@
   <title>Browsing History</title>
 </head>
 <body>
-  <!-- Hero Section -->
-  <section class="hero-section">
-    <div class="container text-center">
-        <h1 class="mb-sm">Browsing History</h1>
-        <p>View and manage your local browsing history</p>
-    </div>
-  </section>
-
-  <!-- Main Content -->
-  <main class="container">
-    <!-- Search Bar -->
-    <div class="search-container">
-        <input type="text" id="search-input" class="search-input" placeholder="Search history...">
-        <i data-lucide="search" class="search-icon" width="16" height="16"></i>
-    </div>
-    
-    <!-- History Container -->
+  <div class="history-page">
     <div class="history-container">
-        <div id="history-list" class="history-list">
-            <!-- History items will be dynamically inserted here -->
+
+      <!-- Header -->
+      <div class="history-header">
+        <div class="history-header-left">
+          <h1 class="history-title">history</h1>
+          <span id="history-stats" class="history-stats-label"></span>
         </div>
-				<div id="no-history" class="no-history">
-					No browsing history saved yet.
-				</div>
+        <div class="history-header-right">
+          <button id="delete-all" class="btn-clear-all" style="display:none;">Clear All</button>
+        </div>
+      </div>
+
+      <!-- Heatmap -->
+      <div id="heatmap-container" class="card heatmap-card"></div>
+
+      <!-- Analytics Row -->
+      <div class="analytics-grid">
+        <div class="card analytics-card">
+          <div class="card-label" id="sparkline-label">activity &middot; 14 days</div>
+          <div id="sparkline-container"></div>
+        </div>
+        <div class="card analytics-card">
+          <div class="card-label" id="domain-chart-label">top sites</div>
+          <div id="domain-chart-container"></div>
+        </div>
+        <div class="card analytics-card">
+          <div class="card-label" id="category-label">by category</div>
+          <div id="category-container"></div>
+        </div>
+      </div>
+
+      <!-- Search + Filters -->
+      <div class="search-filter-row">
+        <div class="search-box">
+          <i data-lucide="search" width="14" height="14" class="search-box-icon"></i>
+          <input type="text" id="search-input" placeholder="Search history..." />
+          <button id="search-clear" class="search-clear-btn" style="display:none;">
+            <i data-lucide="x" width="12" height="12"></i>
+          </button>
+        </div>
+        <div class="time-range-group">
+          <button class="time-range-btn active" data-range="all">all</button>
+          <button class="time-range-btn" data-range="week">week</button>
+          <button class="time-range-btn" data-range="today">today</button>
+        </div>
+      </div>
+
+      <!-- Session-grouped history -->
+      <div id="history-list" class="history-list"></div>
+
+      <!-- Empty state -->
+      <div id="no-history" class="no-history" style="display:none;">
+        <i data-lucide="clock" width="32" height="32"></i>
+        <p>No browsing history found</p>
+      </div>
+
+      <!-- Loading -->
+      <div id="loading-indicator" class="loading-indicator" style="display:none;">Loading...</div>
+
+      <!-- Infinite scroll sentinel -->
+      <div id="scroll-sentinel" style="height:1px;"></div>
     </div>
-    
-    <!-- History Stats and Clear Button -->
-    <div class="history-stats">
-			<div class="text-center">
-				<button id="delete-all" class="btn clear-all-button">Clear All History</button>
-			</div>
-    </div>
-</main>
+  </div>
 </body>
 </html>

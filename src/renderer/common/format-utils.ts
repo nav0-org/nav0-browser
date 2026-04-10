@@ -37,6 +37,25 @@ export abstract class FormatUtils {
     return `${size % 1 === 0 ? size : size.toFixed(1)} ${units[i]}`;
   }
 
+  public static formatDuration(seconds: number): string {
+    if (seconds < 60) return `${seconds}s`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    return m > 0 ? `${h}h ${m}m` : `${h}h`;
+  }
+
+  public static getRelativeDayLabel(date: Date): string {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const diff = Math.floor((today.getTime() - target.getTime()) / 86400000);
+    if (diff === 0) return 'today';
+    if (diff === 1) return 'yesterday';
+    if (diff < 7) return date.toLocaleDateString([], { weekday: 'long' }).toLowerCase();
+    return date.toLocaleDateString([], { month: 'short', day: 'numeric' }).toLowerCase();
+  }
+
   public static getFileMetadata(filePath: string): { fileName: string; fileNameWithoutExtension: string; extension: string } {
     const normalizedPath = filePath.replace(/\\/g, '/');
     const basename = normalizedPath.split('/').pop() || '';

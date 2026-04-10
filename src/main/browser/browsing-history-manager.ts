@@ -18,6 +18,10 @@ export abstract class BrowsingHistoryManager {
       return await BrowsingHistoryManager.fetchRecords(appWindowId, searchTerm, limit, offset);
     });
 
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_BROWSING_HISTORY_STATS, async (event, appWindowId: string) => {
+      return await BrowsingHistoryManager.fetchHistoryStats(appWindowId);
+    });
+
     ipcMain.handle(RendererToMainEventsForBrowserIPC.REMOVE_BROWSING_HISTORY, async (event, appWindowId: string, recordId: string) => {
       return await BrowsingHistoryManager.removeRecord(appWindowId, recordId);
     });
@@ -44,7 +48,7 @@ export abstract class BrowsingHistoryManager {
     const stmt = db.prepare("INSERT INTO browsingHistory (id, url, title, createdDate, topLevelDomain, faviconUrl) VALUES (?, ?, ?, ?, ?, ?);");
     const id = uuid();
     const result = await stmt.run(id, url, title, new Date().toISOString(), topLevelDomain, faviconUrl);
-    const newlyCreatedRecord: BrowsingHistoryRecord = { id: id, url, title, createdDate: new Date(), topLevelDomain, faviconUrl };
+    const newlyCreatedRecord: BrowsingHistoryRecord = { id: id, url, title, createdDate: new Date(), topLevelDomain, faviconUrl, totalDuration: 0, activeDuration: 0 };
     return newlyCreatedRecord;
   }
 
@@ -70,7 +74,7 @@ export abstract class BrowsingHistoryManager {
       }
       const id = uuid();
       insertStmt.run(id, url, title, now, topLevelDomain, faviconUrl);
-      return { id, url, title, createdDate: new Date(now), topLevelDomain, faviconUrl } as BrowsingHistoryRecord;
+      return { id, url, title, createdDate: new Date(now), topLevelDomain, faviconUrl, totalDuration: 0, activeDuration: 0 } as BrowsingHistoryRecord;
     });
 
     return upsert(url, title, topLevelDomain, faviconUrl);
@@ -119,5 +123,25 @@ export abstract class BrowsingHistoryManager {
     const stmt = db.prepare("DELETE FROM browsingHistory;");
     await stmt.run();
     return true;
+  }
+
+  public static updateRecordTimeTracking(appWindowId: string, recordId: string, totalDuration: number, activeDuration: number, outTimestamp: string): void {
+    const db = BrowsingHistoryManager.getDb(appWindowId);
+    if (!db) return;
+    const stmt = db.prepare("UPDATE browsingHistory SET totalDuration = ?, activeDuration = ?, outTimestamp = ? WHERE id = ?;");
+    stmt.run(totalDuration, activeDuration, outTimestamp, recordId);
+  }
+
+  public static async fetchHistoryStats(appWindowId: string): Promise<Array<{ date: string; count: number; activeDuration: number }>> {
+    const db = BrowsingHistoryManager.getDb(appWindowId);
+    if (!db) return [];
+    const stmt = db.prepare(`
+      SELECT DATE(createdDate) as date, COUNT(*) as count, COALESCE(SUM(activeDuration), 0) as activeDuration
+      FROM browsingHistory
+      WHERE createdDate >= DATE('now', '-365 days')
+      GROUP BY DATE(createdDate)
+      ORDER BY date ASC;
+    `);
+    return stmt.all() as Array<{ date: string; count: number; activeDuration: number }>;
   }
 }

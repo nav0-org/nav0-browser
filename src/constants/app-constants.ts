@@ -122,6 +122,7 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly REMOVE_BROWSING_HISTORY = "browser:remove-browsing-history";
   public static readonly REMOVE_ALL_BROWSING_HISTORY = "browser:remove-all-browsing-history";
   public static readonly FETCH_BROWSING_HISTORY = "browser:fetch-browsing-history";
+  public static readonly FETCH_BROWSING_HISTORY_STATS = "browser:fetch-browsing-history-stats";
 
   public static readonly HANDLE_FILE_SELECTION = "browser:handle-file-selection";
   public static readonly OPEN_PDF_FILE = "browser:open-pdf-file";

@@ -4,5 +4,8 @@ export type BrowsingHistoryRecord = {
   url: string,
   title: string,
   topLevelDomain: string,
-  faviconUrl?: string
+  faviconUrl?: string,
+  totalDuration: number,
+  activeDuration: number,
+  outTimestamp?: Date
 }

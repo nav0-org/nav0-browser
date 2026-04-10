@@ -55,6 +55,11 @@ export class Tab {
   private pdfDownloadBypass = false;
   private isSuspended = false;
   private lastActivatedAt: Date = new Date();
+  private pageStartTime: number | null = null;
+  private activeTimeAccumulator = 0;
+  private lastActiveStart: number | null = null;
+  private timeFlushInterval: ReturnType<typeof setInterval> | null = null;
+  private static readonly TIME_FLUSH_INTERVAL_MS = 900_000;
 
   constructor(parentAppWindow: AppWindow, url: string , partitionSetting: string, options?: { suspended?: boolean; title?: string }) {
     this.parentAppWindow = parentAppWindow;
@@ -778,6 +783,8 @@ export class Tab {
       this.lastHistoryRecordId = null;
       return;
     }
+    // Finalize time tracking for the previous page before recording the new one
+    this.finalizePageTime();
     try {
       let urlObject: URL | null = null;
       try {
@@ -797,6 +804,11 @@ export class Tab {
         urlObject ? `${urlObject.protocol}//${urlObject.hostname}/favicon.ico` : ''
       );
       this.lastHistoryRecordId = record?.id ?? null;
+      // Start time tracking for the new page
+      this.pageStartTime = Date.now();
+      this.activeTimeAccumulator = 0;
+      this.lastActiveStart = Date.now();
+      this.startTimeFlush();
     } catch (error) {
       // Window may have been closed/removed before the debounced history recording fired
     }
@@ -841,6 +853,7 @@ export class Tab {
 
   clearPendingTimers(): void {
     this._destroyed = true;
+    this.stopTimeFlush();
     if (this.navigationDebounceTimer) {
       clearTimeout(this.navigationDebounceTimer);
       this.navigationDebounceTimer = null;
@@ -871,8 +884,67 @@ export class Tab {
     this.lastActivatedAt = new Date();
   }
 
+  resumeActiveTime(): void {
+    this.lastActiveStart = Date.now();
+  }
+
+  pauseActiveTime(): void {
+    if (this.lastActiveStart) {
+      this.activeTimeAccumulator += Math.floor((Date.now() - this.lastActiveStart) / 1000);
+      this.lastActiveStart = null;
+    }
+  }
+
+  /**
+   * Persist current time data to the DB without resetting tracking state.
+   * Called periodically so long-running tabs don't lose data on crash.
+   */
+  private flushPageTime(): void {
+    if (!this.lastHistoryRecordId || !this.pageStartTime || !this.parentAppWindow) return;
+    const now = Date.now();
+    const totalDuration = Math.floor((now - this.pageStartTime) / 1000);
+    let activeDuration = this.activeTimeAccumulator;
+    if (this.lastActiveStart) {
+      activeDuration += Math.floor((now - this.lastActiveStart) / 1000);
+    }
+    try {
+      BrowsingHistoryManager.updateRecordTimeTracking(
+        this.parentAppWindow.id, this.lastHistoryRecordId,
+        totalDuration, activeDuration, new Date(now).toISOString()
+      );
+    } catch {
+      // Window may have been closed
+    }
+  }
+
+  private startTimeFlush(): void {
+    this.stopTimeFlush();
+    this.timeFlushInterval = setInterval(() => this.flushPageTime(), Tab.TIME_FLUSH_INTERVAL_MS);
+  }
+
+  private stopTimeFlush(): void {
+    if (this.timeFlushInterval) {
+      clearInterval(this.timeFlushInterval);
+      this.timeFlushInterval = null;
+    }
+  }
+
+  finalizePageTime(): void {
+    this.stopTimeFlush();
+    if (!this.lastHistoryRecordId || !this.pageStartTime || !this.parentAppWindow) return;
+    this.pauseActiveTime();
+    const totalDuration = Math.floor((Date.now() - this.pageStartTime) / 1000);
+    const activeDuration = this.activeTimeAccumulator;
+    const outTimestamp = new Date().toISOString();
+    BrowsingHistoryManager.updateRecordTimeTracking(
+      this.parentAppWindow.id, this.lastHistoryRecordId,
+      totalDuration, activeDuration, outTimestamp
+    );
+  }
+
   suspend(): void {
     if (this.isSuspended || this._destroyed) return;
+    this.finalizePageTime();
     // Clear timers but preserve tab identity (don't set _destroyed permanently)
     if (this.navigationDebounceTimer) {
       clearTimeout(this.navigationDebounceTimer);

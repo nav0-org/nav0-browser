@@ -280,6 +280,7 @@ export class AppWindow {
           };
         }
       }
+      tab.finalizePageTime();
       tab.clearPendingTimers();
       PermissionManager.clearSessionPermissionsForTab(id);
       // Clean up notifications for this tab's webContents
@@ -321,7 +322,9 @@ export class AppWindow {
     }
 
     if(this.activeTabId && this.getActiveTab()){
-      const prevView = this.getActiveTab().getWebContentsViewInstance();
+      const prevTab = this.getActiveTab();
+      prevTab.pauseActiveTime();
+      const prevView = prevTab.getWebContentsViewInstance();
       if (prevView) {
         this.browserWindowInstance.contentView.removeChildView(prevView);
       }
@@ -335,6 +338,7 @@ export class AppWindow {
         await tab.unsuspend();
       }
       tab.updateLastActivatedAt();
+      tab.resumeActiveTime();
 
       // Restore per-tab strip state for the new tab BEFORE calculating offset
       const findState = this.findInPageState.get(id);

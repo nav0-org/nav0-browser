@@ -35,6 +35,21 @@ export const BrowsingHistorySchema: TableSchema = {
       // No notNull constraint since it's optional
     },
     {
+      name: 'totalDuration',
+      columnType: { type: 'standard', sqlType: 'INTEGER' },
+      defaultValue: 0
+    },
+    {
+      name: 'activeDuration',
+      columnType: { type: 'standard', sqlType: 'INTEGER' },
+      defaultValue: 0
+    },
+    {
+      name: 'outTimestamp',
+      columnType: { type: 'timestamp' }
+      // Nullable — set when user navigates away or closes tab
+      },
+    {
       name: 'visitCount',
       columnType: { type: 'standard', sqlType: 'INTEGER' },
       defaultValue: 1,
