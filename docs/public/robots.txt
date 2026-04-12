@@ -2,3 +2,7 @@ User-agent: *
 Allow: /
 
 Sitemap: https://nav0.org/sitemap.xml
+
+# LLM-readable content
+# https://nav0.org/llms.txt — concise project summary for LLMs
+# https://nav0.org/llms-full.txt — comprehensive documentation for LLMs

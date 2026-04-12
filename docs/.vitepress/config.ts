@@ -75,6 +75,63 @@ const siteName = 'Nav0'
 const siteDescription = 'A minimal, privacy-focused web browser. No data collection. No bloat. No AI gimmicks. Just clean, safe browsing.'
 const ogImage = `${siteUrl}/og-image.png`
 
+const softwareAppSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'Nav0 Browser',
+  description: 'A minimal, privacy-focused web browser built on Electron. No data collection. No bloat. No AI gimmicks.',
+  url: siteUrl,
+  applicationCategory: 'BrowserApplication',
+  operatingSystem: 'Windows, macOS, Linux',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD'
+  },
+  license: 'https://opensource.org/licenses/MIT',
+  isAccessibleForFree: true,
+  downloadUrl: 'https://nav0.org/install',
+  softwareVersion: packageJson.version,
+  author: {
+    '@type': 'Organization',
+    name: 'Nav0',
+    url: siteUrl
+  },
+  featureList: [
+    'Zero telemetry',
+    'No data collection',
+    'Built-in ad blocker',
+    'Tracker blocking',
+    'Third-party cookie blocking',
+    'HTTPS auto-upgrade',
+    'Fingerprint protection',
+    'User agent spoofing',
+    'Private browsing mode',
+    'Tab hibernation',
+    'Tab pinning',
+    'Customizable keyboard shortcuts',
+    'Data retention and auto-delete',
+    'Proxy configuration',
+    'Process sandboxing',
+    'Tab management',
+    'Local bookmarks',
+    'Download manager',
+    'Reader mode',
+    'PDF viewer',
+    'Find in page with regex',
+    'Browser notifications',
+    'Open source',
+    'Chromium engine',
+    'Chrome DevTools'
+  ]
+}
+
+const sectionNames: Record<string, { name: string; link: string }> = {
+  blog: { name: 'Blog', link: '/blog/' },
+  guide: { name: 'Guide', link: '/guide/getting-started' },
+  releases: { name: 'Release Notes', link: '/releases/' }
+}
+
 export default defineConfig({
   title: siteName,
   description: siteDescription,
@@ -126,58 +183,6 @@ export default defineConfig({
       description: 'An open-source, privacy-focused web browser project.',
       sameAs: [
         'https://github.com/nav0-org/nav0-browser'
-      ]
-    })],
-
-    // JSON-LD: SoftwareApplication
-    ['script', { type: 'application/ld+json' }, JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'SoftwareApplication',
-      name: 'Nav0 Browser',
-      description: 'A minimal, privacy-focused web browser built on Electron. No data collection. No bloat. No AI gimmicks.',
-      url: siteUrl,
-      applicationCategory: 'BrowserApplication',
-      operatingSystem: 'Windows, macOS, Linux',
-      offers: {
-        '@type': 'Offer',
-        price: '0',
-        priceCurrency: 'USD'
-      },
-      license: 'https://opensource.org/licenses/MIT',
-      isAccessibleForFree: true,
-      downloadUrl: 'https://nav0.org/install',
-      softwareVersion: packageJson.version,
-      author: {
-        '@type': 'Organization',
-        name: 'Nav0',
-        url: siteUrl
-      },
-      featureList: [
-        'Zero telemetry',
-        'No data collection',
-        'Built-in ad blocker',
-        'Tracker blocking',
-        'Third-party cookie blocking',
-        'HTTPS auto-upgrade',
-        'Fingerprint protection',
-        'User agent spoofing',
-        'Private browsing mode',
-        'Tab hibernation',
-        'Tab pinning',
-        'Customizable keyboard shortcuts',
-        'Data retention and auto-delete',
-        'Proxy configuration',
-        'Process sandboxing',
-        'Tab management',
-        'Local bookmarks',
-        'Download manager',
-        'Reader mode',
-        'PDF viewer',
-        'Find in page with regex',
-        'Browser notifications',
-        'Open source',
-        'Chromium engine',
-        'Chrome DevTools'
       ]
     })],
 
@@ -278,5 +283,78 @@ export default defineConfig({
       ['link', { rel: 'canonical', href: canonicalUrl }],
       ['meta', { property: 'og:url', content: canonicalUrl }]
     )
+
+    // Inject SoftwareApplication schema only on relevant pages
+    const softwareAppPages = ['index.md', 'install.md', 'guide/features.md']
+    if (softwareAppPages.includes(pageData.relativePath)) {
+      pageData.frontmatter.head.push(
+        ['script', { type: 'application/ld+json' }, JSON.stringify(softwareAppSchema)]
+      )
+    }
+
+    // Inject BreadcrumbList JSON-LD for all content pages
+    const segments = pageData.relativePath.replace(/\.md$/, '').split('/')
+    const isIndex = segments[segments.length - 1] === 'index'
+    const section = segments.length > 1 ? segments[0] : null
+    const pageTitle = pageData.frontmatter.title || pageData.title || segments[segments.length - 1]
+
+    const breadcrumbItems: Array<{ '@type': string; position: number; name: string; item?: string }> = [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl }
+    ]
+
+    if (section && sectionNames[section]) {
+      breadcrumbItems.push({
+        '@type': 'ListItem',
+        position: 2,
+        name: sectionNames[section].name,
+        item: `${siteUrl}${sectionNames[section].link}`
+      })
+
+      if (!isIndex) {
+        breadcrumbItems.push({
+          '@type': 'ListItem',
+          position: 3,
+          name: pageTitle
+        })
+      }
+    } else if (pageData.relativePath !== 'index.md') {
+      breadcrumbItems.push({
+        '@type': 'ListItem',
+        position: 2,
+        name: pageTitle
+      })
+    }
+
+    if (breadcrumbItems.length > 1) {
+      pageData.frontmatter.head.push(
+        ['script', { type: 'application/ld+json' }, JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: breadcrumbItems
+        })]
+      )
+    }
+
+    // Inject dateModified into Article JSON-LD for blog posts
+    if (pageData.relativePath.startsWith('blog/') && pageData.frontmatter.date) {
+      const dateStr = typeof pageData.frontmatter.date === 'string'
+        ? pageData.frontmatter.date
+        : new Date(pageData.frontmatter.date).toISOString().split('T')[0]
+
+      for (const entry of pageData.frontmatter.head) {
+        if (Array.isArray(entry) && entry[0] === 'script' &&
+            entry[1]?.type === 'application/ld+json' && typeof entry[2] === 'string') {
+          try {
+            const jsonLd = JSON.parse(entry[2])
+            if (jsonLd['@type'] === 'Article' && !jsonLd.dateModified) {
+              jsonLd.dateModified = jsonLd.datePublished || dateStr
+              entry[2] = JSON.stringify(jsonLd)
+            }
+          } catch {
+            // Skip malformed JSON-LD entries
+          }
+        }
+      }
+    }
   }
 })
