@@ -9,25 +9,15 @@
     <div class="history-container">
 
       <!-- Header -->
-      <div class="history-header">
-        <div class="history-header-left">
-          <h1 class="history-title">history</h1>
-          <span id="history-stats" class="history-stats-label"></span>
-        </div>
-        <div class="history-header-right">
-          <button id="delete-all" class="btn-clear-all" style="display:none;">Clear All</button>
-        </div>
-      </div>
+      <h1 class="history-title">History</h1>
+      <p class="history-subtitle">Your browsing activity, at a glance</p>
+      <p class="history-stats-label" id="history-stats"></p>
 
       <!-- Heatmap -->
       <div id="heatmap-container" class="card heatmap-card"></div>
 
       <!-- Analytics Row -->
       <div class="analytics-grid">
-        <div class="card analytics-card">
-          <div class="card-label" id="sparkline-label">activity &middot; 14 days</div>
-          <div id="sparkline-container"></div>
-        </div>
         <div class="card analytics-card">
           <div class="card-label" id="domain-chart-label">top sites</div>
           <div id="domain-chart-container"></div>
@@ -38,20 +28,17 @@
         </div>
       </div>
 
-      <!-- Search + Filters -->
-      <div class="search-filter-row">
-        <div class="search-box">
-          <i data-lucide="search" width="14" height="14" class="search-box-icon"></i>
-          <input type="text" id="search-input" placeholder="Search history..." />
-          <button id="search-clear" class="search-clear-btn" style="display:none;">
-            <i data-lucide="x" width="12" height="12"></i>
-          </button>
-        </div>
-        <div class="time-range-group">
-          <button class="time-range-btn active" data-range="all">all</button>
-          <button class="time-range-btn" data-range="week">week</button>
-          <button class="time-range-btn" data-range="today">today</button>
-        </div>
+      <!-- Search -->
+      <div class="search-container">
+        <input type="text" id="search-input" class="search-input" placeholder="Search history...">
+        <i data-lucide="search" class="search-icon" width="16" height="16"></i>
+      </div>
+
+      <!-- Time range filters -->
+      <div class="time-range-group">
+        <button class="time-range-btn active" data-range="all">all</button>
+        <button class="time-range-btn" data-range="week">week</button>
+        <button class="time-range-btn" data-range="today">today</button>
       </div>
 
       <!-- Session-grouped history -->
@@ -65,6 +52,11 @@
 
       <!-- Loading -->
       <div id="loading-indicator" class="loading-indicator" style="display:none;">Loading...</div>
+
+      <!-- Footer -->
+      <div class="history-footer" id="history-footer">
+        <button id="delete-all" class="btn-clear-all" style="display:none;">Clear All</button>
+      </div>
 
       <!-- Infinite scroll sentinel -->
       <div id="scroll-sentinel" style="height:1px;"></div>

@@ -194,7 +194,6 @@ function resetAndReload(): void {
   currentOffset = 0;
   hasMore = true;
   allLoadedItems = [];
-  maxVisits = 1;
   bookmarksList.innerHTML = '';
   loadBookmarks();
   updateCounts();
