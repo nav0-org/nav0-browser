@@ -193,32 +193,45 @@
   flex-shrink: 0;
 }
 
-/* Category chart */
-.category-chart-wrapper {
+/* Category chart (line bars) */
+.category-row {
   display: flex;
-  justify-content: center;
   align-items: center;
-  position: relative;
+  gap: 8px;
+  margin-bottom: 6px;
 }
 
-.category-tooltip {
-  position: absolute;
-  transform: translate(-50%, -100%);
-  background: var(--primary-dark);
-  color: #fff;
-  padding: 5px 10px;
-  border-radius: var(--radius-sm);
-  font-size: 11px;
+.category-name {
+  width: 100px;
+  font-size: 10px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
-  pointer-events: none;
-  z-index: 10;
-  line-height: 1.4;
-  opacity: 0;
-  transition: opacity 0.15s ease;
+  flex-shrink: 0;
 }
 
-.category-tooltip.visible {
-  opacity: 1;
+.category-bar-track {
+  flex: 1;
+  height: 4px;
+  background: var(--border-color);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.category-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.category-duration {
+  width: 44px;
+  font-size: 9px;
+  color: var(--text-color);
+  font-weight: 600;
+  text-align: right;
+  flex-shrink: 0;
 }
 
 /* Search */
@@ -286,7 +299,7 @@
 
 /* History list */
 .history-list {
-  border-top: 1px solid var(--border-color);
+  /* no inner scroll — page scrolls naturally */
 }
 
 /* Date group */
@@ -294,9 +307,8 @@
   font-size: var(--font-xs);
   font-weight: 600;
   color: var(--primary-color);
-  padding: 6px 12px;
-  margin-bottom: 4px;
-  border-bottom: 1px solid var(--border-color);
+  padding: 12px 12px 6px;
+  margin: 0;
   position: sticky;
   top: 0;
   background: var(--bg-light);
@@ -356,6 +368,12 @@
   min-width: 0;
 }
 
+.entry-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .entry-title {
   font-size: var(--font-md);
   color: var(--text-color);
@@ -370,11 +388,23 @@
   text-decoration: underline;
 }
 
+.entry-category-badge {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 1px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .entry-domain {
   font-size: var(--font-sm);
   color: var(--text-secondary);
   margin-top: 2px;
   display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .entry-duration {

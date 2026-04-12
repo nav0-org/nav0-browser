@@ -123,7 +123,6 @@ function resetAndReload(): void {
   currentOffset = 0;
   hasMore = true;
   allEntries = [];
-  historyList.innerHTML = '';
   loadHistoryPage();
 }
 
@@ -235,6 +234,8 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
   const time = new Date(entry.createdDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const faviconUrl = entry.faviconUrl || `https://${entry.topLevelDomain}/favicon.ico`;
   const hasDuration = (entry.activeDuration || 0) > 0 || (entry.totalDuration || 0) > 0;
+  const category = getCategoryForDomain(entry.topLevelDomain);
+  const catColor = CATEGORY_COLORS[category] || CATEGORY_COLORS.other;
 
   const durationHtml = hasDuration
     ? `<div class="entry-duration">
@@ -247,7 +248,10 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
     <span class="entry-time">${time}</span>
     <div class="entry-favicon"><img src="${faviconUrl}" width="16" height="16" onerror="this.parentElement.innerHTML='<i data-lucide=\\'globe\\' width=\\'16\\' height=\\'16\\'></i>'"></div>
     <div class="entry-content">
-      <span class="entry-title" title="${escapeHtml(entry.title)}">${escapeHtml(entry.title)}</span>
+      <div class="entry-title-row">
+        <span class="entry-title" title="${escapeHtml(entry.title)}">${escapeHtml(entry.title)}</span>
+        <span class="entry-category-badge" style="background:${catColor}18;color:${catColor}">${category}</span>
+      </div>
       <span class="entry-domain">${escapeHtml(entry.topLevelDomain)}</span>
     </div>
     ${durationHtml}
@@ -456,7 +460,7 @@ function renderDomainChart(): void {
 
   const sorted = Array.from(map.values())
     .sort((a, b) => useTime ? b.active - a.active : b.visits - a.visits)
-    .slice(0, 8);
+    .slice(0, 10);
 
   const label = document.getElementById('domain-chart-label');
   if (label) label.textContent = useTime ? 'Top sites by active time' : 'Top sites by visits';
@@ -477,7 +481,7 @@ function renderDomainChart(): void {
   }).join('');
 }
 
-// --- Category Pie Chart ---
+// --- Category Chart (line bars) ---
 function renderCategoryChart(): void {
   if (allEntries.length === 0) {
     categoryContainer.innerHTML = '';
@@ -496,54 +500,27 @@ function renderCategoryChart(): void {
   const totalDuration = Array.from(durationMap.values()).reduce((a, b) => a + b, 0);
   const useDuration = totalDuration > 0;
   const catMap = useDuration ? durationMap : countMap;
-  const total = Array.from(catMap.values()).reduce((a, b) => a + b, 0) || 1;
   const cats = Array.from(catMap.entries())
     .sort((a, b) => b[1] - a[1])
-    .map(([cat, val]) => ({ cat, dur: val, pct: (val / total) * 100 }));
+    .slice(0, 10);
 
   const catLabel = document.getElementById('category-label');
   if (catLabel) catLabel.textContent = useDuration ? 'Time spent by category' : 'Visits by category';
 
-  // SVG donut chart — larger, no legend
-  const radius = 56, circ = 2 * Math.PI * radius;
-  let accum = 0;
-  let slices = '';
-  for (const c of cats) {
-    const color = CATEGORY_COLORS[c.cat] || CATEGORY_COLORS.other;
-    const dashLen = (c.pct / 100) * circ;
-    const offset = -(accum / 100) * circ;
-    slices += `<circle class="category-slice" cx="70" cy="70" r="${radius}" fill="none" stroke="${color}" stroke-width="16" stroke-dasharray="${dashLen} ${circ}" stroke-dashoffset="${offset}" data-cat="${c.cat}" data-pct="${Math.round(c.pct)}" style="cursor:pointer" />`;
-    accum += c.pct;
-  }
+  const maxVal = Math.max(...cats.map(([, val]) => val), 1);
 
-  categoryContainer.innerHTML = `
-    <div class="category-chart-wrapper">
-      <svg width="140" height="140" viewBox="0 0 140 140">${slices}</svg>
-      <div class="category-tooltip" id="category-tooltip"></div>
-    </div>
-  `;
-
-  // Tooltip behavior on hover
-  const svg = categoryContainer.querySelector('svg')!;
-  const tooltip = document.getElementById('category-tooltip')!;
-
-  svg.addEventListener('mouseover', (e) => {
-    const target = e.target as SVGElement;
-    if (!target.classList.contains('category-slice')) return;
-    const cat = target.getAttribute('data-cat') || '';
-    const pct = target.getAttribute('data-pct') || '0';
-    tooltip.textContent = `${cat} \u00b7 ${pct}%`;
-    tooltip.classList.add('visible');
-    tooltip.style.left = '50%';
-    tooltip.style.top = '-4px';
-  });
-
-  svg.addEventListener('mouseout', (e) => {
-    const target = e.target as SVGElement;
-    if (target.classList.contains('category-slice')) {
-      tooltip.classList.remove('visible');
-    }
-  });
+  categoryContainer.innerHTML = cats.map(([cat, val]) => {
+    const color = CATEGORY_COLORS[cat] || CATEGORY_COLORS.other;
+    const valLabel = useDuration ? FormatUtils.formatDuration(val) : `${val}`;
+    return `
+    <div class="category-row">
+      <span class="category-name">${cat}</span>
+      <div class="category-bar-track">
+        <div class="category-bar-fill" style="width:${(val / maxVal) * 100}%;background:${color}"></div>
+      </div>
+      <span class="category-duration">${valLabel}</span>
+    </div>`;
+  }).join('');
 }
 
 // --- Helpers ---
