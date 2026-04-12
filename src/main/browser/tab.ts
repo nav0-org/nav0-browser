@@ -792,13 +792,14 @@ export class Tab {
       } catch (error) {
         //do nothing
       }
-      // Strip URL fragment/hash to avoid duplicate history entries for the same page
-      // (e.g. page.html#section1 vs page.html#section2 should be one record)
+      // Strip URL fragment/hash so in-page anchor changes don't create a
+      // brand new history entry (e.g. page.html#section1 vs page.html#section2
+      // are the same visit).
       const urlWithoutFragment = url.split('#')[0];
-      // Atomic upsert: finds existing record by URL and updates timestamp,
-      // or inserts a new record — all within a single synchronous transaction
-      // to prevent duplicate entries from concurrent calls.
-      const record = BrowsingHistoryManager.upsertRecord(
+      // One row per visit — revisits to the same URL intentionally create
+      // new rows so the history timeline and per-visit time tracking are
+      // preserved.
+      const record = BrowsingHistoryManager.insertRecord(
         this.parentAppWindow.id, urlWithoutFragment, this.title,
         urlObject ? urlObject.hostname : '',
         urlObject ? `${urlObject.protocol}//${urlObject.hostname}/favicon.ico` : ''
