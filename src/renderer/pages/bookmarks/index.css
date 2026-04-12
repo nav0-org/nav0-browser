@@ -426,17 +426,6 @@
   opacity: 1;
 }
 
-/* Heat bar — thin gradient at bottom of reference rows */
-.bookmark-heat-bar {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #c7d2fe, #6366f1);
-  border-radius: 1px;
-  transition: width var(--transition-medium) ease;
-}
-
 /* --------------------------------------------------------------------------
    Clear All Footer
    -------------------------------------------------------------------------- */

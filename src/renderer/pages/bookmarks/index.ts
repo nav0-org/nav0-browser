@@ -92,7 +92,6 @@ let currentOffset = 0;
 let isLoading = false;
 let hasMore = true;
 let allLoadedItems: BookmarkWithStats[] = [];
-let maxVisits = 1;
 
 // --- DOM refs ---
 
@@ -219,10 +218,6 @@ async function loadBookmarks(): Promise<void> {
   allLoadedItems = allLoadedItems.concat(filtered);
   currentOffset += items.length;
 
-  for (const item of allLoadedItems) {
-    if (item.visits > maxVisits) maxVisits = item.visits;
-  }
-
   updateVisibility();
   renderBookmarkItems(filtered);
   isLoading = false;
@@ -308,14 +303,6 @@ function renderBookmarkItems(items: BookmarkWithStats[]): void {
       ? `<span class="bookmark-visits" style="color: ${heatColor(item.visits)}">${item.visits} visits</span>`
       : '';
 
-    // Heat bar (reference only)
-    const heatWidth = item.type === 'reference'
-      ? Math.max(4, (item.visits / maxVisits) * 100)
-      : 0;
-    const heatBarHtml = item.type === 'reference'
-      ? `<div class="bookmark-heat-bar" style="width: ${heatWidth}%"></div>`
-      : '';
-
     // Move tooltip
     const moveTitle = item.type === 'queue' ? 'Move to Reference' : 'Move to Queue';
     const moveIcon = item.type === 'queue' ? 'archive' : 'book-open';
@@ -340,7 +327,6 @@ function renderBookmarkItems(items: BookmarkWithStats[]): void {
           <i data-lucide="x" width="12" height="12"></i>
         </button>
       </div>
-      ${heatBarHtml}
     `;
 
     // Click content → open
