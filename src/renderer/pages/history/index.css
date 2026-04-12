@@ -163,7 +163,7 @@
 
 .domain-name {
   width: 100px;
-  font-size: 10px;
+  font-size: var(--font-sm);
   color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -205,7 +205,7 @@
 
 .category-name {
   width: 100px;
-  font-size: 10px;
+  font-size: var(--font-sm);
   color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
