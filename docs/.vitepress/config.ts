@@ -88,7 +88,8 @@ export default defineConfig({
 
   head: [
     // Favicon
-    ['link', { rel: 'icon', type: 'image/webp', href: '/logo.webp' }],
+    ['link', { rel: 'icon', type: 'image/png', href: '/favicon.png' }],
+    ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' }],
 
     // Theme
     ['meta', { name: 'theme-color', content: '#1a1a1a' }],

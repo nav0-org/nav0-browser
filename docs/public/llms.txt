@@ -78,11 +78,14 @@ Unlike Chrome, Edge, Opera, and other mainstream browsers, Nav0:
 
 - Getting Started: https://nav0.org/guide/getting-started
 - Features: https://nav0.org/guide/features
-- Privacy Policy: https://nav0.org/guide/privacy
+- Privacy Principles: https://nav0.org/guide/privacy
 - Philosophy: https://nav0.org/guide/philosophy
 - Contributing: https://nav0.org/guide/contributing
 - Blog: https://nav0.org/blog/
 - FAQ: https://nav0.org/faq
+- Privacy Policy: https://nav0.org/privacy-policy
+- Terms of Use: https://nav0.org/terms-of-use
+- Disclaimer: https://nav0.org/disclaimer
 
 ## Full Content
 

@@ -9,10 +9,6 @@ head:
   - - meta
     - property: og:description
       content: "Nav0 is a free, open-source desktop browser that collects zero data. No telemetry, no AI, no crypto. Just a browser that browses. Windows, macOS, and Linux."
-  - - script
-    - type: application/ld+json
-    - '{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Nav0","operatingSystem":"Windows, macOS, Linux","applicationCategory":"BrowserApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"A minimal, privacy-focused desktop web browser. Zero telemetry, no data collection, no AI, no bloat.","url":"https://nav0.org","downloadUrl":"https://nav0.org/install","softwareVersion":"latest","license":"https://opensource.org/licenses/MIT"}'
-
 hero:
   name: Nav0
   text: Browse. Nothing More.
