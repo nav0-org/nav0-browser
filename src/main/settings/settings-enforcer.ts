@@ -189,7 +189,7 @@ export abstract class SettingsEnforcer {
     const browsingSes = session.fromPartition('persist:browsertabs');
     const privateSes = session.fromPartition('persist:private');
 
-    const preset = settings.userAgentPreset || (process.platform === 'darwin' ? 'firefox-mac' : process.platform === 'linux' ? 'firefox-linux' : 'firefox-windows');
+    const preset = settings.userAgentPreset || (process.platform === 'darwin' ? 'chrome-mac' : process.platform === 'linux' ? 'chrome-linux' : 'chrome-windows');
 
     let userAgent: string;
 
@@ -201,8 +201,9 @@ export abstract class SettingsEnforcer {
       if (!userAgent) return;
     }
 
-    browsingSes.setUserAgent(userAgent);
-    privateSes.setUserAgent(userAgent);
+    const acceptLanguages = 'en-US,en;q=0.9';
+    browsingSes.setUserAgent(userAgent, acceptLanguages);
+    privateSes.setUserAgent(userAgent, acceptLanguages);
 
     // Apply to all existing open tabs so the change takes effect immediately
     for (const wc of webContents.getAllWebContents()) {
