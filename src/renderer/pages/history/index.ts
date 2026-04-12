@@ -41,6 +41,10 @@ const CATEGORY_COLORS: Record<string, string> = {
   reference: '#d4d4d4', design: '#e0e0e0', other: '#f0f0f0',
 };
 
+const DOMAIN_HEAT_COLORS = [
+  '#171717', '#404040', '#525252', '#737373', '#8a8a8a', '#a3a3a3', '#bdbdbd', '#d4d4d4',
+];
+
 function getCategoryForDomain(domain: string): string {
   if (DOMAIN_CATEGORIES[domain]) return DOMAIN_CATEGORIES[domain];
   // Check if any key is a suffix match (e.g. "sub.github.com" → "github.com")
@@ -61,12 +65,11 @@ let currentTimeRange = 'all';
 // --- DOM refs ---
 const historyList = document.getElementById('history-list') as HTMLElement;
 const searchInput = document.getElementById('search-input') as HTMLInputElement;
-const searchClear = document.getElementById('search-clear') as HTMLElement;
 const deleteAllBtn = document.getElementById('delete-all') as HTMLElement;
+const historyFooter = document.getElementById('history-footer') as HTMLElement;
 const noHistory = document.getElementById('no-history') as HTMLElement;
 const statsLabel = document.getElementById('history-stats') as HTMLElement;
 const heatmapContainer = document.getElementById('heatmap-container') as HTMLElement;
-const sparklineContainer = document.getElementById('sparkline-container') as HTMLElement;
 const domainChartContainer = document.getElementById('domain-chart-container') as HTMLElement;
 const categoryContainer = document.getElementById('category-container') as HTMLElement;
 
@@ -76,15 +79,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadAnalytics();
 
   searchInput?.addEventListener('input', HtmlUtils.debounce(() => {
-    searchClear.style.display = searchInput.value ? 'flex' : 'none';
     resetAndReload();
   }, 300));
-
-  searchClear?.addEventListener('click', () => {
-    searchInput.value = '';
-    searchClear.style.display = 'none';
-    resetAndReload();
-  });
 
   document.querySelectorAll('.time-range-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -168,14 +164,14 @@ function filterByTimeRange(entries: BrowsingHistoryRecord[]): BrowsingHistoryRec
 // --- Rendering ---
 function renderAll(): void {
   renderHistoryList();
-  renderSparkline();
   renderDomainChart();
   renderCategoryChart();
   updateStats();
 
   const hasEntries = allEntries.length > 0;
   noHistory.style.display = hasEntries ? 'none' : 'block';
-  deleteAllBtn.style.display = hasEntries ? 'block' : 'none';
+  deleteAllBtn.style.display = hasEntries ? 'inline-block' : 'none';
+  if (historyFooter) historyFooter.style.display = hasEntries ? 'block' : 'none';
 }
 
 function updateStats(): void {
@@ -292,7 +288,6 @@ function renderSession(session: Session, container: HTMLElement): void {
     const ids = new Set(session.entries.map(e => e.id));
     allEntries = allEntries.filter(e => !ids.has(e.id));
     wrapper.remove();
-    renderSparkline();
     renderDomainChart();
     renderCategoryChart();
     updateStats();
@@ -344,7 +339,6 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
     await window.BrowserAPI.removeBrowsingHistory(window.BrowserAPI.appWindowId, entry.id);
     allEntries = allEntries.filter(item => item.id !== entry.id);
     row.remove();
-    renderSparkline();
     renderDomainChart();
     renderCategoryChart();
     updateStats();
@@ -515,81 +509,7 @@ function renderHeatmap(stats: Array<{ date: string; count: number; activeDuratio
   });
 }
 
-// --- Sparkline (responsive, fills card) ---
-function renderSparkline(): void {
-  const dailyData: { date: Date; count: number; active: number; label: string }[] = [];
-  for (let i = 13; i >= 0; i--) {
-    const d = new Date(Date.now() - i * 86400000);
-    const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-    const dayEnd = dayStart + 86400000;
-    let count = 0;
-    let active = 0;
-    for (const e of allEntries) {
-      const ts = new Date(e.createdDate).getTime();
-      if (ts >= dayStart && ts < dayEnd) {
-        count++;
-        active += e.activeDuration || 0;
-      }
-    }
-    const label = i === 0 ? 'Today' : i === 1 ? 'Yday' : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
-    dailyData.push({ date: d, count, active, label });
-  }
-
-  // Use page count if all active durations are 0
-  const hasActiveData = dailyData.some(d => d.active > 0);
-  const values = dailyData.map(d => hasActiveData ? d.active : d.count);
-  const maxVal = Math.max(...values, 1);
-
-  const sparkLabel = document.getElementById('sparkline-label');
-  if (sparkLabel) sparkLabel.textContent = hasActiveData ? 'active time \u00b7 14 days' : 'page visits \u00b7 14 days';
-
-  // Use viewBox coordinates; actual size determined by CSS width:100%
-  const vw = 300, vh = 80;
-  const padTop = 8, padBot = 20, padX = 4;
-  const chartH = vh - padTop - padBot;
-
-  const points = dailyData.map((d, i) => ({
-    x: padX + (i / (dailyData.length - 1)) * (vw - padX * 2),
-    y: padTop + chartH - (values[i] / maxVal) * chartH,
-    ...d,
-  }));
-
-  // Smooth curve
-  let pathD = `M ${points[0].x} ${points[0].y}`;
-  for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1];
-    const p = points[i];
-    const cpx = (prev.x + p.x) / 2;
-    pathD += ` C ${cpx} ${prev.y}, ${cpx} ${p.y}, ${p.x} ${p.y}`;
-  }
-
-  const fillPath = `${pathD} L ${points[points.length - 1].x} ${padTop + chartH} L ${points[0].x} ${padTop + chartH} Z`;
-
-  let dotsAndLabels = '';
-  for (let i = 0; i < points.length; i++) {
-    const p = points[i];
-    dotsAndLabels += `<circle cx="${p.x}" cy="${p.y}" r="3" fill="var(--bg-light)" stroke="var(--primary-color)" stroke-width="1.5" />`;
-    if (i === 0 || i === points.length - 1 || i === 7) {
-      dotsAndLabels += `<text x="${p.x}" y="${vh - 2}" text-anchor="middle" font-size="9" fill="var(--text-secondary)">${p.label}</text>`;
-    }
-  }
-
-  sparklineContainer.innerHTML = `
-    <svg class="sparkline-svg" viewBox="0 0 ${vw} ${vh}" preserveAspectRatio="xMidYMid meet">
-      <defs>
-        <linearGradient id="spark-fill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="var(--primary-color)" stop-opacity="0.1" />
-          <stop offset="100%" stop-color="var(--primary-color)" stop-opacity="0" />
-        </linearGradient>
-      </defs>
-      <path d="${fillPath}" fill="url(#spark-fill)" />
-      <path d="${pathD}" fill="none" stroke="var(--primary-color)" stroke-width="1.5" />
-      ${dotsAndLabels}
-    </svg>
-  `;
-}
-
-// --- Domain Chart ---
+// --- Domain Chart (heat bar) ---
 function renderDomainChart(): void {
   const map = new Map<string, { domain: string; visits: number; active: number; faviconUrl: string }>();
   for (const e of allEntries) {
@@ -615,23 +535,29 @@ function renderDomainChart(): void {
     .slice(0, 8);
 
   const label = document.getElementById('domain-chart-label');
-  if (label) label.textContent = useTime ? 'top sites \u00b7 active time' : 'top sites \u00b7 visits';
+  if (label) label.textContent = useTime ? 'Top sites by active time' : 'Top sites by visits';
 
-  const maxVal = Math.max(...sorted.map(d => useTime ? d.active : d.visits), 1);
+  const totalVal = sorted.reduce((a, d) => a + (useTime ? d.active : d.visits), 0) || 1;
 
-  domainChartContainer.innerHTML = sorted.map(d => {
+  let barHtml = '';
+  let legendHtml = '';
+  sorted.forEach((d, i) => {
     const val = useTime ? d.active : d.visits;
-    const valLabel = useTime ? FormatUtils.formatDuration(d.active) : `${d.visits}`;
-    return `
-    <div class="domain-row">
-      <span class="domain-favicon"><img src="${d.faviconUrl}" width="14" height="14" onerror="this.parentElement.className='domain-favicon-fallback';this.parentElement.innerHTML='&#x1F310;'"></span>
-      <span class="domain-name">${escapeHtml(d.domain)}</span>
-      <div class="domain-bar-track">
-        <div class="domain-bar-fill" style="width:${(val / maxVal) * 100}%"></div>
-      </div>
-      <span class="domain-duration">${valLabel}</span>
-    </div>`;
-  }).join('');
+    const pct = (val / totalVal) * 100;
+    const color = DOMAIN_HEAT_COLORS[i % DOMAIN_HEAT_COLORS.length];
+    const valLabel = useTime ? FormatUtils.formatDuration(d.active) : `${d.visits} visits`;
+    barHtml += `<div class="heat-bar-segment" style="width:${pct}%;background:${color}"></div>`;
+    legendHtml += `
+      <div class="heat-bar-legend-item">
+        <div class="heat-bar-legend-dot" style="background:${color}"></div>
+        <span class="heat-bar-legend-text">${escapeHtml(d.domain)} \u00b7 ${valLabel}</span>
+      </div>`;
+  });
+
+  domainChartContainer.innerHTML = `
+    <div class="heat-bar">${barHtml}</div>
+    <div class="heat-bar-legend">${legendHtml}</div>
+  `;
 }
 
 // --- Category Pie Chart ---
@@ -659,35 +585,48 @@ function renderCategoryChart(): void {
     .map(([cat, val]) => ({ cat, dur: val, pct: (val / total) * 100 }));
 
   const catLabel = document.getElementById('category-label');
-  if (catLabel) catLabel.textContent = useDuration ? 'time by category' : 'visits by category';
+  if (catLabel) catLabel.textContent = useDuration ? 'Time spent by category' : 'Visits by category';
 
-  // SVG donut chart
-  const radius = 32, circ = 2 * Math.PI * radius;
+  // SVG donut chart — larger, no legend
+  const radius = 56, circ = 2 * Math.PI * radius;
   let accum = 0;
   let slices = '';
   for (const c of cats) {
     const color = CATEGORY_COLORS[c.cat] || CATEGORY_COLORS.other;
     const dashLen = (c.pct / 100) * circ;
     const offset = -(accum / 100) * circ;
-    slices += `<circle cx="40" cy="40" r="${radius}" fill="none" stroke="${color}" stroke-width="10" stroke-dasharray="${dashLen} ${circ}" stroke-dashoffset="${offset}" />`;
+    slices += `<circle class="category-slice" cx="70" cy="70" r="${radius}" fill="none" stroke="${color}" stroke-width="16" stroke-dasharray="${dashLen} ${circ}" stroke-dashoffset="${offset}" data-cat="${c.cat}" data-pct="${Math.round(c.pct)}" style="cursor:pointer" />`;
     accum += c.pct;
   }
 
-  const legendHtml = cats.map(c => {
-    const color = CATEGORY_COLORS[c.cat] || CATEGORY_COLORS.other;
-    return `<div class="category-legend-item">
-      <div class="category-legend-dot" style="background:${color}"></div>
-      <span class="category-legend-name">${c.cat}</span>
-      <span class="category-legend-pct">${Math.round(c.pct)}%</span>
-    </div>`;
-  }).join('');
-
   categoryContainer.innerHTML = `
     <div class="category-chart-wrapper">
-      <svg width="80" height="80" viewBox="0 0 80 80">${slices}</svg>
-      <div class="category-legend">${legendHtml}</div>
+      <svg width="140" height="140" viewBox="0 0 140 140">${slices}</svg>
+      <div class="category-tooltip" id="category-tooltip"></div>
     </div>
   `;
+
+  // Tooltip behavior on hover
+  const svg = categoryContainer.querySelector('svg')!;
+  const tooltip = document.getElementById('category-tooltip')!;
+
+  svg.addEventListener('mouseover', (e) => {
+    const target = e.target as SVGElement;
+    if (!target.classList.contains('category-slice')) return;
+    const cat = target.getAttribute('data-cat') || '';
+    const pct = target.getAttribute('data-pct') || '0';
+    tooltip.textContent = `${cat} \u00b7 ${pct}%`;
+    tooltip.classList.add('visible');
+    tooltip.style.left = '50%';
+    tooltip.style.top = '-4px';
+  });
+
+  svg.addEventListener('mouseout', (e) => {
+    const target = e.target as SVGElement;
+    if (target.classList.contains('category-slice')) {
+      tooltip.classList.remove('visible');
+    }
+  });
 }
 
 // --- Helpers ---
