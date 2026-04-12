@@ -144,6 +144,11 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
   margin-right: 0;
 }
 
+.tab:not(.active) {
+  border: 1px solid var(--border-color);
+  border-bottom: none;
+}
+
 .tab:hover {
   background-color: var(--bg-hover);
 }
