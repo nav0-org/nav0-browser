@@ -57,7 +57,7 @@ export abstract class BookmarkManager {
     const db = BookmarkManager.getDb(appWindowId);
     if (!db) return [];
 
-    const orderBy = type === 'queue' ? 'b.createdDate DESC' : 'visits DESC, b.createdDate DESC';
+    const orderBy = 'b.createdDate DESC';
 
     const stmt = db.prepare(`
       SELECT b.*,
