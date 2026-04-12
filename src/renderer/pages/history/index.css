@@ -151,43 +151,46 @@
   flex-direction: column;
 }
 
-/* Heat bar (top sites) */
-.heat-bar {
-  height: 6px;
-  border-radius: 3px;
-  background: var(--border-color);
-  overflow: hidden;
-  display: flex;
-}
-
-.heat-bar-segment {
-  height: 100%;
-  transition: width 0.6s ease;
-}
-
-.heat-bar-legend {
-  display: flex;
-  gap: 12px;
-  margin-top: 10px;
-  flex-wrap: wrap;
-}
-
-.heat-bar-legend-item {
+/* Domain chart (line bars) */
+.domain-row {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
+  margin-bottom: 6px;
 }
 
-.heat-bar-legend-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
+.domain-name {
+  width: 100px;
+  font-size: 10px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   flex-shrink: 0;
 }
 
-.heat-bar-legend-text {
-  font-size: var(--font-xs);
-  color: var(--text-light);
+.domain-bar-track {
+  flex: 1;
+  height: 4px;
+  background: var(--border-color);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.domain-bar-fill {
+  height: 100%;
+  background: var(--primary-color);
+  border-radius: 2px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.domain-duration {
+  width: 44px;
+  font-size: 9px;
+  color: var(--text-color);
+  font-weight: 600;
+  text-align: right;
+  flex-shrink: 0;
 }
 
 /* Category chart */
@@ -281,9 +284,9 @@
   background: var(--primary-color);
 }
 
-/* History list — no inner scroll, uses page scroll */
+/* History list */
 .history-list {
-  /* no max-height or overflow — page scrolls naturally */
+  border-top: 1px solid var(--border-color);
 }
 
 /* Date group */
@@ -301,154 +304,65 @@
   text-transform: capitalize;
 }
 
-/* Session group */
-.session-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  cursor: pointer;
-  border-radius: var(--radius-md);
-  transition: background var(--transition-fast);
-}
-
-.session-header:hover {
-  background: var(--bg-color);
-}
-
-.session-expand-icon {
-  font-size: 10px;
-  color: var(--text-secondary);
-  transition: transform var(--transition-fast);
-  display: inline-block;
-}
-
-.session-expand-icon.expanded {
-  transform: rotate(90deg);
-}
-
-.session-time {
-  font-size: var(--font-xs);
-  color: var(--primary-color);
-  font-weight: 600;
-}
-
-.session-dash {
-  font-size: var(--font-xs);
-  color: var(--text-secondary);
-}
-
-.session-meta {
-  font-size: var(--font-xs);
-  color: var(--text-secondary);
-}
-
-.session-domains {
-  flex: 1;
-  display: flex;
-  gap: 3px;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-}
-
-.session-domain-badge {
-  width: 16px;
-  height: 16px;
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.session-domain-badge img {
-  width: 16px;
-  height: 16px;
-}
-
-.session-domain-more {
-  font-size: 8px;
-  color: var(--text-secondary);
-  align-self: center;
-}
-
-.session-delete-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: var(--font-xs);
-  color: var(--border-color);
-  padding: 2px 4px;
-  border-radius: var(--radius-sm);
-  transition: color var(--transition-fast);
-}
-
-.session-delete-btn:hover {
-  color: var(--error-color);
-}
-
-/* Session entries */
-.session-entries {
-  margin-left: 20px;
-  border-left: 1px solid var(--border-color);
-  padding-left: 12px;
-}
-
-/* History entry — no checkbox */
+/* History entry — matches bookmark-item layout */
 .history-entry {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 8px;
-  border-radius: var(--radius-sm);
+  gap: 14px;
+  padding: 13px 4px;
   cursor: default;
-  transition: background var(--transition-fast);
+  border-bottom: 1px solid var(--border-color);
+  transition: background var(--transition-fast) ease;
 }
 
 .history-entry:hover {
-  background: var(--bg-color);
+  background: #fcfcfc;
 }
 
 .entry-time {
-  font-size: 10px;
+  font-size: var(--font-xs);
   color: var(--text-secondary);
-  width: 42px;
+  width: 54px;
   flex-shrink: 0;
+  text-align: right;
 }
 
+/* Favicon box — matches bk-favicon */
 .entry-favicon {
-  width: 18px;
-  height: 18px;
-  border-radius: var(--radius-sm);
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
   flex-shrink: 0;
-  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--bg-color);
 }
 
 .entry-favicon img {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
 }
 
-.entry-favicon-fallback {
-  width: 18px;
-  height: 18px;
-  border-radius: var(--radius-sm);
-  background: var(--bg-color);
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
+.entry-favicon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Content area — matches bookmark-content */
+.entry-content {
+  flex: 1;
+  min-width: 0;
 }
 
 .entry-title {
-  font-size: var(--font-sm);
+  font-size: var(--font-md);
   color: var(--text-color);
-  flex: 1;
+  font-weight: 400;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -457,9 +371,10 @@
 }
 
 .entry-domain {
-  font-size: 9px;
+  font-size: var(--font-sm);
   color: var(--text-secondary);
-  flex-shrink: 0;
+  margin-top: 2px;
+  display: block;
 }
 
 .entry-duration {

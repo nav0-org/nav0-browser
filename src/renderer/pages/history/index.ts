@@ -1,6 +1,7 @@
 import { HtmlUtils } from '../../../renderer/common/html-utils';
 import { FormatUtils } from '../../../renderer/common/format-utils';
 import { BrowsingHistoryRecord } from '../../../types/browsing-history-record';
+import { BOOKMARK_CATEGORY_COLORS } from '../../../constants/app-constants';
 import './index.css';
 
 import { createIcons, icons } from 'lucide';
@@ -8,7 +9,6 @@ createIcons({ icons });
 
 // --- Constants ---
 const PAGE_SIZE = 100;
-const SESSION_GAP_MS = 1800000; // 30 minutes
 const HEATMAP_LEVELS = ['#f0f0f0', '#d4d4d4', '#a3a3a3', '#525252', '#171717'];
 
 // Domain-to-category mapping for the pie chart
@@ -36,14 +36,17 @@ const DOMAIN_CATEGORIES: Record<string, string> = {
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  dev: '#171717', social: '#404040', media: '#525252', news: '#737373',
-  search: '#8a8a8a', productivity: '#a3a3a3', shopping: '#bdbdbd',
-  reference: '#d4d4d4', design: '#e0e0e0', other: '#f0f0f0',
+  dev: BOOKMARK_CATEGORY_COLORS.dev || '#6366f1',
+  social: BOOKMARK_CATEGORY_COLORS.social || '#8b5cf6',
+  media: BOOKMARK_CATEGORY_COLORS.media || '#ec4899',
+  news: BOOKMARK_CATEGORY_COLORS.news || '#06b6d4',
+  search: '#a1a1aa',
+  productivity: BOOKMARK_CATEGORY_COLORS.tools || '#f59e0b',
+  shopping: BOOKMARK_CATEGORY_COLORS.shopping || '#f97316',
+  reference: BOOKMARK_CATEGORY_COLORS.reference || '#6366f1',
+  design: '#8b5cf6',
+  other: BOOKMARK_CATEGORY_COLORS.other || '#a1a1aa',
 };
-
-const DOMAIN_HEAT_COLORS = [
-  '#171717', '#404040', '#525252', '#737373', '#8a8a8a', '#a3a3a3', '#bdbdbd', '#d4d4d4',
-];
 
 function getCategoryForDomain(domain: string): string {
   if (DOMAIN_CATEGORIES[domain]) return DOMAIN_CATEGORIES[domain];
@@ -180,11 +183,10 @@ function updateStats(): void {
   statsLabel.textContent = `${allEntries.length.toLocaleString()} pages \u00b7 ${totalDomains} sites \u00b7 ${FormatUtils.formatDuration(totalActive)} active`;
 }
 
-// --- Session grouping ---
-interface Session { entries: BrowsingHistoryRecord[] }
-interface DateGroup { label: string; dateKey: string; sessions: Session[] }
+// --- Day grouping (flat, no sessions) ---
+interface DateGroup { label: string; dateKey: string; entries: BrowsingHistoryRecord[] }
 
-function groupIntoSessions(entries: BrowsingHistoryRecord[]): DateGroup[] {
+function groupByDay(entries: BrowsingHistoryRecord[]): DateGroup[] {
   if (entries.length === 0) return [];
 
   const dateMap = new Map<string, BrowsingHistoryRecord[]>();
@@ -198,25 +200,10 @@ function groupIntoSessions(entries: BrowsingHistoryRecord[]): DateGroup[] {
   const dateGroups: DateGroup[] = [];
   for (const [dateKey, dayEntries] of dateMap) {
     dayEntries.sort((a, b) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime());
-
-    const sessions: Session[] = [];
-    let currentSession: BrowsingHistoryRecord[] = [dayEntries[0]];
-
-    for (let i = 1; i < dayEntries.length; i++) {
-      const gap = new Date(dayEntries[i - 1].createdDate).getTime() - new Date(dayEntries[i].createdDate).getTime();
-      if (gap > SESSION_GAP_MS) {
-        sessions.push({ entries: currentSession });
-        currentSession = [dayEntries[i]];
-      } else {
-        currentSession.push(dayEntries[i]);
-      }
-    }
-    if (currentSession.length) sessions.push({ entries: currentSession });
-
     dateGroups.push({
       label: FormatUtils.getRelativeDayLabel(new Date(dayEntries[0].createdDate)),
       dateKey,
-      sessions,
+      entries: dayEntries,
     });
   }
 
@@ -225,7 +212,7 @@ function groupIntoSessions(entries: BrowsingHistoryRecord[]): DateGroup[] {
 
 function renderHistoryList(): void {
   historyList.innerHTML = '';
-  const dateGroups = groupIntoSessions(allEntries);
+  const dateGroups = groupByDay(allEntries);
 
   for (const dg of dateGroups) {
     const dateLabel = document.createElement('div');
@@ -233,77 +220,12 @@ function renderHistoryList(): void {
     dateLabel.textContent = dg.label;
     historyList.appendChild(dateLabel);
 
-    for (const session of dg.sessions) {
-      renderSession(session, historyList);
+    for (const entry of dg.entries) {
+      historyList.appendChild(renderEntry(entry));
     }
   }
 
   createIcons({ icons });
-}
-
-function renderSession(session: Session, container: HTMLElement): void {
-  const wrapper = document.createElement('div');
-  wrapper.style.marginBottom = '2px';
-
-  const lastEntry = session.entries[session.entries.length - 1];
-  const sessionActive = session.entries.reduce((a, e) => a + (e.activeDuration || 0), 0);
-  const uniqueDomains = [...new Set(session.entries.map(e => e.topLevelDomain))];
-
-  const header = document.createElement('div');
-  header.className = 'session-header';
-  let expanded = true;
-
-  const startTime = new Date(lastEntry.createdDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-  const domainBadgesHtml = uniqueDomains.slice(0, 6).map(domain => {
-    const faviconUrl = `https://${domain}/favicon.ico`;
-    return `<span class="session-domain-badge"><img src="${faviconUrl}" onerror="this.parentElement.innerHTML='&#x1F310;'" width="16" height="16"></span>`;
-  }).join('');
-  const moreHtml = uniqueDomains.length > 6 ? `<span class="session-domain-more">+${uniqueDomains.length - 6}</span>` : '';
-
-  header.innerHTML = `
-    <span class="session-expand-icon expanded">\u25B6</span>
-    <span class="session-time">${startTime}</span>
-    <span class="session-dash">\u2014</span>
-    <span class="session-meta">${session.entries.length} pages \u00b7 ${FormatUtils.formatDuration(sessionActive)} active</span>
-    <div class="session-domains">${domainBadgesHtml}${moreHtml}</div>
-    <button class="session-delete-btn" title="delete session">\u2715</button>
-  `;
-
-  const entriesDiv = document.createElement('div');
-  entriesDiv.className = 'session-entries';
-
-  header.addEventListener('click', (e) => {
-    if ((e.target as HTMLElement).classList.contains('session-delete-btn')) return;
-    expanded = !expanded;
-    entriesDiv.style.display = expanded ? 'block' : 'none';
-    header.querySelector('.session-expand-icon')!.classList.toggle('expanded', expanded);
-  });
-
-  header.querySelector('.session-delete-btn')?.addEventListener('click', async (e) => {
-    e.stopPropagation();
-    for (const entry of session.entries) {
-      await window.BrowserAPI.removeBrowsingHistory(window.BrowserAPI.appWindowId, entry.id);
-    }
-    const ids = new Set(session.entries.map(e => e.id));
-    allEntries = allEntries.filter(e => !ids.has(e.id));
-    wrapper.remove();
-    renderDomainChart();
-    renderCategoryChart();
-    updateStats();
-    if (allEntries.length === 0) {
-      noHistory.style.display = 'block';
-      deleteAllBtn.style.display = 'none';
-    }
-  });
-
-  for (const entry of session.entries) {
-    entriesDiv.appendChild(renderEntry(entry));
-  }
-
-  wrapper.appendChild(header);
-  wrapper.appendChild(entriesDiv);
-  container.appendChild(wrapper);
 }
 
 function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
@@ -323,9 +245,11 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
 
   row.innerHTML = `
     <span class="entry-time">${time}</span>
-    <span class="entry-favicon"><img src="${faviconUrl}" width="14" height="14" onerror="this.parentElement.innerHTML='<span class=\\'entry-favicon-fallback\\'>&#x1F310;</span>'"></span>
-    <span class="entry-title" title="${escapeHtml(entry.title)}">${escapeHtml(entry.title)}</span>
-    <span class="entry-domain">${escapeHtml(entry.topLevelDomain)}</span>
+    <div class="entry-favicon"><img src="${faviconUrl}" width="16" height="16" onerror="this.parentElement.innerHTML='<i data-lucide=\\'globe\\' width=\\'16\\' height=\\'16\\'></i>'"></div>
+    <div class="entry-content">
+      <span class="entry-title" title="${escapeHtml(entry.title)}">${escapeHtml(entry.title)}</span>
+      <span class="entry-domain">${escapeHtml(entry.topLevelDomain)}</span>
+    </div>
     ${durationHtml}
     <button class="entry-delete-btn"><i data-lucide="x" width="12" height="12"></i></button>
   `;
@@ -537,27 +461,20 @@ function renderDomainChart(): void {
   const label = document.getElementById('domain-chart-label');
   if (label) label.textContent = useTime ? 'Top sites by active time' : 'Top sites by visits';
 
-  const totalVal = sorted.reduce((a, d) => a + (useTime ? d.active : d.visits), 0) || 1;
+  const maxVal = Math.max(...sorted.map(d => useTime ? d.active : d.visits), 1);
 
-  let barHtml = '';
-  let legendHtml = '';
-  sorted.forEach((d, i) => {
+  domainChartContainer.innerHTML = sorted.map(d => {
     const val = useTime ? d.active : d.visits;
-    const pct = (val / totalVal) * 100;
-    const color = DOMAIN_HEAT_COLORS[i % DOMAIN_HEAT_COLORS.length];
-    const valLabel = useTime ? FormatUtils.formatDuration(d.active) : `${d.visits} visits`;
-    barHtml += `<div class="heat-bar-segment" style="width:${pct}%;background:${color}"></div>`;
-    legendHtml += `
-      <div class="heat-bar-legend-item">
-        <div class="heat-bar-legend-dot" style="background:${color}"></div>
-        <span class="heat-bar-legend-text">${escapeHtml(d.domain)} \u00b7 ${valLabel}</span>
-      </div>`;
-  });
-
-  domainChartContainer.innerHTML = `
-    <div class="heat-bar">${barHtml}</div>
-    <div class="heat-bar-legend">${legendHtml}</div>
-  `;
+    const valLabel = useTime ? FormatUtils.formatDuration(d.active) : `${d.visits}`;
+    return `
+    <div class="domain-row">
+      <span class="domain-name">${escapeHtml(d.domain)}</span>
+      <div class="domain-bar-track">
+        <div class="domain-bar-fill" style="width:${(val / maxVal) * 100}%"></div>
+      </div>
+      <span class="domain-duration">${valLabel}</span>
+    </div>`;
+  }).join('');
 }
 
 // --- Category Pie Chart ---
