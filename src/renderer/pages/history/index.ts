@@ -416,12 +416,12 @@ function renderHeatmap(stats: Array<{ date: string; count: number; activeDuratio
     const count = parseInt(target.getAttribute('data-count') || '0');
     const active = parseInt(target.getAttribute('data-active') || '0');
     const rect = target.getBoundingClientRect();
-    const cr = scrollArea.getBoundingClientRect();
+    const cr = heatmapContainer.getBoundingClientRect();
 
     if (!tooltip) {
       tooltip = document.createElement('div');
       tooltip.className = 'heatmap-tooltip';
-      scrollArea.appendChild(tooltip);
+      heatmapContainer.appendChild(tooltip);
     }
     tooltip.innerHTML = `<div class="heatmap-tooltip-title">${label}</div><div class="heatmap-tooltip-sub">${count === 0 ? 'no activity' : `${count} pages \u00b7 ${FormatUtils.formatDuration(active)} active`}</div>`;
     tooltip.style.left = `${rect.left - cr.left + rect.width / 2}px`;
