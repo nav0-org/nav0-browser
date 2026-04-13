@@ -1,6 +1,7 @@
 import { HtmlUtils } from '../../../renderer/common/html-utils';
 import { BookmarkWithStats } from '../../../types/bookmark-record';
-import { WEBSITE_CATEGORY_MAP, WEBSITE_CATEGORY_COLORS } from '../../../constants/app-constants';
+import { WEBSITE_CATEGORY_COLORS } from '../../../constants/app-constants';
+import { WEBSITE_CATEGORY_MAP } from '../../../constants/data-constants';
 import './index.css';
 
 import { createIcons, icons } from 'lucide';
