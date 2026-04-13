@@ -162,7 +162,6 @@ export default defineConfig({
 
     // Twitter Card
     ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
-    ['meta', { name: 'twitter:site', content: '@nav0_org' }],
     ['meta', { name: 'twitter:title', content: 'Nav0 — Minimal Privacy Browser' }],
     ['meta', { name: 'twitter:description', content: siteDescription }],
     ['meta', { name: 'twitter:image', content: ogImage }],
