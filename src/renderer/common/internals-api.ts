@@ -79,6 +79,8 @@ declare global {
       restoreClosedTabByIndex: (appWindowId: string, index: number) => Promise<{id: string, title: string, url: string} | null>;
       fetchClosedWindows: () => Promise<Array<{tabCount: number, tabs: Array<{url: string, title: string}>, closedAt: number}>>;
       restoreClosedWindow: (index: number) => Promise<{ok: boolean} | null>;
+      fetchSessionState: () => Promise<{ windowCount: number; totalTabCount: number; savedAt: number } | null>;
+      restorePreviousSession: () => Promise<{ ok: boolean } | null>;
       toggleReaderMode: (appWindowId: string, tabId: string) => Promise<any>;
       downloadCurrentPdf: (appWindowId: string, tabId: string) => Promise<any>;
       // Event listeners
