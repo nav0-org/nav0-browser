@@ -128,7 +128,7 @@ A 2024 study from Trinity College Dublin tested five major browsers and found th
 
 Consider what the major browsers are known to collect:
 
-**Google Chrome** syncs browsing history, bookmarks, passwords, open tabs, and autofill data to Google's servers by default when you sign in. Chrome also participates in Google's advertising ecosystem, with features like the Topics API that categorize your browsing interests for ad targeting. Even the "Enhanced Safe Browsing" mode sends full URLs to Google for analysis.
+**Google Chrome** syncs browsing history, bookmarks, passwords, open tabs, and autofill data to Google's servers by default when you sign in. We documented [how Chrome got this way](/blog/the-enshittification-of-chrome) in detail. Chrome also participates in Google's advertising ecosystem, with features like the Topics API that categorize your browsing interests for ad targeting. Even the "Enhanced Safe Browsing" mode sends full URLs to Google for analysis.
 
 **Microsoft Edge** sends hardware identifiers to Microsoft upon first launch. It includes a built-in shopping assistant that monitors the pages you visit to find deals. Edge has been observed sending the full URL of every page you visit to Bing's API servers.
 
@@ -182,7 +182,7 @@ Every feature is an attack surface. Every integration is a potential data leak. 
 
 ### No Account Required
 
-The moment a browser requires an account, your activity can be linked to your identity. A privacy-respecting browser should work fully without any sign-up, sign-in, or registration.
+The moment a browser requires an account, your activity can be linked to your identity. We explored [why browsers push sign-in so aggressively](/blog/why-your-browser-wants-you-to-sign-in) and what they gain from it. A privacy-respecting browser should work fully without any sign-up, sign-in, or registration.
 
 ## What You Can Do Today
 
@@ -192,7 +192,7 @@ If you're concerned about browser privacy, here are concrete steps:
 
 2. **Don't sign into your browser.** This single step prevents the vast majority of cross-device tracking and data collection.
 
-3. **Use a privacy-focused browser.** Choose one that collects nothing by default, like Nav0. Not one that collects everything and asks you to opt out.
+3. **Use a privacy-focused browser.** Choose one that collects nothing by default, like Nav0. Not one that collects everything and asks you to opt out. See how Nav0's [privacy protections](/guide/privacy-protection) work.
 
 4. **Check the source.** If your browser isn't open source, you can't verify its privacy claims. Trust, but verify. Or better yet, just verify.
 

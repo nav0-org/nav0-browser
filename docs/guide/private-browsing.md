@@ -57,6 +57,32 @@ head:
           }
         ]
       }
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to Use Private Browsing in Nav0",
+        "description": "Open a private browsing window in Nav0 that uses a separate database partition and deletes all data when closed.",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "name": "Open a private window",
+            "text": "Press Cmd+Shift+N on macOS or Ctrl+Shift+N on Windows/Linux. You can also use File menu or the options menu to select New Private Window."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Browse privately",
+            "text": "Private windows operate on a separate storage partition. Cookies, history, cache, and local storage are isolated from your normal browsing windows."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Close to delete all data",
+            "text": "When you close the last private window, Nav0 deletes the entire private database partition. All history, cookies, cached files, and session data are permanently removed."
+          }
+        ]
+      }
 ---
 
 # Private Browsing

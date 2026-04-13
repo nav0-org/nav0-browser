@@ -1,6 +1,43 @@
 ---
 title: "Getting Started with Nav0 Browser — Installation & Setup"
 description: "Get started with Nav0 — a minimal, privacy-focused browser. Install on macOS, Windows, or Linux with no account, no setup dialogs, and no data collection."
+head:
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to Install Nav0 Browser",
+        "description": "Install Nav0 on macOS, Windows, or Linux. No account required, no setup dialogs, no data collection.",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "name": "Choose your platform",
+            "text": "Nav0 is available for macOS, Windows, and Linux. Choose the installation method for your operating system."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Install on macOS",
+            "text": "Run this command in Terminal: curl -fsSL https://raw.githubusercontent.com/nav0-org/nav0-browser/main/install.sh | bash"
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Install on Windows",
+            "text": "Download the .exe installer from GitHub Releases at https://github.com/nav0-org/nav0-browser/releases and run it."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Install on Linux",
+            "text": "Download .deb (Debian/Ubuntu) or .rpm (Fedora/RHEL) packages from GitHub Releases at https://github.com/nav0-org/nav0-browser/releases."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Start browsing",
+            "text": "Launch Nav0. No account creation, no personalization setup, no telemetry consent dialogs. Just a browser, ready to use."
+          }
+        ]
+      }
 ---
 
 # Getting Started

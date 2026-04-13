@@ -141,7 +141,7 @@ With a browser VPN, you're trusting the same company that:
 - May have financial incentives tied to advertising or data monetization
 - Controls the update mechanism and can change behavior silently
 
-This is like hiring a security guard from the same company you're trying to protect your valuables from. Even if they're honest today, the structural incentive is wrong.
+This is like hiring a security guard from the same company you're trying to protect your valuables from. These are the same companies that [want you to sign in](/blog/why-your-browser-wants-you-to-sign-in) so they can track you across devices. Even if they're honest today, the structural incentive is wrong.
 
 A standalone VPN provider's entire business depends on their reputation for privacy. If they're caught logging or selling data, their business is over. A browser vendor's VPN is a side feature, a value-add, a way to keep you in the ecosystem. The incentives are fundamentally different.
 
@@ -161,7 +161,7 @@ When you use Edge with its Secure Network, Edge still:
 - Runs its shopping and rewards features
 - Tracks which sites you visit for "personalization"
 
-The VPN encrypts your traffic from external observers, but the browser is inside the tunnel with you. It sees everything, VPN or not. This makes browser VPNs fundamentally different from system-level VPNs, which sit between all applications and the network.
+The VPN encrypts your traffic from external observers, but the browser is inside the tunnel with you. It sees everything, VPN or not. This is the same problem with [Incognito mode](/blog/incognito-mode-is-not-private) — the protection sounds good but doesn't address the real threat. This makes browser VPNs fundamentally different from system-level VPNs, which sit between all applications and the network.
 
 ## The "Free" VPN Trap
 
@@ -188,7 +188,7 @@ If you genuinely need a VPN, here's what works:
 
 1. **Use a standalone, reputable VPN provider.** Choose one with a proven no-logs policy, ideally verified by independent audits. Run it at the system level so all your traffic is protected, not just browser traffic.
 
-2. **Use a minimal browser alongside your VPN.** A browser that collects nothing (like Nav0) combined with a system-level VPN gives you actual privacy. The browser doesn't spy on you, and the VPN hides your traffic from your ISP.
+2. **Use a minimal browser alongside your VPN.** A browser that collects nothing (like Nav0) combined with a system-level VPN gives you actual privacy. The browser doesn't spy on you, and the VPN hides your traffic from your ISP. See how Nav0's [privacy protections](/guide/privacy-protection) work at every layer.
 
 3. **Understand your threat model.** Most people don't need a VPN for everyday browsing. HTTPS already encrypts your connection to individual websites. A VPN matters most on untrusted networks, when you need to mask your IP from specific services, or when you want to prevent ISP logging.
 

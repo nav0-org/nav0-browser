@@ -168,7 +168,7 @@ If you're a journalist communicating with a source in an authoritarian country, 
 
 If you want a fast, clean browser that doesn't phone home, doesn't track you, doesn't show you ads, and doesn't collect any data about your browsing — Nav0 handles that.
 
-Most people's daily threat model is not "state-level adversary performing traffic analysis." It's "my browser is sending my data to Google/Microsoft/Apple." Nav0 solves that problem completely, without the performance costs of Tor.
+Most people's daily threat model is not "state-level adversary performing traffic analysis." It's "[my browser is sending my data](/blog/your-browser-is-watching-you) to Google/Microsoft/Apple." Nav0 solves that problem completely, without the performance costs of Tor.
 
 ## Usability: Friction by Design vs. Zero Friction
 
@@ -176,7 +176,7 @@ Tor Browser is deliberately restrictive. It disables many browser features to pr
 
 These restrictions exist for good reason. Every browser feature is a potential vector for de-anonymization. Tor Browser's aggressive lockdown is what makes it effective. But it makes everyday browsing painful.
 
-Nav0 doesn't restrict your browsing. JavaScript works normally. Websites render correctly. You can resize your window without a privacy warning. The browser works like a browser — it just doesn't collect your data while doing it.
+Nav0 doesn't restrict your browsing. JavaScript works normally. Websites render correctly. You can resize your window without a privacy warning. The browser works like a browser — it just doesn't collect your data while doing it. See how Nav0's [privacy protections](/guide/privacy-protection) work at every layer without impacting usability.
 
 This usability difference matters because privacy tools only work if people use them. A tool that's too painful for daily use gets abandoned. Many people install Tor Browser, find it too slow for everyday tasks, and go back to Chrome. They'd have been better off using a non-tracking browser like Nav0 for their daily browsing, and reserving Tor for situations that genuinely require anonymity.
 
