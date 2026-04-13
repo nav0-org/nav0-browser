@@ -10,8 +10,8 @@ What's new in every release of Nav0 Browser.
 ---
 
 <div class="release-list-item">
-  <a href="/releases/v0.13.0">
-    <h2>v0.13.0</h2>
+  <a href="/releases/v0.2.0">
+    <h2>v0.2.0</h2>
   </a>
   <div class="release-meta">April 12, 2026 <span class="release-badge latest">Latest</span></div>
   <p class="release-excerpt">Downloads page redesign with cross-session resume, history page with time tracking and analytics, bookmarks page with reading queue/reference split, favicon fetching via net.fetch, and Chrome default user agent.</p>
