@@ -279,6 +279,8 @@ export const WEBSITE_CATEGORY_COLORS: Record<string, string> = {
   travel: '#38bdf8',       // sky
   education: '#a78bfa',    // violet
   entertainment: '#fb923c', // light orange
+  jobs: '#0ea5e9',          // bright sky
+  lifestyle: '#f472b6',     // rose
   other: '#a1a1aa',        // gray
 };
 

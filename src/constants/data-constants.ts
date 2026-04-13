@@ -202,4 +202,26 @@ export const WEBSITE_CATEGORY_MAP: Record<string, string> = {
   'cars.com': 'entertainment',
   'autotrader.com': 'entertainment',
   'zillow.com': 'entertainment',
+
+  // Jobs
+  'linkedin.com/jobs': 'jobs',
+  'indeed.com': 'jobs',
+  'glassdoor.com': 'jobs',
+  'monster.com': 'jobs',
+  'ziprecruiter.com': 'jobs',
+  'wellfound.com': 'jobs',
+  'lever.co': 'jobs',
+  'greenhouse.io': 'jobs',
+  'hired.com': 'jobs',
+
+  // Lifestyle
+  'pinterest.com': 'lifestyle',
+  'houzz.com': 'lifestyle',
+  'ikea.com': 'lifestyle',
+  'zara.com': 'lifestyle',
+  'hm.com': 'lifestyle',
+  'nike.com': 'lifestyle',
+  'asos.com': 'lifestyle',
+  'sephora.com': 'lifestyle',
+  'goodreads.com': 'lifestyle',
 };
