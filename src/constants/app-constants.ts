@@ -274,6 +274,11 @@ export const WEBSITE_CATEGORY_COLORS: Record<string, string> = {
   reference: '#6366f1',    // indigo
   search: '#a1a1aa',       // gray
   design: '#14b8a6',       // teal
+  health: '#34d399',       // emerald
+  gaming: '#e879f9',       // fuchsia
+  travel: '#38bdf8',       // sky
+  education: '#a78bfa',    // violet
+  entertainment: '#fb923c', // light orange
   other: '#a1a1aa',        // gray
 };
 
@@ -353,7 +358,7 @@ export const WEBSITE_CATEGORY_MAP: Record<string, string> = {
   'vimeo.com': 'media',
   'spotify.com': 'media',
   'soundcloud.com': 'media',
-  'twitch.tv': 'media',
+  'twitch.tv': 'gaming',
   'netflix.com': 'media',
   'disneyplus.com': 'media',
   'podcasts.apple.com': 'media',
@@ -422,6 +427,65 @@ export const WEBSITE_CATEGORY_MAP: Record<string, string> = {
   'canva.com': 'design',
   'dribbble.com': 'design',
   'behance.net': 'design',
+
+  // Health
+  'webmd.com': 'health',
+  'mayoclinic.org': 'health',
+  'cdc.gov': 'health',
+  'nih.gov': 'health',
+  'healthline.com': 'health',
+  'medlineplus.gov': 'health',
+  'myfitnesspal.com': 'health',
+  'strava.com': 'health',
+  'fitbit.com': 'health',
+
+  // Gaming
+  'store.steampowered.com': 'gaming',
+  'steampowered.com': 'gaming',
+  'ign.com': 'gaming',
+  'roblox.com': 'gaming',
+  'epicgames.com': 'gaming',
+  'gog.com': 'gaming',
+  'kotaku.com': 'gaming',
+  'gamespot.com': 'gaming',
+  'polygon.com': 'gaming',
+
+  // Travel
+  'booking.com': 'travel',
+  'airbnb.com': 'travel',
+  'expedia.com': 'travel',
+  'tripadvisor.com': 'travel',
+  'kayak.com': 'travel',
+  'skyscanner.com': 'travel',
+  'hotels.com': 'travel',
+  'google.com/travel': 'travel',
+
+  // Education
+  'coursera.org': 'education',
+  'khanacademy.org': 'education',
+  'udemy.com': 'education',
+  'edx.org': 'education',
+  'udacity.com': 'education',
+  'skillshare.com': 'education',
+  'leetcode.com': 'education',
+  'duolingo.com': 'education',
+  'brilliant.org': 'education',
+
+  // Entertainment
+  'espn.com': 'entertainment',
+  'yelp.com': 'entertainment',
+  'doordash.com': 'entertainment',
+  'ubereats.com': 'entertainment',
+  'grubhub.com': 'entertainment',
+  'allrecipes.com': 'entertainment',
+  'imdb.com': 'entertainment',
+  'rottentomatoes.com': 'entertainment',
+  'buzzfeed.com': 'entertainment',
+  'tinder.com': 'entertainment',
+  'bumble.com': 'entertainment',
+  'cars.com': 'entertainment',
+  'autotrader.com': 'entertainment',
+  'zillow.com': 'entertainment',
 };
 
 /**
