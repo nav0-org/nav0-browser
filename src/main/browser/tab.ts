@@ -59,7 +59,7 @@ export class Tab {
   private activeTimeAccumulator = 0;
   private lastActiveStart: number | null = null;
   private timeFlushInterval: ReturnType<typeof setInterval> | null = null;
-  private static readonly TIME_FLUSH_INTERVAL_MS = 900_000;
+  private static readonly TIME_FLUSH_INTERVAL_MS = 60_000;
 
   constructor(parentAppWindow: AppWindow, url: string , partitionSetting: string, options?: { suspended?: boolean; title?: string }) {
     this.parentAppWindow = parentAppWindow;
