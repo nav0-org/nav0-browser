@@ -105,6 +105,10 @@ export class Tab {
       urlToLoad = ABOUT_WEBPACK_ENTRY;
       preloadScriptToLoad = ABOUT_PRELOAD_WEBPACK_ENTRY;
       isInternalPage = true;
+    } else if (this.url.startsWith(InAppUrls.EXTENSIONS)){
+      urlToLoad = EXTENSIONS_WEBPACK_ENTRY;
+      preloadScriptToLoad = EXTENSIONS_PRELOAD_WEBPACK_ENTRY;
+      isInternalPage = true;
     } else if (EXTERNAL_PROTOCOL_RE.test(this.url)) {
       // Hand off mailto:, tel:, etc. to the OS default handler
       shell.openExternal(this.url).catch(() => {});

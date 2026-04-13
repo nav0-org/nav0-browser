@@ -383,3 +383,22 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
   stroke-dashoffset: 87.96;
   transition: stroke-dashoffset 0.25s ease;
 }
+
+/* --------------------------------------------------------------------------
+   Extension Toolbar Buttons
+   -------------------------------------------------------------------------- */
+.extension-buttons-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+}
+
+.extension-toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.extension-toolbar-btn img {
+  pointer-events: none;
+}

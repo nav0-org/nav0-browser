@@ -22,5 +22,8 @@ declare const NEW_TAB_PRELOAD_WEBPACK_ENTRY: string;
 declare const WEB_CONTENT_WEBPACK_ENTRY: string;
 declare const WEB_CONTENT_PRELOAD_WEBPACK_ENTRY: string;
 
+declare const EXTENSIONS_WEBPACK_ENTRY: string;
+declare const EXTENSIONS_PRELOAD_WEBPACK_ENTRY: string;
+
 declare const OVERLAY_WEBPACK_ENTRY: string;
 declare const OVERLAY_PRELOAD_WEBPACK_ENTRY: string;

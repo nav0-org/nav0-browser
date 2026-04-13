@@ -4,6 +4,7 @@ import { DataStoreManager } from './database/data-store-manager';
 import { DownloadManager } from './browser/download-manager';
 import { SessionManager } from './browser/session-manager';
 import { SettingsEnforcer } from './settings/settings-enforcer';
+import { ExtensionManager } from './browser/extension-manager';
 import { startTestControlServer } from './test-control-server';
 
 // Disable Chromium features that trigger macOS "Local Network" permission dialog.
@@ -24,6 +25,7 @@ if (require('electron-squirrel-startup')) {
 app.whenReady().then(async() => {
   await DataStoreManager.init();
   await SettingsEnforcer.init();
+  await ExtensionManager.init();
   await AppWindowManager.init();
 
   // Start test control server after everything is initialized

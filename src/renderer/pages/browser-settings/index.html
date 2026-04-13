@@ -19,6 +19,7 @@
         <li><a href="#network" class="sidebar-link" data-section="network"><i data-lucide="globe" width="16" height="16"></i> Network</a></li>
         <li><a href="#shortcuts" class="sidebar-link" data-section="shortcuts"><i data-lucide="keyboard" width="16" height="16"></i> Keyboard Shortcuts</a></li>
         <li><a href="#developer" class="sidebar-link" data-section="developer"><i data-lucide="code" width="16" height="16"></i> Developer</a></li>
+        <li><a href="#extensions" class="sidebar-link" data-section="extensions"><i data-lucide="puzzle" width="16" height="16"></i> Extensions</a></li>
       </ul>
     </nav>
 
@@ -504,6 +505,50 @@
               <input type="checkbox" id="devtools-toggle">
               <span class="toggle-slider"></span>
             </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== EXTENSIONS SECTION ====== -->
+      <section id="section-extensions" class="settings-section" data-keywords="extensions plugins addons chrome extension unpacked private">
+        <h2 class="section-title">Extensions</h2>
+
+        <!-- Extensions Enabled Toggle -->
+        <div class="setting-group">
+          <div class="setting-toggle-row">
+            <div>
+              <label class="setting-label">Enable Extensions</label>
+              <p class="setting-description">Allow Chrome extensions to be loaded and run in the browser. Disabling this will unload all active extensions.</p>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="extensions-enabled-toggle">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Extensions in Private Mode Toggle -->
+        <div class="setting-group">
+          <div class="setting-toggle-row">
+            <div>
+              <label class="setting-label">Allow Extensions in Private Windows</label>
+              <p class="setting-description">Allow extensions to run in private (incognito) windows. Individual extensions must also be marked as "Allow in Private" to be loaded.</p>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="extensions-private-toggle">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Manage Extensions Link -->
+        <div class="setting-group">
+          <div class="setting-row">
+            <div>
+              <label class="setting-label">Manage Extensions</label>
+              <p class="setting-description">Install, remove, enable, or disable individual extensions.</p>
+            </div>
+            <button class="btn-primary" id="manage-extensions-btn">Open Extensions</button>
           </div>
         </div>
       </section>

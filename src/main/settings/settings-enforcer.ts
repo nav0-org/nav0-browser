@@ -4,6 +4,7 @@ import { DataStoreManager } from "../database/data-store-manager";
 import { DatabaseManager } from "../database/database-manager";
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS, USER_AGENT_PRESETS } from "../../types/settings-types";
 import { AD_BLOCK_DOMAINS, AD_URL_PATTERNS } from "../ad-blocker/ad-block-lists";
+import { ExtensionManager } from "../browser/extension-manager";
 
 export abstract class SettingsEnforcer {
   private static autoDeleteInterval: ReturnType<typeof setInterval> | null = null;
@@ -16,6 +17,7 @@ export abstract class SettingsEnforcer {
     SettingsEnforcer.applyProxySettings(settings);
     SettingsEnforcer.applyUserAgent(settings);
     SettingsEnforcer.applyAdBlocker(settings);
+    SettingsEnforcer.applyExtensionSettings(settings);
     SettingsEnforcer.startAutoDeleteScheduler(settings);
     SettingsEnforcer.runStartupCleanup(settings);
   }
@@ -32,6 +34,7 @@ export abstract class SettingsEnforcer {
       SettingsEnforcer.applyProxySettings(settings);
       SettingsEnforcer.applyUserAgent(settings);
       SettingsEnforcer.applyAdBlocker(settings);
+      SettingsEnforcer.applyExtensionSettings(settings);
       SettingsEnforcer.startAutoDeleteScheduler(settings);
       return true;
     });
@@ -238,6 +241,12 @@ export abstract class SettingsEnforcer {
         return;
       }
 
+      // Allow chrome-extension:// URLs through without blocking
+      if (details.url.startsWith('chrome-extension://')) {
+        callback({});
+        return;
+      }
+
       try {
         const url = new URL(details.url);
         const hostname = url.hostname;
@@ -285,6 +294,39 @@ export abstract class SettingsEnforcer {
 
     browsingSes.webRequest.onBeforeRequest(requestHandler);
     privateSes.webRequest.onBeforeRequest(requestHandler);
+  }
+
+  // ---- Extension Settings ----
+  private static previousExtensionsEnabled: boolean | null = null;
+  private static previousExtensionsAllowedInPrivate: boolean | null = null;
+
+  private static applyExtensionSettings(settings: BrowserSettings) {
+    const extensionsEnabled = settings.extensionsEnabled;
+    const extensionsAllowedInPrivate = settings.extensionsAllowedInPrivate;
+
+    // On first call, just store the state
+    if (SettingsEnforcer.previousExtensionsEnabled === null) {
+      SettingsEnforcer.previousExtensionsEnabled = extensionsEnabled;
+      SettingsEnforcer.previousExtensionsAllowedInPrivate = extensionsAllowedInPrivate;
+      return;
+    }
+
+    // Handle extensions enabled/disabled toggle
+    if (extensionsEnabled !== SettingsEnforcer.previousExtensionsEnabled) {
+      if (!extensionsEnabled) {
+        ExtensionManager.disableAll();
+      } else {
+        ExtensionManager.enableAll();
+      }
+    }
+
+    // Handle private mode toggle
+    if (extensionsAllowedInPrivate !== SettingsEnforcer.previousExtensionsAllowedInPrivate) {
+      ExtensionManager.refreshPrivateSession();
+    }
+
+    SettingsEnforcer.previousExtensionsEnabled = extensionsEnabled;
+    SettingsEnforcer.previousExtensionsAllowedInPrivate = extensionsAllowedInPrivate;
   }
 
   // ---- Data Retention & Auto-Deletion ----

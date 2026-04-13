@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initNetworkSettings();
   initKeyboardShortcuts();
   initDeveloperSettings();
+  initExtensionSettings();
   initSettingsSearch();
   createIcons({ icons });
 });
@@ -85,6 +86,38 @@ function initDeveloperSettings() {
     saveSettings();
     showToast(toggle.checked ? 'Developer Tools enabled' : 'Developer Tools disabled');
   });
+}
+
+// ---- Extension Settings ----
+function initExtensionSettings() {
+  const enabledToggle = document.getElementById('extensions-enabled-toggle') as HTMLInputElement;
+  const privateToggle = document.getElementById('extensions-private-toggle') as HTMLInputElement;
+  const manageBtn = document.getElementById('manage-extensions-btn') as HTMLButtonElement;
+
+  if (enabledToggle) {
+    enabledToggle.checked = settings.extensionsEnabled !== false;
+    enabledToggle.addEventListener('change', () => {
+      settings.extensionsEnabled = enabledToggle.checked;
+      saveSettings();
+      showToast(enabledToggle.checked ? 'Extensions enabled' : 'Extensions disabled');
+    });
+  }
+
+  if (privateToggle) {
+    privateToggle.checked = settings.extensionsAllowedInPrivate || false;
+    privateToggle.addEventListener('change', () => {
+      settings.extensionsAllowedInPrivate = privateToggle.checked;
+      saveSettings();
+      showToast(privateToggle.checked ? 'Extensions allowed in private windows' : 'Extensions blocked in private windows');
+    });
+  }
+
+  if (manageBtn) {
+    manageBtn.addEventListener('click', () => {
+      const appWindowId = (window as any).BrowserAPI.appWindowId;
+      (window as any).BrowserAPI.createTab(appWindowId, 'Nav0://extensions', true);
+    });
+  }
 }
 
 // ---- Settings Search ----

@@ -83,6 +83,10 @@ export interface BrowserSettings {
 
   // Developer Tools
   devToolsEnabled: boolean;
+
+  // Extensions
+  extensionsEnabled: boolean;
+  extensionsAllowedInPrivate: boolean;
 }
 
 export const DEFAULT_SEARCH_ENGINES: SearchEngineConfig[] = [
@@ -281,4 +285,8 @@ export const DEFAULT_BROWSER_SETTINGS: BrowserSettings = {
 
   // Developer Tools
   devToolsEnabled: true,
+
+  // Extensions
+  extensionsEnabled: true,
+  extensionsAllowedInPrivate: false,
 };

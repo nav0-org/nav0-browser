@@ -188,6 +188,16 @@ export abstract class RendererToMainEventsForBrowserIPC {
   // Issue report
   public static readonly SHOW_ISSUE_REPORT = "browser:show-issue-report";
   public static readonly HIDE_ISSUE_REPORT = "browser:hide-issue-report";
+
+  // Extensions
+  public static readonly INSTALL_EXTENSION = "browser:install-extension";
+  public static readonly UNINSTALL_EXTENSION = "browser:uninstall-extension";
+  public static readonly ENABLE_EXTENSION = "browser:enable-extension";
+  public static readonly DISABLE_EXTENSION = "browser:disable-extension";
+  public static readonly FETCH_EXTENSIONS = "browser:fetch-extensions";
+  public static readonly TOGGLE_EXTENSION_PRIVATE = "browser:toggle-extension-private";
+  public static readonly OPEN_EXTENSION_POPUP = "browser:open-extension-popup";
+  public static readonly GET_TOOLBAR_EXTENSIONS = "browser:get-toolbar-extensions";
 }
 
 export abstract class MainToRendererEventsForBrowserIPC {
@@ -220,6 +230,12 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly TAB_PINNED = "browser:tab-pinned";
   public static readonly TAB_UNPINNED = "browser:tab-unpinned";
   public static readonly FULLSCREEN_CHANGED = "browser:fullscreen-changed";
+
+  // Extensions
+  public static readonly EXTENSION_INSTALLED = "browser:extension-installed";
+  public static readonly EXTENSION_UNINSTALLED = "browser:extension-uninstalled";
+  public static readonly EXTENSION_STATE_CHANGED = "browser:extension-state-changed";
+  public static readonly EXTENSIONS_UPDATED = "browser:extensions-updated";
 }
 
 export abstract class DataStoreConstants {
@@ -227,6 +243,7 @@ export abstract class DataStoreConstants {
   public static readonly BROWSER_SETTINGS = "browser-settings";
   public static readonly CLOSED_WINDOWS = "closed-windows";
   public static readonly SESSION_STATE = "session-state";
+  public static readonly EXTENSIONS = "extensions";
 }
 
 export interface ClosedTabRecord {
@@ -251,6 +268,19 @@ export interface SessionTabRecord {
 export interface SessionWindowRecord {
   tabs: SessionTabRecord[];
   activeTabIndex: number;
+}
+
+export interface ExtensionRecord {
+  id: string;
+  name: string;
+  version: string;
+  description: string;
+  path: string;
+  enabled: boolean;
+  allowedInPrivate: boolean;
+  installedAt: number;
+  iconDataUrl?: string;
+  manifestVersion: number;
 }
 
 export interface SessionState {
@@ -324,6 +354,7 @@ export abstract class InAppUrls {
   public static readonly BROWSER_SETTINGS = "Nav0://browser-settings";
   public static readonly NEW_TAB = "Nav0://new-tab";
   public static readonly ABOUT = "Nav0://about";
+  public static readonly EXTENSIONS = "Nav0://extensions";
 }
 
 export abstract class ImageBase64Strings {

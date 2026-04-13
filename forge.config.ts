@@ -122,6 +122,14 @@ const config: ForgeConfig = {
               js: './src/preload/internals-api.ts',
             },
           },
+          {
+            html: './src/renderer/pages/extensions/index.html',
+            js: './src/renderer/pages/extensions/index.ts',
+            name: 'extensions',
+            preload: {
+              js: './src/preload/internals-api.ts',
+            },
+          },
           // permission_prompt and issue_report entries removed — consolidated into overlay
           {
             html: './src/renderer/web-content/index.html',

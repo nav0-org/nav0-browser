@@ -347,6 +347,44 @@ export function init(){
     hideIssueReport: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.HIDE_ISSUE_REPORT, appWindowId);
     },
+
+    // Extensions
+    installExtension: async (appWindowId: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.INSTALL_EXTENSION, appWindowId);
+    },
+    uninstallExtension: async (extensionId: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.UNINSTALL_EXTENSION, extensionId);
+    },
+    enableExtension: async (extensionId: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.ENABLE_EXTENSION, extensionId);
+    },
+    disableExtension: async (extensionId: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.DISABLE_EXTENSION, extensionId);
+    },
+    fetchExtensions: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.FETCH_EXTENSIONS);
+    },
+    toggleExtensionPrivate: async (extensionId: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.TOGGLE_EXTENSION_PRIVATE, extensionId);
+    },
+    openExtensionPopup: async (extensionId: string, bounds: { x: number; y: number }) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.OPEN_EXTENSION_POPUP, extensionId, bounds);
+    },
+    getToolbarExtensions: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GET_TOOLBAR_EXTENSIONS);
+    },
+    onExtensionInstalled: (callback: (data: any) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.EXTENSION_INSTALLED, (_event, data) => callback(data));
+    },
+    onExtensionUninstalled: (callback: (data: { id: string }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.EXTENSION_UNINSTALLED, (_event, data) => callback(data));
+    },
+    onExtensionStateChanged: (callback: (data: any) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.EXTENSION_STATE_CHANGED, (_event, data) => callback(data));
+    },
+    onExtensionsUpdated: (callback: (data: any[]) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.EXTENSIONS_UPDATED, (_event, data) => callback(data));
+    },
   });
 }
 

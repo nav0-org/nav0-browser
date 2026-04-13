@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:;">
+  <title>Extensions</title>
+</head>
+<body>
+
+<div id="extensions-page" class="extensions-page">
+  <div class="extensions-wrapper">
+
+    <!-- Header -->
+    <h1 class="extensions-title">Extensions</h1>
+    <p class="extensions-subtitle">Manage your browser extensions</p>
+
+    <!-- Privacy warning -->
+    <div class="extensions-warning">
+      <i data-lucide="shield-alert" class="warning-icon" width="18" height="18"></i>
+      <span>Extensions can read and modify web pages. Only install extensions you trust.</span>
+    </div>
+
+    <!-- Actions -->
+    <div class="extensions-actions">
+      <button id="install-extension" class="btn-install">
+        <i data-lucide="folder-plus" width="16" height="16"></i>
+        Load Unpacked Extension
+      </button>
+    </div>
+
+    <!-- Extensions list -->
+    <div class="extensions-container">
+      <div id="extensions-list" class="extensions-list">
+        <!-- Extension cards will be dynamically inserted here -->
+      </div>
+      <div id="no-extensions" class="no-extensions">
+        <i data-lucide="puzzle" class="empty-icon" width="48" height="48"></i>
+        <p class="empty-text">No extensions installed</p>
+        <p class="empty-subtext">Click "Load Unpacked Extension" to add one from a folder on your computer.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

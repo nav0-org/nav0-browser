@@ -139,6 +139,11 @@ const OPTIONS_MENU_HTML = `
         <span id="om-devtools-shortcut" class="keyboard-shortcut"></span>
       </div>
 
+      <div class="dropdown-item" id="om-extensions-option">
+        <i data-lucide="puzzle" width="16" height="16"></i>
+        <span class="dropdown-item-text">Extensions</span>
+      </div>
+
       <div class="divider"></div>
 
       <div class="dropdown-item" id="om-settings-option">
@@ -331,6 +336,10 @@ function setupEventListeners(): void {
   optionsElement?.querySelector('#om-devtools-option')?.addEventListener('click', async () => {
     await window.BrowserAPI.toggleDevTools(appWindowId);
     await window.BrowserAPI.hideOptionsMenu(appWindowId);
+  });
+
+  optionsElement?.querySelector('#om-extensions-option')?.addEventListener('click', async () => {
+    await window.BrowserAPI.createTab(appWindowId, InAppUrls.EXTENSIONS, true);
   });
 
   optionsElement?.querySelector('#om-settings-option')?.addEventListener('click', async () => {

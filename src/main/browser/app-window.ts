@@ -7,6 +7,7 @@ import { PermissionManager } from "./permission-manager";
 import { NotificationManager } from "./notification-manager";
 import { FindInPageManager } from "./find-in-page-manager";
 import { UnifiedOverlayManager, OverlayType } from "./unified-overlay-manager";
+import { ExtensionManager } from "./extension-manager";
 import type { Database as DB } from 'better-sqlite3';
 
 export interface PermissionPromptData {
@@ -56,6 +57,9 @@ export class AppWindow {
       this.partitionSetting = 'persist:browsertabs';
     }
     PermissionManager.setupSession(this.partitionSetting);
+    if (this.isPrivate) {
+      ExtensionManager.loadExtensionsOnPrivateSession();
+    }
     const isMac = process.platform === 'darwin';
     const isWindows = process.platform === 'win32';
 

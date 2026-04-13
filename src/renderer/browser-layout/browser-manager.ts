@@ -321,6 +321,60 @@ export class BrowserTabManager {
         }
       }
     });
+
+    // Extension toolbar updates
+    window.BrowserAPI.onExtensionsUpdated?.(() => {
+      this.renderExtensionToolbarButtons();
+    });
+
+    // Initial extension toolbar load
+    this.renderExtensionToolbarButtons();
+  }
+
+  private async renderExtensionToolbarButtons(): Promise<void> {
+    const container = document.getElementById('extension-buttons');
+    if (!container) return;
+
+    try {
+      const extensions: Array<{ id: string; name: string; iconDataUrl?: string; hasPopup: boolean }> = await window.BrowserAPI.getToolbarExtensions();
+      container.innerHTML = '';
+
+      for (const ext of extensions) {
+        const btn = document.createElement('button');
+        btn.className = 'btn-icon btn-ghost rounded-circle p-0 extension-toolbar-btn';
+        btn.title = ext.name;
+        btn.style.width = '32px';
+        btn.style.height = '32px';
+        btn.style.marginLeft = 'var(--spacing-xs)';
+
+        if (ext.iconDataUrl) {
+          const img = document.createElement('img');
+          img.src = ext.iconDataUrl;
+          img.width = 18;
+          img.height = 18;
+          img.style.borderRadius = '2px';
+          btn.appendChild(img);
+        } else {
+          btn.textContent = ext.name.charAt(0).toUpperCase();
+          btn.style.fontSize = '12px';
+          btn.style.fontWeight = '600';
+        }
+
+        if (ext.hasPopup) {
+          btn.addEventListener('click', () => {
+            const rect = btn.getBoundingClientRect();
+            window.BrowserAPI.openExtensionPopup(ext.id, {
+              x: Math.round(rect.left),
+              y: Math.round(rect.bottom + 4),
+            });
+          });
+        }
+
+        container.appendChild(btn);
+      }
+    } catch {
+      // Extensions may not be available yet
+    }
   }
 
   private handleBookmark(): void {
