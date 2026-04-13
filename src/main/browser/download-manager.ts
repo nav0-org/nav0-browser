@@ -292,7 +292,7 @@ export abstract class DownloadManager {
     return records;
   }
 
-  public static async addRecord(appWindowId: string, url: string, fileName: string, fileExtension: string, fileType: 'document' | 'image' | 'archive' | 'audio' | 'file' | 'executable' | 'other', fileSize: number, fileLocation: string): Promise<DownloadRecord>{
+  public static async addRecord(appWindowId: string, url: string, fileName: string, fileExtension: string, fileType: 'document' | 'image' | 'archive' | 'audio' | 'video' | 'file' | 'executable' | 'other', fileSize: number, fileLocation: string): Promise<DownloadRecord>{
     const db = DatabaseManager.getDatabase(AppWindowManager.getWindowById(appWindowId).isPrivate);
     const id = uuid();
     const createdDate = new Date().toISOString();
