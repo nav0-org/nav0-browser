@@ -2,6 +2,7 @@ import { app } from 'electron';
 import { AppWindowManager } from './browser/app-window-manager';
 import { DataStoreManager } from './database/data-store-manager';
 import { DownloadManager } from './browser/download-manager';
+import { SessionManager } from './browser/session-manager';
 import { SettingsEnforcer } from './settings/settings-enforcer';
 import { startTestControlServer } from './test-control-server';
 
@@ -30,6 +31,12 @@ app.whenReady().then(async() => {
   if (testPort > 0) {
     startTestControlServer(testPort);
   }
+});
+
+// Save session state before quit (must run before downloads/settings cleanup)
+app.on('before-quit', () => {
+  SessionManager.stopPeriodicSave();
+  SessionManager.saveCurrentSession();
 });
 
 // Pause all in-progress downloads before quitting so they can be resumed later

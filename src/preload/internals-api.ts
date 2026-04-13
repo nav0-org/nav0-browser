@@ -210,6 +210,12 @@ export function init(){
     restoreClosedWindow: async (index: number) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.RESTORE_CLOSED_WINDOW, index);
     },
+    fetchSessionState: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.FETCH_SESSION_STATE);
+    },
+    restorePreviousSession: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.RESTORE_PREVIOUS_SESSION);
+    },
     toggleReaderMode: async (appWindowId: string, tabId: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.TOGGLE_READER_MODE, appWindowId, tabId);
     },

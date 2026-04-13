@@ -147,6 +147,8 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly RESTORE_CLOSED_TAB_BY_INDEX = "browser:restore-closed-tab-by-index";
   public static readonly FETCH_CLOSED_WINDOWS = "browser:fetch-closed-windows";
   public static readonly RESTORE_CLOSED_WINDOW = "browser:restore-closed-window";
+  public static readonly FETCH_SESSION_STATE = "browser:fetch-session-state";
+  public static readonly RESTORE_PREVIOUS_SESSION = "browser:restore-previous-session";
   public static readonly SHOW_ABOUT_PANEL = "browser:show-about-panel";
   public static readonly GET_ABOUT_INFO = "browser:get-about-info";
   public static readonly TOGGLE_READER_MODE = "browser:toggle-reader-mode";
@@ -224,6 +226,7 @@ export abstract class DataStoreConstants {
   public static readonly DEFAULT_KEY = 'default';
   public static readonly BROWSER_SETTINGS = "browser-settings";
   public static readonly CLOSED_WINDOWS = "closed-windows";
+  public static readonly SESSION_STATE = "session-state";
 }
 
 export interface ClosedTabRecord {
@@ -237,6 +240,23 @@ export interface ClosedWindowRecord {
   tabCount: number;
   tabs: { url: string; title: string }[];
   closedAt: number;
+}
+
+export interface SessionTabRecord {
+  url: string;
+  title: string;
+  faviconUrl: string | null;
+}
+
+export interface SessionWindowRecord {
+  tabs: SessionTabRecord[];
+  activeTabIndex: number;
+}
+
+export interface SessionState {
+  windows: SessionWindowRecord[];
+  savedAt: number;
+  restored: boolean;
 }
 
 export abstract class RendererToMainEventsForDataStoreIPC {

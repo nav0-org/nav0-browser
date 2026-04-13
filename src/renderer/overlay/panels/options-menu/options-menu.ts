@@ -84,6 +84,13 @@ const OPTIONS_MENU_HTML = `
           <div id="om-recently-closed-windows-list">
             <div class="submenu-empty-state">No recently closed windows</div>
           </div>
+
+          <!-- Section 4: Restore Previous Session -->
+          <div class="divider" id="om-restore-session-divider" style="display:none"></div>
+          <div class="dropdown-item" id="om-restore-session-option" style="display:none">
+            <i data-lucide="rotate-ccw" width="16" height="16"></i>
+            <span class="dropdown-item-text">Restore Previous Session</span>
+          </div>
         </div>
       </div>
 
@@ -249,6 +256,30 @@ async function populateHistorySubmenu(): Promise<void> {
     }
   } else if (windowsList && isPrivate) {
     windowsList.innerHTML = '<div class="submenu-empty-state">Not available in private mode</div>';
+  }
+
+  // Populate "Restore Previous Session" option
+  const restoreSessionDivider = containerEl.querySelector('#om-restore-session-divider') as HTMLElement;
+  const restoreSessionItem = containerEl.querySelector('#om-restore-session-option') as HTMLElement;
+  if (restoreSessionItem && restoreSessionDivider && !isPrivate) {
+    const sessionState = await window.BrowserAPI.fetchSessionState();
+    if (sessionState) {
+      restoreSessionDivider.style.display = '';
+      restoreSessionItem.style.display = '';
+      const newItem = restoreSessionItem.cloneNode(true) as HTMLElement;
+      restoreSessionItem.parentNode?.replaceChild(newItem, restoreSessionItem);
+      newItem.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await window.BrowserAPI.restorePreviousSession();
+        await window.BrowserAPI.hideOptionsMenu(appWindowId);
+      });
+    } else {
+      restoreSessionDivider.style.display = 'none';
+      restoreSessionItem.style.display = 'none';
+    }
+  } else if (restoreSessionItem && restoreSessionDivider) {
+    restoreSessionDivider.style.display = 'none';
+    restoreSessionItem.style.display = 'none';
   }
 }
 
