@@ -1019,6 +1019,15 @@ async function initPermissionsSettings() {
     showToast('All permissions cleared');
     loadAndRenderPermissions();
   });
+
+  // Re-fetch permissions when the page becomes visible again (e.g. user
+  // switches back to the settings tab after granting permissions elsewhere)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      const currentSearch = searchInput?.value.trim() || '';
+      loadAndRenderPermissions(currentSearch);
+    }
+  });
 }
 
 async function loadAndRenderPermissions(searchTerm?: string) {
