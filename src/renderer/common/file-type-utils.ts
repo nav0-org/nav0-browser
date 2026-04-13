@@ -2,27 +2,34 @@
 
 /** Color palette for file display types. */
 export const TYPE_COLORS: Record<string, string> = {
-  document: '#6366f1',
-  spreadsheet: '#6366f1',
-  presentation: '#6366f1',
-  image: '#06b6d4',
-  video: '#06b6d4',
-  installer: '#f59e0b',
-  archive: '#8b5cf6',
-  audio: '#ec4899',
-  code: '#10b981',
-  other: '#a1a1aa',
+  document: '#6366f1',        // Indigo
+  spreadsheet: '#22c55e',     // Green
+  presentation: '#3b82f6',    // Blue
+  ebook: '#f97316',           // Orange
+  image: '#06b6d4',           // Cyan
+  video: '#ef4444',           // Red
+  installer: '#f59e0b',       // Amber
+  archive: '#8b5cf6',         // Purple
+  audio: '#ec4899',           // Pink
+  code: '#10b981',            // Emerald
+  font: '#64748b',            // Slate
+  other: '#a1a1aa',           // Gray
 };
 
 /** Maps file extensions to a human-friendly display type. */
 export const EXTENSION_TYPE_MAP: Record<string, string> = {
   // Documents
   pdf: 'document', doc: 'document', docx: 'document', txt: 'document',
-  rtf: 'document', odt: 'document', md: 'document', pages: 'document',
-  tex: 'document', latex: 'document', epub: 'document', mobi: 'document',
+  rtf: 'document', odt: 'document', ott: 'document', md: 'document', pages: 'document',
+  tex: 'document', latex: 'document',
   djvu: 'document', xps: 'document', oxps: 'document', wp: 'document',
   wpd: 'document', wps: 'document', hwp: 'document', hwpx: 'document',
   log: 'document', nfo: 'document', readme: 'document',
+
+  // Ebooks
+  epub: 'ebook', mobi: 'ebook', azw: 'ebook', azw3: 'ebook',
+  fb2: 'ebook', lit: 'ebook', lrf: 'ebook', pdb: 'ebook',
+  cbz: 'ebook', cbr: 'ebook',
 
   // Spreadsheets
   csv: 'spreadsheet', xlsx: 'spreadsheet', xls: 'spreadsheet',
@@ -34,12 +41,15 @@ export const EXTENSION_TYPE_MAP: Record<string, string> = {
   pptm: 'presentation', key: 'presentation', ppsx: 'presentation',
 
   // Images
-  jpg: 'image', jpeg: 'image', png: 'image', gif: 'image', svg: 'image',
+  jpg: 'image', jpeg: 'image', jpe: 'image', jfif: 'image', jp2: 'image',
+  png: 'image', gif: 'image', svg: 'image',
   bmp: 'image', webp: 'image', tiff: 'image', tif: 'image', ico: 'image',
   psd: 'image', ai: 'image', eps: 'image', raw: 'image', cr2: 'image',
   nef: 'image', orf: 'image', sr2: 'image', arw: 'image', dng: 'image',
   heic: 'image', heif: 'image', avif: 'image', jxl: 'image',
   xcf: 'image', sketch: 'image', fig: 'image', indd: 'image',
+  pcx: 'image', tga: 'image', pgm: 'image', ppm: 'image', pbm: 'image', pam: 'image',
+  exr: 'image', hdr: 'image', dds: 'image', cur: 'image', sgi: 'image', dpx: 'image',
 
   // Audio
   mp3: 'audio', wav: 'audio', ogg: 'audio', flac: 'audio', aac: 'audio',
@@ -47,6 +57,8 @@ export const EXTENSION_TYPE_MAP: Record<string, string> = {
   midi: 'audio', ape: 'audio', alac: 'audio', dsf: 'audio', dff: 'audio',
   wv: 'audio', mka: 'audio', ac3: 'audio', dts: 'audio', pcm: 'audio',
   amr: 'audio', ra: 'audio', caf: 'audio',
+  au: 'audio', mp2: 'audio', voc: 'audio', w64: 'audio', snd: 'audio',
+  gsm: 'audio', iff: 'audio', '8svx': 'audio',
 
   // Video
   mp4: 'video', mov: 'video', avi: 'video', mkv: 'video',
@@ -54,7 +66,7 @@ export const EXTENSION_TYPE_MAP: Record<string, string> = {
   mpg: 'video', mpeg: 'video', '3gp': 'video', '3g2': 'video',
   ts: 'video', mts: 'video', m2ts: 'video', vob: 'video',
   ogv: 'video', rm: 'video', rmvb: 'video', asf: 'video',
-  divx: 'video', f4v: 'video', swf: 'video',
+  divx: 'video', f4v: 'video', swf: 'video', mxf: 'video',
 
   // Archives
   zip: 'archive', rar: 'archive', '7z': 'archive', tar: 'archive',
@@ -100,7 +112,9 @@ export const EXTENSION_TYPE_MAP: Record<string, string> = {
   gradle: 'code', sbt: 'code', pom: 'code',
 
   // Fonts
-  ttf: 'other', otf: 'other', woff: 'other', woff2: 'other', eot: 'other',
+  ttf: 'font', otf: 'font', woff: 'font', woff2: 'font', eot: 'font',
+  pfb: 'font', pfm: 'font', sfd: 'font', dfont: 'font', bdf: 'font',
+  fon: 'font', ttc: 'font',
 
   // 3D / CAD
   stl: 'other', obj: 'other', fbx: 'other', gltf: 'other', glb: 'other',
@@ -142,11 +156,16 @@ export const hexToRgba = (hex: string, alpha: number): string => {
 const FILE_ICON_MAP: Record<string, string> = {
   // Documents - Text
   pdf: 'file-text', doc: 'file-text', docx: 'file-text', txt: 'file-text',
-  rtf: 'file-text', odt: 'file-text', md: 'file-text', pages: 'file-text',
-  tex: 'file-text', latex: 'file-text', epub: 'file-text', mobi: 'file-text',
+  rtf: 'file-text', odt: 'file-text', ott: 'file-text', md: 'file-text', pages: 'file-text',
+  tex: 'file-text', latex: 'file-text',
   djvu: 'file-text', xps: 'file-text', oxps: 'file-text', wp: 'file-text',
   wpd: 'file-text', wps: 'file-text', hwp: 'file-text', hwpx: 'file-text',
   nfo: 'file-text', readme: 'file-text', log: 'file-text',
+
+  // Ebooks
+  epub: 'book-open', mobi: 'book-open', azw: 'book-open', azw3: 'book-open',
+  fb2: 'book-open', lit: 'book-open', lrf: 'book-open', pdb: 'book-open',
+  cbz: 'book-open', cbr: 'book-open',
 
   // Spreadsheets
   csv: 'file-spreadsheet', xlsx: 'file-spreadsheet', xls: 'file-spreadsheet',
@@ -158,12 +177,15 @@ const FILE_ICON_MAP: Record<string, string> = {
   pptm: 'file-presentation', key: 'file-presentation', ppsx: 'file-presentation',
 
   // Images
-  jpg: 'image', jpeg: 'image', png: 'image', gif: 'image', svg: 'image',
+  jpg: 'image', jpeg: 'image', jpe: 'image', jfif: 'image', jp2: 'image',
+  png: 'image', gif: 'image', svg: 'image',
   bmp: 'image', webp: 'image', tiff: 'image', tif: 'image', ico: 'image',
   psd: 'image', ai: 'image', eps: 'image', raw: 'image', cr2: 'image',
   nef: 'image', orf: 'image', sr2: 'image', arw: 'image', dng: 'image',
   heic: 'image', heif: 'image', avif: 'image', jxl: 'image',
   xcf: 'image', sketch: 'image', fig: 'image', indd: 'image',
+  pcx: 'image', tga: 'image', pgm: 'image', ppm: 'image', pbm: 'image', pam: 'image',
+  exr: 'image', hdr: 'image', dds: 'image', cur: 'image', sgi: 'image', dpx: 'image',
 
   // Audio
   mp3: 'music', wav: 'music', ogg: 'music', flac: 'music', aac: 'music',
@@ -171,6 +193,8 @@ const FILE_ICON_MAP: Record<string, string> = {
   midi: 'music', ape: 'music', alac: 'music', dsf: 'music', dff: 'music',
   wv: 'music', mka: 'music', ac3: 'music', dts: 'music', pcm: 'music',
   amr: 'music', ra: 'music', caf: 'music',
+  au: 'music', mp2: 'music', voc: 'music', w64: 'music', snd: 'music',
+  gsm: 'music', iff: 'music', '8svx': 'music',
 
   // Video
   mp4: 'video', mov: 'video', avi: 'video', mkv: 'video',
@@ -178,7 +202,7 @@ const FILE_ICON_MAP: Record<string, string> = {
   mpg: 'video', mpeg: 'video', '3gp': 'video', '3g2': 'video',
   ts: 'video', mts: 'video', m2ts: 'video', vob: 'video',
   ogv: 'video', rm: 'video', rmvb: 'video', asf: 'video',
-  divx: 'video', f4v: 'video', swf: 'video',
+  divx: 'video', f4v: 'video', swf: 'video', mxf: 'video',
 
   // Archives
   zip: 'file-archive', rar: 'file-archive', '7z': 'file-archive',
@@ -231,6 +255,8 @@ const FILE_ICON_MAP: Record<string, string> = {
 
   // Fonts
   ttf: 'type', otf: 'type', woff: 'type', woff2: 'type', eot: 'type',
+  pfb: 'type', pfm: 'type', sfd: 'type', dfont: 'type', bdf: 'type',
+  fon: 'type', ttc: 'type',
 
   // 3D / CAD
   stl: 'box', obj: 'box', fbx: 'box', gltf: 'box', glb: 'box',
