@@ -30,6 +30,10 @@ export interface KeyboardShortcutAction {
 export interface BrowserSettings {
   settings_version: number;
 
+  // Startup
+  startupMode: 'new-tab' | 'continue' | 'specific-pages';
+  startupPages: string[];
+
   // Search
   primarySearchEngine: string;
   customSearchEngines: SearchEngineConfig[];
@@ -227,6 +231,10 @@ export const DEFAULT_KEYBOARD_SHORTCUTS: KeyboardShortcutAction[] = [
 
 export const DEFAULT_BROWSER_SETTINGS: BrowserSettings = {
   settings_version: 1,
+
+  // Startup
+  startupMode: 'new-tab',
+  startupPages: [],
 
   // Search - DuckDuckGo as default (privacy-aligned)
   primarySearchEngine: 'Google',

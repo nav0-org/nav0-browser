@@ -14,7 +14,8 @@
         <i data-lucide="search" class="sidebar-search-icon"></i>
       </div>
       <ul class="sidebar-nav">
-        <li><a href="#search" class="sidebar-link active" data-section="search"><i data-lucide="search" width="16" height="16"></i> Search</a></li>
+        <li><a href="#startup" class="sidebar-link active" data-section="startup"><i data-lucide="play" width="16" height="16"></i> On startup</a></li>
+        <li><a href="#search" class="sidebar-link" data-section="search"><i data-lucide="search" width="16" height="16"></i> Search</a></li>
         <li><a href="#privacy" class="sidebar-link" data-section="privacy"><i data-lucide="shield" width="16" height="16"></i> Privacy &amp; Security</a></li>
         <li><a href="#network" class="sidebar-link" data-section="network"><i data-lucide="globe" width="16" height="16"></i> Network</a></li>
         <li><a href="#shortcuts" class="sidebar-link" data-section="shortcuts"><i data-lucide="keyboard" width="16" height="16"></i> Keyboard Shortcuts</a></li>
@@ -26,8 +27,44 @@
     <div class="settings-content-wrapper">
     <main class="settings-content" id="settings-content">
 
+      <!-- ====== ON STARTUP SECTION ====== -->
+      <section id="section-startup" class="settings-section active" data-keywords="startup launch open start page continue session restore tabs">
+        <h2 class="section-title">On startup</h2>
+
+        <div class="setting-group">
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="startup-mode" value="new-tab" checked>
+              <span class="radio-label">Open the New tab page</span>
+              <span class="radio-description">Start with a fresh new tab every time.</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="startup-mode" value="continue">
+              <span class="radio-label">Continue where you left off</span>
+              <span class="radio-description">Restore tabs from your previous browsing session.</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="startup-mode" value="specific-pages">
+              <span class="radio-label">Open a specific page or set of pages</span>
+              <span class="radio-description">Choose which pages open when the browser starts.</span>
+            </label>
+          </div>
+
+          <!-- Startup Pages List (shown when 'specific-pages' is selected) -->
+          <div id="startup-pages-container" class="sub-setting" style="display: none;">
+            <label class="setting-label">Startup Pages</label>
+            <p class="setting-description">These pages will open as tabs when you start the browser.</p>
+            <div id="startup-pages-list" class="items-list"></div>
+            <div class="add-item-form">
+              <input type="text" id="startup-page-input" class="form-input" placeholder="e.g., https://example.com">
+              <button class="btn btn-sm btn-secondary" id="add-startup-page-btn"><i data-lucide="plus" width="14" height="14"></i> Add Page</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- ====== SEARCH SECTION ====== -->
-      <section id="section-search" class="settings-section active" data-keywords="search engine default query url bar duckduckgo google bing brave startpage ecosia custom suggestions">
+      <section id="section-search" class="settings-section" data-keywords="search engine default query url bar duckduckgo google bing brave startpage ecosia custom suggestions">
         <h2 class="section-title">Search</h2>
 
         <!-- Default Search Engine -->
