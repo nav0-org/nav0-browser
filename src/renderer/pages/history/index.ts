@@ -1,7 +1,8 @@
 import { HtmlUtils } from '../../../renderer/common/html-utils';
 import { FormatUtils } from '../../../renderer/common/format-utils';
 import { BrowsingHistoryRecord } from '../../../types/browsing-history-record';
-import { BOOKMARK_CATEGORY_COLORS } from '../../../constants/app-constants';
+import { WEBSITE_CATEGORY_COLORS } from '../../../constants/app-constants';
+import { WEBSITE_CATEGORY_MAP } from '../../../constants/data-constants';
 import './index.css';
 
 import { createIcons, icons } from 'lucide';
@@ -11,47 +12,9 @@ createIcons({ icons });
 const PAGE_SIZE = 100;
 const HEATMAP_LEVELS = ['#f0f0f0', '#d4d4d4', '#a3a3a3', '#525252', '#171717'];
 
-// Domain-to-category mapping for the pie chart
-const DOMAIN_CATEGORIES: Record<string, string> = {
-  'github.com': 'dev', 'gitlab.com': 'dev', 'stackoverflow.com': 'dev',
-  'npmjs.com': 'dev', 'developer.mozilla.org': 'dev', 'docs.python.org': 'dev',
-  'crates.io': 'dev', 'pkg.go.dev': 'dev', 'pypi.org': 'dev',
-  'vercel.com': 'dev', 'netlify.com': 'dev', 'heroku.com': 'dev',
-  'linear.app': 'dev', 'jira.atlassian.com': 'dev', 'bitbucket.org': 'dev',
-  'twitter.com': 'social', 'x.com': 'social', 'facebook.com': 'social',
-  'reddit.com': 'social', 'instagram.com': 'social', 'linkedin.com': 'social',
-  'threads.net': 'social', 'mastodon.social': 'social', 'discord.com': 'social',
-  'youtube.com': 'media', 'twitch.tv': 'media', 'vimeo.com': 'media',
-  'netflix.com': 'media', 'spotify.com': 'media', 'soundcloud.com': 'media',
-  'news.ycombinator.com': 'news', 'techcrunch.com': 'news', 'medium.com': 'news',
-  'bbc.com': 'news', 'nytimes.com': 'news', 'theguardian.com': 'news',
-  'cnn.com': 'news', 'reuters.com': 'news', 'arstechnica.com': 'news',
-  'google.com': 'search', 'bing.com': 'search', 'duckduckgo.com': 'search',
-  'gmail.com': 'productivity', 'outlook.com': 'productivity', 'notion.so': 'productivity',
-  'calendar.google.com': 'productivity', 'docs.google.com': 'productivity',
-  'drive.google.com': 'productivity', 'slack.com': 'productivity',
-  'amazon.com': 'shopping', 'ebay.com': 'shopping', 'etsy.com': 'shopping',
-  'wikipedia.org': 'reference', 'arxiv.org': 'reference', 'mdn.io': 'reference',
-  'figma.com': 'design', 'dribbble.com': 'design', 'behance.net': 'design',
-};
-
-const CATEGORY_COLORS: Record<string, string> = {
-  dev: BOOKMARK_CATEGORY_COLORS.dev || '#6366f1',
-  social: BOOKMARK_CATEGORY_COLORS.social || '#8b5cf6',
-  media: BOOKMARK_CATEGORY_COLORS.media || '#ec4899',
-  news: BOOKMARK_CATEGORY_COLORS.news || '#06b6d4',
-  search: '#a1a1aa',
-  productivity: BOOKMARK_CATEGORY_COLORS.tools || '#f59e0b',
-  shopping: BOOKMARK_CATEGORY_COLORS.shopping || '#f97316',
-  reference: BOOKMARK_CATEGORY_COLORS.reference || '#6366f1',
-  design: '#8b5cf6',
-  other: BOOKMARK_CATEGORY_COLORS.other || '#a1a1aa',
-};
-
 function getCategoryForDomain(domain: string): string {
-  if (DOMAIN_CATEGORIES[domain]) return DOMAIN_CATEGORIES[domain];
-  // Check if any key is a suffix match (e.g. "sub.github.com" → "github.com")
-  for (const [d, cat] of Object.entries(DOMAIN_CATEGORIES)) {
+  if (WEBSITE_CATEGORY_MAP[domain]) return WEBSITE_CATEGORY_MAP[domain];
+  for (const [d, cat] of Object.entries(WEBSITE_CATEGORY_MAP)) {
     if (domain.endsWith('.' + d)) return cat;
   }
   return 'other';
@@ -235,7 +198,7 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
   const faviconUrl = entry.faviconUrl || `https://${entry.topLevelDomain}/favicon.ico`;
   const hasDuration = (entry.activeDuration || 0) > 0 || (entry.totalDuration || 0) > 0;
   const category = getCategoryForDomain(entry.topLevelDomain);
-  const catColor = CATEGORY_COLORS[category] || CATEGORY_COLORS.other;
+  const catColor = WEBSITE_CATEGORY_COLORS[category] || WEBSITE_CATEGORY_COLORS.other;
 
   const durationHtml = hasDuration
     ? `<div class="entry-duration">
@@ -510,7 +473,7 @@ function renderCategoryChart(): void {
   const maxVal = Math.max(...cats.map(([, val]) => val), 1);
 
   categoryContainer.innerHTML = cats.map(([cat, val]) => {
-    const color = CATEGORY_COLORS[cat] || CATEGORY_COLORS.other;
+    const color = WEBSITE_CATEGORY_COLORS[cat] || WEBSITE_CATEGORY_COLORS.other;
     const valLabel = useDuration ? FormatUtils.formatDuration(val) : `${val}`;
     return `
     <div class="category-row">
