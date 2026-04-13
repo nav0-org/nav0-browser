@@ -5,6 +5,7 @@ import { app, dialog, ipcMain, Menu } from "electron";
 import { Tab } from "./tab";
 import { DatabaseManager } from "../database/database-manager";
 import { DataStoreManager } from "../database/data-store-manager";
+import { SessionManager } from "./session-manager";
 import { SearchEngine } from "../web/search-engine";
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
 import { PermissionManager, PermissionRequest } from "./permission-manager";
@@ -86,10 +87,14 @@ export abstract class AppWindowManager {
         }
       }
     );
-    AppWindowManager.createWindow();
+    const sessionRestored = await SessionManager.restoreSession();
+    if (!sessionRestored) {
+      AppWindowManager.createWindow();
+    }
     AppWindowManager.initIPCHandlers();
     AppMenuManager.init();
     AppWindowManager.startHibernationChecker();
+    SessionManager.startPeriodicSave();
   }
   static createWindow(isPrivate = false): AppWindow {
     const window = new AppWindow(isPrivate, DatabaseManager.getDatabase(isPrivate));
@@ -751,6 +756,21 @@ export abstract class AppWindowManager {
         newWindow.createSuspendedTab(restoredUrls[i].url, restoredUrls[i].title || 'Restored Tab');
       }
       return { ok: true };
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_SESSION_STATE, async () => {
+      const session = SessionManager.getSavedSession();
+      if (!session) return null;
+      return {
+        windowCount: session.windows.length,
+        totalTabCount: session.windows.reduce((sum, w) => sum + w.tabs.length, 0),
+        savedAt: session.savedAt,
+      };
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.RESTORE_PREVIOUS_SESSION, async () => {
+      const restored = await SessionManager.restoreSession();
+      return { ok: restored };
     });
 
     ipcMain.on(RendererToMainEventsForBrowserIPC.PRINT_PAGE, async (event, appWindowId: string) => {
