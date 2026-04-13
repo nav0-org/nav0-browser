@@ -127,7 +127,7 @@ In 2022, security researcher Zach Edwards discovered that DuckDuckGo's mobile br
 
 DuckDuckGo's CEO Gabriel Weinberg confirmed this was due to a syndication agreement with Microsoft. DuckDuckGo's search ads come from Microsoft's advertising platform. The agreement contractually required DuckDuckGo to allow certain Microsoft trackers in their browser.
 
-Let that sink in. A privacy browser — whose entire value proposition is blocking trackers — was contractually obligated to allow trackers from its business partner.
+Let that sink in. A privacy browser — whose entire value proposition is blocking trackers — was contractually obligated to allow trackers from its business partner. This is exactly the kind of conflict we explored in [Your Browser Is Watching You](/blog/your-browser-is-watching-you).
 
 DuckDuckGo has since expanded its tracker blocking to include Microsoft's scripts, following the public backlash. But the incident revealed something structural: DuckDuckGo is a business with advertising revenue, and advertising partnerships create privacy exceptions. This wasn't a bug. It was a business deal.
 
@@ -159,7 +159,7 @@ This is DuckDuckGo's attempt to offer AI features while maintaining its privacy 
 
 But there are problems. Your queries still reach third-party AI providers, even if DuckDuckGo strips identifiers. The content of your queries — what you're asking, what you're researching, what you need help with — is sensitive data regardless of whether it's linked to your identity. AI providers process and potentially store these queries under their own data policies.
 
-More fundamentally, AI chat in a browser is feature creep. It's another service, another codebase, another data flow, another thing that can go wrong. It adds complexity without improving the browser's core function: loading web pages.
+More fundamentally, AI chat in a browser is feature creep — the same kind we criticized in [Stop Forcing AI Into My Browser](/blog/stop-forcing-ai-into-browsers). It's another service, another codebase, another data flow, another thing that can go wrong. It adds complexity without improving the browser's core function: loading web pages.
 
 Nav0 has no AI features. No AI chat. No AI summaries. No AI-powered anything. If you want to use AI tools, visit them in a tab where you consciously choose what information to share. Your browser shouldn't be an intermediary for AI interactions any more than it should be an intermediary for email or banking.
 

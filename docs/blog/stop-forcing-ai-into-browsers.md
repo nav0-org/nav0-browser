@@ -129,7 +129,7 @@ Every AI feature in your browser comes with a hidden cost: your data.
 
 Browser AI doesn't run entirely on your device. Most of these features send your data, the page content, your queries, your browsing context, to cloud servers for processing. When Edge's Copilot "reads" a page for you, that page content goes to Microsoft's servers. When Chrome's AI organizes your tabs, Google knows every tab you have open.
 
-This creates a new category of data collection that didn't exist before:
+This creates a new category of data collection on top of [what browsers already collect about you](/blog/your-browser-is-watching-you):
 
 - **Page content extraction.** The AI needs to "understand" the page, which means the full text of every page you interact with gets sent to a remote server.
 - **Conversational context.** Your questions to the AI reveal intent in ways that URL logging never could. Asking "what does this medical term mean?" or "is this a good deal?" tells the vendor far more than a page visit alone.
@@ -162,7 +162,7 @@ A browser used to be a window to the web. Now it's trying to be:
 
 Each new feature adds complexity, increases the attack surface, and moves the browser further from its core purpose. More code means more bugs. More features mean more settings to misconfigure. More integrations mean more data flowing to more places.
 
-The AI trend is particularly concerning because it normalizes the idea that your browser should "understand" what you're doing. Once that expectation is set, the surveillance potential is limitless. An AI that can summarize a page can also categorize it. An AI that can "help you write" can also read everything you type.
+This pattern mirrors [the enshittification of Chrome](/blog/the-enshittification-of-chrome) — what started as a simple tool keeps expanding to serve the vendor, not the user. The AI trend is particularly concerning because it normalizes the idea that your browser should "understand" what you're doing. Once that expectation is set, the surveillance potential is limitless. An AI that can summarize a page can also categorize it. An AI that can "help you write" can also read everything you type.
 
 ## The Alternative: Just Browse
 

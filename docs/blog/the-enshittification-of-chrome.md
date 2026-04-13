@@ -158,7 +158,7 @@ This is where we're at now, and honestly its pretty grim.
 
 Google started cramming Gemini AI into Chrome like they were getting paid per feature.  And I mean, they literally are — every AI interaction is another data point for Google's models. You've got AI-powered tab organizer, AI writing assistant, AI search summaries that replace actual website visits (great for publishers, right?), and "Help me write" features that read whatever you're looking at.
 
-Nobody asked for any of this.  Poll after poll shows users want their browser to be fast, reliable, and stay out of the way. Instead we got a browser that wants to be your AI assistant, your shopping buddy, and your writing tutor all at once.
+Nobody asked for any of this. We wrote a whole piece on [why AI doesn't belong in your browser](/blog/stop-forcing-ai-into-browsers). Poll after poll shows users want their browser to be fast, reliable, and stay out of the way. Instead we got a browser that wants to be your AI assistant, your shopping buddy, and your writing tutor all at once.
 
 ### The Privacy Sandbox Shell Game
 
@@ -170,7 +170,7 @@ And then in mid-2024, Google straight up reversed course and said actually, they
 
 ### The Data Vacuum
 
-At this point Chrome is basically a telemetry machine that also happens to browse the web. Here's a non-exhaustive list of what Chrome phones home about:
+At this point Chrome is basically a telemetry machine that also happens to browse the web. We documented the full scope of [how browsers watch you](/blog/your-browser-is-watching-you) in a separate piece. Here's a non-exhaustive list of what Chrome phones home about:
 
 - **Every URL you visit** (via "Safe Browsing" — they claim its anonymized but the architecture makes full anonymity  basically impossible)
 - **Your search queries** as you type them, keystroke by keystroke
@@ -209,7 +209,7 @@ Chrome in 2026 is objectively worse for users then Chrome in 2012. It uses more 
 
 The good news is you don't actually have to put up with this. There are browsers that haven't followed Chrome down the enshittification path.
 
-But here's the thing — most "alternatives" are still built on Chromium, which is Google's open-source engine. Edge, Brave, Opera, Vivaldi... they all use Chromium under the hood.  That means Google still controls the fundamental architecture. When Google decides to nerf extensions via Manifest V3, all those browsers have to deal with it too.
+But here's the thing — most "alternatives" are still built on Chromium, which is Google's open-source engine. The problem [runs deeper than any single browser](/blog/big-tech-owns-your-browser). Edge, Brave, Opera, Vivaldi... they all use Chromium under the hood.  That means Google still controls the fundamental architecture. When Google decides to nerf extensions via Manifest V3, all those browsers have to deal with it too.
 
 A real alternative needs to be:
 

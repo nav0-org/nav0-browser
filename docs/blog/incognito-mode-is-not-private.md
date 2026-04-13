@@ -169,7 +169,7 @@ If you use Google Search in an Incognito window while signed into your Google ac
 
 Google's own advertising tools — Google Analytics and Google Ads — run on over 70% of the top million websites. When you visit these sites in Incognito mode, these scripts execute and send data to Google. The scripts can't read cookies from your regular session, but they can still collect your fingerprint, IP address, and behavior patterns.
 
-This is why Google had billions of Incognito browsing records to delete after the 2024 settlement. The data was being collected by Google's own tools running on third-party websites.
+This is why Google had billions of Incognito browsing records to delete after the 2024 settlement. The data was being collected by Google's own tools running on third-party websites. This isn't a bug — it's a feature of [Chrome's broader trajectory toward data extraction](/blog/the-enshittification-of-chrome).
 
 ## The Dark Pattern of False Security
 
@@ -179,7 +179,7 @@ When users believe Incognito mode makes them private, they stop looking for actu
 
 Incognito mode functions as a **pressure valve for privacy concerns**. Users feel uneasy about tracking, they switch to Incognito, and the anxiety dissipates. The dark theme and spy icon provide psychological comfort. Meanwhile, the tracking continues uninterrupted.
 
-This is by design. Browser vendors have no incentive to build real privacy into their products. Google makes over $200 billion a year from advertising. Microsoft and others operate similar ad businesses. A browser that actually prevented tracking would directly undermine their primary revenue stream. Incognito mode is the perfect compromise: it makes users feel private without actually reducing data collection in any meaningful way.
+This is by design. Browser vendors have no incentive to build real privacy into their products — [they make money from your data, not from you](/blog/your-browser-is-watching-you). Google makes over $200 billion a year from advertising. Microsoft and others operate similar ad businesses. A browser that actually prevented tracking would directly undermine their primary revenue stream. Incognito mode is the perfect compromise: it makes users feel private without actually reducing data collection in any meaningful way.
 
 ## What Real Privacy Looks Like
 
@@ -187,7 +187,7 @@ If Incognito mode is theater, what does genuine browser privacy look like? It lo
 
 ### Block trackers at the network level
 
-A privacy-focused browser should block known tracking domains before any request is made. Not in a special mode. In every mode. All the time. By default.
+A privacy-focused browser should block known tracking domains before any request is made. Not in a special mode. In every mode. All the time. By default. Nav0's [built-in privacy protections](/guide/privacy-protection) do exactly this.
 
 ### Resist fingerprinting
 

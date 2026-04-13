@@ -124,7 +124,7 @@ The moment you sign in, that changes completely.  Your browsing data gets upload
 - **Extensions and settings.** What tools you use and how you've configured your browser.
 - **Reading lists and bookmarks.** A curated map  of your interests over time.
 
-Individually, each piece might seem harmless. Together, they form one of the most detailed profiles  of a human being that any company could ask for.  Your passwords reveal what services you use. Your history shows what you read, what you research, what you shop for, what worries you at 2am. Your open tabs are basically a live feed of your attention.
+Individually, each piece might seem harmless. Together, they form one of the most detailed profiles  of a human being that any company could ask for. We documented [the full scope of browser surveillance](/blog/your-browser-is-watching-you) in a separate piece.  Your passwords reveal what services you use. Your history shows what you read, what you research, what you shop for, what worries you at 2am. Your open tabs are basically a live feed of your attention.
 
 And all of it is tied to your real identity — your email address,  your phone number, your name. Not an anonymous device ID. Not a pseudonym. You.
 
@@ -132,7 +132,7 @@ And all of it is tied to your real identity — your email address,  your phone 
 
 So why do browser vendors want this data so bad?  Because for most of them, it feeds directly into their core business.
 
-**Google** is an advertising company. That's not an insult, it's literally how they make money. Over 75% of Google's revenue  comes from ads.  Chrome isn't a product Google sells — it's a funnel that feeds their ad targeting machine. When you sign into Chrome, Google can connect your browsing behavior to the same identity they use for Gmail, YouTube, Search, Maps, and Android. The profile they build  is insanely comprehensive. Your Chrome data makes their ads more precise, which makes advertisers pay more, which makes Google more money.
+**Google** is an advertising company. That's not an insult, it's literally how they make money. [Big Tech controls most browsers](/blog/big-tech-owns-your-browser) precisely because of these incentives. Over 75% of Google's revenue  comes from ads.  Chrome isn't a product Google sells — it's a funnel that feeds their ad targeting machine. When you sign into Chrome, Google can connect your browsing behavior to the same identity they use for Gmail, YouTube, Search, Maps, and Android. The profile they build  is insanely comprehensive. Your Chrome data makes their ads more precise, which makes advertisers pay more, which makes Google more money.
 
 **Microsoft** has been leaning hard into the same playbook.  Edge data feeds into Microsoft's advertising network, which powers ads on Bing, MSN, and across partner sites. Microsoft 365 integration means  your browser behavior can be correlated with your work documents, emails, and calendar. Signing into Edge gives Microsoft a view into both your personal and professional life  that would have been unthinkable ten years ago.
 

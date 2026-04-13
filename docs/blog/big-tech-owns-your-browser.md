@@ -111,7 +111,9 @@ The US Department of Justice's antitrust case against Google revealed that Googl
 Chrome's design decisions consistently favor Google's interests:
 - **Manifest V3** changed the extension API in ways that limit the effectiveness of ad blockers, directly protecting Google's advertising revenue.
 - **Privacy Sandbox and Topics API** replaced third-party cookies not with actual privacy, but with a Google-controlled system that still enables ad targeting, just with Google as the gatekeeper.
-- **Chrome sign-in** was made increasingly aggressive over the years, linking browser usage to Google accounts and enabling cross-device tracking.
+- **Chrome sign-in** was made [increasingly aggressive](/blog/why-your-browser-wants-you-to-sign-in) over the years, linking browser usage to Google accounts and enabling cross-device tracking.
+
+We documented this full arc in [The Enshittification of Chrome](/blog/the-enshittification-of-chrome).
 
 ### Microsoft Edge
 
@@ -170,7 +172,7 @@ Default search engines are chosen based on revenue deals, not user preference. D
 
 ### Your Data Fuels Their Business
 
-Chrome sends browsing data to Google. Edge sends telemetry to Microsoft. Even when you opt out of visible features, background data collection often continues. Browser vendors have been caught re-enabling telemetry after updates, adding new data collection without clear disclosure, and using dark patterns in settings to discourage opting out.
+Chrome sends browsing data to Google. Edge sends telemetry to Microsoft. Even when you opt out of visible features, [background data collection often continues](/blog/your-browser-is-watching-you). Browser vendors have been caught re-enabling telemetry after updates, adding new data collection without clear disclosure, and using dark patterns in settings to discourage opting out.
 
 ### You Can't Truly Leave
 

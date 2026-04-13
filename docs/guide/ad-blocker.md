@@ -57,6 +57,32 @@ head:
           }
         ]
       }
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to Configure Nav0's Built-In Ad Blocker",
+        "description": "Configure Nav0's ad blocker to manage filter lists and whitelist specific sites. No extension required.",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "name": "Open ad blocker settings",
+            "text": "Go to Settings, then Privacy, then Ad Blocker to access all ad blocker configuration options."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Toggle filter lists",
+            "text": "Enable or disable individual filter lists: EasyList (ads), EasyPrivacy (trackers), Peter Lowe's list (domains), and Fanboy's Annoyances (cookie banners and popups)."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Whitelist specific sites",
+            "text": "Add domains to the Allowed Sites list to disable the ad blocker for sites that break or require ad scripts to function."
+          }
+        ]
+      }
 ---
 
 # Ad Blocker
