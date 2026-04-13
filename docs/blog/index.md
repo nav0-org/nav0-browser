@@ -10,6 +10,14 @@ Thoughts on privacy, browsers, and the open web.
 ---
 
 <div class="blog-post-item">
+  <a href="/blog/nav0-vs-opera">
+    <h2>Nav0 vs Opera: From Innovation to Monetization</h2>
+  </a>
+  <div class="post-meta">By Nav0 Team &middot; April 13, 2026 &middot; 11 min read &middot; Comparison</div>
+  <p class="post-excerpt">Opera pioneered tabbed browsing and mouse gestures — then new ownership shifted its focus toward monetization. Today it ships a browser-only proxy marketed as a VPN, an AI assistant, built-in messengers, a news feed, and a gaming edition. Nav0 just ships a browser.</p>
+</div>
+
+<div class="blog-post-item">
   <a href="/blog/nav0-v012-performance-update">
     <h2>Nav0 v0.1.2 Performance Update: Even Lighter on the Same Hardware</h2>
   </a>
