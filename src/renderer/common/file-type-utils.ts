@@ -2,18 +2,18 @@
 
 /** Color palette for file display types. */
 export const TYPE_COLORS: Record<string, string> = {
-  document: '#6366f1',
-  spreadsheet: '#6366f1',
-  presentation: '#6366f1',
-  ebook: '#f97316',
-  image: '#06b6d4',
-  video: '#06b6d4',
-  installer: '#f59e0b',
-  archive: '#8b5cf6',
-  audio: '#ec4899',
-  code: '#10b981',
-  font: '#64748b',
-  other: '#a1a1aa',
+  document: '#6366f1',        // Indigo
+  spreadsheet: '#22c55e',     // Green
+  presentation: '#3b82f6',    // Blue
+  ebook: '#f97316',           // Orange
+  image: '#06b6d4',           // Cyan
+  video: '#ef4444',           // Red
+  installer: '#f59e0b',       // Amber
+  archive: '#8b5cf6',         // Purple
+  audio: '#ec4899',           // Pink
+  code: '#10b981',            // Emerald
+  font: '#64748b',            // Slate
+  other: '#a1a1aa',           // Gray
 };
 
 /** Maps file extensions to a human-friendly display type. */
