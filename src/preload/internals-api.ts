@@ -339,6 +339,9 @@ export function init(){
     clearAllPermissions: async () => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.CLEAR_ALL_PERMISSIONS);
     },
+    updatePermissionDecision: async (permissionId: string, decision: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.UPDATE_PERMISSION_DECISION, permissionId, decision);
+    },
 
     // Issue report
     showIssueReport: async (appWindowId: string) => {

@@ -172,6 +172,7 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly REMOVE_PERMISSION = "browser:remove-permission";
   public static readonly REMOVE_ALL_PERMISSIONS_FOR_ORIGIN = "browser:remove-all-permissions-for-origin";
   public static readonly CLEAR_ALL_PERMISSIONS = "browser:clear-all-permissions";
+  public static readonly UPDATE_PERMISSION_DECISION = "browser:update-permission-decision";
   public static readonly PERMISSION_PROMPT_READY = "browser:permission-prompt-ready";
   public static readonly OVERLAY_RENDERER_READY = "overlay:renderer-ready";
   public static readonly SHOW_TAB_CONTEXT_MENU = "browser:show-tab-context-menu";

@@ -16,6 +16,7 @@
       <ul class="sidebar-nav">
         <li><a href="#search" class="sidebar-link active" data-section="search"><i data-lucide="search" width="16" height="16"></i> Search</a></li>
         <li><a href="#privacy" class="sidebar-link" data-section="privacy"><i data-lucide="shield" width="16" height="16"></i> Privacy &amp; Security</a></li>
+        <li><a href="#permissions" class="sidebar-link" data-section="permissions"><i data-lucide="shield-check" width="16" height="16"></i> Permissions</a></li>
         <li><a href="#network" class="sidebar-link" data-section="network"><i data-lucide="globe" width="16" height="16"></i> Network</a></li>
         <li><a href="#shortcuts" class="sidebar-link" data-section="shortcuts"><i data-lucide="keyboard" width="16" height="16"></i> Keyboard Shortcuts</a></li>
         <li><a href="#developer" class="sidebar-link" data-section="developer"><i data-lucide="code" width="16" height="16"></i> Developer</a></li>
@@ -330,6 +331,27 @@
               </label>
             </div>
           </div>
+        </div>
+      </section>
+
+      <!-- ====== PERMISSIONS SECTION ====== -->
+      <section id="section-permissions" class="settings-section" data-keywords="permissions site permission camera microphone location geolocation notifications midi screen sharing clipboard usb bluetooth serial allowed denied grant revoke">
+        <h2 class="section-title">Site Permissions</h2>
+        <p class="setting-description">Manage permissions you've granted or denied to websites.</p>
+
+        <div class="setting-group">
+          <div class="permissions-search">
+            <input type="text" id="permissions-search" class="form-input" placeholder="Search by site or permission type...">
+          </div>
+          <div id="permissions-list"></div>
+          <div id="permissions-empty" class="permissions-empty" style="display: none;">
+            <i data-lucide="shield-check" class="permissions-empty-icon"></i>
+            <p>No site permissions have been granted or denied yet.</p>
+          </div>
+        </div>
+
+        <div class="permissions-footer" id="permissions-footer" style="display: none;">
+          <button class="btn btn-sm btn-secondary" id="clear-all-permissions-btn"><i data-lucide="trash-2" width="14" height="14"></i> Clear All Permissions</button>
         </div>
       </section>
 

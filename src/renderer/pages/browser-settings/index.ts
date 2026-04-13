@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initUserAgentSettings();
   initNetworkSettings();
   initKeyboardShortcuts();
+  initPermissionsSettings();
   initDeveloperSettings();
   initSettingsSearch();
   createIcons({ icons });
@@ -958,6 +959,181 @@ function formatShortcutDisplay(combo: string): string {
     if (part === 'mod') display = modKey;
     return `<span class="keycap">${display}</span>`;
   }).join('');
+}
+
+// ---- Permissions Settings ----
+const PERMISSION_INFO: Record<string, { label: string; icon: string }> = {
+  'media': { label: 'Camera/Microphone', icon: 'camera' },
+  'geolocation': { label: 'Location', icon: 'map-pin' },
+  'notifications': { label: 'Notifications', icon: 'bell' },
+  'midi': { label: 'MIDI Devices', icon: 'music' },
+  'midiSysex': { label: 'MIDI System Exclusive', icon: 'music' },
+  'display-capture': { label: 'Screen Sharing', icon: 'monitor' },
+  'clipboard-read': { label: 'Clipboard', icon: 'clipboard' },
+  'idle-detection': { label: 'Idle Detection', icon: 'moon' },
+  'storage-access': { label: 'Storage Access', icon: 'hard-drive' },
+  'window-management': { label: 'Window Management', icon: 'app-window' },
+  'local-fonts': { label: 'Local Fonts', icon: 'type' },
+  'screen-wake-lock': { label: 'Screen Wake Lock', icon: 'monitor' },
+  'speaker-selection': { label: 'Speaker Selection', icon: 'speaker' },
+  'keyboard-lock': { label: 'Keyboard Lock', icon: 'keyboard' },
+  'usb': { label: 'USB Devices', icon: 'usb' },
+  'serial': { label: 'Serial Ports', icon: 'usb' },
+  'bluetooth': { label: 'Bluetooth Devices', icon: 'bluetooth' },
+  'hid': { label: 'HID Devices', icon: 'keyboard' },
+};
+
+function getPermLabel(permissionType: string): string {
+  return PERMISSION_INFO[permissionType]?.label || permissionType;
+}
+
+function getPermIcon(permissionType: string): string {
+  return PERMISSION_INFO[permissionType]?.icon || 'shield-alert';
+}
+
+interface PermissionRecord {
+  id: string;
+  origin: string;
+  permissionType: string;
+  decision: string;
+  createdAt: string;
+  lastAccessedAt: string;
+}
+
+let permissionsSearchTimeout: ReturnType<typeof setTimeout> | null = null;
+
+async function initPermissionsSettings() {
+  await loadAndRenderPermissions();
+
+  const searchInput = document.getElementById('permissions-search') as HTMLInputElement;
+  searchInput?.addEventListener('input', () => {
+    if (permissionsSearchTimeout) clearTimeout(permissionsSearchTimeout);
+    permissionsSearchTimeout = setTimeout(() => {
+      loadAndRenderPermissions(searchInput.value.trim());
+    }, 300);
+  });
+
+  document.getElementById('clear-all-permissions-btn')?.addEventListener('click', async () => {
+    if (!confirm('Remove all site permissions? Sites will need to request permissions again.')) return;
+    await (window as any).BrowserAPI.clearAllPermissions();
+    showToast('All permissions cleared');
+    loadAndRenderPermissions();
+  });
+}
+
+async function loadAndRenderPermissions(searchTerm?: string) {
+  const permissions: PermissionRecord[] = await (window as any).BrowserAPI.fetchPermissions(searchTerm || '');
+  renderPermissions(permissions);
+}
+
+function renderPermissions(permissions: PermissionRecord[]) {
+  const container = document.getElementById('permissions-list')!;
+  const emptyState = document.getElementById('permissions-empty')!;
+  const footer = document.getElementById('permissions-footer')!;
+
+  container.innerHTML = '';
+
+  if (permissions.length === 0) {
+    emptyState.style.display = '';
+    footer.style.display = 'none';
+    createIcons({ icons });
+    return;
+  }
+
+  emptyState.style.display = 'none';
+  footer.style.display = '';
+
+  // Group by origin
+  const grouped = new Map<string, PermissionRecord[]>();
+  for (const perm of permissions) {
+    const list = grouped.get(perm.origin) || [];
+    list.push(perm);
+    grouped.set(perm.origin, list);
+  }
+
+  for (const [origin, perms] of grouped) {
+    const group = document.createElement('div');
+    group.className = 'permission-origin-group';
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'permission-origin-header';
+    header.innerHTML = `
+      <span class="permission-origin-name">${escapeHtml(origin)}</span>
+      <span class="permission-origin-actions">
+        <button class="btn btn-sm btn-secondary permission-remove-all-btn"><i data-lucide="trash-2" width="12" height="12"></i> Remove All</button>
+      </span>
+    `;
+    header.querySelector('.permission-remove-all-btn')!.addEventListener('click', async () => {
+      await (window as any).BrowserAPI.removeAllPermissionsForOrigin(origin);
+      group.remove();
+      showToast(`Permissions removed for ${origin}`);
+      // Check if list is now empty
+      if (container.children.length === 0) {
+        emptyState.style.display = '';
+        footer.style.display = 'none';
+        createIcons({ icons });
+      }
+    });
+    group.appendChild(header);
+
+    // Permission entries
+    for (const perm of perms) {
+      const entry = document.createElement('div');
+      entry.className = 'permission-entry';
+
+      const iconName = getPermIcon(perm.permissionType);
+      const label = getPermLabel(perm.permissionType);
+      const isAllowed = perm.decision === 'allowed_persistent';
+
+      entry.innerHTML = `
+        <i data-lucide="${iconName}" class="permission-entry-icon" width="18" height="18"></i>
+        <span class="permission-entry-label">${escapeHtml(label)}</span>
+        <span class="permission-entry-decision">
+          <select class="form-select-sm permission-decision-select">
+            <option value="allowed_persistent" ${isAllowed ? 'selected' : ''}>Allow</option>
+            <option value="denied_persistent" ${!isAllowed ? 'selected' : ''}>Deny</option>
+          </select>
+        </span>
+        <button class="permission-entry-remove" title="Remove permission"><i data-lucide="x" width="14" height="14"></i></button>
+      `;
+
+      // Decision change handler
+      const select = entry.querySelector('.permission-decision-select') as HTMLSelectElement;
+      select.addEventListener('change', async () => {
+        await (window as any).BrowserAPI.updatePermissionDecision(perm.id, select.value);
+        showToast(`${label} ${select.value === 'allowed_persistent' ? 'allowed' : 'denied'} for ${origin}`);
+      });
+
+      // Remove handler
+      entry.querySelector('.permission-entry-remove')!.addEventListener('click', async () => {
+        await (window as any).BrowserAPI.removePermission(perm.id);
+        entry.remove();
+        showToast(`${label} permission removed`);
+        // If group is now empty (only header remains), remove group
+        if (group.querySelectorAll('.permission-entry').length === 0) {
+          group.remove();
+          if (container.children.length === 0) {
+            emptyState.style.display = '';
+            footer.style.display = 'none';
+            createIcons({ icons });
+          }
+        }
+      });
+
+      group.appendChild(entry);
+    }
+
+    container.appendChild(group);
+  }
+
+  createIcons({ icons });
+}
+
+function escapeHtml(str: string): string {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }
 
 createIcons({ icons });

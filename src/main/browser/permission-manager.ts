@@ -437,6 +437,20 @@ export class PermissionManager {
     }
   }
 
+  static updatePersistentPermissionDecision(id: string, decision: PersistentDecision): boolean {
+    if (!PermissionManager.db) return false;
+    try {
+      const now = new Date().toISOString();
+      const result = PermissionManager.db.prepare(
+        'UPDATE site_permission SET decision = ?, lastAccessedAt = ? WHERE id = ?'
+      ).run(decision, now, id);
+      return result.changes > 0;
+    } catch (err) {
+      console.error('Failed to update permission decision:', err);
+      return false;
+    }
+  }
+
   static clearAllPersistentPermissions(): void {
     if (!PermissionManager.db) return;
     try {
@@ -640,6 +654,14 @@ export class PermissionManager {
     ipcMain.handle(RendererToMainEventsForBrowserIPC.CLEAR_ALL_PERMISSIONS, () => {
       PermissionManager.clearAllPersistentPermissions();
       return true;
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.UPDATE_PERMISSION_DECISION, (
+      _event: Electron.IpcMainInvokeEvent,
+      permissionId: string,
+      decision: string
+    ) => {
+      return PermissionManager.updatePersistentPermissionDecision(permissionId, decision as PersistentDecision);
     });
 
     ipcMain.handle('get-ip-geolocation', async () => {
