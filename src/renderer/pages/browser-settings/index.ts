@@ -15,6 +15,7 @@ const modKey = isMac ? 'Cmd' : 'Ctrl';
 document.addEventListener('DOMContentLoaded', async () => {
   await loadSettings();
   initSidebarNavigation();
+  initGeneralSettings();
   initSearchSettings();
   initCookieSettings();
   initAdBlockerSettings();
@@ -62,7 +63,7 @@ function initSidebarNavigation() {
     });
   });
   // Activate first section
-  activateSection('search');
+  activateSection('general');
 }
 
 function activateSection(sectionId: string) {
@@ -114,6 +115,38 @@ function initSettingsSearch() {
         section.classList.remove('active');
       }
     });
+  });
+}
+
+// ---- General Settings ----
+function initGeneralSettings() {
+  const pathDisplay = document.getElementById('download-path-display');
+  const changeBtn = document.getElementById('change-download-path-btn');
+  const resetBtn = document.getElementById('reset-download-path-btn');
+
+  function updatePathDisplay() {
+    if (pathDisplay) {
+      pathDisplay.textContent = settings.downloadPath || 'Default downloads folder';
+    }
+  }
+
+  updatePathDisplay();
+
+  changeBtn?.addEventListener('click', async () => {
+    const folder = await (window as any).BrowserAPI.selectDownloadFolder();
+    if (folder) {
+      settings.downloadPath = folder;
+      saveSettings();
+      updatePathDisplay();
+      showToast('Downloads location updated');
+    }
+  });
+
+  resetBtn?.addEventListener('click', () => {
+    settings.downloadPath = '';
+    saveSettings();
+    updatePathDisplay();
+    showToast('Downloads location reset to default');
   });
 }
 
