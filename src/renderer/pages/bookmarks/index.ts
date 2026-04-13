@@ -1,6 +1,6 @@
 import { HtmlUtils } from '../../../renderer/common/html-utils';
 import { BookmarkWithStats } from '../../../types/bookmark-record';
-import { BOOKMARK_CATEGORY_MAP, BOOKMARK_CATEGORY_COLORS } from '../../../constants/app-constants';
+import { WEBSITE_CATEGORY_MAP, WEBSITE_CATEGORY_COLORS } from '../../../constants/app-constants';
 import './index.css';
 
 import { createIcons, icons } from 'lucide';
@@ -11,11 +11,11 @@ createIcons({ icons });
 function getCategoryForUrl(url: string): string {
   try {
     const hostname = new URL(url).hostname.replace(/^www\./, '');
-    if (BOOKMARK_CATEGORY_MAP[hostname]) return BOOKMARK_CATEGORY_MAP[hostname];
+    if (WEBSITE_CATEGORY_MAP[hostname]) return WEBSITE_CATEGORY_MAP[hostname];
     const parts = hostname.split('.');
     if (parts.length > 2) {
       const parent = parts.slice(1).join('.');
-      if (BOOKMARK_CATEGORY_MAP[parent]) return BOOKMARK_CATEGORY_MAP[parent];
+      if (WEBSITE_CATEGORY_MAP[parent]) return WEBSITE_CATEGORY_MAP[parent];
     }
     return 'other';
   } catch {
@@ -24,7 +24,7 @@ function getCategoryForUrl(url: string): string {
 }
 
 function getCategoryColor(category: string): string {
-  return BOOKMARK_CATEGORY_COLORS[category] || BOOKMARK_CATEGORY_COLORS.other;
+  return WEBSITE_CATEGORY_COLORS[category] || WEBSITE_CATEGORY_COLORS.other;
 }
 
 function getDomain(url: string): string {

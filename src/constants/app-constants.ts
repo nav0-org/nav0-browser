@@ -260,25 +260,28 @@ export const STREAMING_SITES: readonly string[] = [
 ];
 
 /**
- * Bookmark category colors — same palette as download TYPE_COLORS.
+ * Website category colors — shared palette for bookmarks, history, and other pages.
  */
-export const BOOKMARK_CATEGORY_COLORS: Record<string, string> = {
-  dev: '#6366f1',       // indigo (matches document/code in downloads)
-  news: '#06b6d4',      // cyan (matches image/video in downloads)
-  media: '#ec4899',     // pink (matches audio in downloads)
-  social: '#8b5cf6',    // purple (matches archive in downloads)
-  tools: '#f59e0b',     // amber (matches installer in downloads)
-  finance: '#10b981',   // green (matches code in downloads)
-  shopping: '#f97316',  // orange
-  reference: '#6366f1', // indigo
-  other: '#a1a1aa',     // gray (matches other in downloads)
+export const WEBSITE_CATEGORY_COLORS: Record<string, string> = {
+  dev: '#6366f1',          // indigo
+  news: '#06b6d4',         // cyan
+  media: '#ec4899',        // pink
+  social: '#8b5cf6',       // purple
+  productivity: '#f59e0b', // amber
+  tools: '#22d3ee',        // light cyan
+  finance: '#10b981',      // green
+  shopping: '#f97316',     // orange
+  reference: '#6366f1',    // indigo
+  search: '#a1a1aa',       // gray
+  design: '#14b8a6',       // teal
+  other: '#a1a1aa',        // gray
 };
 
 /**
- * Domain → bookmark category mapping.
- * Used by the bookmarks page to auto-categorise bookmarks.
+ * Domain → website category mapping.
+ * Used by the bookmarks page, history page, and other pages to auto-categorise websites.
  */
-export const BOOKMARK_CATEGORY_MAP: Record<string, string> = {
+export const WEBSITE_CATEGORY_MAP: Record<string, string> = {
   // Dev
   'github.com': 'dev',
   'gitlab.com': 'dev',
@@ -291,6 +294,7 @@ export const BOOKMARK_CATEGORY_MAP: Record<string, string> = {
   'npmjs.com': 'dev',
   'pypi.org': 'dev',
   'crates.io': 'dev',
+  'pkg.go.dev': 'dev',
   'vitepress.dev': 'dev',
   'vitejs.dev': 'dev',
   'source.chromium.org': 'dev',
@@ -317,8 +321,11 @@ export const BOOKMARK_CATEGORY_MAP: Record<string, string> = {
   'webpack.js.org': 'dev',
   'vercel.com': 'dev',
   'netlify.com': 'dev',
+  'heroku.com': 'dev',
   'docker.com': 'dev',
   'kubernetes.io': 'dev',
+  'linear.app': 'dev',
+  'jira.atlassian.com': 'dev',
 
   // News
   'news.ycombinator.com': 'news',
@@ -332,6 +339,7 @@ export const BOOKMARK_CATEGORY_MAP: Record<string, string> = {
   'theguardian.com': 'news',
   'washingtonpost.com': 'news',
   'apnews.com': 'news',
+  'cnn.com': 'news',
   'bloomberg.com': 'news',
   'engadget.com': 'news',
   'zdnet.com': 'news',
@@ -364,18 +372,22 @@ export const BOOKMARK_CATEGORY_MAP: Record<string, string> = {
   'linkedin.com': 'social',
   'facebook.com': 'social',
   'instagram.com': 'social',
+  'threads.net': 'social',
   'discord.com': 'social',
   'slack.com': 'social',
   'lobste.rs': 'social',
 
+  // Productivity
+  'notion.so': 'productivity',
+  'trello.com': 'productivity',
+  'docs.google.com': 'productivity',
+  'drive.google.com': 'productivity',
+  'sheets.google.com': 'productivity',
+  'gmail.com': 'productivity',
+  'outlook.com': 'productivity',
+  'calendar.google.com': 'productivity',
+
   // Tools
-  'notion.so': 'tools',
-  'figma.com': 'tools',
-  'canva.com': 'tools',
-  'trello.com': 'tools',
-  'docs.google.com': 'tools',
-  'drive.google.com': 'tools',
-  'sheets.google.com': 'tools',
   'translate.google.com': 'tools',
   'excalidraw.com': 'tools',
   'regex101.com': 'tools',
@@ -397,6 +409,19 @@ export const BOOKMARK_CATEGORY_MAP: Record<string, string> = {
   'wikimedia.org': 'reference',
   'archive.org': 'reference',
   'wolframalpha.com': 'reference',
+  'arxiv.org': 'reference',
+  'mdn.io': 'reference',
+
+  // Search
+  'google.com': 'search',
+  'bing.com': 'search',
+  'duckduckgo.com': 'search',
+
+  // Design
+  'figma.com': 'design',
+  'canva.com': 'design',
+  'dribbble.com': 'design',
+  'behance.net': 'design',
 };
 
 /**
