@@ -166,6 +166,10 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly APPLY_SETTINGS = "browser:apply-settings";
   public static readonly GET_STORAGE_ESTIMATE = "browser:get-storage-estimate";
 
+  // Graphics / Hardware Acceleration
+  public static readonly GET_GPU_INFO = "browser:get-gpu-info";
+  public static readonly RESTART_APP = "browser:restart-app";
+
   // Permission system
   public static readonly PERMISSION_PROMPT_RESPONSE = "browser:permission-prompt-response";
   public static readonly FETCH_PERMISSIONS = "browser:fetch-permissions";

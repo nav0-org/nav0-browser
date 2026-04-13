@@ -56,6 +56,19 @@ export abstract class SettingsEnforcer {
     ipcMain.handle(RendererToMainEventsForBrowserIPC.GET_STORAGE_ESTIMATE, async () => {
       return SettingsEnforcer.getStorageEstimate();
     });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.GET_GPU_INFO, async () => {
+      try {
+        return await app.getGPUInfo('basic');
+      } catch {
+        return null;
+      }
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.RESTART_APP, async () => {
+      app.relaunch();
+      app.quit();
+    });
   }
 
   // ---- Cookie Policy Enforcement ----

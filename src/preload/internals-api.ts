@@ -234,6 +234,12 @@ export function init(){
     getStorageEstimate: async () => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GET_STORAGE_ESTIMATE);
     },
+    getGpuInfo: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GET_GPU_INFO);
+    },
+    restartApp: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.RESTART_APP);
+    },
 
     // Event listeners
     onNewTabCreated: (callback: (tab: {id: string, url: string, title: string}) => void) => {

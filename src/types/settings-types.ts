@@ -83,6 +83,9 @@ export interface BrowserSettings {
 
   // Developer Tools
   devToolsEnabled: boolean;
+
+  // Graphics
+  hardwareAccelerationEnabled: boolean;
 }
 
 export const DEFAULT_SEARCH_ENGINES: SearchEngineConfig[] = [
@@ -281,4 +284,7 @@ export const DEFAULT_BROWSER_SETTINGS: BrowserSettings = {
 
   // Developer Tools
   devToolsEnabled: true,
+
+  // Graphics
+  hardwareAccelerationEnabled: true,
 };

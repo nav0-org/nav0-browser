@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initNetworkSettings();
   initKeyboardShortcuts();
   initDeveloperSettings();
+  initGraphicsSettings();
   initSettingsSearch();
   createIcons({ icons });
 });
@@ -84,6 +85,25 @@ function initDeveloperSettings() {
     settings.devToolsEnabled = toggle.checked;
     saveSettings();
     showToast(toggle.checked ? 'Developer Tools enabled' : 'Developer Tools disabled');
+  });
+}
+
+// ---- Graphics Settings ----
+function initGraphicsSettings() {
+  const toggle = document.getElementById('hardware-accel-toggle') as HTMLInputElement;
+  const restartNotice = document.getElementById('hardware-accel-restart-notice');
+  if (!toggle) return;
+
+  const initialValue = settings.hardwareAccelerationEnabled !== false;
+  toggle.checked = initialValue;
+
+  toggle.addEventListener('change', () => {
+    settings.hardwareAccelerationEnabled = toggle.checked;
+    saveSettings();
+    if (restartNotice) {
+      restartNotice.style.display = toggle.checked !== initialValue ? '' : 'none';
+    }
+    showToast(toggle.checked ? 'Hardware acceleration enabled (restart required)' : 'Hardware acceleration disabled (restart required)');
   });
 }
 

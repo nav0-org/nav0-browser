@@ -1,4 +1,5 @@
 import { app } from 'electron';
+import Store from 'electron-store';
 import { AppWindowManager } from './browser/app-window-manager';
 import { DataStoreManager } from './database/data-store-manager';
 import { DownloadManager } from './browser/download-manager';
@@ -14,6 +15,14 @@ app.commandLine.appendSwitch('disable-features', [
   'DialMediaRouteProvider',
   'GlobalMediaControls',
 ].join(','));
+
+// Read hardware acceleration setting early (before app is ready)
+// because app.disableHardwareAcceleration() must be called before any BrowserWindow is created.
+const earlySettingsStore = new Store({ name: 'browser-settings' });
+const earlySettings = earlySettingsStore.get('default') as any;
+if (earlySettings && earlySettings.hardwareAccelerationEnabled === false) {
+  app.disableHardwareAcceleration();
+}
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling
 if (require('electron-squirrel-startup')) {
