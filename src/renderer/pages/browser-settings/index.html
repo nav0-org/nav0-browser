@@ -342,11 +342,13 @@
         <div class="setting-group">
           <div class="permissions-search">
             <input type="text" id="permissions-search" class="form-input" placeholder="Search by site or permission type...">
+            <button class="btn btn-sm btn-secondary" id="refresh-permissions-btn" title="Refresh"><i data-lucide="refresh-cw" width="14" height="14"></i></button>
           </div>
           <div id="permissions-list"></div>
           <div id="permissions-empty" class="permissions-empty" style="display: none;">
             <i data-lucide="shield-check" class="permissions-empty-icon"></i>
             <p>No site permissions have been granted or denied yet.</p>
+            <p class="permissions-empty-hint">When you choose <strong>Always Allow</strong> or <strong>Always Deny</strong> on a site, it will appear here.</p>
           </div>
         </div>
 

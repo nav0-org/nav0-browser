@@ -692,6 +692,19 @@
 /* ---- Permissions Section ---- */
 .permissions-search {
   margin-bottom: var(--spacing-md);
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.permissions-search .form-input {
+  flex: 1;
+}
+
+.permissions-empty-hint {
+  font-size: var(--font-xs);
+  margin-top: var(--spacing-sm);
+  opacity: 0.8;
 }
 
 .permission-origin-group {

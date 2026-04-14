@@ -73,6 +73,7 @@ function activateSection(sectionId: string) {
   const link = document.querySelector(`.sidebar-link[data-section="${sectionId}"]`);
   if (section) section.classList.add('active');
   if (link) link.classList.add('active');
+  document.dispatchEvent(new CustomEvent('settings-section-activated', { detail: { sectionId } }));
 }
 
 // ---- Developer Settings ----
@@ -1003,31 +1004,41 @@ interface PermissionRecord {
 let permissionsSearchTimeout: ReturnType<typeof setTimeout> | null = null;
 
 async function initPermissionsSettings() {
-  await loadAndRenderPermissions();
-
   const searchInput = document.getElementById('permissions-search') as HTMLInputElement;
+
+  const refresh = () => loadAndRenderPermissions(searchInput?.value.trim() || '');
+
+  await refresh();
+
   searchInput?.addEventListener('input', () => {
     if (permissionsSearchTimeout) clearTimeout(permissionsSearchTimeout);
-    permissionsSearchTimeout = setTimeout(() => {
-      loadAndRenderPermissions(searchInput.value.trim());
-    }, 300);
+    permissionsSearchTimeout = setTimeout(refresh, 300);
+  });
+
+  document.getElementById('refresh-permissions-btn')?.addEventListener('click', () => {
+    refresh();
+    showToast('Permissions refreshed');
   });
 
   document.getElementById('clear-all-permissions-btn')?.addEventListener('click', async () => {
     if (!confirm('Remove all site permissions? Sites will need to request permissions again.')) return;
     await (window as any).BrowserAPI.clearAllPermissions();
     showToast('All permissions cleared');
-    loadAndRenderPermissions();
+    refresh();
   });
 
-  // Re-fetch permissions when the page becomes visible again (e.g. user
-  // switches back to the settings tab after granting permissions elsewhere)
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-      const currentSearch = searchInput?.value.trim() || '';
-      loadAndRenderPermissions(currentSearch);
+  // Re-fetch whenever the Permissions sidebar link is clicked — this is the
+  // most reliable trigger since visibilitychange doesn't fire consistently
+  // for WebContentsView tabs in Electron.
+  document.addEventListener('settings-section-activated', (e) => {
+    const detail = (e as CustomEvent).detail;
+    if (detail?.sectionId === 'permissions') {
+      refresh();
     }
   });
+
+  // Fallback: also refresh on window focus (tab switch)
+  window.addEventListener('focus', refresh);
 }
 
 async function loadAndRenderPermissions(searchTerm?: string) {
