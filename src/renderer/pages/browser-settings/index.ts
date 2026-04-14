@@ -87,7 +87,7 @@ function initStartupSettings() {
   const pagesContainer = document.getElementById('startup-pages-container');
 
   // Set initial state from saved settings
-  radios.forEach(r => { if (r.value === (settings.startupMode || 'new-tab')) r.checked = true; });
+  radios.forEach(r => { if (r.value === (settings.startupMode || 'continue')) r.checked = true; });
   if (pagesContainer) {
     pagesContainer.style.display = settings.startupMode === 'specific-pages' ? '' : 'none';
   }
