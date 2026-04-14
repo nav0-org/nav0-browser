@@ -10,10 +10,18 @@ What's new in every release of Nav0 Browser.
 ---
 
 <div class="release-list-item">
+  <a href="/releases/v0.2.1">
+    <h2>v0.2.1</h2>
+  </a>
+  <div class="release-meta">April 14, 2026 <span class="release-badge latest">Latest</span></div>
+  <p class="release-excerpt">Permissions settings page, configurable downloads location, "On startup" options, session restore for non-private windows, expanded website categories, and assorted settings and startup bug fixes.</p>
+</div>
+
+<div class="release-list-item">
   <a href="/releases/v0.2.0">
     <h2>v0.2.0</h2>
   </a>
-  <div class="release-meta">April 12, 2026 <span class="release-badge latest">Latest</span></div>
+  <div class="release-meta">April 12, 2026</div>
   <p class="release-excerpt">Downloads page redesign with cross-session resume, history page with time tracking and analytics, bookmarks page with reading queue/reference split, favicon fetching via net.fetch, and Chrome default user agent.</p>
 </div>
 
