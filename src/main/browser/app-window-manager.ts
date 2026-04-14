@@ -962,5 +962,19 @@ export abstract class AppWindowManager {
       return fileUrl;
     });
 
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.SELECT_DOWNLOAD_FOLDER, async () => {
+      const window = AppWindowManager.getActiveWindow();
+      if (!window) return null;
+
+      const result = await dialog.showOpenDialog(window.getBrowserWindowInstance(), {
+        properties: ['openDirectory'],
+        title: 'Select Downloads Folder',
+        defaultPath: app.getPath('downloads'),
+      });
+
+      if (result.canceled || result.filePaths.length === 0) return null;
+      return result.filePaths[0];
+    });
+
   }
 }

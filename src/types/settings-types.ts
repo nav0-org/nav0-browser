@@ -30,6 +30,9 @@ export interface KeyboardShortcutAction {
 export interface BrowserSettings {
   settings_version: number;
 
+  // General
+  downloadPath: string;
+
   // Search
   primarySearchEngine: string;
   customSearchEngines: SearchEngineConfig[];
@@ -227,6 +230,9 @@ export const DEFAULT_KEYBOARD_SHORTCUTS: KeyboardShortcutAction[] = [
 
 export const DEFAULT_BROWSER_SETTINGS: BrowserSettings = {
   settings_version: 1,
+
+  // General - Downloads (empty string = OS default)
+  downloadPath: '',
 
   // Search - DuckDuckGo as default (privacy-aligned)
   primarySearchEngine: 'Google',

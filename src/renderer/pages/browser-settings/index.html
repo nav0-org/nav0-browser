@@ -14,7 +14,8 @@
         <i data-lucide="search" class="sidebar-search-icon"></i>
       </div>
       <ul class="sidebar-nav">
-        <li><a href="#search" class="sidebar-link active" data-section="search"><i data-lucide="search" width="16" height="16"></i> Search</a></li>
+        <li><a href="#general" class="sidebar-link active" data-section="general"><i data-lucide="settings" width="16" height="16"></i> General</a></li>
+        <li><a href="#search" class="sidebar-link" data-section="search"><i data-lucide="search" width="16" height="16"></i> Search</a></li>
         <li><a href="#privacy" class="sidebar-link" data-section="privacy"><i data-lucide="shield" width="16" height="16"></i> Privacy &amp; Security</a></li>
         <li><a href="#permissions" class="sidebar-link" data-section="permissions"><i data-lucide="shield-check" width="16" height="16"></i> Permissions</a></li>
         <li><a href="#network" class="sidebar-link" data-section="network"><i data-lucide="globe" width="16" height="16"></i> Network</a></li>
@@ -27,8 +28,28 @@
     <div class="settings-content-wrapper">
     <main class="settings-content" id="settings-content">
 
+      <!-- ====== GENERAL SECTION ====== -->
+      <section id="section-general" class="settings-section active" data-keywords="general downloads download location folder path save directory">
+        <h2 class="section-title">General</h2>
+
+        <!-- Downloads Location -->
+        <div class="setting-group">
+          <label class="setting-label">Downloads Location</label>
+          <p class="setting-description">Choose where downloaded files are saved.</p>
+          <div class="setting-action-row">
+            <div style="min-width: 0; flex: 1;">
+              <span id="download-path-display" class="setting-description" style="margin: 0; word-break: break-all;"></span>
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn btn-sm btn-secondary" id="change-download-path-btn"><i data-lucide="folder" width="14" height="14"></i> Change</button>
+              <button class="btn btn-sm btn-ghost" id="reset-download-path-btn"><i data-lucide="rotate-ccw" width="14" height="14"></i> Reset</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- ====== SEARCH SECTION ====== -->
-      <section id="section-search" class="settings-section active" data-keywords="search engine default query url bar duckduckgo google bing brave startpage ecosia custom suggestions">
+      <section id="section-search" class="settings-section" data-keywords="search engine default query url bar duckduckgo google bing brave startpage ecosia custom suggestions">
         <h2 class="section-title">Search</h2>
 
         <!-- Default Search Engine -->

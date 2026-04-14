@@ -14,18 +14,22 @@ const modKey = isMac ? 'Cmd' : 'Ctrl';
 // ---- Init ----
 document.addEventListener('DOMContentLoaded', async () => {
   await loadSettings();
-  initSidebarNavigation();
-  initSearchSettings();
-  initCookieSettings();
-  initAdBlockerSettings();
-  initPopupSettings();
-  initDataRetentionSettings();
-  initUserAgentSettings();
-  initNetworkSettings();
-  initKeyboardShortcuts();
-  initPermissionsSettings();
-  initDeveloperSettings();
-  initSettingsSearch();
+  const safeInit = (fn: () => void, name: string) => {
+    try { fn(); } catch (e) { console.error(`Failed to init ${name}:`, e); }
+  };
+  safeInit(initSidebarNavigation, 'sidebar');
+  safeInit(initGeneralSettings, 'general');
+  safeInit(initSearchSettings, 'search');
+  safeInit(initCookieSettings, 'cookies');
+  safeInit(initAdBlockerSettings, 'adblocker');
+  safeInit(initPopupSettings, 'popups');
+  safeInit(initDataRetentionSettings, 'data-retention');
+  safeInit(initUserAgentSettings, 'user-agent');
+  safeInit(initNetworkSettings, 'network');
+  safeInit(initKeyboardShortcuts, 'shortcuts');
+  safeInit(initPermissionsSettings, 'permissions');
+  safeInit(initDeveloperSettings, 'developer');
+  safeInit(initSettingsSearch, 'search-bar');
   createIcons({ icons });
 });
 
@@ -63,7 +67,7 @@ function initSidebarNavigation() {
     });
   });
   // Activate first section
-  activateSection('search');
+  activateSection('general');
 }
 
 function activateSection(sectionId: string) {
@@ -116,6 +120,38 @@ function initSettingsSearch() {
         section.classList.remove('active');
       }
     });
+  });
+}
+
+// ---- General Settings ----
+function initGeneralSettings() {
+  const pathDisplay = document.getElementById('download-path-display');
+  const changeBtn = document.getElementById('change-download-path-btn');
+  const resetBtn = document.getElementById('reset-download-path-btn');
+
+  function updatePathDisplay() {
+    if (pathDisplay) {
+      pathDisplay.textContent = settings.downloadPath || 'Default downloads folder';
+    }
+  }
+
+  updatePathDisplay();
+
+  changeBtn?.addEventListener('click', async () => {
+    const folder = await (window as any).BrowserAPI.selectDownloadFolder();
+    if (folder) {
+      settings.downloadPath = folder;
+      saveSettings();
+      updatePathDisplay();
+      showToast('Downloads location updated');
+    }
+  });
+
+  resetBtn?.addEventListener('click', () => {
+    settings.downloadPath = '';
+    saveSettings();
+    updatePathDisplay();
+    showToast('Downloads location reset to default');
   });
 }
 
@@ -666,7 +702,8 @@ function initUserAgentSettings() {
   const preview = document.getElementById('ua-preview');
 
   // Set initial values
-  const defaultPreset = process.platform === 'darwin' ? 'chrome-mac' : process.platform === 'linux' ? 'chrome-linux' : 'chrome-windows';
+  const platform = (window as any).DataStoreAPI?.platform;
+  const defaultPreset = platform === 'darwin' ? 'chrome-mac' : platform === 'linux' ? 'chrome-linux' : 'chrome-windows';
   select.value = settings.userAgentPreset || defaultPreset;
   customInput.value = settings.userAgentCustomValue || '';
   customContainer.style.display = select.value === 'custom' ? '' : 'none';
