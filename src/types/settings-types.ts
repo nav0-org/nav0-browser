@@ -30,6 +30,9 @@ export interface KeyboardShortcutAction {
 export interface BrowserSettings {
   settings_version: number;
 
+  // General
+  downloadPath: string;
+
   // Startup
   startupMode: 'new-tab' | 'continue' | 'specific-pages';
   startupPages: string[];
@@ -232,8 +235,11 @@ export const DEFAULT_KEYBOARD_SHORTCUTS: KeyboardShortcutAction[] = [
 export const DEFAULT_BROWSER_SETTINGS: BrowserSettings = {
   settings_version: 1,
 
+  // General - Downloads (empty string = OS default)
+  downloadPath: '',
+
   // Startup
-  startupMode: 'new-tab',
+  startupMode: 'continue',
   startupPages: [],
 
   // Search - DuckDuckGo as default (privacy-aligned)

@@ -516,7 +516,13 @@ export class Tab {
   }
 
   async handleDownload(item: Electron.DownloadItem): Promise<void> {
-    const downloadPath = app.getPath('downloads') + '/' + item.getFilename();
+    const storedSettings = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as BrowserSettings;
+    const s = { ...DEFAULT_BROWSER_SETTINGS, ...storedSettings };
+    let downloadDir = s.downloadPath || app.getPath('downloads');
+    if (s.downloadPath && !fs.existsSync(s.downloadPath)) {
+      downloadDir = app.getPath('downloads');
+    }
+    const downloadPath = path.join(downloadDir, item.getFilename());
     const downloadId = item.getStartTime().toString() + '_' + item.getFilename();
 
     // Prevent duplicate handling when multiple tabs share the same session

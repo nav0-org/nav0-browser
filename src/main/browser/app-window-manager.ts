@@ -87,23 +87,24 @@ export abstract class AppWindowManager {
         }
       }
     );
-    const storedSettings = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as BrowserSettings | undefined;
-    const startupMode = storedSettings?.startupMode || 'new-tab';
+    const stored = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as Partial<BrowserSettings> | undefined;
+    const startupSettings: BrowserSettings = { ...DEFAULT_BROWSER_SETTINGS, ...stored };
+    const startupMode = startupSettings.startupMode;
 
     if (startupMode === 'continue') {
       const sessionRestored = await SessionManager.restoreSession();
       if (!sessionRestored) {
         AppWindowManager.createWindow();
       }
-    } else if (startupMode === 'specific-pages' && storedSettings?.startupPages?.length > 0) {
+    } else if (startupMode === 'specific-pages' && startupSettings.startupPages.length > 0) {
       const win = AppWindowManager.createWindow(false);
       await win.whenReady();
       const defaultTabs = win.getTabs();
       if (defaultTabs.length > 0) {
-        defaultTabs[0].navigate(storedSettings.startupPages[0]);
+        defaultTabs[0].navigate(startupSettings.startupPages[0]);
       }
-      for (let i = 1; i < storedSettings.startupPages.length; i++) {
-        await win.createTab(storedSettings.startupPages[i], false);
+      for (let i = 1; i < startupSettings.startupPages.length; i++) {
+        await win.createTab(startupSettings.startupPages[i], false);
       }
       const allTabs = win.getTabs();
       if (allTabs.length > 0) {
@@ -981,6 +982,20 @@ export abstract class AppWindowManager {
       const fileUrl = `file://${filePath}`;
       await window.createTab(fileUrl, true);
       return fileUrl;
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.SELECT_DOWNLOAD_FOLDER, async () => {
+      const window = AppWindowManager.getActiveWindow();
+      if (!window) return null;
+
+      const result = await dialog.showOpenDialog(window.getBrowserWindowInstance(), {
+        properties: ['openDirectory'],
+        title: 'Select Downloads Folder',
+        defaultPath: app.getPath('downloads'),
+      });
+
+      if (result.canceled || result.filePaths.length === 0) return null;
+      return result.filePaths[0];
     });
 
   }

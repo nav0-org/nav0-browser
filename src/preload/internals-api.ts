@@ -96,6 +96,9 @@ export function init(){
     showItemInFolder: async (filePath: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.SHOW_ITEM_IN_FOLDER, filePath);
     },
+    selectDownloadFolder: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.SELECT_DOWNLOAD_FOLDER);
+    },
     removeBrowsingHistory: async (appWindowId: string, historyId: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.REMOVE_BROWSING_HISTORY, appWindowId, historyId);
     },
@@ -338,6 +341,9 @@ export function init(){
     },
     clearAllPermissions: async () => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.CLEAR_ALL_PERMISSIONS);
+    },
+    updatePermissionDecision: async (permissionId: string, decision: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.UPDATE_PERMISSION_DECISION, permissionId, decision);
     },
 
     // Issue report
