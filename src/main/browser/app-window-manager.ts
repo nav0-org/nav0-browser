@@ -91,6 +91,12 @@ export abstract class AppWindowManager {
     const startupSettings: BrowserSettings = { ...DEFAULT_BROWSER_SETTINGS, ...stored };
     const startupMode = startupSettings.startupMode;
 
+    // Register IPC handlers before any BrowserWindow is created so renderer
+    // processes (which invoke handlers like UPDATE_BROWSER_VIEW_BOUNDS on
+    // DOMContentLoaded) cannot race ahead of handler registration while this
+    // method awaits session restoration or window readiness below.
+    AppWindowManager.initIPCHandlers();
+
     if (startupMode === 'continue') {
       const sessionRestored = await SessionManager.restoreSession();
       if (!sessionRestored) {
@@ -113,7 +119,6 @@ export abstract class AppWindowManager {
     } else {
       AppWindowManager.createWindow();
     }
-    AppWindowManager.initIPCHandlers();
     AppMenuManager.init();
     AppWindowManager.startHibernationChecker();
     SessionManager.startPeriodicSave();
