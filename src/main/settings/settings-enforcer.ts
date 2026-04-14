@@ -17,7 +17,21 @@ export abstract class SettingsEnforcer {
     SettingsEnforcer.applyUserAgent(settings);
     SettingsEnforcer.applyAdBlocker(settings);
     SettingsEnforcer.startAutoDeleteScheduler(settings);
+    SettingsEnforcer.applyDevToolsPolicy(settings);
     SettingsEnforcer.runStartupCleanup(settings);
+  }
+
+  // ---- DevTools Policy ----
+  // When devtools is disabled, close any open devtools across all webContents.
+  private static applyDevToolsPolicy(settings: BrowserSettings) {
+    if (settings.devToolsEnabled) return;
+    for (const wc of webContents.getAllWebContents()) {
+      try {
+        if (wc.isDevToolsOpened()) {
+          wc.closeDevTools();
+        }
+      } catch { /* ignore */ }
+    }
   }
 
   private static getSettings(): BrowserSettings {
@@ -33,6 +47,7 @@ export abstract class SettingsEnforcer {
       SettingsEnforcer.applyUserAgent(settings);
       SettingsEnforcer.applyAdBlocker(settings);
       SettingsEnforcer.startAutoDeleteScheduler(settings);
+      SettingsEnforcer.applyDevToolsPolicy(settings);
       return true;
     });
 

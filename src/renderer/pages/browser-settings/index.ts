@@ -14,18 +14,22 @@ const modKey = isMac ? 'Cmd' : 'Ctrl';
 // ---- Init ----
 document.addEventListener('DOMContentLoaded', async () => {
   await loadSettings();
-  initSidebarNavigation();
-  initSearchSettings();
-  initCookieSettings();
-  initAdBlockerSettings();
-  initPopupSettings();
-  initDataRetentionSettings();
-  initUserAgentSettings();
-  initNetworkSettings();
-  initKeyboardShortcuts();
-  initDeveloperSettings();
-  initGraphicsSettings();
-  initSettingsSearch();
+  const safeInit = (fn: () => void, name: string) => {
+    try { fn(); } catch (e) { console.error(`Failed to init ${name}:`, e); }
+  };
+  safeInit(initSidebarNavigation, 'sidebar');
+  safeInit(initGeneralSettings, 'general');
+  safeInit(initSearchSettings, 'search');
+  safeInit(initCookieSettings, 'cookies');
+  safeInit(initAdBlockerSettings, 'adblocker');
+  safeInit(initPopupSettings, 'popups');
+  safeInit(initDataRetentionSettings, 'data-retention');
+  safeInit(initUserAgentSettings, 'user-agent');
+  safeInit(initNetworkSettings, 'network');
+  safeInit(initKeyboardShortcuts, 'shortcuts');
+  safeInit(initDeveloperSettings, 'developer');
+  safeInit(initGraphicsSettings, 'graphics');
+  safeInit(initSettingsSearch, 'search-bar');
   createIcons({ icons });
 });
 
@@ -63,7 +67,7 @@ function initSidebarNavigation() {
     });
   });
   // Activate first section
-  activateSection('search');
+  activateSection('general');
 }
 
 function activateSection(sectionId: string) {
@@ -134,6 +138,38 @@ function initSettingsSearch() {
         section.classList.remove('active');
       }
     });
+  });
+}
+
+// ---- General Settings ----
+function initGeneralSettings() {
+  const pathDisplay = document.getElementById('download-path-display');
+  const changeBtn = document.getElementById('change-download-path-btn');
+  const resetBtn = document.getElementById('reset-download-path-btn');
+
+  function updatePathDisplay() {
+    if (pathDisplay) {
+      pathDisplay.textContent = settings.downloadPath || 'Default downloads folder';
+    }
+  }
+
+  updatePathDisplay();
+
+  changeBtn?.addEventListener('click', async () => {
+    const folder = await (window as any).BrowserAPI.selectDownloadFolder();
+    if (folder) {
+      settings.downloadPath = folder;
+      saveSettings();
+      updatePathDisplay();
+      showToast('Downloads location updated');
+    }
+  });
+
+  resetBtn?.addEventListener('click', () => {
+    settings.downloadPath = '';
+    saveSettings();
+    updatePathDisplay();
+    showToast('Downloads location reset to default');
   });
 }
 
