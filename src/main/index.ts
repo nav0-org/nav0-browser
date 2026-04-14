@@ -20,14 +20,8 @@ app.commandLine.appendSwitch('disable-features', [
 // because app.disableHardwareAcceleration() must be called before any BrowserWindow is created.
 const earlySettingsStore = new Store({ name: 'browser-settings' });
 const earlySettings = earlySettingsStore.get('default') as any;
-console.log('[HW-ACCEL] early store path:', (earlySettingsStore as any).path);
-console.log('[HW-ACCEL] early settings:', earlySettings);
-console.log('[HW-ACCEL] hardwareAccelerationEnabled:', earlySettings?.hardwareAccelerationEnabled);
 if (earlySettings && earlySettings.hardwareAccelerationEnabled === false) {
-  console.log('[HW-ACCEL] Calling app.disableHardwareAcceleration()');
   app.disableHardwareAcceleration();
-} else {
-  console.log('[HW-ACCEL] Hardware acceleration remains enabled');
 }
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling

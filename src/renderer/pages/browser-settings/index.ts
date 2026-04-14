@@ -684,7 +684,8 @@ function initUserAgentSettings() {
   const preview = document.getElementById('ua-preview');
 
   // Set initial values
-  const defaultPreset = process.platform === 'darwin' ? 'chrome-mac' : process.platform === 'linux' ? 'chrome-linux' : 'chrome-windows';
+  const platform = (window as any).DataStoreAPI?.platform;
+  const defaultPreset = platform === 'darwin' ? 'chrome-mac' : platform === 'linux' ? 'chrome-linux' : 'chrome-windows';
   select.value = settings.userAgentPreset || defaultPreset;
   customInput.value = settings.userAgentCustomValue || '';
   customContainer.style.display = select.value === 'custom' ? '' : 'none';
