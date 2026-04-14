@@ -380,7 +380,16 @@ export function init(container: HTMLElement): void {
 }
 
 export function show(_data?: any): void {
-  // Nothing special needed on show - the dropdown is already rendered
+  // Hide the Developer Tools option when devtools is disabled in settings.
+  window.DataStoreAPI.get('browser-settings').then((stored: unknown) => {
+    const devToolsEnabled = stored && typeof stored === 'object' && 'devToolsEnabled' in stored
+      ? !!(stored as { devToolsEnabled?: boolean }).devToolsEnabled
+      : true;
+    const devtoolsItem = containerEl?.querySelector('#om-devtools-option') as HTMLElement | null;
+    if (devtoolsItem) {
+      devtoolsItem.style.display = devToolsEnabled ? '' : 'none';
+    }
+  }).catch(() => { /* ignore */ });
 }
 
 export function hide(): void {

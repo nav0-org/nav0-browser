@@ -14,18 +14,21 @@ const modKey = isMac ? 'Cmd' : 'Ctrl';
 // ---- Init ----
 document.addEventListener('DOMContentLoaded', async () => {
   await loadSettings();
-  initSidebarNavigation();
-  initGeneralSettings();
-  initSearchSettings();
-  initCookieSettings();
-  initAdBlockerSettings();
-  initPopupSettings();
-  initDataRetentionSettings();
-  initUserAgentSettings();
-  initNetworkSettings();
-  initKeyboardShortcuts();
-  initDeveloperSettings();
-  initSettingsSearch();
+  const safeInit = (fn: () => void, name: string) => {
+    try { fn(); } catch (e) { console.error(`Failed to init ${name}:`, e); }
+  };
+  safeInit(initSidebarNavigation, 'sidebar');
+  safeInit(initGeneralSettings, 'general');
+  safeInit(initSearchSettings, 'search');
+  safeInit(initCookieSettings, 'cookies');
+  safeInit(initAdBlockerSettings, 'adblocker');
+  safeInit(initPopupSettings, 'popups');
+  safeInit(initDataRetentionSettings, 'data-retention');
+  safeInit(initUserAgentSettings, 'user-agent');
+  safeInit(initNetworkSettings, 'network');
+  safeInit(initKeyboardShortcuts, 'shortcuts');
+  safeInit(initDeveloperSettings, 'developer');
+  safeInit(initSettingsSearch, 'search-bar');
   createIcons({ icons });
 });
 
@@ -697,7 +700,8 @@ function initUserAgentSettings() {
   const preview = document.getElementById('ua-preview');
 
   // Set initial values
-  const defaultPreset = process.platform === 'darwin' ? 'chrome-mac' : process.platform === 'linux' ? 'chrome-linux' : 'chrome-windows';
+  const platform = (window as any).DataStoreAPI?.platform;
+  const defaultPreset = platform === 'darwin' ? 'chrome-mac' : platform === 'linux' ? 'chrome-linux' : 'chrome-windows';
   select.value = settings.userAgentPreset || defaultPreset;
   customInput.value = settings.userAgentCustomValue || '';
   customContainer.style.display = select.value === 'custom' ? '' : 'none';
