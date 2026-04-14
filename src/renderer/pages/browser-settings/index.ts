@@ -1042,8 +1042,20 @@ async function initPermissionsSettings() {
 }
 
 async function loadAndRenderPermissions(searchTerm?: string) {
-  const permissions: PermissionRecord[] = await (window as any).BrowserAPI.fetchPermissions(searchTerm || '');
-  renderPermissions(permissions);
+  try {
+    const api = (window as any).BrowserAPI;
+    if (!api || typeof api.fetchPermissions !== 'function') {
+      console.error('[permissions] BrowserAPI.fetchPermissions is unavailable', { hasApi: !!api });
+      renderPermissions([]);
+      return;
+    }
+    const permissions = await api.fetchPermissions(searchTerm || '');
+    console.log('[permissions] fetched', { count: permissions?.length ?? 0, searchTerm, sample: permissions?.[0] });
+    renderPermissions(Array.isArray(permissions) ? permissions : []);
+  } catch (err) {
+    console.error('[permissions] fetch failed', err);
+    renderPermissions([]);
+  }
 }
 
 function renderPermissions(permissions: PermissionRecord[]) {
