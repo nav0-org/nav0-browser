@@ -15,6 +15,7 @@
       </div>
       <ul class="sidebar-nav">
         <li><a href="#general" class="sidebar-link active" data-section="general"><i data-lucide="settings" width="16" height="16"></i> General</a></li>
+        <li><a href="#startup" class="sidebar-link" data-section="startup"><i data-lucide="play" width="16" height="16"></i> On startup</a></li>
         <li><a href="#search" class="sidebar-link" data-section="search"><i data-lucide="search" width="16" height="16"></i> Search</a></li>
         <li><a href="#privacy" class="sidebar-link" data-section="privacy"><i data-lucide="shield" width="16" height="16"></i> Privacy &amp; Security</a></li>
         <li><a href="#permissions" class="sidebar-link" data-section="permissions"><i data-lucide="shield-check" width="16" height="16"></i> Permissions</a></li>
@@ -43,6 +44,42 @@
             <div style="display: flex; gap: 6px;">
               <button class="btn btn-sm btn-secondary" id="change-download-path-btn"><i data-lucide="folder" width="14" height="14"></i> Change</button>
               <button class="btn btn-sm btn-ghost" id="reset-download-path-btn"><i data-lucide="rotate-ccw" width="14" height="14"></i> Reset</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== ON STARTUP SECTION ====== -->
+      <section id="section-startup" class="settings-section" data-keywords="startup launch open start page continue session restore tabs">
+        <h2 class="section-title">On startup</h2>
+
+        <div class="setting-group">
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="startup-mode" value="new-tab">
+              <span class="radio-label">Open the New tab page</span>
+              <span class="radio-description">Start with a fresh new tab every time.</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="startup-mode" value="continue" checked>
+              <span class="radio-label">Continue where you left off</span>
+              <span class="radio-description">Restore tabs from your previous browsing session.</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="startup-mode" value="specific-pages">
+              <span class="radio-label">Open a specific page or set of pages</span>
+              <span class="radio-description">Choose which pages open when the browser starts.</span>
+            </label>
+          </div>
+
+          <!-- Startup Pages List (shown when 'specific-pages' is selected) -->
+          <div id="startup-pages-container" class="sub-setting" style="display: none;">
+            <label class="setting-label">Startup Pages</label>
+            <p class="setting-description">These pages will open as tabs when you start the browser.</p>
+            <div id="startup-pages-list" class="items-list"></div>
+            <div class="add-item-form">
+              <input type="text" id="startup-page-input" class="form-input" placeholder="e.g., https://example.com">
+              <button class="btn btn-sm btn-secondary" id="add-startup-page-btn"><i data-lucide="plus" width="14" height="14"></i> Add Page</button>
             </div>
           </div>
         </div>

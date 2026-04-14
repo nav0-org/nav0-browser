@@ -87,8 +87,30 @@ export abstract class AppWindowManager {
         }
       }
     );
-    const sessionRestored = await SessionManager.restoreSession();
-    if (!sessionRestored) {
+    const stored = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as Partial<BrowserSettings> | undefined;
+    const startupSettings: BrowserSettings = { ...DEFAULT_BROWSER_SETTINGS, ...stored };
+    const startupMode = startupSettings.startupMode;
+
+    if (startupMode === 'continue') {
+      const sessionRestored = await SessionManager.restoreSession();
+      if (!sessionRestored) {
+        AppWindowManager.createWindow();
+      }
+    } else if (startupMode === 'specific-pages' && startupSettings.startupPages.length > 0) {
+      const win = AppWindowManager.createWindow(false);
+      await win.whenReady();
+      const defaultTabs = win.getTabs();
+      if (defaultTabs.length > 0) {
+        defaultTabs[0].navigate(startupSettings.startupPages[0]);
+      }
+      for (let i = 1; i < startupSettings.startupPages.length; i++) {
+        await win.createTab(startupSettings.startupPages[i], false);
+      }
+      const allTabs = win.getTabs();
+      if (allTabs.length > 0) {
+        win.activateTab(allTabs[0].getId());
+      }
+    } else {
       AppWindowManager.createWindow();
     }
     AppWindowManager.initIPCHandlers();

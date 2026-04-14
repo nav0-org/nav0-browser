@@ -33,6 +33,10 @@ export interface BrowserSettings {
   // General
   downloadPath: string;
 
+  // Startup
+  startupMode: 'new-tab' | 'continue' | 'specific-pages';
+  startupPages: string[];
+
   // Search
   primarySearchEngine: string;
   customSearchEngines: SearchEngineConfig[];
@@ -233,6 +237,10 @@ export const DEFAULT_BROWSER_SETTINGS: BrowserSettings = {
 
   // General - Downloads (empty string = OS default)
   downloadPath: '',
+
+  // Startup
+  startupMode: 'continue',
+  startupPages: [],
 
   // Search - DuckDuckGo as default (privacy-aligned)
   primarySearchEngine: 'Google',

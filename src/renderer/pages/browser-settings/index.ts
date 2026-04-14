@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
   safeInit(initSidebarNavigation, 'sidebar');
   safeInit(initGeneralSettings, 'general');
+  safeInit(initStartupSettings, 'startup');
   safeInit(initSearchSettings, 'search');
   safeInit(initCookieSettings, 'cookies');
   safeInit(initAdBlockerSettings, 'adblocker');
@@ -78,6 +79,85 @@ function activateSection(sectionId: string) {
   if (section) section.classList.add('active');
   if (link) link.classList.add('active');
   document.dispatchEvent(new CustomEvent('settings-section-activated', { detail: { sectionId } }));
+}
+
+// ---- Startup Settings ----
+function initStartupSettings() {
+  const radios = document.querySelectorAll('input[name="startup-mode"]') as NodeListOf<HTMLInputElement>;
+  const pagesContainer = document.getElementById('startup-pages-container');
+
+  // Set initial state from saved settings
+  radios.forEach(r => { if (r.value === (settings.startupMode || 'continue')) r.checked = true; });
+  if (pagesContainer) {
+    pagesContainer.style.display = settings.startupMode === 'specific-pages' ? '' : 'none';
+  }
+
+  // Radio change handler
+  radios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      settings.startupMode = radio.value as BrowserSettings['startupMode'];
+      if (pagesContainer) {
+        pagesContainer.style.display = radio.value === 'specific-pages' ? '' : 'none';
+      }
+      saveSettings();
+      showToast('Startup setting updated');
+    });
+  });
+
+  // Render startup pages list
+  renderStartupPages();
+
+  // Add page button
+  document.getElementById('add-startup-page-btn')?.addEventListener('click', () => {
+    const input = document.getElementById('startup-page-input') as HTMLInputElement;
+    let url = input.value.trim();
+    if (!url) return;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+    try {
+      new URL(url);
+    } catch {
+      showToast('Please enter a valid URL');
+      return;
+    }
+    if (!settings.startupPages) settings.startupPages = [];
+    settings.startupPages.push(url);
+    saveSettings();
+    input.value = '';
+    renderStartupPages();
+    showToast('Startup page added');
+  });
+}
+
+function renderStartupPages() {
+  const container = document.getElementById('startup-pages-list');
+  if (!container) return;
+  container.innerHTML = '';
+
+  (settings.startupPages || []).forEach((url, idx) => {
+    const item = document.createElement('div');
+    item.className = 'list-item';
+    item.innerHTML = `
+      <div class="list-item-content">
+        <div class="list-item-text">${url}</div>
+      </div>
+      <div class="list-item-actions">
+        <button class="list-item-btn" data-idx="${idx}" title="Remove">
+          <i data-lucide="x" width="14" height="14"></i>
+        </button>
+      </div>
+    `;
+    item.querySelector('.list-item-btn')?.addEventListener('click', () => {
+      settings.startupPages.splice(idx, 1);
+      saveSettings();
+      renderStartupPages();
+      showToast('Startup page removed');
+    });
+    container.appendChild(item);
+  });
+
+  createIcons({ icons });
 }
 
 // ---- Developer Settings ----
