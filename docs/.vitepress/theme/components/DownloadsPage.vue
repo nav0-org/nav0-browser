@@ -20,6 +20,32 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+const copied = ref(false)
+const macCommand = 'curl -fsSL https://raw.githubusercontent.com/nav0-org/nav0-browser/main/install.sh | bash'
+
+async function copyMacCommand() {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(macCommand)
+    } else {
+      // Fallback for older browsers / non-secure contexts
+      const ta = document.createElement('textarea')
+      ta.value = macCommand
+      ta.setAttribute('readonly', '')
+      ta.style.position = 'absolute'
+      ta.style.left = '-9999px'
+      document.body.appendChild(ta)
+      ta.select()
+      document.execCommand('copy')
+      document.body.removeChild(ta)
+    }
+    copied.value = true
+    setTimeout(() => { copied.value = false }, 1500)
+  } catch {
+    // Silently fail — no telemetry/logging per Nav0 privacy principles
+  }
+}
 </script>
 
 <template>
@@ -35,8 +61,27 @@ onMounted(async () => {
     <div class="install-section">
       <h2>macOS</h2>
       <p>Run this command in Terminal to install Nav0:</p>
-      <div class="code-block">
-        <code>curl -fsSL https://raw.githubusercontent.com/nav0-org/nav0-browser/main/install.sh | bash</code>
+      <div class="code-block code-block--with-copy">
+        <code>{{ macCommand }}</code>
+        <button
+          class="copy-btn"
+          type="button"
+          :aria-label="copied ? 'Copied' : 'Copy command'"
+          :title="copied ? 'Copied' : 'Copy command'"
+          @click="copyMacCommand"
+        >
+          <svg v-if="!copied" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               aria-hidden="true">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               aria-hidden="true">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </button>
       </div>
       <p class="install-note">
         Downloads the latest release, installs to /Applications, and handles macOS Gatekeeper automatically.
@@ -157,6 +202,40 @@ onMounted(async () => {
   color: var(--vp-c-text-1);
   background: none;
   padding: 0;
+}
+
+.code-block--with-copy {
+  position: relative;
+  padding-right: 3rem;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--vp-c-text-2);
+  cursor: pointer;
+  transition: color 0.2s, background-color 0.2s, border-color 0.2s;
+}
+
+.copy-btn:hover {
+  color: var(--vp-c-text-1);
+  background: var(--vp-c-bg-mute);
+  border-color: var(--vp-c-divider);
+}
+
+.copy-btn:focus-visible {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: 2px;
 }
 
 .install-note {
