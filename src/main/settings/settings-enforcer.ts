@@ -2,7 +2,7 @@ import { session, ipcMain, app, webContents } from "electron";
 import { DataStoreConstants, RendererToMainEventsForBrowserIPC, MULTI_PART_TLDS } from "../../constants/app-constants";
 import { DataStoreManager } from "../database/data-store-manager";
 import { DatabaseManager } from "../database/database-manager";
-import { BrowserSettings, DEFAULT_BROWSER_SETTINGS, USER_AGENT_PRESETS } from "../../types/settings-types";
+import { BrowserSettings, ClientHintValues, DEFAULT_BROWSER_SETTINGS, USER_AGENT_CLIENT_HINTS, USER_AGENT_PRESETS } from "../../types/settings-types";
 import { AD_BLOCK_DOMAINS, AD_URL_PATTERNS } from "../ad-blocker/ad-block-lists";
 
 export abstract class SettingsEnforcer {
@@ -78,8 +78,9 @@ export abstract class SettingsEnforcer {
   // ---- Request Header Policy ----
   // Installs a single onBeforeSendHeaders listener per browsing/private session
   // that handles:
-  //   - Cookie stripping when blockAllCookies is on (browsing session only,
-  //     matching pre-existing behavior).
+  //   - Cookie stripping when blockAllCookies is on.
+  //   - User-Agent Client Hints rewriting so spoofed UA strings stay consistent
+  //     with the Sec-CH-UA* headers Chromium auto-sends.
   //   - A per-request User-Agent override to a Firefox string for
   //     accounts.google.com, which sidesteps Google's Chromium/Electron
   //     embedded-browser block. (Technique borrowed from Min browser:
@@ -87,24 +88,20 @@ export abstract class SettingsEnforcer {
   private static applyRequestHeaderPolicy(settings: BrowserSettings) {
     const browsingSes = session.fromPartition('persist:browsertabs');
     const privateSes = session.fromPartition('persist:private');
+    const clientHints = SettingsEnforcer.resolveClientHintsForSettings(settings);
     const stripCookies = settings.blockAllCookies;
     const preset = SettingsEnforcer.resolveUserAgentPreset(settings);
     // Respect an explicit custom UA — don't override it for Google sign-in.
     const hasCustomUserAgent = preset === 'custom' && !!settings.userAgentCustomValue;
 
-    const sessionsWithCookieStripping: Array<[Electron.Session, boolean]> = [
-      [browsingSes, true],
-      [privateSes, false],
-    ];
-
-    for (const [ses, allowCookieStripping] of sessionsWithCookieStripping) {
+    for (const ses of [browsingSes, privateSes]) {
       // Clear any previous listener; Electron only allows one per session.
       ses.webRequest.onBeforeSendHeaders(null);
 
       ses.webRequest.onBeforeSendHeaders((details, callback) => {
         const headers = { ...details.requestHeaders };
 
-        if (allowCookieStripping && stripCookies) {
+        if (stripCookies) {
           delete headers['Cookie'];
           delete headers['cookie'];
         }
@@ -127,6 +124,26 @@ export abstract class SettingsEnforcer {
               delete headers[key];
             }
           }
+        } else if (clientHints === null) {
+          // Non-Chromium preset (Firefox/Safari/custom): strip all sec-ch-ua*
+          // headers so the request shape matches what those browsers send.
+          for (const key of Object.keys(headers)) {
+            if (key.toLowerCase().startsWith('sec-ch-ua')) {
+              delete headers[key];
+            }
+          }
+        } else if (clientHints) {
+          // Chromium preset: overwrite the low-entropy Client Hints so the
+          // brand list and platform match the spoofed UA string.
+          for (const key of Object.keys(headers)) {
+            const lk = key.toLowerCase();
+            if (lk === 'sec-ch-ua' || lk === 'sec-ch-ua-mobile' || lk === 'sec-ch-ua-platform') {
+              delete headers[key];
+            }
+          }
+          headers['sec-ch-ua'] = clientHints['sec-ch-ua'];
+          headers['sec-ch-ua-mobile'] = clientHints['sec-ch-ua-mobile'];
+          headers['sec-ch-ua-platform'] = clientHints['sec-ch-ua-platform'];
         }
 
         callback({ requestHeaders: headers });
@@ -274,6 +291,15 @@ export abstract class SettingsEnforcer {
     return settings.userAgentPreset || (process.platform === 'darwin' ? 'chrome-mac' : process.platform === 'linux' ? 'chrome-linux' : 'chrome-windows');
   }
 
+  // Returns the Client Hints values to apply, or `undefined` to mean "leave
+  // the request headers alone" (no preset matched / custom UA without a value).
+  private static resolveClientHintsForSettings(settings: BrowserSettings): ClientHintValues | undefined {
+    const preset = SettingsEnforcer.resolveUserAgentPreset(settings);
+    if (preset === 'custom' && !settings.userAgentCustomValue) return undefined;
+    if (!(preset in USER_AGENT_CLIENT_HINTS)) return undefined;
+    return USER_AGENT_CLIENT_HINTS[preset];
+  }
+
   private static applyUserAgent(settings: BrowserSettings) {
     const browsingSes = session.fromPartition('persist:browsertabs');
     const privateSes = session.fromPartition('persist:private');
@@ -301,6 +327,10 @@ export abstract class SettingsEnforcer {
         wc.setUserAgent(userAgent);
       }
     }
+
+    // Re-install the request header listener so Client Hints stay aligned with
+    // the freshly-applied User-Agent preset.
+    SettingsEnforcer.applyRequestHeaderPolicy(settings);
   }
 
   // ---- Ad-Blocker ----

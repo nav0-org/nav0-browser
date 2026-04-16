@@ -208,6 +208,46 @@ export const USER_AGENT_PRESETS: Record<string, { label: string; value: string }
   },
 };
 
+// User Agent Client Hints (low-entropy) that must stay consistent with the
+// spoofed User-Agent string. Chromium-based browsers auto-send these headers
+// on every request, so if the UA string claims Chrome but the Client Hints
+// still identify Electron, sites like Google block sign-in. For non-Chromium
+// presets (Firefox/Safari), the value is null — we strip the headers because
+// those browsers do not send them.
+export type ClientHintValues = {
+  'sec-ch-ua': string;
+  'sec-ch-ua-mobile': string;   // '?0' (desktop) or '?1' (mobile)
+  'sec-ch-ua-platform': string; // quoted token, e.g. '"macOS"'
+} | null;
+
+export const USER_AGENT_CLIENT_HINTS: Record<string, ClientHintValues> = {
+  'chrome-windows': {
+    'sec-ch-ua': '"Chromium";v="136", "Google Chrome";v="136", "Not.A/Brand";v="99"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"Windows"',
+  },
+  'chrome-mac': {
+    'sec-ch-ua': '"Chromium";v="136", "Google Chrome";v="136", "Not.A/Brand";v="99"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"macOS"',
+  },
+  'chrome-linux': {
+    'sec-ch-ua': '"Chromium";v="136", "Google Chrome";v="136", "Not.A/Brand";v="99"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"Linux"',
+  },
+  'edge-windows': {
+    'sec-ch-ua': '"Microsoft Edge";v="136", "Chromium";v="136", "Not.A/Brand";v="99"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"Windows"',
+  },
+  'safari-mac': null,
+  'firefox-windows': null,
+  'firefox-mac': null,
+  'firefox-linux': null,
+  'custom': null,
+};
+
 export const DEFAULT_KEYBOARD_SHORTCUTS: KeyboardShortcutAction[] = [
   { id: 'new-tab', label: 'New Tab', category: 'Tabs', defaultShortcut: 'mod+T', currentShortcut: 'mod+T' },
   { id: 'close-tab', label: 'Close Tab', category: 'Tabs', defaultShortcut: 'mod+W', currentShortcut: 'mod+W' },
