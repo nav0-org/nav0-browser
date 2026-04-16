@@ -4,7 +4,7 @@ import { DataStoreManager } from "../database/data-store-manager";
 import { DatabaseManager } from "../database/database-manager";
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS, USER_AGENT_PRESETS } from "../../types/settings-types";
 import { AD_BLOCK_DOMAINS, AD_URL_PATTERNS } from "../ad-blocker/ad-block-lists";
-import { applyClientHints } from "../browser/ua-switcher";
+import { applyClientHints, alignUAWithRealChromeVersion } from "../browser/ua-switcher";
 
 export abstract class SettingsEnforcer {
   private static autoDeleteInterval: ReturnType<typeof setInterval> | null = null;
@@ -298,6 +298,15 @@ export abstract class SettingsEnforcer {
     } else {
       userAgent = USER_AGENT_PRESETS[preset]?.value || '';
       if (!userAgent) return;
+    }
+
+    // For built-in Chrome/Edge presets, substitute Electron's real Chromium
+    // major version into the UA so navigator.userAgent and the unchangeable
+    // navigator.userAgentData.brands agree. Turnstile checks both. See
+    // ua-switcher.ts:alignUAWithRealChromeVersion for the full rationale.
+    // (Custom UAs are user-authored and left untouched.)
+    if (preset !== 'custom') {
+      userAgent = alignUAWithRealChromeVersion(userAgent);
     }
 
     const acceptLanguages = 'en-US,en;q=0.9';

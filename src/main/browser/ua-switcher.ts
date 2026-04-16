@@ -107,3 +107,37 @@ export function applyClientHints(headers: Record<string, string | string[]>): vo
   headers["sec-ch-ua-mobile"] = "?0";
   headers["sec-ch-ua-platform"] = platformFromUA(ua);
 }
+
+/**
+ * Rewrite the `Chrome/x.y.z.w` (and, if present, `Edg/x.y.z.w`) token in a UA
+ * preset so its major/minor version matches Electron's ACTUAL Chromium
+ * version, with the remaining parts zeroed (Chrome UA-Reduction form).
+ *
+ * Why this is necessary: the nav0 UA presets hard-code a Chrome major like
+ * `Chrome/136.0.0.0`, but Electron ships its own Chromium (e.g. 134). If we
+ * call `session.setUserAgent()` with the preset verbatim, then:
+ *   - `navigator.userAgent` reports Chrome 136 (from our override)
+ *   - `navigator.userAgentData.brands` reports Chromium 134 (from Electron's
+ *     real Chromium — this is NOT changeable from the main process)
+ * Cloudflare Turnstile reads both JS APIs and flags the drift. By substituting
+ * Electron's real Chromium major into the preset string before calling
+ * `setUserAgent`, the UA string, userAgentData, and our SEC-CH-UA header all
+ * agree on the Chrome major version. Min Browser sidesteps this by never
+ * overriding the UA at all; we can't do that without losing the preset
+ * feature, so we align versions instead.
+ *
+ * Platform masquerading (e.g. "Chrome on macOS" from Windows) is preserved —
+ * only the Chrome version number changes.
+ *
+ * Pass-through for non-Chrome presets (Firefox / Safari): the regex simply
+ * doesn't match, and the UA is returned unchanged.
+ */
+export function alignUAWithRealChromeVersion(ua: string): string {
+  const chromeVersion = process.versions.chrome;
+  if (!ua || !chromeVersion) return ua;
+  const reduced = reduceChromeVersion(chromeVersion);
+  // Replaces "Chrome/<anything up to whitespace>" — same for Edg/.
+  return ua
+    .replace(/Chrome\/\S+/g, `Chrome/${reduced}`)
+    .replace(/Edg\/\S+/g, `Edg/${reduced}`);
+}
