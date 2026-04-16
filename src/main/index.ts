@@ -4,7 +4,14 @@ import { DataStoreManager } from './database/data-store-manager';
 import { DownloadManager } from './browser/download-manager';
 import { SessionManager } from './browser/session-manager';
 import { SettingsEnforcer } from './settings/settings-enforcer';
+import { configureUserAgentFallback } from './browser/ua-switcher';
 import { startTestControlServer } from './test-control-server';
+
+// Strip "Electron/..." and "nav0-browser/..." tokens from the default User-Agent
+// and zero Chrome minor-version numbers so sites that fingerprint the UA (e.g.
+// Cloudflare Turnstile) don't flag webContents we haven't explicitly configured.
+// Must run before any BrowserWindow / WebContentsView is created.
+configureUserAgentFallback();
 
 // Disable Chromium features that trigger macOS "Local Network" permission dialog.
 // These features use mDNS/Bonjour for device discovery, which is unnecessary for

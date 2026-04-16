@@ -4,6 +4,7 @@ import { DataStoreManager } from "../database/data-store-manager";
 import { DatabaseManager } from "../database/database-manager";
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS, USER_AGENT_PRESETS } from "../../types/settings-types";
 import { AD_BLOCK_DOMAINS, AD_URL_PATTERNS } from "../ad-blocker/ad-block-lists";
+import { applyClientHints } from "../browser/ua-switcher";
 
 export abstract class SettingsEnforcer {
   private static autoDeleteInterval: ReturnType<typeof setInterval> | null = null;
@@ -75,19 +76,36 @@ export abstract class SettingsEnforcer {
 
   // ---- Cookie Policy Enforcement ----
   private static applyCookiePolicy(settings: BrowserSettings) {
-    const ses = session.fromPartition('persist:browsertabs');
-    // Remove existing listeners to prevent duplicates
-    ses.webRequest.onBeforeSendHeaders(null);
-    ses.webRequest.onHeadersReceived(null);
+    const browsingSes = session.fromPartition('persist:browsertabs');
+    const privateSes = session.fromPartition('persist:private');
+
+    // Reset listeners on both partitions so we can reattach cleanly.
+    browsingSes.webRequest.onBeforeSendHeaders(null);
+    browsingSes.webRequest.onHeadersReceived(null);
+    privateSes.webRequest.onBeforeSendHeaders(null);
+    privateSes.webRequest.onHeadersReceived(null);
+
+    // Always attach onBeforeSendHeaders on both partitions so SEC-CH-UA
+    // client hints stay aligned with the configured User-Agent (see
+    // ua-switcher.ts). Cloudflare Turnstile cross-checks the two, so if
+    // they drift (because Chromium auto-populates SEC-CH-UA from its own
+    // version while we've overridden the UA) the challenge fails.
+    const makeBeforeSendHeaders = (stripCookie: boolean) => {
+      return (details: Electron.OnBeforeSendHeadersListenerDetails, callback: (response: Electron.BeforeSendResponse) => void) => {
+        const headers = { ...details.requestHeaders };
+        applyClientHints(headers);
+        if (stripCookie) {
+          delete headers['Cookie'];
+        }
+        callback({ requestHeaders: headers });
+      };
+    };
+    browsingSes.webRequest.onBeforeSendHeaders(makeBeforeSendHeaders(settings.blockAllCookies));
+    privateSes.webRequest.onBeforeSendHeaders(makeBeforeSendHeaders(false));
 
     if (settings.blockAllCookies) {
-      // Block all cookies
-      ses.webRequest.onBeforeSendHeaders((details, callback) => {
-        const headers = { ...details.requestHeaders };
-        delete headers['Cookie'];
-        callback({ requestHeaders: headers });
-      });
-      ses.webRequest.onHeadersReceived((details, callback) => {
+      // Block all cookies (response side) on the browsing partition.
+      browsingSes.webRequest.onHeadersReceived((details, callback) => {
         const headers = { ...details.responseHeaders };
         delete headers['set-cookie'];
         delete headers['Set-Cookie'];
@@ -96,6 +114,7 @@ export abstract class SettingsEnforcer {
       return;
     }
 
+    const ses = browsingSes;
     if (settings.cookiePolicy === 'block-all-third-party' || settings.cookiePolicy === 'block-with-exceptions') {
       ses.webRequest.onHeadersReceived((details, callback) => {
         if (!details.responseHeaders) {
