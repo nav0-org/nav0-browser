@@ -13,7 +13,8 @@ export abstract class SettingsEnforcer {
   public static async init() {
     SettingsEnforcer.initIPCHandlers();
     const settings = SettingsEnforcer.getSettings();
-    SettingsEnforcer.applyCookiePolicy(settings);
+    SettingsEnforcer.applyRequestHeaderPolicy(settings);
+    SettingsEnforcer.applyResponseHeaderPolicy(settings);
     SettingsEnforcer.applyProxySettings(settings);
     SettingsEnforcer.applyUserAgent(settings);
     SettingsEnforcer.applyAdBlocker(settings);
@@ -43,7 +44,8 @@ export abstract class SettingsEnforcer {
   private static initIPCHandlers() {
     ipcMain.handle(RendererToMainEventsForBrowserIPC.APPLY_SETTINGS, async () => {
       const settings = SettingsEnforcer.getSettings();
-      SettingsEnforcer.applyCookiePolicy(settings);
+      SettingsEnforcer.applyRequestHeaderPolicy(settings);
+      SettingsEnforcer.applyResponseHeaderPolicy(settings);
       SettingsEnforcer.applyProxySettings(settings);
       SettingsEnforcer.applyUserAgent(settings);
       SettingsEnforcer.applyAdBlocker(settings);
@@ -74,38 +76,98 @@ export abstract class SettingsEnforcer {
     });
   }
 
-  // ---- Cookie Policy Enforcement ----
-  private static applyCookiePolicy(settings: BrowserSettings) {
+  // ---- Request Header Policy ----
+  // Single onBeforeSendHeaders listener per browsing/private session. Electron
+  // only allows one listener per session, so the three concerns below are
+  // consolidated:
+  //   1. Cookie stripping when blockAllCookies is on (browsing session only,
+  //      matching pre-existing behavior).
+  //   2. SEC-CH-UA Client Hints alignment with the configured User-Agent so
+  //      Cloudflare Turnstile (and similar) don't flag the Electron/Chromium
+  //      version mismatch. See src/main/browser/ua-switcher.ts.
+  //   3. A per-request User-Agent override to a Firefox string for
+  //      accounts.google.com, which sidesteps Google's Chromium/Electron
+  //      embedded-browser block. Technique borrowed from Min browser:
+  //      https://github.com/minbrowser/min/blob/master/main/UASwitcher.js
+  private static applyRequestHeaderPolicy(settings: BrowserSettings) {
     const browsingSes = session.fromPartition('persist:browsertabs');
     const privateSes = session.fromPartition('persist:private');
+    const stripCookies = settings.blockAllCookies;
+    const preset = SettingsEnforcer.resolveUserAgentPreset(settings);
+    // Respect an explicit custom UA — don't override it for Google sign-in.
+    const hasCustomUserAgent = preset === 'custom' && !!settings.userAgentCustomValue;
 
-    // Reset listeners on both partitions so we can reattach cleanly.
-    browsingSes.webRequest.onBeforeSendHeaders(null);
-    browsingSes.webRequest.onHeadersReceived(null);
-    privateSes.webRequest.onBeforeSendHeaders(null);
-    privateSes.webRequest.onHeadersReceived(null);
+    const sessionsWithCookieStripping: Array<[Electron.Session, boolean]> = [
+      [browsingSes, true],
+      [privateSes, false],
+    ];
 
-    // Always attach onBeforeSendHeaders on both partitions so SEC-CH-UA
-    // client hints stay aligned with the configured User-Agent (see
-    // ua-switcher.ts). Cloudflare Turnstile cross-checks the two, so if
-    // they drift (because Chromium auto-populates SEC-CH-UA from its own
-    // version while we've overridden the UA) the challenge fails.
-    const makeBeforeSendHeaders = (stripCookie: boolean) => {
-      return (details: Electron.OnBeforeSendHeadersListenerDetails, callback: (response: Electron.BeforeSendResponse) => void) => {
+    for (const [ses, allowCookieStripping] of sessionsWithCookieStripping) {
+      // Clear any previous listener; Electron only allows one per session.
+      ses.webRequest.onBeforeSendHeaders(null);
+
+      ses.webRequest.onBeforeSendHeaders((details, callback) => {
         const headers = { ...details.requestHeaders };
-        applyClientHints(headers);
-        if (stripCookie) {
+
+        if (allowCookieStripping && stripCookies) {
           delete headers['Cookie'];
+          delete headers['cookie'];
         }
+
+        // Align SEC-CH-UA Client Hints with whatever User-Agent is about to
+        // go out, so Turnstile's header-consistency check passes.
+        applyClientHints(headers);
+
+        // Google sign-in workaround: Google serves a different (Firefox-path)
+        // sign-in page when the UA claims Firefox, and that path does not run
+        // the Chromium/Electron embedded-browser detection. Override only for
+        // accounts.google.com so the rest of the session keeps the user's
+        // chosen preset.
+        let isGoogleSignIn = false;
+        try {
+          isGoogleSignIn = new URL(details.url).hostname === 'accounts.google.com';
+        } catch { /* ignore */ }
+
+        if (isGoogleSignIn && !hasCustomUserAgent) {
+          headers['User-Agent'] = SettingsEnforcer.getFirefoxUA();
+          // Firefox doesn't send Client Hints — strip every sec-ch-ua* header
+          // that applyClientHints just set.
+          for (const key of Object.keys(headers)) {
+            if (key.toLowerCase().startsWith('sec-ch-ua')) {
+              delete headers[key];
+            }
+          }
+        }
+
         callback({ requestHeaders: headers });
-      };
+      });
+    }
+  }
+
+  // Firefox UA generator (adapted from Min browser's UASwitcher.js).
+  // Estimates the current Firefox major version: v91 was released on
+  // 2021-08-10, and new major versions ship roughly every 4.1 weeks.
+  private static getFirefoxUA(): string {
+    const rootUAs = {
+      mac: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:FXVERSION.0) Gecko/20100101 Firefox/FXVERSION.0',
+      windows: 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:FXVERSION.0) Gecko/20100101 Firefox/FXVERSION.0',
+      linux: 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:FXVERSION.0) Gecko/20100101 Firefox/FXVERSION.0',
     };
-    browsingSes.webRequest.onBeforeSendHeaders(makeBeforeSendHeaders(settings.blockAllCookies));
-    privateSes.webRequest.onBeforeSendHeaders(makeBeforeSendHeaders(false));
+    let rootUA: string;
+    if (process.platform === 'win32') rootUA = rootUAs.windows;
+    else if (process.platform === 'darwin') rootUA = rootUAs.mac;
+    else rootUA = rootUAs.linux;
+    const fxVersion = 91 + Math.floor((Date.now() - 1628553600000) / (4.1 * 7 * 24 * 60 * 60 * 1000));
+    return rootUA.replace(/FXVERSION/g, String(fxVersion));
+  }
+
+  // ---- Response Header Policy (Cookie Jar Enforcement) ----
+  private static applyResponseHeaderPolicy(settings: BrowserSettings) {
+    const ses = session.fromPartition('persist:browsertabs');
+    ses.webRequest.onHeadersReceived(null);
 
     if (settings.blockAllCookies) {
-      // Block all cookies (response side) on the browsing partition.
-      browsingSes.webRequest.onHeadersReceived((details, callback) => {
+      ses.webRequest.onHeadersReceived((details, callback) => {
         const headers = { ...details.responseHeaders };
         delete headers['set-cookie'];
         delete headers['Set-Cookie'];
@@ -114,7 +176,6 @@ export abstract class SettingsEnforcer {
       return;
     }
 
-    const ses = browsingSes;
     if (settings.cookiePolicy === 'block-all-third-party' || settings.cookiePolicy === 'block-with-exceptions') {
       ses.webRequest.onHeadersReceived((details, callback) => {
         if (!details.responseHeaders) {
@@ -219,11 +280,15 @@ export abstract class SettingsEnforcer {
   }
 
   // ---- User Agent ----
+  private static resolveUserAgentPreset(settings: BrowserSettings): string {
+    return settings.userAgentPreset || (process.platform === 'darwin' ? 'chrome-mac' : process.platform === 'linux' ? 'chrome-linux' : 'chrome-windows');
+  }
+
   private static applyUserAgent(settings: BrowserSettings) {
     const browsingSes = session.fromPartition('persist:browsertabs');
     const privateSes = session.fromPartition('persist:private');
 
-    const preset = settings.userAgentPreset || (process.platform === 'darwin' ? 'chrome-mac' : process.platform === 'linux' ? 'chrome-linux' : 'chrome-windows');
+    const preset = SettingsEnforcer.resolveUserAgentPreset(settings);
 
     let userAgent: string;
 
