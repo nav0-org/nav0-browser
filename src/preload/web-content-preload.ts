@@ -12,7 +12,7 @@
  * process via IPC (bypassing renderer CSP / network restrictions).
  */
 
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, webFrame } from 'electron';
 
 // Expose a function the main-world polyfill can call to get IP geolocation
 // from the main process (uses Electron net.fetch, immune to page CSP).
@@ -365,3 +365,64 @@ observer.observe(document, { childList: true, subtree: true });
 if (document.documentElement) {
   injectPolyfill();
 }
+
+// ─── window.chrome.runtime polyfill for Google domains ────────────────
+// Many Google properties (accounts.google.com sign-in, Gmail, etc.) probe
+// `window.chrome.runtime.connect` to confirm they're running in real Chrome.
+// In Electron `window.chrome` is undefined, so the check fails and Google
+// blocks sign-in or refuses to load — even when the User-Agent is a
+// perfectly-aligned Chrome string. Injecting a minimal stub satisfies the
+// probe. Same fix Min Browser applies in js/preload/siteUnbreak.js.
+//
+// Hangouts and Drive are excluded because Min found defining window.chrome
+// breaks them (Hangouts tries to talk to a non-existent extension; Drive's
+// file viewer behaves similarly). See:
+// https://github.com/minbrowser/min/issues/1051 and the comments in
+// siteUnbreak.js.
+//
+// Use webFrame.executeJavaScript instead of an inline <script> blob: Google
+// ships a strict CSP via response header that the preload can't inspect
+// (only meta CSP is visible from here), so the existing injectPolyfill
+// blob-URL path may be blocked. webFrame.executeJavaScript runs in the
+// page's main world and bypasses CSP entirely.
+function injectGoogleChromeRuntimeStub(): void {
+  try {
+    const host = window.location.hostname;
+    const isGoogleHost =
+      (host === 'google.com' || host.endsWith('.google.com')) &&
+      host !== 'hangouts.google.com' &&
+      host !== 'drive.google.com';
+    if (!isGoogleHost) return;
+
+    const code = `
+      (function () {
+        if (window.chrome && window.chrome.runtime) return;
+        var noop = function () {};
+        var stubPort = {
+          name: '',
+          onMessage: { addListener: noop, removeListener: noop, hasListener: function () { return false; } },
+          onDisconnect: { addListener: noop, removeListener: noop, hasListener: function () { return false; } },
+          postMessage: noop,
+          disconnect: noop,
+        };
+        var runtime = {
+          id: undefined,
+          connect: function () { return stubPort; },
+          sendMessage: function () {},
+          onMessage: { addListener: noop, removeListener: noop, hasListener: function () { return false; } },
+          onConnect: { addListener: noop, removeListener: noop, hasListener: function () { return false; } },
+        };
+        if (!window.chrome) {
+          Object.defineProperty(window, 'chrome', { value: { runtime: runtime }, writable: true, configurable: true });
+        } else {
+          window.chrome.runtime = runtime;
+        }
+      })();
+    `;
+    webFrame.executeJavaScript(code).catch(() => { /* ignore */ });
+  } catch {
+    // Ignore — preload should never throw into the page.
+  }
+}
+
+injectGoogleChromeRuntimeStub();
