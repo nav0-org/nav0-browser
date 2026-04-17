@@ -10,10 +10,18 @@ What's new in every release of Nav0 Browser.
 ---
 
 <div class="release-list-item">
+  <a href="/releases/v0.2.2">
+    <h2>v0.2.2</h2>
+  </a>
+  <div class="release-meta">April 17, 2026 <span class="release-badge latest">Latest</span></div>
+  <p class="release-excerpt">Cloudflare Turnstile compatibility, Chrome version pinning to Electron's real Chromium, and Google sign-in and Gmail fixes via Firefox UA swap and a minimal window.chrome.runtime stub.</p>
+</div>
+
+<div class="release-list-item">
   <a href="/releases/v0.2.1">
     <h2>v0.2.1</h2>
   </a>
-  <div class="release-meta">April 14, 2026 <span class="release-badge latest">Latest</span></div>
+  <div class="release-meta">April 14, 2026</div>
   <p class="release-excerpt">Permissions settings page, configurable downloads location, "On startup" options, session restore for non-private windows, expanded website categories, and assorted settings and startup bug fixes.</p>
 </div>
 
