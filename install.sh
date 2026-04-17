@@ -18,16 +18,59 @@ case "$ARCH" in
     ;;
 esac
 
-# Check if Nav0 is currently running and ask the user to close it
-if pgrep -f "$APP_NAME" >/dev/null 2>&1; then
+# Check if Nav0 is currently running; offer to quit and continue.
+if pgrep -x "$APP_NAME" >/dev/null 2>&1 \
+   || pgrep -f "/${APP_NAME}.app/Contents/MacOS/${APP_NAME}" >/dev/null 2>&1; then
   echo ""
-  echo "Nav0 is currently running. Please close it before upgrading."
-  echo "Press Enter once you've closed Nav0 (or Ctrl+C to cancel)..."
-  read -r
-  if pgrep -f "$APP_NAME" >/dev/null 2>&1; then
-    echo "Error: Nav0 is still running. Please close it and try again."
+  echo "Warning: Nav0 is currently running."
+  echo "Continuing will quit and restart the browser."
+
+  ANSWER=""
+  if [ "${NAV0_ASSUME_YES:-}" = "1" ]; then
+    ANSWER="y"
+  elif [ -r /dev/tty ]; then
+    printf "Do you want to continue? [y/N] " > /dev/tty
+    IFS= read -r ANSWER < /dev/tty || ANSWER=""
+  else
+    echo "Error: Nav0 is running and no TTY is available for confirmation."
+    echo "Re-run in an interactive shell, or set NAV0_ASSUME_YES=1 to proceed."
     exit 1
   fi
+
+  case "$ANSWER" in
+    y|Y|yes|YES|Yes) ;;
+    *) echo "Aborted."; exit 0 ;;
+  esac
+
+  echo "Quitting Nav0..."
+  osascript -e "tell application \"$APP_NAME\" to quit" >/dev/null 2>&1 || true
+
+  # Wait up to ~5s for graceful exit.
+  for _ in 1 2 3 4 5 6 7 8 9 10; do
+    pgrep -x "$APP_NAME" >/dev/null 2>&1 || break
+    sleep 0.5
+  done
+
+  # Escalate if still alive: SIGTERM, then SIGKILL.
+  if pgrep -x "$APP_NAME" >/dev/null 2>&1; then
+    echo "Nav0 did not quit gracefully; sending SIGTERM..."
+    pkill -x "$APP_NAME" >/dev/null 2>&1 || true
+    for _ in 1 2 3 4 5 6; do
+      pgrep -x "$APP_NAME" >/dev/null 2>&1 || break
+      sleep 0.5
+    done
+  fi
+  if pgrep -x "$APP_NAME" >/dev/null 2>&1; then
+    echo "Nav0 still running; sending SIGKILL..."
+    pkill -9 -x "$APP_NAME" >/dev/null 2>&1 || true
+    sleep 1
+  fi
+
+  if pgrep -x "$APP_NAME" >/dev/null 2>&1; then
+    echo "Error: Could not stop Nav0. Please quit it manually and retry."
+    exit 1
+  fi
+  echo "Nav0 stopped."
 fi
 
 # Get latest release tag
