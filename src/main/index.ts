@@ -1,4 +1,4 @@
-import { app } from 'electron';
+import { app, dialog } from 'electron';
 import { AppWindowManager } from './browser/app-window-manager';
 import { DataStoreManager } from './database/data-store-manager';
 import { DownloadManager } from './browser/download-manager';
@@ -6,6 +6,30 @@ import { SessionManager } from './browser/session-manager';
 import { SettingsEnforcer } from './settings/settings-enforcer';
 import { configureUserAgentFallback } from './browser/ua-switcher';
 import { startTestControlServer } from './test-control-server';
+
+// Global error handlers — keep the browser alive when a stray exception
+// or unhandled rejection escapes a handler. Without these, Electron shows
+// its default fatal-crash dialog and the window goes away.
+let lastErrorDialogAt = 0;
+const ERROR_DIALOG_COOLDOWN_MS = 5000;
+function showErrorDialogThrottled(title: string, message: string): void {
+  const now = Date.now();
+  if (now - lastErrorDialogAt < ERROR_DIALOG_COOLDOWN_MS) return;
+  lastErrorDialogAt = now;
+  try {
+    dialog.showErrorBox(title, message);
+  } catch { /* ignore dialog failures so we never re-enter */ }
+}
+process.on('uncaughtException', (err: Error) => {
+  console.error('[main] uncaughtException:', err);
+  showErrorDialogThrottled(
+    'Nav0 encountered an unexpected error',
+    `The browser will keep running, but some features may be unstable.\n\n${err?.stack || err?.message || String(err)}`
+  );
+});
+process.on('unhandledRejection', (reason: unknown) => {
+  console.error('[main] unhandledRejection:', reason);
+});
 
 // Strip "Electron/..." and "nav0-browser/..." tokens from the default User-Agent
 // and zero Chrome minor-version numbers so sites that fingerprint the UA (e.g.

@@ -14,7 +14,7 @@ import { PermissionManager } from "./permission-manager";
 import { ReaderModeManager, ReaderModeState } from "./reader-mode-manager";
 import { DataStoreManager } from "../database/data-store-manager";
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
-import { COSMETIC_FILTER_CSS, AD_BLOCK_EARLY_SCRIPT, AD_BLOCK_SCRIPT } from "../ad-blocker/ad-block-lists";
+import { COSMETIC_FILTER_CSS, AD_BLOCK_EARLY_SCRIPT, AD_BLOCK_SCRIPT, YOUTUBE_ANTI_ADBLOCK_CSS, YOUTUBE_ANTI_ADBLOCK_SCRIPT } from "../ad-blocker/ad-block-lists";
 import { SSLManager } from "./ssl-manager";
 import { buildErrorPageScript, NavigationError } from "./error-page/error-page";
 const domainPattern = /^[^\s]+\.[^\s]+$/;
@@ -119,6 +119,13 @@ export class Tab {
       urlToLoad = this.url;
       preloadScriptToLoad = WEB_CONTENT_PRELOAD_WEBPACK_ENTRY;
     } else if (this.url.startsWith('http://') || this.url.startsWith('https://')) {
+      urlToLoad = this.url;
+      preloadScriptToLoad = WEB_CONTENT_PRELOAD_WEBPACK_ENTRY;
+    } else if (Tab.looksLikeLocalhostInput(this.url)) {
+      // Bare localhost-style inputs (localhost:3000, 127.0.0.1, myapp.local,
+      // foo.test) should load directly over HTTP — they rarely have valid
+      // TLS certs, and forcing HTTPS breaks reverse-proxy and dev-server flows.
+      this.url = 'http://' + this.url;
       urlToLoad = this.url;
       preloadScriptToLoad = WEB_CONTENT_PRELOAD_WEBPACK_ENTRY;
     } else if (domainPattern.test(this.url)) {
@@ -668,10 +675,27 @@ export class Tab {
    */
   private injectAdBlockDOMScript(): void {
     if (!this.isAdBlockAllowed()) return;
-    if (Tab.isStreamingSite(this.url)) return;
     const wc = this.webContentsViewInstance.webContents;
+    if (Tab.isYouTube(this.url)) {
+      // Narrow YouTube carve-out: hide the anti-adblock modal and unpause the
+      // player. Generic ad blocking still skipped (YT is in STREAMING_SITES).
+      wc.insertCSS(YOUTUBE_ANTI_ADBLOCK_CSS).catch(() => { /* swallow */ });
+      wc.executeJavaScript(YOUTUBE_ANTI_ADBLOCK_SCRIPT).catch(() => { /* swallow */ });
+      return;
+    }
+    if (Tab.isStreamingSite(this.url)) return;
     wc.insertCSS(COSMETIC_FILTER_CSS).catch(() => {});
     wc.executeJavaScript(AD_BLOCK_SCRIPT).catch(() => {});
+  }
+
+  private static isYouTube(url: string): boolean {
+    try {
+      const hostname = new URL(url).hostname.toLowerCase();
+      return hostname === 'youtube.com' || hostname.endsWith('.youtube.com')
+        || hostname === 'youtube-nocookie.com' || hostname.endsWith('.youtube-nocookie.com');
+    } catch {
+      return false;
+    }
   }
 
   private static isStreamingSite(url: string): boolean {
@@ -1112,6 +1136,33 @@ export class Tab {
     } catch {
       return false;
     }
+  }
+
+  /**
+   * Detects address-bar input that should be treated as a local URL even
+   * without an http:// scheme — e.g. `localhost:3000`, `127.0.0.1/foo`,
+   * `myapp.local`, `backend.test`. Returning true routes the input to a
+   * direct HTTP navigation instead of a search fallback + https upgrade.
+   */
+  private static looksLikeLocalhostInput(input: string): boolean {
+    if (!input) return false;
+    const raw = input.trim();
+    if (!raw || /\s/.test(raw)) return false;
+    // Split off path/query to isolate the authority portion
+    const authority = raw.split(/[/?#]/, 1)[0];
+    if (!authority) return false;
+    // Strip port
+    let host = authority;
+    const portIdx = host.lastIndexOf(':');
+    if (portIdx > -1 && /^\d+$/.test(host.slice(portIdx + 1))) {
+      host = host.slice(0, portIdx);
+    }
+    host = host.toLowerCase();
+    if (host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0' || host === '[::1]' || host === '::1') return true;
+    // Loopback / link-local TLDs commonly used for local dev and intranet
+    if (host.endsWith('.localhost') || host.endsWith('.local') || host.endsWith('.test')
+        || host.endsWith('.lan') || host.endsWith('.internal') || host.endsWith('.home.arpa')) return true;
+    return false;
   }
 
   //for handling right clicks
