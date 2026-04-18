@@ -5,8 +5,10 @@ import { CommandOHandler } from "./overlay-handlers/command-o-handler";
 import { OptionsMenuHandler } from "./overlay-handlers/options-menu-handler";
 import { IssueReportHandler } from "./overlay-handlers/issue-report-handler";
 import { SSLInfoHandler } from "./overlay-handlers/ssl-info-handler";
+import { AlertHandler } from "./overlay-handlers/alert-handler";
+import { BasicAuthHandler } from "./overlay-handlers/basic-auth-handler";
 
-export type OverlayType = 'command-k' | 'command-o' | 'options-menu' | 'issue-report' | 'ssl-info';
+export type OverlayType = 'command-k' | 'command-o' | 'options-menu' | 'issue-report' | 'ssl-info' | 'alert' | 'basic-auth';
 
 export class UnifiedOverlayManager {
   private webContentsViewInstance: WebContentsView;
@@ -38,6 +40,8 @@ export class UnifiedOverlayManager {
 
     this.sslInfoHandler = new SSLInfoHandler();
     this.handlers.set('ssl-info', this.sslInfoHandler);
+    this.handlers.set('alert', new AlertHandler());
+    this.handlers.set('basic-auth', new BasicAuthHandler());
 
     // Set up SSL info listeners
     this.sslInfoHandler.setupListeners(this.webContentsViewInstance.webContents);

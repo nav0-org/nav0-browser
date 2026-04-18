@@ -67,3 +67,32 @@ app.on('before-quit', async () => {
 app.on('activate', () => {
   AppWindowManager.createWindow(false);
 });
+
+// HTTP basic / proxy authentication. Show an in-app overlay rather than
+// letting Chromium fall back to its native auth dialog (which bypasses our
+// chrome). If we can't resolve the owning window we leave the event alone so
+// the default behavior (cancel / platform dialog) still applies.
+app.on('login', (event, webContents, request, authInfo, callback) => {
+  const window = AppWindowManager.findWindowByWebContentsId(webContents.id);
+  if (!window) return;
+  event.preventDefault();
+  window.showBasicAuthOverlay(
+    {
+      host: authInfo.host,
+      port: authInfo.port,
+      realm: authInfo.realm,
+      isProxy: authInfo.isProxy,
+      scheme: authInfo.scheme,
+      url: request.url,
+    },
+    (creds) => {
+      if (creds) {
+        callback(creds.username, creds.password);
+      } else {
+        // Cancel the auth challenge: calling the callback with no arguments
+        // tells Chromium to cancel the request.
+        callback();
+      }
+    }
+  );
+});

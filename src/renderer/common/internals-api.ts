@@ -127,6 +127,14 @@ declare global {
       // Issue report
       showIssueReport: (appWindowId: string) => Promise<any>;
       hideIssueReport: (appWindowId: string) => Promise<any>;
+
+      // Alert / confirm / prompt overlay
+      respondToDialog: (appWindowId: string, requestId: string, response: { confirmed: boolean; value?: string }) => void;
+      hideAlertOverlay: (appWindowId: string) => void;
+
+      // Basic auth overlay
+      respondToBasicAuth: (appWindowId: string, requestId: string, creds: { username: string; password: string } | null) => void;
+      hideBasicAuthOverlay: (appWindowId: string) => void;
     };
   }
 }

@@ -353,6 +353,22 @@ export function init(){
     hideIssueReport: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.HIDE_ISSUE_REPORT, appWindowId);
     },
+
+    // Alert / confirm / prompt overlay
+    respondToDialog: (appWindowId: string, requestId: string, response: { confirmed: boolean; value?: string }) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.DIALOG_RESPONSE, appWindowId, requestId, response);
+    },
+    hideAlertOverlay: (appWindowId: string) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.HIDE_ALERT_OVERLAY, appWindowId);
+    },
+
+    // Basic auth overlay
+    respondToBasicAuth: (appWindowId: string, requestId: string, creds: { username: string; password: string } | null) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.BASIC_AUTH_RESPONSE, appWindowId, requestId, creds);
+    },
+    hideBasicAuthOverlay: (appWindowId: string) => {
+      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.HIDE_BASIC_AUTH_OVERLAY, appWindowId);
+    },
   });
 }
 

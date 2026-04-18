@@ -8,6 +8,7 @@ import { NotificationManager } from "./notification-manager";
 import { FindInPageManager } from "./find-in-page-manager";
 import { UnifiedOverlayManager, OverlayType } from "./unified-overlay-manager";
 import type { Database as DB } from 'better-sqlite3';
+import type { BasicAuthCreds, BasicAuthRequest, DialogRequest, DialogResponse } from "../../types/dialog-types";
 
 export interface PermissionPromptData {
   requestId: string;
@@ -33,6 +34,8 @@ export class AppWindow {
   private findInPageManager: FindInPageManager | null = null;
   private findInPageState: Map<string, { searchText: string }> = new Map(); // per-tab find state
   private permissionPrompts: Map<string, PermissionPromptData> = new Map(); // per-tab permission data
+  private pendingDialogs: Map<string, (response: DialogResponse) => void> = new Map();
+  private pendingBasicAuth: Map<string, (creds: BasicAuthCreds | null) => void> = new Map();
   private database: DB;
   private readyPromise: Promise<void>;
   private resolveReady: () => void;
@@ -109,6 +112,11 @@ export class AppWindow {
       });
 
       this.browserWindowInstance.on('closed', () => {
+        // Resolve any outstanding dialogs / auth prompts so awaiting callers don't hang
+        for (const [, resolve] of this.pendingDialogs) resolve({ confirmed: false });
+        this.pendingDialogs.clear();
+        for (const [, callback] of this.pendingBasicAuth) callback(null);
+        this.pendingBasicAuth.clear();
         this.browserWindowInstance = null;
       });
 
@@ -528,6 +536,86 @@ export class AppWindow {
   hideIssueReportOverlay(): void {
     if (this.unifiedOverlayManager?.isVisible('issue-report')) {
       this.unifiedOverlayManager.hideOverlay('issue-report');
+      this.removeOverlayViewIfEmpty();
+    }
+  }
+
+  // --- Alert / Confirm / Prompt overlay ---
+
+  async showAlertOverlay(data: Omit<DialogRequest, 'requestId'>): Promise<DialogResponse> {
+    if (!this.browserWindowInstance) {
+      return { confirmed: false };
+    }
+    const requestId = uuid();
+    const request: DialogRequest = { requestId, ...data };
+
+    const responsePromise = new Promise<DialogResponse>((resolve) => {
+      this.pendingDialogs.set(requestId, resolve);
+    });
+
+    await this.overlayInitPromise;
+    if (!this.unifiedOverlayManager) {
+      this.pendingDialogs.delete(requestId);
+      return { confirmed: false };
+    }
+    await this.unifiedOverlayManager.whenReady();
+    this.ensureOverlayViewAdded();
+    this.unifiedOverlayManager.showOverlay('alert', request);
+
+    return responsePromise;
+  }
+
+  resolveDialog(requestId: string, response: DialogResponse): void {
+    const resolver = this.pendingDialogs.get(requestId);
+    if (!resolver) return;
+    this.pendingDialogs.delete(requestId);
+    resolver(response);
+    this.hideAlertOverlay();
+  }
+
+  hideAlertOverlay(): void {
+    if (this.unifiedOverlayManager?.isVisible('alert')) {
+      this.unifiedOverlayManager.hideOverlay('alert');
+      this.removeOverlayViewIfEmpty();
+    }
+  }
+
+  // --- Basic auth overlay ---
+
+  async showBasicAuthOverlay(
+    data: Omit<BasicAuthRequest, 'requestId'>,
+    callback: (creds: BasicAuthCreds | null) => void
+  ): Promise<void> {
+    if (!this.browserWindowInstance) {
+      callback(null);
+      return;
+    }
+    const requestId = uuid();
+    const request: BasicAuthRequest = { requestId, ...data };
+    this.pendingBasicAuth.set(requestId, callback);
+
+    await this.overlayInitPromise;
+    if (!this.unifiedOverlayManager) {
+      this.pendingBasicAuth.delete(requestId);
+      callback(null);
+      return;
+    }
+    await this.unifiedOverlayManager.whenReady();
+    this.ensureOverlayViewAdded();
+    this.unifiedOverlayManager.showOverlay('basic-auth', request);
+  }
+
+  resolveBasicAuth(requestId: string, creds: BasicAuthCreds | null): void {
+    const callback = this.pendingBasicAuth.get(requestId);
+    if (!callback) return;
+    this.pendingBasicAuth.delete(requestId);
+    callback(creds);
+    this.hideBasicAuthOverlay();
+  }
+
+  hideBasicAuthOverlay(): void {
+    if (this.unifiedOverlayManager?.isVisible('basic-auth')) {
+      this.unifiedOverlayManager.hideOverlay('basic-auth');
       this.removeOverlayViewIfEmpty();
     }
   }

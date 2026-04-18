@@ -7,8 +7,10 @@ import * as commandOPanel from './panels/command-o/command-o';
 import * as optionsMenuPanel from './panels/options-menu/options-menu';
 import * as issueReportPanel from './panels/issue-report/issue-report';
 import * as sslInfoPanel from './panels/ssl-info/ssl-info';
+import * as alertPanel from './panels/alert/alert';
+import * as basicAuthPanel from './panels/basic-auth/basic-auth';
 
-type PanelName = 'command-k' | 'command-o' | 'options-menu' | 'issue-report' | 'ssl-info';
+type PanelName = 'command-k' | 'command-o' | 'options-menu' | 'issue-report' | 'ssl-info' | 'alert' | 'basic-auth';
 
 const panels: Record<PanelName, { init: (container: HTMLElement) => void; show: (data?: any) => void; hide: () => void }> = {
   'command-k': commandKPanel,
@@ -16,6 +18,8 @@ const panels: Record<PanelName, { init: (container: HTMLElement) => void; show: 
   'options-menu': optionsMenuPanel,
   'issue-report': issueReportPanel,
   'ssl-info': sslInfoPanel,
+  'alert': alertPanel,
+  'basic-auth': basicAuthPanel,
 };
 
 document.addEventListener('DOMContentLoaded', () => {

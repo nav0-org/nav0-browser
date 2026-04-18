@@ -293,6 +293,15 @@ export abstract class AppWindowManager {
     return AppWindowManager.windows.get(id) || null;
   }
 
+  static findWindowByWebContentsId(webContentsId: number): AppWindow | null {
+    for (const window of AppWindowManager.windows.values()) {
+      if (window.findTabByWebContentsId(webContentsId)) {
+        return window;
+      }
+    }
+    return null;
+  }
+
   static initIPCHandlers(): void {
     ipcMain.on(RendererToMainEventsForBrowserIPC.CREATE_TAB, async (event, appWindowId: string, url: string, activateNewTab: boolean) => {
       let window: AppWindow | null = null;
@@ -628,6 +637,59 @@ export abstract class AppWindowManager {
       const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
       if (window) {
         return window.hideIssueReportOverlay();
+      }
+    });
+
+    // Alert / confirm / prompt — triggered by the web-content preload polyfill.
+    // Uses sendSync so the page script blocks until the user responds, matching
+    // real browser semantics for window.alert/confirm/prompt.
+    ipcMain.on(RendererToMainEventsForBrowserIPC.WEB_CONTENT_DIALOG_REQUEST, async (event, payload: { kind: 'alert' | 'confirm' | 'prompt'; message: string; defaultValue?: string }) => {
+      const webContentsId = event.sender.id;
+      const window = AppWindowManager.findWindowByWebContentsId(webContentsId);
+      if (!window) {
+        event.returnValue = { confirmed: false };
+        return;
+      }
+      let origin = 'about:blank';
+      try {
+        const url = event.sender.getURL();
+        origin = url ? new URL(url).origin : origin;
+      } catch { /* keep default */ }
+      const response = await window.showAlertOverlay({
+        kind: payload.kind,
+        message: typeof payload.message === 'string' ? payload.message : '',
+        defaultValue: payload.defaultValue,
+        origin,
+      });
+      event.returnValue = response;
+    });
+
+    ipcMain.on(RendererToMainEventsForBrowserIPC.DIALOG_RESPONSE, (event, appWindowId: string, requestId: string, response: { confirmed: boolean; value?: string }) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        window.resolveDialog(requestId, response);
+      }
+    });
+
+    ipcMain.on(RendererToMainEventsForBrowserIPC.HIDE_ALERT_OVERLAY, (event, appWindowId: string) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        window.hideAlertOverlay();
+      }
+    });
+
+    // Basic auth
+    ipcMain.on(RendererToMainEventsForBrowserIPC.BASIC_AUTH_RESPONSE, (event, appWindowId: string, requestId: string, creds: { username: string; password: string } | null) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        window.resolveBasicAuth(requestId, creds);
+      }
+    });
+
+    ipcMain.on(RendererToMainEventsForBrowserIPC.HIDE_BASIC_AUTH_OVERLAY, (event, appWindowId: string) => {
+      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      if (window) {
+        window.hideBasicAuthOverlay();
       }
     });
 

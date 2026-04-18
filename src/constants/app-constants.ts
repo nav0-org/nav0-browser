@@ -190,6 +190,15 @@ export abstract class RendererToMainEventsForBrowserIPC {
   // Issue report
   public static readonly SHOW_ISSUE_REPORT = "browser:show-issue-report";
   public static readonly HIDE_ISSUE_REPORT = "browser:hide-issue-report";
+
+  // Alert / confirm / prompt overlay
+  public static readonly HIDE_ALERT_OVERLAY = "browser:hide-alert-overlay";
+  public static readonly DIALOG_RESPONSE = "browser:dialog-response";
+  public static readonly WEB_CONTENT_DIALOG_REQUEST = "webcontent:dialog-request";
+
+  // Basic auth overlay
+  public static readonly HIDE_BASIC_AUTH_OVERLAY = "browser:hide-basic-auth-overlay";
+  public static readonly BASIC_AUTH_RESPONSE = "browser:basic-auth-response";
 }
 
 export abstract class MainToRendererEventsForBrowserIPC {
