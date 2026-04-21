@@ -1,629 +1,917 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:;">
-  <title>Settings</title>
-</head>
-<body>
-  <div class="settings-layout">
-    <!-- Sidebar -->
-    <nav class="settings-sidebar">
-      <div class="sidebar-search">
-        <input type="text" id="settings-search" class="sidebar-search-input" placeholder="Search settings...">
-        <i data-lucide="search" class="sidebar-search-icon"></i>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:;"
+    />
+    <title>Settings</title>
+  </head>
+  <body>
+    <div class="settings-layout">
+      <!-- Sidebar -->
+      <nav class="settings-sidebar">
+        <div class="sidebar-search">
+          <input
+            type="text"
+            id="settings-search"
+            class="sidebar-search-input"
+            placeholder="Search settings..."
+          />
+          <i data-lucide="search" class="sidebar-search-icon"></i>
+        </div>
+        <ul class="sidebar-nav">
+          <li>
+            <a href="#general" class="sidebar-link active" data-section="general"
+              ><i data-lucide="settings" width="16" height="16"></i> General</a
+            >
+          </li>
+          <li>
+            <a href="#startup" class="sidebar-link" data-section="startup"
+              ><i data-lucide="play" width="16" height="16"></i> On startup</a
+            >
+          </li>
+          <li>
+            <a href="#search" class="sidebar-link" data-section="search"
+              ><i data-lucide="search" width="16" height="16"></i> Search</a
+            >
+          </li>
+          <li>
+            <a href="#privacy" class="sidebar-link" data-section="privacy"
+              ><i data-lucide="shield" width="16" height="16"></i> Privacy &amp; Security</a
+            >
+          </li>
+          <li>
+            <a href="#permissions" class="sidebar-link" data-section="permissions"
+              ><i data-lucide="shield-check" width="16" height="16"></i> Permissions</a
+            >
+          </li>
+          <li>
+            <a href="#network" class="sidebar-link" data-section="network"
+              ><i data-lucide="globe" width="16" height="16"></i> Network</a
+            >
+          </li>
+          <li>
+            <a href="#shortcuts" class="sidebar-link" data-section="shortcuts"
+              ><i data-lucide="keyboard" width="16" height="16"></i> Keyboard Shortcuts</a
+            >
+          </li>
+          <li>
+            <a href="#developer" class="sidebar-link" data-section="developer"
+              ><i data-lucide="code" width="16" height="16"></i> Developer</a
+            >
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Content -->
+      <div class="settings-content-wrapper">
+        <main class="settings-content" id="settings-content">
+          <!-- ====== GENERAL SECTION ====== -->
+          <section
+            id="section-general"
+            class="settings-section active"
+            data-keywords="general downloads download location folder path save directory"
+          >
+            <h2 class="section-title">General</h2>
+
+            <!-- Downloads Location -->
+            <div class="setting-group">
+              <label class="setting-label">Downloads Location</label>
+              <p class="setting-description">Choose where downloaded files are saved.</p>
+              <div class="setting-action-row">
+                <div style="min-width: 0; flex: 1">
+                  <span
+                    id="download-path-display"
+                    class="setting-description"
+                    style="margin: 0; word-break: break-all"
+                  ></span>
+                </div>
+                <div style="display: flex; gap: 6px">
+                  <button class="btn btn-sm btn-secondary" id="change-download-path-btn">
+                    <i data-lucide="folder" width="14" height="14"></i> Change
+                  </button>
+                  <button class="btn btn-sm btn-ghost" id="reset-download-path-btn">
+                    <i data-lucide="rotate-ccw" width="14" height="14"></i> Reset
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ====== ON STARTUP SECTION ====== -->
+          <section
+            id="section-startup"
+            class="settings-section"
+            data-keywords="startup launch open start page continue session restore tabs"
+          >
+            <h2 class="section-title">On startup</h2>
+
+            <div class="setting-group">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="startup-mode" value="new-tab" />
+                  <span class="radio-label">Open the New tab page</span>
+                  <span class="radio-description">Start with a fresh new tab every time.</span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="startup-mode" value="continue" checked />
+                  <span class="radio-label">Continue where you left off</span>
+                  <span class="radio-description"
+                    >Restore tabs from your previous browsing session.</span
+                  >
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="startup-mode" value="specific-pages" />
+                  <span class="radio-label">Open a specific page or set of pages</span>
+                  <span class="radio-description"
+                    >Choose which pages open when the browser starts.</span
+                  >
+                </label>
+              </div>
+
+              <!-- Startup Pages List (shown when 'specific-pages' is selected) -->
+              <div id="startup-pages-container" class="sub-setting" style="display: none">
+                <label class="setting-label">Startup Pages</label>
+                <p class="setting-description">
+                  These pages will open as tabs when you start the browser.
+                </p>
+                <div id="startup-pages-list" class="items-list"></div>
+                <div class="add-item-form">
+                  <input
+                    type="text"
+                    id="startup-page-input"
+                    class="form-input"
+                    placeholder="e.g., https://example.com"
+                  />
+                  <button class="btn btn-sm btn-secondary" id="add-startup-page-btn">
+                    <i data-lucide="plus" width="14" height="14"></i> Add Page
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ====== SEARCH SECTION ====== -->
+          <section
+            id="section-search"
+            class="settings-section"
+            data-keywords="search engine default query url bar duckduckgo google bing brave startpage ecosia custom suggestions"
+          >
+            <h2 class="section-title">Search</h2>
+
+            <!-- Default Search Engine -->
+            <div class="setting-group">
+              <label class="setting-label">Default Search Engine</label>
+              <p class="setting-description">
+                Choose the search engine used when you type queries in the URL bar.
+              </p>
+              <select id="search-engine-select" class="form-select">
+                <option value="DuckDuckGo">DuckDuckGo</option>
+                <option value="Google">Google</option>
+                <option value="Bing">Bing</option>
+                <option value="Brave Search">Brave Search</option>
+                <option value="Startpage">Startpage</option>
+                <option value="Ecosia">Ecosia</option>
+              </select>
+            </div>
+
+            <!-- Search Suggestions -->
+            <div class="setting-group">
+              <div class="setting-toggle-row">
+                <div>
+                  <label class="setting-label">Show search suggestions as I type</label>
+                  <p class="setting-description">
+                    Sends keystrokes to the search engine. Disabled in private browsing.
+                  </p>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="search-suggestions-toggle" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Custom Search Engines -->
+            <div class="setting-group">
+              <label class="setting-label">Custom Search Engines</label>
+              <p class="setting-description">
+                Add a custom search engine using a URL template with <code>%s</code> as the query
+                placeholder.
+              </p>
+              <div id="custom-engines-list" class="items-list"></div>
+              <div class="add-item-form" id="add-engine-form">
+                <input
+                  type="text"
+                  id="custom-engine-name"
+                  class="form-input"
+                  placeholder="Engine name"
+                />
+                <input
+                  type="text"
+                  id="custom-engine-url"
+                  class="form-input"
+                  placeholder="Search URL (e.g., https://example.com/search?q=%s)"
+                />
+                <button class="btn btn-sm btn-secondary" id="add-engine-btn">
+                  <i data-lucide="plus" width="14" height="14"></i> Add Engine
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ====== PRIVACY & SECURITY SECTION ====== -->
+          <section
+            id="section-privacy"
+            class="settings-section"
+            data-keywords="privacy security cookies third-party block exceptions clear ad blocker tracker filter list easylist data retention auto-delete browsing history cache popup popups pop-up window open allow block site"
+          >
+            <h2 class="section-title">Privacy &amp; Security</h2>
+
+            <!-- Third-Party Cookie Policy -->
+            <div class="setting-group">
+              <label class="setting-label">Third-Party Cookies</label>
+              <p class="setting-description">
+                Control how cookies from other sites are handled when you browse.
+              </p>
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="cookie-policy" value="block-all-third-party" checked />
+                  <span class="radio-label"
+                    >Block all third-party cookies
+                    <span class="badge-recommend">Recommended</span></span
+                  >
+                  <span class="radio-description"
+                    >No cross-site cookies are stored or sent. Strictest privacy.</span
+                  >
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="cookie-policy" value="block-with-exceptions" />
+                  <span class="radio-label">Block third-party cookies with exceptions</span>
+                  <span class="radio-description"
+                    >Block by default, but allow for sites you specify.</span
+                  >
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="cookie-policy" value="allow-all" />
+                  <span class="radio-label">Allow all cookies</span>
+                  <span class="radio-description"
+                    >No restrictions on third-party cookies (not recommended).</span
+                  >
+                </label>
+              </div>
+
+              <!-- Cookie Exceptions -->
+              <div id="cookie-exceptions-container" class="sub-setting" style="display: none">
+                <label class="setting-label">Cookie Exceptions</label>
+                <p class="setting-description">
+                  Sites in this list can set cookies even when embedded on other sites.
+                </p>
+                <div id="cookie-exceptions-list" class="items-list"></div>
+                <div class="add-item-form">
+                  <input
+                    type="text"
+                    id="cookie-exception-input"
+                    class="form-input"
+                    placeholder="e.g., accounts.google.com"
+                  />
+                  <button class="btn btn-sm btn-secondary" id="add-cookie-exception-btn">
+                    <i data-lucide="plus" width="14" height="14"></i> Add
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Additional Cookie Controls -->
+            <div class="setting-group">
+              <label class="setting-label">Additional Cookie Controls</label>
+              <div class="setting-toggle-row">
+                <div>
+                  <label class="setting-label-sm">Block all cookies</label>
+                  <p class="setting-description">
+                    Overrides the above. Blocks first-party and third-party cookies.
+                  </p>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="block-all-cookies-toggle" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="setting-toggle-row">
+                <div>
+                  <label class="setting-label-sm">Clear cookies on browser close</label>
+                  <p class="setting-description">
+                    Removes all cookies and site data when you quit the browser.
+                  </p>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="clear-cookies-close-toggle" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="setting-action-row">
+                <div>
+                  <label class="setting-label-sm">Clear all cookies now</label>
+                  <p class="setting-description" id="cookie-count-display">
+                    Remove all stored cookies.
+                  </p>
+                </div>
+                <button class="btn btn-sm btn-secondary" id="clear-cookies-btn">
+                  <i data-lucide="trash-2" width="14" height="14"></i> Clear Cookies
+                </button>
+              </div>
+            </div>
+
+            <!-- Ad-Blocker -->
+            <div class="setting-group">
+              <div class="setting-toggle-row">
+                <div>
+                  <label class="setting-label">Block ads and trackers</label>
+                  <p class="setting-description">
+                    Blocks ad and tracking requests before they load. Improves page speed and
+                    privacy.
+                  </p>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="adblocker-toggle" checked />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <div id="adblocker-details" class="sub-setting">
+                <!-- Filter Lists -->
+                <label class="setting-label">Filter Lists</label>
+                <div id="filter-lists-container" class="items-list"></div>
+
+                <!-- Custom Filter List -->
+                <div class="add-item-form">
+                  <input
+                    type="text"
+                    id="custom-filter-url"
+                    class="form-input"
+                    placeholder="Custom filter list URL"
+                  />
+                  <button class="btn btn-sm btn-secondary" id="add-filter-btn">
+                    <i data-lucide="plus" width="14" height="14"></i> Add List
+                  </button>
+                </div>
+
+                <!-- Allowed Sites -->
+                <label class="setting-label mt-md">Allowed Sites</label>
+                <p class="setting-description">Sites where the ad-blocker is disabled.</p>
+                <div id="adblocker-allowed-sites" class="items-list"></div>
+                <div class="add-item-form">
+                  <input
+                    type="text"
+                    id="allowed-site-input"
+                    class="form-input"
+                    placeholder="e.g., example.com"
+                  />
+                  <button class="btn btn-sm btn-secondary" id="add-allowed-site-btn">
+                    <i data-lucide="plus" width="14" height="14"></i> Add Site
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pop-up Blocking -->
+            <div class="setting-group">
+              <label class="setting-label">Pop-up Windows</label>
+              <p class="setting-description">Control whether websites can open pop-up windows.</p>
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="popup-policy" value="block" />
+                  <span class="radio-label">Block pop-ups</span>
+                  <span class="radio-description"
+                    >Pop-ups are blocked unless the site is in your allowed list.</span
+                  >
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="popup-policy" value="smart" checked />
+                  <span class="radio-label"
+                    >Smart allow <span class="badge-recommend">Recommended</span></span
+                  >
+                  <span class="radio-description"
+                    >Allow up to 3 pop-ups per 60 seconds from a site, then block until the window
+                    resets.</span
+                  >
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="popup-policy" value="allow" />
+                  <span class="radio-label">Allow all pop-ups</span>
+                  <span class="radio-description"
+                    >All pop-ups are allowed unless the site is in your blocked list.</span
+                  >
+                </label>
+              </div>
+
+              <!-- Allowed Sites (shown when policy is 'block') -->
+              <div id="popup-allowed-container" class="sub-setting">
+                <label class="setting-label">Allowed Sites</label>
+                <p class="setting-description">Sites that are always allowed to open pop-ups.</p>
+                <div id="popup-allowed-list" class="items-list"></div>
+                <div class="add-item-form">
+                  <input
+                    type="text"
+                    id="popup-allowed-input"
+                    class="form-input"
+                    placeholder="e.g., accounts.google.com"
+                  />
+                  <button class="btn btn-sm btn-secondary" id="add-popup-allowed-btn">
+                    <i data-lucide="plus" width="14" height="14"></i> Add
+                  </button>
+                </div>
+              </div>
+
+              <!-- Blocked Sites (shown when policy is 'allow') -->
+              <div id="popup-blocked-container" class="sub-setting" style="display: none">
+                <label class="setting-label">Blocked Sites</label>
+                <p class="setting-description">Sites that are never allowed to open pop-ups.</p>
+                <div id="popup-blocked-list" class="items-list"></div>
+                <div class="add-item-form">
+                  <input
+                    type="text"
+                    id="popup-blocked-input"
+                    class="form-input"
+                    placeholder="e.g., annoying-ads.com"
+                  />
+                  <button class="btn btn-sm btn-secondary" id="add-popup-blocked-btn">
+                    <i data-lucide="plus" width="14" height="14"></i> Add
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Data Retention & Auto-Deletion -->
+            <div class="setting-group">
+              <label class="setting-label">Browsing Data</label>
+
+              <!-- Manual Clear -->
+              <div class="setting-action-row">
+                <div>
+                  <label class="setting-label-sm">Clear browsing data</label>
+                  <p class="setting-description">Remove history, cookies, cache, and other data.</p>
+                </div>
+                <button class="btn btn-sm btn-secondary" id="clear-data-btn">
+                  <i data-lucide="trash-2" width="14" height="14"></i> Clear Data...
+                </button>
+              </div>
+
+              <!-- Auto-Deletion Toggle -->
+              <div class="setting-toggle-row mt-md">
+                <div>
+                  <label class="setting-label-sm">Auto-delete old browsing data</label>
+                  <p class="setting-description">
+                    Automatically remove data older than the configured retention period.
+                  </p>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="auto-delete-toggle" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <!-- Retention Periods -->
+              <div id="retention-settings" class="sub-setting" style="display: none">
+                <div class="retention-grid">
+                  <div class="retention-row">
+                    <span>Browsing history</span>
+                    <select id="retention-history" class="form-select-sm">
+                      <option value="1">1 day</option>
+                      <option value="7">7 days</option>
+                      <option value="30" selected>30 days</option>
+                      <option value="90">90 days</option>
+                      <option value="180">6 months</option>
+                      <option value="365">1 year</option>
+                      <option value="never">Never</option>
+                    </select>
+                  </div>
+                  <div class="retention-row">
+                    <span>Download history</span>
+                    <select id="retention-downloads" class="form-select-sm">
+                      <option value="1">1 day</option>
+                      <option value="7">7 days</option>
+                      <option value="30">30 days</option>
+                      <option value="90" selected>90 days</option>
+                      <option value="180">6 months</option>
+                      <option value="365">1 year</option>
+                      <option value="never">Never</option>
+                    </select>
+                  </div>
+                  <div class="retention-row">
+                    <span>Cookies &amp; site data</span>
+                    <select id="retention-cookies" class="form-select-sm">
+                      <option value="1">1 day</option>
+                      <option value="7">7 days</option>
+                      <option value="30" selected>30 days</option>
+                      <option value="90">90 days</option>
+                      <option value="180">6 months</option>
+                      <option value="365">1 year</option>
+                      <option value="never">Never</option>
+                    </select>
+                  </div>
+                  <div class="retention-row">
+                    <span>Cached images &amp; files</span>
+                    <select id="retention-cache" class="form-select-sm">
+                      <option value="1">1 day</option>
+                      <option value="7">7 days</option>
+                      <option value="30" selected>30 days</option>
+                      <option value="90">90 days</option>
+                      <option value="180">6 months</option>
+                      <option value="365">1 year</option>
+                      <option value="never">Never</option>
+                    </select>
+                  </div>
+                  <div class="retention-row">
+                    <span>Autofill form data</span>
+                    <select id="retention-autofill" class="form-select-sm">
+                      <option value="1">1 day</option>
+                      <option value="7">7 days</option>
+                      <option value="30">30 days</option>
+                      <option value="90">90 days</option>
+                      <option value="180">6 months</option>
+                      <option value="365">1 year</option>
+                      <option value="never" selected>Never</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Clear on Close -->
+              <div class="mt-md">
+                <label class="setting-label">Clear on Close</label>
+                <div class="setting-toggle-row">
+                  <label class="setting-label-sm">Clear browsing history on close</label>
+                  <label class="toggle">
+                    <input type="checkbox" id="clear-history-close-toggle" />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="setting-toggle-row">
+                  <label class="setting-label-sm">Clear cache on close</label>
+                  <label class="toggle">
+                    <input type="checkbox" id="clear-cache-close-toggle" />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ====== PERMISSIONS SECTION ====== -->
+          <section
+            id="section-permissions"
+            class="settings-section"
+            data-keywords="permissions site permission camera microphone location geolocation notifications midi screen sharing clipboard usb bluetooth serial allowed denied grant revoke"
+          >
+            <h2 class="section-title">Site Permissions</h2>
+            <p class="setting-description">
+              Manage permissions you've granted or denied to websites.
+            </p>
+
+            <div class="setting-group">
+              <div class="permissions-search">
+                <input
+                  type="text"
+                  id="permissions-search"
+                  class="form-input"
+                  placeholder="Search by site or permission type..."
+                />
+                <button
+                  class="btn btn-sm btn-secondary"
+                  id="refresh-permissions-btn"
+                  title="Refresh"
+                >
+                  <i data-lucide="refresh-cw" width="14" height="14"></i>
+                </button>
+              </div>
+              <div id="permissions-list"></div>
+              <div id="permissions-empty" class="permissions-empty" style="display: none">
+                <i data-lucide="shield-check" class="permissions-empty-icon"></i>
+                <p>No site permissions have been granted or denied yet.</p>
+                <p class="permissions-empty-hint">
+                  When you choose <strong>Always Allow</strong> or <strong>Always Deny</strong> on a
+                  site, it will appear here.
+                </p>
+              </div>
+            </div>
+
+            <div class="permissions-footer" id="permissions-footer" style="display: none">
+              <button class="btn btn-sm btn-secondary" id="clear-all-permissions-btn">
+                <i data-lucide="trash-2" width="14" height="14"></i> Clear All Permissions
+              </button>
+            </div>
+          </section>
+
+          <!-- ====== NETWORK SECTION ====== -->
+          <section
+            id="section-network"
+            class="settings-section"
+            data-keywords="network proxy http https socks pac auto-config direct system manual connection user agent browser identity chrome safari firefox edge custom"
+          >
+            <h2 class="section-title">Network</h2>
+
+            <!-- User Agent -->
+            <div class="setting-group">
+              <label class="setting-label">User Agent</label>
+              <p class="setting-description">
+                Controls how this browser identifies itself to websites. Some sites may serve
+                different content based on the browser identity.
+              </p>
+              <select id="user-agent-select" class="form-select">
+                <option value="chrome-windows">Chrome on Windows</option>
+                <option value="chrome-mac">Chrome on macOS</option>
+                <option value="chrome-linux">Chrome on Linux</option>
+                <option value="firefox-windows">Firefox on Windows</option>
+                <option value="firefox-mac">Firefox on macOS</option>
+                <option value="firefox-linux">Firefox on Linux</option>
+                <option value="safari-mac">Safari on macOS</option>
+                <option value="edge-windows">Edge on Windows</option>
+                <option value="custom">Custom...</option>
+              </select>
+              <div id="custom-ua-container" class="sub-setting" style="display: none">
+                <label class="setting-label">Custom User Agent String</label>
+                <input
+                  type="text"
+                  id="custom-ua-input"
+                  class="form-input"
+                  placeholder="Enter your custom user agent string..."
+                />
+              </div>
+              <p
+                class="setting-description"
+                id="ua-preview"
+                style="
+                  margin-top: 8px;
+                  font-family: monospace;
+                  font-size: 11px;
+                  word-break: break-all;
+                "
+              ></p>
+            </div>
+
+            <div class="setting-group">
+              <label class="setting-label">Proxy Configuration</label>
+              <p class="setting-description">Configure how the browser connects to the internet.</p>
+
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="proxy-mode" value="direct" checked />
+                  <span class="radio-label">Direct connection (no proxy)</span>
+                  <span class="radio-description"
+                    >All traffic goes directly to the destination.</span
+                  >
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="proxy-mode" value="system" />
+                  <span class="radio-label">Use system proxy settings</span>
+                  <span class="radio-description">Inherit proxy configuration from the OS.</span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="proxy-mode" value="manual" />
+                  <span class="radio-label">Manual proxy configuration</span>
+                  <span class="radio-description">Specify proxy server details directly.</span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="proxy-mode" value="pac" />
+                  <span class="radio-label">Automatic proxy configuration URL (PAC)</span>
+                  <span class="radio-description">Provide a URL to a PAC file.</span>
+                </label>
+              </div>
+
+              <!-- Manual Proxy Form -->
+              <div id="manual-proxy-form" class="sub-setting" style="display: none">
+                <div class="proxy-grid">
+                  <div class="proxy-row">
+                    <label>HTTP Proxy</label>
+                    <div class="proxy-inputs">
+                      <input
+                        type="text"
+                        id="proxy-http-host"
+                        class="form-input"
+                        placeholder="proxy.example.com"
+                      />
+                      <input
+                        type="text"
+                        id="proxy-http-port"
+                        class="form-input form-input-sm"
+                        placeholder="8080"
+                      />
+                    </div>
+                  </div>
+                  <div class="proxy-row">
+                    <label>HTTPS Proxy</label>
+                    <div class="proxy-inputs">
+                      <input
+                        type="text"
+                        id="proxy-https-host"
+                        class="form-input"
+                        placeholder="(optional, falls back to HTTP)"
+                      />
+                      <input
+                        type="text"
+                        id="proxy-https-port"
+                        class="form-input form-input-sm"
+                        placeholder="8443"
+                      />
+                    </div>
+                  </div>
+                  <div class="proxy-row">
+                    <label>SOCKS Proxy</label>
+                    <div class="proxy-inputs">
+                      <input
+                        type="text"
+                        id="proxy-socks-host"
+                        class="form-input"
+                        placeholder="(optional)"
+                      />
+                      <input
+                        type="text"
+                        id="proxy-socks-port"
+                        class="form-input form-input-sm"
+                        placeholder="1080"
+                      />
+                      <select id="proxy-socks-version" class="form-select-sm">
+                        <option value="5">SOCKS5</option>
+                        <option value="4">SOCKS4</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="proxy-row">
+                    <label>No proxy for</label>
+                    <input
+                      type="text"
+                      id="proxy-bypass"
+                      class="form-input"
+                      placeholder="localhost, 127.0.0.1, *.internal.corp.com"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- PAC URL Form -->
+              <div id="pac-proxy-form" class="sub-setting" style="display: none">
+                <div class="form-group">
+                  <label>PAC File URL</label>
+                  <input
+                    type="text"
+                    id="proxy-pac-url"
+                    class="form-input"
+                    placeholder="http://proxy.corp.com/proxy.pac"
+                  />
+                </div>
+              </div>
+
+              <!-- Bypass internal toggle -->
+              <div class="setting-toggle-row mt-md">
+                <div>
+                  <label class="setting-label-sm">Bypass proxy for Nav0 internal traffic</label>
+                  <p class="setting-description">
+                    Filter list updates and internal requests bypass the proxy.
+                  </p>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="bypass-internal-toggle" checked />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <!-- ====== KEYBOARD SHORTCUTS SECTION ====== -->
+          <section
+            id="section-shortcuts"
+            class="settings-section"
+            data-keywords="keyboard shortcuts keybinding hotkey accelerator rebind custom key combination ctrl cmd alt shift tab window navigation"
+          >
+            <h2 class="section-title">Keyboard Shortcuts</h2>
+
+            <div class="setting-group">
+              <!-- Category Filter -->
+              <div class="shortcuts-filter">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="Tabs">Tabs</button>
+                <button class="filter-btn" data-filter="Window">Window</button>
+                <button class="filter-btn" data-filter="Navigation">Navigation</button>
+                <button class="filter-btn" data-filter="Utilities">Utilities</button>
+                <button class="filter-btn" data-filter="Bookmarks">Bookmarks</button>
+                <button class="filter-btn" data-filter="Developer">Developer</button>
+                <button class="filter-btn" data-filter="View">View</button>
+              </div>
+
+              <!-- Search -->
+              <div class="shortcuts-search">
+                <input
+                  type="text"
+                  id="shortcut-search"
+                  class="form-input"
+                  placeholder="Search shortcuts..."
+                />
+              </div>
+
+              <!-- Shortcuts Table -->
+              <div class="shortcuts-table-container">
+                <table class="shortcuts-table" id="shortcuts-table">
+                  <thead>
+                    <tr>
+                      <th>Action</th>
+                      <th>Category</th>
+                      <th>Default</th>
+                      <th>Current Shortcut</th>
+                      <th>Reset</th>
+                    </tr>
+                  </thead>
+                  <tbody id="shortcuts-tbody">
+                    <!-- Populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="mt-md" style="text-align: right">
+                <button class="btn btn-sm btn-secondary" id="reset-all-shortcuts-btn">
+                  <i data-lucide="rotate-ccw" width="14" height="14"></i> Reset All to Defaults
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ====== DEVELOPER SECTION ====== -->
+          <section
+            id="section-developer"
+            class="settings-section"
+            data-keywords="developer devtools dev tools inspect element console debug chromium"
+          >
+            <h2 class="section-title">Developer</h2>
+
+            <!-- Developer Tools Toggle -->
+            <div class="setting-group">
+              <div class="setting-toggle-row">
+                <div>
+                  <label class="setting-label">Enable Developer Tools</label>
+                  <p class="setting-description">
+                    Allow opening Chromium Developer Tools to inspect pages, debug JavaScript, and
+                    monitor network activity. Use <kbd>Cmd+Opt+I</kbd> (macOS) or
+                    <kbd>Ctrl+Shift+I</kbd> (Windows/Linux) to toggle.
+                  </p>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="devtools-toggle" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </section>
+        </main>
       </div>
-      <ul class="sidebar-nav">
-        <li><a href="#general" class="sidebar-link active" data-section="general"><i data-lucide="settings" width="16" height="16"></i> General</a></li>
-        <li><a href="#startup" class="sidebar-link" data-section="startup"><i data-lucide="play" width="16" height="16"></i> On startup</a></li>
-        <li><a href="#search" class="sidebar-link" data-section="search"><i data-lucide="search" width="16" height="16"></i> Search</a></li>
-        <li><a href="#privacy" class="sidebar-link" data-section="privacy"><i data-lucide="shield" width="16" height="16"></i> Privacy &amp; Security</a></li>
-        <li><a href="#permissions" class="sidebar-link" data-section="permissions"><i data-lucide="shield-check" width="16" height="16"></i> Permissions</a></li>
-        <li><a href="#network" class="sidebar-link" data-section="network"><i data-lucide="globe" width="16" height="16"></i> Network</a></li>
-        <li><a href="#shortcuts" class="sidebar-link" data-section="shortcuts"><i data-lucide="keyboard" width="16" height="16"></i> Keyboard Shortcuts</a></li>
-        <li><a href="#developer" class="sidebar-link" data-section="developer"><i data-lucide="code" width="16" height="16"></i> Developer</a></li>
-      </ul>
-    </nav>
-
-    <!-- Content -->
-    <div class="settings-content-wrapper">
-    <main class="settings-content" id="settings-content">
-
-      <!-- ====== GENERAL SECTION ====== -->
-      <section id="section-general" class="settings-section active" data-keywords="general downloads download location folder path save directory">
-        <h2 class="section-title">General</h2>
-
-        <!-- Downloads Location -->
-        <div class="setting-group">
-          <label class="setting-label">Downloads Location</label>
-          <p class="setting-description">Choose where downloaded files are saved.</p>
-          <div class="setting-action-row">
-            <div style="min-width: 0; flex: 1;">
-              <span id="download-path-display" class="setting-description" style="margin: 0; word-break: break-all;"></span>
-            </div>
-            <div style="display: flex; gap: 6px;">
-              <button class="btn btn-sm btn-secondary" id="change-download-path-btn"><i data-lucide="folder" width="14" height="14"></i> Change</button>
-              <button class="btn btn-sm btn-ghost" id="reset-download-path-btn"><i data-lucide="rotate-ccw" width="14" height="14"></i> Reset</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ====== ON STARTUP SECTION ====== -->
-      <section id="section-startup" class="settings-section" data-keywords="startup launch open start page continue session restore tabs">
-        <h2 class="section-title">On startup</h2>
-
-        <div class="setting-group">
-          <div class="radio-group">
-            <label class="radio-option">
-              <input type="radio" name="startup-mode" value="new-tab">
-              <span class="radio-label">Open the New tab page</span>
-              <span class="radio-description">Start with a fresh new tab every time.</span>
-            </label>
-            <label class="radio-option">
-              <input type="radio" name="startup-mode" value="continue" checked>
-              <span class="radio-label">Continue where you left off</span>
-              <span class="radio-description">Restore tabs from your previous browsing session.</span>
-            </label>
-            <label class="radio-option">
-              <input type="radio" name="startup-mode" value="specific-pages">
-              <span class="radio-label">Open a specific page or set of pages</span>
-              <span class="radio-description">Choose which pages open when the browser starts.</span>
-            </label>
-          </div>
-
-          <!-- Startup Pages List (shown when 'specific-pages' is selected) -->
-          <div id="startup-pages-container" class="sub-setting" style="display: none;">
-            <label class="setting-label">Startup Pages</label>
-            <p class="setting-description">These pages will open as tabs when you start the browser.</p>
-            <div id="startup-pages-list" class="items-list"></div>
-            <div class="add-item-form">
-              <input type="text" id="startup-page-input" class="form-input" placeholder="e.g., https://example.com">
-              <button class="btn btn-sm btn-secondary" id="add-startup-page-btn"><i data-lucide="plus" width="14" height="14"></i> Add Page</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ====== SEARCH SECTION ====== -->
-      <section id="section-search" class="settings-section" data-keywords="search engine default query url bar duckduckgo google bing brave startpage ecosia custom suggestions">
-        <h2 class="section-title">Search</h2>
-
-        <!-- Default Search Engine -->
-        <div class="setting-group">
-          <label class="setting-label">Default Search Engine</label>
-          <p class="setting-description">Choose the search engine used when you type queries in the URL bar.</p>
-          <select id="search-engine-select" class="form-select">
-            <option value="DuckDuckGo">DuckDuckGo</option>
-            <option value="Google">Google</option>
-            <option value="Bing">Bing</option>
-            <option value="Brave Search">Brave Search</option>
-            <option value="Startpage">Startpage</option>
-            <option value="Ecosia">Ecosia</option>
-          </select>
-        </div>
-
-        <!-- Search Suggestions -->
-        <div class="setting-group">
-          <div class="setting-toggle-row">
-            <div>
-              <label class="setting-label">Show search suggestions as I type</label>
-              <p class="setting-description">Sends keystrokes to the search engine. Disabled in private browsing.</p>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" id="search-suggestions-toggle">
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Custom Search Engines -->
-        <div class="setting-group">
-          <label class="setting-label">Custom Search Engines</label>
-          <p class="setting-description">Add a custom search engine using a URL template with <code>%s</code> as the query placeholder.</p>
-          <div id="custom-engines-list" class="items-list"></div>
-          <div class="add-item-form" id="add-engine-form">
-            <input type="text" id="custom-engine-name" class="form-input" placeholder="Engine name">
-            <input type="text" id="custom-engine-url" class="form-input" placeholder="Search URL (e.g., https://example.com/search?q=%s)">
-            <button class="btn btn-sm btn-secondary" id="add-engine-btn"><i data-lucide="plus" width="14" height="14"></i> Add Engine</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- ====== PRIVACY & SECURITY SECTION ====== -->
-      <section id="section-privacy" class="settings-section" data-keywords="privacy security cookies third-party block exceptions clear ad blocker tracker filter list easylist data retention auto-delete browsing history cache popup popups pop-up window open allow block site">
-        <h2 class="section-title">Privacy &amp; Security</h2>
-
-        <!-- Third-Party Cookie Policy -->
-        <div class="setting-group">
-          <label class="setting-label">Third-Party Cookies</label>
-          <p class="setting-description">Control how cookies from other sites are handled when you browse.</p>
-          <div class="radio-group">
-            <label class="radio-option">
-              <input type="radio" name="cookie-policy" value="block-all-third-party" checked>
-              <span class="radio-label">Block all third-party cookies <span class="badge-recommend">Recommended</span></span>
-              <span class="radio-description">No cross-site cookies are stored or sent. Strictest privacy.</span>
-            </label>
-            <label class="radio-option">
-              <input type="radio" name="cookie-policy" value="block-with-exceptions">
-              <span class="radio-label">Block third-party cookies with exceptions</span>
-              <span class="radio-description">Block by default, but allow for sites you specify.</span>
-            </label>
-            <label class="radio-option">
-              <input type="radio" name="cookie-policy" value="allow-all">
-              <span class="radio-label">Allow all cookies</span>
-              <span class="radio-description">No restrictions on third-party cookies (not recommended).</span>
-            </label>
-          </div>
-
-          <!-- Cookie Exceptions -->
-          <div id="cookie-exceptions-container" class="sub-setting" style="display: none;">
-            <label class="setting-label">Cookie Exceptions</label>
-            <p class="setting-description">Sites in this list can set cookies even when embedded on other sites.</p>
-            <div id="cookie-exceptions-list" class="items-list"></div>
-            <div class="add-item-form">
-              <input type="text" id="cookie-exception-input" class="form-input" placeholder="e.g., accounts.google.com">
-              <button class="btn btn-sm btn-secondary" id="add-cookie-exception-btn"><i data-lucide="plus" width="14" height="14"></i> Add</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Additional Cookie Controls -->
-        <div class="setting-group">
-          <label class="setting-label">Additional Cookie Controls</label>
-          <div class="setting-toggle-row">
-            <div>
-              <label class="setting-label-sm">Block all cookies</label>
-              <p class="setting-description">Overrides the above. Blocks first-party and third-party cookies.</p>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" id="block-all-cookies-toggle">
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-          <div class="setting-toggle-row">
-            <div>
-              <label class="setting-label-sm">Clear cookies on browser close</label>
-              <p class="setting-description">Removes all cookies and site data when you quit the browser.</p>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" id="clear-cookies-close-toggle">
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-          <div class="setting-action-row">
-            <div>
-              <label class="setting-label-sm">Clear all cookies now</label>
-              <p class="setting-description" id="cookie-count-display">Remove all stored cookies.</p>
-            </div>
-            <button class="btn btn-sm btn-secondary" id="clear-cookies-btn"><i data-lucide="trash-2" width="14" height="14"></i> Clear Cookies</button>
-          </div>
-        </div>
-
-        <!-- Ad-Blocker -->
-        <div class="setting-group">
-          <div class="setting-toggle-row">
-            <div>
-              <label class="setting-label">Block ads and trackers</label>
-              <p class="setting-description">Blocks ad and tracking requests before they load. Improves page speed and privacy.</p>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" id="adblocker-toggle" checked>
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-
-          <div id="adblocker-details" class="sub-setting">
-            <!-- Filter Lists -->
-            <label class="setting-label">Filter Lists</label>
-            <div id="filter-lists-container" class="items-list"></div>
-
-            <!-- Custom Filter List -->
-            <div class="add-item-form">
-              <input type="text" id="custom-filter-url" class="form-input" placeholder="Custom filter list URL">
-              <button class="btn btn-sm btn-secondary" id="add-filter-btn"><i data-lucide="plus" width="14" height="14"></i> Add List</button>
-            </div>
-
-            <!-- Allowed Sites -->
-            <label class="setting-label mt-md">Allowed Sites</label>
-            <p class="setting-description">Sites where the ad-blocker is disabled.</p>
-            <div id="adblocker-allowed-sites" class="items-list"></div>
-            <div class="add-item-form">
-              <input type="text" id="allowed-site-input" class="form-input" placeholder="e.g., example.com">
-              <button class="btn btn-sm btn-secondary" id="add-allowed-site-btn"><i data-lucide="plus" width="14" height="14"></i> Add Site</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Pop-up Blocking -->
-        <div class="setting-group">
-          <label class="setting-label">Pop-up Windows</label>
-          <p class="setting-description">Control whether websites can open pop-up windows.</p>
-          <div class="radio-group">
-            <label class="radio-option">
-              <input type="radio" name="popup-policy" value="block">
-              <span class="radio-label">Block pop-ups</span>
-              <span class="radio-description">Pop-ups are blocked unless the site is in your allowed list.</span>
-            </label>
-            <label class="radio-option">
-              <input type="radio" name="popup-policy" value="smart" checked>
-              <span class="radio-label">Smart allow <span class="badge-recommend">Recommended</span></span>
-              <span class="radio-description">Allow up to 3 pop-ups per 60 seconds from a site, then block until the window resets.</span>
-            </label>
-            <label class="radio-option">
-              <input type="radio" name="popup-policy" value="allow">
-              <span class="radio-label">Allow all pop-ups</span>
-              <span class="radio-description">All pop-ups are allowed unless the site is in your blocked list.</span>
-            </label>
-          </div>
-
-          <!-- Allowed Sites (shown when policy is 'block') -->
-          <div id="popup-allowed-container" class="sub-setting">
-            <label class="setting-label">Allowed Sites</label>
-            <p class="setting-description">Sites that are always allowed to open pop-ups.</p>
-            <div id="popup-allowed-list" class="items-list"></div>
-            <div class="add-item-form">
-              <input type="text" id="popup-allowed-input" class="form-input" placeholder="e.g., accounts.google.com">
-              <button class="btn btn-sm btn-secondary" id="add-popup-allowed-btn"><i data-lucide="plus" width="14" height="14"></i> Add</button>
-            </div>
-          </div>
-
-          <!-- Blocked Sites (shown when policy is 'allow') -->
-          <div id="popup-blocked-container" class="sub-setting" style="display: none;">
-            <label class="setting-label">Blocked Sites</label>
-            <p class="setting-description">Sites that are never allowed to open pop-ups.</p>
-            <div id="popup-blocked-list" class="items-list"></div>
-            <div class="add-item-form">
-              <input type="text" id="popup-blocked-input" class="form-input" placeholder="e.g., annoying-ads.com">
-              <button class="btn btn-sm btn-secondary" id="add-popup-blocked-btn"><i data-lucide="plus" width="14" height="14"></i> Add</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Data Retention & Auto-Deletion -->
-        <div class="setting-group">
-          <label class="setting-label">Browsing Data</label>
-
-          <!-- Manual Clear -->
-          <div class="setting-action-row">
-            <div>
-              <label class="setting-label-sm">Clear browsing data</label>
-              <p class="setting-description">Remove history, cookies, cache, and other data.</p>
-            </div>
-            <button class="btn btn-sm btn-secondary" id="clear-data-btn"><i data-lucide="trash-2" width="14" height="14"></i> Clear Data...</button>
-          </div>
-
-          <!-- Auto-Deletion Toggle -->
-          <div class="setting-toggle-row mt-md">
-            <div>
-              <label class="setting-label-sm">Auto-delete old browsing data</label>
-              <p class="setting-description">Automatically remove data older than the configured retention period.</p>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" id="auto-delete-toggle">
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-
-          <!-- Retention Periods -->
-          <div id="retention-settings" class="sub-setting" style="display: none;">
-            <div class="retention-grid">
-              <div class="retention-row">
-                <span>Browsing history</span>
-                <select id="retention-history" class="form-select-sm">
-                  <option value="1">1 day</option>
-                  <option value="7">7 days</option>
-                  <option value="30" selected>30 days</option>
-                  <option value="90">90 days</option>
-                  <option value="180">6 months</option>
-                  <option value="365">1 year</option>
-                  <option value="never">Never</option>
-                </select>
-              </div>
-              <div class="retention-row">
-                <span>Download history</span>
-                <select id="retention-downloads" class="form-select-sm">
-                  <option value="1">1 day</option>
-                  <option value="7">7 days</option>
-                  <option value="30">30 days</option>
-                  <option value="90" selected>90 days</option>
-                  <option value="180">6 months</option>
-                  <option value="365">1 year</option>
-                  <option value="never">Never</option>
-                </select>
-              </div>
-              <div class="retention-row">
-                <span>Cookies &amp; site data</span>
-                <select id="retention-cookies" class="form-select-sm">
-                  <option value="1">1 day</option>
-                  <option value="7">7 days</option>
-                  <option value="30" selected>30 days</option>
-                  <option value="90">90 days</option>
-                  <option value="180">6 months</option>
-                  <option value="365">1 year</option>
-                  <option value="never">Never</option>
-                </select>
-              </div>
-              <div class="retention-row">
-                <span>Cached images &amp; files</span>
-                <select id="retention-cache" class="form-select-sm">
-                  <option value="1">1 day</option>
-                  <option value="7">7 days</option>
-                  <option value="30" selected>30 days</option>
-                  <option value="90">90 days</option>
-                  <option value="180">6 months</option>
-                  <option value="365">1 year</option>
-                  <option value="never">Never</option>
-                </select>
-              </div>
-              <div class="retention-row">
-                <span>Autofill form data</span>
-                <select id="retention-autofill" class="form-select-sm">
-                  <option value="1">1 day</option>
-                  <option value="7">7 days</option>
-                  <option value="30">30 days</option>
-                  <option value="90">90 days</option>
-                  <option value="180">6 months</option>
-                  <option value="365">1 year</option>
-                  <option value="never" selected>Never</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <!-- Clear on Close -->
-          <div class="mt-md">
-            <label class="setting-label">Clear on Close</label>
-            <div class="setting-toggle-row">
-              <label class="setting-label-sm">Clear browsing history on close</label>
-              <label class="toggle">
-                <input type="checkbox" id="clear-history-close-toggle">
-                <span class="toggle-slider"></span>
-              </label>
-            </div>
-            <div class="setting-toggle-row">
-              <label class="setting-label-sm">Clear cache on close</label>
-              <label class="toggle">
-                <input type="checkbox" id="clear-cache-close-toggle">
-                <span class="toggle-slider"></span>
-              </label>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ====== PERMISSIONS SECTION ====== -->
-      <section id="section-permissions" class="settings-section" data-keywords="permissions site permission camera microphone location geolocation notifications midi screen sharing clipboard usb bluetooth serial allowed denied grant revoke">
-        <h2 class="section-title">Site Permissions</h2>
-        <p class="setting-description">Manage permissions you've granted or denied to websites.</p>
-
-        <div class="setting-group">
-          <div class="permissions-search">
-            <input type="text" id="permissions-search" class="form-input" placeholder="Search by site or permission type...">
-            <button class="btn btn-sm btn-secondary" id="refresh-permissions-btn" title="Refresh"><i data-lucide="refresh-cw" width="14" height="14"></i></button>
-          </div>
-          <div id="permissions-list"></div>
-          <div id="permissions-empty" class="permissions-empty" style="display: none;">
-            <i data-lucide="shield-check" class="permissions-empty-icon"></i>
-            <p>No site permissions have been granted or denied yet.</p>
-            <p class="permissions-empty-hint">When you choose <strong>Always Allow</strong> or <strong>Always Deny</strong> on a site, it will appear here.</p>
-          </div>
-        </div>
-
-        <div class="permissions-footer" id="permissions-footer" style="display: none;">
-          <button class="btn btn-sm btn-secondary" id="clear-all-permissions-btn"><i data-lucide="trash-2" width="14" height="14"></i> Clear All Permissions</button>
-        </div>
-      </section>
-
-      <!-- ====== NETWORK SECTION ====== -->
-      <section id="section-network" class="settings-section" data-keywords="network proxy http https socks pac auto-config direct system manual connection user agent browser identity chrome safari firefox edge custom">
-        <h2 class="section-title">Network</h2>
-
-        <!-- User Agent -->
-        <div class="setting-group">
-          <label class="setting-label">User Agent</label>
-          <p class="setting-description">Controls how this browser identifies itself to websites. Some sites may serve different content based on the browser identity.</p>
-          <select id="user-agent-select" class="form-select">
-            <option value="chrome-windows">Chrome on Windows</option>
-            <option value="chrome-mac">Chrome on macOS</option>
-            <option value="chrome-linux">Chrome on Linux</option>
-            <option value="firefox-windows">Firefox on Windows</option>
-            <option value="firefox-mac">Firefox on macOS</option>
-            <option value="firefox-linux">Firefox on Linux</option>
-            <option value="safari-mac">Safari on macOS</option>
-            <option value="edge-windows">Edge on Windows</option>
-            <option value="custom">Custom...</option>
-          </select>
-          <div id="custom-ua-container" class="sub-setting" style="display: none;">
-            <label class="setting-label">Custom User Agent String</label>
-            <input type="text" id="custom-ua-input" class="form-input" placeholder="Enter your custom user agent string...">
-          </div>
-          <p class="setting-description" id="ua-preview" style="margin-top: 8px; font-family: monospace; font-size: 11px; word-break: break-all;"></p>
-        </div>
-
-        <div class="setting-group">
-          <label class="setting-label">Proxy Configuration</label>
-          <p class="setting-description">Configure how the browser connects to the internet.</p>
-
-          <div class="radio-group">
-            <label class="radio-option">
-              <input type="radio" name="proxy-mode" value="direct" checked>
-              <span class="radio-label">Direct connection (no proxy)</span>
-              <span class="radio-description">All traffic goes directly to the destination.</span>
-            </label>
-            <label class="radio-option">
-              <input type="radio" name="proxy-mode" value="system">
-              <span class="radio-label">Use system proxy settings</span>
-              <span class="radio-description">Inherit proxy configuration from the OS.</span>
-            </label>
-            <label class="radio-option">
-              <input type="radio" name="proxy-mode" value="manual">
-              <span class="radio-label">Manual proxy configuration</span>
-              <span class="radio-description">Specify proxy server details directly.</span>
-            </label>
-            <label class="radio-option">
-              <input type="radio" name="proxy-mode" value="pac">
-              <span class="radio-label">Automatic proxy configuration URL (PAC)</span>
-              <span class="radio-description">Provide a URL to a PAC file.</span>
-            </label>
-          </div>
-
-          <!-- Manual Proxy Form -->
-          <div id="manual-proxy-form" class="sub-setting" style="display: none;">
-            <div class="proxy-grid">
-              <div class="proxy-row">
-                <label>HTTP Proxy</label>
-                <div class="proxy-inputs">
-                  <input type="text" id="proxy-http-host" class="form-input" placeholder="proxy.example.com">
-                  <input type="text" id="proxy-http-port" class="form-input form-input-sm" placeholder="8080">
-                </div>
-              </div>
-              <div class="proxy-row">
-                <label>HTTPS Proxy</label>
-                <div class="proxy-inputs">
-                  <input type="text" id="proxy-https-host" class="form-input" placeholder="(optional, falls back to HTTP)">
-                  <input type="text" id="proxy-https-port" class="form-input form-input-sm" placeholder="8443">
-                </div>
-              </div>
-              <div class="proxy-row">
-                <label>SOCKS Proxy</label>
-                <div class="proxy-inputs">
-                  <input type="text" id="proxy-socks-host" class="form-input" placeholder="(optional)">
-                  <input type="text" id="proxy-socks-port" class="form-input form-input-sm" placeholder="1080">
-                  <select id="proxy-socks-version" class="form-select-sm">
-                    <option value="5">SOCKS5</option>
-                    <option value="4">SOCKS4</option>
-                  </select>
-                </div>
-              </div>
-              <div class="proxy-row">
-                <label>No proxy for</label>
-                <input type="text" id="proxy-bypass" class="form-input" placeholder="localhost, 127.0.0.1, *.internal.corp.com">
-              </div>
-            </div>
-          </div>
-
-          <!-- PAC URL Form -->
-          <div id="pac-proxy-form" class="sub-setting" style="display: none;">
-            <div class="form-group">
-              <label>PAC File URL</label>
-              <input type="text" id="proxy-pac-url" class="form-input" placeholder="http://proxy.corp.com/proxy.pac">
-            </div>
-          </div>
-
-          <!-- Bypass internal toggle -->
-          <div class="setting-toggle-row mt-md">
-            <div>
-              <label class="setting-label-sm">Bypass proxy for Nav0 internal traffic</label>
-              <p class="setting-description">Filter list updates and internal requests bypass the proxy.</p>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" id="bypass-internal-toggle" checked>
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-        </div>
-      </section>
-
-      <!-- ====== KEYBOARD SHORTCUTS SECTION ====== -->
-      <section id="section-shortcuts" class="settings-section" data-keywords="keyboard shortcuts keybinding hotkey accelerator rebind custom key combination ctrl cmd alt shift tab window navigation">
-        <h2 class="section-title">Keyboard Shortcuts</h2>
-
-        <div class="setting-group">
-          <!-- Category Filter -->
-          <div class="shortcuts-filter">
-            <button class="filter-btn active" data-filter="all">All</button>
-            <button class="filter-btn" data-filter="Tabs">Tabs</button>
-            <button class="filter-btn" data-filter="Window">Window</button>
-            <button class="filter-btn" data-filter="Navigation">Navigation</button>
-            <button class="filter-btn" data-filter="Utilities">Utilities</button>
-            <button class="filter-btn" data-filter="Bookmarks">Bookmarks</button>
-            <button class="filter-btn" data-filter="Developer">Developer</button>
-            <button class="filter-btn" data-filter="View">View</button>
-          </div>
-
-          <!-- Search -->
-          <div class="shortcuts-search">
-            <input type="text" id="shortcut-search" class="form-input" placeholder="Search shortcuts...">
-          </div>
-
-          <!-- Shortcuts Table -->
-          <div class="shortcuts-table-container">
-            <table class="shortcuts-table" id="shortcuts-table">
-              <thead>
-                <tr>
-                  <th>Action</th>
-                  <th>Category</th>
-                  <th>Default</th>
-                  <th>Current Shortcut</th>
-                  <th>Reset</th>
-                </tr>
-              </thead>
-              <tbody id="shortcuts-tbody">
-                <!-- Populated by JS -->
-              </tbody>
-            </table>
-          </div>
-
-          <div class="mt-md" style="text-align: right;">
-            <button class="btn btn-sm btn-secondary" id="reset-all-shortcuts-btn"><i data-lucide="rotate-ccw" width="14" height="14"></i> Reset All to Defaults</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- ====== DEVELOPER SECTION ====== -->
-      <section id="section-developer" class="settings-section" data-keywords="developer devtools dev tools inspect element console debug chromium">
-        <h2 class="section-title">Developer</h2>
-
-        <!-- Developer Tools Toggle -->
-        <div class="setting-group">
-          <div class="setting-toggle-row">
-            <div>
-              <label class="setting-label">Enable Developer Tools</label>
-              <p class="setting-description">Allow opening Chromium Developer Tools to inspect pages, debug JavaScript, and monitor network activity. Use <kbd>Cmd+Opt+I</kbd> (macOS) or <kbd>Ctrl+Shift+I</kbd> (Windows/Linux) to toggle.</p>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" id="devtools-toggle">
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-        </div>
-      </section>
-
-    </main>
     </div>
-  </div>
 
-  <!-- Clear Browsing Data Dialog -->
-  <div id="clear-data-dialog" class="dialog-overlay" style="display: none;">
-    <div class="dialog-box">
-      <h3 class="dialog-title">Clear Browsing Data</h3>
-      <div class="dialog-body">
-        <div class="form-group">
-          <label class="setting-label-sm">Time range</label>
-          <select id="clear-time-range" class="form-select">
-            <option value="last-hour">Last hour</option>
-            <option value="last-24h">Last 24 hours</option>
-            <option value="last-7d">Last 7 days</option>
-            <option value="last-30d">Last 30 days</option>
-            <option value="all-time" selected>All time</option>
-          </select>
+    <!-- Clear Browsing Data Dialog -->
+    <div id="clear-data-dialog" class="dialog-overlay" style="display: none">
+      <div class="dialog-box">
+        <h3 class="dialog-title">Clear Browsing Data</h3>
+        <div class="dialog-body">
+          <div class="form-group">
+            <label class="setting-label-sm">Time range</label>
+            <select id="clear-time-range" class="form-select">
+              <option value="last-hour">Last hour</option>
+              <option value="last-24h">Last 24 hours</option>
+              <option value="last-7d">Last 7 days</option>
+              <option value="last-30d">Last 30 days</option>
+              <option value="all-time" selected>All time</option>
+            </select>
+          </div>
+          <div class="dialog-checkboxes">
+            <label class="checkbox-option"
+              ><input type="checkbox" id="clear-history-cb" checked /> Browsing history</label
+            >
+            <label class="checkbox-option"
+              ><input type="checkbox" id="clear-downloads-cb" checked /> Download history</label
+            >
+            <label class="checkbox-option"
+              ><input type="checkbox" id="clear-cookies-cb" checked /> Cookies &amp; site
+              data</label
+            >
+            <label class="checkbox-option"
+              ><input type="checkbox" id="clear-cache-cb" checked /> Cached images &amp;
+              files</label
+            >
+            <label class="checkbox-option"
+              ><input type="checkbox" id="clear-autofill-cb" /> Autofill form data</label
+            >
+            <label class="checkbox-option"
+              ><input type="checkbox" id="clear-passwords-cb" /> Saved passwords</label
+            >
+            <label class="checkbox-option"
+              ><input type="checkbox" id="clear-permissions-cb" /> Site permissions</label
+            >
+          </div>
         </div>
-        <div class="dialog-checkboxes">
-          <label class="checkbox-option"><input type="checkbox" id="clear-history-cb" checked> Browsing history</label>
-          <label class="checkbox-option"><input type="checkbox" id="clear-downloads-cb" checked> Download history</label>
-          <label class="checkbox-option"><input type="checkbox" id="clear-cookies-cb" checked> Cookies &amp; site data</label>
-          <label class="checkbox-option"><input type="checkbox" id="clear-cache-cb" checked> Cached images &amp; files</label>
-          <label class="checkbox-option"><input type="checkbox" id="clear-autofill-cb"> Autofill form data</label>
-          <label class="checkbox-option"><input type="checkbox" id="clear-passwords-cb"> Saved passwords</label>
-          <label class="checkbox-option"><input type="checkbox" id="clear-permissions-cb"> Site permissions</label>
+        <div class="dialog-actions">
+          <button class="btn btn-sm btn-ghost" id="clear-data-cancel">Cancel</button>
+          <button class="btn btn-sm btn-primary" id="clear-data-confirm">Clear Data</button>
         </div>
-      </div>
-      <div class="dialog-actions">
-        <button class="btn btn-sm btn-ghost" id="clear-data-cancel">Cancel</button>
-        <button class="btn btn-sm btn-primary" id="clear-data-confirm">Clear Data</button>
       </div>
     </div>
-  </div>
-</body>
+  </body>
 </html>

@@ -10,7 +10,7 @@ head:
       content: article
   - - meta
     - property: article:published_time
-      content: "2026-02-15"
+      content: '2026-02-15'
   - - meta
     - property: article:author
       content: Nav0 Team
@@ -166,7 +166,7 @@ Privacy-focused users often run five, ten, or more extensions simultaneously. Ea
 - **Can interact with other extensions** in unexpected ways, creating conflicts and gaps.
 - **Adds to your browser fingerprint.** Ironically, the extensions you install to protect your privacy make you more uniquely identifiable. Your specific combination of extensions, their configurations, and their effects on page behavior create a fingerprint that tracking scripts can detect.
 
-A 2024 study demonstrated that browser extensions are detectable by websites through timing attacks, DOM modifications, and resource loading patterns. The researchers could identify specific extensions and use the combination as a tracking vector. Running privacy extensions can make you *more* trackable, not less.
+A 2024 study demonstrated that browser extensions are detectable by websites through timing attacks, DOM modifications, and resource loading patterns. The researchers could identify specific extensions and use the combination as a tracking vector. Running privacy extensions can make you _more_ trackable, not less.
 
 ## The Fundamental Architecture Problem
 
@@ -248,4 +248,4 @@ The real solution isn't a better extension. It's a better browser — one where 
 
 ---
 
-*Nav0 is a minimal, privacy-focused browser with tracking protection, HTTPS upgrades, and fingerprinting resistance built in. No extensions required. It's open source, free, and collects zero data. [Get started](/guide/getting-started).*
+_Nav0 is a minimal, privacy-focused browser with tracking protection, HTTPS upgrades, and fingerprinting resistance built in. No extensions required. It's open source, free, and collects zero data. [Get started](/guide/getting-started)._

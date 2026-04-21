@@ -1,6 +1,6 @@
 ---
-title: "Privacy Policy — Nav0 Browser"
-description: "The official privacy policy for Nav0 Browser. We collect nothing. No telemetry, no personal data, no browsing history, no analytics. Your privacy is absolute."
+title: 'Privacy Policy — Nav0 Browser'
+description: 'The official privacy policy for Nav0 Browser. We collect nothing. No telemetry, no personal data, no browsing history, no analytics. Your privacy is absolute.'
 ---
 
 # Privacy Policy
@@ -365,18 +365,18 @@ Any communications you initiate with us (e.g., bug reports, feature requests via
 
 To illustrate how Nav0 differs from mainstream browsers:
 
-| Data Category | Mainstream Browsers | Nav0 |
-|---|---|---|
-| Browsing history | Often synced to cloud servers | Stored locally only, never transmitted |
-| Search queries | Logged and analyzed for ad targeting | Never intercepted or logged |
-| Crash reports | Automatically sent to vendor | Never collected or transmitted |
-| Usage patterns | Tracked for "product improvement" | Not tracked at all |
-| Device information | Collected for "compatibility" | Not collected |
-| IP address | Logged on vendor servers | Never seen by us |
-| User accounts | Required or strongly encouraged | Do not exist |
-| Telemetry | On by default, hard to disable | Does not exist in the codebase |
-| Ad profiles | Built from browsing behavior | No profiling of any kind |
-| Data sales | Common with "free" browsers | Nothing to sell |
+| Data Category      | Mainstream Browsers                  | Nav0                                   |
+| ------------------ | ------------------------------------ | -------------------------------------- |
+| Browsing history   | Often synced to cloud servers        | Stored locally only, never transmitted |
+| Search queries     | Logged and analyzed for ad targeting | Never intercepted or logged            |
+| Crash reports      | Automatically sent to vendor         | Never collected or transmitted         |
+| Usage patterns     | Tracked for "product improvement"    | Not tracked at all                     |
+| Device information | Collected for "compatibility"        | Not collected                          |
+| IP address         | Logged on vendor servers             | Never seen by us                       |
+| User accounts      | Required or strongly encouraged      | Do not exist                           |
+| Telemetry          | On by default, hard to disable       | Does not exist in the codebase         |
+| Ad profiles        | Built from browsing behavior         | No profiling of any kind               |
+| Data sales         | Common with "free" browsers          | Nothing to sell                        |
 
 ---
 
@@ -405,18 +405,18 @@ If you have questions, concerns, or feedback about this Privacy Policy or Nav0's
 
 ## 17. Summary
 
-| Question | Answer |
-|---|---|
-| Does Nav0 collect personal data? | No |
-| Does Nav0 use analytics or telemetry? | No |
-| Does Nav0 track browsing activity? | No |
-| Does Nav0 sell or share data? | No — there is no data to sell or share |
-| Does Nav0 have user accounts? | No |
-| Does Nav0 sync data to the cloud? | No |
-| Does Nav0 phone home? | No |
-| Where is my data stored? | Locally on your device, nowhere else |
-| Can law enforcement get my data from Nav0? | No — we don't have it |
-| Is Nav0 open source? | Yes — verify everything yourself |
+| Question                                   | Answer                                 |
+| ------------------------------------------ | -------------------------------------- |
+| Does Nav0 collect personal data?           | No                                     |
+| Does Nav0 use analytics or telemetry?      | No                                     |
+| Does Nav0 track browsing activity?         | No                                     |
+| Does Nav0 sell or share data?              | No — there is no data to sell or share |
+| Does Nav0 have user accounts?              | No                                     |
+| Does Nav0 sync data to the cloud?          | No                                     |
+| Does Nav0 phone home?                      | No                                     |
+| Where is my data stored?                   | Locally on your device, nowhere else   |
+| Can law enforcement get my data from Nav0? | No — we don't have it                  |
+| Is Nav0 open source?                       | Yes — verify everything yourself       |
 
 ---
 

@@ -16,7 +16,16 @@ type WindowGroup = {
   tabs: TabInfo[];
 };
 
-const WINDOW_COLORS = ['#3b82f6', '#f59e0b', '#22c55e', '#ef4444', '#a855f7', '#ec4899', '#14b8a6', '#f97316'];
+const WINDOW_COLORS = [
+  '#3b82f6',
+  '#f59e0b',
+  '#22c55e',
+  '#ef4444',
+  '#a855f7',
+  '#ec4899',
+  '#14b8a6',
+  '#f97316',
+];
 const GRID_COLS = 4;
 
 let allGroups: WindowGroup[] = [];
@@ -132,7 +141,11 @@ const render = () => {
         e.preventDefault();
         groupEl.classList.remove('drop-target');
         if (dragData && dragData.sourceWindowId !== group.windowId) {
-          await window.BrowserAPI.moveTabToWindow(dragData.sourceWindowId, dragData.tabId, group.windowId);
+          await window.BrowserAPI.moveTabToWindow(
+            dragData.sourceWindowId,
+            dragData.tabId,
+            group.windowId
+          );
           window.BrowserAPI.hideCommandOOverlay(window.BrowserAPI.appWindowId);
         }
       });
@@ -189,7 +202,9 @@ const render = () => {
         card.addEventListener('dragend', () => {
           card.classList.remove('dragging');
           dragData = null;
-          document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
+          document
+            .querySelectorAll('.drop-target')
+            .forEach((el) => el.classList.remove('drop-target'));
         });
       }
 
@@ -218,16 +233,18 @@ const switchToTab = (tab: TabInfo, windowId: string) => {
 const filterTabs = (query: string) => {
   const lowerQuery = query.toLowerCase().trim();
   if (!lowerQuery) {
-    filteredGroups = allGroups.map(g => ({ ...g, tabs: [...g.tabs] }));
+    filteredGroups = allGroups.map((g) => ({ ...g, tabs: [...g.tabs] }));
   } else {
-    filteredGroups = allGroups.map(g => ({
-      ...g,
-      tabs: g.tabs.filter(t => {
-        const title = (t.title || '').toLowerCase();
-        const url = (t.url || '').toLowerCase();
-        return title.includes(lowerQuery) || url.includes(lowerQuery);
-      }),
-    })).filter(g => g.tabs.length > 0);
+    filteredGroups = allGroups
+      .map((g) => ({
+        ...g,
+        tabs: g.tabs.filter((t) => {
+          const title = (t.title || '').toLowerCase();
+          const url = (t.url || '').toLowerCase();
+          return title.includes(lowerQuery) || url.includes(lowerQuery);
+        }),
+      }))
+      .filter((g) => g.tabs.length > 0);
   }
   buildFlatTabs();
   selectedIndex = flatTabs.length > 0 ? 0 : -1;

@@ -1,9 +1,8 @@
-import { app, dialog, Menu, shell } from "electron";
-import { AppConstants, DataStoreConstants, InAppUrls } from "../../constants/app-constants";
-import { AppWindowManager } from "./app-window-manager";
-import { DataStoreManager } from "../database/data-store-manager";
-import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
-
+import { app, dialog, Menu, shell } from 'electron';
+import { AppConstants, DataStoreConstants, InAppUrls } from '../../constants/app-constants';
+import { AppWindowManager } from './app-window-manager';
+import { DataStoreManager } from '../database/data-store-manager';
+import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from '../../types/settings-types';
 
 export abstract class AppMenuManager {
   private static menu: Electron.Menu;
@@ -17,203 +16,355 @@ export abstract class AppMenuManager {
 
     const isMac = process.platform === 'darwin';
     const template = [
-      ...(isMac ? [{
-        label: AppConstants.APP_NAME,
-        submenu: [
-          { role: 'about'  as const},
-          { type: 'separator' as const },
-          { label: 'Settings...', accelerator: 'CmdOrCtrl+,', click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.BROWSER_SETTINGS, true) }},
-          { type: 'separator' as const },
-          { role: 'services' as const },
-          { type: 'separator' as const },
-          { role: 'hide' as const },
-          { role: 'hideOthers' as const },
-          { role: 'unhide' as const },
-          { type: 'separator' as const },
-          { role: 'quit' as const }
-        ]
-      }] : []),
+      ...(isMac
+        ? [
+            {
+              label: AppConstants.APP_NAME,
+              submenu: [
+                { role: 'about' as const },
+                { type: 'separator' as const },
+                {
+                  label: 'Settings...',
+                  accelerator: 'CmdOrCtrl+,',
+                  click: async () => {
+                    await AppWindowManager.getActiveWindow().createTab(
+                      InAppUrls.BROWSER_SETTINGS,
+                      true
+                    );
+                  },
+                },
+                { type: 'separator' as const },
+                { role: 'services' as const },
+                { type: 'separator' as const },
+                { role: 'hide' as const },
+                { role: 'hideOthers' as const },
+                { role: 'unhide' as const },
+                { type: 'separator' as const },
+                { role: 'quit' as const },
+              ],
+            },
+          ]
+        : []),
       {
         label: 'File',
         submenu: [
-          {label: 'New Tab', accelerator: 'CmdOrCtrl+T', click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.NEW_TAB, true) }},
-          {label: 'New Window', accelerator: 'CmdOrCtrl+N', click: async() => { AppWindowManager.createWindow(false); }},
-          {label: 'New Private Window', accelerator: 'CmdOrCtrl+Shift+N', click: async() => { AppWindowManager.createWindow(true); }},
-          {label: 'Reopen Closed Tab', accelerator: 'CmdOrCtrl+Shift+T', click: async() => {
-            const activeWindow = AppWindowManager.getActiveWindow();
-            if (activeWindow && !activeWindow.isPrivate) {
-              const closedTab = AppWindowManager.popLastClosedTab();
-              if (closedTab) {
-                await activeWindow.createTab(closedTab.url, true);
+          {
+            label: 'New Tab',
+            accelerator: 'CmdOrCtrl+T',
+            click: async () => {
+              await AppWindowManager.getActiveWindow().createTab(InAppUrls.NEW_TAB, true);
+            },
+          },
+          {
+            label: 'New Window',
+            accelerator: 'CmdOrCtrl+N',
+            click: async () => {
+              AppWindowManager.createWindow(false);
+            },
+          },
+          {
+            label: 'New Private Window',
+            accelerator: 'CmdOrCtrl+Shift+N',
+            click: async () => {
+              AppWindowManager.createWindow(true);
+            },
+          },
+          {
+            label: 'Reopen Closed Tab',
+            accelerator: 'CmdOrCtrl+Shift+T',
+            click: async () => {
+              const activeWindow = AppWindowManager.getActiveWindow();
+              if (activeWindow && !activeWindow.isPrivate) {
+                const closedTab = AppWindowManager.popLastClosedTab();
+                if (closedTab) {
+                  await activeWindow.createTab(closedTab.url, true);
+                }
               }
-            }
-          }},
-          {type: 'separator' as const},
-          {label: 'Open PDF File', accelerator: 'CmdOrCtrl+Shift+O', click: async() => {
-            const activeWindow = AppWindowManager.getActiveWindow();
-            if (!activeWindow) return;
-            const result = await dialog.showOpenDialog(activeWindow.getBrowserWindowInstance(), {
-              properties: ['openFile'],
-              filters: [{ name: 'PDF Files', extensions: ['pdf'] }]
-            });
-            if (result.canceled || result.filePaths.length === 0) return;
-            await activeWindow.createTab(`file://${result.filePaths[0]}`, true);
-          }},
-          {type: 'separator' as const},
-          {label: 'Print...', accelerator: 'CmdOrCtrl+P', click: async() => {
-            const activeWindow = AppWindowManager.getActiveWindow();
-            if (!activeWindow) return;
-            const activeTab = activeWindow.getActiveTab();
-            if (activeTab && activeTab.getWebContentsViewInstance()) {
-              activeTab.getWebContentsViewInstance().webContents.print();
-            }
-          }},
-          {type: 'separator' as const},
-          {label: 'Reload', accelerator: 'CmdOrCtrl+R', click: async() => {
-            const activeWindow = AppWindowManager.getActiveWindow();
-            if (activeWindow) {
+            },
+          },
+          { type: 'separator' as const },
+          {
+            label: 'Open PDF File',
+            accelerator: 'CmdOrCtrl+Shift+O',
+            click: async () => {
+              const activeWindow = AppWindowManager.getActiveWindow();
+              if (!activeWindow) return;
+              const result = await dialog.showOpenDialog(activeWindow.getBrowserWindowInstance(), {
+                properties: ['openFile'],
+                filters: [{ name: 'PDF Files', extensions: ['pdf'] }],
+              });
+              if (result.canceled || result.filePaths.length === 0) return;
+              await activeWindow.createTab(`file://${result.filePaths[0]}`, true);
+            },
+          },
+          { type: 'separator' as const },
+          {
+            label: 'Print...',
+            accelerator: 'CmdOrCtrl+P',
+            click: async () => {
+              const activeWindow = AppWindowManager.getActiveWindow();
+              if (!activeWindow) return;
               const activeTab = activeWindow.getActiveTab();
               if (activeTab && activeTab.getWebContentsViewInstance()) {
-                activeTab.getWebContentsViewInstance().webContents.reload();
+                activeTab.getWebContentsViewInstance().webContents.print();
               }
-            }
-          }},
-          {label: 'Hard Reload', accelerator: 'CmdOrCtrl+Shift+R', click: () => {
-            const activeWindow = AppWindowManager.getActiveWindow();
-            if (activeWindow) {
-              const activeTab = activeWindow.getActiveTab();
-              if (activeTab && activeTab.getWebContentsViewInstance()) {
-                const webContents = activeTab.getWebContentsViewInstance().webContents;
-                const session = webContents.session;
-                const currentUrl = webContents.getURL();
-                try {
-                  const origin = new URL(currentUrl).origin;
-                  session.clearStorageData({ origin }).catch(() => {});
-                } catch (_) { /* origin may not be parseable */ }
-                session.clearCache().catch(() => {});
-                session.clearCodeCaches({}).catch(() => {});
-                webContents.reloadIgnoringCache();
+            },
+          },
+          { type: 'separator' as const },
+          {
+            label: 'Reload',
+            accelerator: 'CmdOrCtrl+R',
+            click: async () => {
+              const activeWindow = AppWindowManager.getActiveWindow();
+              if (activeWindow) {
+                const activeTab = activeWindow.getActiveTab();
+                if (activeTab && activeTab.getWebContentsViewInstance()) {
+                  activeTab.getWebContentsViewInstance().webContents.reload();
+                }
               }
-            }
-          }},
-          {type: 'separator' as const},
-          {label: 'Close Tab', click: async() => { AppWindowManager.getActiveWindow().closeTab(AppWindowManager.getActiveWindow().getActiveTabId(), true); }},
-          {label: 'Close Window', click: async() => { AppWindowManager.closeWindow(AppWindowManager.getActiveWindowId()); }},
-        ]
+            },
+          },
+          {
+            label: 'Hard Reload',
+            accelerator: 'CmdOrCtrl+Shift+R',
+            click: () => {
+              const activeWindow = AppWindowManager.getActiveWindow();
+              if (activeWindow) {
+                const activeTab = activeWindow.getActiveTab();
+                if (activeTab && activeTab.getWebContentsViewInstance()) {
+                  const webContents = activeTab.getWebContentsViewInstance().webContents;
+                  const session = webContents.session;
+                  const currentUrl = webContents.getURL();
+                  try {
+                    const origin = new URL(currentUrl).origin;
+                    session.clearStorageData({ origin }).catch(() => {});
+                  } catch (_) {
+                    /* origin may not be parseable */
+                  }
+                  session.clearCache().catch(() => {});
+                  session.clearCodeCaches({}).catch(() => {});
+                  webContents.reloadIgnoringCache();
+                }
+              }
+            },
+          },
+          { type: 'separator' as const },
+          {
+            label: 'Close Tab',
+            click: async () => {
+              AppWindowManager.getActiveWindow().closeTab(
+                AppWindowManager.getActiveWindow().getActiveTabId(),
+                true
+              );
+            },
+          },
+          {
+            label: 'Close Window',
+            click: async () => {
+              AppWindowManager.closeWindow(AppWindowManager.getActiveWindowId());
+            },
+          },
+        ],
       },
       {
         label: 'Go To',
         submenu: [
-          {label: 'Bookmarks', accelerator: 'CmdOrCtrl+Shift+B', click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.BOOKMARKS, true) }},
-          {label: 'History', accelerator: 'CmdOrCtrl+Shift+H', click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.HISTORY, true) }},
-          {label: 'Downloads', accelerator: 'CmdOrCtrl+Shift+D',click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.DOWNLOADS, true) }},
-          {type: 'separator' as const},
-          {label: 'Settings', accelerator: 'CmdOrCtrl+,', click: async() => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.BROWSER_SETTINGS, true) }},
-          {type: 'separator' as const},
-          {label: 'Command K Interface', accelerator: 'CmdOrCtrl+K', click: async() => { AppWindowManager.getActiveWindow().showCommandKOverlay() }},
-          {label: 'Tab Switcher', accelerator: 'CmdOrCtrl+O', click: async() => { AppWindowManager.getActiveWindow().showCommandOOverlay() }},
-        ]
+          {
+            label: 'Bookmarks',
+            accelerator: 'CmdOrCtrl+Shift+B',
+            click: async () => {
+              await AppWindowManager.getActiveWindow().createTab(InAppUrls.BOOKMARKS, true);
+            },
+          },
+          {
+            label: 'History',
+            accelerator: 'CmdOrCtrl+Shift+H',
+            click: async () => {
+              await AppWindowManager.getActiveWindow().createTab(InAppUrls.HISTORY, true);
+            },
+          },
+          {
+            label: 'Downloads',
+            accelerator: 'CmdOrCtrl+Shift+D',
+            click: async () => {
+              await AppWindowManager.getActiveWindow().createTab(InAppUrls.DOWNLOADS, true);
+            },
+          },
+          { type: 'separator' as const },
+          {
+            label: 'Settings',
+            accelerator: 'CmdOrCtrl+,',
+            click: async () => {
+              await AppWindowManager.getActiveWindow().createTab(InAppUrls.BROWSER_SETTINGS, true);
+            },
+          },
+          { type: 'separator' as const },
+          {
+            label: 'Command K Interface',
+            accelerator: 'CmdOrCtrl+K',
+            click: async () => {
+              AppWindowManager.getActiveWindow().showCommandKOverlay();
+            },
+          },
+          {
+            label: 'Tab Switcher',
+            accelerator: 'CmdOrCtrl+O',
+            click: async () => {
+              AppWindowManager.getActiveWindow().showCommandOOverlay();
+            },
+          },
+        ],
       },
       {
         label: 'Edit',
         submenu: [
-          { role: 'undo' as const, accelerator: 'CmdOrCtrl+Z', },
-          { role: 'redo' as const, accelerator: 'CmdOrCtrl+Z', },
+          { role: 'undo' as const, accelerator: 'CmdOrCtrl+Z' },
+          { role: 'redo' as const, accelerator: 'CmdOrCtrl+Z' },
           { type: 'separator' as const },
-          { role: 'cut' as const, accelerator: 'CmdOrCtrl+X', },
-          { role: 'copy' as const, accelerator: 'CmdOrCtrl+C', },
-          { role: 'paste' as const, accelerator: 'CmdOrCtrl+V', },
+          { role: 'cut' as const, accelerator: 'CmdOrCtrl+X' },
+          { role: 'copy' as const, accelerator: 'CmdOrCtrl+C' },
+          { role: 'paste' as const, accelerator: 'CmdOrCtrl+V' },
           { type: 'separator' as const },
-          {label: 'Find in Page', accelerator: 'CmdOrCtrl+F', click: async() => { AppWindowManager.getActiveWindow()?.showFindInPage(); }},
-          ...(isMac ? [
-            { role: 'pasteAndMatchStyle' as const },
-            { role: 'delete' as const },
-            { role: 'selectAll' as const },
-            // { type: 'separator' as const },
-            // { label: 'Speech', submenu: [
-            //   { role: 'startSpeaking' as const },
-            //   { role: 'stopSpeaking' as const }
-            // ]}
-          ] : [
-            { role: 'delete' as const },
-            { type: 'separator' as const },
-            { role: 'selectAll' as const }
-          ])
-        ]
+          {
+            label: 'Find in Page',
+            accelerator: 'CmdOrCtrl+F',
+            click: async () => {
+              AppWindowManager.getActiveWindow()?.showFindInPage();
+            },
+          },
+          ...(isMac
+            ? [
+                { role: 'pasteAndMatchStyle' as const },
+                { role: 'delete' as const },
+                { role: 'selectAll' as const },
+                // { type: 'separator' as const },
+                // { label: 'Speech', submenu: [
+                //   { role: 'startSpeaking' as const },
+                //   { role: 'stopSpeaking' as const }
+                // ]}
+              ]
+            : [
+                { role: 'delete' as const },
+                { type: 'separator' as const },
+                { role: 'selectAll' as const },
+              ]),
+        ],
       },
       {
         label: 'View',
         submenu: [
           // { role: 'reload' as const},
-          { label: 'Toggle Developer Tools', accelerator: isMac ? 'Cmd+Alt+I' : 'Ctrl+Shift+I', click: () => {
-            const settings = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as BrowserSettings;
-            const merged = { ...DEFAULT_BROWSER_SETTINGS, ...settings };
-            if (!merged.devToolsEnabled) return;
-            const activeWindow = AppWindowManager.getActiveWindow();
-            if (!activeWindow) return;
-            const activeTab = activeWindow.getActiveTab();
-            if (activeTab && activeTab.getWebContentsViewInstance()) {
-              activeTab.getWebContentsViewInstance().webContents.toggleDevTools();
-            }
-          }},
-          { type: 'separator' as const},
-          { role: 'resetZoom' as const},
-          { role: 'zoomIn' as const, accelerator: 'CmdOrCtrl+Shift+=',},
-          { role: 'zoomOut' as const, accelerator: 'CmdOrCtrl+Shift+-',},
-          { type: 'separator' as const},
-          { label: 'Toggle Full Screen', accelerator: isMac ? 'Ctrl+Command+F' : 'F11', click: () => { AppWindowManager.getActiveWindow()?.toggleFullScreen(); }},
-          { type: 'separator' as const},
-          {label: 'Toggle Reader Mode', click: async() => {
-            const activeWindow = AppWindowManager.getActiveWindow();
-            if (activeWindow) {
+          {
+            label: 'Toggle Developer Tools',
+            accelerator: isMac ? 'Cmd+Alt+I' : 'Ctrl+Shift+I',
+            click: () => {
+              const settings = DataStoreManager.get(
+                DataStoreConstants.BROWSER_SETTINGS
+              ) as BrowserSettings;
+              const merged = { ...DEFAULT_BROWSER_SETTINGS, ...settings };
+              if (!merged.devToolsEnabled) return;
+              const activeWindow = AppWindowManager.getActiveWindow();
+              if (!activeWindow) return;
               const activeTab = activeWindow.getActiveTab();
-              if (activeTab) {
-                await activeTab.toggleReaderMode();
+              if (activeTab && activeTab.getWebContentsViewInstance()) {
+                activeTab.getWebContentsViewInstance().webContents.toggleDevTools();
               }
-            }
-          }},
-        ]
+            },
+          },
+          { type: 'separator' as const },
+          { role: 'resetZoom' as const },
+          { role: 'zoomIn' as const, accelerator: 'CmdOrCtrl+Shift+=' },
+          { role: 'zoomOut' as const, accelerator: 'CmdOrCtrl+Shift+-' },
+          { type: 'separator' as const },
+          {
+            label: 'Toggle Full Screen',
+            accelerator: isMac ? 'Ctrl+Command+F' : 'F11',
+            click: () => {
+              AppWindowManager.getActiveWindow()?.toggleFullScreen();
+            },
+          },
+          { type: 'separator' as const },
+          {
+            label: 'Toggle Reader Mode',
+            click: async () => {
+              const activeWindow = AppWindowManager.getActiveWindow();
+              if (activeWindow) {
+                const activeTab = activeWindow.getActiveTab();
+                if (activeTab) {
+                  await activeTab.toggleReaderMode();
+                }
+              }
+            },
+          },
+        ],
       },
       {
         label: 'Window',
         submenu: [
-          { role: 'minimize' as const},
-          { role: 'zoom' as const},
-          ...(isMac ? [
-            { type: 'separator' as const},
-            { role: 'front' as const},
-            { type: 'separator' as const},
-            { role: 'window' as const}
-          ] : [
-            { role: 'close' as const}
-          ])
-        ]
+          { role: 'minimize' as const },
+          { role: 'zoom' as const },
+          ...(isMac
+            ? [
+                { type: 'separator' as const },
+                { role: 'front' as const },
+                { type: 'separator' as const },
+                { role: 'window' as const },
+              ]
+            : [{ role: 'close' as const }]),
+        ],
       },
       {
         label: 'Help and More',
         submenu: [
-          {label: 'About Nav0', click: async () => { await AppWindowManager.getActiveWindow().createTab(InAppUrls.ABOUT, true); }},
-          {label: 'Privacy Policy', click: async () => { await AppWindowManager.getActiveWindow().createTab('https://nav0.org/privacy-policy', true); }},
-          {label: 'Terms of Use', click: async() => { await AppWindowManager.getActiveWindow().createTab('https://nav0.org/terms-of-use', true); }},
-          {label: 'Disclaimer', click: async () => {
-            const activeWindow = AppWindowManager.getActiveWindow();
-            if (activeWindow) {
-              await activeWindow.createTab('https://nav0.org/disclaimer', true);
-            } else {
-              await shell.openExternal('https://nav0.org/disclaimer');
-            }
-          }},
-          {type: 'separator' as const},
-          {label: 'Report an Issue', click: async() => {
-            const activeWindow = AppWindowManager.getActiveWindow();
-            if (activeWindow) {
-              await activeWindow.showIssueReportOverlay();
-            }
-          }},
-        ]
-      }
+          {
+            label: 'About Nav0',
+            click: async () => {
+              await AppWindowManager.getActiveWindow().createTab(InAppUrls.ABOUT, true);
+            },
+          },
+          {
+            label: 'Privacy Policy',
+            click: async () => {
+              await AppWindowManager.getActiveWindow().createTab(
+                'https://nav0.org/privacy-policy',
+                true
+              );
+            },
+          },
+          {
+            label: 'Terms of Use',
+            click: async () => {
+              await AppWindowManager.getActiveWindow().createTab(
+                'https://nav0.org/terms-of-use',
+                true
+              );
+            },
+          },
+          {
+            label: 'Disclaimer',
+            click: async () => {
+              const activeWindow = AppWindowManager.getActiveWindow();
+              if (activeWindow) {
+                await activeWindow.createTab('https://nav0.org/disclaimer', true);
+              } else {
+                await shell.openExternal('https://nav0.org/disclaimer');
+              }
+            },
+          },
+          { type: 'separator' as const },
+          {
+            label: 'Report an Issue',
+            click: async () => {
+              const activeWindow = AppWindowManager.getActiveWindow();
+              if (activeWindow) {
+                await activeWindow.showIssueReportOverlay();
+              }
+            },
+          },
+        ],
+      },
     ];
     AppMenuManager.menu = Menu.buildFromTemplate(template);
-    Menu.setApplicationMenu(AppMenuManager.menu)
+    Menu.setApplicationMenu(AppMenuManager.menu);
   }
 }

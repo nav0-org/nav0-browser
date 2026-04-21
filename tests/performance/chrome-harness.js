@@ -10,8 +10,8 @@ app.commandLine.appendSwitch('no-sandbox');
 app.commandLine.appendSwitch('disable-dev-shm-usage');
 app.commandLine.appendSwitch('disable-gpu');
 
-const tabArg = process.argv.find(a => a.startsWith('--tabs='));
-const urlsArg = process.argv.find(a => a.startsWith('--urls='));
+const tabArg = process.argv.find((a) => a.startsWith('--tabs='));
+const urlsArg = process.argv.find((a) => a.startsWith('--urls='));
 const tabCount = tabArg ? parseInt(tabArg.split('=')[1], 10) : 10;
 
 let urls;

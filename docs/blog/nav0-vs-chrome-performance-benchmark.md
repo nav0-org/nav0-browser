@@ -1,6 +1,6 @@
 ---
-title: "Nav0 vs Chrome: A Head-to-Head Performance Benchmark on macOS"
-description: "We ran a rigorous head-to-head performance comparison between Nav0 and Google Chrome on a MacBook Pro M1. Nav0 used 48.5% less memory, 86.3% less CPU, and spawned far fewer processes across every tab count tested."
+title: 'Nav0 vs Chrome: A Head-to-Head Performance Benchmark on macOS'
+description: 'We ran a rigorous head-to-head performance comparison between Nav0 and Google Chrome on a MacBook Pro M1. Nav0 used 48.5% less memory, 86.3% less CPU, and spawned far fewer processes across every tab count tested.'
 date: 2026-03-04
 author: Nav0 Team
 tags: [performance, benchmark, chrome, memory, cpu, macos]
@@ -10,7 +10,7 @@ head:
       content: article
   - - meta
     - property: article:published_time
-      content: "2026-03-04"
+      content: '2026-03-04'
   - - meta
     - property: article:author
       content: Nav0 Team
@@ -28,7 +28,7 @@ head:
       content: memory
   - - meta
     - name: keywords
-      content: "Nav0 vs chrome, browser performance benchmark, chrome memory usage, chrome RAM, browser CPU usage, lightweight browser, electron performance, chrome process count, browser benchmark macos, Nav0 browser performance, chrome high memory usage fix, chrome too many processes, best low memory browser 2026, browser 50 tabs memory test, chrome vs electron browser performance, macbook browser benchmark M1"
+      content: 'Nav0 vs chrome, browser performance benchmark, chrome memory usage, chrome RAM, browser CPU usage, lightweight browser, electron performance, chrome process count, browser benchmark macos, Nav0 browser performance, chrome high memory usage fix, chrome too many processes, best low memory browser 2026, browser 50 tabs memory test, chrome vs electron browser performance, macbook browser benchmark M1'
   - - script
     - type: application/ld+json
     - |
@@ -110,29 +110,29 @@ Before we get into methodology, here are the numbers. Every test was run on the 
 
 ### Memory Usage
 
-| Tabs | Chrome | Nav0 | Difference |
-|------|--------|------|------------|
-| 10 | 1,551 MB | 1,247 MB | -304 MB (-19.6%) |
-| 20 | 4,441 MB | 2,461 MB | -1,980 MB (-44.6%) |
-| 30 | 6,938 MB | 3,755 MB | -3,183 MB (-45.9%) |
-| 40 | 8,251 MB | 4,345 MB | -3,906 MB (-47.3%) |
-| 50 | 10,076 MB | 4,294 MB | -5,782 MB (-57.4%) |
+| Tabs | Chrome    | Nav0     | Difference         |
+| ---- | --------- | -------- | ------------------ |
+| 10   | 1,551 MB  | 1,247 MB | -304 MB (-19.6%)   |
+| 20   | 4,441 MB  | 2,461 MB | -1,980 MB (-44.6%) |
+| 30   | 6,938 MB  | 3,755 MB | -3,183 MB (-45.9%) |
+| 40   | 8,251 MB  | 4,345 MB | -3,906 MB (-47.3%) |
+| 50   | 10,076 MB | 4,294 MB | -5,782 MB (-57.4%) |
 
 At 50 tabs, Chrome consumed over 10 GB of memory. Nav0 used 4.3 GB. That's a 57.4% reduction — nearly 6 GB of RAM saved.
 
-And notice the scaling pattern. Chrome's memory usage grows almost linearly with tab count: roughly 200 MB per tab. Nav0's memory growth flattens significantly after 30 tabs, barely increasing between 40 and 50 tabs. At 50 tabs, Nav0 actually used slightly *less* memory than at 40 tabs (4,294 MB vs 4,345 MB), suggesting that its resource management actively adapts to constrained conditions.
+And notice the scaling pattern. Chrome's memory usage grows almost linearly with tab count: roughly 200 MB per tab. Nav0's memory growth flattens significantly after 30 tabs, barely increasing between 40 and 50 tabs. At 50 tabs, Nav0 actually used slightly _less_ memory than at 40 tabs (4,294 MB vs 4,345 MB), suggesting that its resource management actively adapts to constrained conditions.
 
 **Average across all tests: Chrome 6,251 MB vs Nav0 3,220 MB — Nav0 uses 48.5% less memory.**
 
 ### CPU Usage
 
-| Tabs | Chrome | Nav0 | Difference |
-|------|--------|------|------------|
-| 10 | 29.5% | 8.0% | -21.6 pts (-73.0%) |
-| 20 | 14.6% | 9.1% | -5.5 pts (-37.7%) |
-| 30 | 141.2% | 11.8% | -129.3 pts (-91.6%) |
-| 40 | 187.7% | 12.0% | -175.8 pts (-93.6%) |
-| 50 | 101.7% | 24.4% | -77.3 pts (-76.0%) |
+| Tabs | Chrome | Nav0  | Difference          |
+| ---- | ------ | ----- | ------------------- |
+| 10   | 29.5%  | 8.0%  | -21.6 pts (-73.0%)  |
+| 20   | 14.6%  | 9.1%  | -5.5 pts (-37.7%)   |
+| 30   | 141.2% | 11.8% | -129.3 pts (-91.6%) |
+| 40   | 187.7% | 12.0% | -175.8 pts (-93.6%) |
+| 50   | 101.7% | 24.4% | -77.3 pts (-76.0%)  |
 
 CPU percentages over 100% mean multiple cores are being saturated. At 40 tabs, Chrome was consuming nearly 188% CPU — pinning almost two full cores just to keep idle tabs alive. Nav0 at the same tab count: 12%. That's not a typo.
 
@@ -142,13 +142,13 @@ Chrome's CPU behavior was also erratic. It swung from 14.6% at 20 tabs to 141.2%
 
 ### Process Count
 
-| Tabs | Chrome | Nav0 | Difference |
-|------|--------|------|------------|
-| 10 | 67 | 22 | -45 (-67.2%) |
-| 20 | 90 | 34 | -56 (-62.2%) |
-| 30 | 103 | 43 | -60 (-58.3%) |
-| 40 | 112 | 53 | -59 (-52.7%) |
-| 50 | 120 | 62 | -58 (-48.3%) |
+| Tabs | Chrome | Nav0 | Difference   |
+| ---- | ------ | ---- | ------------ |
+| 10   | 67     | 22   | -45 (-67.2%) |
+| 20   | 90     | 34   | -56 (-62.2%) |
+| 30   | 103    | 43   | -60 (-58.3%) |
+| 40   | 112    | 53   | -59 (-52.7%) |
+| 50   | 120    | 62   | -58 (-48.3%) |
 
 With just 10 tabs open, Chrome spawned 67 processes. Nav0 ran with 22. Every additional process means additional memory overhead, additional context switches, and additional CPU scheduling work for your operating system.
 
@@ -183,12 +183,15 @@ Both browsers were tested back-to-back for each tab count, meaning they experien
 We didn't just load `about:blank` fifty times. The test rotated through 15 real-world websites spanning three weight classes:
 
 **Light pages** — minimal JavaScript, mostly text:
+
 - Hacker News, CNN Lite, NPR Text, Wikipedia, Craigslist
 
 **Medium pages** — moderate JavaScript, standard web apps:
+
 - MDN Web Docs, GitHub Docs, Stack Overflow, npm, GitHub Explore
 
 **Heavy pages** — complex JavaScript, video, dynamic content:
+
 - Reddit, YouTube, BBC News, CNN, Twitch
 
 Tabs cycled through these 15 URLs in order, so at 50 tabs each URL was loaded at least three times. This ensures the benchmark reflects realistic browsing patterns, not synthetic best-case scenarios.
@@ -225,7 +228,7 @@ Both Chrome and Nav0 spawn child processes — renderers, GPU processes, utility
 3. Recurse into each child to find grandchildren, and so on.
 4. Collect every PID in the tree for measurement.
 
-This ensures we're measuring the *complete* browser footprint, not just the main process. Chrome in particular has a complex multi-process architecture with many types of subprocesses, and missing any of them would undercount its resource usage.
+This ensures we're measuring the _complete_ browser footprint, not just the main process. Chrome in particular has a complex multi-process architecture with many types of subprocesses, and missing any of them would undercount its resource usage.
 
 ### Chrome Test Setup
 
@@ -241,7 +244,7 @@ Chrome was launched via command line with these flags:
 
 Tabs were opened using Puppeteer via the Chrome DevTools Protocol. Each tab was navigated with `waitUntil: 'domcontentloaded'` and a 20-second timeout.
 
-Note: Chrome was tested with extensions disabled and background networking turned off. This is a *favorable* configuration for Chrome — in real-world usage with extensions, syncing, and background services active, Chrome's resource usage would be even higher.
+Note: Chrome was tested with extensions disabled and background networking turned off. This is a _favorable_ configuration for Chrome — in real-world usage with extensions, syncing, and background services active, Chrome's resource usage would be even higher.
 
 ### Nav0 Test Setup
 
@@ -251,7 +254,7 @@ Nav0 was launched with its default configuration — no special flags to reduce 
 
 ### What We Didn't Do
 
-Transparency matters, so here's what this benchmark does *not* test:
+Transparency matters, so here's what this benchmark does _not_ test:
 
 - **Page load speed.** We measured idle resource consumption, not how fast pages render. That's a different benchmark.
 - **JavaScript performance.** We didn't run Speedometer, JetStream, or other JS benchmarks. Both browsers use variants of the V8/Chromium engine, so JS execution speed is similar.
@@ -287,7 +290,7 @@ Nav0 achieves tab isolation with significantly fewer processes. At 10 tabs, it u
 
 Perhaps the most striking result is how Nav0 scales. Chrome's resource usage grows roughly linearly — each additional tab adds a relatively fixed amount of memory and CPU. Nav0's resource growth flattens at higher tab counts, suggesting active resource management that adapts as the number of tabs increases.
 
-At 50 tabs, Nav0 used less memory than at 40 tabs. Chrome at 50 tabs used 22% more memory than at 40. The gap between the two browsers *widened* as tab count increased, from 19.6% at 10 tabs to 57.4% at 50 tabs. If you're someone who keeps a lot of tabs open — and let's be honest, that's most of us — the difference is dramatic.
+At 50 tabs, Nav0 used less memory than at 40 tabs. Chrome at 50 tabs used 22% more memory than at 40. The gap between the two browsers _widened_ as tab count increased, from 19.6% at 10 tabs to 57.4% at 50 tabs. If you're someone who keeps a lot of tabs open — and let's be honest, that's most of us — the difference is dramatic.
 
 ## What This Means for You
 
@@ -331,4 +334,4 @@ Your computer's resources should go toward the things you're actually doing, not
 
 ---
 
-*Nav0 is a minimal, open-source browser built on one principle: your browser should work for you, not for an ad company. Zero telemetry. Zero bloat. Zero BS. [Learn more](/guide/philosophy).*
+_Nav0 is a minimal, open-source browser built on one principle: your browser should work for you, not for an ad company. Zero telemetry. Zero bloat. Zero BS. [Learn more](/guide/philosophy)._

@@ -1,4 +1,4 @@
-@import url("../styles/global.css");
+@import url('../styles/global.css');
 
 .browser-container {
   width: 100%;
@@ -10,7 +10,7 @@
   border: 1px solid var(--border-color);
 }
 
-.private-window-identifier{
+.private-window-identifier {
   height: 30px;
   margin: 0px 6px 0px 0px;
   border-radius: 10px;
@@ -22,7 +22,7 @@
   justify-content: center;
 }
 
-body.is-private .private-window-identifier{
+body.is-private .private-window-identifier {
   display: flex;
 }
 
@@ -99,7 +99,9 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
   max-width: 200px;
   font-size: var(--font-sm);
   cursor: pointer;
-  transition: background-color var(--transition-fast), width var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    width var(--transition-fast);
   white-space: nowrap;
   color: var(--text-secondary);
   position: relative;
@@ -182,7 +184,9 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
 }
 
 @keyframes tab-loader-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .tab-title {
@@ -207,7 +211,9 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
   cursor: pointer;
   padding: 0;
   opacity: 0;
-  transition: opacity var(--transition-fast), background-color var(--transition-fast);
+  transition:
+    opacity var(--transition-fast),
+    background-color var(--transition-fast);
 }
 
 .tab:hover .tab-close {
@@ -247,7 +253,6 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
   padding-bottom: 0px;
 }
 
-
 .address-bar:focus-within {
   background-color: var(--bg-light);
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
@@ -265,7 +270,9 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
   border-radius: var(--radius-circle);
   background: none;
   border: none;
-  transition: color 0.2s ease, background-color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .ssl-indicator:hover {
@@ -300,8 +307,13 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
 }
 
 @keyframes ssl-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 
 .url-input {
@@ -317,8 +329,10 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9CA3AF;
-  transition: color 0.2s ease, background-color 0.2s ease;
+  color: #9ca3af;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .reader-mode-btn:hover {
@@ -327,11 +341,11 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
 }
 
 .reader-mode-btn.active {
-  color: #6366F1;
+  color: #6366f1;
 }
 
 .reader-mode-btn.active:hover {
-  color: #4F46E5;
+  color: #4f46e5;
 }
 
 /* Ensure submenu fits within viewport */

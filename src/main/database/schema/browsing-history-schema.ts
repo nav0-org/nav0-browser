@@ -7,61 +7,61 @@ export const BrowsingHistorySchema: TableSchema = {
       name: 'id',
       columnType: { type: 'uuid' },
       primaryKey: true,
-      notNull: true
+      notNull: true,
     },
     {
       name: 'createdDate',
       columnType: { type: 'timestamp', defaultNow: true },
-      notNull: true
+      notNull: true,
     },
     {
       name: 'url',
       columnType: { type: 'standard', sqlType: 'TEXT' },
-      notNull: true
+      notNull: true,
     },
     {
       name: 'title',
       columnType: { type: 'standard', sqlType: 'TEXT' },
-      notNull: true
+      notNull: true,
     },
     {
       name: 'topLevelDomain',
       columnType: { type: 'standard', sqlType: 'TEXT' },
-      notNull: true
+      notNull: true,
     },
     {
       name: 'faviconUrl',
-      columnType: { type: 'standard', sqlType: 'TEXT' }
+      columnType: { type: 'standard', sqlType: 'TEXT' },
       // No notNull constraint since it's optional
     },
     {
       name: 'totalDuration',
       columnType: { type: 'standard', sqlType: 'INTEGER' },
-      defaultValue: 0
+      defaultValue: 0,
     },
     {
       name: 'activeDuration',
       columnType: { type: 'standard', sqlType: 'INTEGER' },
-      defaultValue: 0
+      defaultValue: 0,
     },
     {
       name: 'outTimestamp',
-      columnType: { type: 'timestamp' }
+      columnType: { type: 'timestamp' },
       // Nullable — set when user navigates away or closes tab
-    }
+    },
   ],
   indices: [
     {
       name: 'idxBrowsingHistoryUrl',
-      columns: ['url']
+      columns: ['url'],
     },
     {
       name: 'idxBrowsingHistoryTopLevelDomain',
-      columns: ['topLevelDomain']
+      columns: ['topLevelDomain'],
     },
     {
       name: 'idxBrowsingHistoryCreatedDate',
-      columns: ['createdDate']
-    }
-  ]
+      columns: ['createdDate'],
+    },
+  ],
 };

@@ -10,7 +10,7 @@ head:
       content: article
   - - meta
     - property: article:published_time
-      content: "2026-03-21"
+      content: '2026-03-21'
   - - meta
     - property: article:author
       content: Nav0 Team
@@ -28,7 +28,7 @@ head:
       content: ads
   - - meta
     - name: keywords
-      content: "Nav0 vs brave, brave browser privacy, brave ads, brave crypto wallet, BAT token, brave bloat, brave Leo AI, private browser comparison, brave VPN, minimal browser vs brave, does brave collect data, brave ad replacement, is brave really private, brave browser telemetry, brave vs nav0 privacy comparison, best private browser 2026, lightweight browser no ads, browser without crypto wallet"
+      content: 'Nav0 vs brave, brave browser privacy, brave ads, brave crypto wallet, BAT token, brave bloat, brave Leo AI, private browser comparison, brave VPN, minimal browser vs brave, does brave collect data, brave ad replacement, is brave really private, brave browser telemetry, brave vs nav0 privacy comparison, best private browser 2026, lightweight browser no ads, browser without crypto wallet'
   - - script
     - type: application/ld+json
     - |
@@ -104,20 +104,20 @@ Nav0 is a browser that browses the web.
 
 Both claim to be privacy-focused. But these are fundamentally different products with fundamentally different incentives. One is building a privacy-branded advertising ecosystem. The other just doesn't collect your data.
 
-| Feature | Nav0 | Brave |
-|---------|------|-------|
-| Telemetry | None — zero data collection | Reduced vs Chrome, but not zero (crash reports, ad stats, VPN diagnostics) |
-| Open Source | Yes (MIT license, small auditable codebase) | Yes (Chromium fork, large complex codebase) |
-| Built-in Ad Blocker | Yes — blocks ads, no replacements | Yes — blocks ads, replaces with Brave Ads |
-| Ad Network | None | Yes (Brave Ads with BAT cryptocurrency rewards) |
-| Crypto Wallet | None | Yes (Ethereum, Solana, Filecoin) |
-| AI Assistant | None | Yes (Leo AI with multiple models) |
-| VPN | None | Yes (Brave VPN, paid subscription) |
-| Browser Extensions | Not supported | Chrome Web Store extensions supported |
-| Cross-Device Sync | None — all data stays local | Yes (via Brave Sync) |
-| Mobile App | Desktop only | iOS and Android |
-| Business Model | Free, open source, no monetization | Ad network, VPN subscriptions, AI premium, search partnerships |
-| New Tab Page | Blank — zero network requests | Sponsored images, Brave News content |
+| Feature             | Nav0                                        | Brave                                                                      |
+| ------------------- | ------------------------------------------- | -------------------------------------------------------------------------- |
+| Telemetry           | None — zero data collection                 | Reduced vs Chrome, but not zero (crash reports, ad stats, VPN diagnostics) |
+| Open Source         | Yes (MIT license, small auditable codebase) | Yes (Chromium fork, large complex codebase)                                |
+| Built-in Ad Blocker | Yes — blocks ads, no replacements           | Yes — blocks ads, replaces with Brave Ads                                  |
+| Ad Network          | None                                        | Yes (Brave Ads with BAT cryptocurrency rewards)                            |
+| Crypto Wallet       | None                                        | Yes (Ethereum, Solana, Filecoin)                                           |
+| AI Assistant        | None                                        | Yes (Leo AI with multiple models)                                          |
+| VPN                 | None                                        | Yes (Brave VPN, paid subscription)                                         |
+| Browser Extensions  | Not supported                               | Chrome Web Store extensions supported                                      |
+| Cross-Device Sync   | None — all data stays local                 | Yes (via Brave Sync)                                                       |
+| Mobile App          | Desktop only                                | iOS and Android                                                            |
+| Business Model      | Free, open source, no monetization          | Ad network, VPN subscriptions, AI premium, search partnerships             |
+| New Tab Page        | Blank — zero network requests               | Sponsored images, Brave News content                                       |
 
 ## The Ad Replacement Model
 
@@ -267,4 +267,4 @@ Brave traded one ad company for another. Nav0 traded ads for nothing.
 
 ---
 
-*Nav0 is a minimal, open-source browser built on one principle: your browser should work for you, not for an ad company. Zero telemetry. Zero bloat. Zero BS. [Learn more](/guide/philosophy).*
+_Nav0 is a minimal, open-source browser built on one principle: your browser should work for you, not for an ad company. Zero telemetry. Zero bloat. Zero BS. [Learn more](/guide/philosophy)._

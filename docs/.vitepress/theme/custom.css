@@ -3,22 +3,23 @@
 :root {
   --nav0-color-1: #000000;
   --nav0-color-2: #333333;
-
   --vp-c-brand-1: #000000;
   --vp-c-brand-2: #333333;
   --vp-c-brand-3: #555555;
   --vp-c-brand-soft: rgba(0, 0, 0, 0.08);
-
   --vp-home-hero-name-color: transparent;
-  --vp-home-hero-name-background: -webkit-linear-gradient(
-    124deg, var(--nav0-color-2) 16%, var(--nav0-color-1)
-  ) 0% 0% / 200% 100%;
-
+  --vp-home-hero-name-background: linear-gradient(
+      124deg,
+      var(--nav0-color-2) 16%,
+      var(--nav0-color-1)
+    )
+    0% 0% / 200% 100%;
   --vp-home-hero-image-background-image: linear-gradient(
-    124deg, var(--nav0-color-1) 50%, var(--nav0-color-2) 50%
+    124deg,
+    var(--nav0-color-1) 50%,
+    var(--nav0-color-2) 50%
   );
   --vp-home-hero-image-filter: blur(44px);
-
   --vp-button-brand-border: #000000;
   --vp-button-brand-text: #ffffff;
   --vp-button-brand-bg: #000000;
@@ -33,12 +34,10 @@
 .dark {
   --nav0-color-1: #ffffff;
   --nav0-color-2: #e0e0e0;
-
   --vp-c-brand-1: #ffffff;
   --vp-c-brand-2: #e0e0e0;
   --vp-c-brand-3: #cccccc;
   --vp-c-brand-soft: rgba(255, 255, 255, 0.1);
-
   --vp-button-brand-border: #ffffff;
   --vp-button-brand-text: #000000;
   --vp-button-brand-bg: #ffffff;
@@ -111,13 +110,15 @@
 }
 
 .feature-capsules-bg {
-  content: "";
+  content: '';
   position: absolute;
   inset: -128px calc(-1 * (100vw - 100%) / 2);
   display: block;
   z-index: -1;
   pointer-events: none;
+
   --gradient-size: 128px;
+
   background-image: linear-gradient(
     to bottom,
     transparent,
@@ -157,9 +158,11 @@
 
 .capsules-wrapper {
   overflow: hidden;
+
   --mask-size: 148px;
   --fade-size: 64px;
   --fade-offset: 48px;
+
   margin: 24px calc(-1 * var(--mask-size));
   padding: 0 var(--mask-size);
 }
@@ -459,7 +462,9 @@ a.blog-card:hover {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Error */
@@ -936,7 +941,7 @@ a.blog-card:hover {
 }
 
 /* ---- Content ---- */
-.nav0-bg > *:not(.nav0-bg-pattern):not(.nav0-bg-vignette) {
+.nav0-bg > *:not(.nav0-bg-pattern, .nav0-bg-vignette) {
   position: relative;
   z-index: 2;
 }
@@ -951,11 +956,7 @@ html.dark .nav0-bg .nav0-bg-pattern {
 }
 
 html.dark .nav0-bg .nav0-bg-vignette {
-  background: radial-gradient(
-    ellipse 70% 60% at 50% 50%,
-    transparent 40%,
-    #0a0a0a 100%
-  );
+  background: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 40%, #0a0a0a 100%);
 }
 
 /* ---- Light Theme ---- */
@@ -968,11 +969,7 @@ html:not(.dark) .nav0-bg .nav0-bg-pattern {
 }
 
 html:not(.dark) .nav0-bg .nav0-bg-vignette {
-  background: radial-gradient(
-    ellipse 70% 60% at 50% 50%,
-    transparent 40%,
-    #fafafa 100%
-  );
+  background: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 40%, #fafafa 100%);
 }
 
 /* ---- Semi-transparent sidebar & nav so pattern shows through ---- */

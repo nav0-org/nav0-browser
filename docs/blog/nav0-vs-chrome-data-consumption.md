@@ -1,6 +1,6 @@
 ---
-title: "Nav0 vs Chrome: Which Browser Actually Respects Your Data?"
-description: "We measured every byte transferred by Nav0 and Chrome across 15 real websites. Nav0 used 17.7% less data, made 29.1% fewer requests, blocked 2.5 MB of trackers, and produced zero idle background traffic."
+title: 'Nav0 vs Chrome: Which Browser Actually Respects Your Data?'
+description: 'We measured every byte transferred by Nav0 and Chrome across 15 real websites. Nav0 used 17.7% less data, made 29.1% fewer requests, blocked 2.5 MB of trackers, and produced zero idle background traffic.'
 date: 2026-03-14
 author: Nav0 Team
 tags: [data-consumption, privacy, benchmark, chrome, trackers, bandwidth]
@@ -10,7 +10,7 @@ head:
       content: article
   - - meta
     - property: article:published_time
-      content: "2026-03-14"
+      content: '2026-03-14'
   - - meta
     - property: article:author
       content: Nav0 Team
@@ -28,7 +28,7 @@ head:
       content: chrome
   - - meta
     - name: keywords
-      content: "Nav0 vs chrome, browser data usage, chrome data consumption, browser bandwidth, tracker blocking, chrome background requests, lightweight browser, browser privacy, chrome telemetry, Nav0 browser data, chrome idle background traffic, browser tracker blocking built in, chrome third party requests, best browser for metered connection, browser that blocks trackers without extensions, how much data does chrome send to advertisers"
+      content: 'Nav0 vs chrome, browser data usage, chrome data consumption, browser bandwidth, tracker blocking, chrome background requests, lightweight browser, browser privacy, chrome telemetry, Nav0 browser data, chrome idle background traffic, browser tracker blocking built in, chrome third party requests, best browser for metered connection, browser that blocks trackers without extensions, how much data does chrome send to advertisers'
   - - script
     - type: application/ld+json
     - |
@@ -102,7 +102,7 @@ Last week we published a [performance benchmark](/blog/nav0-vs-chrome-performanc
 
 This time, we measured something different: how much data each browser actually transfers when you browse the web. Every HTTP request, every tracker pixel, every background ping — we captured it all using the Chrome DevTools Protocol's network interception, then compared the two browsers side by side across 15 real websites.
 
-The short version: Chrome transferred 44.02 MB. Nav0 transferred 36.22 MB. That's 17.7% less data. But the raw totals don't tell the full story. Where Chrome and Nav0 really diverge is in *what* that data is and *who* it's for.
+The short version: Chrome transferred 44.02 MB. Nav0 transferred 36.22 MB. That's 17.7% less data. But the raw totals don't tell the full story. Where Chrome and Nav0 really diverge is in _what_ that data is and _who_ it's for.
 
 ## The Numbers
 
@@ -110,23 +110,23 @@ We opened the same 15 websites in both browsers and measured every network reque
 
 ### Per-Page Data Consumption
 
-| Site | Chrome | Nav0 | Difference | Winner |
-|------|--------|------|------------|--------|
-| news.ycombinator.com | 11.33 KB | 11.36 KB | +0.3% | Chrome |
-| text.npr.org | 2.79 KB | 2.79 KB | +0.0% | Nav0 |
-| en.wikipedia.org | 857.71 KB | 830.86 KB | -3.1% | Nav0 |
-| craigslist.org | 465.36 KB | 775.62 KB | +66.7% | Chrome |
-| lite.cnn.com | 83.41 KB | 38.74 KB | -53.6% | Nav0 |
-| developer.mozilla.org | 708.96 KB | 524.51 KB | -26.0% | Nav0 |
-| docs.github.com | 441.27 KB | 435.34 KB | -1.3% | Nav0 |
-| stackoverflow.com | 2.09 MB | 1.46 MB | -30.2% | Nav0 |
-| npmjs.com | 1.12 MB | 1.11 MB | -0.2% | Nav0 |
-| github.com | 1.14 MB | 1.49 MB | +30.8% | Chrome |
-| reddit.com | 1.51 MB | 1.27 MB | -15.3% | Nav0 |
-| youtube.com | 460.81 KB | 476.91 KB | +3.5% | Chrome |
-| bbc.com | 4.41 MB | 2.08 MB | -52.8% | Nav0 |
-| edition.cnn.com | 26.45 MB | 22.42 MB | -15.3% | Nav0 |
-| twitch.tv | 3.78 MB | 3.01 MB | -20.5% | Nav0 |
+| Site                  | Chrome    | Nav0      | Difference | Winner |
+| --------------------- | --------- | --------- | ---------- | ------ |
+| news.ycombinator.com  | 11.33 KB  | 11.36 KB  | +0.3%      | Chrome |
+| text.npr.org          | 2.79 KB   | 2.79 KB   | +0.0%      | Nav0   |
+| en.wikipedia.org      | 857.71 KB | 830.86 KB | -3.1%      | Nav0   |
+| craigslist.org        | 465.36 KB | 775.62 KB | +66.7%     | Chrome |
+| lite.cnn.com          | 83.41 KB  | 38.74 KB  | -53.6%     | Nav0   |
+| developer.mozilla.org | 708.96 KB | 524.51 KB | -26.0%     | Nav0   |
+| docs.github.com       | 441.27 KB | 435.34 KB | -1.3%      | Nav0   |
+| stackoverflow.com     | 2.09 MB   | 1.46 MB   | -30.2%     | Nav0   |
+| npmjs.com             | 1.12 MB   | 1.11 MB   | -0.2%      | Nav0   |
+| github.com            | 1.14 MB   | 1.49 MB   | +30.8%     | Chrome |
+| reddit.com            | 1.51 MB   | 1.27 MB   | -15.3%     | Nav0   |
+| youtube.com           | 460.81 KB | 476.91 KB | +3.5%      | Chrome |
+| bbc.com               | 4.41 MB   | 2.08 MB   | -52.8%     | Nav0   |
+| edition.cnn.com       | 26.45 MB  | 22.42 MB  | -15.3%     | Nav0   |
+| twitch.tv             | 3.78 MB   | 3.01 MB   | -20.5%     | Nav0   |
 
 Nav0 used less data on 11 of 15 pages. Chrome won on 4 — all by small margins except Craigslist, which we'll address in the methodology section.
 
@@ -136,15 +136,15 @@ On lightweight pages like Hacker News and NPR Text, both browsers transferred ne
 
 ### The Totals
 
-| Metric | Chrome | Nav0 | Difference |
-|--------|--------|------|------------|
-| Total received | 43.46 MB | 35.87 MB | -17.5% |
-| Total sent | 575.30 KB | 359.13 KB | -37.6% |
-| Total requests | 1,168 | 828 | -340 (29.1% fewer) |
+| Metric         | Chrome    | Nav0      | Difference         |
+| -------------- | --------- | --------- | ------------------ |
+| Total received | 43.46 MB  | 35.87 MB  | -17.5%             |
+| Total sent     | 575.30 KB | 359.13 KB | -37.6%             |
+| Total requests | 1,168     | 828       | -340 (29.1% fewer) |
 
 Nav0 made 340 fewer HTTP requests across the same 15 pages. That's 340 fewer connections opened, 340 fewer DNS lookups, 340 fewer TLS handshakes. Each one costs time, battery, and bandwidth.
 
-The sent data difference is even more telling. Nav0 sent 37.6% less data *upstream* — meaning it's not just downloading less junk, it's also sending less information about you back to third-party servers.
+The sent data difference is even more telling. Nav0 sent 37.6% less data _upstream_ — meaning it's not just downloading less junk, it's also sending less information about you back to third-party servers.
 
 ## Where the Data Goes
 
@@ -152,13 +152,13 @@ The raw byte counts are interesting, but the breakdown by category is where it g
 
 ### Request Categories
 
-| Category | Chrome Requests | Chrome Bytes | Nav0 Requests | Nav0 Bytes |
-|----------|----------------|--------------|---------------|------------|
-| First-party | 211 | 3.87 MB | 202 | 4.38 MB |
-| Third-party | 935 | 39.59 MB | 612 | 31.49 MB |
-| Tracker | 104 | 2.63 MB | 14 | 137.64 KB |
-| Blocked | 0 | 0 B | 21 | 0 B |
-| Blocked tracker | 0 | 0 B | 25 | 0 B |
+| Category        | Chrome Requests | Chrome Bytes | Nav0 Requests | Nav0 Bytes |
+| --------------- | --------------- | ------------ | ------------- | ---------- |
+| First-party     | 211             | 3.87 MB      | 202           | 4.38 MB    |
+| Third-party     | 935             | 39.59 MB     | 612           | 31.49 MB   |
+| Tracker         | 104             | 2.63 MB      | 14            | 137.64 KB  |
+| Blocked         | 0               | 0 B          | 21            | 0 B        |
+| Blocked tracker | 0               | 0 B          | 25            | 0 B        |
 
 Read that tracker row again. Chrome loaded 104 tracker requests totaling 2.63 MB. Nav0 loaded 14 tracker requests totaling 137.64 KB — and blocked 25 more outright.
 
@@ -170,17 +170,17 @@ And the third-party numbers are striking too. Chrome made 935 third-party reques
 
 ### Resource Types
 
-| Type | Chrome Requests | Chrome Bytes | Nav0 Requests | Nav0 Bytes |
-|------|----------------|--------------|---------------|------------|
-| Script | 415 | 15.66 MB | 331 | 12.26 MB |
-| Image | 303 | 12.85 MB | 255 | 9.59 MB |
-| Media | 2 | 10.80 MB | 6 | 10.83 MB |
-| Document | 16 | 1,011.89 KB | 16 | 994.27 KB |
-| Font | 24 | 1,004.28 KB | 23 | 975.89 KB |
-| XHR | 157 | 756.93 KB | 47 | 147.08 KB |
-| Stylesheet | 88 | 658.07 KB | 80 | 642.69 KB |
-| Fetch | 87 | 303.09 KB | 34 | 126.30 KB |
-| Ping | 21 | 8.19 KB | 9 | 3.74 KB |
+| Type       | Chrome Requests | Chrome Bytes | Nav0 Requests | Nav0 Bytes |
+| ---------- | --------------- | ------------ | ------------- | ---------- |
+| Script     | 415             | 15.66 MB     | 331           | 12.26 MB   |
+| Image      | 303             | 12.85 MB     | 255           | 9.59 MB    |
+| Media      | 2               | 10.80 MB     | 6             | 10.83 MB   |
+| Document   | 16              | 1,011.89 KB  | 16            | 994.27 KB  |
+| Font       | 24              | 1,004.28 KB  | 23            | 975.89 KB  |
+| XHR        | 157             | 756.93 KB    | 47            | 147.08 KB  |
+| Stylesheet | 88              | 658.07 KB    | 80            | 642.69 KB  |
+| Fetch      | 87              | 303.09 KB    | 34            | 126.30 KB  |
+| Ping       | 21              | 8.19 KB      | 9             | 3.74 KB    |
 
 The standout here is XHR. Chrome made 157 XHR requests totaling 756.93 KB. Nav0 made 47, totaling 147.08 KB. That's a 70% reduction in background data calls. Most of those XHR requests in Chrome are analytics, tracking beacons, and data synchronization calls that have nothing to do with rendering the page you're looking at.
 
@@ -231,7 +231,7 @@ The important thing: on the pages where Chrome "won," the margins were small in 
 
 ## What About First-Party Data?
 
-You might have noticed that Nav0 actually transferred *more* first-party data than Chrome: 4.38 MB vs 3.87 MB. That's a 13% increase.
+You might have noticed that Nav0 actually transferred _more_ first-party data than Chrome: 4.38 MB vs 3.87 MB. That's a 13% increase.
 
 We think this is a feature, not a bug. Nav0 blocks third-party tracker scripts that Chrome loads. Some of those scripts dynamically modify what first-party content gets loaded — for example, a tracker script might lazy-load certain images or defer content loading. When those scripts are blocked, the browser may load the full first-party content directly instead.
 
@@ -336,4 +336,4 @@ Your browser should load the page you asked for and then stop. Nav0 does that. C
 
 ---
 
-*Nav0 is a minimal, open-source browser built on one principle: your browser should work for you, not for an ad company. Zero telemetry. Zero bloat. Zero BS. [Learn more](/guide/philosophy).*
+_Nav0 is a minimal, open-source browser built on one principle: your browser should work for you, not for an ad company. Zero telemetry. Zero bloat. Zero BS. [Learn more](/guide/philosophy)._

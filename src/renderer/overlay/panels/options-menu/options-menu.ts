@@ -156,7 +156,7 @@ function initializeDomElements(): void {
   const modKey = window.BrowserAPI.platform === 'darwin' ? 'Cmd' : 'Ctrl';
   const setShortcut = (id: string, keys: string[]) => {
     const el = containerEl.querySelector(`#${id}`) as HTMLElement;
-    if (el) el.innerHTML = keys.map(k => `<span class="keycap">${k}</span>`).join('');
+    if (el) el.innerHTML = keys.map((k) => `<span class="keycap">${k}</span>`).join('');
   };
 
   setShortcut('om-new-tab-shortcut', [modKey, 'T']);
@@ -194,7 +194,9 @@ async function populateHistorySubmenu(): Promise<void> {
           const favicon = document.createElement('img');
           favicon.className = 'closed-tab-favicon';
           favicon.src = tab.faviconUrl;
-          favicon.onerror = () => { favicon.style.display = 'none'; };
+          favicon.onerror = () => {
+            favicon.style.display = 'none';
+          };
           item.appendChild(favicon);
         }
 
@@ -259,7 +261,9 @@ async function populateHistorySubmenu(): Promise<void> {
   }
 
   // Populate "Restore Previous Session" option
-  const restoreSessionDivider = containerEl.querySelector('#om-restore-session-divider') as HTMLElement;
+  const restoreSessionDivider = containerEl.querySelector(
+    '#om-restore-session-divider'
+  ) as HTMLElement;
   const restoreSessionItem = containerEl.querySelector('#om-restore-session-option') as HTMLElement;
   if (restoreSessionItem && restoreSessionDivider && !isPrivate) {
     const sessionState = await window.BrowserAPI.fetchSessionState();
@@ -300,9 +304,11 @@ function setupEventListeners(): void {
     await window.BrowserAPI.createNewAppWindow();
   });
 
-  optionsElement?.querySelector('#om-new-private-window-option')?.addEventListener('click', async () => {
-    await window.BrowserAPI.createNewPrivateAppWindow();
-  });
+  optionsElement
+    ?.querySelector('#om-new-private-window-option')
+    ?.addEventListener('click', async () => {
+      await window.BrowserAPI.createNewPrivateAppWindow();
+    });
 
   optionsElement?.querySelector('#om-open-pdf-option')?.addEventListener('click', async () => {
     await window.BrowserAPI.openPdfFile(appWindowId);
@@ -341,9 +347,11 @@ function setupEventListeners(): void {
     await window.BrowserAPI.createTab(appWindowId, InAppUrls.ABOUT, true);
   });
 
-  optionsElement?.querySelector('#om-privacy-policy-option')?.addEventListener('click', async () => {
-    await window.BrowserAPI.createTab(appWindowId, 'https://nav0.org/privacy-policy', true);
-  });
+  optionsElement
+    ?.querySelector('#om-privacy-policy-option')
+    ?.addEventListener('click', async () => {
+      await window.BrowserAPI.createTab(appWindowId, 'https://nav0.org/privacy-policy', true);
+    });
 
   optionsElement?.querySelector('#om-terms-of-use-option')?.addEventListener('click', async () => {
     await window.BrowserAPI.createTab(appWindowId, 'https://nav0.org/terms-of-use', true);
@@ -381,15 +389,20 @@ export function init(container: HTMLElement): void {
 
 export function show(_data?: any): void {
   // Hide the Developer Tools option when devtools is disabled in settings.
-  window.DataStoreAPI.get('browser-settings').then((stored: unknown) => {
-    const devToolsEnabled = stored && typeof stored === 'object' && 'devToolsEnabled' in stored
-      ? !!(stored as { devToolsEnabled?: boolean }).devToolsEnabled
-      : true;
-    const devtoolsItem = containerEl?.querySelector('#om-devtools-option') as HTMLElement | null;
-    if (devtoolsItem) {
-      devtoolsItem.style.display = devToolsEnabled ? '' : 'none';
-    }
-  }).catch(() => { /* ignore */ });
+  window.DataStoreAPI.get('browser-settings')
+    .then((stored: unknown) => {
+      const devToolsEnabled =
+        stored && typeof stored === 'object' && 'devToolsEnabled' in stored
+          ? !!(stored as { devToolsEnabled?: boolean }).devToolsEnabled
+          : true;
+      const devtoolsItem = containerEl?.querySelector('#om-devtools-option') as HTMLElement | null;
+      if (devtoolsItem) {
+        devtoolsItem.style.display = devToolsEnabled ? '' : 'none';
+      }
+    })
+    .catch(() => {
+      /* ignore */
+    });
 }
 
 export function hide(): void {

@@ -1,6 +1,6 @@
-import { WebContents } from "electron";
-import { MainToRendererEventsForBrowserIPC } from "../../../constants/app-constants";
-import { OverlayHandler } from "./overlay-handler";
+import { WebContents } from 'electron';
+import { MainToRendererEventsForBrowserIPC } from '../../../constants/app-constants';
+import { OverlayHandler } from './overlay-handler';
 
 export class CommandOHandler implements OverlayHandler {
   onShow(webContents: WebContents): void {

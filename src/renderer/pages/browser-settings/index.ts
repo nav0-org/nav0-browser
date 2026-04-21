@@ -1,6 +1,16 @@
 import './index.css';
 import { createIcons, icons } from 'lucide';
-import { BrowserSettings, DEFAULT_BROWSER_SETTINGS, DEFAULT_SEARCH_ENGINES, DEFAULT_FILTER_LISTS, DEFAULT_KEYBOARD_SHORTCUTS, USER_AGENT_PRESETS, SearchEngineConfig, FilterListConfig, KeyboardShortcutAction } from '../../../types/settings-types';
+import {
+  BrowserSettings,
+  DEFAULT_BROWSER_SETTINGS,
+  DEFAULT_SEARCH_ENGINES,
+  DEFAULT_FILTER_LISTS,
+  DEFAULT_KEYBOARD_SHORTCUTS,
+  USER_AGENT_PRESETS,
+  SearchEngineConfig,
+  FilterListConfig,
+  KeyboardShortcutAction,
+} from '../../../types/settings-types';
 
 // ---- Globals ----
 let settings: BrowserSettings = { ...DEFAULT_BROWSER_SETTINGS };
@@ -15,7 +25,11 @@ const modKey = isMac ? 'Cmd' : 'Ctrl';
 document.addEventListener('DOMContentLoaded', async () => {
   await loadSettings();
   const safeInit = (fn: () => void, name: string) => {
-    try { fn(); } catch (e) { console.error(`Failed to init ${name}:`, e); }
+    try {
+      fn();
+    } catch (e) {
+      console.error(`Failed to init ${name}:`, e);
+    }
   };
   safeInit(initSidebarNavigation, 'sidebar');
   safeInit(initGeneralSettings, 'general');
@@ -60,7 +74,7 @@ function showToast(message: string) {
 // ---- Sidebar Navigation ----
 function initSidebarNavigation() {
   const links = document.querySelectorAll('.sidebar-link');
-  links.forEach(link => {
+  links.forEach((link) => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
       const section = (link as HTMLElement).dataset.section;
@@ -72,8 +86,8 @@ function initSidebarNavigation() {
 }
 
 function activateSection(sectionId: string) {
-  document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+  document.querySelectorAll('.settings-section').forEach((s) => s.classList.remove('active'));
+  document.querySelectorAll('.sidebar-link').forEach((l) => l.classList.remove('active'));
   const section = document.getElementById(`section-${sectionId}`);
   const link = document.querySelector(`.sidebar-link[data-section="${sectionId}"]`);
   if (section) section.classList.add('active');
@@ -83,17 +97,21 @@ function activateSection(sectionId: string) {
 
 // ---- Startup Settings ----
 function initStartupSettings() {
-  const radios = document.querySelectorAll('input[name="startup-mode"]') as NodeListOf<HTMLInputElement>;
+  const radios = document.querySelectorAll(
+    'input[name="startup-mode"]'
+  ) as NodeListOf<HTMLInputElement>;
   const pagesContainer = document.getElementById('startup-pages-container');
 
   // Set initial state from saved settings
-  radios.forEach(r => { if (r.value === (settings.startupMode || 'continue')) r.checked = true; });
+  radios.forEach((r) => {
+    if (r.value === (settings.startupMode || 'continue')) r.checked = true;
+  });
   if (pagesContainer) {
     pagesContainer.style.display = settings.startupMode === 'specific-pages' ? '' : 'none';
   }
 
   // Radio change handler
-  radios.forEach(radio => {
+  radios.forEach((radio) => {
     radio.addEventListener('change', () => {
       settings.startupMode = radio.value as BrowserSettings['startupMode'];
       if (pagesContainer) {
@@ -180,7 +198,7 @@ function initSettingsSearch() {
     const query = searchInput.value.toLowerCase().trim();
     if (!query) {
       // Show current active section
-      document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.settings-section').forEach((s) => s.classList.remove('active'));
       const activeLink = document.querySelector('.sidebar-link.active');
       if (activeLink) {
         const sectionId = (activeLink as HTMLElement).dataset.section;
@@ -190,7 +208,7 @@ function initSettingsSearch() {
       return;
     }
     // Find matching sections
-    document.querySelectorAll('.settings-section').forEach(section => {
+    document.querySelectorAll('.settings-section').forEach((section) => {
       const keywords = (section as HTMLElement).dataset.keywords || '';
       const title = section.querySelector('.section-title')?.textContent || '';
       const allText = (keywords + ' ' + title).toLowerCase();
@@ -238,7 +256,9 @@ function initGeneralSettings() {
 // ---- Search Engine Settings ----
 function initSearchSettings() {
   const select = document.getElementById('search-engine-select') as HTMLSelectElement;
-  const suggestionsToggle = document.getElementById('search-suggestions-toggle') as HTMLInputElement;
+  const suggestionsToggle = document.getElementById(
+    'search-suggestions-toggle'
+  ) as HTMLInputElement;
 
   // Build options (built-in + custom)
   rebuildEngineSelect();
@@ -292,14 +312,14 @@ function rebuildEngineSelect() {
   const currentValue = select.value || settings.primarySearchEngine || 'DuckDuckGo';
   select.innerHTML = '';
 
-  DEFAULT_SEARCH_ENGINES.forEach(engine => {
+  DEFAULT_SEARCH_ENGINES.forEach((engine) => {
     const opt = document.createElement('option');
     opt.value = engine.name;
     opt.textContent = engine.name;
     select.appendChild(opt);
   });
 
-  (settings.customSearchEngines || []).forEach(engine => {
+  (settings.customSearchEngines || []).forEach((engine) => {
     const opt = document.createElement('option');
     opt.value = engine.name;
     opt.textContent = engine.name + ' (custom)';
@@ -348,14 +368,20 @@ function renderCustomEngines() {
 
 // ---- Cookie Settings ----
 function initCookieSettings() {
-  const radios = document.querySelectorAll('input[name="cookie-policy"]') as NodeListOf<HTMLInputElement>;
+  const radios = document.querySelectorAll(
+    'input[name="cookie-policy"]'
+  ) as NodeListOf<HTMLInputElement>;
   const exceptionsContainer = document.getElementById('cookie-exceptions-container');
   const blockAllToggle = document.getElementById('block-all-cookies-toggle') as HTMLInputElement;
-  const clearOnCloseToggle = document.getElementById('clear-cookies-close-toggle') as HTMLInputElement;
+  const clearOnCloseToggle = document.getElementById(
+    'clear-cookies-close-toggle'
+  ) as HTMLInputElement;
   const clearCookiesBtn = document.getElementById('clear-cookies-btn');
 
   // Set initial state
-  radios.forEach(r => { if (r.value === settings.cookiePolicy) r.checked = true; });
+  radios.forEach((r) => {
+    if (r.value === settings.cookiePolicy) r.checked = true;
+  });
   blockAllToggle.checked = settings.blockAllCookies || false;
   clearOnCloseToggle.checked = settings.clearCookiesOnClose || false;
 
@@ -364,7 +390,7 @@ function initCookieSettings() {
     exceptionsContainer.style.display = '';
   }
 
-  radios.forEach(radio => {
+  radios.forEach((radio) => {
     radio.addEventListener('change', () => {
       settings.cookiePolicy = radio.value as BrowserSettings['cookiePolicy'];
       exceptionsContainer.style.display = radio.value === 'block-with-exceptions' ? '' : 'none';
@@ -427,7 +453,9 @@ async function updateCookieCount() {
     if (display && result) {
       display.textContent = `${result.count} cookies stored.`;
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 function renderCookieExceptions() {
@@ -581,15 +609,19 @@ function renderAllowedSites() {
 
 // ---- Pop-up Settings ----
 function initPopupSettings() {
-  const radios = document.querySelectorAll('input[name="popup-policy"]') as NodeListOf<HTMLInputElement>;
+  const radios = document.querySelectorAll(
+    'input[name="popup-policy"]'
+  ) as NodeListOf<HTMLInputElement>;
   const allowedContainer = document.getElementById('popup-allowed-container');
   const blockedContainer = document.getElementById('popup-blocked-container');
 
   // Set initial state
-  radios.forEach(r => { if (r.value === (settings.popupPolicy || 'block')) r.checked = true; });
+  radios.forEach((r) => {
+    if (r.value === (settings.popupPolicy || 'block')) r.checked = true;
+  });
   updatePopupContainerVisibility(settings.popupPolicy || 'block');
 
-  radios.forEach(radio => {
+  radios.forEach((radio) => {
     radio.addEventListener('change', () => {
       settings.popupPolicy = radio.value as BrowserSettings['popupPolicy'];
       updatePopupContainerVisibility(radio.value);
@@ -599,7 +631,7 @@ function initPopupSettings() {
   });
 
   function updatePopupContainerVisibility(policy: string) {
-    allowedContainer.style.display = (policy === 'block' || policy === 'smart') ? '' : 'none';
+    allowedContainer.style.display = policy === 'block' || policy === 'smart' ? '' : 'none';
     blockedContainer.style.display = policy === 'allow' ? '' : 'none';
   }
 
@@ -687,8 +719,12 @@ function renderPopupBlockedSites() {
 function initDataRetentionSettings() {
   const autoDeleteToggle = document.getElementById('auto-delete-toggle') as HTMLInputElement;
   const retentionSettings = document.getElementById('retention-settings');
-  const clearHistoryCloseToggle = document.getElementById('clear-history-close-toggle') as HTMLInputElement;
-  const clearCacheCloseToggle = document.getElementById('clear-cache-close-toggle') as HTMLInputElement;
+  const clearHistoryCloseToggle = document.getElementById(
+    'clear-history-close-toggle'
+  ) as HTMLInputElement;
+  const clearCacheCloseToggle = document.getElementById(
+    'clear-cache-close-toggle'
+  ) as HTMLInputElement;
 
   autoDeleteToggle.checked = settings.autoDeleteEnabled || false;
   retentionSettings.style.display = autoDeleteToggle.checked ? '' : 'none';
@@ -719,15 +755,31 @@ function initDataRetentionSettings() {
   });
 
   // Retention period selectors
-  ['retention-history', 'retention-downloads', 'retention-cookies', 'retention-cache', 'retention-autofill'].forEach(id => {
+  [
+    'retention-history',
+    'retention-downloads',
+    'retention-cookies',
+    'retention-cache',
+    'retention-autofill',
+  ].forEach((id) => {
     document.getElementById(id)?.addEventListener('change', () => {
       const select = document.getElementById(id) as HTMLSelectElement;
       switch (id) {
-        case 'retention-history': settings.retentionBrowsingHistory = select.value; break;
-        case 'retention-downloads': settings.retentionDownloadHistory = select.value; break;
-        case 'retention-cookies': settings.retentionCookiesSiteData = select.value; break;
-        case 'retention-cache': settings.retentionCachedFiles = select.value; break;
-        case 'retention-autofill': settings.retentionAutofillData = select.value; break;
+        case 'retention-history':
+          settings.retentionBrowsingHistory = select.value;
+          break;
+        case 'retention-downloads':
+          settings.retentionDownloadHistory = select.value;
+          break;
+        case 'retention-cookies':
+          settings.retentionCookiesSiteData = select.value;
+          break;
+        case 'retention-cache':
+          settings.retentionCachedFiles = select.value;
+          break;
+        case 'retention-autofill':
+          settings.retentionAutofillData = select.value;
+          break;
       }
       saveSettings();
     });
@@ -760,7 +812,8 @@ function initDataRetentionSettings() {
       cachedFiles: (document.getElementById('clear-cache-cb') as HTMLInputElement).checked,
       autofillData: (document.getElementById('clear-autofill-cb') as HTMLInputElement).checked,
       savedPasswords: (document.getElementById('clear-passwords-cb') as HTMLInputElement).checked,
-      sitePermissions: (document.getElementById('clear-permissions-cb') as HTMLInputElement).checked,
+      sitePermissions: (document.getElementById('clear-permissions-cb') as HTMLInputElement)
+        .checked,
     };
     await (window as any).BrowserAPI.clearBrowsingData(options);
     clearDataDialog.style.display = 'none';
@@ -783,7 +836,8 @@ function initUserAgentSettings() {
 
   // Set initial values
   const platform = (window as any).DataStoreAPI?.platform;
-  const defaultPreset = platform === 'darwin' ? 'chrome-mac' : platform === 'linux' ? 'chrome-linux' : 'chrome-windows';
+  const defaultPreset =
+    platform === 'darwin' ? 'chrome-mac' : platform === 'linux' ? 'chrome-linux' : 'chrome-windows';
   select.value = settings.userAgentPreset || defaultPreset;
   customInput.value = settings.userAgentCustomValue || '';
   customContainer.style.display = select.value === 'custom' ? '' : 'none';
@@ -818,27 +872,39 @@ function initUserAgentSettings() {
 
 // ---- Network / Proxy Settings ----
 function initNetworkSettings() {
-  const radios = document.querySelectorAll('input[name="proxy-mode"]') as NodeListOf<HTMLInputElement>;
+  const radios = document.querySelectorAll(
+    'input[name="proxy-mode"]'
+  ) as NodeListOf<HTMLInputElement>;
   const manualForm = document.getElementById('manual-proxy-form');
   const pacForm = document.getElementById('pac-proxy-form');
   const bypassToggle = document.getElementById('bypass-internal-toggle') as HTMLInputElement;
 
   // Set initial values
-  radios.forEach(r => { if (r.value === settings.proxyMode) r.checked = true; });
+  radios.forEach((r) => {
+    if (r.value === settings.proxyMode) r.checked = true;
+  });
   updateProxyFormVisibility(settings.proxyMode);
 
-  (document.getElementById('proxy-http-host') as HTMLInputElement).value = settings.proxyHttpHost || '';
-  (document.getElementById('proxy-http-port') as HTMLInputElement).value = settings.proxyHttpPort || '';
-  (document.getElementById('proxy-https-host') as HTMLInputElement).value = settings.proxyHttpsHost || '';
-  (document.getElementById('proxy-https-port') as HTMLInputElement).value = settings.proxyHttpsPort || '';
-  (document.getElementById('proxy-socks-host') as HTMLInputElement).value = settings.proxySocksHost || '';
-  (document.getElementById('proxy-socks-port') as HTMLInputElement).value = settings.proxySocksPort || '';
-  (document.getElementById('proxy-socks-version') as HTMLSelectElement).value = settings.proxySocksVersion || '5';
-  (document.getElementById('proxy-bypass') as HTMLInputElement).value = settings.proxyBypassList || '';
+  (document.getElementById('proxy-http-host') as HTMLInputElement).value =
+    settings.proxyHttpHost || '';
+  (document.getElementById('proxy-http-port') as HTMLInputElement).value =
+    settings.proxyHttpPort || '';
+  (document.getElementById('proxy-https-host') as HTMLInputElement).value =
+    settings.proxyHttpsHost || '';
+  (document.getElementById('proxy-https-port') as HTMLInputElement).value =
+    settings.proxyHttpsPort || '';
+  (document.getElementById('proxy-socks-host') as HTMLInputElement).value =
+    settings.proxySocksHost || '';
+  (document.getElementById('proxy-socks-port') as HTMLInputElement).value =
+    settings.proxySocksPort || '';
+  (document.getElementById('proxy-socks-version') as HTMLSelectElement).value =
+    settings.proxySocksVersion || '5';
+  (document.getElementById('proxy-bypass') as HTMLInputElement).value =
+    settings.proxyBypassList || '';
   (document.getElementById('proxy-pac-url') as HTMLInputElement).value = settings.proxyPacUrl || '';
   bypassToggle.checked = settings.bypassProxyForInternal !== false;
 
-  radios.forEach(radio => {
+  radios.forEach((radio) => {
     radio.addEventListener('change', () => {
       settings.proxyMode = radio.value as BrowserSettings['proxyMode'];
       updateProxyFormVisibility(radio.value);
@@ -848,26 +914,53 @@ function initNetworkSettings() {
   });
 
   // Save proxy fields on change (debounced)
-  const proxyFields = ['proxy-http-host', 'proxy-http-port', 'proxy-https-host', 'proxy-https-port', 'proxy-socks-host', 'proxy-socks-port', 'proxy-bypass', 'proxy-pac-url'];
-  proxyFields.forEach(fieldId => {
+  const proxyFields = [
+    'proxy-http-host',
+    'proxy-http-port',
+    'proxy-https-host',
+    'proxy-https-port',
+    'proxy-socks-host',
+    'proxy-socks-port',
+    'proxy-bypass',
+    'proxy-pac-url',
+  ];
+  proxyFields.forEach((fieldId) => {
     const el = document.getElementById(fieldId) as HTMLInputElement;
     el?.addEventListener('change', () => {
       switch (fieldId) {
-        case 'proxy-http-host': settings.proxyHttpHost = el.value; break;
-        case 'proxy-http-port': settings.proxyHttpPort = el.value; break;
-        case 'proxy-https-host': settings.proxyHttpsHost = el.value; break;
-        case 'proxy-https-port': settings.proxyHttpsPort = el.value; break;
-        case 'proxy-socks-host': settings.proxySocksHost = el.value; break;
-        case 'proxy-socks-port': settings.proxySocksPort = el.value; break;
-        case 'proxy-bypass': settings.proxyBypassList = el.value; break;
-        case 'proxy-pac-url': settings.proxyPacUrl = el.value; break;
+        case 'proxy-http-host':
+          settings.proxyHttpHost = el.value;
+          break;
+        case 'proxy-http-port':
+          settings.proxyHttpPort = el.value;
+          break;
+        case 'proxy-https-host':
+          settings.proxyHttpsHost = el.value;
+          break;
+        case 'proxy-https-port':
+          settings.proxyHttpsPort = el.value;
+          break;
+        case 'proxy-socks-host':
+          settings.proxySocksHost = el.value;
+          break;
+        case 'proxy-socks-port':
+          settings.proxySocksPort = el.value;
+          break;
+        case 'proxy-bypass':
+          settings.proxyBypassList = el.value;
+          break;
+        case 'proxy-pac-url':
+          settings.proxyPacUrl = el.value;
+          break;
       }
       saveSettings();
     });
   });
 
   document.getElementById('proxy-socks-version')?.addEventListener('change', () => {
-    settings.proxySocksVersion = (document.getElementById('proxy-socks-version') as HTMLSelectElement).value;
+    settings.proxySocksVersion = (
+      document.getElementById('proxy-socks-version') as HTMLSelectElement
+    ).value;
     saveSettings();
   });
 
@@ -887,7 +980,7 @@ function updateProxyFormVisibility(mode: string) {
 // ---- Keyboard Shortcuts ----
 function initKeyboardShortcuts() {
   // Build shortcuts list from defaults + overrides
-  shortcuts = DEFAULT_KEYBOARD_SHORTCUTS.map(s => ({
+  shortcuts = DEFAULT_KEYBOARD_SHORTCUTS.map((s) => ({
     ...s,
     currentShortcut: settings.keyboardShortcuts?.[s.id] || s.defaultShortcut,
   }));
@@ -895,9 +988,9 @@ function initKeyboardShortcuts() {
   renderShortcutsTable();
 
   // Category filter
-  document.querySelectorAll('.filter-btn').forEach(btn => {
+  document.querySelectorAll('.filter-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.filter-btn').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       activeFilter = (btn as HTMLElement).dataset.filter;
       renderShortcutsTable();
@@ -914,7 +1007,7 @@ function initKeyboardShortcuts() {
     if (confirm('Reset all keyboard shortcuts to defaults?')) {
       settings.keyboardShortcuts = {};
       saveSettings();
-      shortcuts = DEFAULT_KEYBOARD_SHORTCUTS.map(s => ({ ...s }));
+      shortcuts = DEFAULT_KEYBOARD_SHORTCUTS.map((s) => ({ ...s }));
       renderShortcutsTable();
       showToast('All shortcuts reset to defaults');
     }
@@ -929,15 +1022,22 @@ function renderShortcutsTable() {
   if (!tbody) return;
   tbody.innerHTML = '';
 
-  const searchTerm = ((document.getElementById('shortcut-search') as HTMLInputElement)?.value || '').toLowerCase();
+  const searchTerm = (
+    (document.getElementById('shortcut-search') as HTMLInputElement)?.value || ''
+  ).toLowerCase();
 
-  const filtered = shortcuts.filter(s => {
+  const filtered = shortcuts.filter((s) => {
     if (activeFilter !== 'all' && s.category !== activeFilter) return false;
-    if (searchTerm && s.label.toLowerCase().indexOf(searchTerm) === -1 && s.currentShortcut.toLowerCase().indexOf(searchTerm) === -1) return false;
+    if (
+      searchTerm &&
+      s.label.toLowerCase().indexOf(searchTerm) === -1 &&
+      s.currentShortcut.toLowerCase().indexOf(searchTerm) === -1
+    )
+      return false;
     return true;
   });
 
-  filtered.forEach(shortcut => {
+  filtered.forEach((shortcut) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${shortcut.label}</td>
@@ -989,7 +1089,7 @@ function handleShortcutRecording(e: KeyboardEvent) {
   // Allow clearing with Backspace/Delete
   if (e.key === 'Backspace' || e.key === 'Delete') {
     const actionId = recordingCell.dataset.recordingFor;
-    const shortcut = shortcuts.find(s => s.id === actionId);
+    const shortcut = shortcuts.find((s) => s.id === actionId);
     if (shortcut) {
       shortcut.currentShortcut = '';
       if (!settings.keyboardShortcuts) settings.keyboardShortcuts = {};
@@ -1039,12 +1139,14 @@ function handleShortcutRecording(e: KeyboardEvent) {
 
   // Check for conflicts
   const actionId = recordingCell.dataset.recordingFor;
-  const conflicting = shortcuts.find(s => s.id !== actionId && s.currentShortcut === combo);
+  const conflicting = shortcuts.find((s) => s.id !== actionId && s.currentShortcut === combo);
 
   if (conflicting) {
-    const swap = confirm(`"${combo}" is already assigned to "${conflicting.label}". Swap bindings?`);
+    const swap = confirm(
+      `"${combo}" is already assigned to "${conflicting.label}". Swap bindings?`
+    );
     if (swap) {
-      const currentShortcut = shortcuts.find(s => s.id === actionId);
+      const currentShortcut = shortcuts.find((s) => s.id === actionId);
       conflicting.currentShortcut = currentShortcut?.currentShortcut || '';
       if (!settings.keyboardShortcuts) settings.keyboardShortcuts = {};
       settings.keyboardShortcuts[conflicting.id] = conflicting.currentShortcut;
@@ -1056,7 +1158,7 @@ function handleShortcutRecording(e: KeyboardEvent) {
   }
 
   // Apply new binding
-  const shortcut = shortcuts.find(s => s.id === actionId);
+  const shortcut = shortcuts.find((s) => s.id === actionId);
   if (shortcut) {
     shortcut.currentShortcut = combo;
     if (!settings.keyboardShortcuts) settings.keyboardShortcuts = {};
@@ -1072,20 +1174,23 @@ function handleShortcutRecording(e: KeyboardEvent) {
 
 function formatShortcutDisplay(combo: string): string {
   if (!combo) return '<span style="color: var(--text-secondary); font-style: italic;">None</span>';
-  return combo.split('+').map(part => {
-    let display = part;
-    if (part === 'mod') display = modKey;
-    return `<span class="keycap">${display}</span>`;
-  }).join('');
+  return combo
+    .split('+')
+    .map((part) => {
+      let display = part;
+      if (part === 'mod') display = modKey;
+      return `<span class="keycap">${display}</span>`;
+    })
+    .join('');
 }
 
 // ---- Permissions Settings ----
 const PERMISSION_INFO: Record<string, { label: string; icon: string }> = {
-  'media': { label: 'Camera/Microphone', icon: 'camera' },
-  'geolocation': { label: 'Location', icon: 'map-pin' },
-  'notifications': { label: 'Notifications', icon: 'bell' },
-  'midi': { label: 'MIDI Devices', icon: 'music' },
-  'midiSysex': { label: 'MIDI System Exclusive', icon: 'music' },
+  media: { label: 'Camera/Microphone', icon: 'camera' },
+  geolocation: { label: 'Location', icon: 'map-pin' },
+  notifications: { label: 'Notifications', icon: 'bell' },
+  midi: { label: 'MIDI Devices', icon: 'music' },
+  midiSysex: { label: 'MIDI System Exclusive', icon: 'music' },
   'display-capture': { label: 'Screen Sharing', icon: 'monitor' },
   'clipboard-read': { label: 'Clipboard', icon: 'clipboard' },
   'idle-detection': { label: 'Idle Detection', icon: 'moon' },
@@ -1095,10 +1200,10 @@ const PERMISSION_INFO: Record<string, { label: string; icon: string }> = {
   'screen-wake-lock': { label: 'Screen Wake Lock', icon: 'monitor' },
   'speaker-selection': { label: 'Speaker Selection', icon: 'speaker' },
   'keyboard-lock': { label: 'Keyboard Lock', icon: 'keyboard' },
-  'usb': { label: 'USB Devices', icon: 'usb' },
-  'serial': { label: 'Serial Ports', icon: 'usb' },
-  'bluetooth': { label: 'Bluetooth Devices', icon: 'bluetooth' },
-  'hid': { label: 'HID Devices', icon: 'keyboard' },
+  usb: { label: 'USB Devices', icon: 'usb' },
+  serial: { label: 'Serial Ports', icon: 'usb' },
+  bluetooth: { label: 'Bluetooth Devices', icon: 'bluetooth' },
+  hid: { label: 'HID Devices', icon: 'keyboard' },
 };
 
 function getPermLabel(permissionType: string): string {
@@ -1138,7 +1243,8 @@ async function initPermissionsSettings() {
   });
 
   document.getElementById('clear-all-permissions-btn')?.addEventListener('click', async () => {
-    if (!confirm('Remove all site permissions? Sites will need to request permissions again.')) return;
+    if (!confirm('Remove all site permissions? Sites will need to request permissions again.'))
+      return;
     await (window as any).BrowserAPI.clearAllPermissions();
     showToast('All permissions cleared');
     refresh();
@@ -1167,7 +1273,11 @@ async function loadAndRenderPermissions(searchTerm?: string) {
       return;
     }
     const permissions = await api.fetchPermissions(searchTerm || '');
-    console.log('[permissions] fetched', { count: permissions?.length ?? 0, searchTerm, sample: permissions?.[0] });
+    console.log('[permissions] fetched', {
+      count: permissions?.length ?? 0,
+      searchTerm,
+      sample: permissions?.[0],
+    });
     renderPermissions(Array.isArray(permissions) ? permissions : []);
   } catch (err) {
     console.error('[permissions] fetch failed', err);
@@ -1251,7 +1361,9 @@ function renderPermissions(permissions: PermissionRecord[]) {
       const select = entry.querySelector('.permission-decision-select') as HTMLSelectElement;
       select.addEventListener('change', async () => {
         await (window as any).BrowserAPI.updatePermissionDecision(perm.id, select.value);
-        showToast(`${label} ${select.value === 'allowed_persistent' ? 'allowed' : 'denied'} for ${origin}`);
+        showToast(
+          `${label} ${select.value === 'allowed_persistent' ? 'allowed' : 'denied'} for ${origin}`
+        );
       });
 
       // Remove handler

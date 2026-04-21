@@ -1,5 +1,5 @@
 ---
-title: "Incognito Mode Is Not Private: The Biggest Lie Your Browser Tells You"
+title: 'Incognito Mode Is Not Private: The Biggest Lie Your Browser Tells You'
 description: "Private browsing modes like Chrome's Incognito don't make you private. They hide your history from your device — not from your ISP, employer, or the websites you visit. Here's what they actually do."
 date: 2026-03-15
 author: Nav0 Team
@@ -10,7 +10,7 @@ head:
       content: article
   - - meta
     - property: article:published_time
-      content: "2026-03-15"
+      content: '2026-03-15'
   - - meta
     - property: article:author
       content: Nav0 Team
@@ -25,7 +25,7 @@ head:
       content: incognito
   - - meta
     - name: keywords
-      content: "is incognito mode private, does incognito hide from ISP, chrome incognito tracking, private browsing myth, incognito mode what does it do, does incognito mode protect from hackers, can employer see incognito browsing, incognito mode vs VPN, does private browsing hide your IP address, browser fingerprinting incognito, google tracks incognito mode, is private browsing really private, incognito mode limitations, what does incognito mode actually hide"
+      content: 'is incognito mode private, does incognito hide from ISP, chrome incognito tracking, private browsing myth, incognito mode what does it do, does incognito mode protect from hackers, can employer see incognito browsing, incognito mode vs VPN, does private browsing hide your IP address, browser fingerprinting incognito, google tracks incognito mode, is private browsing really private, incognito mode limitations, what does incognito mode actually hide'
   - - script
     - type: application/ld+json
     - |
@@ -149,7 +149,7 @@ When you open an Incognito window and visit a website, your request travels thro
 - When you connected and for how long
 - How much data you transferred
 
-HTTPS encrypts the *content* of your connection, but the destination is visible. Your ISP knows you visited a health information site, even if it can't read which specific page you looked at. In many countries, ISPs are legally required to retain this data and can be compelled to share it with law enforcement.
+HTTPS encrypts the _content_ of your connection, but the destination is visible. Your ISP knows you visited a health information site, even if it can't read which specific page you looked at. In many countries, ISPs are legally required to retain this data and can be compelled to share it with law enforcement.
 
 Incognito mode changes absolutely nothing about this. Your network traffic looks identical whether you're in Incognito or not.
 
@@ -199,7 +199,7 @@ Your DNS lookups reveal every domain you visit. A browser that takes privacy ser
 
 ### Collect no telemetry
 
-If the browser itself is sending data about your activity to its vendor, it doesn't matter how many trackers it blocks. The browser *is* the tracker. A truly private browser sends nothing.
+If the browser itself is sending data about your activity to its vendor, it doesn't matter how many trackers it blocks. The browser _is_ the tracker. A truly private browser sends nothing.
 
 ### Make privacy the default, not a mode
 
@@ -239,4 +239,4 @@ Privacy isn't a mode. It's an architecture.
 
 ---
 
-*Nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started).*
+_Nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started)._

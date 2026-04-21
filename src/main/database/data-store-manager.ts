@@ -1,6 +1,9 @@
 import { ipcMain, webContents, BrowserWindow } from 'electron';
 import Store from 'electron-store';
-import { DataStoreConstants, RendererToMainEventsForDataStoreIPC } from '../../constants/app-constants';
+import {
+  DataStoreConstants,
+  RendererToMainEventsForDataStoreIPC,
+} from '../../constants/app-constants';
 import { DEFAULT_BROWSER_SETTINGS } from '../../types/settings-types';
 
 // Define interface for watcher data
@@ -15,18 +18,40 @@ export abstract class DataStoreManager {
   private static watchers: Map<number, WatcherData> = new Map();
   private static UNIVERSAL_KEY = DataStoreConstants.DEFAULT_KEY;
 
-
-  public static init(){
+  public static init() {
     DataStoreManager.initStores();
     DataStoreManager.initListeners();
   }
 
   private static initStores(): void {
-    DataStoreManager.stores.set(DataStoreConstants.BROWSER_SETTINGS, new Store({ name: DataStoreConstants.BROWSER_SETTINGS, defaults: {'default' : DataStoreManager.getDefaultValue(DataStoreConstants.BROWSER_SETTINGS)}  as Record<string, any>}));
-    DataStoreManager.stores.set(DataStoreConstants.CLOSED_WINDOWS, new Store({ name: DataStoreConstants.CLOSED_WINDOWS, defaults: {'default' : DataStoreManager.getDefaultValue(DataStoreConstants.CLOSED_WINDOWS)}  as Record<string, any>}));
-    DataStoreManager.stores.set(DataStoreConstants.SESSION_STATE, new Store({ name: DataStoreConstants.SESSION_STATE, defaults: {'default' : DataStoreManager.getDefaultValue(DataStoreConstants.SESSION_STATE)}  as Record<string, any>}));
+    DataStoreManager.stores.set(
+      DataStoreConstants.BROWSER_SETTINGS,
+      new Store({
+        name: DataStoreConstants.BROWSER_SETTINGS,
+        defaults: {
+          default: DataStoreManager.getDefaultValue(DataStoreConstants.BROWSER_SETTINGS),
+        } as Record<string, any>,
+      })
+    );
+    DataStoreManager.stores.set(
+      DataStoreConstants.CLOSED_WINDOWS,
+      new Store({
+        name: DataStoreConstants.CLOSED_WINDOWS,
+        defaults: {
+          default: DataStoreManager.getDefaultValue(DataStoreConstants.CLOSED_WINDOWS),
+        } as Record<string, any>,
+      })
+    );
+    DataStoreManager.stores.set(
+      DataStoreConstants.SESSION_STATE,
+      new Store({
+        name: DataStoreConstants.SESSION_STATE,
+        defaults: {
+          default: DataStoreManager.getDefaultValue(DataStoreConstants.SESSION_STATE),
+        } as Record<string, any>,
+      })
+    );
   }
-
 
   private static initListeners(): void {
     ipcMain.handle(RendererToMainEventsForDataStoreIPC.STORE_GET, (event, storeName) => {
@@ -39,7 +64,7 @@ export abstract class DataStoreManager {
 
       // // Notify all watchers except sender
       // for (const [watcherId, watchData] of DataStore.watchers.entries()) {
-      //   if (watcherId !== event.sender.id && 
+      //   if (watcherId !== event.sender.id &&
       //       watchData.storeName === storeName &&
       //       watchData.keys.has(key)) {
       //     try {
@@ -53,21 +78,21 @@ export abstract class DataStoreManager {
       //     }
       //   }
       // }
-      
+
       return true;
     });
 
     // Watch handler
     // ipcMain.on('store:watch', (event, storeName, key) => {
     //   const watcherId = event.sender.id;
-      
+
     //   if (!DataStore.watchers.has(watcherId)) {
     //     DataStore.watchers.set(watcherId, {
     //       storeName,
     //       keys: new Set([key]),
     //       cleanup: () => DataStore.watchers.delete(watcherId)
     //     });
-        
+
     //     // Clean up when webContents is destroyed
     //     event.sender.once('destroyed', () => {
     //       if (DataStore.watchers.has(watcherId)) {
@@ -83,12 +108,12 @@ export abstract class DataStoreManager {
     // // Unwatch handler
     // ipcMain.on('store:unwatch', (event, storeName, key) => {
     //   const watcherId = event.sender.id;
-      
+
     //   if (DataStore.watchers.has(watcherId)) {
     //     const watcher = DataStore.watchers.get(watcherId);
     //     if (watcher) {
     //       watcher.keys.delete(key);
-          
+
     //       // If no more keys, remove the watcher
     //       if (watcher.keys.size === 0) {
     //         DataStore.watchers.delete(watcherId);
@@ -114,14 +139,14 @@ export abstract class DataStoreManager {
   //   for (const window of BrowserWindow.getAllWindows()) {
   //     const watcherId = window.webContents.id;
   //     const watchData = DataStoreManager.watchers.get(watcherId);
-      
+
   //     if (watchData && watchData.storeName === storeName && watchData.keys.has(key)) {
   //       window.webContents.send('store:changed', storeName, key, value);
   //     }
   //   }
   // }
 
-  private static getDefaultValue(storeName: string): any{
+  private static getDefaultValue(storeName: string): any {
     let returnValue;
     switch (storeName) {
       case DataStoreConstants.BROWSER_SETTINGS:

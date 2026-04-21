@@ -1,5 +1,5 @@
 ---
-title: "Nav0 vs Tor Browser: Maximum Anonymity vs. Maximum Simplicity"
+title: 'Nav0 vs Tor Browser: Maximum Anonymity vs. Maximum Simplicity'
 description: "Tor Browser is the gold standard for online anonymity, routing your traffic through encrypted relays worldwide. Nav0 takes a different approach: zero data collection without the performance tradeoffs. Here's when you need Tor — and when Nav0 is enough."
 date: 2026-04-04
 author: Nav0 Team
@@ -10,7 +10,7 @@ head:
       content: article
   - - meta
     - property: article:published_time
-      content: "2026-04-04"
+      content: '2026-04-04'
   - - meta
     - property: article:author
       content: Nav0 Team
@@ -28,7 +28,7 @@ head:
       content: anonymity
   - - meta
     - name: keywords
-      content: "Nav0 vs tor browser, tor browser privacy, tor anonymity, onion routing, tor performance, tor vs private browser, minimal browser vs tor, private browser comparison, is tor browser safe, tor browser alternative, tor browser slow, best private browser 2026, tor browser vs nav0, anonymous browsing, tor exit node risk, browser without tracking"
+      content: 'Nav0 vs tor browser, tor browser privacy, tor anonymity, onion routing, tor performance, tor vs private browser, minimal browser vs tor, private browser comparison, is tor browser safe, tor browser alternative, tor browser slow, best private browser 2026, tor browser vs nav0, anonymous browsing, tor exit node risk, browser without tracking'
   - - script
     - type: application/ld+json
     - |
@@ -106,21 +106,21 @@ These are different tools for different threat models. One protects you from gov
 
 ## Nav0 vs Tor Browser: Quick Comparison
 
-| Feature | Nav0 | Tor Browser |
-|---------|------|-------------|
-| **Privacy model** | Zero data collection by browser | Network-level anonymity via onion routing |
-| **IP anonymity** | No (direct connection) | Yes (3-relay encrypted routing) |
-| **Browsing speed** | Full speed (direct) | Slow (3-5s+ per page via relays) |
-| **Anti-fingerprinting** | No | Yes (standardized browser profile) |
-| **Website compatibility** | Full | Limited (CAPTCHAs, blocks, broken sites) |
-| **Telemetry** | Zero | Zero |
-| **JavaScript** | Enabled (full) | Configurable (restricted in Safer/Safest modes) |
-| **Open source** | Yes (MIT license) | Yes (modified Firefox ESR) |
-| **.onion site access** | No | Yes |
-| **Censorship circumvention** | No | Yes |
-| **Extensions** | None | Limited (NoScript only) |
-| **Platforms** | macOS, Windows, Linux | Windows, macOS, Linux, Android |
-| **Best for** | Daily private browsing | Anonymity-critical situations |
+| Feature                      | Nav0                            | Tor Browser                                     |
+| ---------------------------- | ------------------------------- | ----------------------------------------------- |
+| **Privacy model**            | Zero data collection by browser | Network-level anonymity via onion routing       |
+| **IP anonymity**             | No (direct connection)          | Yes (3-relay encrypted routing)                 |
+| **Browsing speed**           | Full speed (direct)             | Slow (3-5s+ per page via relays)                |
+| **Anti-fingerprinting**      | No                              | Yes (standardized browser profile)              |
+| **Website compatibility**    | Full                            | Limited (CAPTCHAs, blocks, broken sites)        |
+| **Telemetry**                | Zero                            | Zero                                            |
+| **JavaScript**               | Enabled (full)                  | Configurable (restricted in Safer/Safest modes) |
+| **Open source**              | Yes (MIT license)               | Yes (modified Firefox ESR)                      |
+| **.onion site access**       | No                              | Yes                                             |
+| **Censorship circumvention** | No                              | Yes                                             |
+| **Extensions**               | None                            | Limited (NoScript only)                         |
+| **Platforms**                | macOS, Windows, Linux           | Windows, macOS, Linux, Android                  |
+| **Best for**                 | Daily private browsing          | Anonymity-critical situations                   |
 
 ## What Tor Actually Does
 
@@ -151,6 +151,7 @@ Nav0 connects directly to the internet. Pages load at full speed. No CAPTCHAs tr
 Here's the core distinction: Tor Browser and Nav0 protect against different threats.
 
 **Tor Browser protects against:**
+
 - Network surveillance (ISP, government, corporate network monitoring)
 - IP-based tracking across websites
 - Geographic identification
@@ -158,6 +159,7 @@ Here's the core distinction: Tor Browser and Nav0 protect against different thre
 - Browser fingerprinting
 
 **Nav0 protects against:**
+
 - Your browser collecting and sending your data to its maker
 - Telemetry and usage analytics
 - Ad tracking and behavioral profiling by the browser itself
@@ -213,6 +215,7 @@ Nav0 connects directly to websites. There's no intermediary that can inspect or 
 This isn't actually a competition. Tor Browser and Nav0 serve different purposes:
 
 **Use Tor Browser when:**
+
 - You need to hide your IP address from the website you're visiting
 - You need to bypass censorship in a restrictive country
 - You're accessing sensitive information that could put you at risk
@@ -220,6 +223,7 @@ This isn't actually a competition. Tor Browser and Nav0 serve different purposes
 - Your threat model includes network surveillance
 
 **Use Nav0 when:**
+
 - You want a daily-driver browser that doesn't collect your data
 - You want fast, unrestricted browsing with zero telemetry
 - Your threat model is browser-level tracking, not network-level surveillance
@@ -276,4 +280,4 @@ For the times when "enough" isn't enough, use Tor.
 
 ---
 
-*Nav0 is a privacy-focused browser that collects zero data. It's open source, free, and built for people who believe their browser shouldn't spy on them. [Get started](/guide/getting-started).*
+_Nav0 is a privacy-focused browser that collects zero data. It's open source, free, and built for people who believe their browser shouldn't spy on them. [Get started](/guide/getting-started)._

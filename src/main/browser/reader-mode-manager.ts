@@ -1,7 +1,7 @@
-import type { WebContents } from "electron";
+import type { WebContents } from 'electron';
 // Imported as raw source strings via webpack asset/source rule
-import readabilitySource from "@mozilla/readability/Readability.js";
-import readabilityReadableSource from "@mozilla/readability/Readability-readerable.js";
+import readabilitySource from '@mozilla/readability/Readability.js';
+import readabilityReadableSource from '@mozilla/readability/Readability-readerable.js';
 
 export interface ReaderArticle {
   title: string;
@@ -34,12 +34,12 @@ export class ReaderModeManager {
   static async checkEligibility(webContents: WebContents): Promise<boolean> {
     try {
       const script =
-        "(function() {" +
-        "var module = { exports: {} };" +
+        '(function() {' +
+        'var module = { exports: {} };' +
         readabilityReadableSource +
-        "var isProbablyReaderable = module.exports;" +
-        "return isProbablyReaderable(document, {minScore: 60, minContentLength: 140});" +
-        "})()";
+        'var isProbablyReaderable = module.exports;' +
+        'return isProbablyReaderable(document, {minScore: 60, minContentLength: 140});' +
+        '})()';
       return await webContents.executeJavaScript(script);
     } catch {
       return false;
@@ -49,20 +49,20 @@ export class ReaderModeManager {
   static async extractContent(webContents: WebContents): Promise<ReaderArticle | null> {
     try {
       const script =
-        "(function() {" +
-        "var module = { exports: {} };" +
+        '(function() {' +
+        'var module = { exports: {} };' +
         readabilitySource +
-        "var Readability = module.exports;" +
-        "var article = new Readability(document.cloneNode(true)).parse();" +
-        "return article ? {" +
+        'var Readability = module.exports;' +
+        'var article = new Readability(document.cloneNode(true)).parse();' +
+        'return article ? {' +
         "  title: article.title || ''," +
         "  byline: article.byline || ''," +
         "  content: article.content || ''," +
         "  siteName: article.siteName || ''," +
         "  excerpt: article.excerpt || ''," +
         "  publishedTime: article.publishedTime || ''" +
-        "} : null;" +
-        "})()";
+        '} : null;' +
+        '})()';
       return await webContents.executeJavaScript(script);
     } catch {
       return null;
@@ -74,39 +74,41 @@ export class ReaderModeManager {
       const cssKey = await webContents.insertCSS(ReaderModeManager.getReaderCSS());
       const articleJSON = JSON.stringify(article);
       await webContents.executeJavaScript(
-        "(function() {" +
-        "window.__Nav0ReaderModeScrollPos = window.scrollY;" +
-        "var children = document.body.children;" +
-        "for (var i = 0; i < children.length; i++) {" +
-        "  children[i].setAttribute('data-Nav0-reader-hidden', '');" +
-        "  children[i].style.setProperty('display', 'none', 'important');" +
-        "}" +
-        "var article = " + articleJSON + ";" +
-        "var container = document.createElement('div');" +
-        "container.id = 'Nav0-reader-mode';" +
-        "container.style.opacity = '0';" +
-        "var meta = '';" +
-        "if (article.byline) meta += '<span class=\"Nav0-reader-byline\">' + article.byline + '</span>';" +
-        "if (article.siteName) meta += '<span class=\"Nav0-reader-site\">' + article.siteName + '</span>';" +
-        "if (article.publishedTime) {" +
-        "  try { var d = new Date(article.publishedTime); if (!isNaN(d.getTime())) meta += '<span class=\"Nav0-reader-date\">' + d.toLocaleDateString(undefined, {year:'numeric',month:'long',day:'numeric'}) + '</span>'; }" +
-        "  catch(e) {}" +
-        "}" +
-        "container.innerHTML = " +
-        "  '<article class=\"Nav0-reader-article\">' +" +
-        "  '<header class=\"Nav0-reader-header\">' +" +
-        "  '<h1 class=\"Nav0-reader-title\">' + article.title + '</h1>' +" +
-        "  (meta ? '<div class=\"Nav0-reader-meta\">' + meta + '</div>' : '') +" +
-        "  '</header>' +" +
-        "  '<div class=\"Nav0-reader-content\">' + article.content + '</div>' +" +
-        "  '</article>';" +
-        "document.body.appendChild(container);" +
-        "window.scrollTo(0, 0);" +
-        "requestAnimationFrame(function() {" +
-        "  container.style.transition = 'opacity 0.3s ease';" +
-        "  container.style.opacity = '1';" +
-        "});" +
-        "})()"
+        '(function() {' +
+          'window.__Nav0ReaderModeScrollPos = window.scrollY;' +
+          'var children = document.body.children;' +
+          'for (var i = 0; i < children.length; i++) {' +
+          "  children[i].setAttribute('data-Nav0-reader-hidden', '');" +
+          "  children[i].style.setProperty('display', 'none', 'important');" +
+          '}' +
+          'var article = ' +
+          articleJSON +
+          ';' +
+          "var container = document.createElement('div');" +
+          "container.id = 'Nav0-reader-mode';" +
+          "container.style.opacity = '0';" +
+          "var meta = '';" +
+          "if (article.byline) meta += '<span class=\"Nav0-reader-byline\">' + article.byline + '</span>';" +
+          "if (article.siteName) meta += '<span class=\"Nav0-reader-site\">' + article.siteName + '</span>';" +
+          'if (article.publishedTime) {' +
+          "  try { var d = new Date(article.publishedTime); if (!isNaN(d.getTime())) meta += '<span class=\"Nav0-reader-date\">' + d.toLocaleDateString(undefined, {year:'numeric',month:'long',day:'numeric'}) + '</span>'; }" +
+          '  catch(e) {}' +
+          '}' +
+          'container.innerHTML = ' +
+          '  \'<article class="Nav0-reader-article">\' +' +
+          '  \'<header class="Nav0-reader-header">\' +' +
+          "  '<h1 class=\"Nav0-reader-title\">' + article.title + '</h1>' +" +
+          "  (meta ? '<div class=\"Nav0-reader-meta\">' + meta + '</div>' : '') +" +
+          "  '</header>' +" +
+          "  '<div class=\"Nav0-reader-content\">' + article.content + '</div>' +" +
+          "  '</article>';" +
+          'document.body.appendChild(container);' +
+          'window.scrollTo(0, 0);' +
+          'requestAnimationFrame(function() {' +
+          "  container.style.transition = 'opacity 0.3s ease';" +
+          "  container.style.opacity = '1';" +
+          '});' +
+          '})()'
       );
       return cssKey;
     } catch {
@@ -117,16 +119,16 @@ export class ReaderModeManager {
   static async deactivate(webContents: WebContents, cssKey: string | null): Promise<void> {
     try {
       await webContents.executeJavaScript(
-        "(function() {" +
-        "var container = document.getElementById('Nav0-reader-mode');" +
-        "if (container) container.remove();" +
-        "var hidden = document.querySelectorAll('[data-Nav0-reader-hidden]');" +
-        "for (var i = 0; i < hidden.length; i++) {" +
-        "  hidden[i].removeAttribute('data-Nav0-reader-hidden');" +
-        "  hidden[i].style.removeProperty('display');" +
-        "}" +
-        "window.scrollTo(0, window.__Nav0ReaderModeScrollPos || 0);" +
-        "})()"
+        '(function() {' +
+          "var container = document.getElementById('Nav0-reader-mode');" +
+          'if (container) container.remove();' +
+          "var hidden = document.querySelectorAll('[data-Nav0-reader-hidden]');" +
+          'for (var i = 0; i < hidden.length; i++) {' +
+          "  hidden[i].removeAttribute('data-Nav0-reader-hidden');" +
+          "  hidden[i].style.removeProperty('display');" +
+          '}' +
+          'window.scrollTo(0, window.__Nav0ReaderModeScrollPos || 0);' +
+          '})()'
       );
       if (cssKey) {
         await webContents.removeInsertedCSS(cssKey);

@@ -39,6 +39,6 @@ export const rules: Required<ModuleOptions>['rules'] = [
   },
   {
     test: /\.html$/,
-    use: 'html-loader'
-  }
+    use: 'html-loader',
+  },
 ];

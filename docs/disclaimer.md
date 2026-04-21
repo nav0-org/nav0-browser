@@ -1,6 +1,6 @@
 ---
-title: "Nav0 Browser Disclaimer — Important Legal Information"
-description: "Read the full disclaimer for Nav0 Browser. Understand the terms of use, limitations, and legal notices for this open-source, privacy-focused web browser."
+title: 'Nav0 Browser Disclaimer — Important Legal Information'
+description: 'Read the full disclaimer for Nav0 Browser. Understand the terms of use, limitations, and legal notices for this open-source, privacy-focused web browser.'
 ---
 
 # Disclaimer

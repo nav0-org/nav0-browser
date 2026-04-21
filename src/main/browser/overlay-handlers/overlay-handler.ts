@@ -1,4 +1,4 @@
-import { WebContents } from "electron";
+import { WebContents } from 'electron';
 
 export interface OverlayHandler {
   onShow(webContents: WebContents, data?: any): void;

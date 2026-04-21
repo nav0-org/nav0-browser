@@ -29,12 +29,14 @@ const NAV0_DEBUG_PORT = 9229;
 const REPORT_DIR = path.join(__dirname, 'reports');
 
 // App paths — auto-detected; override with env vars CHROME_BIN / NAV0_BIN
-const CHROME_BIN = process.env.CHROME_BIN || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const CHROME_BIN =
+  process.env.CHROME_BIN || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const NAV0_CANDIDATES = [
   path.join(os.homedir(), 'Desktop/Nav0.app/Contents/MacOS/Nav0'),
   '/Applications/Nav0.app/Contents/MacOS/Nav0',
 ];
-const NAV0_BIN = process.env.NAV0_BIN || NAV0_CANDIDATES.find(p => fs.existsSync(p)) || NAV0_CANDIDATES[1];
+const NAV0_BIN =
+  process.env.NAV0_BIN || NAV0_CANDIDATES.find((p) => fs.existsSync(p)) || NAV0_CANDIDATES[1];
 
 const TEST_URLS = [
   // Light pages
@@ -62,7 +64,7 @@ const TEST_URLS = [
 // ─── Utility Functions ──────────────────────────────────────────────────────
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function timestamp() {
@@ -80,7 +82,10 @@ function getDescendantPids(pid) {
   try {
     const out = execSync(`pgrep -P ${pid}`, { encoding: 'utf-8', timeout: 5000 }).trim();
     if (!out) return [];
-    const children = out.split('\n').map(Number).filter(n => !isNaN(n) && n > 0);
+    const children = out
+      .split('\n')
+      .map(Number)
+      .filter((n) => !isNaN(n) && n > 0);
     let all = [...children];
     for (const child of children) {
       all = all.concat(getDescendantPids(child));
@@ -121,7 +126,9 @@ function getPhysicalFootprintMB(rootPid) {
     for (const line of output.split('\n')) {
       if (line.includes('peak')) continue; // skip peak footprint lines
       // Match "Physical footprint:  123M" or "Physical footprint:  1.2G"
-      const humanMatch = line.match(/(?:Physical footprint|phys_footprint):\s+([\d.]+)\s*([BKMG])/i);
+      const humanMatch = line.match(
+        /(?:Physical footprint|phys_footprint):\s+([\d.]+)\s*([BKMG])/i
+      );
       if (humanMatch) {
         const val = parseFloat(humanMatch[1]);
         const unit = humanMatch[2].toUpperCase();
@@ -189,9 +196,18 @@ function waitForPort(port, timeoutMs = 60000) {
       }
       const sock = new net.Socket();
       sock.setTimeout(1000);
-      sock.once('connect', () => { sock.destroy(); resolve(); });
-      sock.once('error', () => { sock.destroy(); setTimeout(attempt, 500); });
-      sock.once('timeout', () => { sock.destroy(); setTimeout(attempt, 500); });
+      sock.once('connect', () => {
+        sock.destroy();
+        resolve();
+      });
+      sock.once('error', () => {
+        sock.destroy();
+        setTimeout(attempt, 500);
+      });
+      sock.once('timeout', () => {
+        sock.destroy();
+        setTimeout(attempt, 500);
+      });
       sock.connect(port, '127.0.0.1');
     };
     attempt();
@@ -200,14 +216,19 @@ function waitForPort(port, timeoutMs = 60000) {
 
 function httpGetJson(url) {
   return new Promise((resolve, reject) => {
-    http.get(url, (res) => {
-      let data = '';
-      res.on('data', (chunk) => data += chunk);
-      res.on('end', () => {
-        try { resolve(JSON.parse(data)); }
-        catch (e) { reject(new Error(`JSON parse error from ${url}`)); }
-      });
-    }).on('error', reject);
+    http
+      .get(url, (res) => {
+        let data = '';
+        res.on('data', (chunk) => (data += chunk));
+        res.on('end', () => {
+          try {
+            resolve(JSON.parse(data));
+          } catch (e) {
+            reject(new Error(`JSON parse error from ${url}`));
+          }
+        });
+      })
+      .on('error', reject);
   });
 }
 
@@ -231,13 +252,19 @@ function findPidOnPort(port) {
 function killTree(pid) {
   const descendants = getDescendantPids(pid);
   for (const p of descendants.reverse()) {
-    try { process.kill(p, 'SIGTERM'); } catch {}
+    try {
+      process.kill(p, 'SIGTERM');
+    } catch {}
   }
-  try { process.kill(pid, 'SIGTERM'); } catch {}
+  try {
+    process.kill(pid, 'SIGTERM');
+  } catch {}
   // Give a moment then force kill stragglers
   setTimeout(() => {
     for (const p of [...descendants, pid]) {
-      try { process.kill(p, 'SIGKILL'); } catch {}
+      try {
+        process.kill(p, 'SIGKILL');
+      } catch {}
     }
   }, 2000);
 }
@@ -260,19 +287,23 @@ async function testChrome(tabCount) {
   // Create a temp profile so we don't touch the user's real profile
   const tmpProfile = fs.mkdtempSync(path.join(os.tmpdir(), 'chrome-perf-'));
 
-  const proc = spawn(CHROME_BIN, [
-    `--remote-debugging-port=${CHROME_DEBUG_PORT}`,
-    `--user-data-dir=${tmpProfile}`,
-    '--no-first-run',
-    '--no-default-browser-check',
-    '--disable-default-apps',
-    '--disable-extensions',
-    '--disable-background-networking',
-    'about:blank',
-  ], {
-    stdio: ['ignore', 'pipe', 'pipe'],
-    detached: true,
-  });
+  const proc = spawn(
+    CHROME_BIN,
+    [
+      `--remote-debugging-port=${CHROME_DEBUG_PORT}`,
+      `--user-data-dir=${tmpProfile}`,
+      '--no-first-run',
+      '--no-default-browser-check',
+      '--disable-default-apps',
+      '--disable-extensions',
+      '--disable-background-networking',
+      'about:blank',
+    ],
+    {
+      stdio: ['ignore', 'pipe', 'pipe'],
+      detached: true,
+    }
+  );
 
   proc.stdout.on('data', () => {});
   proc.stderr.on('data', () => {});
@@ -308,7 +339,9 @@ async function testChrome(tabCount) {
     const memoryMB = getPhysicalFootprintMB(pid);
     const metrics = await measureCpuAndProcs(pid, SAMPLE_DURATION_MS);
     const result = { browser: 'Chrome', tabCount, memoryMB, ...metrics };
-    log(`[Chrome] ${tabCount} tabs → Mem=${result.memoryMB}MB CPU=${result.cpuPercent}% Procs=${result.processCount}`);
+    log(
+      `[Chrome] ${tabCount} tabs → Mem=${result.memoryMB}MB CPU=${result.cpuPercent}% Procs=${result.processCount}`
+    );
 
     browser.disconnect();
     return result;
@@ -316,7 +349,9 @@ async function testChrome(tabCount) {
     killTree(pid);
     await sleep(3000);
     // Clean up temp profile
-    try { fs.rmSync(tmpProfile, { recursive: true, force: true }); } catch {}
+    try {
+      fs.rmSync(tmpProfile, { recursive: true, force: true });
+    } catch {}
   }
 }
 
@@ -330,10 +365,13 @@ function httpPost(url) {
   return new Promise((resolve, reject) => {
     const req = http.request(url, { method: 'POST' }, (res) => {
       let data = '';
-      res.on('data', (c) => data += c);
+      res.on('data', (c) => (data += c));
       res.on('end', () => {
-        try { resolve(JSON.parse(data)); }
-        catch { resolve(data); }
+        try {
+          resolve(JSON.parse(data));
+        } catch {
+          resolve(data);
+        }
       });
     });
     req.on('error', reject);
@@ -356,7 +394,9 @@ async function testNav0(tabCount) {
   });
 
   let stderrBuf = '';
-  proc.stderr.on('data', (d) => { stderrBuf += d.toString(); });
+  proc.stderr.on('data', (d) => {
+    stderrBuf += d.toString();
+  });
   proc.stdout.on('data', () => {});
 
   const spawnPid = proc.pid;
@@ -391,7 +431,9 @@ async function testNav0(tabCount) {
     const memoryMB = getPhysicalFootprintMB(electronPid);
     const metrics = await measureCpuAndProcs(electronPid, SAMPLE_DURATION_MS);
     const result = { browser: 'Nav0', tabCount, memoryMB, ...metrics };
-    log(`[Nav0] ${tabCount} tabs → Mem=${result.memoryMB}MB CPU=${result.cpuPercent}% Procs=${result.processCount}`);
+    log(
+      `[Nav0] ${tabCount} tabs → Mem=${result.memoryMB}MB CPU=${result.cpuPercent}% Procs=${result.processCount}`
+    );
 
     return result;
   } catch (err) {
@@ -419,7 +461,9 @@ function generateReport(chromeResults, nav0Results) {
   lines.push('          BROWSER PERFORMANCE COMPARISON: Nav0 vs Chrome');
   lines.push(sep);
   lines.push('');
-  lines.push(`  System:    ${os.type()} ${os.arch()} | ${os.cpus()[0]?.model || 'Unknown'} | ${os.cpus().length} CPUs | ${(os.totalmem() / 1073741824).toFixed(1)} GB RAM`);
+  lines.push(
+    `  System:    ${os.type()} ${os.arch()} | ${os.cpus()[0]?.model || 'Unknown'} | ${os.cpus().length} CPUs | ${(os.totalmem() / 1073741824).toFixed(1)} GB RAM`
+  );
   lines.push(`  Date:      ${new Date().toISOString()}`);
   lines.push(`  Settle:    ${SETTLE_TIME_MS / 1000}s | Sample: ${SAMPLE_DURATION_MS / 1000}s`);
   lines.push(`  Tab URLs:  ${TEST_URLS.length} rotating test URLs`);
@@ -438,7 +482,8 @@ function generateReport(chromeResults, nav0Results) {
   lines.push(thin);
   lines.push(fmtHeader());
   for (const tc of TAB_COUNTS) {
-    const c = chromeMap[tc], n = nav0Map[tc];
+    const c = chromeMap[tc],
+      n = nav0Map[tc];
     if (c && n) lines.push(fmtRow(tc, c.memoryMB, n.memoryMB, 'MB'));
     else if (c) lines.push(fmtRowSingle(tc, 'Chrome', c.memoryMB, 'MB'));
     else if (n) lines.push(fmtRowSingle(tc, 'Nav0', n.memoryMB, 'MB'));
@@ -451,7 +496,8 @@ function generateReport(chromeResults, nav0Results) {
   lines.push(thin);
   lines.push(fmtHeader());
   for (const tc of TAB_COUNTS) {
-    const c = chromeMap[tc], n = nav0Map[tc];
+    const c = chromeMap[tc],
+      n = nav0Map[tc];
     if (c && n) lines.push(fmtRow(tc, c.cpuPercent, n.cpuPercent, '%'));
     else if (c) lines.push(fmtRowSingle(tc, 'Chrome', c.cpuPercent, '%'));
     else if (n) lines.push(fmtRowSingle(tc, 'Nav0', n.cpuPercent, '%'));
@@ -464,7 +510,8 @@ function generateReport(chromeResults, nav0Results) {
   lines.push(thin);
   lines.push(fmtHeader());
   for (const tc of TAB_COUNTS) {
-    const c = chromeMap[tc], n = nav0Map[tc];
+    const c = chromeMap[tc],
+      n = nav0Map[tc];
     if (c && n) lines.push(fmtRow(tc, c.processCount, n.processCount, ''));
     else if (c) lines.push(fmtRowSingle(tc, 'Chrome', c.processCount, ''));
     else if (n) lines.push(fmtRowSingle(tc, 'Nav0', n.processCount, ''));
@@ -472,9 +519,9 @@ function generateReport(chromeResults, nav0Results) {
   lines.push('');
 
   // ── Summary ──
-  const validPairs = TAB_COUNTS
-    .map(tc => [chromeMap[tc], nav0Map[tc]])
-    .filter(([c, n]) => c && n);
+  const validPairs = TAB_COUNTS.map((tc) => [chromeMap[tc], nav0Map[tc]]).filter(
+    ([c, n]) => c && n
+  );
 
   if (validPairs.length > 0) {
     lines.push(sep);
@@ -485,12 +532,16 @@ function generateReport(chromeResults, nav0Results) {
     const avgCM = avg(validPairs.map(([c]) => c.memoryMB));
     const avgNM = avg(validPairs.map(([, n]) => n.memoryMB));
     const memPct = pctDiff(avgCM, avgNM);
-    lines.push(`  Avg Memory:   Chrome ${avgCM.toFixed(1)} MB  vs  Nav0 ${avgNM.toFixed(1)} MB  (${memPct}) → ${avgNM <= avgCM ? 'Nav0' : 'Chrome'} wins`);
+    lines.push(
+      `  Avg Memory:   Chrome ${avgCM.toFixed(1)} MB  vs  Nav0 ${avgNM.toFixed(1)} MB  (${memPct}) → ${avgNM <= avgCM ? 'Nav0' : 'Chrome'} wins`
+    );
 
     const avgCC = avg(validPairs.map(([c]) => c.cpuPercent));
     const avgNC = avg(validPairs.map(([, n]) => n.cpuPercent));
     const cpuPct = pctDiff(avgCC, avgNC);
-    lines.push(`  Avg CPU:      Chrome ${avgCC.toFixed(2)}%  vs  Nav0 ${avgNC.toFixed(2)}%  (${cpuPct}) → ${avgNC <= avgCC ? 'Nav0' : 'Chrome'} wins`);
+    lines.push(
+      `  Avg CPU:      Chrome ${avgCC.toFixed(2)}%  vs  Nav0 ${avgNC.toFixed(2)}%  (${cpuPct}) → ${avgNC <= avgCC ? 'Nav0' : 'Chrome'} wins`
+    );
 
     lines.push('');
   }
@@ -533,7 +584,9 @@ function generateReport(chromeResults, nav0Results) {
 
 // ── Formatting helpers ──
 
-function pad(str, len) { return String(str).padEnd(len); }
+function pad(str, len) {
+  return String(str).padEnd(len);
+}
 
 function fmtHeader() {
   return '  ' + pad('Tabs', 8) + pad('Chrome', 14) + pad('Nav0', 14) + pad('Diff', 18) + 'Winner';
@@ -545,18 +598,26 @@ function fmtRow(tabs, chromeVal, nav0Val, unit) {
   const pct = ((diff / base) * 100).toFixed(1);
   const sign = diff >= 0 ? '+' : '';
   const winner = nav0Val <= chromeVal ? 'Nav0' : 'Chrome';
-  return '  ' +
+  return (
+    '  ' +
     pad(tabs, 8) +
     pad(`${chromeVal}${unit}`, 14) +
     pad(`${nav0Val}${unit}`, 14) +
     pad(`${sign}${diff.toFixed(2)} (${sign}${pct}%)`, 18) +
-    winner;
+    winner
+  );
 }
 
 function fmtRowSingle(tabs, browser, val, unit) {
-  return '  ' + pad(tabs, 8) + (browser === 'Chrome'
-    ? pad(`${val}${unit}`, 14) + pad('N/A', 14)
-    : pad('N/A', 14) + pad(`${val}${unit}`, 14)) + pad('—', 18) + '—';
+  return (
+    '  ' +
+    pad(tabs, 8) +
+    (browser === 'Chrome'
+      ? pad(`${val}${unit}`, 14) + pad('N/A', 14)
+      : pad('N/A', 14) + pad(`${val}${unit}`, 14)) +
+    pad('—', 18) +
+    '—'
+  );
 }
 
 function avg(nums) {
@@ -565,7 +626,7 @@ function avg(nums) {
 
 function pctDiff(base, other) {
   if (base === 0) return 'N/A';
-  const diff = ((other - base) / base * 100).toFixed(1);
+  const diff = (((other - base) / base) * 100).toFixed(1);
   const sign = other >= base ? '+' : '';
   return `${sign}${diff}%`;
 }

@@ -1,6 +1,6 @@
 ---
-title: "Nav0 Tab Management — Tabs, Pinning, Hibernation & Multi-Window"
-description: "Nav0 offers full tab management with pinning, hibernation, drag-and-drop between windows, tab restoration, Command-K search, and the Cmd+O tab switcher."
+title: 'Nav0 Tab Management — Tabs, Pinning, Hibernation & Multi-Window'
+description: 'Nav0 offers full tab management with pinning, hibernation, drag-and-drop between windows, tab restoration, Command-K search, and the Cmd+O tab switcher.'
 head:
   - - meta
     - property: og:type
@@ -65,11 +65,11 @@ Nav0 provides a full-featured tab system designed for efficiency. Open as many t
 
 ## Opening & Closing Tabs
 
-| Action | Shortcut (macOS) | Shortcut (Windows/Linux) |
-|--------|-------------------|--------------------------|
-| New tab | Cmd+T | Ctrl+T |
-| Close tab | Cmd+W | Ctrl+W |
-| Reopen last closed tab | Cmd+Shift+T | Ctrl+Shift+T |
+| Action                 | Shortcut (macOS) | Shortcut (Windows/Linux) |
+| ---------------------- | ---------------- | ------------------------ |
+| New tab                | Cmd+T            | Ctrl+T                   |
+| Close tab              | Cmd+W            | Ctrl+W                   |
+| Reopen last closed tab | Cmd+Shift+T      | Ctrl+Shift+T             |
 
 - **New tabs open in the background** — Opening a link in a new tab doesn't steal focus from your current page
 - **Middle-click to close** — Click the middle mouse button on any tab to close it
@@ -98,15 +98,15 @@ Pinned tabs survive browser restarts and stay in place when you open and close o
 
 Right-click any tab to access:
 
-| Action | What It Does |
-|--------|-------------|
-| **Reload** | Refresh the tab's page |
-| **Duplicate** | Open a copy of the tab |
-| **Pin / Unpin** | Toggle tab pinning |
-| **Mute / Unmute** | Toggle audio for the tab |
+| Action                 | What It Does                       |
+| ---------------------- | ---------------------------------- |
+| **Reload**             | Refresh the tab's page             |
+| **Duplicate**          | Open a copy of the tab             |
+| **Pin / Unpin**        | Toggle tab pinning                 |
+| **Mute / Unmute**      | Toggle audio for the tab           |
 | **Move to New Window** | Detach the tab into its own window |
-| **Close** | Close the tab |
-| **Close Other Tabs** | Close all tabs except this one |
+| **Close**              | Close the tab                      |
+| **Close Other Tabs**   | Close all tabs except this one     |
 
 ## Tab Hibernation
 
@@ -173,15 +173,15 @@ Filter results by type using category tabs: All, Tabs, Bookmarks, History, Downl
 
 ## Keyboard Shortcuts for Tabs
 
-| Action | macOS | Windows/Linux |
-|--------|-------|---------------|
-| New Tab | Cmd+T | Ctrl+T |
-| Close Tab | Cmd+W | Ctrl+W |
-| Reopen Closed Tab | Cmd+Shift+T | Ctrl+Shift+T |
-| Command Palette | Cmd+K | Ctrl+K |
-| Tab Switcher | Cmd+O | Ctrl+O |
-| New Window | Cmd+N | Ctrl+N |
-| New Private Window | Cmd+Shift+N | Ctrl+Shift+N |
+| Action             | macOS       | Windows/Linux |
+| ------------------ | ----------- | ------------- |
+| New Tab            | Cmd+T       | Ctrl+T        |
+| Close Tab          | Cmd+W       | Ctrl+W        |
+| Reopen Closed Tab  | Cmd+Shift+T | Ctrl+Shift+T  |
+| Command Palette    | Cmd+K       | Ctrl+K        |
+| Tab Switcher       | Cmd+O       | Ctrl+O        |
+| New Window         | Cmd+N       | Ctrl+N        |
+| New Private Window | Cmd+Shift+N | Ctrl+Shift+N  |
 
 All keyboard shortcuts are customizable. See [Keyboard Shortcuts](/guide/keyboard-shortcuts) for the full list.
 
@@ -209,4 +209,4 @@ Tab hibernation is automatic and not configurable. Tabs must be inactive for 72 
 
 ---
 
-*See also: [Keyboard Shortcuts](/guide/keyboard-shortcuts) · [Private Browsing](/guide/private-browsing) · [Features Overview](/guide/features)*
+_See also: [Keyboard Shortcuts](/guide/keyboard-shortcuts) · [Private Browsing](/guide/private-browsing) · [Features Overview](/guide/features)_

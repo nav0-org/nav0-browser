@@ -7,90 +7,90 @@ export const DownloadsSchema: TableSchema = {
       name: 'id',
       columnType: { type: 'uuid' },
       primaryKey: true,
-      notNull: true
+      notNull: true,
     },
     {
       name: 'createdDate',
       columnType: { type: 'timestamp', defaultNow: true },
-      notNull: true
+      notNull: true,
     },
     {
       name: 'url',
       columnType: { type: 'standard', sqlType: 'TEXT' },
-      notNull: true
+      notNull: true,
     },
     {
       name: 'fileName',
       columnType: { type: 'standard', sqlType: 'TEXT' },
-      notNull: true
+      notNull: true,
     },
     {
       name: 'fileExtension',
       columnType: { type: 'standard', sqlType: 'TEXT' },
-      notNull: true
+      notNull: true,
     },
     {
       name: 'fileType',
       columnType: { type: 'standard', sqlType: 'TEXT' },
-      notNull: true
+      notNull: true,
     },
     {
       name: 'fileSize',
       columnType: { type: 'standard', sqlType: 'INTEGER' },
-      notNull: true
+      notNull: true,
     },
     {
       name: 'fileLocation',
       columnType: { type: 'standard', sqlType: 'TEXT' },
-      notNull: true
+      notNull: true,
     },
     {
       name: 'status',
       columnType: { type: 'standard', sqlType: 'TEXT' },
-      defaultValue: 'completed'
+      defaultValue: 'completed',
     },
     {
       name: 'receivedBytes',
       columnType: { type: 'standard', sqlType: 'INTEGER' },
-      defaultValue: 0
+      defaultValue: 0,
     },
     {
       name: 'urlChain',
       columnType: { type: 'standard', sqlType: 'TEXT' },
-      defaultValue: '[]'
+      defaultValue: '[]',
     },
     {
       name: 'eTag',
       columnType: { type: 'standard', sqlType: 'TEXT' },
-      defaultValue: ''
+      defaultValue: '',
     },
     {
       name: 'lastModified',
       columnType: { type: 'standard', sqlType: 'TEXT' },
-      defaultValue: ''
+      defaultValue: '',
     },
     {
       name: 'startTime',
       columnType: { type: 'standard', sqlType: 'REAL' },
-      defaultValue: 0
-    }
+      defaultValue: 0,
+    },
   ],
   indices: [
     {
       name: 'idxDownloadFileType',
-      columns: ['fileType']
+      columns: ['fileType'],
     },
     {
       name: 'idxDownloadFileExtension',
-      columns: ['fileExtension']
+      columns: ['fileExtension'],
     },
     {
       name: 'idxDownloadCreatedDate',
-      columns: ['createdDate']
+      columns: ['createdDate'],
     },
     {
       name: 'idxDownloadStatus',
-      columns: ['status']
-    }
-  ]
+      columns: ['status'],
+    },
+  ],
 };

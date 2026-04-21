@@ -1,6 +1,6 @@
 ---
-title: "Nav0 vs Microsoft Edge: The Browser That Reports Everything to Redmond"
-description: "Microsoft Edge ships with more telemetry than almost any browser on the market. It sends your browsing data to Microsoft, pushes Bing, Copilot AI, shopping tools, and news feeds you never asked for. Nav0 sends nothing to anyone."
+title: 'Nav0 vs Microsoft Edge: The Browser That Reports Everything to Redmond'
+description: 'Microsoft Edge ships with more telemetry than almost any browser on the market. It sends your browsing data to Microsoft, pushes Bing, Copilot AI, shopping tools, and news feeds you never asked for. Nav0 sends nothing to anyone.'
 date: 2026-04-04
 author: Nav0 Team
 tags: [edge, microsoft, privacy, comparison, telemetry, bloat]
@@ -10,7 +10,7 @@ head:
       content: article
   - - meta
     - property: article:published_time
-      content: "2026-04-04"
+      content: '2026-04-04'
   - - meta
     - property: article:author
       content: Nav0 Team
@@ -28,7 +28,7 @@ head:
       content: comparison
   - - meta
     - name: keywords
-      content: "Nav0 vs edge, microsoft edge privacy, edge telemetry, edge copilot, edge bloat, edge tracking, bing browser, minimal browser vs edge, private browser comparison, is microsoft edge safe, edge data collection, edge hardware UUID, edge vs private browser, best browser without telemetry, microsoft edge alternative 2026, edge sends data to microsoft, browser without microsoft account"
+      content: 'Nav0 vs edge, microsoft edge privacy, edge telemetry, edge copilot, edge bloat, edge tracking, bing browser, minimal browser vs edge, private browser comparison, is microsoft edge safe, edge data collection, edge hardware UUID, edge vs private browser, best browser without telemetry, microsoft edge alternative 2026, edge sends data to microsoft, browser without microsoft account'
   - - script
     - type: application/ld+json
     - |
@@ -106,20 +106,20 @@ Edge is Chromium with Microsoft's business strategy bolted on. It's fast, capabl
 
 ## Nav0 vs Edge: Quick Comparison
 
-| Feature | Nav0 | Microsoft Edge |
-|---------|------|----------------|
-| **Telemetry** | Zero | Extensive (hardware UUID, browsing data, crash reports) |
-| **AI features** | None | Copilot AI (reads page content) |
-| **Built-in features** | 7 (essential browsing only) | 15+ (shopping, games, news, AI, VPN) |
-| **Account required** | No | Pushed aggressively (Microsoft account) |
-| **Data sent to vendor** | Zero bytes | Hardware UUIDs, browsing data, diagnostics |
-| **Default search** | DuckDuckGo | Bing (with resistance to changing) |
-| **New tab page** | Blank | News feed, ads, trending searches |
-| **Open source** | Yes (MIT license) | No (closed source) |
-| **Ad blocker** | Built-in (EasyList, EasyPrivacy) | None built-in |
-| **Business model** | None (free, open source) | Advertising, subscriptions, data |
-| **Extensions** | None | Chrome Web Store |
-| **Platforms** | macOS, Windows, Linux | Windows, macOS, iOS, Android |
+| Feature                 | Nav0                             | Microsoft Edge                                          |
+| ----------------------- | -------------------------------- | ------------------------------------------------------- |
+| **Telemetry**           | Zero                             | Extensive (hardware UUID, browsing data, crash reports) |
+| **AI features**         | None                             | Copilot AI (reads page content)                         |
+| **Built-in features**   | 7 (essential browsing only)      | 15+ (shopping, games, news, AI, VPN)                    |
+| **Account required**    | No                               | Pushed aggressively (Microsoft account)                 |
+| **Data sent to vendor** | Zero bytes                       | Hardware UUIDs, browsing data, diagnostics              |
+| **Default search**      | DuckDuckGo                       | Bing (with resistance to changing)                      |
+| **New tab page**        | Blank                            | News feed, ads, trending searches                       |
+| **Open source**         | Yes (MIT license)                | No (closed source)                                      |
+| **Ad blocker**          | Built-in (EasyList, EasyPrivacy) | None built-in                                           |
+| **Business model**      | None (free, open source)         | Advertising, subscriptions, data                        |
+| **Extensions**          | None                             | Chrome Web Store                                        |
+| **Platforms**           | macOS, Windows, Linux            | Windows, macOS, iOS, Android                            |
 
 ## The Telemetry Problem
 
@@ -277,4 +277,4 @@ Edge is Microsoft's browser. Nav0 is your browser.
 
 ---
 
-*Nav0 is a privacy-focused browser that collects zero data. It's open source, free, and built for people who believe their browser shouldn't spy on them. [Get started](/guide/getting-started).*
+_Nav0 is a privacy-focused browser that collects zero data. It's open source, free, and built for people who believe their browser shouldn't spy on them. [Get started](/guide/getting-started)._

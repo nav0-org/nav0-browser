@@ -185,8 +185,10 @@ const renderResults = (results: ResultItem[], query: string) => {
   activeIndex = results.length > 0 ? 0 : -1;
 
   // Remove all dynamic result elements (keep empty-state and loading)
-  const dynamicElements = resultsContainer.querySelectorAll('.section-title, .result-item, .no-results');
-  dynamicElements.forEach(el => el.remove());
+  const dynamicElements = resultsContainer.querySelectorAll(
+    '.section-title, .result-item, .no-results'
+  );
+  dynamicElements.forEach((el) => el.remove());
 
   if (results.length === 0 && !query) {
     emptyState.style.display = 'flex';
@@ -198,11 +200,11 @@ const renderResults = (results: ResultItem[], query: string) => {
   loadingIndicator.style.display = 'none';
 
   // Group results by type
-  const tabs = results.filter(r => r.type === 'tab');
-  const bookmarks = results.filter(r => r.type === 'bookmark');
-  const history = results.filter(r => r.type === 'history');
-  const downloads = results.filter(r => r.type === 'download');
-  const searchItems = results.filter(r => r.type === 'search');
+  const tabs = results.filter((r) => r.type === 'tab');
+  const bookmarks = results.filter((r) => r.type === 'bookmark');
+  const history = results.filter((r) => r.type === 'history');
+  const downloads = results.filter((r) => r.type === 'download');
+  const searchItems = results.filter((r) => r.type === 'search');
 
   const fragment = document.createDocumentFragment();
 
@@ -213,7 +215,7 @@ const renderResults = (results: ResultItem[], query: string) => {
     sectionTitle.textContent = title;
     fragment.appendChild(sectionTitle);
 
-    items.forEach(item => {
+    items.forEach((item) => {
       const idx = results.indexOf(item);
       fragment.appendChild(createResultItemElement(item, idx));
     });
@@ -225,7 +227,7 @@ const renderResults = (results: ResultItem[], query: string) => {
   addSection('Downloads', downloads);
 
   // Search engine item at the end
-  searchItems.forEach(item => {
+  searchItems.forEach((item) => {
     const idx = results.indexOf(item);
     fragment.appendChild(createResultItemElement(item, idx));
   });
@@ -282,22 +284,26 @@ const performSearch = async (query: string) => {
     const lowerQuery = query.toLowerCase();
 
     // Fetch open tabs (filtered client-side)
-    const fetchTabs = (activeFilter === 'all' || activeFilter === 'tabs')
-      ? window.BrowserAPI.fetchOpenTabs(window.BrowserAPI.appWindowId)
-      : Promise.resolve([]);
+    const fetchTabs =
+      activeFilter === 'all' || activeFilter === 'tabs'
+        ? window.BrowserAPI.fetchOpenTabs(window.BrowserAPI.appWindowId)
+        : Promise.resolve([]);
 
     // Fetch data based on active filter
-    const fetchBookmarks = (activeFilter === 'all' || activeFilter === 'bookmarks')
-      ? window.BrowserAPI.fetchBookmarks(window.BrowserAPI.appWindowId, query, 5, 0)
-      : Promise.resolve([]);
+    const fetchBookmarks =
+      activeFilter === 'all' || activeFilter === 'bookmarks'
+        ? window.BrowserAPI.fetchBookmarks(window.BrowserAPI.appWindowId, query, 5, 0)
+        : Promise.resolve([]);
 
-    const fetchHistory = (activeFilter === 'all' || activeFilter === 'history')
-      ? window.BrowserAPI.fetchBrowsingHistory(window.BrowserAPI.appWindowId, query, 5, 0)
-      : Promise.resolve([]);
+    const fetchHistory =
+      activeFilter === 'all' || activeFilter === 'history'
+        ? window.BrowserAPI.fetchBrowsingHistory(window.BrowserAPI.appWindowId, query, 5, 0)
+        : Promise.resolve([]);
 
-    const fetchDownloads = (activeFilter === 'all' || activeFilter === 'downloads')
-      ? window.BrowserAPI.fetchDownloads(window.BrowserAPI.appWindowId, query, 5, 0)
-      : Promise.resolve([]);
+    const fetchDownloads =
+      activeFilter === 'all' || activeFilter === 'downloads'
+        ? window.BrowserAPI.fetchDownloads(window.BrowserAPI.appWindowId, query, 5, 0)
+        : Promise.resolve([]);
 
     const [openTabs, bookmarks, history, downloads] = await Promise.all([
       fetchTabs,
@@ -365,12 +371,17 @@ const performSearch = async (query: string) => {
   } catch (error) {
     loadingIndicator.style.display = 'none';
     // On error, still show the search option
-    renderResults([{
-      type: 'search',
-      title: query,
-      url: '',
-      meta: 'Search with default search engine',
-    }], query);
+    renderResults(
+      [
+        {
+          type: 'search',
+          title: query,
+          url: '',
+          meta: 'Search with default search engine',
+        },
+      ],
+      query
+    );
   }
 };
 
@@ -378,7 +389,7 @@ const navigateResults = (direction: number) => {
   if (currentResults.length === 0) return;
 
   const resultElements = resultsContainer.querySelectorAll<HTMLElement>('.result-item');
-  resultElements.forEach(item => item.classList.remove('active'));
+  resultElements.forEach((item) => item.classList.remove('active'));
 
   activeIndex = (activeIndex + direction) % currentResults.length;
   if (activeIndex < 0) activeIndex = currentResults.length - 1;
@@ -476,9 +487,9 @@ export function init(container: HTMLElement): void {
   actionButtons = container.querySelectorAll<HTMLButtonElement>('.action-btn');
 
   // Filter button handling
-  actionButtons.forEach(button => {
+  actionButtons.forEach((button) => {
     button.addEventListener('click', () => {
-      actionButtons.forEach(b => b.classList.remove('primary'));
+      actionButtons.forEach((b) => b.classList.remove('primary'));
       button.classList.add('primary');
       activeFilter = (button.dataset.filter as typeof activeFilter) || 'all';
       const query = searchInput.value;
@@ -504,7 +515,7 @@ export function show(_data?: any): void {
   if (debounceTimer) clearTimeout(debounceTimer);
 
   // Reset filter buttons
-  actionButtons.forEach(b => b.classList.remove('primary'));
+  actionButtons.forEach((b) => b.classList.remove('primary'));
   const allBtn = containerEl.querySelector('.action-btn[data-filter="all"]') as HTMLButtonElement;
   if (allBtn) allBtn.classList.add('primary');
 

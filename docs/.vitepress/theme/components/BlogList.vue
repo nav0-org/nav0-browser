@@ -8,7 +8,9 @@
         <span class="blog-tag">{{ post.tag }}</span>
         <h3>{{ post.title }}</h3>
         <p>{{ post.excerpt }}</p>
-        <span class="blog-meta">By {{ post.author }} &middot; {{ post.date }} &middot; {{ post.readTime }}</span>
+        <span class="blog-meta"
+          >By {{ post.author }} &middot; {{ post.date }} &middot; {{ post.readTime }}</span
+        >
       </a>
     </div>
 
@@ -19,8 +21,8 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { data as posts } from '../posts.data'
+import { computed } from 'vue';
+import { data as posts } from '../posts.data';
 
-const latestPosts = computed(() => posts.slice(0, 6))
+const latestPosts = computed(() => posts.slice(0, 6));
 </script>

@@ -1,5 +1,5 @@
 ---
-title: "Nav0 vs DuckDuckGo Browser: When Your Privacy Brand Has a Microsoft Exception"
+title: 'Nav0 vs DuckDuckGo Browser: When Your Privacy Brand Has a Microsoft Exception'
 description: "DuckDuckGo's browser is a solid privacy option — until you learn about the Microsoft tracking exception, the remote config system, and the AI features. Nav0 takes the simpler path: collect nothing, period."
 date: 2026-04-04
 author: Nav0 Team
@@ -10,7 +10,7 @@ head:
       content: article
   - - meta
     - property: article:published_time
-      content: "2026-04-04"
+      content: '2026-04-04'
   - - meta
     - property: article:author
       content: Nav0 Team
@@ -28,7 +28,7 @@ head:
       content: tracking
   - - meta
     - name: keywords
-      content: "Nav0 vs duckduckgo browser, duckduckgo privacy, duckduckgo microsoft tracking, duckduckgo AI, duck browser, privacy browser comparison, minimal browser vs duckduckgo, duckduckgo browser review, is duckduckgo browser safe, duckduckgo browser alternative, duckduckgo fire button, duckduckgo tracker radar, duckduckgo remote config, best private browser 2026, duckduckgo vs nav0, browser without ads"
+      content: 'Nav0 vs duckduckgo browser, duckduckgo privacy, duckduckgo microsoft tracking, duckduckgo AI, duck browser, privacy browser comparison, minimal browser vs duckduckgo, duckduckgo browser review, is duckduckgo browser safe, duckduckgo browser alternative, duckduckgo fire button, duckduckgo tracker radar, duckduckgo remote config, best private browser 2026, duckduckgo vs nav0, browser without ads'
   - - script
     - type: application/ld+json
     - |
@@ -106,20 +106,20 @@ DuckDuckGo's browser is genuinely better than Chrome or Edge on privacy. But "be
 
 ## Nav0 vs DuckDuckGo Browser: Quick Comparison
 
-| Feature | Nav0 | DuckDuckGo Browser |
-|---------|------|---------------------|
-| **Telemetry** | Zero | Remote config phone-home |
-| **Business model** | None (free, open source) | Ad-supported (Microsoft ad partnership) |
-| **Tracker blocking** | Community lists (EasyList, EasyPrivacy) | Proprietary Tracker Radar dataset |
-| **Tracking exceptions** | None — zero exceptions for any company | Had Microsoft exception (now fixed) |
-| **AI features** | None | Duck AI (proxied to third-party providers) |
-| **Remote configuration** | None — locally bundled lists | Yes (server-side feature flags, tracker lists) |
-| **Open source** | Yes (MIT license) | Yes (with remote config caveat) |
-| **Auditability** | Full (code = behavior) | Partial (server-side configs affect behavior) |
-| **Default search** | DuckDuckGo | DuckDuckGo |
-| **Mobile apps** | None (desktop only) | iOS, Android |
-| **Desktop platforms** | macOS, Windows, Linux | macOS, Windows |
-| **Email protection** | None | Email forwarding with tracker stripping |
+| Feature                  | Nav0                                    | DuckDuckGo Browser                             |
+| ------------------------ | --------------------------------------- | ---------------------------------------------- |
+| **Telemetry**            | Zero                                    | Remote config phone-home                       |
+| **Business model**       | None (free, open source)                | Ad-supported (Microsoft ad partnership)        |
+| **Tracker blocking**     | Community lists (EasyList, EasyPrivacy) | Proprietary Tracker Radar dataset              |
+| **Tracking exceptions**  | None — zero exceptions for any company  | Had Microsoft exception (now fixed)            |
+| **AI features**          | None                                    | Duck AI (proxied to third-party providers)     |
+| **Remote configuration** | None — locally bundled lists            | Yes (server-side feature flags, tracker lists) |
+| **Open source**          | Yes (MIT license)                       | Yes (with remote config caveat)                |
+| **Auditability**         | Full (code = behavior)                  | Partial (server-side configs affect behavior)  |
+| **Default search**       | DuckDuckGo                              | DuckDuckGo                                     |
+| **Mobile apps**          | None (desktop only)                     | iOS, Android                                   |
+| **Desktop platforms**    | macOS, Windows, Linux                   | macOS, Windows                                 |
+| **Email protection**     | None                                    | Email forwarding with tracker stripping        |
 
 ## The Microsoft Tracking Exception
 
@@ -249,4 +249,4 @@ Nav0 is architectural privacy. No exceptions.
 
 ---
 
-*Nav0 is a privacy-focused browser that collects zero data. It's open source, free, and built for people who believe their browser shouldn't spy on them. [Get started](/guide/getting-started).*
+_Nav0 is a privacy-focused browser that collects zero data. It's open source, free, and built for people who believe their browser shouldn't spy on them. [Get started](/guide/getting-started)._

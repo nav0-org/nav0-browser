@@ -1,6 +1,6 @@
 ---
-title: "Nav0 Privacy & Tracking Protection — Cookies, Fingerprinting, HTTPS & Data Retention"
-description: "Nav0 blocks third-party cookies, prevents fingerprinting, enforces HTTPS, spoofs user agents, and auto-deletes browsing data. Learn how every layer works."
+title: 'Nav0 Privacy & Tracking Protection — Cookies, Fingerprinting, HTTPS & Data Retention'
+description: 'Nav0 blocks third-party cookies, prevents fingerprinting, enforces HTTPS, spoofs user agents, and auto-deletes browsing data. Learn how every layer works.'
 head:
   - - meta
     - property: og:type
@@ -69,11 +69,11 @@ Cookies are the most common tracking mechanism on the web. Nav0 gives you granul
 
 ### Three Cookie Modes
 
-| Mode | What It Does | Default |
-|------|-------------|---------|
-| **Block all third-party** | Blocks cookies from domains other than the one you're visiting | Yes |
-| **Block with exceptions** | Blocks third-party cookies but allows specific domains you whitelist | No |
-| **Allow all** | No cookie restrictions (not recommended) | No |
+| Mode                      | What It Does                                                         | Default |
+| ------------------------- | -------------------------------------------------------------------- | ------- |
+| **Block all third-party** | Blocks cookies from domains other than the one you're visiting       | Yes     |
+| **Block with exceptions** | Blocks third-party cookies but allows specific domains you whitelist | No      |
+| **Allow all**             | No cookie restrictions (not recommended)                             | No      |
 
 The default — blocking all third-party cookies — prevents cross-site tracking while keeping first-party site functionality intact.
 
@@ -117,16 +117,16 @@ Your user agent string tells every website what browser and operating system you
 
 ### Built-In Presets
 
-| Preset | Description |
-|--------|-------------|
-| **Firefox on Windows** | Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0 |
-| **Firefox on macOS** | Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:138.0) Gecko/20100101 Firefox/138.0 |
-| **Firefox on Linux** | Mozilla/5.0 (X11; Linux x86_64; rv:138.0) Gecko/20100101 Firefox/138.0 |
-| **Chrome on Windows** | Chrome/136.0.0.0 on Windows 10 |
-| **Chrome on macOS** | Chrome/136.0.0.0 on macOS |
-| **Safari on macOS** | Safari/605.1.15 (Version 18.4) |
-| **Edge on Windows** | Edge/136.0.0.0 on Windows 10 |
-| **Custom** | Any user agent string you specify |
+| Preset                 | Description                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------ |
+| **Firefox on Windows** | Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0     |
+| **Firefox on macOS**   | Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:138.0) Gecko/20100101 Firefox/138.0 |
+| **Firefox on Linux**   | Mozilla/5.0 (X11; Linux x86_64; rv:138.0) Gecko/20100101 Firefox/138.0               |
+| **Chrome on Windows**  | Chrome/136.0.0.0 on Windows 10                                                       |
+| **Chrome on macOS**    | Chrome/136.0.0.0 on macOS                                                            |
+| **Safari on macOS**    | Safari/605.1.15 (Version 18.4)                                                       |
+| **Edge on Windows**    | Edge/136.0.0.0 on Windows 10                                                         |
+| **Custom**             | Any user agent string you specify                                                    |
 
 **Default:** Nav0 automatically selects the Firefox preset matching your operating system. This masks the Electron/Chromium engine and blends your traffic with the large Firefox user base.
 
@@ -138,13 +138,13 @@ Nav0 lets you control how long your data is kept, with automatic cleanup.
 
 ### Configurable Retention Periods
 
-| Data Type | Default Retention | Options |
-|-----------|------------------|---------|
-| **Browsing history** | 30 days | 1 day – never |
-| **Download history** | 90 days | 1 day – never |
-| **Cookies & site data** | 30 days | 1 day – never |
-| **Cached files** | 30 days | 1 day – never |
-| **Autofill data** | Never (keep forever) | 1 day – never |
+| Data Type               | Default Retention    | Options       |
+| ----------------------- | -------------------- | ------------- |
+| **Browsing history**    | 30 days              | 1 day – never |
+| **Download history**    | 90 days              | 1 day – never |
+| **Cookies & site data** | 30 days              | 1 day – never |
+| **Cached files**        | 30 days              | 1 day – never |
+| **Autofill data**       | Never (keep forever) | 1 day – never |
 
 ### Auto-Delete Scheduler
 
@@ -178,11 +178,11 @@ Popups are a common vector for unwanted content, phishing, and tracking. Nav0 bl
 
 ### Three Popup Policies
 
-| Policy | Behavior |
-|--------|----------|
+| Policy              | Behavior                                                                               |
+| ------------------- | -------------------------------------------------------------------------------------- |
 | **Smart** (default) | Allows popups triggered by user interaction within 60 seconds, blocks unsolicited ones |
-| **Block all** | Blocks every popup regardless of context |
-| **Allow all** | No popup restrictions |
+| **Block all**       | Blocks every popup regardless of context                                               |
+| **Allow all**       | No popup restrictions                                                                  |
 
 ### Flood Protection
 
@@ -198,12 +198,12 @@ Route your traffic through a proxy for additional privacy or network requirement
 
 ### Supported Proxy Modes
 
-| Mode | Description |
-|------|-------------|
-| **Direct** (default) | No proxy — connect directly |
-| **System** | Use your operating system's proxy settings |
-| **Manual** | Configure HTTP, HTTPS, or SOCKS4/5 proxy with host and port |
-| **PAC** | Use a Proxy Auto-Config URL for dynamic proxy routing |
+| Mode                 | Description                                                 |
+| -------------------- | ----------------------------------------------------------- |
+| **Direct** (default) | No proxy — connect directly                                 |
+| **System**           | Use your operating system's proxy settings                  |
+| **Manual**           | Configure HTTP, HTTPS, or SOCKS4/5 proxy with host and port |
+| **PAC**              | Use a Proxy Auto-Config URL for dynamic proxy routing       |
 
 ### Additional Options
 
@@ -212,20 +212,20 @@ Route your traffic through a proxy for additional privacy or network requirement
 
 ## What We Don't Do
 
-| Practice | Nav0 |
-|----------|------|
-| Send URLs to a safe browsing service | No |
-| Phone home on startup | No |
-| Collect anonymized usage data | No |
-| Run background sync | No |
-| Pre-fetch suggested content | No |
-| Track your tracking protection settings | No |
+| Practice                                | Nav0 |
+| --------------------------------------- | ---- |
+| Send URLs to a safe browsing service    | No   |
+| Phone home on startup                   | No   |
+| Collect anonymized usage data           | No   |
+| Run background sync                     | No   |
+| Pre-fetch suggested content             | No   |
+| Track your tracking protection settings | No   |
 
 ## Frequently Asked Questions
 
 ### How is this different from the Privacy page?
 
-The [Privacy page](/guide/privacy) describes our privacy *policy* — what data we collect (nothing) and our commitments. This page describes the privacy *features* — the technical mechanisms that protect you from third-party tracking while you browse.
+The [Privacy page](/guide/privacy) describes our privacy _policy_ — what data we collect (nothing) and our commitments. This page describes the privacy _features_ — the technical mechanisms that protect you from third-party tracking while you browse.
 
 ### Can I verify these privacy claims?
 
@@ -248,4 +248,4 @@ Yes. All privacy features are active in private browsing windows. Private browsi
 
 ---
 
-*See also: [Ad Blocker](/guide/ad-blocker) · [Private Browsing](/guide/private-browsing) · [Features Overview](/guide/features)*
+_See also: [Ad Blocker](/guide/ad-blocker) · [Private Browsing](/guide/private-browsing) · [Features Overview](/guide/features)_

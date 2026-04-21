@@ -30,7 +30,9 @@
   max-width: 90%;
   background-color: var(--bg-light);
   border-radius: var(--radius-xl);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.18),
+    0 2px 8px rgba(0, 0, 0, 0.08);
   border: 1px solid var(--border-color);
   overflow: hidden;
   z-index: 1;
@@ -40,12 +42,20 @@
 }
 
 @keyframes alertSlideIn {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .alert-dialog { animation: none; }
+  .alert-dialog {
+    animation: none;
+  }
 }
 
 .alert-header {

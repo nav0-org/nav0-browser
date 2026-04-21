@@ -1,19 +1,24 @@
-import { ClosedTabRecord, ClosedWindowRecord, RendererToMainEventsForBrowserIPC, MainToRendererEventsForBrowserIPC, DataStoreConstants } from "../../constants/app-constants";
-import { AppMenuManager } from "./app-menu-manager";
-import { AppWindow } from "./app-window";
-import { app, dialog, ipcMain, Menu } from "electron";
-import { Tab } from "./tab";
-import { DatabaseManager } from "../database/database-manager";
-import { DataStoreManager } from "../database/data-store-manager";
-import { SessionManager } from "./session-manager";
-import { SearchEngine } from "../web/search-engine";
-import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
-import { PermissionManager, PermissionRequest } from "./permission-manager";
-import { NotificationManager } from "./notification-manager";
-import { PermissionPromptData } from "./app-window";
-import fs from "fs";
-import path from "path";
-import crypto from "crypto";
+import {
+  ClosedTabRecord,
+  ClosedWindowRecord,
+  RendererToMainEventsForBrowserIPC,
+  MainToRendererEventsForBrowserIPC,
+  DataStoreConstants,
+} from '../../constants/app-constants';
+import { AppMenuManager } from './app-menu-manager';
+import { AppWindow, PermissionPromptData } from './app-window';
+import { app, dialog, ipcMain, Menu } from 'electron';
+import { Tab } from './tab';
+import { DatabaseManager } from '../database/database-manager';
+import { DataStoreManager } from '../database/data-store-manager';
+import { SessionManager } from './session-manager';
+import { SearchEngine } from '../web/search-engine';
+import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from '../../types/settings-types';
+import { PermissionManager, PermissionRequest } from './permission-manager';
+import { NotificationManager } from './notification-manager';
+import fs from 'fs';
+import path from 'path';
+import crypto from 'crypto';
 
 export abstract class AppWindowManager {
   private static windows: Map<string, AppWindow>;
@@ -87,7 +92,9 @@ export abstract class AppWindowManager {
         }
       }
     );
-    const stored = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as Partial<BrowserSettings> | undefined;
+    const stored = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as
+      | Partial<BrowserSettings>
+      | undefined;
     const startupSettings: BrowserSettings = { ...DEFAULT_BROWSER_SETTINGS, ...stored };
     const startupMode = startupSettings.startupMode;
 
@@ -174,7 +181,6 @@ export abstract class AppWindowManager {
     }
   }
 
-
   private static recordWindowTabs(window: AppWindow): void {
     if (window.isPrivate) return;
     // Avoid double-recording if already recorded
@@ -202,12 +208,12 @@ export abstract class AppWindowManager {
       AppWindowManager.recordWindowTabs(window);
 
       const remainingPrivateWindows: Array<AppWindow> = [];
-      AppWindowManager.windows.forEach(element => {
-        if(element.isPrivate && element.id != id){
+      AppWindowManager.windows.forEach((element) => {
+        if (element.isPrivate && element.id != id) {
           remainingPrivateWindows.push(element);
         }
       });
-      if(window.isPrivate && remainingPrivateWindows.length === 0){
+      if (window.isPrivate && remainingPrivateWindows.length === 0) {
         clearSession = true;
       }
       window.closeWindow(clearSession);
@@ -246,7 +252,9 @@ export abstract class AppWindowManager {
   static recordClosedTab(record: ClosedTabRecord): void {
     AppWindowManager.closedTabs.push(record);
     if (AppWindowManager.closedTabs.length > AppWindowManager.MAX_CLOSED_TABS) {
-      AppWindowManager.closedTabs = AppWindowManager.closedTabs.slice(-AppWindowManager.MAX_CLOSED_TABS);
+      AppWindowManager.closedTabs = AppWindowManager.closedTabs.slice(
+        -AppWindowManager.MAX_CLOSED_TABS
+      );
     }
   }
 
@@ -303,418 +311,595 @@ export abstract class AppWindowManager {
   }
 
   static initIPCHandlers(): void {
-    ipcMain.on(RendererToMainEventsForBrowserIPC.CREATE_TAB, async (event, appWindowId: string, url: string, activateNewTab: boolean) => {
-      let window: AppWindow | null = null;
-      if (appWindowId) {
-        window = AppWindowManager.getWindowById(appWindowId);
-      } else {
-        window = AppWindowManager.getActiveWindow();
-      }
-      if (window) {
-        const newTab = await window.createTab(url, activateNewTab);
-        return { id : newTab.id, title: newTab.getTitle(), url: newTab.getUrl() };
-      }
-    });
-
-    ipcMain.on(RendererToMainEventsForBrowserIPC.ACTIVATE_TAB, async (event, appWindowId: string, tabId: string, isUserInitiated: boolean) => {
-      const window = AppWindowManager.getWindowById(appWindowId);
-      if (window) {
-        window.activateTab(tabId, isUserInitiated);
-        return { };
-      }
-    });
-
-    ipcMain.on(RendererToMainEventsForBrowserIPC.CLOSE_TAB, async (event, appWindowId: string, tabId: string, isUserInitiated: boolean) => {
-      const window = AppWindowManager.getWindowById(appWindowId);
-      if (window) {
-        const closedRecord = window.closeTab(tabId, isUserInitiated);
-        if (closedRecord) {
-          AppWindowManager.recordClosedTab(closedRecord);
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.CREATE_TAB,
+      async (event, appWindowId: string, url: string, activateNewTab: boolean) => {
+        let window: AppWindow | null = null;
+        if (appWindowId) {
+          window = AppWindowManager.getWindowById(appWindowId);
+        } else {
+          window = AppWindowManager.getActiveWindow();
         }
-        return { };
+        if (window) {
+          const newTab = await window.createTab(url, activateNewTab);
+          return { id: newTab.id, title: newTab.getTitle(), url: newTab.getUrl() };
+        }
       }
-    });
+    );
+
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.ACTIVATE_TAB,
+      async (event, appWindowId: string, tabId: string, isUserInitiated: boolean) => {
+        const window = AppWindowManager.getWindowById(appWindowId);
+        if (window) {
+          window.activateTab(tabId, isUserInitiated);
+          return {};
+        }
+      }
+    );
+
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.CLOSE_TAB,
+      async (event, appWindowId: string, tabId: string, isUserInitiated: boolean) => {
+        const window = AppWindowManager.getWindowById(appWindowId);
+        if (window) {
+          const closedRecord = window.closeTab(tabId, isUserInitiated);
+          if (closedRecord) {
+            AppWindowManager.recordClosedTab(closedRecord);
+          }
+          return {};
+        }
+      }
+    );
 
     ipcMain.handle(RendererToMainEventsForBrowserIPC.GET_ACTIVE_APP_WINDOW_ID, async (event) => {
       return { activeWindowId: AppWindowManager.activeWindowId };
     });
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.NAVIGATE, async (event, appWindowId: string | null, tabId: string | null, url: string) => {
-      let appWindow: AppWindow;
-      let tab: Tab;
-      if(appWindowId){
-        appWindow = AppWindowManager.getWindowById(appWindowId)
-      } else {
-        appWindow = AppWindowManager.getActiveWindow();
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.NAVIGATE,
+      async (event, appWindowId: string | null, tabId: string | null, url: string) => {
+        let appWindow: AppWindow;
+        let tab: Tab;
+        if (appWindowId) {
+          appWindow = AppWindowManager.getWindowById(appWindowId);
+        } else {
+          appWindow = AppWindowManager.getActiveWindow();
+        }
+        if (appWindow && tabId) {
+          tab = AppWindowManager.getWindowById(appWindowId).getTabById(tabId);
+        } else if (appWindow) {
+          tab = appWindow.getActiveTab();
+        }
+        if (tab) {
+          return tab.navigate(url);
+        }
       }
-      if(appWindow && tabId){
-        tab = AppWindowManager.getWindowById(appWindowId).getTabById(tabId);
-      } else if (appWindow){
-        tab = appWindow.getActiveTab(); 
-      }
-      if (tab) {
-        return tab.navigate(url);
-      }
-    });
+    );
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.GO_BACK, async (event, appWindowId: string, tabId: string) => {
-      let appWindow: AppWindow;
-      let tab: Tab;
-      if(appWindowId){
-        appWindow = AppWindowManager.getWindowById(appWindowId)
-      } else {
-        appWindow = AppWindowManager.getActiveWindow();
-      }
-      if(appWindow && tabId){
-        tab = AppWindowManager.getWindowById(appWindowId).getTabById(tabId);
-      } else if (appWindow){
-        tab = appWindow.getActiveTab(); 
-      }
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.GO_BACK,
+      async (event, appWindowId: string, tabId: string) => {
+        let appWindow: AppWindow;
+        let tab: Tab;
+        if (appWindowId) {
+          appWindow = AppWindowManager.getWindowById(appWindowId);
+        } else {
+          appWindow = AppWindowManager.getActiveWindow();
+        }
+        if (appWindow && tabId) {
+          tab = AppWindowManager.getWindowById(appWindowId).getTabById(tabId);
+        } else if (appWindow) {
+          tab = appWindow.getActiveTab();
+        }
 
-      if (tab?.getWebContentsViewInstance()?.webContents.navigationHistory.canGoBack()) {
-        return tab.getWebContentsViewInstance().webContents.navigationHistory.goBack();
+        if (tab?.getWebContentsViewInstance()?.webContents.navigationHistory.canGoBack()) {
+          return tab.getWebContentsViewInstance().webContents.navigationHistory.goBack();
+        }
       }
-    });
+    );
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.GO_FORWARD, async (event, appWindowId: string, tabId: string) => {
-      let appWindow: AppWindow;
-      let tab: Tab;
-      if(appWindowId){
-        appWindow = AppWindowManager.getWindowById(appWindowId)
-      } else {
-        appWindow = AppWindowManager.getActiveWindow();
-      }
-      if(appWindow && tabId){
-        tab = AppWindowManager.getWindowById(appWindowId).getTabById(tabId);
-      } else if (appWindow){
-        tab = appWindow.getActiveTab();
-      }
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.GO_FORWARD,
+      async (event, appWindowId: string, tabId: string) => {
+        let appWindow: AppWindow;
+        let tab: Tab;
+        if (appWindowId) {
+          appWindow = AppWindowManager.getWindowById(appWindowId);
+        } else {
+          appWindow = AppWindowManager.getActiveWindow();
+        }
+        if (appWindow && tabId) {
+          tab = AppWindowManager.getWindowById(appWindowId).getTabById(tabId);
+        } else if (appWindow) {
+          tab = appWindow.getActiveTab();
+        }
 
-      if (tab?.getWebContentsViewInstance()?.webContents.navigationHistory.canGoForward()) {
-        return tab.getWebContentsViewInstance().webContents.navigationHistory.goForward();
+        if (tab?.getWebContentsViewInstance()?.webContents.navigationHistory.canGoForward()) {
+          return tab.getWebContentsViewInstance().webContents.navigationHistory.goForward();
+        }
       }
-    });
+    );
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.REFRESH, async (event, appWindowId: string, tabId: string) => {
-      let appWindow: AppWindow;
-      let tab: Tab;
-      if(appWindowId){
-        appWindow = AppWindowManager.getWindowById(appWindowId)
-      } else {
-        appWindow = AppWindowManager.getActiveWindow();
-      }
-      if(appWindow && tabId){
-        tab = AppWindowManager.getWindowById(appWindowId).getTabById(tabId);
-      } else if (appWindow){
-        tab = appWindow.getActiveTab();
-      }
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.REFRESH,
+      async (event, appWindowId: string, tabId: string) => {
+        let appWindow: AppWindow;
+        let tab: Tab;
+        if (appWindowId) {
+          appWindow = AppWindowManager.getWindowById(appWindowId);
+        } else {
+          appWindow = AppWindowManager.getActiveWindow();
+        }
+        if (appWindow && tabId) {
+          tab = AppWindowManager.getWindowById(appWindowId).getTabById(tabId);
+        } else if (appWindow) {
+          tab = appWindow.getActiveTab();
+        }
 
-      if (tab && tab.getWebContentsViewInstance()) {
-        return tab.getWebContentsViewInstance().webContents.reload();
+        if (tab && tab.getWebContentsViewInstance()) {
+          return tab.getWebContentsViewInstance().webContents.reload();
+        }
       }
-    });
+    );
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.HARD_RELOAD, async (event, appWindowId: string, tabId: string) => {
-      let appWindow: AppWindow;
-      let tab: Tab;
-      if(appWindowId){
-        appWindow = AppWindowManager.getWindowById(appWindowId)
-      } else {
-        appWindow = AppWindowManager.getActiveWindow();
-      }
-      if(appWindow && tabId){
-        tab = AppWindowManager.getWindowById(appWindowId).getTabById(tabId);
-      } else if (appWindow){
-        tab = appWindow.getActiveTab();
-      }
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.HARD_RELOAD,
+      async (event, appWindowId: string, tabId: string) => {
+        let appWindow: AppWindow;
+        let tab: Tab;
+        if (appWindowId) {
+          appWindow = AppWindowManager.getWindowById(appWindowId);
+        } else {
+          appWindow = AppWindowManager.getActiveWindow();
+        }
+        if (appWindow && tabId) {
+          tab = AppWindowManager.getWindowById(appWindowId).getTabById(tabId);
+        } else if (appWindow) {
+          tab = appWindow.getActiveTab();
+        }
 
-      if (tab && tab.getWebContentsViewInstance()) {
-        const webContents = tab.getWebContentsViewInstance().webContents;
-        const session = webContents.session;
+        if (tab && tab.getWebContentsViewInstance()) {
+          const webContents = tab.getWebContentsViewInstance().webContents;
+          const session = webContents.session;
 
-        // Fire cache clearing without awaiting — reloadIgnoringCache already
-        // bypasses the HTTP cache at the network level. Awaiting these can hang
-        // and prevent the reload from ever executing.
-        const currentUrl = webContents.getURL();
-        try {
-          const origin = new URL(currentUrl).origin;
-          session.clearStorageData({ origin }).catch(() => {});
-        } catch (_) { /* origin may not be parseable */ }
-        session.clearCache().catch(() => {});
-        session.clearCodeCaches({}).catch(() => {});
+          // Fire cache clearing without awaiting — reloadIgnoringCache already
+          // bypasses the HTTP cache at the network level. Awaiting these can hang
+          // and prevent the reload from ever executing.
+          const currentUrl = webContents.getURL();
+          try {
+            const origin = new URL(currentUrl).origin;
+            session.clearStorageData({ origin }).catch(() => {});
+          } catch (_) {
+            /* origin may not be parseable */
+          }
+          session.clearCache().catch(() => {});
+          session.clearCodeCaches({}).catch(() => {});
 
-        return webContents.reloadIgnoringCache();
+          return webContents.reloadIgnoringCache();
+        }
       }
-    });
+    );
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.UPDATE_BROWSER_VIEW_BOUNDS, async (event, appWindowId: string, bounds: { x: number, y: number, width: number, height: number }) => {
-      let window: AppWindow | null = null;
-      if (appWindowId) {
-        window = AppWindowManager.getWindowById(appWindowId);
-      } else {
-        window = AppWindowManager.getActiveWindow();
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.UPDATE_BROWSER_VIEW_BOUNDS,
+      async (
+        event,
+        appWindowId: string,
+        bounds: { x: number; y: number; width: number; height: number }
+      ) => {
+        let window: AppWindow | null = null;
+        if (appWindowId) {
+          window = AppWindowManager.getWindowById(appWindowId);
+        } else {
+          window = AppWindowManager.getActiveWindow();
+        }
+        if (window) {
+          return window.updateViewBounds(bounds);
+        }
       }
-      if (window) {
-        return window.updateViewBounds(bounds);
-      }
-    });
+    );
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.CLOSE_WINDOW, async (event, appWindowId: string) => {
-      AppWindowManager.closeWindow(appWindowId);
-    });
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.CLOSE_WINDOW,
+      async (event, appWindowId: string) => {
+        AppWindowManager.closeWindow(appWindowId);
+      }
+    );
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_OPTIONS_MENU, async (event, appWindowId: string) => {
-      let window: AppWindow | null = null;
-      if (appWindowId) {
-        window = AppWindowManager.getWindowById(appWindowId);
-      } else {
-        window = AppWindowManager.getActiveWindow();
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.SHOW_OPTIONS_MENU,
+      async (event, appWindowId: string) => {
+        let window: AppWindow | null = null;
+        if (appWindowId) {
+          window = AppWindowManager.getWindowById(appWindowId);
+        } else {
+          window = AppWindowManager.getActiveWindow();
+        }
+        if (window) {
+          return window.showOptionsMenuOverlay();
+        }
       }
-      if (window) {
-        return window.showOptionsMenuOverlay();
-      }
-    });
+    );
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.HANDLE_FILE_SELECTION, async (event, appWindowId: string, tabId: string, extensions: string[]): Promise<string[] | null> => {
-      let window: AppWindow | null = null;
-      if (appWindowId) {
-        window = AppWindowManager.getWindowById(appWindowId);
-      } else {
-        window = AppWindowManager.getActiveWindow();
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.HANDLE_FILE_SELECTION,
+      async (
+        event,
+        appWindowId: string,
+        tabId: string,
+        extensions: string[]
+      ): Promise<string[] | null> => {
+        let window: AppWindow | null = null;
+        if (appWindowId) {
+          window = AppWindowManager.getWindowById(appWindowId);
+        } else {
+          window = AppWindowManager.getActiveWindow();
+        }
+        if (tabId) {
+          return window.getTabById(tabId).handleFileSelection(extensions);
+        } else {
+          return window.getActiveTab().handleFileSelection(extensions);
+        }
       }
-      if (tabId) {
-        return window.getTabById(tabId).handleFileSelection(extensions)
-      } else {
-        return window.getActiveTab().handleFileSelection(extensions)
-      }
-    });
+    );
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.HIDE_OPTIONS_MENU, async (event, appWindowId: string) => {
-      let window: AppWindow | null = null;
-      if (appWindowId) {
-        window = AppWindowManager.getWindowById(appWindowId);
-      } else {
-        window = AppWindowManager.getActiveWindow();
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.HIDE_OPTIONS_MENU,
+      async (event, appWindowId: string) => {
+        let window: AppWindow | null = null;
+        if (appWindowId) {
+          window = AppWindowManager.getWindowById(appWindowId);
+        } else {
+          window = AppWindowManager.getActiveWindow();
+        }
+        if (window) {
+          return window.hideOptionsMenuOverlay();
+        }
       }
-      if (window) {
-        return window.hideOptionsMenuOverlay();
-      }
-    });
+    );
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_COMMAND_K_OVERLAY, async (event, appWindowId: string) => {
-      let window: AppWindow | null = null;
-      if (appWindowId) {
-        window = AppWindowManager.getWindowById(appWindowId);
-      } else {
-        window = AppWindowManager.getActiveWindow();
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.SHOW_COMMAND_K_OVERLAY,
+      async (event, appWindowId: string) => {
+        let window: AppWindow | null = null;
+        if (appWindowId) {
+          window = AppWindowManager.getWindowById(appWindowId);
+        } else {
+          window = AppWindowManager.getActiveWindow();
+        }
+        if (window) {
+          return window.showCommandKOverlay();
+        }
       }
-      if (window) {
-        return window.showCommandKOverlay();
-      }
-    });
+    );
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.HIDE_COMMAND_K_OVERLAY, async (event, appWindowId: string) => {
-      let window: AppWindow | null = null;
-      if (appWindowId) {
-        window = AppWindowManager.getWindowById(appWindowId);
-      } else {
-        window = AppWindowManager.getActiveWindow();
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.HIDE_COMMAND_K_OVERLAY,
+      async (event, appWindowId: string) => {
+        let window: AppWindow | null = null;
+        if (appWindowId) {
+          window = AppWindowManager.getWindowById(appWindowId);
+        } else {
+          window = AppWindowManager.getActiveWindow();
+        }
+        if (window) {
+          return window.hideCommandKOverlay();
+        }
       }
-      if (window) {
-        return window.hideCommandKOverlay();
+    );
+
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.SHOW_COMMAND_O_OVERLAY,
+      async (event, appWindowId: string) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (window) {
+          return window.showCommandOOverlay();
+        }
       }
-    });
+    );
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_COMMAND_O_OVERLAY, async (event, appWindowId: string) => {
-      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
-      if (window) {
-        return window.showCommandOOverlay();
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.HIDE_COMMAND_O_OVERLAY,
+      async (event, appWindowId: string) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (window) {
+          return window.hideCommandOOverlay();
+        }
       }
-    });
+    );
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.HIDE_COMMAND_O_OVERLAY, async (event, appWindowId: string) => {
-      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
-      if (window) {
-        return window.hideCommandOOverlay();
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.FETCH_ALL_WINDOWS_TABS,
+      async (event, isPrivate: boolean) => {
+        const result: Array<{
+          windowId: string;
+          windowName: string;
+          isPrivate: boolean;
+          tabs: Array<{
+            id: string;
+            title: string;
+            url: string;
+            faviconUrl: string | null;
+            isActive: boolean;
+          }>;
+        }> = [];
+        let windowIndex = 0;
+        for (const window of AppWindowManager.windows.values()) {
+          if (window.isPrivate !== isPrivate) continue;
+          const activeTabId = window.getActiveTabId();
+          const tabs = window.getTabs().map((tab) => ({
+            id: tab.getId(),
+            title: tab.getTitle(),
+            url: tab.getUrl(),
+            faviconUrl: tab.getFaviconUrl(),
+            isActive: tab.getId() === activeTabId,
+          }));
+          const label = window.isPrivate
+            ? `Private Window ${windowIndex + 1}`
+            : `Window ${windowIndex + 1}`;
+          result.push({
+            windowId: window.id,
+            windowName: label,
+            isPrivate: window.isPrivate,
+            tabs,
+          });
+          windowIndex++;
+        }
+        return result;
       }
-    });
+    );
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_ALL_WINDOWS_TABS, async (event, isPrivate: boolean) => {
-      const result: Array<{ windowId: string; windowName: string; isPrivate: boolean; tabs: Array<{ id: string; title: string; url: string; faviconUrl: string | null; isActive: boolean }> }> = [];
-      let windowIndex = 0;
-      for (const window of AppWindowManager.windows.values()) {
-        if (window.isPrivate !== isPrivate) continue;
-        const activeTabId = window.getActiveTabId();
-        const tabs = window.getTabs().map(tab => ({
-          id: tab.getId(),
-          title: tab.getTitle(),
-          url: tab.getUrl(),
-          faviconUrl: tab.getFaviconUrl(),
-          isActive: tab.getId() === activeTabId,
-        }));
-        const label = window.isPrivate ? `Private Window ${windowIndex + 1}` : `Window ${windowIndex + 1}`;
-        result.push({
-          windowId: window.id,
-          windowName: label,
-          isPrivate: window.isPrivate,
-          tabs,
-        });
-        windowIndex++;
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.MOVE_TAB_TO_WINDOW,
+      async (event, sourceWindowId: string, tabId: string, targetWindowId: string) => {
+        const sourceWindow = AppWindowManager.getWindowById(sourceWindowId);
+        const targetWindow = AppWindowManager.getWindowById(targetWindowId);
+        if (!sourceWindow || !targetWindow) return { success: false };
+        if (sourceWindow.isPrivate || targetWindow.isPrivate) return { success: false };
+        if (sourceWindowId === targetWindowId) return { success: false };
+
+        const tab = sourceWindow.getTabs().find((t) => t.getId() === tabId);
+        if (!tab) return { success: false };
+
+        const url = tab.getUrl();
+        const closedRecord = sourceWindow.closeTab(tabId, true);
+        if (closedRecord) {
+          AppWindowManager.recordClosedTab(closedRecord);
+        }
+        await targetWindow.createTab(url, true);
+        AppWindowManager.activateWindow(targetWindow.id);
+        return { success: true };
       }
-      return result;
-    });
+    );
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.MOVE_TAB_TO_WINDOW, async (event, sourceWindowId: string, tabId: string, targetWindowId: string) => {
-      const sourceWindow = AppWindowManager.getWindowById(sourceWindowId);
-      const targetWindow = AppWindowManager.getWindowById(targetWindowId);
-      if (!sourceWindow || !targetWindow) return { success: false };
-      if (sourceWindow.isPrivate || targetWindow.isPrivate) return { success: false };
-      if (sourceWindowId === targetWindowId) return { success: false };
-
-      const tab = sourceWindow.getTabs().find(t => t.getId() === tabId);
-      if (!tab) return { success: false };
-
-      const url = tab.getUrl();
-      const closedRecord = sourceWindow.closeTab(tabId, true);
-      if (closedRecord) {
-        AppWindowManager.recordClosedTab(closedRecord);
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.SHOW_FIND_IN_PAGE,
+      async (event, appWindowId: string) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (window) {
+          return window.showFindInPage();
+        }
       }
-      await targetWindow.createTab(url, true);
-      AppWindowManager.activateWindow(targetWindow.id);
-      return { success: true };
-    });
+    );
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_FIND_IN_PAGE, async (event, appWindowId: string) => {
-      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
-      if (window) {
-        return window.showFindInPage();
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.HIDE_FIND_IN_PAGE,
+      async (event, appWindowId: string) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (window) {
+          return window.hideFindInPage();
+        }
       }
-    });
+    );
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.HIDE_FIND_IN_PAGE, async (event, appWindowId: string) => {
-      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
-      if (window) {
-        return window.hideFindInPage();
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.FIND_IN_PAGE,
+      async (event, appWindowId: string, text: string, options?: { matchCase?: boolean }) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (window) {
+          window.findInPage(text, options);
+        }
       }
-    });
+    );
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.FIND_IN_PAGE, async (event, appWindowId: string, text: string, options?: { matchCase?: boolean }) => {
-      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
-      if (window) {
-        window.findInPage(text, options);
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.FIND_IN_PAGE_NEXT,
+      async (event, appWindowId: string, text: string, options?: { matchCase?: boolean }) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (window) {
+          window.findInPageNext(text, options);
+        }
       }
-    });
+    );
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.FIND_IN_PAGE_NEXT, async (event, appWindowId: string, text: string, options?: { matchCase?: boolean }) => {
-      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
-      if (window) {
-        window.findInPageNext(text, options);
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.FIND_IN_PAGE_PREVIOUS,
+      async (event, appWindowId: string, text: string, options?: { matchCase?: boolean }) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (window) {
+          window.findInPagePrevious(text, options);
+        }
       }
-    });
+    );
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.FIND_IN_PAGE_PREVIOUS, async (event, appWindowId: string, text: string, options?: { matchCase?: boolean }) => {
-      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
-      if (window) {
-        window.findInPagePrevious(text, options);
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.STOP_FIND_IN_PAGE,
+      async (event, appWindowId: string) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (window) {
+          window.stopFindInPage();
+        }
       }
-    });
+    );
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.STOP_FIND_IN_PAGE, async (event, appWindowId: string) => {
-      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
-      if (window) {
-        window.stopFindInPage();
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.SHOW_ISSUE_REPORT,
+      async (event, appWindowId: string) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (window) {
+          return window.showIssueReportOverlay();
+        }
       }
-    });
+    );
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_ISSUE_REPORT, async (event, appWindowId: string) => {
-      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
-      if (window) {
-        return window.showIssueReportOverlay();
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.HIDE_ISSUE_REPORT,
+      async (event, appWindowId: string) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (window) {
+          return window.hideIssueReportOverlay();
+        }
       }
-    });
-
-    ipcMain.on(RendererToMainEventsForBrowserIPC.HIDE_ISSUE_REPORT, async (event, appWindowId: string) => {
-      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
-      if (window) {
-        return window.hideIssueReportOverlay();
-      }
-    });
+    );
 
     // Alert / confirm / prompt — triggered by the web-content preload polyfill.
     // Uses sendSync so the page script blocks until the user responds, matching
     // real browser semantics for window.alert/confirm/prompt.
-    ipcMain.on(RendererToMainEventsForBrowserIPC.WEB_CONTENT_DIALOG_REQUEST, async (event, payload: { kind: 'alert' | 'confirm' | 'prompt'; message: string; defaultValue?: string }) => {
-      const webContentsId = event.sender.id;
-      const window = AppWindowManager.findWindowByWebContentsId(webContentsId);
-      if (!window) {
-        event.returnValue = { confirmed: false };
-        return;
-      }
-      let origin = 'about:blank';
-      try {
-        const url = event.sender.getURL();
-        origin = url ? new URL(url).origin : origin;
-      } catch { /* keep default */ }
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.WEB_CONTENT_DIALOG_REQUEST,
+      async (
+        event,
+        payload: { kind: 'alert' | 'confirm' | 'prompt'; message: string; defaultValue?: string }
+      ) => {
+        const webContentsId = event.sender.id;
+        const window = AppWindowManager.findWindowByWebContentsId(webContentsId);
+        if (!window) {
+          event.returnValue = { confirmed: false };
+          return;
+        }
+        let origin = 'about:blank';
+        try {
+          const url = event.sender.getURL();
+          origin = url ? new URL(url).origin : origin;
+        } catch {
+          /* keep default */
+        }
 
-      // Surface the triggering tab before showing the overlay so the dialog
-      // isn't rendered over an unrelated tab's content.
-      const tab = window.findTabByWebContentsId(event.sender.id);
-      if (tab && window.getActiveTabId() !== tab.id) {
-        window.activateTab(tab.id, false);
-      }
-      window.getBrowserWindowInstance()?.focus();
+        // Surface the triggering tab before showing the overlay so the dialog
+        // isn't rendered over an unrelated tab's content.
+        const tab = window.findTabByWebContentsId(event.sender.id);
+        if (tab && window.getActiveTabId() !== tab.id) {
+          window.activateTab(tab.id, false);
+        }
+        window.getBrowserWindowInstance()?.focus();
 
-      const response = await window.showAlertOverlay({
-        kind: payload.kind,
-        message: typeof payload.message === 'string' ? payload.message : '',
-        defaultValue: payload.defaultValue,
-        origin,
-      });
-      event.returnValue = response;
-    });
-
-    ipcMain.on(RendererToMainEventsForBrowserIPC.DIALOG_RESPONSE, (event, appWindowId: string, requestId: string, response: { confirmed: boolean; value?: string }) => {
-      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
-      if (window) {
-        window.resolveDialog(requestId, response);
+        const response = await window.showAlertOverlay({
+          kind: payload.kind,
+          message: typeof payload.message === 'string' ? payload.message : '',
+          defaultValue: payload.defaultValue,
+          origin,
+        });
+        event.returnValue = response;
       }
-    });
+    );
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.HIDE_ALERT_OVERLAY, (event, appWindowId: string) => {
-      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
-      if (window) {
-        window.hideAlertOverlay();
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.DIALOG_RESPONSE,
+      (
+        event,
+        appWindowId: string,
+        requestId: string,
+        response: { confirmed: boolean; value?: string }
+      ) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (window) {
+          window.resolveDialog(requestId, response);
+        }
       }
-    });
+    );
+
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.HIDE_ALERT_OVERLAY,
+      (event, appWindowId: string) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (window) {
+          window.hideAlertOverlay();
+        }
+      }
+    );
 
     // Basic auth
-    ipcMain.on(RendererToMainEventsForBrowserIPC.BASIC_AUTH_RESPONSE, (event, appWindowId: string, requestId: string, creds: { username: string; password: string } | null) => {
-      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
-      if (window) {
-        window.resolveBasicAuth(requestId, creds);
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.BASIC_AUTH_RESPONSE,
+      (
+        event,
+        appWindowId: string,
+        requestId: string,
+        creds: { username: string; password: string } | null
+      ) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (window) {
+          window.resolveBasicAuth(requestId, creds);
+        }
       }
-    });
+    );
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.HIDE_BASIC_AUTH_OVERLAY, (event, appWindowId: string) => {
-      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
-      if (window) {
-        window.hideBasicAuthOverlay();
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.HIDE_BASIC_AUTH_OVERLAY,
+      (event, appWindowId: string) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (window) {
+          window.hideBasicAuthOverlay();
+        }
       }
-    });
+    );
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_SSL_INFO, async (event, appWindowId: string, data: { sslStatus: string; sslDetails: any; url: string }) => {
-      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
-      if (window) {
-        return window.showSSLInfoOverlay(data);
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.SHOW_SSL_INFO,
+      async (
+        event,
+        appWindowId: string,
+        data: { sslStatus: string; sslDetails: any; url: string }
+      ) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (window) {
+          return window.showSSLInfoOverlay(data);
+        }
       }
-    });
+    );
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.HIDE_SSL_INFO, async (event, appWindowId: string) => {
-      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
-      if (window) {
-        return window.hideSSLInfoOverlay();
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.HIDE_SSL_INFO,
+      async (event, appWindowId: string) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (window) {
+          return window.hideSSLInfoOverlay();
+        }
       }
-    });
+    );
 
     ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_ABOUT_PANEL, async () => {
       app.showAboutPanel();
@@ -766,95 +951,130 @@ export abstract class AppWindowManager {
       AppWindowManager.createWindow(true);
     });
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.GET_SEARCH_URL, async (event, searchTerm: string) => {
-      return await SearchEngine.getSearchUrl(searchTerm);
-    });
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.GET_SEARCH_URL,
+      async (event, searchTerm: string) => {
+        return await SearchEngine.getSearchUrl(searchTerm);
+      }
+    );
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.TOGGLE_READER_MODE, async (event, appWindowId: string, tabId: string) => {
-      const window = AppWindowManager.getWindowById(appWindowId);
-      if (window) {
-        const tab = tabId ? window.getTabById(tabId) : window.getActiveTab();
-        if (tab) {
-          await tab.toggleReaderMode();
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.TOGGLE_READER_MODE,
+      async (event, appWindowId: string, tabId: string) => {
+        const window = AppWindowManager.getWindowById(appWindowId);
+        if (window) {
+          const tab = tabId ? window.getTabById(tabId) : window.getActiveTab();
+          if (tab) {
+            await tab.toggleReaderMode();
+          }
         }
       }
-    });
+    );
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.DOWNLOAD_CURRENT_PDF, async (event, appWindowId: string, tabId: string) => {
-      const window = AppWindowManager.getWindowById(appWindowId);
-      if (window) {
-        const tab = tabId ? window.getTabById(tabId) : window.getActiveTab();
-        if (tab) {
-          tab.downloadCurrentPdf();
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.DOWNLOAD_CURRENT_PDF,
+      async (event, appWindowId: string, tabId: string) => {
+        const window = AppWindowManager.getWindowById(appWindowId);
+        if (window) {
+          const tab = tabId ? window.getTabById(tabId) : window.getActiveTab();
+          if (tab) {
+            tab.downloadCurrentPdf();
+          }
         }
       }
-    });
+    );
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_OPEN_TABS, async (event, appWindowId: string) => {
-      let window: AppWindow | null = null;
-      if (appWindowId) {
-        window = AppWindowManager.getWindowById(appWindowId);
-      } else {
-        window = AppWindowManager.getActiveWindow();
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.FETCH_OPEN_TABS,
+      async (event, appWindowId: string) => {
+        let window: AppWindow | null = null;
+        if (appWindowId) {
+          window = AppWindowManager.getWindowById(appWindowId);
+        } else {
+          window = AppWindowManager.getActiveWindow();
+        }
+        if (window) {
+          return window.getTabs().map((tab) => ({
+            id: tab.getId(),
+            title: tab.getTitle(),
+            url: tab.getUrl(),
+            faviconUrl: tab.getFaviconUrl(),
+          }));
+        }
+        return [];
       }
-      if (window) {
-        return window.getTabs().map(tab => ({
-          id: tab.getId(),
-          title: tab.getTitle(),
-          url: tab.getUrl(),
-          faviconUrl: tab.getFaviconUrl(),
-        }));
+    );
+
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.FETCH_RECENTLY_CLOSED_TABS,
+      async (event, appWindowId: string) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (!window || window.isPrivate) return [];
+        return AppWindowManager.getRecentlyClosedTabs();
       }
-      return [];
-    });
+    );
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_RECENTLY_CLOSED_TABS, async (event, appWindowId: string) => {
-      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
-      if (!window || window.isPrivate) return [];
-      return AppWindowManager.getRecentlyClosedTabs();
-    });
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.RESTORE_CLOSED_TAB,
+      async (event, appWindowId: string) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (!window || window.isPrivate) return null;
+        const closedTab = AppWindowManager.popLastClosedTab();
+        if (!closedTab) return null;
+        const tab = await window.createTab(closedTab.url, true);
+        return { id: tab.getId(), title: tab.getTitle(), url: tab.getUrl() };
+      }
+    );
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.RESTORE_CLOSED_TAB, async (event, appWindowId: string) => {
-      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
-      if (!window || window.isPrivate) return null;
-      const closedTab = AppWindowManager.popLastClosedTab();
-      if (!closedTab) return null;
-      const tab = await window.createTab(closedTab.url, true);
-      return { id: tab.getId(), title: tab.getTitle(), url: tab.getUrl() };
-    });
-
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.RESTORE_CLOSED_TAB_BY_INDEX, async (event, appWindowId: string, index: number) => {
-      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
-      if (!window || window.isPrivate) return null;
-      const closedTab = AppWindowManager.removeClosedTabByIndex(index);
-      if (!closedTab) return null;
-      const tab = await window.createTab(closedTab.url, true);
-      return { id: tab.getId(), title: tab.getTitle(), url: tab.getUrl() };
-    });
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.RESTORE_CLOSED_TAB_BY_INDEX,
+      async (event, appWindowId: string, index: number) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (!window || window.isPrivate) return null;
+        const closedTab = AppWindowManager.removeClosedTabByIndex(index);
+        if (!closedTab) return null;
+        const tab = await window.createTab(closedTab.url, true);
+        return { id: tab.getId(), title: tab.getTitle(), url: tab.getUrl() };
+      }
+    );
 
     ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_CLOSED_WINDOWS, async () => {
       return AppWindowManager.getClosedWindows().reverse();
     });
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.RESTORE_CLOSED_WINDOW, async (event, index: number) => {
-      const closedWindow = AppWindowManager.removeClosedWindowByIndex(index);
-      if (!closedWindow || !closedWindow.tabs || closedWindow.tabs.length === 0) return null;
-      const restoredUrls = closedWindow.tabs.filter(t => t.url && t.url !== '' && !t.url.startsWith('Nav0://'));
-      if (restoredUrls.length === 0) return null;
-      const newWindow = AppWindowManager.createWindow(false);
-      // Wait for the window's renderer to load and its default New Tab to be created
-      await newWindow.whenReady();
-      // Navigate the default tab to the first restored URL instead of closing it
-      const defaultTabs = newWindow.getTabs();
-      if (defaultTabs.length > 0) {
-        defaultTabs[0].navigate(restoredUrls[0].url);
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.RESTORE_CLOSED_WINDOW,
+      async (event, index: number) => {
+        const closedWindow = AppWindowManager.removeClosedWindowByIndex(index);
+        if (!closedWindow || !closedWindow.tabs || closedWindow.tabs.length === 0) return null;
+        const restoredUrls = closedWindow.tabs.filter(
+          (t) => t.url && t.url !== '' && !t.url.startsWith('Nav0://')
+        );
+        if (restoredUrls.length === 0) return null;
+        const newWindow = AppWindowManager.createWindow(false);
+        // Wait for the window's renderer to load and its default New Tab to be created
+        await newWindow.whenReady();
+        // Navigate the default tab to the first restored URL instead of closing it
+        const defaultTabs = newWindow.getTabs();
+        if (defaultTabs.length > 0) {
+          defaultTabs[0].navigate(restoredUrls[0].url);
+        }
+        // Create remaining tabs in suspended state — they load only when activated
+        for (let i = 1; i < restoredUrls.length; i++) {
+          newWindow.createSuspendedTab(
+            restoredUrls[i].url,
+            restoredUrls[i].title || 'Restored Tab'
+          );
+        }
+        return { ok: true };
       }
-      // Create remaining tabs in suspended state — they load only when activated
-      for (let i = 1; i < restoredUrls.length; i++) {
-        newWindow.createSuspendedTab(restoredUrls[i].url, restoredUrls[i].title || 'Restored Tab');
-      }
-      return { ok: true };
-    });
+    );
 
     ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_SESSION_STATE, async () => {
       const session = SessionManager.getSavedSession();
@@ -872,193 +1092,218 @@ export abstract class AppWindowManager {
     });
 
     ipcMain.on(RendererToMainEventsForBrowserIPC.PRINT_PAGE, async (event, appWindowId: string) => {
-      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
+      const window = appWindowId
+        ? AppWindowManager.getWindowById(appWindowId)
+        : AppWindowManager.getActiveWindow();
       if (!window) return;
       const activeTab = window.getActiveTab();
       if (!activeTab || !activeTab.getWebContentsViewInstance()) return;
       activeTab.getWebContentsViewInstance().webContents.print();
     });
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.TOGGLE_DEV_TOOLS, async (event, appWindowId: string) => {
-      const settings = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as BrowserSettings;
-      const merged = { ...DEFAULT_BROWSER_SETTINGS, ...settings };
-      if (!merged.devToolsEnabled) return;
-      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
-      if (!window) return;
-      const activeTab = window.getActiveTab();
-      if (!activeTab || !activeTab.getWebContentsViewInstance()) return;
-      activeTab.getWebContentsViewInstance().webContents.toggleDevTools();
-    });
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.TOGGLE_DEV_TOOLS,
+      async (event, appWindowId: string) => {
+        const settings = DataStoreManager.get(
+          DataStoreConstants.BROWSER_SETTINGS
+        ) as BrowserSettings;
+        const merged = { ...DEFAULT_BROWSER_SETTINGS, ...settings };
+        if (!merged.devToolsEnabled) return;
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (!window) return;
+        const activeTab = window.getActiveTab();
+        if (!activeTab || !activeTab.getWebContentsViewInstance()) return;
+        activeTab.getWebContentsViewInstance().webContents.toggleDevTools();
+      }
+    );
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.SHOW_TAB_CONTEXT_MENU, async (event, appWindowId: string, tabId: string, isPinned: boolean) => {
-      const window = appWindowId ? AppWindowManager.getWindowById(appWindowId) : AppWindowManager.getActiveWindow();
-      if (!window) return;
-      const tab = window.getTabById(tabId);
-      if (!tab) return;
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.SHOW_TAB_CONTEXT_MENU,
+      async (event, appWindowId: string, tabId: string, isPinned: boolean) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (!window) return;
+        const tab = window.getTabById(tabId);
+        if (!tab) return;
 
-      const view = tab.getWebContentsViewInstance();
-      if (!view) return; // Tab is suspended
-      const webContents = view.webContents;
-      const isMuted = webContents.isAudioMuted();
+        const view = tab.getWebContentsViewInstance();
+        if (!view) return; // Tab is suspended
+        const webContents = view.webContents;
+        const isMuted = webContents.isAudioMuted();
 
-      const template: Electron.MenuItemConstructorOptions[] = [
-        {
-          label: isPinned ? 'Unpin Tab' : 'Pin Tab',
-          click: () => {
-            if (isPinned) {
-              window.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_UNPINNED, { id: tabId });
-            } else {
-              window.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_PINNED, { id: tabId });
-            }
-          },
-        },
-        { type: 'separator' },
-        {
-          label: 'Reload Tab',
-          click: () => {
-            webContents.reload();
-          },
-        },
-        {
-          label: 'Hard Reload Tab',
-          click: () => {
-            const webSession = webContents.session;
-            const currentUrl = webContents.getURL();
-            try {
-              const origin = new URL(currentUrl).origin;
-              webSession.clearStorageData({ origin }).catch(() => {});
-            } catch (_) { /* origin may not be parseable */ }
-            webSession.clearCache().catch(() => {});
-            webSession.clearCodeCaches({}).catch(() => {});
-            webContents.reloadIgnoringCache();
-          },
-        },
-        {
-          label: 'Duplicate Tab',
-          click: () => {
-            const url = tab.getUrl();
-            window.createTab(url, true);
-          },
-        },
-        {
-          label: 'Print...',
-          click: () => {
-            webContents.print();
-          },
-        },
-        { type: 'separator' },
-        {
-          label: isMuted ? 'Unmute Site' : 'Mute Site',
-          click: () => {
-            webContents.setAudioMuted(!isMuted);
-          },
-        },
-        { type: 'separator' },
-        {
-          label: 'Close Tab',
-          click: () => {
-            const closedRecord = window.closeTab(tabId, true);
-            if (closedRecord) {
-              AppWindowManager.recordClosedTab(closedRecord);
-            }
-          },
-        },
-        {
-          label: 'Close Other Tabs',
-          enabled: window.getTabs().length > 1,
-          click: () => {
-            const allTabs = window.getTabs();
-            for (const t of allTabs) {
-              if (t.getId() !== tabId) {
-                const closedRecord = window.closeTab(t.getId(), true);
-                if (closedRecord) {
-                  AppWindowManager.recordClosedTab(closedRecord);
-                }
-              }
-            }
-          },
-        },
-      ];
-
-      // "Move to Another Window" submenu — only for non-private windows
-      if (!window.isPrivate) {
-        const otherWindows = AppWindowManager.getWindows().filter(
-          (w) => w.id !== window.id && !w.isPrivate
-        );
-
-        const moveSubmenu: Electron.MenuItemConstructorOptions[] = [
+        const template: Electron.MenuItemConstructorOptions[] = [
           {
-            label: 'New Window',
-            click: async () => {
+            label: isPinned ? 'Unpin Tab' : 'Pin Tab',
+            click: () => {
+              if (isPinned) {
+                window
+                  .getBrowserWindowInstance()
+                  ?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_UNPINNED, { id: tabId });
+              } else {
+                window
+                  .getBrowserWindowInstance()
+                  ?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_PINNED, { id: tabId });
+              }
+            },
+          },
+          { type: 'separator' },
+          {
+            label: 'Reload Tab',
+            click: () => {
+              webContents.reload();
+            },
+          },
+          {
+            label: 'Hard Reload Tab',
+            click: () => {
+              const webSession = webContents.session;
+              const currentUrl = webContents.getURL();
+              try {
+                const origin = new URL(currentUrl).origin;
+                webSession.clearStorageData({ origin }).catch(() => {});
+              } catch (_) {
+                /* origin may not be parseable */
+              }
+              webSession.clearCache().catch(() => {});
+              webSession.clearCodeCaches({}).catch(() => {});
+              webContents.reloadIgnoringCache();
+            },
+          },
+          {
+            label: 'Duplicate Tab',
+            click: () => {
               const url = tab.getUrl();
+              window.createTab(url, true);
+            },
+          },
+          {
+            label: 'Print...',
+            click: () => {
+              webContents.print();
+            },
+          },
+          { type: 'separator' },
+          {
+            label: isMuted ? 'Unmute Site' : 'Mute Site',
+            click: () => {
+              webContents.setAudioMuted(!isMuted);
+            },
+          },
+          { type: 'separator' },
+          {
+            label: 'Close Tab',
+            click: () => {
               const closedRecord = window.closeTab(tabId, true);
               if (closedRecord) {
                 AppWindowManager.recordClosedTab(closedRecord);
               }
-              const newWindow = AppWindowManager.createWindow();
-              await newWindow.whenReady();
-              // Navigate the default tab to the moved tab's URL
-              const defaultTabs = newWindow.getTabs();
-              if (defaultTabs.length > 0) {
-                defaultTabs[0].navigate(url);
+            },
+          },
+          {
+            label: 'Close Other Tabs',
+            enabled: window.getTabs().length > 1,
+            click: () => {
+              const allTabs = window.getTabs();
+              for (const t of allTabs) {
+                if (t.getId() !== tabId) {
+                  const closedRecord = window.closeTab(t.getId(), true);
+                  if (closedRecord) {
+                    AppWindowManager.recordClosedTab(closedRecord);
+                  }
+                }
               }
-              AppWindowManager.activateWindow(newWindow.id);
             },
           },
         ];
 
-        if (otherWindows.length > 0) {
-          moveSubmenu.push({ type: 'separator' });
-          for (let index = 0; index < otherWindows.length; index++) {
-            const targetWindow = otherWindows[index];
-            const activeTab = targetWindow.getActiveTab();
-            const label = activeTab ? activeTab.getTitle() || `Window ${index + 1}` : `Window ${index + 1}`;
-            moveSubmenu.push({
-              label,
+        // "Move to Another Window" submenu — only for non-private windows
+        if (!window.isPrivate) {
+          const otherWindows = AppWindowManager.getWindows().filter(
+            (w) => w.id !== window.id && !w.isPrivate
+          );
+
+          const moveSubmenu: Electron.MenuItemConstructorOptions[] = [
+            {
+              label: 'New Window',
               click: async () => {
                 const url = tab.getUrl();
                 const closedRecord = window.closeTab(tabId, true);
                 if (closedRecord) {
                   AppWindowManager.recordClosedTab(closedRecord);
                 }
-                await targetWindow.createTab(url, true);
-                AppWindowManager.activateWindow(targetWindow.id);
+                const newWindow = AppWindowManager.createWindow();
+                await newWindow.whenReady();
+                // Navigate the default tab to the moved tab's URL
+                const defaultTabs = newWindow.getTabs();
+                if (defaultTabs.length > 0) {
+                  defaultTabs[0].navigate(url);
+                }
+                AppWindowManager.activateWindow(newWindow.id);
               },
-            });
+            },
+          ];
+
+          if (otherWindows.length > 0) {
+            moveSubmenu.push({ type: 'separator' });
+            for (let index = 0; index < otherWindows.length; index++) {
+              const targetWindow = otherWindows[index];
+              const activeTab = targetWindow.getActiveTab();
+              const label = activeTab
+                ? activeTab.getTitle() || `Window ${index + 1}`
+                : `Window ${index + 1}`;
+              moveSubmenu.push({
+                label,
+                click: async () => {
+                  const url = tab.getUrl();
+                  const closedRecord = window.closeTab(tabId, true);
+                  if (closedRecord) {
+                    AppWindowManager.recordClosedTab(closedRecord);
+                  }
+                  await targetWindow.createTab(url, true);
+                  AppWindowManager.activateWindow(targetWindow.id);
+                },
+              });
+            }
           }
+
+          template.splice(-2, 0, {
+            label: 'Move to Another Window',
+            submenu: moveSubmenu,
+          });
         }
 
-        template.splice(-2, 0, {
-          label: 'Move to Another Window',
-          submenu: moveSubmenu,
+        const menu = Menu.buildFromTemplate(template);
+        menu.popup({ window: window.getBrowserWindowInstance() });
+      }
+    );
+
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.OPEN_PDF_FILE,
+      async (event, appWindowId: string) => {
+        let window: AppWindow | null = null;
+        if (appWindowId) {
+          window = AppWindowManager.getWindowById(appWindowId);
+        } else {
+          window = AppWindowManager.getActiveWindow();
+        }
+        if (!window) return null;
+
+        const result = await dialog.showOpenDialog(window.getBrowserWindowInstance(), {
+          properties: ['openFile'],
+          filters: [{ name: 'PDF Files', extensions: ['pdf'] }],
         });
+
+        if (result.canceled || result.filePaths.length === 0) return null;
+
+        const filePath = result.filePaths[0];
+        const fileUrl = `file://${filePath}`;
+        await window.createTab(fileUrl, true);
+        return fileUrl;
       }
-
-      const menu = Menu.buildFromTemplate(template);
-      menu.popup({ window: window.getBrowserWindowInstance() });
-    });
-
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.OPEN_PDF_FILE, async (event, appWindowId: string) => {
-      let window: AppWindow | null = null;
-      if (appWindowId) {
-        window = AppWindowManager.getWindowById(appWindowId);
-      } else {
-        window = AppWindowManager.getActiveWindow();
-      }
-      if (!window) return null;
-
-      const result = await dialog.showOpenDialog(window.getBrowserWindowInstance(), {
-        properties: ['openFile'],
-        filters: [{ name: 'PDF Files', extensions: ['pdf'] }]
-      });
-
-      if (result.canceled || result.filePaths.length === 0) return null;
-
-      const filePath = result.filePaths[0];
-      const fileUrl = `file://${filePath}`;
-      await window.createTab(fileUrl, true);
-      return fileUrl;
-    });
+    );
 
     ipcMain.handle(RendererToMainEventsForBrowserIPC.SELECT_DOWNLOAD_FOLDER, async () => {
       const window = AppWindowManager.getActiveWindow();
@@ -1073,6 +1318,5 @@ export abstract class AppWindowManager {
       if (result.canceled || result.filePaths.length === 0) return null;
       return result.filePaths[0];
     });
-
   }
 }

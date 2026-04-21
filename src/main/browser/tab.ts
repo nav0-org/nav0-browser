@@ -1,34 +1,45 @@
-import { app, BrowserWindow, dialog, Menu, MenuItem, net, shell, WebContentsView } from "electron";
-import { InAppUrls, DataStoreConstants, MainToRendererEventsForBrowserIPC, WebContentsEvents, STREAMING_SITES } from "../../constants/app-constants";
-import { v4 as uuid } from "uuid";
-import { AppWindow } from "./app-window";
-import { BookmarkManager } from "./bookmark-manager";
-import { BookmarkRecord } from "../../types/bookmark-record";
-import { BrowsingHistoryManager } from "./browsing-history-manager";
-import { DownloadManager } from "./download-manager";
-import * as fs from "fs";
-import path from "path";
-import { Utils } from "../browser/utils";
-import { SearchEngine } from "../web/search-engine";
-import { PermissionManager } from "./permission-manager";
-import { ReaderModeManager, ReaderModeState } from "./reader-mode-manager";
-import { DataStoreManager } from "../database/data-store-manager";
-import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
-import { COSMETIC_FILTER_CSS, AD_BLOCK_EARLY_SCRIPT, AD_BLOCK_SCRIPT } from "../ad-blocker/ad-block-lists";
-import { SSLManager } from "./ssl-manager";
-import { buildErrorPageScript, NavigationError } from "./error-page/error-page";
+import { app, BrowserWindow, dialog, Menu, MenuItem, net, shell, WebContentsView } from 'electron';
+import {
+  InAppUrls,
+  DataStoreConstants,
+  MainToRendererEventsForBrowserIPC,
+  WebContentsEvents,
+  STREAMING_SITES,
+} from '../../constants/app-constants';
+import { v4 as uuid } from 'uuid';
+import { AppWindow } from './app-window';
+import { BookmarkManager } from './bookmark-manager';
+import { BookmarkRecord } from '../../types/bookmark-record';
+import { BrowsingHistoryManager } from './browsing-history-manager';
+import { DownloadManager } from './download-manager';
+import * as fs from 'fs';
+import path from 'path';
+import { Utils } from '../browser/utils';
+import { SearchEngine } from '../web/search-engine';
+import { PermissionManager } from './permission-manager';
+import { ReaderModeManager, ReaderModeState } from './reader-mode-manager';
+import { DataStoreManager } from '../database/data-store-manager';
+import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from '../../types/settings-types';
+import {
+  COSMETIC_FILTER_CSS,
+  AD_BLOCK_EARLY_SCRIPT,
+  AD_BLOCK_SCRIPT,
+} from '../ad-blocker/ad-block-lists';
+import { SSLManager } from './ssl-manager';
+import { buildErrorPageScript, NavigationError } from './error-page/error-page';
 const domainPattern = /^[^\s]+\.[^\s]+$/;
 // Protocols that should be handed off to the OS default handler.
 // Covers communication (mailto, tel, sms), calendar (webcal), and
 // common app deep-links (slack, zoom, teams, discord, vscode, etc.)
-const EXTERNAL_PROTOCOL_RE = /^(mailto|tel|callto|sms|facetime|webcal|slack|zoommtg|zoomus|msteams|discord|spotify|vscode|vscode-insiders|obsidian|notion|figma|linear|raycast):/i;
+const EXTERNAL_PROTOCOL_RE =
+  /^(mailto|tel|callto|sms|facetime|webcal|slack|zoommtg|zoomus|msteams|discord|spotify|vscode|vscode-insiders|obsidian|notion|figma|linear|raycast):/i;
 
 export class Tab {
   public readonly id: string = uuid();
   private url: string;
   private title: string;
   private faviconUrl: string | null = null;
-  private webContentsViewInstance : WebContentsView | null = null;
+  private webContentsViewInstance: WebContentsView | null = null;
   private partitionSetting: string;
   private preloadScript: string | null = null;
   private parentAppWindow: AppWindow | null = null;
@@ -51,7 +62,13 @@ export class Tab {
   private pendingError: NavigationError | null = null;
   private sslStatus: 'secure' | 'insecure' | 'internal' = 'internal';
   private sslCertificate: Electron.Certificate | null = null;
-  private willDownloadHandler: ((event: Electron.Event, item: Electron.DownloadItem, webContents: Electron.WebContents) => void) | null = null;
+  private willDownloadHandler:
+    | ((
+        event: Electron.Event,
+        item: Electron.DownloadItem,
+        webContents: Electron.WebContents
+      ) => void)
+    | null = null;
   private pdfDownloadBypass = false;
   private isSuspended = false;
   private lastActivatedAt: Date = new Date();
@@ -61,7 +78,12 @@ export class Tab {
   private timeFlushInterval: ReturnType<typeof setInterval> | null = null;
   private static readonly TIME_FLUSH_INTERVAL_MS = 60_000;
 
-  constructor(parentAppWindow: AppWindow, url: string , partitionSetting: string, options?: { suspended?: boolean; title?: string }) {
+  constructor(
+    parentAppWindow: AppWindow,
+    url: string,
+    partitionSetting: string,
+    options?: { suspended?: boolean; title?: string }
+  ) {
     this.parentAppWindow = parentAppWindow;
     this.id = uuid();
     this.url = url || '';
@@ -74,34 +96,34 @@ export class Tab {
     }
   }
 
-  private async loadURL(url?: string){
+  private async loadURL(url?: string) {
     let urlToLoad;
     let preloadScriptToLoad;
     let isInternalPage = false;
     this.url = url ?? this.url;
     this.url = this.url.trim();
-    if (this.url.startsWith(InAppUrls.BOOKMARKS)){
+    if (this.url.startsWith(InAppUrls.BOOKMARKS)) {
       urlToLoad = BOOKMARKS_WEBPACK_ENTRY;
       preloadScriptToLoad = BOOKMARKS_PRELOAD_WEBPACK_ENTRY;
       isInternalPage = true;
-    } else if (this.url.startsWith(InAppUrls.BROWSER_SETTINGS)){
+    } else if (this.url.startsWith(InAppUrls.BROWSER_SETTINGS)) {
       urlToLoad = BROWSER_SETTINGS_WEBPACK_ENTRY;
       preloadScriptToLoad = BROWSER_SETTINGS_PRELOAD_WEBPACK_ENTRY;
       isInternalPage = true;
-    } else if (this.url.startsWith(InAppUrls.DOWNLOADS)){
+    } else if (this.url.startsWith(InAppUrls.DOWNLOADS)) {
       urlToLoad = DOWNLOADS_WEBPACK_ENTRY;
       preloadScriptToLoad = DOWNLOADS_PRELOAD_WEBPACK_ENTRY;
       isInternalPage = true;
-    } else if (this.url.startsWith(InAppUrls.HISTORY)){
+    } else if (this.url.startsWith(InAppUrls.HISTORY)) {
       urlToLoad = HISTORY_WEBPACK_ENTRY;
       preloadScriptToLoad = HISTORY_PRELOAD_WEBPACK_ENTRY;
       isInternalPage = true;
-    } else if (this.url.startsWith(InAppUrls.NEW_TAB)){
+    } else if (this.url.startsWith(InAppUrls.NEW_TAB)) {
       urlToLoad = NEW_TAB_WEBPACK_ENTRY;
       preloadScriptToLoad = NEW_TAB_PRELOAD_WEBPACK_ENTRY;
       this.url = '';
       isInternalPage = true;
-    } else if (this.url.startsWith(InAppUrls.ABOUT)){
+    } else if (this.url.startsWith(InAppUrls.ABOUT)) {
       urlToLoad = ABOUT_WEBPACK_ENTRY;
       preloadScriptToLoad = ABOUT_PRELOAD_WEBPACK_ENTRY;
       isInternalPage = true;
@@ -137,8 +159,9 @@ export class Tab {
       urlToLoad = this.url;
       preloadScriptToLoad = WEB_CONTENT_PRELOAD_WEBPACK_ENTRY;
     }
-    const needsNewView = this.preloadScript !== preloadScriptToLoad || !this.webContentsViewInstance;
-    if(needsNewView){
+    const needsNewView =
+      this.preloadScript !== preloadScriptToLoad || !this.webContentsViewInstance;
+    if (needsNewView) {
       this.preloadScript = preloadScriptToLoad;
       this.initWebContentsView();
     }
@@ -149,7 +172,7 @@ export class Tab {
     } else {
       this.readyPromise = Promise.resolve();
     }
-    if(urlToLoad){
+    if (urlToLoad) {
       this.webContentsViewInstance.webContents.loadURL(urlToLoad);
     }
     // If this tab is already active and the view was recreated, re-activate after content loads
@@ -159,8 +182,8 @@ export class Tab {
     }
   }
 
-  private async initWebContentsView(){
-    if(this.webContentsViewInstance) {
+  private async initWebContentsView() {
+    if (this.webContentsViewInstance) {
       this.webContentsViewInstance.webContents.close();
     }
     this.webContentsViewInstance = new WebContentsView({
@@ -171,10 +194,14 @@ export class Tab {
         sandbox: true,
         webSecurity: true,
         plugins: true,
-        additionalArguments: [`--app-window-id=${this.parentAppWindow.id}`, `--is-private=${this.parentAppWindow.isPrivate}`, `--tab-id=${this.id}`],
+        additionalArguments: [
+          `--app-window-id=${this.parentAppWindow.id}`,
+          `--is-private=${this.parentAppWindow.isPrivate}`,
+          `--tab-id=${this.id}`,
+        ],
         allowRunningInsecureContent: false,
-        partition: this.partitionSetting
-      }
+        partition: this.partitionSetting,
+      },
     });
     // User agent is set at the session level by SettingsEnforcer.applyUserAgent()
     // this.webContentsViewInstance.webContents.openDevTools({mode : 'detach'});
@@ -237,38 +264,46 @@ export class Tab {
     });
 
     //for hard navigation (debounced)
-    this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE, async (event, url: string) => {
-      if (this._destroyed) return;
-      // Skip data: URLs (SSL warning interstitials) during forward/back navigation.
-      // These are not real pages — go back to where the user came from.
-      if (url.startsWith('data:') && !this.showingSSLWarning) {
-        const nav = this.webContentsViewInstance.webContents.navigationHistory;
-        if (nav.canGoBack()) {
-          nav.goBack();
+    this.webContentsViewInstance.webContents.on(
+      WebContentsEvents.DID_NAVIGATE,
+      async (event, url: string) => {
+        if (this._destroyed) return;
+        // Skip data: URLs (SSL warning interstitials) during forward/back navigation.
+        // These are not real pages — go back to where the user came from.
+        if (url.startsWith('data:') && !this.showingSSLWarning) {
+          const nav = this.webContentsViewInstance.webContents.navigationHistory;
+          if (nav.canGoBack()) {
+            nav.goBack();
+          }
+          return;
         }
-        return;
+        // Clear any pending error on successful navigation
+        this.pendingError = null;
+        // Reset SSL status for new navigation (will be re-evaluated in sendTabUrlUpdate)
+        try {
+          const hostname = new URL(url).hostname;
+          if (this.sslStatus === 'insecure' && !SSLManager.isHostBypassed(hostname)) {
+            this.sslStatus = 'secure';
+            this.sslCertificate = null;
+          }
+        } catch {
+          /* ignore invalid URLs */
+        }
+        this.handleOriginChange(url);
+        this.debouncedHandleNavigationCompletion(url);
+        // Inject early ad-block hooks (IMA mock, play() interception) as soon as navigation commits
+        this.injectAdBlockEarlyScript(url);
       }
-      // Clear any pending error on successful navigation
-      this.pendingError = null;
-      // Reset SSL status for new navigation (will be re-evaluated in sendTabUrlUpdate)
-      try {
-        const hostname = new URL(url).hostname;
-        if (this.sslStatus === 'insecure' && !SSLManager.isHostBypassed(hostname)) {
-          this.sslStatus = 'secure';
-          this.sslCertificate = null;
-        }
-      } catch { /* ignore invalid URLs */ }
-      this.handleOriginChange(url);
-      this.debouncedHandleNavigationCompletion(url);
-      // Inject early ad-block hooks (IMA mock, play() interception) as soon as navigation commits
-      this.injectAdBlockEarlyScript(url);
-    });
+    );
     //for soft navigation (debounced)
-    this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_NAVIGATE_IN_PAGE, async (event, url: string) => {
-      if (this._destroyed) return;
-      this.debouncedHandleNavigationCompletion(url);
-      // Re-apply dark mode for back/forward in-page navigations (bfcache restores)
-    });
+    this.webContentsViewInstance.webContents.on(
+      WebContentsEvents.DID_NAVIGATE_IN_PAGE,
+      async (event, url: string) => {
+        if (this._destroyed) return;
+        this.debouncedHandleNavigationCompletion(url);
+        // Re-apply dark mode for back/forward in-page navigations (bfcache restores)
+      }
+    );
 
     // Cosmetic ad filtering and DOM cleanup once the DOM is ready
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DOM_READY, () => {
@@ -280,12 +315,17 @@ export class Tab {
       this.injectAdBlockDOMScript();
     });
 
-    this.willDownloadHandler = async (event: Electron.Event, item: Electron.DownloadItem, downloadWebContents: Electron.WebContents) => {
+    this.willDownloadHandler = async (
+      event: Electron.Event,
+      item: Electron.DownloadItem,
+      downloadWebContents: Electron.WebContents
+    ) => {
       // Allow cross-session resumes triggered by createInterruptedDownload
       // (their downloadWebContents won't match any tab's webContents)
       const downloadId = item.getStartTime().toString() + '_' + item.getFilename();
       const isCrossSessionResume = DownloadManager.isResuming(downloadId);
-      if (!isCrossSessionResume && downloadWebContents !== this.webContentsViewInstance.webContents) return;
+      if (!isCrossSessionResume && downloadWebContents !== this.webContentsViewInstance.webContents)
+        return;
 
       const fileName = item.getFilename();
       const mimeType = item.getMimeType();
@@ -293,7 +333,10 @@ export class Tab {
       // Intercept PDF downloads and open them in-tab instead,
       // unless the user explicitly requested a PDF download
       // or this is a cross-session resume.
-      if (!isCrossSessionResume && (mimeType === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf'))) {
+      if (
+        !isCrossSessionResume &&
+        (mimeType === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf'))
+      ) {
         if (this.pdfDownloadBypass) {
           this.pdfDownloadBypass = false;
           // Fall through to handleDownload below
@@ -312,123 +355,163 @@ export class Tab {
     this.webContentsViewInstance.webContents.session.on('will-download', this.willDownloadHandler);
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_START_LOADING, () => {
       if (this._destroyed) return;
-      this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_LOADING_CHANGED, {
-        id: this.id,
-        isLoading: true
-      });
+      this.parentAppWindow
+        .getBrowserWindowInstance()
+        ?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_LOADING_CHANGED, {
+          id: this.id,
+          isLoading: true,
+        });
     });
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_STOP_LOADING, () => {
       if (this._destroyed) return;
-      this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_LOADING_CHANGED, {
-        id: this.id,
-        isLoading: false
-      });
-    });
-    this.webContentsViewInstance.webContents.on(WebContentsEvents.PAGE_TITLE_UPDATED, async (event, title: string) => {
-      if (this._destroyed) return;
-      this.title = title;
-      this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_TITLE_UPDATED, {
-        id: this.id,
-        title: this.title
-      });
-      // Update the history record with the actual title
-      if(this.lastHistoryRecordId) {
-        await BrowsingHistoryManager.updateRecordTitle(this.parentAppWindow.id, this.lastHistoryRecordId, title);
-      }
-    });
-    this.webContentsViewInstance.webContents.on(WebContentsEvents.PAGE_FAVICON_UPDATED, async (event, faviconUrls: string[]) => {
-      if (this._destroyed) return;
-      if(!this.url.startsWith(InAppUrls.PREFIX) && this.url !== '') {
-        const faviconUrl = faviconUrls[faviconUrls.length - 1];
-        this.faviconUrl = faviconUrl;
-
-        // Fetch the favicon from the main process using net.fetch to avoid
-        // Sec-Fetch-Site/Sec-Fetch-Dest headers that CDNs (e.g. Cloudflare)
-        // use to block cross-site image requests from the renderer's <img> tag.
-        let faviconToSend = faviconUrl;
-        try {
-          if (faviconUrl.startsWith('http')) {
-            const response = await (net.fetch as (input: string, init?: Record<string, unknown>) => Promise<Response>)(
-              faviconUrl,
-              { session: this.webContentsViewInstance?.webContents.session }
-            );
-            if (response.ok) {
-              const contentType = response.headers.get('content-type') || 'image/x-icon';
-              const buffer = Buffer.from(await response.arrayBuffer());
-              faviconToSend = `data:${contentType};base64,${buffer.toString('base64')}`;
-              this.faviconUrl = faviconToSend;
-            }
-          }
-        } catch {
-          // Fall back to the original URL — renderer onerror will handle failures
-        }
-
-        if (this._destroyed) return;
-        this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_FAVICON_UPDATED, {
+      this.parentAppWindow
+        .getBrowserWindowInstance()
+        ?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_LOADING_CHANGED, {
           id: this.id,
-          faviconUrl: faviconToSend
+          isLoading: false,
         });
-        // Update the history record with the actual favicon
-        if(this.lastHistoryRecordId) {
-          await BrowsingHistoryManager.updateRecordFavicon(this.parentAppWindow.id, this.lastHistoryRecordId, faviconToSend);
+    });
+    this.webContentsViewInstance.webContents.on(
+      WebContentsEvents.PAGE_TITLE_UPDATED,
+      async (event, title: string) => {
+        if (this._destroyed) return;
+        this.title = title;
+        this.parentAppWindow
+          .getBrowserWindowInstance()
+          ?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_TITLE_UPDATED, {
+            id: this.id,
+            title: this.title,
+          });
+        // Update the history record with the actual title
+        if (this.lastHistoryRecordId) {
+          await BrowsingHistoryManager.updateRecordTitle(
+            this.parentAppWindow.id,
+            this.lastHistoryRecordId,
+            title
+          );
         }
       }
-    });
-    this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_FAIL_LOAD, (event, errorCode, errorDescription, validatedURL, isMainFrame) => {
-      if (this._destroyed) return;
-      // Only handle main frame failures; ignore subframe/resource errors and aborted loads
-      if (!isMainFrame || errorCode === -3) return;
-      console.error('Failed to load URL:', this.url, errorCode, errorDescription);
-      this.pendingError = { errorCode, errorDescription, validatedURL };
-      this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.NAVIGATION_FAILED, {
-        id: this.id,
-      });
-    });
+    );
+    this.webContentsViewInstance.webContents.on(
+      WebContentsEvents.PAGE_FAVICON_UPDATED,
+      async (event, faviconUrls: string[]) => {
+        if (this._destroyed) return;
+        if (!this.url.startsWith(InAppUrls.PREFIX) && this.url !== '') {
+          const faviconUrl = faviconUrls[faviconUrls.length - 1];
+          this.faviconUrl = faviconUrl;
+
+          // Fetch the favicon from the main process using net.fetch to avoid
+          // Sec-Fetch-Site/Sec-Fetch-Dest headers that CDNs (e.g. Cloudflare)
+          // use to block cross-site image requests from the renderer's <img> tag.
+          let faviconToSend = faviconUrl;
+          try {
+            if (faviconUrl.startsWith('http')) {
+              const response = await (
+                net.fetch as (input: string, init?: Record<string, unknown>) => Promise<Response>
+              )(faviconUrl, { session: this.webContentsViewInstance?.webContents.session });
+              if (response.ok) {
+                const contentType = response.headers.get('content-type') || 'image/x-icon';
+                const buffer = Buffer.from(await response.arrayBuffer());
+                faviconToSend = `data:${contentType};base64,${buffer.toString('base64')}`;
+                this.faviconUrl = faviconToSend;
+              }
+            }
+          } catch {
+            // Fall back to the original URL — renderer onerror will handle failures
+          }
+
+          if (this._destroyed) return;
+          this.parentAppWindow
+            .getBrowserWindowInstance()
+            ?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_FAVICON_UPDATED, {
+              id: this.id,
+              faviconUrl: faviconToSend,
+            });
+          // Update the history record with the actual favicon
+          if (this.lastHistoryRecordId) {
+            await BrowsingHistoryManager.updateRecordFavicon(
+              this.parentAppWindow.id,
+              this.lastHistoryRecordId,
+              faviconToSend
+            );
+          }
+        }
+      }
+    );
+    this.webContentsViewInstance.webContents.on(
+      WebContentsEvents.DID_FAIL_LOAD,
+      (event, errorCode, errorDescription, validatedURL, isMainFrame) => {
+        if (this._destroyed) return;
+        // Only handle main frame failures; ignore subframe/resource errors and aborted loads
+        if (!isMainFrame || errorCode === -3) return;
+        console.error('Failed to load URL:', this.url, errorCode, errorDescription);
+        this.pendingError = { errorCode, errorDescription, validatedURL };
+        this.parentAppWindow
+          .getBrowserWindowInstance()
+          ?.webContents.send(MainToRendererEventsForBrowserIPC.NAVIGATION_FAILED, {
+            id: this.id,
+          });
+      }
+    );
 
     this.webContentsViewInstance.webContents.on('context-menu', (event, params) => {
       if (this._destroyed) return;
-      this.handleContextMenuEvent(this.parentAppWindow, event, params)
+      this.handleContextMenuEvent(this.parentAppWindow, event, params);
     });
 
     // Handle SSL certificate errors — show interstitial warning page
-    this.webContentsViewInstance.webContents.on('certificate-error', (event, url, error, certificate, callback) => {
-      if (this._destroyed) { callback(false); return; }
-
-      // If the host has been explicitly bypassed by the user, allow the connection
-      try {
-        if (SSLManager.isHostBypassed(new URL(url).hostname)) {
-          event.preventDefault();
-          callback(true);
+    this.webContentsViewInstance.webContents.on(
+      'certificate-error',
+      (event, url, error, certificate, callback) => {
+        if (this._destroyed) {
+          callback(false);
           return;
         }
-      } catch { /* ignore parse errors */ }
 
-      // Guard: don't stack multiple warnings
-      if (this.showingSSLWarning) { event.preventDefault(); callback(false); return; }
-
-      event.preventDefault();
-      callback(false);
-
-      this.showingSSLWarning = true;
-      this.sslCertificate = certificate;
-      this.url = url;
-      this.sendTabUrlUpdate(url);
-
-      SSLManager.showWarning(this.webContentsViewInstance.webContents, url, error).then((decision) => {
-        this.showingSSLWarning = false;
-        if (decision === 'proceed') {
-          this.sslStatus = 'insecure';
-          this.navigate(url);
-        } else {
-          const wc = this.webContentsViewInstance.webContents;
-          if (wc.navigationHistory.canGoBack()) {
-            wc.navigationHistory.goBack();
-          } else {
-            this.navigate(InAppUrls.NEW_TAB);
+        // If the host has been explicitly bypassed by the user, allow the connection
+        try {
+          if (SSLManager.isHostBypassed(new URL(url).hostname)) {
+            event.preventDefault();
+            callback(true);
+            return;
           }
+        } catch {
+          /* ignore parse errors */
         }
-      });
-    });
+
+        // Guard: don't stack multiple warnings
+        if (this.showingSSLWarning) {
+          event.preventDefault();
+          callback(false);
+          return;
+        }
+
+        event.preventDefault();
+        callback(false);
+
+        this.showingSSLWarning = true;
+        this.sslCertificate = certificate;
+        this.url = url;
+        this.sendTabUrlUpdate(url);
+
+        SSLManager.showWarning(this.webContentsViewInstance.webContents, url, error).then(
+          (decision) => {
+            this.showingSSLWarning = false;
+            if (decision === 'proceed') {
+              this.sslStatus = 'insecure';
+              this.navigate(url);
+            } else {
+              const wc = this.webContentsViewInstance.webContents;
+              if (wc.navigationHistory.canGoBack()) {
+                wc.navigationHistory.goBack();
+              } else {
+                this.navigate(InAppUrls.NEW_TAB);
+              }
+            }
+          }
+        );
+      }
+    );
 
     this.webContentsViewInstance.webContents.setWindowOpenHandler(({ url, disposition }) => {
       // Hand off external protocols to the OS (mailto:, tel:, etc.)
@@ -438,18 +521,20 @@ export class Tab {
       }
 
       const now = Date.now();
-      this.popupTimestamps = this.popupTimestamps.filter(t => now - t < Tab.POPUP_WINDOW_MS);
+      this.popupTimestamps = this.popupTimestamps.filter((t) => now - t < Tab.POPUP_WINDOW_MS);
 
       // Flood protection: always enforced regardless of policy
       if (this.popupTimestamps.length >= Tab.MAX_POPUPS) {
-        console.warn(`Popup blocked: tab exceeded ${Tab.MAX_POPUPS} popups in ${Tab.POPUP_WINDOW_MS / 1000}s`);
-        return { action: 'deny' }
+        console.warn(
+          `Popup blocked: tab exceeded ${Tab.MAX_POPUPS} popups in ${Tab.POPUP_WINDOW_MS / 1000}s`
+        );
+        return { action: 'deny' };
       }
 
       // Check popup policy from settings
       if (!this.isPopupAllowedBySettings(url)) {
         console.warn(`Popup blocked by settings for: ${url}`);
-        return { action: 'deny' }
+        return { action: 'deny' };
       }
 
       if (url === 'about:blank') {
@@ -460,9 +545,9 @@ export class Tab {
             frame: false,
             fullscreenable: false,
             backgroundColor: 'black',
-          }
-        }
-      } else if (disposition === 'foreground-tab' || disposition === 'background-tab'){
+          },
+        };
+      } else if (disposition === 'foreground-tab' || disposition === 'background-tab') {
         this.popupTimestamps.push(now);
         this.parentAppWindow.createTab(url, false);
       } else if (disposition === 'new-window') {
@@ -475,10 +560,10 @@ export class Tab {
             width: 500,
             height: 700,
             fullscreenable: false,
-          }
-        }
+          },
+        };
       }
-      return { action: 'deny' }
+      return { action: 'deny' };
     });
   }
 
@@ -490,12 +575,20 @@ export class Tab {
       // Get hostnames for both the opener page and the popup destination
       const openerUrl = this.webContentsViewInstance.webContents.getURL();
       let openerHostname = '';
-      try { openerHostname = new URL(openerUrl).hostname; } catch { /* ignore */ }
+      try {
+        openerHostname = new URL(openerUrl).hostname;
+      } catch {
+        /* ignore */
+      }
       let popupHostname = '';
-      try { popupHostname = new URL(popupUrl).hostname; } catch { /* ignore */ }
+      try {
+        popupHostname = new URL(popupUrl).hostname;
+      } catch {
+        /* ignore */
+      }
 
       const matchesSite = (hostname: string, sites: string[]) =>
-        (sites || []).some(site => {
+        (sites || []).some((site) => {
           const d = site.toLowerCase().trim();
           return hostname === d || hostname.endsWith('.' + d);
         });
@@ -523,7 +616,9 @@ export class Tab {
   }
 
   async handleDownload(item: Electron.DownloadItem): Promise<void> {
-    const storedSettings = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as BrowserSettings;
+    const storedSettings = DataStoreManager.get(
+      DataStoreConstants.BROWSER_SETTINGS
+    ) as BrowserSettings;
     const s = { ...DEFAULT_BROWSER_SETTINGS, ...storedSettings };
     let downloadDir = s.downloadPath || app.getPath('downloads');
     if (s.downloadPath && !fs.existsSync(s.downloadPath)) {
@@ -547,24 +642,51 @@ export class Tab {
       DownloadManager.updateRecordStatus(this.parentAppWindow.id, dbRecordId, 'in_progress');
     } else {
       // New download – create DB record
-      const record = await DownloadManager.addRecord(this.parentAppWindow.id, item.getURL(), item.getFilename(), path.extname(item.getFilename()), Utils.getFileType(path.extname(item.getFilename())), item.getTotalBytes(), downloadPath);
+      const record = await DownloadManager.addRecord(
+        this.parentAppWindow.id,
+        item.getURL(),
+        item.getFilename(),
+        path.extname(item.getFilename()),
+        Utils.getFileType(path.extname(item.getFilename())),
+        item.getTotalBytes(),
+        downloadPath
+      );
       dbRecordId = record.id;
     }
 
     // Store resume metadata in the DB for cross-session resume
     DownloadManager.updateRecordResumeMetadata(
-      this.parentAppWindow.id, dbRecordId,
-      JSON.stringify(item.getURLChain()), item.getETag(), item.getLastModifiedTime(), item.getStartTime()
+      this.parentAppWindow.id,
+      dbRecordId,
+      JSON.stringify(item.getURLChain()),
+      item.getETag(),
+      item.getLastModifiedTime(),
+      item.getStartTime()
     );
 
     // Track in main process so renderer can query on page load
-    DownloadManager.trackDownloadStarted(downloadId, item.getFilename(), item.getTotalBytes(), dbRecordId);
+    DownloadManager.trackDownloadStarted(
+      downloadId,
+      item.getFilename(),
+      item.getTotalBytes(),
+      dbRecordId
+    );
     DownloadManager.storeDownloadItem(downloadId, item);
 
     // Notify renderer (browser chrome + all tabs) that a download has started
-    const startedData = { downloadId, dbRecordId, fileName: item.getFilename(), totalBytes: item.getTotalBytes() };
-    this.parentAppWindow.getBrowserWindowInstance().webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_STARTED, startedData);
-    this.parentAppWindow.broadcastToTabs(MainToRendererEventsForBrowserIPC.DOWNLOAD_STARTED, startedData);
+    const startedData = {
+      downloadId,
+      dbRecordId,
+      fileName: item.getFilename(),
+      totalBytes: item.getTotalBytes(),
+    };
+    this.parentAppWindow
+      .getBrowserWindowInstance()
+      .webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_STARTED, startedData);
+    this.parentAppWindow.broadcastToTabs(
+      MainToRendererEventsForBrowserIPC.DOWNLOAD_STARTED,
+      startedData
+    );
 
     // Track progress updates (throttled to every 250ms)
     let lastProgressSent = 0;
@@ -574,12 +696,26 @@ export class Tab {
       lastProgressSent = now;
 
       if (state === 'progressing') {
-        DownloadManager.trackDownloadProgress(downloadId, item.getReceivedBytes(), item.getTotalBytes());
+        DownloadManager.trackDownloadProgress(
+          downloadId,
+          item.getReceivedBytes(),
+          item.getTotalBytes()
+        );
         const browserWindow = this.parentAppWindow.getBrowserWindowInstance();
         if (!browserWindow?.webContents) return;
-        const progressData = { downloadId, receivedBytes: item.getReceivedBytes(), totalBytes: item.getTotalBytes() };
-        browserWindow.webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_PROGRESS, progressData);
-        this.parentAppWindow.broadcastToTabs(MainToRendererEventsForBrowserIPC.DOWNLOAD_PROGRESS, progressData);
+        const progressData = {
+          downloadId,
+          receivedBytes: item.getReceivedBytes(),
+          totalBytes: item.getTotalBytes(),
+        };
+        browserWindow.webContents.send(
+          MainToRendererEventsForBrowserIPC.DOWNLOAD_PROGRESS,
+          progressData
+        );
+        this.parentAppWindow.broadcastToTabs(
+          MainToRendererEventsForBrowserIPC.DOWNLOAD_PROGRESS,
+          progressData
+        );
       }
     });
 
@@ -589,7 +725,12 @@ export class Tab {
 
       // Update DB record status
       if (state === 'completed') {
-        DownloadManager.updateRecordStatus(this.parentAppWindow.id, dbRecordId, 'completed', item.getTotalBytes() || item.getReceivedBytes());
+        DownloadManager.updateRecordStatus(
+          this.parentAppWindow.id,
+          dbRecordId,
+          'completed',
+          item.getTotalBytes() || item.getReceivedBytes()
+        );
       } else if (state === 'cancelled') {
         // During shutdown, downloads are auto-cancelled after being paused by
         // pauseAllDownloads() – don't overwrite the 'paused' status in the DB
@@ -605,14 +746,22 @@ export class Tab {
         try {
           const backupPath = downloadPath + '.nav0resume';
           if (fs.existsSync(backupPath)) fs.unlinkSync(backupPath);
-        } catch (_) { /* best-effort */ }
+        } catch (_) {
+          /* best-effort */
+        }
       }
 
       const browserWindow = this.parentAppWindow.getBrowserWindowInstance();
       if (!browserWindow?.webContents) return;
       const completedData = { downloadId, state, fileName: item.getFilename(), dbRecordId };
-      browserWindow.webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED, completedData);
-      this.parentAppWindow.broadcastToTabs(MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED, completedData);
+      browserWindow.webContents.send(
+        MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED,
+        completedData
+      );
+      this.parentAppWindow.broadcastToTabs(
+        MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED,
+        completedData
+      );
     });
 
     // createInterruptedDownload produces a DownloadItem in the 'interrupted'
@@ -638,7 +787,11 @@ export class Tab {
 
   private isAdBlockAllowed(url?: string): boolean {
     const checkUrl = url || this.url;
-    if (checkUrl.startsWith(InAppUrls.PREFIX) || checkUrl === '' || checkUrl.startsWith('file://')) {
+    if (
+      checkUrl.startsWith(InAppUrls.PREFIX) ||
+      checkUrl === '' ||
+      checkUrl.startsWith('file://')
+    ) {
       return false;
     }
     try {
@@ -647,7 +800,7 @@ export class Tab {
       if (!settings.adBlockerEnabled) return false;
 
       const hostname = new URL(checkUrl).hostname;
-      const isAllowed = (settings.adBlockerAllowedSites || []).some(site => {
+      const isAllowed = (settings.adBlockerAllowedSites || []).some((site) => {
         const siteDomain = site.toLowerCase().trim();
         return hostname === siteDomain || hostname.endsWith('.' + siteDomain);
       });
@@ -684,7 +837,7 @@ export class Tab {
   private static isStreamingSite(url: string): boolean {
     try {
       const hostname = new URL(url).hostname.toLowerCase();
-      return STREAMING_SITES.some(site => hostname === site || hostname.endsWith('.' + site));
+      return STREAMING_SITES.some((site) => hostname === site || hostname.endsWith('.' + site));
     } catch {
       return false;
     }
@@ -697,7 +850,7 @@ export class Tab {
 
   private debouncedHandleNavigationCompletion(url: string): void {
     if (this._destroyed) return;
-    if(this.navigationDebounceTimer) {
+    if (this.navigationDebounceTimer) {
       clearTimeout(this.navigationDebounceTimer);
     }
     // Deactivate reader mode on navigation
@@ -712,7 +865,7 @@ export class Tab {
     // Update URL and send tab update immediately for responsive UI
     // Skip data: URLs (e.g. SSL warning pages) and active SSL warnings
     if (this.showingSSLWarning || url.startsWith('data:')) return;
-    if(!this.url.startsWith(InAppUrls.PREFIX) && this.url !== '') {
+    if (!this.url.startsWith(InAppUrls.PREFIX) && this.url !== '') {
       this.url = url;
     }
     this.sendTabUrlUpdate(url);
@@ -735,7 +888,12 @@ export class Tab {
     this.updateSSLStatus(url);
 
     // Build certificate details if available
-    let sslDetails: { issuer: string; validFrom: string; validTo: string; subjectName: string } | null = null;
+    let sslDetails: {
+      issuer: string;
+      validFrom: string;
+      validTo: string;
+      subjectName: string;
+    } | null = null;
     if (this.sslCertificate) {
       sslDetails = {
         issuer: this.sslCertificate.issuerName,
@@ -745,17 +903,20 @@ export class Tab {
       };
     }
 
-    this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_URL_UPDATED, {
-      id: this.id,
-      url: this.url,
-      isBookmark: (this.bookmark? true : false),
-      bookmarkId: this.bookmark ? this.bookmark.id : null,
-      bookmarkType: this.bookmark ? this.bookmark.type : null,
-      canGoBack: this.webContentsViewInstance?.webContents.navigationHistory.canGoBack() ?? false,
-      canGoForward: this.webContentsViewInstance?.webContents.navigationHistory.canGoForward() ?? false,
-      sslStatus: this.sslStatus,
-      sslDetails,
-    });
+    this.parentAppWindow
+      .getBrowserWindowInstance()
+      ?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_URL_UPDATED, {
+        id: this.id,
+        url: this.url,
+        isBookmark: this.bookmark ? true : false,
+        bookmarkId: this.bookmark ? this.bookmark.id : null,
+        bookmarkType: this.bookmark ? this.bookmark.type : null,
+        canGoBack: this.webContentsViewInstance?.webContents.navigationHistory.canGoBack() ?? false,
+        canGoForward:
+          this.webContentsViewInstance?.webContents.navigationHistory.canGoForward() ?? false,
+        sslStatus: this.sslStatus,
+        sslDetails,
+      });
   }
 
   private updateSSLStatus(url: string): void {
@@ -792,7 +953,7 @@ export class Tab {
   }
 
   private recordHistory(url: string): void {
-    if(this.url.startsWith(InAppUrls.PREFIX) || this.url === '') {
+    if (this.url.startsWith(InAppUrls.PREFIX) || this.url === '') {
       this.lastHistoryRecordId = null;
       return;
     }
@@ -813,7 +974,9 @@ export class Tab {
       // new rows so the history timeline and per-visit time tracking are
       // preserved.
       const record = BrowsingHistoryManager.insertRecord(
-        this.parentAppWindow.id, urlWithoutFragment, this.title,
+        this.parentAppWindow.id,
+        urlWithoutFragment,
+        this.title,
         urlObject ? urlObject.hostname : '',
         urlObject ? `${urlObject.protocol}//${urlObject.hostname}/favicon.ico` : ''
       );
@@ -857,7 +1020,10 @@ export class Tab {
   }
 
   async handleFileSelection(extensions: string[]): Promise<string[] | null> {
-    const result = await dialog.showOpenDialog({properties: ['openFile', 'multiSelections'], filters: [{ name: 'Files', extensions }]});
+    const result = await dialog.showOpenDialog({
+      properties: ['openFile', 'multiSelections'],
+      filters: [{ name: 'Files', extensions }],
+    });
     console.log(result);
     if (result.canceled) {
       return null;
@@ -877,7 +1043,10 @@ export class Tab {
       this.readerModeCheckTimer = null;
     }
     if (this.willDownloadHandler && this.webContentsViewInstance) {
-      this.webContentsViewInstance.webContents.session.removeListener('will-download', this.willDownloadHandler);
+      this.webContentsViewInstance.webContents.session.removeListener(
+        'will-download',
+        this.willDownloadHandler
+      );
       this.willDownloadHandler = null;
     }
   }
@@ -923,8 +1092,11 @@ export class Tab {
     }
     try {
       BrowsingHistoryManager.updateRecordTimeTracking(
-        this.parentAppWindow.id, this.lastHistoryRecordId,
-        totalDuration, activeDuration, new Date(now).toISOString()
+        this.parentAppWindow.id,
+        this.lastHistoryRecordId,
+        totalDuration,
+        activeDuration,
+        new Date(now).toISOString()
       );
     } catch {
       // Window may have been closed
@@ -951,8 +1123,11 @@ export class Tab {
     const activeDuration = this.activeTimeAccumulator;
     const outTimestamp = new Date().toISOString();
     BrowsingHistoryManager.updateRecordTimeTracking(
-      this.parentAppWindow.id, this.lastHistoryRecordId,
-      totalDuration, activeDuration, outTimestamp
+      this.parentAppWindow.id,
+      this.lastHistoryRecordId,
+      totalDuration,
+      activeDuration,
+      outTimestamp
     );
   }
 
@@ -969,7 +1144,10 @@ export class Tab {
       this.readerModeCheckTimer = null;
     }
     if (this.willDownloadHandler && this.webContentsViewInstance) {
-      this.webContentsViewInstance.webContents.session.removeListener('will-download', this.willDownloadHandler);
+      this.webContentsViewInstance.webContents.session.removeListener(
+        'will-download',
+        this.willDownloadHandler
+      );
       this.willDownloadHandler = null;
     }
     if (this.webContentsViewInstance) {
@@ -1027,10 +1205,12 @@ export class Tab {
 
   private sendReaderModeAvailability(): void {
     try {
-      this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(
-        MainToRendererEventsForBrowserIPC.READER_MODE_AVAILABILITY_CHANGED,
-        { id: this.id, isEligible: this.readerMode.isEligible }
-      );
+      this.parentAppWindow
+        .getBrowserWindowInstance()
+        ?.webContents.send(MainToRendererEventsForBrowserIPC.READER_MODE_AVAILABILITY_CHANGED, {
+          id: this.id,
+          isEligible: this.readerMode.isEligible,
+        });
     } catch {
       // Window may be closed
     }
@@ -1038,10 +1218,12 @@ export class Tab {
 
   private sendReaderModeStateChanged(): void {
     try {
-      this.parentAppWindow.getBrowserWindowInstance()?.webContents.send(
-        MainToRendererEventsForBrowserIPC.READER_MODE_STATE_CHANGED,
-        { id: this.id, isActive: this.readerMode.isActive }
-      );
+      this.parentAppWindow
+        .getBrowserWindowInstance()
+        ?.webContents.send(MainToRendererEventsForBrowserIPC.READER_MODE_STATE_CHANGED, {
+          id: this.id,
+          isActive: this.readerMode.isActive,
+        });
     } catch {
       // Window may be closed
     }
@@ -1073,15 +1255,17 @@ export class Tab {
 
   private async activateReaderMode(): Promise<void> {
     // Extract article content
-    const article = this.readerMode.cachedArticle ||
-      await ReaderModeManager.extractContent(this.webContentsViewInstance.webContents);
+    const article =
+      this.readerMode.cachedArticle ||
+      (await ReaderModeManager.extractContent(this.webContentsViewInstance.webContents));
     if (!article) return;
 
     this.readerMode.cachedArticle = article;
 
     // Inject reader mode view
     const cssKey = await ReaderModeManager.activate(
-      this.webContentsViewInstance.webContents, article
+      this.webContentsViewInstance.webContents,
+      article
     );
     if (cssKey === null) return;
 
@@ -1109,13 +1293,20 @@ export class Tab {
   }
 
   private isExternalPage(): boolean {
-    return !this.url.startsWith(InAppUrls.PREFIX) && this.url !== '' && !this.url.startsWith('file://');
+    return (
+      !this.url.startsWith(InAppUrls.PREFIX) && this.url !== '' && !this.url.startsWith('file://')
+    );
   }
 
   private isLocalhost(url: string): boolean {
     try {
       const hostname = new URL(url).hostname;
-      return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]';
+      return (
+        hostname === 'localhost' ||
+        hostname === '127.0.0.1' ||
+        hostname === '::1' ||
+        hostname === '[::1]'
+      );
     } catch {
       return false;
     }
@@ -1141,10 +1332,24 @@ export class Tab {
       host = host.slice(0, portIdx);
     }
     host = host.toLowerCase();
-    if (host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0' || host === '[::1]' || host === '::1') return true;
+    if (
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host === '0.0.0.0' ||
+      host === '[::1]' ||
+      host === '::1'
+    )
+      return true;
     // Loopback / link-local TLDs commonly used for local dev and intranet
-    if (host.endsWith('.localhost') || host.endsWith('.local') || host.endsWith('.test')
-        || host.endsWith('.lan') || host.endsWith('.internal') || host.endsWith('.home.arpa')) return true;
+    if (
+      host.endsWith('.localhost') ||
+      host.endsWith('.local') ||
+      host.endsWith('.test') ||
+      host.endsWith('.lan') ||
+      host.endsWith('.internal') ||
+      host.endsWith('.home.arpa')
+    )
+      return true;
     return false;
   }
 
@@ -1152,15 +1357,16 @@ export class Tab {
   handleContextMenuEvent(parentAppWindow: AppWindow, event: any, params: any) {
     const { editFlags, linkURL, srcURL, selectionText, mediaType, isEditable, x, y } = params;
     const template: (Electron.MenuItemConstructorOptions | MenuItem)[] = [];
-    
-    if (isEditable) { // Handle editable text fields (textarea, input, etc.)
+
+    if (isEditable) {
+      // Handle editable text fields (textarea, input, etc.)
       if (editFlags.canCut) {
         template.push({
           label: 'Cut',
           accelerator: 'CmdOrCtrl+X',
-          role: 'cut'
+          role: 'cut',
         });
-      }      
+      }
       // if (editFlags.canCopy) {
       //   template.push({
       //     label: 'Copy',
@@ -1172,7 +1378,7 @@ export class Tab {
         template.push({
           label: 'Paste',
           accelerator: 'CmdOrCtrl+V',
-          role: 'paste'
+          role: 'paste',
         });
       }
       // if (editFlags.canPaste) {
@@ -1186,20 +1392,20 @@ export class Tab {
       if (editFlags.canDelete) {
         template.push({
           label: 'Delete',
-          role: 'delete'
+          role: 'delete',
         });
       }
       if (editFlags.canSelectAll) {
         template.push({
           label: 'Select All',
           accelerator: 'CmdOrCtrl+A',
-          role: 'selectAll'
+          role: 'selectAll',
         });
       }
       // if (editFlags.canEditRichly) {
       //   template.push(
       //     { type: 'separator' },
-      //     { 
+      //     {
       //       label: 'Spelling and Grammar',
       //       submenu: [
       //         { label: 'Check Document', role: 'checkSpelling' },
@@ -1210,98 +1416,142 @@ export class Tab {
       //   );
       // }
     }
-    if (linkURL) { //for clicking on hyperlinks
+    if (linkURL) {
+      //for clicking on hyperlinks
       if (EXTERNAL_PROTOCOL_RE.test(linkURL)) {
         template.push(
-          { label: 'Open in default app', click: () => {
-            shell.openExternal(linkURL).catch(() => {});
-          }},
-          { label: 'Copy link address', click: () => {
-            this.webContentsViewInstance.webContents.executeJavaScript(`
+          {
+            label: 'Open in default app',
+            click: () => {
+              shell.openExternal(linkURL).catch(() => {});
+            },
+          },
+          {
+            label: 'Copy link address',
+            click: () => {
+              this.webContentsViewInstance.webContents.executeJavaScript(`
               navigator.clipboard.writeText("${linkURL}");
             `);
-          }},
+            },
+          },
           { type: 'separator' as const }
         );
       } else {
-      template.push(
-        { label: 'Open link in new tab', click: () => {
-          parentAppWindow.createTab(linkURL, false);
-        }},
-        { label: 'Open link in new window', click: () => {
-          //@todo - implement this
-        }},
-        { label: 'Copy link address', click: () => {
-          this.webContentsViewInstance.webContents.executeJavaScript(`
+        template.push(
+          {
+            label: 'Open link in new tab',
+            click: () => {
+              parentAppWindow.createTab(linkURL, false);
+            },
+          },
+          {
+            label: 'Open link in new window',
+            click: () => {
+              //@todo - implement this
+            },
+          },
+          {
+            label: 'Copy link address',
+            click: () => {
+              this.webContentsViewInstance.webContents.executeJavaScript(`
             navigator.clipboard.writeText("${linkURL}");
           `);
-        }},
-        { type:  'separator'}
-      );
+            },
+          },
+          { type: 'separator' }
+        );
       }
     }
-    if (srcURL) { //for clicking on image
+    if (srcURL) {
+      //for clicking on image
       template.push(
-        { label: 'Save Image As...', click: async () => {
-          this.webContentsViewInstance.webContents.downloadURL(srcURL);
-        }},
-        { label: 'Copy Image', click: () => {
-          this.webContentsViewInstance.webContents.copyImageAt(params.x, params.y);
-        }},
-        { type:  'separator'}
+        {
+          label: 'Save Image As...',
+          click: async () => {
+            this.webContentsViewInstance.webContents.downloadURL(srcURL);
+          },
+        },
+        {
+          label: 'Copy Image',
+          click: () => {
+            this.webContentsViewInstance.webContents.copyImageAt(params.x, params.y);
+          },
+        },
+        { type: 'separator' }
       );
-    } 
-    if (selectionText) { //for selected text
+    }
+    if (selectionText) {
+      //for selected text
       const engineName = SearchEngine.getSearchEngineName();
-      const truncatedText = selectionText.length > 30 ? selectionText.substring(0, 30) + '...' : selectionText;
+      const truncatedText =
+        selectionText.length > 30 ? selectionText.substring(0, 30) + '...' : selectionText;
       template.push(
-        { label: 'Copy', click: () => {
-          this.webContentsViewInstance.webContents.copy();
-        }},
-        { label: `Search ${engineName} for "${truncatedText}"`, click: () => {
-          this.parentAppWindow.createTab(selectionText, true);
-        }}
+        {
+          label: 'Copy',
+          click: () => {
+            this.webContentsViewInstance.webContents.copy();
+          },
+        },
+        {
+          label: `Search ${engineName} for "${truncatedText}"`,
+          click: () => {
+            this.parentAppWindow.createTab(selectionText, true);
+          },
+        }
       );
-      template.push(
-        { type:  'separator'}
-      );
-    } 
+      template.push({ type: 'separator' });
+    }
 
-    
     template.push(
-      { label: 'Back', click: () => {
-        if (this.webContentsViewInstance.webContents.navigationHistory.canGoBack()) {
-          this.webContentsViewInstance.webContents.navigationHistory.goBack();
-        }
-      }},
-      { label: 'Forward', click: () => {
-        if (this.webContentsViewInstance.webContents.navigationHistory.canGoForward()) {
-          this.webContentsViewInstance.webContents.navigationHistory.goForward();
-        }
-      }},
-      { label: 'Reload', click: () => {
-        this.webContentsViewInstance.webContents.reload();
-      }},
-      { label: 'Hard Reload', click: () => {
-        const webContents = this.webContentsViewInstance.webContents;
-        const webSession = webContents.session;
-        const currentUrl = webContents.getURL();
-        try {
-          const origin = new URL(currentUrl).origin;
-          webSession.clearStorageData({ origin }).catch(() => {});
-        } catch (_) { /* origin may not be parseable */ }
-        webSession.clearCache().catch(() => {});
-        webSession.clearCodeCaches({}).catch(() => {});
-        webContents.reloadIgnoringCache();
-      }},
+      {
+        label: 'Back',
+        click: () => {
+          if (this.webContentsViewInstance.webContents.navigationHistory.canGoBack()) {
+            this.webContentsViewInstance.webContents.navigationHistory.goBack();
+          }
+        },
+      },
+      {
+        label: 'Forward',
+        click: () => {
+          if (this.webContentsViewInstance.webContents.navigationHistory.canGoForward()) {
+            this.webContentsViewInstance.webContents.navigationHistory.goForward();
+          }
+        },
+      },
+      {
+        label: 'Reload',
+        click: () => {
+          this.webContentsViewInstance.webContents.reload();
+        },
+      },
+      {
+        label: 'Hard Reload',
+        click: () => {
+          const webContents = this.webContentsViewInstance.webContents;
+          const webSession = webContents.session;
+          const currentUrl = webContents.getURL();
+          try {
+            const origin = new URL(currentUrl).origin;
+            webSession.clearStorageData({ origin }).catch(() => {});
+          } catch (_) {
+            /* origin may not be parseable */
+          }
+          webSession.clearCache().catch(() => {});
+          webSession.clearCodeCaches({}).catch(() => {});
+          webContents.reloadIgnoringCache();
+        },
+      },
       { type: 'separator' },
-      { label: 'Print...', click: () => {
-        this.webContentsViewInstance.webContents.print();
-      }},
+      {
+        label: 'Print...',
+        click: () => {
+          this.webContentsViewInstance.webContents.print();
+        },
+      }
     );
-  
-    
+
     const menu = Menu.buildFromTemplate(template);
-    menu.popup({ window: parentAppWindow.getBrowserWindowInstance()});
+    menu.popup({ window: parentAppWindow.getBrowserWindowInstance() });
   }
 }

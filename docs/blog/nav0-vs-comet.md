@@ -1,6 +1,6 @@
 ---
-title: "Nav0 vs Comet Browser: Two Privacy Browsers, Different Trust Models"
-description: "Comet Browser and Nav0 both promise fast, private browsing. But one is closed source and the other is fully auditable. When it comes to privacy, verifiability is what separates promises from proof."
+title: 'Nav0 vs Comet Browser: Two Privacy Browsers, Different Trust Models'
+description: 'Comet Browser and Nav0 both promise fast, private browsing. But one is closed source and the other is fully auditable. When it comes to privacy, verifiability is what separates promises from proof.'
 date: 2026-04-04
 author: Nav0 Team
 tags: [comet, privacy, comparison, open-source, transparency]
@@ -10,7 +10,7 @@ head:
       content: article
   - - meta
     - property: article:published_time
-      content: "2026-04-04"
+      content: '2026-04-04'
   - - meta
     - property: article:author
       content: Nav0 Team
@@ -28,7 +28,7 @@ head:
       content: transparency
   - - meta
     - name: keywords
-      content: "Nav0 vs comet browser, comet browser privacy, comet browser review, minimal browser comparison, lightweight browser, private browser comparison, comet vs nav0, comet browser alternative, is comet browser safe, best minimal browser 2026, comet browser open source, lightweight browser no tracking, fast private browser, open source browser comparison, browser without bloat"
+      content: 'Nav0 vs comet browser, comet browser privacy, comet browser review, minimal browser comparison, lightweight browser, private browser comparison, comet vs nav0, comet browser alternative, is comet browser safe, best minimal browser 2026, comet browser open source, lightweight browser no tracking, fast private browser, open source browser comparison, browser without bloat'
   - - script
     - type: application/ld+json
     - |
@@ -96,19 +96,19 @@ But promises aren't proof. What matters is what's behind them: is the code open 
 
 ## Nav0 vs Comet Browser: Quick Comparison
 
-| Feature | Nav0 | Comet Browser |
-|---------|------|---------------|
-| **Open source** | Yes (MIT license) | No (closed source) |
-| **Telemetry** | Verifiably zero | Unverifiable (closed source) |
-| **Privacy claims** | Provable in code | Requires trust |
-| **Engine** | Chromium (via Electron) | Chromium |
-| **Ad blocker** | Built-in (EasyList, EasyPrivacy, Peter Lowe) | Unknown implementation |
-| **Published benchmarks** | Yes (48.5% less memory vs Chrome) | No public benchmarks |
-| **Community development** | Public GitHub (issues, PRs, discussions) | Closed development |
-| **License** | MIT (free to inspect, modify, redistribute) | Proprietary |
-| **Data storage** | Local SQLite + electron-store (auditable schemas) | Unknown |
-| **Business model** | None | Unknown |
-| **Feature set** | Tabs, bookmarks, history, downloads, ad blocker, reader mode, PDF viewer | Unverified specifics (closed source) |
+| Feature                   | Nav0                                                                     | Comet Browser                        |
+| ------------------------- | ------------------------------------------------------------------------ | ------------------------------------ |
+| **Open source**           | Yes (MIT license)                                                        | No (closed source)                   |
+| **Telemetry**             | Verifiably zero                                                          | Unverifiable (closed source)         |
+| **Privacy claims**        | Provable in code                                                         | Requires trust                       |
+| **Engine**                | Chromium (via Electron)                                                  | Chromium                             |
+| **Ad blocker**            | Built-in (EasyList, EasyPrivacy, Peter Lowe)                             | Unknown implementation               |
+| **Published benchmarks**  | Yes (48.5% less memory vs Chrome)                                        | No public benchmarks                 |
+| **Community development** | Public GitHub (issues, PRs, discussions)                                 | Closed development                   |
+| **License**               | MIT (free to inspect, modify, redistribute)                              | Proprietary                          |
+| **Data storage**          | Local SQLite + electron-store (auditable schemas)                        | Unknown                              |
+| **Business model**        | None                                                                     | Unknown                              |
+| **Feature set**           | Tabs, bookmarks, history, downloads, ad blocker, reader mode, PDF viewer | Unverified specifics (closed source) |
 
 ## The Open Source Question
 
@@ -127,6 +127,7 @@ Nav0's code is the proof. Comet's word is the proof. One of these is more durabl
 Both browsers avoid the bloat of mainstream alternatives. Neither includes a crypto wallet, AI assistant, news feed, or VPN upsell. In a market where browsers compete to add features, both Nav0 and Comet focus on browsing. That shared instinct is worth respecting.
 
 Nav0's feature set includes:
+
 - Tabs and tab management
 - Bookmarks
 - Browsing history
@@ -171,6 +172,7 @@ Performance claims without published benchmarks and open methodology are marketi
 Nav0 stores all user data locally using better-sqlite3 (native SQLite bindings) and electron-store for key-value settings. The database schemas are defined in the source code. You can inspect exactly what Nav0 stores, how it stores it, and where it goes. The answer to "where" is always: your device, and nowhere else.
 
 Nav0's storage model is deliberately simple:
+
 - **Bookmarks** — URL, title, timestamp, stored in SQLite
 - **History** — URL, title, visit timestamp, stored in SQLite
 - **Downloads** — file info and status, stored in SQLite
@@ -239,4 +241,4 @@ Open source is good. Zero telemetry is better. Verifiable, zero-telemetry, open-
 
 ---
 
-*Nav0 is a privacy-focused browser that collects zero data. It's open source, free, and built for people who believe their browser shouldn't spy on them. [Get started](/guide/getting-started).*
+_Nav0 is a privacy-focused browser that collects zero data. It's open source, free, and built for people who believe their browser shouldn't spy on them. [Get started](/guide/getting-started)._

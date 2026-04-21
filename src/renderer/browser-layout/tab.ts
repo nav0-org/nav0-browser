@@ -2,9 +2,11 @@ import { createIcons, icons } from 'lucide';
 import TabTemplate from './tab.html';
 import { ImageBase64Strings, InAppUrls } from '../../constants/app-constants';
 
-const EMPTY_FAVICON = 'data:image/svg+xml,' + encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><rect x="0.5" y="0.5" width="15" height="15" rx="2" fill="none" stroke="#ccc" stroke-width="1"/></svg>'
-);
+const EMPTY_FAVICON =
+  'data:image/svg+xml,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><rect x="0.5" y="0.5" width="15" height="15" rx="2" fill="none" stroke="#ccc" stroke-width="1"/></svg>'
+  );
 
 export class Tab {
   public id: string;
@@ -22,7 +24,12 @@ export class Tab {
   public isReaderModeActive = false;
   public isPinned = false;
   public sslStatus: 'secure' | 'insecure' | 'internal' = 'internal';
-  public sslDetails: { issuer: string; validFrom: string; validTo: string; subjectName: string } | null = null;
+  public sslDetails: {
+    issuer: string;
+    validFrom: string;
+    validTo: string;
+    subjectName: string;
+  } | null = null;
 
   constructor(id: string, url: string, title?: string) {
     this.id = id;
@@ -33,27 +40,27 @@ export class Tab {
   createTabElement(appWindowId: string): void {
     const tempContainer = document.createElement('div');
     tempContainer.innerHTML = TabTemplate;
-    
+
     // Get the tab element
     this.tabElement = tempContainer.firstElementChild as HTMLElement;
     this.tabElement.dataset.tabId = this.id;
-    
+
     // Set the title
     const titleSpan = this.tabElement.querySelector('#tab-title');
     if (titleSpan) {
       titleSpan.textContent = this.title || 'New Tab';
     }
     this.tabElement.title = this.title || 'New Tab';
-    
+
     // Add close button event listener
     const closeButton = this.tabElement.querySelector('#tab-close-button');
     if (closeButton) {
       closeButton.addEventListener('click', (e) => {
-        e.stopPropagation();        
+        e.stopPropagation();
         window.BrowserAPI.closeTab(appWindowId, this.id, true);
       });
     }
-    
+
     // Add click event to activate tab
     this.tabElement.addEventListener('click', () => {
       window.BrowserAPI.activateTab(appWindowId, this.id, true);
@@ -73,7 +80,7 @@ export class Tab {
     }
 
     setTimeout(() => {
-      createIcons({icons});
+      createIcons({ icons });
     }, 10);
   }
 
@@ -88,14 +95,21 @@ export class Tab {
     }
   }
 
-  handleUrlChange(url: string, isBookmark: boolean, bookmarkId: string | null, bookmarkType: 'reference' | 'queue' | null, canGoBack: boolean, canGoForward: boolean): void {
+  handleUrlChange(
+    url: string,
+    isBookmark: boolean,
+    bookmarkId: string | null,
+    bookmarkType: 'reference' | 'queue' | null,
+    canGoBack: boolean,
+    canGoForward: boolean
+  ): void {
     this.url = url;
     this.isBookmark = isBookmark;
     this.bookmarkId = bookmarkId;
     this.bookmarkType = bookmarkType;
     this.canGoBack = canGoBack;
     this.canGoForward = canGoForward;
-    if(this.url.startsWith(InAppUrls.PREFIX)) {
+    if (this.url.startsWith(InAppUrls.PREFIX)) {
       this.updateTabFavicon(ImageBase64Strings.FAVICON);
     }
   }
@@ -118,7 +132,7 @@ export class Tab {
   }
 
   updateTabFavicon(faviconUrl: string): void {
-    if(this.url.startsWith(InAppUrls.PREFIX)) {
+    if (this.url.startsWith(InAppUrls.PREFIX)) {
       this.faviconUrl = ImageBase64Strings.FAVICON;
     } else {
       this.faviconUrl = faviconUrl;
@@ -138,7 +152,7 @@ export class Tab {
   activateTab(): void {
     if (this.tabElement) {
       this.tabElement.classList.add('active');
-    } 
+    }
   }
   deactivateTab(): void {
     if (this.tabElement) {

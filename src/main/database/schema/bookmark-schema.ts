@@ -7,22 +7,22 @@ export const BookmarksSchema: TableSchema = {
       name: 'id',
       columnType: { type: 'uuid' },
       primaryKey: true,
-      notNull: true
+      notNull: true,
     },
     {
       name: 'createdDate',
       columnType: { type: 'timestamp', defaultNow: true },
-      notNull: true
+      notNull: true,
     },
     {
       name: 'url',
       columnType: { type: 'standard', sqlType: 'TEXT' },
-      notNull: true
+      notNull: true,
     },
     {
       name: 'title',
       columnType: { type: 'standard', sqlType: 'TEXT' },
-      notNull: true
+      notNull: true,
     },
     {
       name: 'faviconUrl',
@@ -33,20 +33,20 @@ export const BookmarksSchema: TableSchema = {
       name: 'type',
       columnType: { type: 'standard', sqlType: 'TEXT' },
       defaultValue: 'reference',
-    }
+    },
   ],
   indices: [
     {
       name: 'idxBookmarkUrl',
-      columns: ['url']
+      columns: ['url'],
     },
     {
       name: 'idxBookmarkCreatedDate',
-      columns: ['createdDate']
+      columns: ['createdDate'],
     },
     {
       name: 'idxBookmarkType',
-      columns: ['type']
-    }
-  ]
+      columns: ['type'],
+    },
+  ],
 };

@@ -1,5 +1,5 @@
 ---
-title: "Nav0 Ad Blocker — Built-In Ad & Tracker Blocking"
+title: 'Nav0 Ad Blocker — Built-In Ad & Tracker Blocking'
 description: "Nav0's built-in ad blocker blocks ads, trackers, and video ads at the network level with zero configuration. No extensions required. Learn how it works."
 head:
   - - meta
@@ -115,12 +115,12 @@ Nav0 injects a mock Google IMA SDK (Interactive Media Ads) early in the page lif
 
 Nav0 ships with four built-in filter lists. Each can be enabled or disabled individually in Settings.
 
-| Filter List | Purpose | Default |
-|-------------|---------|---------|
-| **EasyList** | Standard ad-blocking rules — the most widely used ad filter list | Enabled |
-| **EasyPrivacy** | Tracking protection rules — blocks analytics and tracking scripts | Enabled |
-| **Peter Lowe's Ad Server List** | Lightweight domain-level blocking — minimal overhead, broad coverage | Enabled |
-| **Fanboy's Annoyances** | Cookie consent banners, social widgets, and newsletter popups | Disabled |
+| Filter List                     | Purpose                                                              | Default  |
+| ------------------------------- | -------------------------------------------------------------------- | -------- |
+| **EasyList**                    | Standard ad-blocking rules — the most widely used ad filter list     | Enabled  |
+| **EasyPrivacy**                 | Tracking protection rules — blocks analytics and tracking scripts    | Enabled  |
+| **Peter Lowe's Ad Server List** | Lightweight domain-level blocking — minimal overhead, broad coverage | Enabled  |
+| **Fanboy's Annoyances**         | Cookie consent banners, social widgets, and newsletter popups        | Disabled |
 
 All lists are well-established, community-maintained, and open source.
 
@@ -181,4 +181,4 @@ Yes. The ad blocker is active in both normal and private browsing windows with t
 
 ---
 
-*See also: [Privacy & Tracking Protection](/guide/privacy-protection) · [Features Overview](/guide/features) · [Private Browsing](/guide/private-browsing)*
+_See also: [Privacy & Tracking Protection](/guide/privacy-protection) · [Features Overview](/guide/features) · [Private Browsing](/guide/private-browsing)_

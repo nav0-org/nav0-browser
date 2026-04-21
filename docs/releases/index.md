@@ -1,5 +1,5 @@
 ---
-title: "Release Notes — Nav0 Browser"
+title: 'Release Notes — Nav0 Browser'
 description: "Release notes and changelog for Nav0 Browser. See what's new in every release — features, fixes, and improvements."
 ---
 

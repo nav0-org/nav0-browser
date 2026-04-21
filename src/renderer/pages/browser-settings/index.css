@@ -1,4 +1,4 @@
-@import url("../../styles/global.css");
+@import url('../../styles/global.css');
 
 /* ---- Settings Layout ---- */
 .settings-layout {
@@ -68,7 +68,9 @@
   text-decoration: none;
   font-size: var(--font-sm);
   font-weight: 400;
-  transition: background-color var(--transition-fast), color var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
   border-left: 3px solid transparent;
 }
 
@@ -174,7 +176,10 @@
 .toggle-slider {
   position: absolute;
   cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: #ccc;
   transition: 0.2s;
   border-radius: 20px;
@@ -182,7 +187,7 @@
 
 .toggle-slider:before {
   position: absolute;
-  content: "";
+  content: '';
   height: 16px;
   width: 16px;
   left: 2px;
@@ -246,7 +251,7 @@
   background-color: var(--bg-color);
 }
 
-.radio-option input[type="radio"] {
+.radio-option input[type='radio'] {
   margin-top: 3px;
   flex-shrink: 0;
 }
@@ -379,7 +384,9 @@
   color: var(--text-secondary);
   display: flex;
   align-items: center;
-  transition: color var(--transition-fast), background-color var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast);
 }
 
 .list-item-btn:hover {
@@ -536,7 +543,7 @@
 }
 
 .shortcut-key-cell.recording::after {
-  content: "Press new shortcut...";
+  content: 'Press new shortcut...';
   color: var(--info-color);
   font-size: var(--font-xs);
   font-style: italic;
@@ -569,7 +576,10 @@
 /* ---- Dialog Overlay ---- */
 .dialog-overlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
@@ -614,7 +624,7 @@
   padding: 2px 0;
 }
 
-.checkbox-option input[type="checkbox"] {
+.checkbox-option input[type='checkbox'] {
   margin: 0;
 }
 
@@ -813,4 +823,3 @@
   margin-top: var(--spacing-md);
   text-align: right;
 }
-

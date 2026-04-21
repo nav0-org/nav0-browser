@@ -174,30 +174,32 @@ function bindEvents(): void {
   prevBtn.disabled = true;
   nextBtn.disabled = true;
 
-  window.BrowserAPI.onFindInPageResult((data: { activeMatchOrdinal: number; matches: number; finalUpdate: boolean }) => {
-    if (!findInput.value) {
-      matchCounter.textContent = '';
-      matchCounter.classList.remove('no-match');
-      findInput.classList.remove('no-match');
-      prevBtn.disabled = true;
-      nextBtn.disabled = true;
-      return;
-    }
+  window.BrowserAPI.onFindInPageResult(
+    (data: { activeMatchOrdinal: number; matches: number; finalUpdate: boolean }) => {
+      if (!findInput.value) {
+        matchCounter.textContent = '';
+        matchCounter.classList.remove('no-match');
+        findInput.classList.remove('no-match');
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        return;
+      }
 
-    if (data.matches === 0) {
-      matchCounter.textContent = 'No matches';
-      matchCounter.classList.add('no-match');
-      findInput.classList.add('no-match');
-      prevBtn.disabled = true;
-      nextBtn.disabled = true;
-    } else {
-      matchCounter.textContent = `${data.activeMatchOrdinal} of ${data.matches}`;
-      matchCounter.classList.remove('no-match');
-      findInput.classList.remove('no-match');
-      prevBtn.disabled = false;
-      nextBtn.disabled = false;
+      if (data.matches === 0) {
+        matchCounter.textContent = 'No matches';
+        matchCounter.classList.add('no-match');
+        findInput.classList.add('no-match');
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+      } else {
+        matchCounter.textContent = `${data.activeMatchOrdinal} of ${data.matches}`;
+        matchCounter.classList.remove('no-match');
+        findInput.classList.remove('no-match');
+        prevBtn.disabled = false;
+        nextBtn.disabled = false;
+      }
     }
-  });
+  );
 }
 
 function resetFindBar(): void {

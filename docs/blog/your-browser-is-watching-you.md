@@ -1,6 +1,6 @@
 ---
-title: "Your Browser Is Watching You: The Hidden Cost of Free Browsing"
-description: "Modern browsers collect an astonishing amount of data about you. We break down exactly what they track, why it matters, and what you can do about it."
+title: 'Your Browser Is Watching You: The Hidden Cost of Free Browsing'
+description: 'Modern browsers collect an astonishing amount of data about you. We break down exactly what they track, why it matters, and what you can do about it.'
 date: 2026-02-10
 author: Nav0 Team
 tags: [privacy, browsers, data-collection]
@@ -10,7 +10,7 @@ head:
       content: article
   - - meta
     - property: article:published_time
-      content: "2026-02-10"
+      content: '2026-02-10'
   - - meta
     - property: article:author
       content: Nav0 Team
@@ -144,7 +144,7 @@ You might think: "I have nothing to hide." But that misses the point entirely.
 
 Privacy isn't about hiding wrongdoing. It's about maintaining autonomy. When you know you're being watched, you behave differently. You self-censor. You don't research that medical symptom. You don't read that controversial article. You don't explore that unconventional idea.
 
-This is the **chilling effect**, and it's well-documented in research. A 2016 study published in the *Berkeley Technology Law Journal* found that after the Snowden revelations, Wikipedia traffic to articles about sensitive topics dropped significantly. People altered their behavior simply because they knew surveillance was possible.
+This is the **chilling effect**, and it's well-documented in research. A 2016 study published in the _Berkeley Technology Law Journal_ found that after the Snowden revelations, Wikipedia traffic to articles about sensitive topics dropped significantly. People altered their behavior simply because they knew surveillance was possible.
 
 ### Data Breaches Are Inevitable
 
@@ -230,4 +230,4 @@ The browser you choose is one of the most consequential technology decisions you
 
 ---
 
-*Nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started).*
+_Nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started)._

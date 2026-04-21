@@ -1,6 +1,6 @@
 ---
-title: "Nav0 Privacy Policy — Zero Data Collection"
-description: "Nav0 collects zero data. No telemetry, no crash reports, no browsing history sent anywhere. Learn exactly how Nav0 protects your privacy by doing nothing."
+title: 'Nav0 Privacy Policy — Zero Data Collection'
+description: 'Nav0 collects zero data. No telemetry, no crash reports, no browsing history sent anywhere. Learn exactly how Nav0 protects your privacy by doing nothing.'
 ---
 
 # Privacy
@@ -16,30 +16,35 @@ That's not a simplified summary. That's the complete policy. Nav0 does not colle
 ## What We Don't Collect
 
 ### Telemetry
+
 - No usage statistics
 - No crash reports sent to us
 - No feature usage tracking
 - No A/B testing data
 
 ### Personal Information
+
 - No names
 - No emails
 - No accounts
 - No identifiers
 
 ### Browsing Data
+
 - No URLs visited
 - No search queries
 - No browsing history
 - No bookmarks
 
 ### Device Information
+
 - No hardware specs
 - No OS details
 - No screen resolution
 - No installed software
 
 ### Network Data
+
 - No IP addresses
 - No location data
 - No connection information
@@ -54,6 +59,7 @@ Most data collection starts with "sign in." Nav0 has no accounts, so there's not
 ### No Cloud Services
 
 Your data stays on your device:
+
 - Bookmarks: local file
 - History: local database
 - Settings: local config
@@ -62,6 +68,7 @@ Your data stays on your device:
 ### No Phone Home
 
 Nav0 makes no unsolicited network requests:
+
 - No analytics pings
 - No heartbeat checks
 - No "anonymous" usage data
@@ -70,6 +77,7 @@ Nav0 makes no unsolicited network requests:
 ### Open Source
 
 Don't trust us—verify:
+
 - Full source code available
 - Build it yourself
 - Audit the network traffic
@@ -77,20 +85,21 @@ Don't trust us—verify:
 
 ## Comparison
 
-| Data Point | Other Browsers | Nav0 |
-|------------|----------------|------|
-| Browsing history | Often synced/analyzed | Local only |
-| Search queries | Logged by default | Never collected |
-| Crash data | Sent automatically | Stays local |
-| Usage patterns | Tracked for "improvement" | Not tracked |
-| Device info | Collected for "compatibility" | Not collected |
-| IP address | Logged on their servers | Never seen by us |
+| Data Point       | Other Browsers                | Nav0             |
+| ---------------- | ----------------------------- | ---------------- |
+| Browsing history | Often synced/analyzed         | Local only       |
+| Search queries   | Logged by default             | Never collected  |
+| Crash data       | Sent automatically            | Stays local      |
+| Usage patterns   | Tracked for "improvement"     | Not tracked      |
+| Device info      | Collected for "compatibility" | Not collected    |
+| IP address       | Logged on their servers       | Never seen by us |
 
 ## Third-Party Concerns
 
 ### Search Engines
 
 When you search, your query goes to your chosen search engine. We recommend privacy-respecting options:
+
 - DuckDuckGo
 - Startpage
 - Brave Search
@@ -100,6 +109,7 @@ Nav0 doesn't see or log what you search.
 ### Websites You Visit
 
 Websites you visit can still:
+
 - Set cookies (manageable in settings)
 - Run JavaScript (controllable per-site)
 - Track you through their own means
@@ -109,6 +119,7 @@ Nav0 provides tools to limit this, but we can't control what websites do.
 ### Extensions
 
 Nav0 supports extensions. Third-party extensions may have their own privacy policies. We recommend:
+
 - Reviewing extension permissions
 - Using open-source extensions
 - Limiting installed extensions
@@ -132,6 +143,7 @@ Same answer. We physically cannot comply with data requests because we don't col
 ### No Privacy Policy Changes
 
 We can't change our privacy policy to start collecting data without:
+
 1. Changing the source code (visible to all)
 2. Releasing a new version (you control updates)
 3. Facing community backlash (we're open source)

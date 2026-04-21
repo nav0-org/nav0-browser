@@ -46,7 +46,7 @@ function updateStrip(data: PermissionPromptData): void {
 
   // Permission label (combine all requested permissions)
   if (labelEl) {
-    const labels = data.permissions.map(p => p.label);
+    const labels = data.permissions.map((p) => p.label);
     labelEl.textContent = labels.join(', ');
   }
 
@@ -108,10 +108,16 @@ export function initPermissionPrompt(): void {
   stripContainer = document.getElementById('permission-strip') as HTMLElement;
 
   // Button handlers
-  document.getElementById('perm-allow-once')?.addEventListener('click', () => respond('allow_once'));
-  document.getElementById('perm-always-allow')?.addEventListener('click', () => respond('always_allow'));
+  document
+    .getElementById('perm-allow-once')
+    ?.addEventListener('click', () => respond('allow_once'));
+  document
+    .getElementById('perm-always-allow')
+    ?.addEventListener('click', () => respond('always_allow'));
   document.getElementById('perm-deny-once')?.addEventListener('click', () => respond('deny_once'));
-  document.getElementById('perm-always-deny')?.addEventListener('click', () => respond('always_deny'));
+  document
+    .getElementById('perm-always-deny')
+    ?.addEventListener('click', () => respond('always_deny'));
 
   // Escape = deny once (when strip visible)
   document.addEventListener('keydown', (e: KeyboardEvent) => {

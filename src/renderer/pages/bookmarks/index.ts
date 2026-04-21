@@ -87,7 +87,7 @@ function escapeHtml(str: string): string {
 const PAGE_SIZE = 50;
 let activeTab: 'queue' | 'reference' = 'queue';
 let currentSearchTerm = '';
-let selectedCategories: Set<string> = new Set();
+const selectedCategories: Set<string> = new Set();
 let availableCategories: string[] = [];
 let currentOffset = 0;
 let isLoading = false;
@@ -152,10 +152,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function updateCounts(): Promise<void> {
   const queueItems = await window.BrowserAPI.fetchBookmarksWithStats(
-    window.BrowserAPI.appWindowId, 'queue', currentSearchTerm, 10000, 0
+    window.BrowserAPI.appWindowId,
+    'queue',
+    currentSearchTerm,
+    10000,
+    0
   );
   const refItems = await window.BrowserAPI.fetchBookmarksWithStats(
-    window.BrowserAPI.appWindowId, 'reference', currentSearchTerm, 10000, 0
+    window.BrowserAPI.appWindowId,
+    'reference',
+    currentSearchTerm,
+    10000,
+    0
   );
   queueCountEl.textContent = String(queueItems.length);
   referenceCountEl.textContent = String(refItems.length);
@@ -205,14 +213,18 @@ async function loadBookmarks(): Promise<void> {
   isLoading = true;
 
   const items: BookmarkWithStats[] = await window.BrowserAPI.fetchBookmarksWithStats(
-    window.BrowserAPI.appWindowId, activeTab, currentSearchTerm, PAGE_SIZE, currentOffset
+    window.BrowserAPI.appWindowId,
+    activeTab,
+    currentSearchTerm,
+    PAGE_SIZE,
+    currentOffset
   );
 
   if (items.length < PAGE_SIZE) hasMore = false;
 
   let filtered = items;
   if (selectedCategories.size > 0) {
-    filtered = items.filter(b => selectedCategories.has(getCategoryForUrl(b.url)));
+    filtered = items.filter((b) => selectedCategories.has(getCategoryForUrl(b.url)));
   }
 
   allLoadedItems = allLoadedItems.concat(filtered);
@@ -299,9 +311,10 @@ function renderBookmarkItems(items: BookmarkWithStats[]): void {
     badgesHtml += `<span class="badge badge-category" style="background: ${catColor}18; color: ${catColor}">${category}</span>`;
 
     // Visit count (reference only)
-    const visitsHtml = item.type === 'reference'
-      ? `<span class="bookmark-visits" style="color: ${heatColor(item.visits)}">${item.visits} visits</span>`
-      : '';
+    const visitsHtml =
+      item.type === 'reference'
+        ? `<span class="bookmark-visits" style="color: ${heatColor(item.visits)}">${item.visits} visits</span>`
+        : '';
 
     // Move tooltip
     const moveTitle = item.type === 'queue' ? 'Move to Reference' : 'Move to Queue';
@@ -340,7 +353,7 @@ function renderBookmarkItems(items: BookmarkWithStats[]): void {
       const newType = item.type === 'queue' ? 'reference' : 'queue';
       await window.BrowserAPI.updateBookmarkType(window.BrowserAPI.appWindowId, item.id, newType);
       row.remove();
-      allLoadedItems = allLoadedItems.filter(b => b.id !== item.id);
+      allLoadedItems = allLoadedItems.filter((b) => b.id !== item.id);
       updateVisibility();
       updateCounts();
     });
@@ -350,7 +363,7 @@ function renderBookmarkItems(items: BookmarkWithStats[]): void {
       e.stopPropagation();
       await window.BrowserAPI.removeBookmark(window.BrowserAPI.appWindowId, item.id);
       row.remove();
-      allLoadedItems = allLoadedItems.filter(b => b.id !== item.id);
+      allLoadedItems = allLoadedItems.filter((b) => b.id !== item.id);
       updateVisibility();
       updateCounts();
     });
@@ -369,9 +382,13 @@ async function showStaleReview(): Promise<void> {
   staleReviewList.innerHTML = '';
 
   const refItems: BookmarkWithStats[] = await window.BrowserAPI.fetchBookmarksWithStats(
-    window.BrowserAPI.appWindowId, 'reference', '', 10000, 0
+    window.BrowserAPI.appWindowId,
+    'reference',
+    '',
+    10000,
+    0
   );
-  const staleItems = refItems.filter(b => daysSince(b.lastVisited) > 180);
+  const staleItems = refItems.filter((b) => daysSince(b.lastVisited) > 180);
 
   for (const item of staleItems) {
     const domain = getDomain(item.url);
@@ -380,9 +397,11 @@ async function showStaleReview(): Promise<void> {
     el.className = 'stale-review-item';
     el.innerHTML = `
       <div class="bk-favicon">
-        ${item.faviconUrl
-          ? `<img src="${item.faviconUrl}" alt="" style="width:16px;height:16px" onerror="this.parentElement.textContent='🌐'">`
-          : '<i data-lucide="globe" width="16" height="16"></i>'}
+        ${
+          item.faviconUrl
+            ? `<img src="${item.faviconUrl}" alt="" style="width:16px;height:16px" onerror="this.parentElement.textContent='🌐'">`
+            : '<i data-lucide="globe" width="16" height="16"></i>'
+        }
       </div>
       <div class="stale-review-content">
         <div class="stale-review-title">${escapeHtml(item.title)}</div>
@@ -406,7 +425,7 @@ async function showStaleReview(): Promise<void> {
     el.querySelector('[data-action="remove"]')?.addEventListener('click', async () => {
       await window.BrowserAPI.removeBookmark(window.BrowserAPI.appWindowId, item.id);
       el.remove();
-      allLoadedItems = allLoadedItems.filter(b => b.id !== item.id);
+      allLoadedItems = allLoadedItems.filter((b) => b.id !== item.id);
       updateVisibility();
       updateCounts();
       if (staleReviewList.children.length === 0) hideStaleReview();

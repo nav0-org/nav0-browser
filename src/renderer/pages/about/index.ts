@@ -4,16 +4,16 @@ import { createIcons, icons } from 'lucide';
 createIcons({ icons });
 
 const PLATFORM_NAMES: Record<string, string> = {
-  'darwin': 'macOS',
-  'win32': 'Windows',
-  'linux': 'Linux',
-  'freebsd': 'FreeBSD',
+  darwin: 'macOS',
+  win32: 'Windows',
+  linux: 'Linux',
+  freebsd: 'FreeBSD',
 };
 
 const ARCH_NAMES: Record<string, string> = {
-  'x64': 'x86_64',
-  'arm64': 'ARM64',
-  'ia32': 'x86 (32-bit)',
+  x64: 'x86_64',
+  arm64: 'ARM64',
+  ia32: 'x86 (32-bit)',
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -25,7 +25,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('chromium-version').textContent = info.chromiumVersion;
     document.getElementById('node-version').textContent = info.nodeVersion;
     document.getElementById('v8-version').textContent = info.v8Version;
-    document.getElementById('platform').textContent = PLATFORM_NAMES[info.platform] || info.platform;
+    document.getElementById('platform').textContent =
+      PLATFORM_NAMES[info.platform] || info.platform;
     document.getElementById('arch').textContent = ARCH_NAMES[info.arch] || info.arch;
     document.getElementById('os-version').textContent = info.osVersion || '--';
     document.getElementById('app-path').textContent = info.appPath;
@@ -51,6 +52,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   document.getElementById('link-license')?.addEventListener('click', () => {
-    window.BrowserAPI.createTab(appWindowId, 'https://github.com/nav0-org/nav0-browser/blob/main/LICENSE.md', true);
+    window.BrowserAPI.createTab(
+      appWindowId,
+      'https://github.com/nav0-org/nav0-browser/blob/main/LICENSE.md',
+      true
+    );
   });
 });
