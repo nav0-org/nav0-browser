@@ -76,6 +76,15 @@ app.on('login', (event, webContents, request, authInfo, callback) => {
   const window = AppWindowManager.findWindowByWebContentsId(webContents.id);
   if (!window) return;
   event.preventDefault();
+
+  // Activate the triggering tab so the credentials dialog appears in context
+  // rather than over an unrelated tab.
+  const tab = window.findTabByWebContentsId(webContents.id);
+  if (tab && window.getActiveTabId() !== tab.id) {
+    window.activateTab(tab.id, false);
+  }
+  window.getBrowserWindowInstance()?.focus();
+
   window.showBasicAuthOverlay(
     {
       host: authInfo.host,

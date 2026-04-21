@@ -655,6 +655,15 @@ export abstract class AppWindowManager {
         const url = event.sender.getURL();
         origin = url ? new URL(url).origin : origin;
       } catch { /* keep default */ }
+
+      // Surface the triggering tab before showing the overlay so the dialog
+      // isn't rendered over an unrelated tab's content.
+      const tab = window.findTabByWebContentsId(event.sender.id);
+      if (tab && window.getActiveTabId() !== tab.id) {
+        window.activateTab(tab.id, false);
+      }
+      window.getBrowserWindowInstance()?.focus();
+
       const response = await window.showAlertOverlay({
         kind: payload.kind,
         message: typeof payload.message === 'string' ? payload.message : '',
