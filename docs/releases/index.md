@@ -10,10 +10,18 @@ What's new in every release of Nav0 Browser.
 ---
 
 <div class="release-list-item">
+  <a href="/releases/v0.2.3">
+    <h2>v0.2.3</h2>
+  </a>
+  <div class="release-meta">April 21, 2026 <span class="release-badge latest">Latest</span></div>
+  <p class="release-excerpt">Blocking alert/confirm/prompt and basic-auth overlays, getDisplayMedia screen sharing with a dedicated picker, localhost and .local-style URL handling, main-process crash hardening, and a graceful installer prompt when Nav0 is already running.</p>
+</div>
+
+<div class="release-list-item">
   <a href="/releases/v0.2.2">
     <h2>v0.2.2</h2>
   </a>
-  <div class="release-meta">April 17, 2026 <span class="release-badge latest">Latest</span></div>
+  <div class="release-meta">April 17, 2026</div>
   <p class="release-excerpt">Cloudflare Turnstile compatibility, Chrome version pinning to Electron's real Chromium, and Google sign-in and Gmail fixes via Firefox UA swap and a minimal window.chrome.runtime stub.</p>
 </div>
 
