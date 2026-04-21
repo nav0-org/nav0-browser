@@ -141,6 +141,14 @@ const config: ForgeConfig = {
               js: './src/preload/internals-api.ts',
             },
           },
+          {
+            html: './src/renderer/pages/display-capture-picker/index.html',
+            js: './src/renderer/pages/display-capture-picker/index.ts',
+            name: 'display_capture_picker',
+            preload: {
+              js: './src/preload/display-capture-picker-preload.ts',
+            },
+          },
         ],
       },
     }),

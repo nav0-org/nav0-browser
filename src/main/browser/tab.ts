@@ -121,6 +121,13 @@ export class Tab {
     } else if (this.url.startsWith('http://') || this.url.startsWith('https://')) {
       urlToLoad = this.url;
       preloadScriptToLoad = WEB_CONTENT_PRELOAD_WEBPACK_ENTRY;
+    } else if (Tab.looksLikeLocalhostInput(this.url)) {
+      // Bare localhost-style inputs (localhost:3000, 127.0.0.1, myapp.local,
+      // foo.test) should load directly over HTTP — they rarely have valid
+      // TLS certs, and forcing HTTPS breaks reverse-proxy and dev-server flows.
+      this.url = 'http://' + this.url;
+      urlToLoad = this.url;
+      preloadScriptToLoad = WEB_CONTENT_PRELOAD_WEBPACK_ENTRY;
     } else if (domainPattern.test(this.url)) {
       this.url = 'https://' + this.url;
       urlToLoad = this.url;
@@ -1112,6 +1119,33 @@ export class Tab {
     } catch {
       return false;
     }
+  }
+
+  /**
+   * Detects address-bar input that should be treated as a local URL even
+   * without an http:// scheme — e.g. `localhost:3000`, `127.0.0.1/foo`,
+   * `myapp.local`, `backend.test`. Returning true routes the input to a
+   * direct HTTP navigation instead of a search fallback + https upgrade.
+   */
+  private static looksLikeLocalhostInput(input: string): boolean {
+    if (!input) return false;
+    const raw = input.trim();
+    if (!raw || /\s/.test(raw)) return false;
+    // Split off path/query to isolate the authority portion
+    const authority = raw.split(/[/?#]/, 1)[0];
+    if (!authority) return false;
+    // Strip port
+    let host = authority;
+    const portIdx = host.lastIndexOf(':');
+    if (portIdx > -1 && /^\d+$/.test(host.slice(portIdx + 1))) {
+      host = host.slice(0, portIdx);
+    }
+    host = host.toLowerCase();
+    if (host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0' || host === '[::1]' || host === '::1') return true;
+    // Loopback / link-local TLDs commonly used for local dev and intranet
+    if (host.endsWith('.localhost') || host.endsWith('.local') || host.endsWith('.test')
+        || host.endsWith('.lan') || host.endsWith('.internal') || host.endsWith('.home.arpa')) return true;
+    return false;
   }
 
   //for handling right clicks

@@ -1,4 +1,4 @@
-import { session, WebContents, ipcMain, net, clipboard } from 'electron';
+import { session, WebContents, ipcMain, net, clipboard, desktopCapturer, BrowserWindow } from 'electron';
 import { v4 as uuid } from 'uuid';
 import { RendererToMainEventsForBrowserIPC } from '../../constants/app-constants';
 import type { Database as DatabaseType } from 'better-sqlite3';
@@ -106,7 +106,24 @@ export class PermissionManager {
         return;
       }
 
-      const origin = PermissionManager.extractOrigin(details.requestingUrl);
+      const iframeOrigin = PermissionManager.extractOrigin(details.requestingUrl);
+      // Iframe delegation: when the request originates from a sub-frame, key
+      // the prompt + persistent decision against the top-frame origin the user
+      // recognises. Still require the iframe itself to be on a secure origin
+      // so we don't let a mixed-content embed inherit a stored grant.
+      const detailsAny = details as unknown as { isMainFrame?: boolean };
+      const isSubFrame = detailsAny.isMainFrame === false;
+      let topOrigin = iframeOrigin;
+      if (isSubFrame) {
+        try {
+          const topUrl = webContents.getURL();
+          if (topUrl) topOrigin = PermissionManager.extractOrigin(topUrl);
+        } catch { /* fall through to iframe origin */ }
+      }
+      const origin = topOrigin;
+      const iframeIsSecure = PermissionManager.isSecureOrigin(iframeOrigin);
+      const topIsSecure = PermissionManager.isSecureOrigin(topOrigin);
+
       const tabInfo = PermissionManager.findTabCallback?.(webContents.id);
 
       if (!tabInfo) {
@@ -115,10 +132,12 @@ export class PermissionManager {
       }
 
       const { appWindowId, tabId } = tabInfo;
-      const isSecure = PermissionManager.isSecureOrigin(origin);
+      const isSecure = topIsSecure;
 
-      // Check for insecure origin blocking
-      const isInsecureBlocked = !isSecure && PermissionManager.SENSITIVE_PERMISSIONS.has(permission);
+      // Block sensitive permissions unless BOTH the top frame and the
+      // requesting sub-frame are on secure origins.
+      const isInsecureBlocked = PermissionManager.SENSITIVE_PERMISSIONS.has(permission)
+        && (!topIsSecure || !iframeIsSecure);
 
       // Check stored persistent decisions (not in private mode)
       if (!isPrivate && !isInsecureBlocked) {
@@ -182,6 +201,109 @@ export class PermissionManager {
     // from being called for some permissions (notably geolocation). Without a check
     // handler, Electron defaults all permissions to "ask", ensuring every request
     // flows through our prompt UI above.
+
+    // getDisplayMedia() — Chromium delegates screen/window selection to the host
+    // app. Without this handler screen sharing silently fails in Meet/Zoom/Teams.
+    ses.setDisplayMediaRequestHandler(async (_request, callback) => {
+      try {
+        const source = await PermissionManager.showDisplayMediaPicker();
+        if (source) {
+          callback({ video: source });
+        } else {
+          // Deny: pass undefined so the renderer promise rejects with NotAllowedError
+          (callback as (s?: Electron.Streams) => void)(undefined);
+        }
+      } catch (err) {
+        console.error('display-media picker failed:', err);
+        (callback as (s?: Electron.Streams) => void)(undefined);
+      }
+    });
+  }
+
+  // ─── Display-Media Source Picker ─────────────────────────────────
+  //
+  // Each getDisplayMedia() request opens a dedicated BrowserWindow rendering
+  // the display-capture-picker webpack entry. The renderer fetches the source
+  // list via IPC (DISPLAY_CAPTURE_PICKER_GET_SOURCES) and returns the chosen
+  // index via DISPLAY_CAPTURE_PICKER_SELECT. Per-request state is held in a
+  // Map keyed by the picker window's webContents id so concurrent requests
+  // (one per session) don't interfere.
+
+  private static pendingPickers: Map<number, {
+    sources: Electron.DesktopCapturerSource[];
+    resolve: (source: Electron.DesktopCapturerSource | null) => void;
+  }> = new Map();
+
+  private static async showDisplayMediaPicker(): Promise<Electron.DesktopCapturerSource | null> {
+    const sources = await desktopCapturer.getSources({
+      types: ['screen', 'window'],
+      thumbnailSize: { width: 320, height: 200 },
+      fetchWindowIcons: false,
+    });
+    if (sources.length === 0) return null;
+
+    return new Promise<Electron.DesktopCapturerSource | null>((resolve) => {
+      const parent = BrowserWindow.getFocusedWindow() ?? undefined;
+      const pickerWin = new BrowserWindow({
+        width: 720,
+        height: 540,
+        title: 'Share your screen',
+        parent,
+        modal: !!parent,
+        resizable: false,
+        minimizable: false,
+        maximizable: false,
+        fullscreenable: false,
+        useContentSize: true,
+        show: false,
+        webPreferences: {
+          preload: DISPLAY_CAPTURE_PICKER_PRELOAD_WEBPACK_ENTRY,
+          nodeIntegration: false,
+          contextIsolation: true,
+          sandbox: true,
+          webSecurity: true,
+        },
+      });
+
+      const wcId = pickerWin.webContents.id;
+      let resolved = false;
+      const done = (idx: number | null) => {
+        if (resolved) return;
+        resolved = true;
+        PermissionManager.pendingPickers.delete(wcId);
+        if (!pickerWin.isDestroyed()) pickerWin.destroy();
+        resolve(idx !== null && idx >= 0 && idx < sources.length ? sources[idx] : null);
+      };
+
+      PermissionManager.pendingPickers.set(wcId, {
+        sources,
+        resolve: (source) => done(source ? sources.indexOf(source) : null),
+      });
+
+      pickerWin.on('closed', () => done(null));
+
+      pickerWin.loadURL(DISPLAY_CAPTURE_PICKER_WEBPACK_ENTRY)
+        .then(() => { if (!pickerWin.isDestroyed()) pickerWin.show(); })
+        .catch(() => done(null));
+    });
+  }
+
+  private static getSourcesForPicker(webContentsId: number): Array<{ idx: number; name: string; type: 'Screen' | 'Window'; thumbnail: string }> {
+    const pending = PermissionManager.pendingPickers.get(webContentsId);
+    if (!pending) return [];
+    return pending.sources.map((s, i) => ({
+      idx: i,
+      name: s.name,
+      type: s.id.startsWith('screen:') ? 'Screen' : 'Window',
+      thumbnail: s.thumbnail.toDataURL(),
+    }));
+  }
+
+  private static resolvePicker(webContentsId: number, idx: number | null): void {
+    const pending = PermissionManager.pendingPickers.get(webContentsId);
+    if (!pending) return;
+    const source = idx !== null && idx >= 0 && idx < pending.sources.length ? pending.sources[idx] : null;
+    pending.resolve(source);
   }
 
   // ─── Request Queue ───────────────────────────────────────────────
@@ -662,6 +784,19 @@ export class PermissionManager {
       decision: string
     ) => {
       return PermissionManager.updatePersistentPermissionDecision(permissionId, decision as PersistentDecision);
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.DISPLAY_CAPTURE_PICKER_GET_SOURCES, (
+      event: Electron.IpcMainInvokeEvent
+    ) => {
+      return PermissionManager.getSourcesForPicker(event.sender.id);
+    });
+
+    ipcMain.on(RendererToMainEventsForBrowserIPC.DISPLAY_CAPTURE_PICKER_SELECT, (
+      event: Electron.IpcMainEvent,
+      idx: number | null
+    ) => {
+      PermissionManager.resolvePicker(event.sender.id, idx);
     });
 
     ipcMain.handle('get-ip-geolocation', async () => {

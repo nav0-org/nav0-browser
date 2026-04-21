@@ -176,6 +176,9 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly UPDATE_PERMISSION_DECISION = "browser:update-permission-decision";
   public static readonly PERMISSION_PROMPT_READY = "browser:permission-prompt-ready";
   public static readonly OVERLAY_RENDERER_READY = "overlay:renderer-ready";
+  // Display-capture source picker
+  public static readonly DISPLAY_CAPTURE_PICKER_GET_SOURCES = "browser:display-capture-picker-get-sources";
+  public static readonly DISPLAY_CAPTURE_PICKER_SELECT = "browser:display-capture-picker-select";
   public static readonly SHOW_TAB_CONTEXT_MENU = "browser:show-tab-context-menu";
   public static readonly PRINT_PAGE = "browser:print-page";
   public static readonly PIN_TAB = "browser:pin-tab";
