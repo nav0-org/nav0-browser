@@ -13,6 +13,7 @@
  */
 
 import { contextBridge, ipcRenderer, webFrame } from 'electron';
+import { RendererToMainEventsForBrowserIPC } from '../constants/app-constants';
 
 // Expose a function the main-world polyfill can call to get IP geolocation
 // from the main process (uses Electron net.fetch, immune to page CSP).
@@ -57,6 +58,21 @@ contextBridge.exposeInMainWorld('__Nav0Notify', {
 
 ipcRenderer.on('notification:event', (_event, data: { id: string; type: string }) => {
   if (notifEventCallback) notifEventCallback(data);
+});
+
+// ─── window.alert / confirm / prompt bridge ─────────────────────────
+// Native JS dialogs are spec'd as synchronous. We forward them to the main
+// process via sendSync, which blocks the renderer until the in-app overlay
+// returns a response — preserving site semantics (e.g. scripts that test
+// confirm()'s return value before continuing).
+contextBridge.exposeInMainWorld('__Nav0Dialog', {
+  requestSync: (payload: { kind: 'alert' | 'confirm' | 'prompt'; message: string; defaultValue?: string }): { confirmed: boolean; value?: string } => {
+    try {
+      return ipcRenderer.sendSync(RendererToMainEventsForBrowserIPC.WEB_CONTENT_DIALOG_REQUEST, payload);
+    } catch {
+      return { confirmed: false };
+    }
+  },
 });
 
 const POLYFILL_CODE = `
@@ -251,6 +267,38 @@ const NOTIFICATION_POLYFILL_CODE = `
 })();
 `;
 
+const DIALOG_POLYFILL_CODE = `
+(function() {
+  if (window.__Nav0DialogPatched) return;
+  window.__Nav0DialogPatched = true;
+  if (!window.__Nav0Dialog || typeof window.__Nav0Dialog.requestSync !== 'function') return;
+
+  function toMessage(v) {
+    if (v === undefined) return '';
+    try { return String(v); } catch (_) { return ''; }
+  }
+
+  window.alert = function(message) {
+    window.__Nav0Dialog.requestSync({ kind: 'alert', message: toMessage(message) });
+  };
+
+  window.confirm = function(message) {
+    var res = window.__Nav0Dialog.requestSync({ kind: 'confirm', message: toMessage(message) });
+    return !!(res && res.confirmed);
+  };
+
+  window.prompt = function(message, defaultValue) {
+    var res = window.__Nav0Dialog.requestSync({
+      kind: 'prompt',
+      message: toMessage(message),
+      defaultValue: defaultValue === undefined || defaultValue === null ? '' : toMessage(defaultValue),
+    });
+    if (!res || !res.confirmed) return null;
+    return res.value == null ? '' : res.value;
+  };
+})();
+`;
+
 const SHARE_POLYFILL_CODE = `
 (function() {
   if (window.__Nav0SharePatched) return;
@@ -327,7 +375,7 @@ function injectPolyfill(): void {
       }
     }
 
-    const code = POLYFILL_CODE + SHARE_POLYFILL_CODE + NOTIFICATION_POLYFILL_CODE;
+    const code = POLYFILL_CODE + SHARE_POLYFILL_CODE + NOTIFICATION_POLYFILL_CODE + DIALOG_POLYFILL_CODE;
 
     // Use a blob URL instead of inline script to avoid CSP violations.
     // Blob URLs are allowed by most CSPs that include 'blob:' in script-src.
