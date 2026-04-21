@@ -12,11 +12,34 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "eslint --ext .ts,.tsx .",
+    "lint": "npm run lint:ts && npm run lint:css && npm run lint:html",
+    "lint:ts": "eslint --ext .ts,.tsx .",
+    "lint:css": "stylelint \"**/*.css\"",
+    "lint:html": "htmlhint \"src/**/*.html\"",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test:perf": "node tests/performance/browser-perf-test.js",
     "test:data": "node tests/performance/data-consumption-test.js",
     "postinstall": "electron-rebuild -f -w better-sqlite3",
-    "rebuild": "electron-rebuild -f -w better-sqlite3"
+    "rebuild": "electron-rebuild -f -w better-sqlite3",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.css": [
+      "stylelint --fix",
+      "prettier --write"
+    ],
+    "*.html": [
+      "htmlhint",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   },
   "keywords": [
     "browser",
@@ -56,13 +79,20 @@
     "css-loader": "^6.11.0",
     "electron": "35.2.1",
     "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.31.0",
     "fork-ts-checker-webpack-plugin": "^7.3.0",
     "html-loader": "^5.1.0",
+    "htmlhint": "^1.9.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "mini-css-extract-plugin": "^2.10.0",
     "node-loader": "^2.1.0",
+    "prettier": "^3.8.3",
     "puppeteer-core": "^24.37.5",
     "style-loader": "^3.3.4",
+    "stylelint": "^17.8.0",
+    "stylelint-config-standard": "^40.0.0",
     "ts-loader": "^9.5.2",
     "ts-node": "10.9.2",
     "typescript": "5.8.3",
