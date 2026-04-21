@@ -1023,63 +1023,6 @@ export const AD_BLOCK_EARLY_SCRIPT = `
 `;
 
 /**
- * YouTube-specific anti-adblock mitigations.
- *
- * Context: YouTube detects ad blocking by probing whether requests to
- * googlesyndication.com / doubleclick.net / pagead2 succeed. Those domains
- * are (correctly) in AD_BLOCK_DOMAINS — removing them to silence the nag
- * would disable ad blocking site-wide, which is not an acceptable trade-off.
- *
- * Instead we scope a targeted fix to YouTube: hide the "Ad blockers violate
- * YouTube's Terms of Service" modal and unpause the video if anti-adblock
- * code paused it. This is the same pattern uBlock Origin uses. These hooks
- * are NOT installed anywhere else — the rest of the streaming-site carve-out
- * still skips cosmetic + JS ad blocking on youtube.com so playback works.
- */
-export const YOUTUBE_ANTI_ADBLOCK_CSS = `
-ytd-enforcement-message-view-model,
-ytd-popup-container ytd-enforcement-message-view-model,
-tp-yt-paper-dialog:has(ytd-enforcement-message-view-model),
-tp-yt-paper-dialog[aria-labelledby*="Ad blockers"],
-ytmusic-you-there-renderer,
-.ytmusic-you-there-renderer {
-  display: none !important;
-}
-`;
-
-export const YOUTUBE_ANTI_ADBLOCK_SCRIPT = `
-(function() {
-  'use strict';
-  if (window.__Nav0YtAntiAdblock) return;
-  window.__Nav0YtAntiAdblock = true;
-
-  function dismissAntiAdblockModal() {
-    try {
-      var nags = document.querySelectorAll('ytd-enforcement-message-view-model, tp-yt-paper-dialog[aria-labelledby*="Ad blockers"]');
-      for (var i = 0; i < nags.length; i++) {
-        var n = nags[i];
-        n.style.setProperty('display', 'none', 'important');
-        if (n.parentElement) n.parentElement.removeChild(n);
-      }
-      // Re-enable the player if anti-adblock paused it
-      var video = document.querySelector('video.html5-main-video');
-      if (video && video.paused && video.currentTime > 0 && !video.ended) {
-        video.play().catch(function() {});
-      }
-    } catch (e) {}
-  }
-
-  // Run on first load + every time YT inserts new nodes (SPA navigations)
-  dismissAntiAdblockModal();
-  var mo = new MutationObserver(dismissAntiAdblockModal);
-  mo.observe(document.documentElement, { childList: true, subtree: true });
-
-  // Stop observing after 2 min of page life to avoid runaway cost
-  setTimeout(function() { try { mo.disconnect(); } catch (e) {} }, 2 * 60 * 1000);
-})();
-`;
-
-/**
  * DOM-ready script for cosmetic ad removal, MutationObserver, and cleanup.
  * Runs after the DOM is ready to actively remove ad elements.
  */

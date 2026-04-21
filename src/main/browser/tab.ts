@@ -14,7 +14,7 @@ import { PermissionManager } from "./permission-manager";
 import { ReaderModeManager, ReaderModeState } from "./reader-mode-manager";
 import { DataStoreManager } from "../database/data-store-manager";
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "../../types/settings-types";
-import { COSMETIC_FILTER_CSS, AD_BLOCK_EARLY_SCRIPT, AD_BLOCK_SCRIPT, YOUTUBE_ANTI_ADBLOCK_CSS, YOUTUBE_ANTI_ADBLOCK_SCRIPT } from "../ad-blocker/ad-block-lists";
+import { COSMETIC_FILTER_CSS, AD_BLOCK_EARLY_SCRIPT, AD_BLOCK_SCRIPT } from "../ad-blocker/ad-block-lists";
 import { SSLManager } from "./ssl-manager";
 import { buildErrorPageScript, NavigationError } from "./error-page/error-page";
 const domainPattern = /^[^\s]+\.[^\s]+$/;
@@ -675,27 +675,10 @@ export class Tab {
    */
   private injectAdBlockDOMScript(): void {
     if (!this.isAdBlockAllowed()) return;
-    const wc = this.webContentsViewInstance.webContents;
-    if (Tab.isYouTube(this.url)) {
-      // Narrow YouTube carve-out: hide the anti-adblock modal and unpause the
-      // player. Generic ad blocking still skipped (YT is in STREAMING_SITES).
-      wc.insertCSS(YOUTUBE_ANTI_ADBLOCK_CSS).catch(() => { /* swallow */ });
-      wc.executeJavaScript(YOUTUBE_ANTI_ADBLOCK_SCRIPT).catch(() => { /* swallow */ });
-      return;
-    }
     if (Tab.isStreamingSite(this.url)) return;
+    const wc = this.webContentsViewInstance.webContents;
     wc.insertCSS(COSMETIC_FILTER_CSS).catch(() => {});
     wc.executeJavaScript(AD_BLOCK_SCRIPT).catch(() => {});
-  }
-
-  private static isYouTube(url: string): boolean {
-    try {
-      const hostname = new URL(url).hostname.toLowerCase();
-      return hostname === 'youtube.com' || hostname.endsWith('.youtube.com')
-        || hostname === 'youtube-nocookie.com' || hostname.endsWith('.youtube-nocookie.com');
-    } catch {
-      return false;
-    }
   }
 
   private static isStreamingSite(url: string): boolean {
