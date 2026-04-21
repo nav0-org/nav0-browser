@@ -24,3 +24,6 @@ declare const WEB_CONTENT_PRELOAD_WEBPACK_ENTRY: string;
 
 declare const OVERLAY_WEBPACK_ENTRY: string;
 declare const OVERLAY_PRELOAD_WEBPACK_ENTRY: string;
+
+declare const DISPLAY_CAPTURE_PICKER_WEBPACK_ENTRY: string;
+declare const DISPLAY_CAPTURE_PICKER_PRELOAD_WEBPACK_ENTRY: string;

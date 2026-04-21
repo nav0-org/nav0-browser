@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+  <title>Share your screen</title>
+</head>
+<body>
+  <header class="picker-header">
+    <h1>Choose what to share</h1>
+  </header>
+
+  <main class="picker-grid-wrap">
+    <div class="picker-grid" id="picker-grid" role="listbox" aria-label="Available screens and windows"></div>
+    <p class="picker-empty" id="picker-empty" hidden>No screens or windows available.</p>
+  </main>
+
+  <footer class="picker-actions">
+    <button type="button" id="picker-cancel" class="picker-btn">Cancel</button>
+    <button type="button" id="picker-share" class="picker-btn picker-btn-primary" disabled>Share</button>
+  </footer>
+</body>
+</html>

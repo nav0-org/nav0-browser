@@ -221,6 +221,18 @@ export class PermissionManager {
   }
 
   // ─── Display-Media Source Picker ─────────────────────────────────
+  //
+  // Each getDisplayMedia() request opens a dedicated BrowserWindow rendering
+  // the display-capture-picker webpack entry. The renderer fetches the source
+  // list via IPC (DISPLAY_CAPTURE_PICKER_GET_SOURCES) and returns the chosen
+  // index via DISPLAY_CAPTURE_PICKER_SELECT. Per-request state is held in a
+  // Map keyed by the picker window's webContents id so concurrent requests
+  // (one per session) don't interfere.
+
+  private static pendingPickers: Map<number, {
+    sources: Electron.DesktopCapturerSource[];
+    resolve: (source: Electron.DesktopCapturerSource | null) => void;
+  }> = new Map();
 
   private static async showDisplayMediaPicker(): Promise<Electron.DesktopCapturerSource | null> {
     const sources = await desktopCapturer.getSources({
@@ -229,79 +241,6 @@ export class PermissionManager {
       fetchWindowIcons: false,
     });
     if (sources.length === 0) return null;
-
-    const thumbs = sources.map((s, i) => ({
-      idx: i,
-      name: s.name,
-      type: s.id.startsWith('screen:') ? 'Screen' : 'Window',
-      thumbnail: s.thumbnail.toDataURL(),
-    }));
-
-    const html = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>Share your screen</title>
-<style>
-html,body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f5f5;color:#222;height:100%;}
-body{padding:16px;box-sizing:border-box;display:flex;flex-direction:column;}
-h1{font-size:15px;margin:0 0 12px;font-weight:600;}
-.grid{flex:1;display:grid;grid-template-columns:repeat(2,1fr);gap:12px;overflow-y:auto;align-content:start;}
-.src{background:#fff;border:2px solid transparent;border-radius:8px;padding:8px;cursor:pointer;text-align:center;user-select:none;}
-.src:hover{border-color:#aaa;}
-.src.selected{border-color:#2a7cff;}
-.src img{width:100%;height:auto;border-radius:4px;display:block;background:#000;}
-.src .name{font-size:12px;margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.src .type{font-size:10px;color:#888;margin-top:4px;}
-.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px;}
-button{padding:8px 16px;font-size:13px;border:1px solid #ccc;background:#fff;border-radius:4px;cursor:pointer;}
-button.primary{background:#2a7cff;color:#fff;border-color:#2a7cff;}
-button.primary:disabled{background:#88b4ff;cursor:not-allowed;}
-</style>
-</head>
-<body>
-<h1>Choose what to share</h1>
-<div class="grid" id="sources"></div>
-<div class="actions">
-<button id="cancel">Cancel</button>
-<button id="share" class="primary" disabled>Share</button>
-</div>
-<script>
-var sources = ${JSON.stringify(thumbs)};
-var selectedIdx = -1;
-var grid = document.getElementById('sources');
-var shareBtn = document.getElementById('share');
-sources.forEach(function(s, i) {
-  var el = document.createElement('div');
-  el.className = 'src';
-  var img = document.createElement('img'); img.src = s.thumbnail;
-  var type = document.createElement('div'); type.className = 'type'; type.textContent = s.type;
-  var name = document.createElement('div'); name.className = 'name'; name.title = s.name; name.textContent = s.name;
-  el.appendChild(img); el.appendChild(type); el.appendChild(name);
-  el.addEventListener('click', function() {
-    selectedIdx = i;
-    Array.prototype.forEach.call(grid.querySelectorAll('.src'), function(c) { c.classList.remove('selected'); });
-    el.classList.add('selected');
-    shareBtn.disabled = false;
-  });
-  el.addEventListener('dblclick', function() {
-    selectedIdx = i;
-    document.title = 'nav0-picker:select:' + i;
-  });
-  grid.appendChild(el);
-});
-document.getElementById('cancel').addEventListener('click', function() {
-  document.title = 'nav0-picker:cancel';
-});
-shareBtn.addEventListener('click', function() {
-  if (selectedIdx >= 0) document.title = 'nav0-picker:select:' + selectedIdx;
-});
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') document.title = 'nav0-picker:cancel';
-});
-</script>
-</body>
-</html>`;
 
     return new Promise<Electron.DesktopCapturerSource | null>((resolve) => {
       const parent = BrowserWindow.getFocusedWindow() ?? undefined;
@@ -318,6 +257,7 @@ document.addEventListener('keydown', function(e) {
         useContentSize: true,
         show: false,
         webPreferences: {
+          preload: DISPLAY_CAPTURE_PICKER_PRELOAD_WEBPACK_ENTRY,
           nodeIntegration: false,
           contextIsolation: true,
           sandbox: true,
@@ -325,28 +265,45 @@ document.addEventListener('keydown', function(e) {
         },
       });
 
+      const wcId = pickerWin.webContents.id;
       let resolved = false;
       const done = (idx: number | null) => {
         if (resolved) return;
         resolved = true;
+        PermissionManager.pendingPickers.delete(wcId);
         if (!pickerWin.isDestroyed()) pickerWin.destroy();
         resolve(idx !== null && idx >= 0 && idx < sources.length ? sources[idx] : null);
       };
 
-      pickerWin.webContents.on('page-title-updated', (event, title) => {
-        if (!title || !title.startsWith('nav0-picker:')) return;
-        event.preventDefault();
-        const body = title.slice('nav0-picker:'.length);
-        if (body === 'cancel') { done(null); return; }
-        const m = body.match(/^select:(\d+)$/);
-        done(m ? parseInt(m[1], 10) : null);
+      PermissionManager.pendingPickers.set(wcId, {
+        sources,
+        resolve: (source) => done(source ? sources.indexOf(source) : null),
       });
+
       pickerWin.on('closed', () => done(null));
 
-      pickerWin.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html))
+      pickerWin.loadURL(DISPLAY_CAPTURE_PICKER_WEBPACK_ENTRY)
         .then(() => { if (!pickerWin.isDestroyed()) pickerWin.show(); })
         .catch(() => done(null));
     });
+  }
+
+  private static getSourcesForPicker(webContentsId: number): Array<{ idx: number; name: string; type: 'Screen' | 'Window'; thumbnail: string }> {
+    const pending = PermissionManager.pendingPickers.get(webContentsId);
+    if (!pending) return [];
+    return pending.sources.map((s, i) => ({
+      idx: i,
+      name: s.name,
+      type: s.id.startsWith('screen:') ? 'Screen' : 'Window',
+      thumbnail: s.thumbnail.toDataURL(),
+    }));
+  }
+
+  private static resolvePicker(webContentsId: number, idx: number | null): void {
+    const pending = PermissionManager.pendingPickers.get(webContentsId);
+    if (!pending) return;
+    const source = idx !== null && idx >= 0 && idx < pending.sources.length ? pending.sources[idx] : null;
+    pending.resolve(source);
   }
 
   // ─── Request Queue ───────────────────────────────────────────────
@@ -827,6 +784,19 @@ document.addEventListener('keydown', function(e) {
       decision: string
     ) => {
       return PermissionManager.updatePersistentPermissionDecision(permissionId, decision as PersistentDecision);
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.DISPLAY_CAPTURE_PICKER_GET_SOURCES, (
+      event: Electron.IpcMainInvokeEvent
+    ) => {
+      return PermissionManager.getSourcesForPicker(event.sender.id);
+    });
+
+    ipcMain.on(RendererToMainEventsForBrowserIPC.DISPLAY_CAPTURE_PICKER_SELECT, (
+      event: Electron.IpcMainEvent,
+      idx: number | null
+    ) => {
+      PermissionManager.resolvePicker(event.sender.id, idx);
     });
 
     ipcMain.handle('get-ip-geolocation', async () => {

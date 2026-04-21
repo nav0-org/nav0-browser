@@ -1,0 +1,128 @@
+@import url("../../styles/global.css");
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+.picker-header {
+  padding: var(--spacing-md) var(--spacing-md) var(--spacing-sm);
+}
+
+.picker-header h1 {
+  margin: 0;
+  font-size: var(--font-lg);
+  font-weight: 600;
+}
+
+.picker-grid-wrap {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 var(--spacing-md);
+}
+
+.picker-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+  align-content: start;
+  padding-bottom: var(--spacing-md);
+}
+
+.picker-source {
+  background-color: var(--bg-light);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
+  cursor: pointer;
+  user-select: none;
+  transition: border-color var(--transition-fast);
+}
+
+.picker-source:hover {
+  border-color: var(--border-color-dark);
+}
+
+.picker-source.selected {
+  border-color: var(--primary-color);
+}
+
+.picker-source-thumb {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: contain;
+  background-color: #000;
+  border-radius: var(--radius-sm);
+  display: block;
+}
+
+.picker-source-type {
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: var(--spacing-xs);
+}
+
+.picker-source-name {
+  font-size: var(--font-sm);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.picker-empty {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: var(--spacing-lg);
+}
+
+.picker-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md) var(--spacing-md);
+  border-top: 1px solid var(--border-color);
+}
+
+.picker-btn {
+  font-size: var(--font-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-color-dark);
+  background-color: var(--bg-light);
+  color: var(--text-color);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.picker-btn:hover {
+  background-color: var(--bg-hover);
+}
+
+.picker-btn-primary {
+  background-color: var(--primary-color);
+  color: var(--bg-light);
+  border-color: var(--primary-color);
+}
+
+.picker-btn-primary:hover {
+  background-color: var(--primary-dark);
+}
+
+.picker-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--primary-color);
+}
