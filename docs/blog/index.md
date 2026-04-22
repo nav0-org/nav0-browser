@@ -10,6 +10,14 @@ Thoughts on privacy, browsers, and the open web.
 ---
 
 <div class="blog-post-item">
+  <a href="/blog/the-indie-browser-renaissance">
+    <h2>The Indie Browser Renaissance: Meet the Projects Rebuilding the Web on Their Own Terms</h2>
+  </a>
+  <div class="post-meta">By Nav0 Team &middot; April 22, 2026 &middot; 10 min read &middot; Open Web</div>
+  <p class="post-excerpt">A celebratory tour of today's indie browser scene — Min, Helium, Ladybird, Zen, Orion, Qutebrowser, SigmaOS, Floorp, LibreWolf, Nav0, and more — and why a small, scrappy wave of projects matters in a web dominated by four vendors.</p>
+</div>
+
+<div class="blog-post-item">
   <a href="/blog/nav0-vs-opera">
     <h2>Nav0 vs Opera: From Innovation to Monetization</h2>
   </a>
