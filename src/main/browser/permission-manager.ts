@@ -31,6 +31,7 @@ export interface PermissionRecord {
   decision: string;
   createdAt: string;
   lastAccessedAt: string;
+  faviconUrl?: string | null;
 }
 
 // Callback type for showing/hiding the prompt UI
@@ -528,13 +529,21 @@ export class PermissionManager {
   static getAllPersistentPermissions(searchTerm?: string): PermissionRecord[] {
     if (!PermissionManager.db) return [];
     try {
+      const baseSelect = `
+        SELECT p.*,
+          (SELECT h.faviconUrl FROM browsingHistory h
+           WHERE h.faviconUrl IS NOT NULL
+             AND (h.url = p.origin OR h.url LIKE p.origin || '/%')
+           ORDER BY h.createdDate DESC LIMIT 1) AS faviconUrl
+        FROM site_permission p
+      `;
       if (searchTerm) {
         return PermissionManager.db.prepare(
-          'SELECT * FROM site_permission WHERE origin LIKE ? OR permissionType LIKE ? ORDER BY origin, permissionType'
+          `${baseSelect} WHERE p.origin LIKE ? OR p.permissionType LIKE ? ORDER BY p.origin, p.permissionType`
         ).all(`%${searchTerm}%`, `%${searchTerm}%`) as PermissionRecord[];
       }
       return PermissionManager.db.prepare(
-        'SELECT * FROM site_permission ORDER BY origin, permissionType'
+        `${baseSelect} ORDER BY p.origin, p.permissionType`
       ).all() as PermissionRecord[];
     } catch {
       return [];
