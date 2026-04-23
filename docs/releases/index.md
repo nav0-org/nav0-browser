@@ -10,10 +10,18 @@ What's new in every release of Nav0 Browser.
 ---
 
 <div class="release-list-item">
+  <a href="/releases/v0.2.4">
+    <h2>v0.2.4</h2>
+  </a>
+  <div class="release-meta">April 23, 2026 <span class="release-badge latest">Latest</span></div>
+  <p class="release-excerpt">Settings page redesign, favicons next to origins in Site Permissions, and a new linting/formatting/pre-commit-hook tooling stack.</p>
+</div>
+
+<div class="release-list-item">
   <a href="/releases/v0.2.3">
     <h2>v0.2.3</h2>
   </a>
-  <div class="release-meta">April 21, 2026 <span class="release-badge latest">Latest</span></div>
+  <div class="release-meta">April 21, 2026</div>
   <p class="release-excerpt">Blocking alert/confirm/prompt and basic-auth overlays, getDisplayMedia screen sharing with a dedicated picker, localhost and .local-style URL handling, main-process crash hardening, and a graceful installer prompt when Nav0 is already running.</p>
 </div>
 
