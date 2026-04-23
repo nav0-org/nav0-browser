@@ -45,27 +45,28 @@ Main Process (src/main/)          Renderer Process (src/renderer/)
 
 Every feature is encapsulated in a manager class:
 
-| Manager | Location | Purpose |
-|---------|----------|---------|
-| `AppWindowManager` | `src/main/browser/` | Window lifecycle, multi-window support |
-| `AppWindow` | `src/main/browser/` | Single window with tabs and overlays |
-| `Tab` | `src/main/browser/` | Individual tab (WebContentsView) |
-| `DatabaseManager` | `src/main/database/` | SQLite connection management |
-| `SchemaManager` | `src/main/database/` | Database schema versioning |
-| `DataStoreManager` | `src/main/database/` | electron-store key-value wrapper |
-| `DownloadManager` | `src/main/browser/` | Download tracking and control |
-| `BookmarkManager` | `src/main/browser/` | Bookmark CRUD operations |
-| `PermissionManager` | `src/main/browser/` | Site permission policies |
-| `SettingsEnforcer` | `src/main/settings/` | Applies user preferences to sessions |
-| `ReaderModeManager` | `src/main/browser/` | Reader mode extraction (@mozilla/readability) |
-| `SSLManager` | `src/main/browser/` | Certificate validation |
-| `FindInPageManager` | `src/main/browser/` | In-page text search |
-| `CommandKOverlayManager` | `src/main/browser/` | Command palette overlay |
-| `CommandOOverlayManager` | `src/main/browser/` | File opener overlay |
+| Manager                  | Location             | Purpose                                       |
+| ------------------------ | -------------------- | --------------------------------------------- |
+| `AppWindowManager`       | `src/main/browser/`  | Window lifecycle, multi-window support        |
+| `AppWindow`              | `src/main/browser/`  | Single window with tabs and overlays          |
+| `Tab`                    | `src/main/browser/`  | Individual tab (WebContentsView)              |
+| `DatabaseManager`        | `src/main/database/` | SQLite connection management                  |
+| `SchemaManager`          | `src/main/database/` | Database schema versioning                    |
+| `DataStoreManager`       | `src/main/database/` | electron-store key-value wrapper              |
+| `DownloadManager`        | `src/main/browser/`  | Download tracking and control                 |
+| `BookmarkManager`        | `src/main/browser/`  | Bookmark CRUD operations                      |
+| `PermissionManager`      | `src/main/browser/`  | Site permission policies                      |
+| `SettingsEnforcer`       | `src/main/settings/` | Applies user preferences to sessions          |
+| `ReaderModeManager`      | `src/main/browser/`  | Reader mode extraction (@mozilla/readability) |
+| `SSLManager`             | `src/main/browser/`  | Certificate validation                        |
+| `FindInPageManager`      | `src/main/browser/`  | In-page text search                           |
+| `CommandKOverlayManager` | `src/main/browser/`  | Command palette overlay                       |
+| `CommandOOverlayManager` | `src/main/browser/`  | File opener overlay                           |
 
 ### IPC Communication
 
 All IPC channels are defined as string constants in `src/constants/app-constants.ts`:
+
 - `RendererToMainEventsForBrowserIPC` — renderer-initiated browser actions
 - `MainToRendererEventsForBrowserIPC` — main process responses to renderer
 - `RendererToMainEventsForDataStoreIPC` — data operations (CRUD for bookmarks, history, etc.)
@@ -148,18 +149,18 @@ docs/                              # VitePress documentation site
 
 ## Tech Stack
 
-| Component | Technology | Version |
-|-----------|-----------|---------|
-| Runtime | Electron | 35.2.1 |
-| Language | TypeScript | 5.8.3 |
-| Bundler | Webpack (via @electron-forge) | — |
-| Build Tool | Electron Forge | 7.8.0 |
-| Database | better-sqlite3 | 11.9.1 |
-| Key-Value Store | electron-store | 8.2.0 |
-| Reader Mode | @mozilla/readability | 0.6.0 |
-| Icons | Lucide | 0.503.0 |
-| Docs | VitePress | 1.5.0 |
-| Testing | Puppeteer Core | 24.37.5 |
+| Component       | Technology                    | Version |
+| --------------- | ----------------------------- | ------- |
+| Runtime         | Electron                      | 35.2.1  |
+| Language        | TypeScript                    | 5.8.3   |
+| Bundler         | Webpack (via @electron-forge) | —       |
+| Build Tool      | Electron Forge                | 7.8.0   |
+| Database        | better-sqlite3                | 11.9.1  |
+| Key-Value Store | electron-store                | 8.2.0   |
+| Reader Mode     | @mozilla/readability          | 0.6.0   |
+| Icons           | Lucide                        | 0.503.0 |
+| Docs            | VitePress                     | 1.5.0   |
+| Testing         | Puppeteer Core                | 24.37.5 |
 
 ## Build & Configuration
 
@@ -263,8 +264,8 @@ Blog posts live in `docs/blog/`. The sidebar and index are auto-generated from f
 
 ```yaml
 ---
-title: "Your Post Title Here"
-description: "A concise description for SEO and social sharing."
+title: 'Your Post Title Here'
+description: 'A concise description for SEO and social sharing.'
 date: 2026-03-21
 author: Nav0 Team
 tags: [privacy, browsers]
@@ -274,7 +275,7 @@ head:
       content: article
   - - meta
     - property: article:published_time
-      content: "2026-03-21"
+      content: '2026-03-21'
   - - meta
     - property: article:author
       content: Nav0 Team
@@ -313,7 +314,7 @@ Your content here...
 ```md
 ---
 
-*Nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started).*
+_Nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started)._
 ```
 
 5. **Add the entry to `docs/blog/index.md`** at the top of the list (newest first):
@@ -323,7 +324,9 @@ Your content here...
   <a href="/blog/<slug>">
     <h2>Your Post Title Here</h2>
   </a>
-  <div class="post-meta">By Nav0 Team &middot; March 21, 2026 &middot; 8 min read &middot; Category</div>
+  <div class="post-meta">
+    By Nav0 Team &middot; March 21, 2026 &middot; 8 min read &middot; Category
+  </div>
   <p class="post-excerpt">A brief excerpt summarizing the post (1-2 sentences).</p>
 </div>
 ```
@@ -347,7 +350,7 @@ Release notes live in `docs/releases/`. The sidebar is auto-generated from front
 
 ```yaml
 ---
-title: "v0.1.0"
+title: 'v0.1.0'
 date: 2026-03-21
 badge: Latest
 ---
@@ -405,14 +408,14 @@ Remove the `<span class="release-badge latest">Latest</span>` from the previous 
 
 ## Default Browser Settings
 
-| Category | Setting | Default |
-|----------|---------|---------|
-| Search | Engine | DuckDuckGo |
-| Search | Suggestions | Disabled |
-| Privacy | Cookie Policy | Block 3rd-party |
-| Privacy | Clear on close | No |
-| Ad Blocker | Enabled | Yes |
-| Ad Blocker | Lists | EasyList, EasyPrivacy, Peter Lowe |
-| Proxy | Mode | Direct |
-| User Agent | Preset | nav0-browser (custom) |
-| Popups | Policy | Smart (limited) |
+| Category   | Setting        | Default                           |
+| ---------- | -------------- | --------------------------------- |
+| Search     | Engine         | DuckDuckGo                        |
+| Search     | Suggestions    | Disabled                          |
+| Privacy    | Cookie Policy  | Block 3rd-party                   |
+| Privacy    | Clear on close | No                                |
+| Ad Blocker | Enabled        | Yes                               |
+| Ad Blocker | Lists          | EasyList, EasyPrivacy, Peter Lowe |
+| Proxy      | Mode           | Direct                            |
+| User Agent | Preset         | nav0-browser (custom)             |
+| Popups     | Policy         | Smart (limited)                   |

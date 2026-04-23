@@ -16,11 +16,10 @@ const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
     icon: 'src/renderer/assets/logo',
-    extraResource: [
-    ],
+    extraResource: [],
   },
   rebuildConfig: {
-    force: true
+    force: true,
   },
   makers: [
     new MakerSquirrel({

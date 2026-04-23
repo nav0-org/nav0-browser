@@ -1,6 +1,6 @@
 ---
-title: "Contributing to Nav0 Browser — Open Source Development Guide"
-description: "How to contribute to Nav0: report bugs, submit code, improve documentation, and help the community. Setup instructions, guidelines, and code of conduct."
+title: 'Contributing to Nav0 Browser — Open Source Development Guide'
+description: 'How to contribute to Nav0: report bugs, submit code, improve documentation, and help the community. Setup instructions, guidelines, and code of conduct.'
 ---
 
 # Contributing
@@ -12,6 +12,7 @@ Nav0 is open source and welcomes contributions from the community.
 ### Use and Report
 
 The simplest contribution:
+
 - Use Nav0 as your browser
 - Report bugs when you find them
 - Suggest improvements
@@ -19,6 +20,7 @@ The simplest contribution:
 ### Code Contributions
 
 Help build Nav0:
+
 - Fix bugs
 - Improve performance
 - Enhance security
@@ -27,6 +29,7 @@ Help build Nav0:
 ### Documentation
 
 Improve these docs:
+
 - Fix typos and errors
 - Clarify confusing sections
 - Add missing information
@@ -35,6 +38,7 @@ Improve these docs:
 ### Community
 
 Help the community:
+
 - Answer questions in issues
 - Help triage bug reports
 - Review pull requests
@@ -116,6 +120,7 @@ Bad:
 ### Pull Request Process
 
 1. **Create a branch**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -126,6 +131,7 @@ Bad:
    - Update documentation if needed
 
 3. **Test locally**
+
    ```bash
    npm run test
    npm run lint
@@ -133,9 +139,11 @@ Bad:
    ```
 
 4. **Push and create PR**
+
    ```bash
    git push origin feature/your-feature-name
    ```
+
    Then open a PR on GitHub.
 
 5. **Respond to feedback**
@@ -238,6 +246,7 @@ npm run docs:build
 ## Recognition
 
 Contributors are recognized in:
+
 - Git history (your commits)
 - GitHub contributors page
 - Release notes (for significant contributions)

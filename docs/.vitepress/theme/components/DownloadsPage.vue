@@ -1,47 +1,50 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import packageJson from '../../../../package.json'
+import { ref, onMounted } from 'vue';
+import packageJson from '../../../../package.json';
 
-const version = ref(packageJson.version)
-const loading = ref(true)
+const version = ref(packageJson.version);
+const loading = ref(true);
 
 onMounted(async () => {
   try {
-    const res = await fetch('https://api.github.com/repos/nav0-org/nav0-browser/releases/latest')
+    const res = await fetch('https://api.github.com/repos/nav0-org/nav0-browser/releases/latest');
     if (res.ok) {
-      const data = await res.json()
+      const data = await res.json();
       // tag_name is like "v0.0.9", strip the leading "v"
-      const tag = data.tag_name || ''
-      version.value = tag.startsWith('v') ? tag.slice(1) : tag
+      const tag = data.tag_name || '';
+      version.value = tag.startsWith('v') ? tag.slice(1) : tag;
     }
   } catch {
     // keep fallback version from package.json
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-})
+});
 
-const copied = ref(false)
-const macCommand = 'curl -fsSL https://raw.githubusercontent.com/nav0-org/nav0-browser/main/install.sh | bash'
+const copied = ref(false);
+const macCommand =
+  'curl -fsSL https://raw.githubusercontent.com/nav0-org/nav0-browser/main/install.sh | bash';
 
 async function copyMacCommand() {
   try {
     if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(macCommand)
+      await navigator.clipboard.writeText(macCommand);
     } else {
       // Fallback for older browsers / non-secure contexts
-      const ta = document.createElement('textarea')
-      ta.value = macCommand
-      ta.setAttribute('readonly', '')
-      ta.style.position = 'absolute'
-      ta.style.left = '-9999px'
-      document.body.appendChild(ta)
-      ta.select()
-      document.execCommand('copy')
-      document.body.removeChild(ta)
+      const ta = document.createElement('textarea');
+      ta.value = macCommand;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'absolute';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
     }
-    copied.value = true
-    setTimeout(() => { copied.value = false }, 1500)
+    copied.value = true;
+    setTimeout(() => {
+      copied.value = false;
+    }, 1500);
   } catch {
     // Silently fail — no telemetry/logging per Nav0 privacy principles
   }
@@ -52,10 +55,10 @@ async function copyMacCommand() {
   <div class="install-page">
     <div class="install-hero">
       <h1>Install Nav0</h1>
-      <p class="install-subtitle">
-        Install Nav0 on macOS, Windows, or Linux.
+      <p class="install-subtitle">Install Nav0 on macOS, Windows, or Linux.</p>
+      <p class="install-version" v-if="!loading">
+        Latest release: <strong>v{{ version }}</strong>
       </p>
-      <p class="install-version" v-if="!loading">Latest release: <strong>v{{ version }}</strong></p>
     </div>
 
     <div class="install-section">
@@ -70,21 +73,42 @@ async function copyMacCommand() {
           :title="copied ? 'Copied' : 'Copy command'"
           @click="copyMacCommand"
         >
-          <svg v-if="!copied" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-               fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-               aria-hidden="true">
+          <svg
+            v-if="!copied"
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
           </svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-               fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-               aria-hidden="true">
+          <svg
+            v-else
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
         </button>
       </div>
       <p class="install-note">
-        Downloads the latest release, installs to /Applications, and handles macOS Gatekeeper automatically.
+        Downloads the latest release, installs to /Applications, and handles macOS Gatekeeper
+        automatically.
       </p>
       <!-- Homebrew option temporarily hidden
       <p>Or install with <a href="https://brew.sh" target="_blank" rel="noopener">Homebrew</a>:</p>
@@ -100,7 +124,10 @@ async function copyMacCommand() {
     <div class="install-section">
       <h2>Windows</h2>
       <div class="download-links">
-        <a class="download-btn" :href="`https://github.com/nav0-org/nav0-browser/releases/download/v${version}/Nav0-${version}.Setup.exe`">
+        <a
+          class="download-btn"
+          :href="`https://github.com/nav0-org/nav0-browser/releases/download/v${version}/Nav0-${version}.Setup.exe`"
+        >
           <span class="download-label">Windows x64</span>
           <span class="download-format">.exe installer</span>
         </a>
@@ -110,11 +137,17 @@ async function copyMacCommand() {
     <div class="install-section">
       <h2>Linux</h2>
       <div class="download-links">
-        <a class="download-btn" :href="`https://github.com/nav0-org/nav0-browser/releases/download/v${version}/Nav0_${version}_amd64.deb`">
+        <a
+          class="download-btn"
+          :href="`https://github.com/nav0-org/nav0-browser/releases/download/v${version}/Nav0_${version}_amd64.deb`"
+        >
           <span class="download-label">Debian / Ubuntu</span>
           <span class="download-format">.deb package</span>
         </a>
-        <a class="download-btn" :href="`https://github.com/nav0-org/nav0-browser/releases/download/v${version}/Nav0-${version}-1.x86_64.rpm`">
+        <a
+          class="download-btn"
+          :href="`https://github.com/nav0-org/nav0-browser/releases/download/v${version}/Nav0-${version}-1.x86_64.rpm`"
+        >
           <span class="download-label">Fedora / RHEL</span>
           <span class="download-format">.rpm package</span>
         </a>
@@ -123,7 +156,10 @@ async function copyMacCommand() {
 
     <div class="install-section">
       <h2>Build from Source</h2>
-      <p>Nav0 can be built from source on Windows, macOS, and Linux. This is recommended for maximum trust.</p>
+      <p>
+        Nav0 can be built from source on Windows, macOS, and Linux. This is recommended for maximum
+        trust.
+      </p>
       <div class="code-block">
         <code>git clone https://github.com/nav0-org/nav0-browser.git</code>
         <code>cd nav0-browser</code>
@@ -131,16 +167,18 @@ async function copyMacCommand() {
         <code>npm run make</code>
       </div>
       <p class="install-note">
-        Requires <a href="https://nodejs.org" target="_blank" rel="noopener">Node.js</a> 22+ and npm.
-        The built app will be in the <code>out/</code> directory.
+        Requires <a href="https://nodejs.org" target="_blank" rel="noopener">Node.js</a> 22+ and
+        npm. The built app will be in the <code>out/</code> directory.
       </p>
     </div>
 
     <div class="install-footer">
       <p>
         Nav0 is open-source under the
-        <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT License</a>.
-        View the source on <a href="https://github.com/nav0-org/nav0-browser" target="_blank" rel="noopener">GitHub</a>.
+        <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT License</a
+        >. View the source on
+        <a href="https://github.com/nav0-org/nav0-browser" target="_blank" rel="noopener">GitHub</a
+        >.
       </p>
     </div>
   </div>
@@ -224,7 +262,10 @@ async function copyMacCommand() {
   border-radius: 6px;
   color: var(--vp-c-text-2);
   cursor: pointer;
-  transition: color 0.2s, background-color 0.2s, border-color 0.2s;
+  transition:
+    color 0.2s,
+    background-color 0.2s,
+    border-color 0.2s;
 }
 
 .copy-btn:hover {
@@ -267,7 +308,9 @@ async function copyMacCommand() {
   border-radius: 8px;
   text-decoration: none;
   color: var(--vp-c-text-1);
-  transition: border-color 0.25s, background-color 0.25s;
+  transition:
+    border-color 0.25s,
+    background-color 0.25s;
   min-width: 180px;
 }
 

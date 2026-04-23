@@ -1,5 +1,5 @@
 ---
-title: "Stop Forcing AI Into My Browser"
+title: 'Stop Forcing AI Into My Browser'
 description: "Every major browser is cramming AI features into their product. Nobody asked for this. Here's why forced AI integration is bad for users, bad for privacy, and bad for the web."
 date: 2026-02-08
 author: Nav0 Team
@@ -10,7 +10,7 @@ head:
       content: article
   - - meta
     - property: article:published_time
-      content: "2026-02-08"
+      content: '2026-02-08'
   - - meta
     - property: article:author
       content: Nav0 Team
@@ -152,6 +152,7 @@ And there's no easy way to fully disable them. You can close the sidebar, but th
 The forced integration of AI into browsers is just the latest chapter in a longer story: the relentless expansion of what a browser is supposed to be.
 
 A browser used to be a window to the web. Now it's trying to be:
+
 - A writing assistant
 - A shopping companion
 - A meeting scheduler
@@ -210,4 +211,4 @@ Yes. Nav0 is a minimal, privacy-focused browser with zero AI features, zero tele
 
 ---
 
-*Nav0 is a minimal, privacy-focused browser that believes your browser should browse, nothing more. No AI, no bloat, no data collection. [Learn more](/guide/philosophy).*
+_Nav0 is a minimal, privacy-focused browser that believes your browser should browse, nothing more. No AI, no bloat, no data collection. [Learn more](/guide/philosophy)._

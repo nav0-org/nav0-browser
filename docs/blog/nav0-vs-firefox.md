@@ -10,7 +10,7 @@ head:
       content: article
   - - meta
     - property: article:published_time
-      content: "2026-03-21"
+      content: '2026-03-21'
   - - meta
     - property: article:author
       content: Nav0 Team
@@ -28,7 +28,7 @@ head:
       content: telemetry
   - - meta
     - name: keywords
-      content: "Nav0 vs firefox, firefox privacy, firefox telemetry, mozilla data collection, firefox bloat, firefox sponsored shortcuts, firefox pocket, private browser comparison, minimal browser vs firefox, firefox about config privacy, does firefox collect data, firefox sponsored new tab, mozilla google deal, firefox vs nav0 privacy, is firefox really private, best private browser 2026, browser without telemetry, firefox hardening alternative"
+      content: 'Nav0 vs firefox, firefox privacy, firefox telemetry, mozilla data collection, firefox bloat, firefox sponsored shortcuts, firefox pocket, private browser comparison, minimal browser vs firefox, firefox about config privacy, does firefox collect data, firefox sponsored new tab, mozilla google deal, firefox vs nav0 privacy, is firefox really private, best private browser 2026, browser without telemetry, firefox hardening alternative'
   - - script
     - type: application/ld+json
     - |
@@ -106,22 +106,22 @@ But "better than Chrome" is a low bar. And when you look closely at what Firefox
 
 Nav0 exists in that gap.
 
-| Feature | Nav0 | Firefox |
-|---------|------|---------|
-| Telemetry | None — zero data collection | On by default (usage stats, technical data, interaction data, location) |
-| Open Source | Yes (MIT license, small auditable codebase) | Yes (MPL 2.0, large complex codebase) |
-| Built-in Ad Blocker | Yes | No (requires extensions like uBlock Origin) |
-| Sponsored Content | None | Yes (sponsored shortcuts, Pocket stories on new tab) |
-| User Accounts | None — all data stays local | Mozilla Account for sync (bookmarks, history, passwords) |
-| AI Features | None | Experimental (chatbot integrations, content recommendations) |
-| VPN | None | Mozilla VPN (paid subscription) |
-| Browser Extensions | Not supported | Full extensions ecosystem (WebExtensions API) |
-| Cross-Device Sync | None | Yes (via Mozilla Account, end-to-end encrypted) |
-| Mobile App | Desktop only | iOS and Android |
-| Rendering Engine | Chromium (via Electron) | Gecko (independent engine, supports web diversity) |
-| Business Model | Free, open source, no monetization | Google search deal (~$450M/yr), sponsored content, VPN subscriptions |
-| New Tab Page | Blank — zero network requests | Sponsored shortcuts, Pocket recommendations, Google search bar |
-| Configuration for Privacy | Private by default, nothing to configure | Requires about:config hardening (200+ settings) for full privacy |
+| Feature                   | Nav0                                        | Firefox                                                                 |
+| ------------------------- | ------------------------------------------- | ----------------------------------------------------------------------- |
+| Telemetry                 | None — zero data collection                 | On by default (usage stats, technical data, interaction data, location) |
+| Open Source               | Yes (MIT license, small auditable codebase) | Yes (MPL 2.0, large complex codebase)                                   |
+| Built-in Ad Blocker       | Yes                                         | No (requires extensions like uBlock Origin)                             |
+| Sponsored Content         | None                                        | Yes (sponsored shortcuts, Pocket stories on new tab)                    |
+| User Accounts             | None — all data stays local                 | Mozilla Account for sync (bookmarks, history, passwords)                |
+| AI Features               | None                                        | Experimental (chatbot integrations, content recommendations)            |
+| VPN                       | None                                        | Mozilla VPN (paid subscription)                                         |
+| Browser Extensions        | Not supported                               | Full extensions ecosystem (WebExtensions API)                           |
+| Cross-Device Sync         | None                                        | Yes (via Mozilla Account, end-to-end encrypted)                         |
+| Mobile App                | Desktop only                                | iOS and Android                                                         |
+| Rendering Engine          | Chromium (via Electron)                     | Gecko (independent engine, supports web diversity)                      |
+| Business Model            | Free, open source, no monetization          | Google search deal (~$450M/yr), sponsored content, VPN subscriptions    |
+| New Tab Page              | Blank — zero network requests               | Sponsored shortcuts, Pocket recommendations, Google search bar          |
+| Configuration for Privacy | Private by default, nothing to configure    | Requires about:config hardening (200+ settings) for full privacy        |
 
 ## Telemetry: On by Default
 
@@ -210,13 +210,13 @@ Nav0 has no search engine deals. No revenue dependencies. No corporate relations
 
 ## The about:config Argument
 
-Firefox power users often argue that Firefox *can* be made fully private. And they're right. Open `about:config` and you can disable telemetry, turn off Pocket, remove sponsored content, block Firefox Suggest, disable Safe Browsing phone-home, prevent prefetching, and lock down dozens of other settings.
+Firefox power users often argue that Firefox _can_ be made fully private. And they're right. Open `about:config` and you can disable telemetry, turn off Pocket, remove sponsored content, block Firefox Suggest, disable Safe Browsing phone-home, prevent prefetching, and lock down dozens of other settings.
 
 There are entire websites and GitHub repositories dedicated to Firefox hardening — lists of hundreds of `about:config` preferences to toggle for maximum privacy. Projects like arkenfox/user.js maintain comprehensive privacy configurations.
 
 This proves the point rather than refuting it.
 
-If you need to change 200 settings to make your browser private, your browser is not private. It's *configurable*. There's a meaningful difference. A browser that's private by default respects every user. A browser that's private after extensive configuration respects only the technically sophisticated users who know the right toggles.
+If you need to change 200 settings to make your browser private, your browser is not private. It's _configurable_. There's a meaningful difference. A browser that's private by default respects every user. A browser that's private after extensive configuration respects only the technically sophisticated users who know the right toggles.
 
 And those configurations break after updates. Firefox changes behavior between versions. Settings get deprecated, renamed, or overridden by new features. Maintaining a hardened Firefox configuration is an ongoing project, not a one-time setup.
 
@@ -288,4 +288,4 @@ Firefox proves that a privacy-respecting browser can be built. Nav0 asks: what i
 
 ---
 
-*Nav0 is a minimal, open-source browser built on one principle: your browser should work for you, not for an ad company. Zero telemetry. Zero bloat. Zero BS. [Learn more](/guide/philosophy).*
+_Nav0 is a minimal, open-source browser built on one principle: your browser should work for you, not for an ad company. Zero telemetry. Zero bloat. Zero BS. [Learn more](/guide/philosophy)._

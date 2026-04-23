@@ -1,5 +1,5 @@
 ---
-title: "Nav0 Private Browsing — How Private Mode Works"
+title: 'Nav0 Private Browsing — How Private Mode Works'
 description: "Nav0's private browsing mode uses a separate database partition, clears all data on window close, and blocks cross-contamination with normal windows. Learn how it works."
 head:
   - - meta
@@ -124,14 +124,14 @@ There is no way to recover this data after closing the private window.
 
 Private and normal windows are fully isolated from each other:
 
-| Aspect | Behavior |
-|--------|----------|
-| **Cookies** | Private windows have a separate cookie jar — not shared with normal windows |
-| **History** | Private browsing history is not recorded in the normal history database |
-| **Cache** | Separate cache — cached files from normal browsing are not available in private mode |
-| **Tab movement** | Tabs cannot be moved or dragged between private and normal windows |
-| **Tab switcher** | Cmd+O only shows tabs matching the current context (private or normal) |
-| **Permissions** | Permission decisions in private mode are session-only — not saved |
+| Aspect           | Behavior                                                                             |
+| ---------------- | ------------------------------------------------------------------------------------ |
+| **Cookies**      | Private windows have a separate cookie jar — not shared with normal windows          |
+| **History**      | Private browsing history is not recorded in the normal history database              |
+| **Cache**        | Separate cache — cached files from normal browsing are not available in private mode |
+| **Tab movement** | Tabs cannot be moved or dragged between private and normal windows                   |
+| **Tab switcher** | Cmd+O only shows tabs matching the current context (private or normal)               |
+| **Permissions**  | Permission decisions in private mode are session-only — not saved                    |
 
 ## What Private Browsing Does
 
@@ -155,16 +155,16 @@ For protection against network-level surveillance, you need a VPN or the Tor net
 
 ## What Persists After Closing
 
-| Data | Persists? |
-|------|-----------|
-| Browsing history | No |
-| Cookies | No |
-| Cache | No |
-| Local storage | No |
-| Session storage | No |
-| Downloaded files | Yes — saved to your filesystem |
-| Bookmarks created | Yes — saved to normal bookmark database |
-| Permission decisions | No — session-only |
+| Data                 | Persists?                               |
+| -------------------- | --------------------------------------- |
+| Browsing history     | No                                      |
+| Cookies              | No                                      |
+| Cache                | No                                      |
+| Local storage        | No                                      |
+| Session storage      | No                                      |
+| Downloaded files     | Yes — saved to your filesystem          |
+| Bookmarks created    | Yes — saved to normal bookmark database |
+| Permission decisions | No — session-only                       |
 
 ## Private Browsing + Nav0's Privacy Features
 
@@ -181,13 +181,13 @@ Private browsing adds an additional layer on top of these protections, not a rep
 
 ## Compared to Other Browsers
 
-| Feature | Nav0 | Chrome | Firefox | Brave |
-|---------|------|--------|---------|-------|
-| Separate storage partition | Yes | Yes | Yes | Yes |
-| Full cleanup on close | Yes | Yes | Yes | Yes |
-| No telemetry in private mode | Yes | No | Partial | Partial |
-| No sync/account leakage | Yes (no accounts) | Risk if signed in | Risk if signed in | Risk if signed in |
-| No server-side record | Yes | No (Google may log) | Depends on settings | Depends on settings |
+| Feature                      | Nav0              | Chrome              | Firefox             | Brave               |
+| ---------------------------- | ----------------- | ------------------- | ------------------- | ------------------- |
+| Separate storage partition   | Yes               | Yes                 | Yes                 | Yes                 |
+| Full cleanup on close        | Yes               | Yes                 | Yes                 | Yes                 |
+| No telemetry in private mode | Yes               | No                  | Partial             | Partial             |
+| No sync/account leakage      | Yes (no accounts) | Risk if signed in   | Risk if signed in   | Risk if signed in   |
+| No server-side record        | Yes               | No (Google may log) | Depends on settings | Depends on settings |
 
 The key difference: because Nav0 has no accounts, no sync, and no telemetry, there is no server-side component that could inadvertently record your private browsing activity. In browsers with account systems, private mode data can leak through sync services, crash reports, or telemetry — even if the browser claims it doesn't.
 
@@ -195,7 +195,7 @@ The key difference: because Nav0 has no accounts, no sync, and no telemetry, the
 
 ### Can I have multiple private windows open at once?
 
-Yes. All private windows share the same private partition, so they share cookies and session state with each other. When the *last* private window closes, all private data is deleted.
+Yes. All private windows share the same private partition, so they share cookies and session state with each other. When the _last_ private window closes, all private data is deleted.
 
 ### Are tabs from private windows shown in the Command-K search?
 
@@ -211,4 +211,4 @@ Private browsing is suitable for keeping your browsing history off your local de
 
 ---
 
-*See also: [Privacy & Tracking Protection](/guide/privacy-protection) · [Ad Blocker](/guide/ad-blocker) · [Features Overview](/guide/features)*
+_See also: [Privacy & Tracking Protection](/guide/privacy-protection) · [Ad Blocker](/guide/ad-blocker) · [Features Overview](/guide/features)_

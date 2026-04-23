@@ -1,4 +1,4 @@
-import { app } from "electron";
+import { app } from 'electron';
 
 /*
  * User-Agent and Client-Hints normalization.
@@ -23,9 +23,9 @@ import { app } from "electron";
 function reduceChromeVersion(version: string): string {
   // "133.0.6943.53" -> "133.0.0.0" (Chrome UA-Reduction form)
   return version
-    .split(".")
-    .map((part, idx) => (idx === 0 ? part : "0"))
-    .join(".");
+    .split('.')
+    .map((part, idx) => (idx === 0 ? part : '0'))
+    .join('.');
 }
 
 /**
@@ -34,13 +34,13 @@ function reduceChromeVersion(version: string): string {
  * Must be called before any BrowserWindow/WebContentsView is created.
  */
 export function configureUserAgentFallback(): void {
-  const defaultUA = app.userAgentFallback || "";
+  const defaultUA = app.userAgentFallback || '';
   const chromeVersion = process.versions.chrome;
 
   let newUA = defaultUA
-    .replace(/nav0-browser\/\S+\s?/i, "")
-    .replace(/Nav0\/\S+\s?/i, "")
-    .replace(/Electron\/\S+\s?/, "");
+    .replace(/nav0-browser\/\S+\s?/i, '')
+    .replace(/Nav0\/\S+\s?/i, '')
+    .replace(/Electron\/\S+\s?/, '');
 
   if (chromeVersion) {
     newUA = newUA.replace(chromeVersion, reduceChromeVersion(chromeVersion));
@@ -68,7 +68,7 @@ function platformFromUA(ua: string): string {
  *   auto-populated, since those browsers do not send them.
  */
 export function applyClientHints(headers: Record<string, string | string[]>): void {
-  const rawUA = headers["User-Agent"] ?? headers["user-agent"] ?? "";
+  const rawUA = headers['User-Agent'] ?? headers['user-agent'] ?? '';
   const ua = Array.isArray(rawUA) ? rawUA[0] : rawUA;
   if (!ua) return;
 
@@ -76,12 +76,12 @@ export function applyClientHints(headers: Record<string, string | string[]>): vo
   const isSafariOnly = /Safari\//.test(ua) && !/Chrome\/|Chromium\/|Edg\//.test(ua);
 
   if (isFirefox || isSafariOnly) {
-    delete headers["sec-ch-ua"];
-    delete headers["Sec-CH-UA"];
-    delete headers["sec-ch-ua-mobile"];
-    delete headers["Sec-CH-UA-Mobile"];
-    delete headers["sec-ch-ua-platform"];
-    delete headers["Sec-CH-UA-Platform"];
+    delete headers['sec-ch-ua'];
+    delete headers['Sec-CH-UA'];
+    delete headers['sec-ch-ua-mobile'];
+    delete headers['Sec-CH-UA-Mobile'];
+    delete headers['sec-ch-ua-platform'];
+    delete headers['Sec-CH-UA-Platform'];
     return;
   }
 
@@ -99,13 +99,13 @@ export function applyClientHints(headers: Record<string, string | string[]>): vo
   }
 
   // Delete any pre-existing casing variants to avoid duplicates in the final request.
-  delete headers["Sec-CH-UA"];
-  delete headers["Sec-CH-UA-Mobile"];
-  delete headers["Sec-CH-UA-Platform"];
+  delete headers['Sec-CH-UA'];
+  delete headers['Sec-CH-UA-Mobile'];
+  delete headers['Sec-CH-UA-Platform'];
 
-  headers["sec-ch-ua"] = brandHeader;
-  headers["sec-ch-ua-mobile"] = "?0";
-  headers["sec-ch-ua-platform"] = platformFromUA(ua);
+  headers['sec-ch-ua'] = brandHeader;
+  headers['sec-ch-ua-mobile'] = '?0';
+  headers['sec-ch-ua-platform'] = platformFromUA(ua);
 }
 
 /**
@@ -137,7 +137,5 @@ export function alignUAWithRealChromeVersion(ua: string): string {
   if (!ua || !chromeVersion) return ua;
   const reduced = reduceChromeVersion(chromeVersion);
   // Replaces "Chrome/<anything up to whitespace>" — same for Edg/.
-  return ua
-    .replace(/Chrome\/\S+/g, `Chrome/${reduced}`)
-    .replace(/Edg\/\S+/g, `Edg/${reduced}`);
+  return ua.replace(/Chrome\/\S+/g, `Chrome/${reduced}`).replace(/Edg\/\S+/g, `Edg/${reduced}`);
 }

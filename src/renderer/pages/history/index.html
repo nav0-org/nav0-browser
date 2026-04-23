@@ -1,67 +1,74 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:;">
-  <title>Browsing History</title>
-</head>
-<body>
-  <div class="history-page">
-    <div class="history-container">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:;"
+    />
+    <title>Browsing History</title>
+  </head>
+  <body>
+    <div class="history-page">
+      <div class="history-container">
+        <!-- Header -->
+        <h1 class="history-title">History</h1>
+        <p class="history-subtitle">Your browsing activity, at a glance</p>
+        <p class="history-stats-label" id="history-stats"></p>
 
-      <!-- Header -->
-      <h1 class="history-title">History</h1>
-      <p class="history-subtitle">Your browsing activity, at a glance</p>
-      <p class="history-stats-label" id="history-stats"></p>
+        <!-- Heatmap -->
+        <div id="heatmap-container" class="card heatmap-card"></div>
 
-      <!-- Heatmap -->
-      <div id="heatmap-container" class="card heatmap-card"></div>
-
-      <!-- Analytics Row -->
-      <div class="analytics-grid">
-        <div class="card analytics-card">
-          <div class="card-label" id="domain-chart-label">top sites</div>
-          <div id="domain-chart-container"></div>
+        <!-- Analytics Row -->
+        <div class="analytics-grid">
+          <div class="card analytics-card">
+            <div class="card-label" id="domain-chart-label">top sites</div>
+            <div id="domain-chart-container"></div>
+          </div>
+          <div class="card analytics-card">
+            <div class="card-label" id="category-label">by category</div>
+            <div id="category-container"></div>
+          </div>
         </div>
-        <div class="card analytics-card">
-          <div class="card-label" id="category-label">by category</div>
-          <div id="category-container"></div>
+
+        <!-- Search -->
+        <div class="search-container">
+          <input
+            type="text"
+            id="search-input"
+            class="search-input"
+            placeholder="Search history..."
+          />
+          <i data-lucide="search" class="search-icon" width="16" height="16"></i>
         </div>
+
+        <!-- Time range filters -->
+        <div class="time-range-group">
+          <button class="time-range-btn active" data-range="all">all</button>
+          <button class="time-range-btn" data-range="week">week</button>
+          <button class="time-range-btn" data-range="today">today</button>
+        </div>
+
+        <!-- Session-grouped history -->
+        <div id="history-list" class="history-list"></div>
+
+        <!-- Empty state -->
+        <div id="no-history" class="no-history" style="display: none">
+          <i data-lucide="clock" width="32" height="32"></i>
+          <p>No browsing history found</p>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading-indicator" class="loading-indicator" style="display: none">Loading...</div>
+
+        <!-- Footer -->
+        <div class="history-footer" id="history-footer">
+          <button id="delete-all" class="btn-clear-all" style="display: none">Clear All</button>
+        </div>
+
+        <!-- Infinite scroll sentinel -->
+        <div id="scroll-sentinel" style="height: 1px"></div>
       </div>
-
-      <!-- Search -->
-      <div class="search-container">
-        <input type="text" id="search-input" class="search-input" placeholder="Search history...">
-        <i data-lucide="search" class="search-icon" width="16" height="16"></i>
-      </div>
-
-      <!-- Time range filters -->
-      <div class="time-range-group">
-        <button class="time-range-btn active" data-range="all">all</button>
-        <button class="time-range-btn" data-range="week">week</button>
-        <button class="time-range-btn" data-range="today">today</button>
-      </div>
-
-      <!-- Session-grouped history -->
-      <div id="history-list" class="history-list"></div>
-
-      <!-- Empty state -->
-      <div id="no-history" class="no-history" style="display:none;">
-        <i data-lucide="clock" width="32" height="32"></i>
-        <p>No browsing history found</p>
-      </div>
-
-      <!-- Loading -->
-      <div id="loading-indicator" class="loading-indicator" style="display:none;">Loading...</div>
-
-      <!-- Footer -->
-      <div class="history-footer" id="history-footer">
-        <button id="delete-all" class="btn-clear-all" style="display:none;">Clear All</button>
-      </div>
-
-      <!-- Infinite scroll sentinel -->
-      <div id="scroll-sentinel" style="height:1px;"></div>
     </div>
-  </div>
-</body>
+  </body>
 </html>

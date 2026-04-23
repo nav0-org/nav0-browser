@@ -1,7 +1,7 @@
-import { WebContents } from "electron";
-import { MainToRendererEventsForBrowserIPC } from "../../../constants/app-constants";
-import { DialogRequest } from "../../../types/dialog-types";
-import { OverlayHandler } from "./overlay-handler";
+import { WebContents } from 'electron';
+import { MainToRendererEventsForBrowserIPC } from '../../../constants/app-constants';
+import { DialogRequest } from '../../../types/dialog-types';
+import { OverlayHandler } from './overlay-handler';
 
 export class AlertHandler implements OverlayHandler {
   onShow(webContents: WebContents, data?: DialogRequest): void {

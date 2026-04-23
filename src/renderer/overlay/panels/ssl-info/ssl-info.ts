@@ -1,7 +1,9 @@
 import './ssl-info.css';
 
-const ICON_LOCK = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
-const ICON_WARNING = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+const ICON_LOCK =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+const ICON_WARNING =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
 
 let containerEl: HTMLElement;
 let header: HTMLElement;
@@ -35,7 +37,9 @@ function renderSSLInfo(data: { sslStatus: string; sslDetails: any; url: string }
     const parsed = new URL(data.url);
     hostname = parsed.hostname;
     protocol = parsed.protocol;
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 
   header.classList.remove('secure', 'insecure');
 
@@ -67,7 +71,8 @@ function renderSSLInfo(data: { sslStatus: string; sslDetails: any; url: string }
 
     let html = '';
     if (protocol === 'http:') {
-      html += '<div class="ssl-info-warning-banner">Your connection to this site is not encrypted</div>';
+      html +=
+        '<div class="ssl-info-warning-banner">Your connection to this site is not encrypted</div>';
       html += `<div class="ssl-info-detail">You should not enter any sensitive information on this site (for example, passwords or credit cards), because it could be stolen by attackers.</div>`;
       html += '<div class="ssl-info-protocol">';
       html += `<div><span class="ssl-label">Protocol:</span> <span class="ssl-text-danger">HTTP (not encrypted)</span></div>`;
@@ -81,7 +86,8 @@ function renderSSLInfo(data: { sslStatus: string; sslDetails: any; url: string }
       html += '<li>The identity of this website cannot be verified</li>';
       html += '</ul></div>';
     } else {
-      html += '<div class="ssl-info-warning-banner">Certificate error — you bypassed the warning</div>';
+      html +=
+        '<div class="ssl-info-warning-banner">Certificate error — you bypassed the warning</div>';
       html += `<div class="ssl-info-detail">The certificate for <strong>${escapeHtml(hostname)}</strong> is not trusted. Someone could be intercepting your connection.</div>`;
       html += '<div class="ssl-info-protocol">';
       html += `<div><span class="ssl-label">Protocol:</span> <span class="ssl-text-danger">HTTPS (certificate invalid)</span></div>`;

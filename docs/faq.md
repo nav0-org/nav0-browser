@@ -1,6 +1,6 @@
 ---
-title: "Frequently Asked Questions — Nav0 Browser"
-description: "Answers to common questions about Nav0 — privacy, data collection, features, and how it differs from Chrome, Brave, and Firefox."
+title: 'Frequently Asked Questions — Nav0 Browser'
+description: 'Answers to common questions about Nav0 — privacy, data collection, features, and how it differs from Chrome, Brave, and Firefox.'
 head:
   - - meta
     - property: og:type
@@ -318,14 +318,15 @@ No. Nav0 works fully without any sign-up, sign-in, or registration. There are no
 
 All data is stored **locally on your device**:
 
-| Data | Storage |
-|------|---------|
-| Bookmarks | Local database |
-| History | Local database |
-| Settings | Local config file |
+| Data      | Storage            |
+| --------- | ------------------ |
+| Bookmarks | Local database     |
+| History   | Local database     |
+| Settings  | Local config file  |
 | Downloads | Your chosen folder |
 
 Configuration locations:
+
 - **Windows**: `%APPDATA%/nav0/`
 - **macOS**: `~/Library/Application Support/nav0/`
 - **Linux**: `~/.config/nav0/`
@@ -349,6 +350,7 @@ In private mode, Nav0 saves no history, clears cookies on close, and persists no
 ### How is Nav0 different from Chrome, Edge, or other mainstream browsers?
 
 Unlike mainstream browsers, Nav0:
+
 - Does **not** send browsing data to any server
 - Does **not** require or encourage sign-in
 - Does **not** include advertising or monetization features
@@ -372,6 +374,7 @@ Firefox receives approximately 80-85% of its revenue from **Google search engine
 ### Does Nav0 support browser extensions?
 
 Yes. Nav0 supports extensions. However, third-party extensions have their own privacy policies. We recommend:
+
 - Reviewing extension permissions carefully
 - Using open-source extensions
 - Limiting the number of installed extensions
@@ -435,6 +438,7 @@ Nav0 is a **community project**. It does not monetize users. There are no search
 ### How does Nav0 improve without collecting telemetry?
 
 Through:
+
 - Voluntary bug reports from users
 - GitHub issues and discussions
 - Community feedback

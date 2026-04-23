@@ -1,92 +1,98 @@
-import { defineConfig } from 'vitepress'
-import { readdirSync, readFileSync } from 'node:fs'
-import { resolve, dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
-import packageJson from '../../package.json'
+import { defineConfig } from 'vitepress';
+import { readdirSync, readFileSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import packageJson from '../../package.json';
 
 function getReleaseSidebar() {
-  const releasesDir = resolve(dirname(fileURLToPath(import.meta.url)), '../releases')
-  const files = readdirSync(releasesDir).filter(f => f.endsWith('.md') && f !== 'index.md')
+  const releasesDir = resolve(dirname(fileURLToPath(import.meta.url)), '../releases');
+  const files = readdirSync(releasesDir).filter((f) => f.endsWith('.md') && f !== 'index.md');
 
-  const releases = files.map(file => {
-    const content = readFileSync(resolve(releasesDir, file), 'utf-8')
-    const match = content.match(/^---\n([\s\S]*?)\n---/)
-    if (!match) return null
+  const releases = files
+    .map((file) => {
+      const content = readFileSync(resolve(releasesDir, file), 'utf-8');
+      const match = content.match(/^---\n([\s\S]*?)\n---/);
+      if (!match) return null;
 
-    const frontmatter = match[1]
-    const titleMatch = frontmatter.match(/title:\s*(["'])(.+?)\1/)
-    const dateMatch = frontmatter.match(/^date:\s*(\S+)/m)
+      const frontmatter = match[1];
+      const titleMatch = frontmatter.match(/title:\s*(["'])(.+?)\1/);
+      const dateMatch = frontmatter.match(/^date:\s*(\S+)/m);
 
-    return {
-      text: titleMatch?.[2] || file.replace('.md', ''),
-      date: dateMatch?.[1] || '',
-      link: `/releases/${file.replace('.md', '')}`
-    }
-  }).filter((r): r is { text: string; date: string; link: string } => r !== null)
+      return {
+        text: titleMatch?.[2] || file.replace('.md', ''),
+        date: dateMatch?.[1] || '',
+        link: `/releases/${file.replace('.md', '')}`,
+      };
+    })
+    .filter((r): r is { text: string; date: string; link: string } => r !== null);
 
-  releases.sort((a, b) => +new Date(b.date) - +new Date(a.date))
+  releases.sort((a, b) => +new Date(b.date) - +new Date(a.date));
 
   return [
     {
       text: 'Release Notes',
       items: [
         { text: 'All Releases', link: '/releases/' },
-        ...releases.map(({ text, link }) => ({ text, link }))
-      ]
-    }
-  ]
+        ...releases.map(({ text, link }) => ({ text, link })),
+      ],
+    },
+  ];
 }
 
 function getBlogSidebar() {
-  const blogDir = resolve(dirname(fileURLToPath(import.meta.url)), '../blog')
-  const files = readdirSync(blogDir).filter(f => f.endsWith('.md') && f !== 'index.md')
+  const blogDir = resolve(dirname(fileURLToPath(import.meta.url)), '../blog');
+  const files = readdirSync(blogDir).filter((f) => f.endsWith('.md') && f !== 'index.md');
 
-  const posts = files.map(file => {
-    const content = readFileSync(resolve(blogDir, file), 'utf-8')
-    const match = content.match(/^---\n([\s\S]*?)\n---/)
-    if (!match) return null
+  const posts = files
+    .map((file) => {
+      const content = readFileSync(resolve(blogDir, file), 'utf-8');
+      const match = content.match(/^---\n([\s\S]*?)\n---/);
+      if (!match) return null;
 
-    const frontmatter = match[1]
-    const titleMatch = frontmatter.match(/title:\s*(["'])(.+?)\1/)
-    const dateMatch = frontmatter.match(/^date:\s*(\S+)/m)
+      const frontmatter = match[1];
+      const titleMatch = frontmatter.match(/title:\s*(["'])(.+?)\1/);
+      const dateMatch = frontmatter.match(/^date:\s*(\S+)/m);
 
-    return {
-      text: titleMatch?.[2] || file.replace('.md', ''),
-      date: dateMatch?.[1] || '',
-      link: `/blog/${file.replace('.md', '')}`
-    }
-  }).filter((p): p is { text: string; date: string; link: string } => p !== null)
+      return {
+        text: titleMatch?.[2] || file.replace('.md', ''),
+        date: dateMatch?.[1] || '',
+        link: `/blog/${file.replace('.md', '')}`,
+      };
+    })
+    .filter((p): p is { text: string; date: string; link: string } => p !== null);
 
-  posts.sort((a, b) => +new Date(b.date) - +new Date(a.date))
+  posts.sort((a, b) => +new Date(b.date) - +new Date(a.date));
 
   return [
     {
       text: 'Blog',
       items: [
         { text: 'All Posts', link: '/blog/' },
-        ...posts.map(({ text, link }) => ({ text, link }))
-      ]
-    }
-  ]
+        ...posts.map(({ text, link }) => ({ text, link })),
+      ],
+    },
+  ];
 }
 
-const siteUrl = 'https://nav0.org'
-const siteName = 'Nav0'
-const siteDescription = 'A minimal, privacy-focused web browser. No data collection. No bloat. No AI gimmicks. Just clean, safe browsing.'
-const ogImage = `${siteUrl}/og-image.png`
+const siteUrl = 'https://nav0.org';
+const siteName = 'Nav0';
+const siteDescription =
+  'A minimal, privacy-focused web browser. No data collection. No bloat. No AI gimmicks. Just clean, safe browsing.';
+const ogImage = `${siteUrl}/og-image.png`;
 
 const softwareAppSchema = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
   name: 'Nav0 Browser',
-  description: 'A minimal, privacy-focused web browser built on Electron. No data collection. No bloat. No AI gimmicks.',
+  description:
+    'A minimal, privacy-focused web browser built on Electron. No data collection. No bloat. No AI gimmicks.',
   url: siteUrl,
   applicationCategory: 'BrowserApplication',
   operatingSystem: 'Windows, macOS, Linux',
   offers: {
     '@type': 'Offer',
     price: '0',
-    priceCurrency: 'USD'
+    priceCurrency: 'USD',
   },
   license: 'https://opensource.org/licenses/MIT',
   isAccessibleForFree: true,
@@ -95,7 +101,7 @@ const softwareAppSchema = {
   author: {
     '@type': 'Organization',
     name: 'Nav0',
-    url: siteUrl
+    url: siteUrl,
   },
   featureList: [
     'Zero telemetry',
@@ -122,15 +128,15 @@ const softwareAppSchema = {
     'Browser notifications',
     'Open source',
     'Chromium engine',
-    'Chrome DevTools'
-  ]
-}
+    'Chrome DevTools',
+  ],
+};
 
 const sectionNames: Record<string, { name: string; link: string }> = {
   blog: { name: 'Blog', link: '/blog/' },
   guide: { name: 'Guide', link: '/guide/getting-started' },
-  releases: { name: 'Release Notes', link: '/releases/' }
-}
+  releases: { name: 'Release Notes', link: '/releases/' },
+};
 
 export default defineConfig({
   title: siteName,
@@ -167,38 +173,47 @@ export default defineConfig({
     ['meta', { name: 'twitter:image', content: ogImage }],
 
     // Google Search Console
-    ['meta', { name: 'google-site-verification', content: '9xATJZCv2SiLHb9BMJXHLSOqzbddjf7m2CQWwIqI1I0' }],
+    [
+      'meta',
+      { name: 'google-site-verification', content: '9xATJZCv2SiLHb9BMJXHLSOqzbddjf7m2CQWwIqI1I0' },
+    ],
 
     // Additional SEO
     ['meta', { name: 'author', content: 'Nav0 Contributors' }],
     ['meta', { name: 'robots', content: 'index, follow' }],
 
     // JSON-LD: Organization
-    ['script', { type: 'application/ld+json' }, JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'Organization',
-      name: 'Nav0',
-      url: siteUrl,
-      logo: `${siteUrl}/logo.webp`,
-      description: 'An open-source, privacy-focused web browser project.',
-      sameAs: [
-        'https://github.com/nav0-org/nav0-browser'
-      ]
-    })],
-
-    // JSON-LD: WebSite
-    ['script', { type: 'application/ld+json' }, JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'WebSite',
-      name: siteName,
-      url: siteUrl,
-      description: siteDescription,
-      publisher: {
+    [
+      'script',
+      { type: 'application/ld+json' },
+      JSON.stringify({
+        '@context': 'https://schema.org',
         '@type': 'Organization',
         name: 'Nav0',
-        url: siteUrl
-      }
-    })],
+        url: siteUrl,
+        logo: `${siteUrl}/logo.webp`,
+        description: 'An open-source, privacy-focused web browser project.',
+        sameAs: ['https://github.com/nav0-org/nav0-browser'],
+      }),
+    ],
+
+    // JSON-LD: WebSite
+    [
+      'script',
+      { type: 'application/ld+json' },
+      JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: siteName,
+        url: siteUrl,
+        description: siteDescription,
+        publisher: {
+          '@type': 'Organization',
+          name: 'Nav0',
+          url: siteUrl,
+        },
+      }),
+    ],
   ],
 
   themeConfig: {
@@ -217,9 +232,9 @@ export default defineConfig({
           { text: 'FAQ', link: '/faq' },
           { text: 'Privacy Policy', link: '/privacy-policy' },
           { text: 'Terms of Use', link: '/terms-of-use' },
-          { text: 'Disclaimer', link: '/disclaimer' }
-        ]
-      }
+          { text: 'Disclaimer', link: '/disclaimer' },
+        ],
+      },
     ],
 
     sidebar: {
@@ -228,8 +243,8 @@ export default defineConfig({
           text: 'Introduction',
           items: [
             { text: 'Getting Started', link: '/guide/getting-started' },
-            { text: 'Features', link: '/guide/features' }
-          ]
+            { text: 'Features', link: '/guide/features' },
+          ],
         },
         {
           text: 'Feature Guides',
@@ -238,117 +253,125 @@ export default defineConfig({
             { text: 'Privacy & Tracking Protection', link: '/guide/privacy-protection' },
             { text: 'Private Browsing', link: '/guide/private-browsing' },
             { text: 'Tab Management', link: '/guide/tab-management' },
-            { text: 'Keyboard Shortcuts', link: '/guide/keyboard-shortcuts' }
-          ]
+            { text: 'Keyboard Shortcuts', link: '/guide/keyboard-shortcuts' },
+          ],
         },
         {
           text: 'Core Principles',
           items: [
             { text: 'Privacy', link: '/guide/privacy' },
-            { text: 'Philosophy', link: '/guide/philosophy' }
-          ]
+            { text: 'Philosophy', link: '/guide/philosophy' },
+          ],
         },
         {
           text: 'Community',
-          items: [
-            { text: 'Contributing', link: '/guide/contributing' }
-          ]
-        }
+          items: [{ text: 'Contributing', link: '/guide/contributing' }],
+        },
       ],
       '/blog/': getBlogSidebar(),
-      '/releases/': getReleaseSidebar()
+      '/releases/': getReleaseSidebar(),
     },
 
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/nav0-org/nav0-browser' }
-    ],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/nav0-org/nav0-browser' }],
 
     footer: {
       message: 'Released under the MIT License.',
-      copyright: 'Copyright Ketan Patil'
+      copyright: 'Copyright Ketan Patil',
     },
 
     search: {
-      provider: 'local'
-    }
+      provider: 'local',
+    },
   },
 
   transformPageData(pageData) {
     const canonicalUrl = `${siteUrl}/${pageData.relativePath}`
       .replace(/index\.md$/, '')
-      .replace(/\.md$/, '')
+      .replace(/\.md$/, '');
 
-    pageData.frontmatter.head ??= []
+    pageData.frontmatter.head ??= [];
     pageData.frontmatter.head.push(
       ['link', { rel: 'canonical', href: canonicalUrl }],
       ['meta', { property: 'og:url', content: canonicalUrl }]
-    )
+    );
 
     // Inject SoftwareApplication schema only on relevant pages
-    const softwareAppPages = ['index.md', 'install.md', 'guide/features.md']
+    const softwareAppPages = ['index.md', 'install.md', 'guide/features.md'];
     if (softwareAppPages.includes(pageData.relativePath)) {
-      pageData.frontmatter.head.push(
-        ['script', { type: 'application/ld+json' }, JSON.stringify(softwareAppSchema)]
-      )
+      pageData.frontmatter.head.push([
+        'script',
+        { type: 'application/ld+json' },
+        JSON.stringify(softwareAppSchema),
+      ]);
     }
 
     // Inject BreadcrumbList JSON-LD for all content pages
-    const segments = pageData.relativePath.replace(/\.md$/, '').split('/')
-    const isIndex = segments[segments.length - 1] === 'index'
-    const section = segments.length > 1 ? segments[0] : null
-    const pageTitle = pageData.frontmatter.title || pageData.title || segments[segments.length - 1]
+    const segments = pageData.relativePath.replace(/\.md$/, '').split('/');
+    const isIndex = segments[segments.length - 1] === 'index';
+    const section = segments.length > 1 ? segments[0] : null;
+    const pageTitle = pageData.frontmatter.title || pageData.title || segments[segments.length - 1];
 
-    const breadcrumbItems: Array<{ '@type': string; position: number; name: string; item?: string }> = [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl }
-    ]
+    const breadcrumbItems: Array<{
+      '@type': string;
+      position: number;
+      name: string;
+      item?: string;
+    }> = [{ '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl }];
 
     if (section && sectionNames[section]) {
       breadcrumbItems.push({
         '@type': 'ListItem',
         position: 2,
         name: sectionNames[section].name,
-        item: `${siteUrl}${sectionNames[section].link}`
-      })
+        item: `${siteUrl}${sectionNames[section].link}`,
+      });
 
       if (!isIndex) {
         breadcrumbItems.push({
           '@type': 'ListItem',
           position: 3,
-          name: pageTitle
-        })
+          name: pageTitle,
+        });
       }
     } else if (pageData.relativePath !== 'index.md') {
       breadcrumbItems.push({
         '@type': 'ListItem',
         position: 2,
-        name: pageTitle
-      })
+        name: pageTitle,
+      });
     }
 
     if (breadcrumbItems.length > 1) {
-      pageData.frontmatter.head.push(
-        ['script', { type: 'application/ld+json' }, JSON.stringify({
+      pageData.frontmatter.head.push([
+        'script',
+        { type: 'application/ld+json' },
+        JSON.stringify({
           '@context': 'https://schema.org',
           '@type': 'BreadcrumbList',
-          itemListElement: breadcrumbItems
-        })]
-      )
+          itemListElement: breadcrumbItems,
+        }),
+      ]);
     }
 
     // Inject dateModified into Article JSON-LD for blog posts
     if (pageData.relativePath.startsWith('blog/') && pageData.frontmatter.date) {
-      const dateStr = typeof pageData.frontmatter.date === 'string'
-        ? pageData.frontmatter.date
-        : new Date(pageData.frontmatter.date).toISOString().split('T')[0]
+      const dateStr =
+        typeof pageData.frontmatter.date === 'string'
+          ? pageData.frontmatter.date
+          : new Date(pageData.frontmatter.date).toISOString().split('T')[0];
 
       for (const entry of pageData.frontmatter.head) {
-        if (Array.isArray(entry) && entry[0] === 'script' &&
-            entry[1]?.type === 'application/ld+json' && typeof entry[2] === 'string') {
+        if (
+          Array.isArray(entry) &&
+          entry[0] === 'script' &&
+          entry[1]?.type === 'application/ld+json' &&
+          typeof entry[2] === 'string'
+        ) {
           try {
-            const jsonLd = JSON.parse(entry[2])
+            const jsonLd = JSON.parse(entry[2]);
             if (jsonLd['@type'] === 'Article' && !jsonLd.dateModified) {
-              jsonLd.dateModified = jsonLd.datePublished || dateStr
-              entry[2] = JSON.stringify(jsonLd)
+              jsonLd.dateModified = jsonLd.datePublished || dateStr;
+              entry[2] = JSON.stringify(jsonLd);
             }
           } catch {
             // Skip malformed JSON-LD entries
@@ -356,5 +379,5 @@ export default defineConfig({
         }
       }
     }
-  }
-})
+  },
+});

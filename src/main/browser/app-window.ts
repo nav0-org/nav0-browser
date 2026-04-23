@@ -1,14 +1,24 @@
-import { BrowserWindow, screen, session } from "electron";
-import { v4 as uuid } from "uuid";
-import { Tab } from "./tab";
-import { AppConstants, ClosedTabRecord, InAppUrls, MainToRendererEventsForBrowserIPC } from "../../constants/app-constants";
-import { DownloadManager } from "./download-manager";
-import { PermissionManager } from "./permission-manager";
-import { NotificationManager } from "./notification-manager";
-import { FindInPageManager } from "./find-in-page-manager";
-import { UnifiedOverlayManager, OverlayType } from "./unified-overlay-manager";
+import { BrowserWindow, screen, session } from 'electron';
+import { v4 as uuid } from 'uuid';
+import { Tab } from './tab';
+import {
+  AppConstants,
+  ClosedTabRecord,
+  InAppUrls,
+  MainToRendererEventsForBrowserIPC,
+} from '../../constants/app-constants';
+import { DownloadManager } from './download-manager';
+import { PermissionManager } from './permission-manager';
+import { NotificationManager } from './notification-manager';
+import { FindInPageManager } from './find-in-page-manager';
+import { UnifiedOverlayManager, OverlayType } from './unified-overlay-manager';
 import type { Database as DB } from 'better-sqlite3';
-import type { BasicAuthCreds, BasicAuthRequest, DialogRequest, DialogResponse } from "../../types/dialog-types";
+import type {
+  BasicAuthCreds,
+  BasicAuthRequest,
+  DialogRequest,
+  DialogResponse,
+} from '../../types/dialog-types';
 
 export interface PermissionPromptData {
   requestId: string;
@@ -67,22 +77,28 @@ export class AppWindow {
       height: 800,
       fullscreen: true,
       show: false,
-      title : AppConstants.APP_NAME,
+      title: AppConstants.APP_NAME,
       icon: '../../renderer/assets/logo.png',
       titleBarStyle: isMac ? 'hiddenInset' : 'hidden',
-      ...(isWindows ? {
-        titleBarOverlay: {
-          color: '#ffffff',
-          symbolColor: '#333333',
-          height: 38,
-        },
-      } : {}),
+      ...(isWindows
+        ? {
+            titleBarOverlay: {
+              color: '#ffffff',
+              symbolColor: '#333333',
+              height: 38,
+            },
+          }
+        : {}),
       trafficLightPosition: isMac ? { x: 12, y: 10 } : undefined,
       webPreferences: {
         preload: BROWSER_LAYOUT_PRELOAD_WEBPACK_ENTRY,
         nodeIntegration: false,
         contextIsolation: true,
-        additionalArguments: [`--app-window-id=${this.id}`, `--is-private=${this.isPrivate}`, `--platform=${process.platform}`],
+        additionalArguments: [
+          `--app-window-id=${this.id}`,
+          `--is-private=${this.isPrivate}`,
+          `--platform=${process.platform}`,
+        ],
         sandbox: true,
         webSecurity: true,
         allowRunningInsecureContent: false,
@@ -92,7 +108,11 @@ export class AppWindow {
 
     this.overlayInitPromise = new Promise<void>((resolve) => {
       setTimeout(() => {
-        this.unifiedOverlayManager = new UnifiedOverlayManager(this.id, this.isPrivate, this.partitionSetting);
+        this.unifiedOverlayManager = new UnifiedOverlayManager(
+          this.id,
+          this.isPrivate,
+          this.partitionSetting
+        );
         resolve();
       }, 500);
     });
@@ -101,68 +121,77 @@ export class AppWindow {
 
     this.browserWindowInstance.loadURL(BROWSER_LAYOUT_WEBPACK_ENTRY);
 
-      this.browserWindowInstance.webContents.setWindowOpenHandler(({ url }) => {
-        return { action: 'deny' };
-      });
+    this.browserWindowInstance.webContents.setWindowOpenHandler(({ url }) => {
+      return { action: 'deny' };
+    });
 
-      // Pause all active downloads before the window is destroyed
-      // so their resume metadata can be persisted to the DB
-      this.browserWindowInstance.on('close', () => {
-        DownloadManager.pauseAllDownloads();
-      });
+    // Pause all active downloads before the window is destroyed
+    // so their resume metadata can be persisted to the DB
+    this.browserWindowInstance.on('close', () => {
+      DownloadManager.pauseAllDownloads();
+    });
 
-      this.browserWindowInstance.on('closed', () => {
-        // Resolve any outstanding dialogs / auth prompts so awaiting callers don't hang
-        for (const [, resolve] of this.pendingDialogs) resolve({ confirmed: false });
-        this.pendingDialogs.clear();
-        for (const [, callback] of this.pendingBasicAuth) callback(null);
-        this.pendingBasicAuth.clear();
-        this.browserWindowInstance = null;
-      });
+    this.browserWindowInstance.on('closed', () => {
+      // Resolve any outstanding dialogs / auth prompts so awaiting callers don't hang
+      for (const [, resolve] of this.pendingDialogs) resolve({ confirmed: false });
+      this.pendingDialogs.clear();
+      for (const [, callback] of this.pendingBasicAuth) callback(null);
+      this.pendingBasicAuth.clear();
+      this.browserWindowInstance = null;
+    });
 
-      // When leaving fullscreen, set proper windowed bounds and resize all views.
-      this.browserWindowInstance.on('leave-full-screen', () => {
-        this._desiredFullScreen = false;
-        const { width: screenW, height: screenH } = screen.getPrimaryDisplay().workAreaSize;
-        const w = Math.min(1200, screenW);
-        const h = Math.min(800, screenH);
-        const x = Math.round((screenW - w) / 2);
-        const y = Math.round((screenH - h) / 2);
-        this.browserWindowInstance?.setBounds({ x, y, width: w, height: h });
-        this.handleResizing();
-        this.browserWindowInstance?.webContents.send(MainToRendererEventsForBrowserIPC.FULLSCREEN_CHANGED, { isFullScreen: false });
-      });
+    // When leaving fullscreen, set proper windowed bounds and resize all views.
+    this.browserWindowInstance.on('leave-full-screen', () => {
+      this._desiredFullScreen = false;
+      const { width: screenW, height: screenH } = screen.getPrimaryDisplay().workAreaSize;
+      const w = Math.min(1200, screenW);
+      const h = Math.min(800, screenH);
+      const x = Math.round((screenW - w) / 2);
+      const y = Math.round((screenH - h) / 2);
+      this.browserWindowInstance?.setBounds({ x, y, width: w, height: h });
+      this.handleResizing();
+      this.browserWindowInstance?.webContents.send(
+        MainToRendererEventsForBrowserIPC.FULLSCREEN_CHANGED,
+        { isFullScreen: false }
+      );
+    });
 
-      this.browserWindowInstance.on('enter-full-screen', () => {
-        this._desiredFullScreen = true;
-        this.handleResizing();
-        this.browserWindowInstance?.webContents.send(MainToRendererEventsForBrowserIPC.FULLSCREEN_CHANGED, { isFullScreen: true });
-      });
+    this.browserWindowInstance.on('enter-full-screen', () => {
+      this._desiredFullScreen = true;
+      this.handleResizing();
+      this.browserWindowInstance?.webContents.send(
+        MainToRendererEventsForBrowserIPC.FULLSCREEN_CHANGED,
+        { isFullScreen: true }
+      );
+    });
 
-      this.browserWindowInstance.webContents.on('did-finish-load', async () => {
-        const firstTab = await this.createTab(InAppUrls.NEW_TAB);
-        this.activateTab(firstTab.getId());
+    this.browserWindowInstance.webContents.on('did-finish-load', async () => {
+      const firstTab = await this.createTab(InAppUrls.NEW_TAB);
+      this.activateTab(firstTab.getId());
 
-        this.browserWindowInstance.webContents.send(MainToRendererEventsForBrowserIPC.NEW_TAB_CREATED, {
+      this.browserWindowInstance.webContents.send(
+        MainToRendererEventsForBrowserIPC.NEW_TAB_CREATED,
+        {
           id: firstTab.id,
           title: firstTab.getTitle(),
-          url: firstTab.getUrl()
-        });
-        this.resolveReady();
-        this.browserWindowInstance?.show();
-      });
+          url: firstTab.getUrl(),
+        }
+      );
+      this.resolveReady();
+      this.browserWindowInstance?.show();
+    });
 
-      // this.browserWindowInstance.webContents.openDevTools({mode : 'detach'});
-      this.browserWindowInstance.on('resize', this.handleResizing.bind(this));
+    // this.browserWindowInstance.webContents.openDevTools({mode : 'detach'});
+    this.browserWindowInstance.on('resize', this.handleResizing.bind(this));
   }
 
   public closeWindow(clearSession: boolean) {
     for (const tab of this.tabs.values()) {
       tab.clearPendingTimers();
     }
-    if(clearSession){
+    if (clearSession) {
       PermissionManager.clearMemoryPermissions();
-      const currentSession = session.fromPartition('persist:private')
+      const currentSession = session.fromPartition('persist:private');
       currentSession?.clearAuthCache();
       currentSession?.clearStorageData();
       currentSession?.clearCache();
@@ -176,7 +205,7 @@ export class AppWindow {
     this.browserWindowInstance.close();
   }
 
-  public getViewBounds(): { x: number, y: number, width: number, height: number } | null{
+  public getViewBounds(): { x: number; y: number; width: number; height: number } | null {
     if (this.browserWindowInstance) {
       return this.browserWindowInstance.getBounds();
     }
@@ -213,9 +242,14 @@ export class AppWindow {
     if (!this.browserWindowInstance || !this.getActiveTab()) return;
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
     const yOffset = this.getYOffset();
-    this.getActiveTab().getWebContentsViewInstance()?.setBounds({
-      x: 0, y: yOffset, width: parentBounds.width, height: parentBounds.height - yOffset,
-    });
+    this.getActiveTab()
+      .getWebContentsViewInstance()
+      ?.setBounds({
+        x: 0,
+        y: yOffset,
+        width: parentBounds.width,
+        height: parentBounds.height - yOffset,
+      });
   }
 
   private handleResizing() {
@@ -225,12 +259,14 @@ export class AppWindow {
 
     // Resize active tab
     if (this.getActiveTab()) {
-      this.getActiveTab().getWebContentsViewInstance()?.setBounds({
-        x: 0,
-        y: yOffset,
-        width: parentBounds.width,
-        height: parentBounds.height - yOffset,
-      });
+      this.getActiveTab()
+        .getWebContentsViewInstance()
+        ?.setBounds({
+          x: 0,
+          y: yOffset,
+          width: parentBounds.width,
+          height: parentBounds.height - yOffset,
+        });
     }
 
     // Resize unified overlay if visible
@@ -246,13 +282,16 @@ export class AppWindow {
     const tab = new Tab(this, url, this.partitionSetting);
     this.tabs.set(tab.getId(), tab);
 
-    this.browserWindowInstance?.webContents.send(MainToRendererEventsForBrowserIPC.NEW_TAB_CREATED, {
-      id: tab.id,
-      title: tab.getTitle(),
-      url: tab.getUrl()
-    });
+    this.browserWindowInstance?.webContents.send(
+      MainToRendererEventsForBrowserIPC.NEW_TAB_CREATED,
+      {
+        id: tab.id,
+        title: tab.getTitle(),
+        url: tab.getUrl(),
+      }
+    );
 
-    if(activateNewTab){
+    if (activateNewTab) {
       await tab.whenReady();
       this.activateTab(tab.getId(), true);
     }
@@ -264,11 +303,14 @@ export class AppWindow {
     const tab = new Tab(this, url, this.partitionSetting, { suspended: true, title });
     this.tabs.set(tab.getId(), tab);
 
-    this.browserWindowInstance?.webContents.send(MainToRendererEventsForBrowserIPC.NEW_TAB_CREATED, {
-      id: tab.id,
-      title: tab.getTitle(),
-      url: tab.getUrl()
-    });
+    this.browserWindowInstance?.webContents.send(
+      MainToRendererEventsForBrowserIPC.NEW_TAB_CREATED,
+      {
+        id: tab.id,
+        title: tab.getTitle(),
+        url: tab.getUrl(),
+      }
+    );
 
     return tab;
   }
@@ -326,10 +368,12 @@ export class AppWindow {
     }
     if (this.permissionStripVisible) {
       this.permissionStripVisible = false;
-      this.browserWindowInstance?.webContents.send(MainToRendererEventsForBrowserIPC.HIDE_PERMISSION_STRIP);
+      this.browserWindowInstance?.webContents.send(
+        MainToRendererEventsForBrowserIPC.HIDE_PERMISSION_STRIP
+      );
     }
 
-    if(this.activeTabId && this.getActiveTab()){
+    if (this.activeTabId && this.getActiveTab()) {
       const prevTab = this.getActiveTab();
       prevTab.pauseActiveTime();
       const prevView = prevTab.getWebContentsViewInstance();
@@ -352,7 +396,9 @@ export class AppWindow {
       const findState = this.findInPageState.get(id);
       if (findState) {
         if (tab && tab.getWebContentsViewInstance()) {
-          this.findInPageManager.setActiveTabWebContents(tab.getWebContentsViewInstance().webContents);
+          this.findInPageManager.setActiveTabWebContents(
+            tab.getWebContentsViewInstance().webContents
+          );
         }
         this.findInPageManager.show(findState.searchText);
       }
@@ -367,7 +413,12 @@ export class AppWindow {
 
       const parentBounds = this.browserWindowInstance.contentView.getBounds();
       const yOffset = this.getYOffset();
-      tab.getWebContentsViewInstance()?.setBounds({x: 0, y: yOffset, width: parentBounds.width, height: parentBounds.height - yOffset});
+      tab.getWebContentsViewInstance()?.setBounds({
+        x: 0,
+        y: yOffset,
+        width: parentBounds.width,
+        height: parentBounds.height - yOffset,
+      });
       this.browserWindowInstance.contentView.addChildView(tab.getWebContentsViewInstance());
       // Only focus tab if find bar is not visible (find bar needs input focus)
       if (!this.isFindInPageVisible()) {
@@ -377,7 +428,7 @@ export class AppWindow {
     this.browserWindowInstance?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_ACTIVATED, {
       id: this.getActiveTab().id,
       title: this.getActiveTab().getTitle(),
-      url: this.getActiveTab().getUrl()
+      url: this.getActiveTab().getUrl(),
     });
   }
 
@@ -417,7 +468,7 @@ export class AppWindow {
     }
   }
 
-  updateViewBounds(bounds: { x: number, y: number, width: number, height: number }): void {
+  updateViewBounds(bounds: { x: number; y: number; width: number; height: number }): void {
     if (this.getActiveTab()) {
       this.getActiveTab().getWebContentsViewInstance()?.setBounds(bounds);
     }
@@ -482,10 +533,12 @@ export class AppWindow {
   }
 
   broadcastToTabs(channel: string, data: any): void {
-    this.tabs.forEach(tab => {
+    this.tabs.forEach((tab) => {
       try {
         tab.getWebContentsViewInstance()?.webContents?.send(channel, data);
-      } catch (_) { /* tab may be closing */ }
+      } catch (_) {
+        /* tab may be closing */
+      }
     });
   }
 
@@ -648,7 +701,9 @@ export class AppWindow {
 
     const activeTab = this.getActiveTab();
     if (activeTab && activeTab.getWebContentsViewInstance()) {
-      this.findInPageManager.setActiveTabWebContents(activeTab.getWebContentsViewInstance().webContents);
+      this.findInPageManager.setActiveTabWebContents(
+        activeTab.getWebContentsViewInstance().webContents
+      );
     }
 
     if (this.activeTabId) this.findInPageState.set(this.activeTabId, { searchText: '' });
@@ -687,7 +742,11 @@ export class AppWindow {
 
   private sslInfoDismissedAt = 0;
 
-  async showSSLInfoOverlay(data: { sslStatus: string; sslDetails: any; url: string }): Promise<void> {
+  async showSSLInfoOverlay(data: {
+    sslStatus: string;
+    sslDetails: any;
+    url: string;
+  }): Promise<void> {
     if (!this.browserWindowInstance) return;
     this.hideOptionsMenuOverlay();
     this.hideCommandKOverlay();
@@ -730,10 +789,9 @@ export class AppWindow {
   }
 
   getTabSummaries(): { url: string; title: string }[] {
-    return Array.from(this.tabs.values()).map(tab => ({
+    return Array.from(this.tabs.values()).map((tab) => ({
       url: tab.getUrl(),
       title: tab.getTitle(),
     }));
   }
-
 }

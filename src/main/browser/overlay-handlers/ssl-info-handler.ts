@@ -1,6 +1,6 @@
-import { WebContents } from "electron";
-import { MainToRendererEventsForBrowserIPC } from "../../../constants/app-constants";
-import { OverlayHandler } from "./overlay-handler";
+import { WebContents } from 'electron';
+import { MainToRendererEventsForBrowserIPC } from '../../../constants/app-constants';
+import { OverlayHandler } from './overlay-handler';
 
 export class SSLInfoHandler implements OverlayHandler {
   private onDismiss: (() => void) | null = null;
@@ -26,10 +26,16 @@ export class SSLInfoHandler implements OverlayHandler {
     });
   }
 
-  onShow(webContents: WebContents, data?: { sslStatus: string; sslDetails: any; url: string }): void {
+  onShow(
+    webContents: WebContents,
+    data?: { sslStatus: string; sslDetails: any; url: string }
+  ): void {
     if (data) {
       this._isVisible = true;
-      webContents.send(MainToRendererEventsForBrowserIPC.SHOW_OVERLAY_PANEL, { type: 'ssl-info', data });
+      webContents.send(MainToRendererEventsForBrowserIPC.SHOW_OVERLAY_PANEL, {
+        type: 'ssl-info',
+        data,
+      });
       webContents.focus();
     }
   }

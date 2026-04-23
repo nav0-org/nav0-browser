@@ -1,5 +1,5 @@
-import { Tab } from "./tab";
-import { InAppUrls } from "../../constants/app-constants";
+import { Tab } from './tab';
+import { InAppUrls } from '../../constants/app-constants';
 
 export class BrowserTabManager {
   // DOM Elements
@@ -26,7 +26,7 @@ export class BrowserTabManager {
 
   // State
   private tabs: Tab[] = [];
-  private activeDownloads: Map<string, { receivedBytes: number, totalBytes: number }> = new Map();
+  private activeDownloads: Map<string, { receivedBytes: number; totalBytes: number }> = new Map();
   private activeTabId: string | null = null;
   private appWindowId: string | null = null;
   private isPrivate = false;
@@ -35,7 +35,7 @@ export class BrowserTabManager {
     this.appWindowId = window.BrowserAPI.appWindowId;
     this.isPrivate = window.BrowserAPI.isPrivate;
 
-    if(this.isPrivate){
+    if (this.isPrivate) {
       document.body.classList.add('is-private');
     }
 
@@ -61,11 +61,10 @@ export class BrowserTabManager {
       this.updateBrowserViewBounds();
       window.addEventListener('resize', () => this.updateBrowserViewBounds());
     });
-
   }
 
   public getTabById(tabId: string): Tab | undefined {
-    return this.tabs.find(tab => tab.id === tabId);
+    return this.tabs.find((tab) => tab.id === tabId);
   }
 
   private initializeDomElements(): void {
@@ -84,8 +83,12 @@ export class BrowserTabManager {
     this.unbookmarkButton = document.getElementById('unbookmark-button') as HTMLButtonElement;
     this.readinglistButton = document.getElementById('readinglist-button') as HTMLButtonElement;
     this.downloadsButton = document.getElementById('downloads-button') as HTMLButtonElement;
-    this.downloadProgressRing = document.getElementById('download-progress-ring') as unknown as SVGElement;
-    this.downloadProgressFill = document.querySelector('.download-progress-ring-fill') as unknown as SVGCircleElement;
+    this.downloadProgressRing = document.getElementById(
+      'download-progress-ring'
+    ) as unknown as SVGElement;
+    this.downloadProgressFill = document.querySelector(
+      '.download-progress-ring-fill'
+    ) as unknown as SVGCircleElement;
     this.readerModeButton = document.getElementById('reader-mode-button') as HTMLButtonElement;
     this.pdfDownloadButton = document.getElementById('pdf-download-button') as HTMLButtonElement;
     this.sslIndicator = document.getElementById('ssl-indicator') as HTMLButtonElement;
@@ -125,7 +128,13 @@ export class BrowserTabManager {
     // Click 1: Not bookmarked → add as reference bookmark
     this.bookmarkButton.addEventListener('click', async () => {
       const activeTab = this.getTabById(this.activeTabId);
-      const record = await window.BrowserAPI.addBookmark(this.appWindowId, activeTab.title, activeTab.url, activeTab.faviconUrl, 'reference');
+      const record = await window.BrowserAPI.addBookmark(
+        this.appWindowId,
+        activeTab.title,
+        activeTab.url,
+        activeTab.faviconUrl,
+        'reference'
+      );
       activeTab.isBookmark = true;
       activeTab.bookmarkId = record.id;
       activeTab.bookmarkType = 'reference';
@@ -169,7 +178,7 @@ export class BrowserTabManager {
       window.BrowserAPI.createTab(this.appWindowId, InAppUrls.DOWNLOADS, true);
     });
 
-    this.optionsButton.addEventListener('click', async() => {
+    this.optionsButton.addEventListener('click', async () => {
       await window.BrowserAPI.showOptionsMenu(this.appWindowId);
     });
 
@@ -188,8 +197,8 @@ export class BrowserTabManager {
   }
 
   private setupIpcListeners(): void {
-    window.BrowserAPI.onNewTabCreated((tab: {id: string, url: string, title: string}) => {
-      if(!this.getTabById(tab.id)){
+    window.BrowserAPI.onNewTabCreated((tab: { id: string; url: string; title: string }) => {
+      if (!this.getTabById(tab.id)) {
         this.tabs.push(new Tab(tab.id, tab.url, tab.title));
         this.getTabById(tab.id)?.createTabElement(this.appWindowId);
         this.tabsContainer.appendChild(this.getTabById(tab.id)?.getTabElement());
@@ -198,7 +207,7 @@ export class BrowserTabManager {
     });
 
     // Tab activated
-    window.BrowserAPI.onTabActivated((data: {id: string, url: string}) => {
+    window.BrowserAPI.onTabActivated((data: { id: string; url: string }) => {
       const newActiveTab = this.getTabById(data.id);
       this.activeTabId = data.id;
       this.updateActiveTab();
@@ -213,69 +222,100 @@ export class BrowserTabManager {
     // Tab closed
     window.BrowserAPI.onTabClosed((data: { id: string }) => {
       let newActiveTabId;
-      if(data.id === this.activeTabId){
-        const oldTabIndex = this.tabs.findIndex(tab => tab.id === data.id);
-        if(oldTabIndex === 0 && this.tabs.length > 1){
+      if (data.id === this.activeTabId) {
+        const oldTabIndex = this.tabs.findIndex((tab) => tab.id === data.id);
+        if (oldTabIndex === 0 && this.tabs.length > 1) {
           newActiveTabId = this.tabs[1].id;
-        } else if(oldTabIndex > 0){
+        } else if (oldTabIndex > 0) {
           newActiveTabId = this.tabs[oldTabIndex - 1].id;
         }
       }
 
       this.removeTab(data.id);
-      if(newActiveTabId){
+      if (newActiveTabId) {
         window.BrowserAPI.activateTab(this.appWindowId, newActiveTabId, true);
-      } else if(this.tabs.length === 0){
+      } else if (this.tabs.length === 0) {
         window.BrowserAPI.closeAppWindow(this.appWindowId);
       }
     });
 
     // Tab title updated
-    window.BrowserAPI.onTabTitleUpdated((data: { id: string, title: string }) => {
+    window.BrowserAPI.onTabTitleUpdated((data: { id: string; title: string }) => {
       this.getTabById(data.id)?.updateTabTitle(data.title);
     });
 
     // Tab URL updated
-    window.BrowserAPI.onTabUrlUpdated((data: { id: string, url: string, isBookmark: boolean, bookmarkId: string | null, bookmarkType: 'reference' | 'queue' | null, canGoBack: boolean, canGoForward: boolean, sslStatus?: string, sslDetails?: { issuer: string; validFrom: string; validTo: string; subjectName: string } | null }) => {
-      const tab = this.getTabById(data.id);
-      if (tab) {
-        tab.handleUrlChange(data.url, data.isBookmark, data.bookmarkId, data.bookmarkType, data.canGoBack, data.canGoForward);
-        tab.sslStatus = (data.sslStatus as 'secure' | 'insecure' | 'internal') || 'internal';
-        tab.sslDetails = data.sslDetails || null;
+    window.BrowserAPI.onTabUrlUpdated(
+      (data: {
+        id: string;
+        url: string;
+        isBookmark: boolean;
+        bookmarkId: string | null;
+        bookmarkType: 'reference' | 'queue' | null;
+        canGoBack: boolean;
+        canGoForward: boolean;
+        sslStatus?: string;
+        sslDetails?: {
+          issuer: string;
+          validFrom: string;
+          validTo: string;
+          subjectName: string;
+        } | null;
+      }) => {
+        const tab = this.getTabById(data.id);
+        if (tab) {
+          tab.handleUrlChange(
+            data.url,
+            data.isBookmark,
+            data.bookmarkId,
+            data.bookmarkType,
+            data.canGoBack,
+            data.canGoForward
+          );
+          tab.sslStatus = (data.sslStatus as 'secure' | 'insecure' | 'internal') || 'internal';
+          tab.sslDetails = data.sslDetails || null;
+        }
+        if (data.id === this.activeTabId) {
+          this.urlInput.value = data.url;
+          this.backButton.disabled = !data.canGoBack;
+          this.forwardButton.disabled = !data.canGoForward;
+          this.handleBookmark();
+          this.updateSSLIndicator();
+          this.updatePdfDownloadButton();
+        }
       }
-      if (data.id === this.activeTabId) {
-        this.urlInput.value = data.url;
-        this.backButton.disabled = !data.canGoBack;
-        this.forwardButton.disabled = !data.canGoForward;
-        this.handleBookmark();
-        this.updateSSLIndicator();
-        this.updatePdfDownloadButton();
-      }
-    });
+    );
 
-    window.BrowserAPI.onTabFaviconUpdated((data: { id: string, faviconUrl: string }) => {
+    window.BrowserAPI.onTabFaviconUpdated((data: { id: string; faviconUrl: string }) => {
       this.getTabById(data.id)?.updateTabFavicon(data.faviconUrl);
     });
 
     // Tab loading state changed
-    window.BrowserAPI.onTabLoadingChanged((data: { id: string, isLoading: boolean }) => {
+    window.BrowserAPI.onTabLoadingChanged((data: { id: string; isLoading: boolean }) => {
       this.getTabById(data.id)?.setLoading(data.isLoading);
     });
 
     // Download progress tracking
-    window.BrowserAPI.onDownloadStarted((data: { downloadId: string, fileName: string, totalBytes: number }) => {
-      this.activeDownloads.set(data.downloadId, { receivedBytes: 0, totalBytes: data.totalBytes });
-      this.updateDownloadProgress();
-    });
-
-    window.BrowserAPI.onDownloadProgress((data: { downloadId: string, receivedBytes: number, totalBytes: number }) => {
-      const download = this.activeDownloads.get(data.downloadId);
-      if (download) {
-        download.receivedBytes = data.receivedBytes;
-        download.totalBytes = data.totalBytes;
+    window.BrowserAPI.onDownloadStarted(
+      (data: { downloadId: string; fileName: string; totalBytes: number }) => {
+        this.activeDownloads.set(data.downloadId, {
+          receivedBytes: 0,
+          totalBytes: data.totalBytes,
+        });
+        this.updateDownloadProgress();
       }
-      this.updateDownloadProgress();
-    });
+    );
+
+    window.BrowserAPI.onDownloadProgress(
+      (data: { downloadId: string; receivedBytes: number; totalBytes: number }) => {
+        const download = this.activeDownloads.get(data.downloadId);
+        if (download) {
+          download.receivedBytes = data.receivedBytes;
+          download.totalBytes = data.totalBytes;
+        }
+        this.updateDownloadProgress();
+      }
+    );
 
     window.BrowserAPI.onDownloadCompleted((data: { downloadId: string }) => {
       this.activeDownloads.delete(data.downloadId);
@@ -283,15 +323,17 @@ export class BrowserTabManager {
     });
 
     // Reader mode availability changed
-    window.BrowserAPI.onReaderModeAvailabilityChanged((data: { id: string, isEligible: boolean }) => {
-      const tab = this.getTabById(data.id);
-      if (tab) {
-        tab.isReaderModeEligible = data.isEligible;
-        if (data.id === this.activeTabId) {
-          this.updateReaderModeButton();
+    window.BrowserAPI.onReaderModeAvailabilityChanged(
+      (data: { id: string; isEligible: boolean }) => {
+        const tab = this.getTabById(data.id);
+        if (tab) {
+          tab.isReaderModeEligible = data.isEligible;
+          if (data.id === this.activeTabId) {
+            this.updateReaderModeButton();
+          }
         }
       }
-    });
+    );
 
     // Tab pinned
     window.BrowserAPI.onTabPinned((data: { id: string }) => {
@@ -312,7 +354,7 @@ export class BrowserTabManager {
     });
 
     // Reader mode state changed
-    window.BrowserAPI.onReaderModeStateChanged((data: { id: string, isActive: boolean }) => {
+    window.BrowserAPI.onReaderModeStateChanged((data: { id: string; isActive: boolean }) => {
       const tab = this.getTabById(data.id);
       if (tab) {
         tab.isReaderModeActive = data.isActive;
@@ -369,13 +411,17 @@ export class BrowserTabManager {
     }
     // Detect PDF by URL extension or Chrome's built-in PDF viewer URL
     const url = activeTab.url.toLowerCase();
-    const isPdf = url.endsWith('.pdf') || url.includes('.pdf?') || url.includes('.pdf#') || url.includes('content-type=application/pdf');
+    const isPdf =
+      url.endsWith('.pdf') ||
+      url.includes('.pdf?') ||
+      url.includes('.pdf#') ||
+      url.includes('content-type=application/pdf');
     this.pdfDownloadButton.style.display = isPdf ? 'block' : 'none';
   }
 
   private removeTab(tabId: string): void {
     const tabToBeClosed = this.getTabById(tabId);
-    this.tabs = this.tabs.filter(tab => tab.id !== tabId);
+    this.tabs = this.tabs.filter((tab) => tab.id !== tabId);
 
     if (tabToBeClosed?.getTabElement()) {
       this.tabsContainer.removeChild(tabToBeClosed.getTabElement());
@@ -390,7 +436,7 @@ export class BrowserTabManager {
   }
 
   private updateActiveTab(): void {
-    this.tabs.forEach(tab => {
+    this.tabs.forEach((tab) => {
       if (tab.id === this.activeTabId) {
         tab.activateTab();
       } else {
@@ -450,8 +496,8 @@ export class BrowserTabManager {
   }
 
   private reorderPinnedTabs(): void {
-    const pinnedTabs = this.tabs.filter(t => t.isPinned);
-    const unpinnedTabs = this.tabs.filter(t => !t.isPinned);
+    const pinnedTabs = this.tabs.filter((t) => t.isPinned);
+    const unpinnedTabs = this.tabs.filter((t) => !t.isPinned);
     this.tabs = [...pinnedTabs, ...unpinnedTabs];
 
     // Reorder DOM elements
@@ -473,9 +519,12 @@ export class BrowserTabManager {
   }
 
   // Inline SVG strings for SSL indicator icons (avoids Lucide element replacement issues)
-  private static readonly SSL_ICON_SEARCH = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>';
-  private static readonly SSL_ICON_SECURE = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
-  private static readonly SSL_ICON_INSECURE = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+  private static readonly SSL_ICON_SEARCH =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>';
+  private static readonly SSL_ICON_SECURE =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+  private static readonly SSL_ICON_INSECURE =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
 
   private setupSSLIndicator(): void {
     this.sslIndicator.addEventListener('click', () => {
@@ -525,11 +574,11 @@ export class BrowserTabManager {
 
   private updateBrowserViewBounds(): void {
     const rect = this.browserViewContainer.getBoundingClientRect();
-    window.BrowserAPI.updateBrowserViewBounds(this.appWindowId,{
+    window.BrowserAPI.updateBrowserViewBounds(this.appWindowId, {
       x: 0,
       y: Math.round(rect.top),
       width: Math.round(rect.width),
-      height: Math.round(rect.height)
+      height: Math.round(rect.height),
     });
   }
 }

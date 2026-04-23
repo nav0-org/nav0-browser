@@ -1,6 +1,6 @@
 ---
-title: "Nav0 vs Opera: From Innovation to Monetization"
-description: "Opera pioneered tabbed browsing and mouse gestures — then new ownership shifted its focus toward monetization. Today it ships a browser-only proxy marketed as a VPN, an AI assistant, built-in messengers, a news feed, and a gaming edition. Nav0 just ships a browser."
+title: 'Nav0 vs Opera: From Innovation to Monetization'
+description: 'Opera pioneered tabbed browsing and mouse gestures — then new ownership shifted its focus toward monetization. Today it ships a browser-only proxy marketed as a VPN, an AI assistant, built-in messengers, a news feed, and a gaming edition. Nav0 just ships a browser.'
 date: 2026-04-13
 author: Nav0 Team
 tags: [opera, privacy, comparison, bloat, vpn, telemetry]
@@ -10,7 +10,7 @@ head:
       content: article
   - - meta
     - property: article:published_time
-      content: "2026-04-13"
+      content: '2026-04-13'
   - - meta
     - property: article:author
       content: Nav0 Team
@@ -28,7 +28,7 @@ head:
       content: bloat
   - - meta
     - name: keywords
-      content: "Nav0 vs opera, opera browser privacy, opera vpn, opera telemetry, opera chinese ownership, opera data collection, opera aria ai, opera gx browser, opera bloat, is opera safe, opera browser alternative, opera free vpn proxy, private browser vs opera, minimal browser comparison, best privacy browser 2026, opera browser tracking, opera news feed, does opera sell data, opera browser security, lightweight browser without vpn, browser without ai assistant"
+      content: 'Nav0 vs opera, opera browser privacy, opera vpn, opera telemetry, opera chinese ownership, opera data collection, opera aria ai, opera gx browser, opera bloat, is opera safe, opera browser alternative, opera free vpn proxy, private browser vs opera, minimal browser comparison, best privacy browser 2026, opera browser tracking, opera news feed, does opera sell data, opera browser security, lightweight browser without vpn, browser without ai assistant'
   - - script
     - type: application/ld+json
     - |
@@ -106,21 +106,21 @@ Nav0 is a browser that browses the web. Opera is a browser that browses you.
 
 ## Nav0 vs Opera: Quick Comparison
 
-| Feature | Nav0 | Opera |
-|---------|------|-------|
-| **Telemetry** | Zero | Yes (browsing data, usage stats, device identifiers) |
-| **Open source** | Fully open source (MIT) | Closed source |
-| **Ownership** | Independent, no corporate parent | Kunlun Tech (Beijing, China) |
-| **Built-in "VPN"** | None | Browser-only proxy (not a real VPN) |
-| **AI assistant** | None | Aria (powered by multiple AI models) |
-| **Built-in messengers** | None | WhatsApp, Telegram, Facebook Messenger, Instagram |
-| **News feed** | None | Yes (Opera News, with ads and sponsored content) |
-| **Ad blocker** | Built-in (EasyList, EasyPrivacy) | Built-in |
-| **Crypto wallet** | None | Yes (built-in Web3 wallet) |
-| **Gaming edition** | No | Opera GX (with RAM/CPU limiters, Twitch integration) |
-| **Data sharing with advertisers** | None | Yes (per privacy policy) |
-| **Account system** | None | Opera account with cloud sync |
-| **Business model** | Free, open source, no monetization | Search deals, advertising, sponsored content, data partnerships |
+| Feature                           | Nav0                               | Opera                                                           |
+| --------------------------------- | ---------------------------------- | --------------------------------------------------------------- |
+| **Telemetry**                     | Zero                               | Yes (browsing data, usage stats, device identifiers)            |
+| **Open source**                   | Fully open source (MIT)            | Closed source                                                   |
+| **Ownership**                     | Independent, no corporate parent   | Kunlun Tech (Beijing, China)                                    |
+| **Built-in "VPN"**                | None                               | Browser-only proxy (not a real VPN)                             |
+| **AI assistant**                  | None                               | Aria (powered by multiple AI models)                            |
+| **Built-in messengers**           | None                               | WhatsApp, Telegram, Facebook Messenger, Instagram               |
+| **News feed**                     | None                               | Yes (Opera News, with ads and sponsored content)                |
+| **Ad blocker**                    | Built-in (EasyList, EasyPrivacy)   | Built-in                                                        |
+| **Crypto wallet**                 | None                               | Yes (built-in Web3 wallet)                                      |
+| **Gaming edition**                | No                                 | Opera GX (with RAM/CPU limiters, Twitch integration)            |
+| **Data sharing with advertisers** | None                               | Yes (per privacy policy)                                        |
+| **Account system**                | None                               | Opera account with cloud sync                                   |
+| **Business model**                | Free, open source, no monetization | Search deals, advertising, sponsored content, data partnerships |
 
 ## The Ownership Problem
 
@@ -274,4 +274,4 @@ Opera changed direction. Nav0 never had to — just code, open for anyone to rea
 
 ---
 
-*Nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started).*
+_Nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started)._

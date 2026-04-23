@@ -1,4 +1,4 @@
-@import url("../../styles/global.css");
+@import url('../../styles/global.css');
 
 .hero-section {
   background-color: var(--primary-light);

@@ -1,8 +1,12 @@
-import { DataStoreConstants } from "../../constants/app-constants";
-import { DataStoreManager } from "../database/data-store-manager";
-import { WebContentsView } from "electron";
-import Bluebird from "bluebird";
-import { BrowserSettings, DEFAULT_SEARCH_ENGINES, SearchEngineConfig } from "../../types/settings-types";
+import { DataStoreConstants } from '../../constants/app-constants';
+import { DataStoreManager } from '../database/data-store-manager';
+import { WebContentsView } from 'electron';
+import Bluebird from 'bluebird';
+import {
+  BrowserSettings,
+  DEFAULT_SEARCH_ENGINES,
+  SearchEngineConfig,
+} from '../../types/settings-types';
 
 export abstract class SearchEngine {
   private static getSettings(): BrowserSettings {
@@ -12,9 +16,9 @@ export abstract class SearchEngine {
   private static getSearchEngineConfig(): SearchEngineConfig | null {
     const settings = SearchEngine.getSettings();
     const engineName = settings?.primarySearchEngine || 'DuckDuckGo';
-    const builtIn = DEFAULT_SEARCH_ENGINES.find(e => e.name === engineName);
+    const builtIn = DEFAULT_SEARCH_ENGINES.find((e) => e.name === engineName);
     if (builtIn) return builtIn;
-    const custom = settings?.customSearchEngines?.find(e => e.name === engineName);
+    const custom = settings?.customSearchEngines?.find((e) => e.name === engineName);
     if (custom) return custom;
     return DEFAULT_SEARCH_ENGINES[0];
   }
@@ -43,17 +47,19 @@ export abstract class SearchEngine {
         webSecurity: true,
         allowRunningInsecureContent: false,
         // partition: this.partitionSetting,
-      }
+      },
     });
     webContentsView.webContents.setAudioMuted(true);
-    await webContentsView.webContents.loadURL(searchUrl).catch((error) => {console.error(error);});
+    await webContentsView.webContents.loadURL(searchUrl).catch((error) => {
+      console.error(error);
+    });
     let results: Array<string> = [];
     const engineName = config?.name || 'DuckDuckGo';
-    if(engineName === 'Google'){
+    if (engineName === 'Google') {
       results = await SearchEngine.extractTopSearchResultsForGoogle(webContentsView);
-    } else if(engineName === 'Bing'){
+    } else if (engineName === 'Bing') {
       results = await SearchEngine.extractTopSearchResultsForBing(webContentsView);
-    } else if(engineName === 'DuckDuckGo'){
+    } else if (engineName === 'DuckDuckGo') {
       results = await SearchEngine.extractTopSearchResultsForDuckDuckGo(webContentsView);
     } else {
       results = await SearchEngine.extractTopSearchResultsGeneric(webContentsView);
@@ -62,26 +68,34 @@ export abstract class SearchEngine {
     return results;
   }
 
-  public static async performWebResearch(searchTerm: string): Promise<Array<{source: string, text: string}>> {
+  public static async performWebResearch(
+    searchTerm: string
+  ): Promise<Array<{ source: string; text: string }>> {
     const topResults = await SearchEngine.getTopResults(searchTerm);
 
-    const results: Array<{source: string, text: string}> = [];
-    await Bluebird.map(topResults.slice(0, 5), (url) => {
-      return SearchEngine.extractTextFromURL(url)
-        .then((textContent) => {
-          results.push({source: url, text: textContent});
-          return Promise.resolve();
-        })
-        .catch((error) => {
-          console.error(`Error loading URL ${url}:`, error);
-          return Promise.resolve();
-        });
-    }, {concurrency: 5}); 
+    const results: Array<{ source: string; text: string }> = [];
+    await Bluebird.map(
+      topResults.slice(0, 5),
+      (url) => {
+        return SearchEngine.extractTextFromURL(url)
+          .then((textContent) => {
+            results.push({ source: url, text: textContent });
+            return Promise.resolve();
+          })
+          .catch((error) => {
+            console.error(`Error loading URL ${url}:`, error);
+            return Promise.resolve();
+          });
+      },
+      { concurrency: 5 }
+    );
 
     return results;
   }
 
-  public static async extractTopSearchResultsForGoogle(webContentsView: WebContentsView): Promise<Array<string>> {
+  public static async extractTopSearchResultsForGoogle(
+    webContentsView: WebContentsView
+  ): Promise<Array<string>> {
     return webContentsView.webContents.executeJavaScript(`
       (function() {
         const results = [];
@@ -204,7 +218,9 @@ export abstract class SearchEngine {
     `);
   }
 
-  public static async extractTopSearchResultsForBing(webContentsView: WebContentsView): Promise<Array<string>> {
+  public static async extractTopSearchResultsForBing(
+    webContentsView: WebContentsView
+  ): Promise<Array<string>> {
     return webContentsView.webContents.executeJavaScript(`
       (function() {
         const results = [];
@@ -319,7 +335,9 @@ export abstract class SearchEngine {
     `);
   }
 
-  public static async extractTopSearchResultsForDuckDuckGo(webContentsView: WebContentsView): Promise<Array<string>> {
+  public static async extractTopSearchResultsForDuckDuckGo(
+    webContentsView: WebContentsView
+  ): Promise<Array<string>> {
     return webContentsView.webContents.executeJavaScript(`
       (function() {
         const results = [];
@@ -451,7 +469,9 @@ export abstract class SearchEngine {
     `);
   }
 
-  public static async extractTopSearchResultsGeneric(webContentsView: WebContentsView): Promise<Array<string>> {
+  public static async extractTopSearchResultsGeneric(
+    webContentsView: WebContentsView
+  ): Promise<Array<string>> {
     return webContentsView.webContents.executeJavaScript(`
       (function() {
         const results = [];
@@ -482,17 +502,19 @@ export abstract class SearchEngine {
         webSecurity: true,
         allowRunningInsecureContent: false,
         // partition: this.partitionSetting
-      }
+      },
     });
     webContentsView.webContents.setAudioMuted(true);
-    await webContentsView.webContents.loadURL(url).catch((error) => {console.error(error);});
+    await webContentsView.webContents.loadURL(url).catch((error) => {
+      console.error(error);
+    });
     await webContentsView.webContents.executeJavaScript(`
       const script = document.createElement('script');
       script.src = 'https://cdnjs.cloudflare.com/ajax/libs/readability/0.6.0/Readability.min.js';
       document.head.appendChild(script);
     `);
 
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     let textContent = await webContentsView.webContents.executeJavaScript(`
       (function() {
         const doc = new Readability(document).parse();
@@ -516,5 +538,4 @@ export abstract class SearchEngine {
 
     return textContent;
   }
-
 }

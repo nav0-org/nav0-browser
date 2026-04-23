@@ -7,43 +7,43 @@ export const PermissionSchema: TableSchema = {
       name: 'id',
       columnType: { type: 'uuid' },
       primaryKey: true,
-      notNull: true
+      notNull: true,
     },
     {
       name: 'origin',
       columnType: { type: 'standard', sqlType: 'TEXT' },
-      notNull: true
+      notNull: true,
     },
     {
       name: 'permissionType',
       columnType: { type: 'standard', sqlType: 'TEXT' },
-      notNull: true
+      notNull: true,
     },
     {
       name: 'decision',
       columnType: { type: 'standard', sqlType: 'TEXT' },
-      notNull: true
+      notNull: true,
     },
     {
       name: 'createdAt',
       columnType: { type: 'timestamp', defaultNow: true },
-      notNull: true
+      notNull: true,
     },
     {
       name: 'lastAccessedAt',
       columnType: { type: 'timestamp', defaultNow: true },
-      notNull: true
-    }
+      notNull: true,
+    },
   ],
   indices: [
     {
       name: 'idxPermissionOrigin',
-      columns: ['origin']
+      columns: ['origin'],
     },
     {
       name: 'idxPermissionOriginType',
       columns: ['origin', 'permissionType'],
-      unique: true
-    }
-  ]
+      unique: true,
+    },
+  ],
 };

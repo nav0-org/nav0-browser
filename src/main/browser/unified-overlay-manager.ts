@@ -1,14 +1,21 @@
-import { WebContentsView } from "electron";
-import { OverlayHandler } from "./overlay-handlers/overlay-handler";
-import { CommandKHandler } from "./overlay-handlers/command-k-handler";
-import { CommandOHandler } from "./overlay-handlers/command-o-handler";
-import { OptionsMenuHandler } from "./overlay-handlers/options-menu-handler";
-import { IssueReportHandler } from "./overlay-handlers/issue-report-handler";
-import { SSLInfoHandler } from "./overlay-handlers/ssl-info-handler";
-import { AlertHandler } from "./overlay-handlers/alert-handler";
-import { BasicAuthHandler } from "./overlay-handlers/basic-auth-handler";
+import { WebContentsView } from 'electron';
+import { OverlayHandler } from './overlay-handlers/overlay-handler';
+import { CommandKHandler } from './overlay-handlers/command-k-handler';
+import { CommandOHandler } from './overlay-handlers/command-o-handler';
+import { OptionsMenuHandler } from './overlay-handlers/options-menu-handler';
+import { IssueReportHandler } from './overlay-handlers/issue-report-handler';
+import { SSLInfoHandler } from './overlay-handlers/ssl-info-handler';
+import { AlertHandler } from './overlay-handlers/alert-handler';
+import { BasicAuthHandler } from './overlay-handlers/basic-auth-handler';
 
-export type OverlayType = 'command-k' | 'command-o' | 'options-menu' | 'issue-report' | 'ssl-info' | 'alert' | 'basic-auth';
+export type OverlayType =
+  | 'command-k'
+  | 'command-o'
+  | 'options-menu'
+  | 'issue-report'
+  | 'ssl-info'
+  | 'alert'
+  | 'basic-auth';
 
 export class UnifiedOverlayManager {
   private webContentsViewInstance: WebContentsView;
@@ -29,7 +36,7 @@ export class UnifiedOverlayManager {
         partition: partitionSetting,
         additionalArguments: [`--app-window-id=${appWindowId}`, `--is-private=${isPrivate}`],
         transparent: true,
-      }
+      },
     });
 
     // Set up handlers

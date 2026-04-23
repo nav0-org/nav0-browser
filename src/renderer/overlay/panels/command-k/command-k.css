@@ -158,7 +158,8 @@
   cursor: pointer;
 }
 
-#overlay-command-k .result-item:hover, #overlay-command-k .result-item.active {
+#overlay-command-k .result-item:hover,
+#overlay-command-k .result-item.active {
   background-color: var(--bg-color);
   border-left-color: var(--primary-color);
 }
@@ -212,7 +213,8 @@
   text-overflow: ellipsis;
 }
 
-#overlay-command-k .result-date, #overlay-command-k .result-preview {
+#overlay-command-k .result-date,
+#overlay-command-k .result-preview {
   font-size: var(--font-sm);
   color: var(--text-secondary);
   white-space: nowrap;
@@ -309,8 +311,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 #overlay-command-k .highlight {
@@ -328,4 +334,3 @@
     max-height: 80vh;
   }
 }
-

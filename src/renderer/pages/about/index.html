@@ -1,130 +1,129 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:;">
-  <title>About Nav0</title>
-</head>
-<body>
-
-  <!-- Hero Section -->
-  <section class="hero-section">
-    <div class="container text-center">
-      <h1 class="mb-sm">About Nav0</h1>
-      <p>Software information, build details, and integrity checksums</p>
-    </div>
-  </section>
-
-  <!-- Main Content -->
-  <main class="container container-sm">
-
-    <!-- Version Info Card -->
-    <div class="about-card">
-      <div class="about-card-header">
-        <i data-lucide="box" width="18" height="18"></i>
-        <span>Software</span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:;"
+    />
+    <title>About Nav0</title>
+  </head>
+  <body>
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="container text-center">
+        <h1 class="mb-sm">About Nav0</h1>
+        <p>Software information, build details, and integrity checksums</p>
       </div>
-      <div class="about-card-body">
-        <div class="about-row">
-          <span class="about-label">Nav0 Browser</span>
-          <span class="about-value" id="app-version">--</span>
-        </div>
-        <div class="about-row">
-          <span class="about-label">Electron</span>
-          <span class="about-value" id="electron-version">--</span>
-        </div>
-        <div class="about-row">
-          <span class="about-label">Chromium</span>
-          <span class="about-value" id="chromium-version">--</span>
-        </div>
-        <div class="about-row">
-          <span class="about-label">Node.js</span>
-          <span class="about-value" id="node-version">--</span>
-        </div>
-        <div class="about-row">
-          <span class="about-label">V8</span>
-          <span class="about-value" id="v8-version">--</span>
-        </div>
-      </div>
-    </div>
+    </section>
 
-    <!-- System Info Card -->
-    <div class="about-card">
-      <div class="about-card-header">
-        <i data-lucide="monitor" width="18" height="18"></i>
-        <span>System</span>
-      </div>
-      <div class="about-card-body">
-        <div class="about-row">
-          <span class="about-label">Platform</span>
-          <span class="about-value" id="platform">--</span>
+    <!-- Main Content -->
+    <main class="container container-sm">
+      <!-- Version Info Card -->
+      <div class="about-card">
+        <div class="about-card-header">
+          <i data-lucide="box" width="18" height="18"></i>
+          <span>Software</span>
         </div>
-        <div class="about-row">
-          <span class="about-label">Architecture</span>
-          <span class="about-value" id="arch">--</span>
-        </div>
-        <div class="about-row">
-          <span class="about-label">OS Version</span>
-          <span class="about-value" id="os-version">--</span>
+        <div class="about-card-body">
+          <div class="about-row">
+            <span class="about-label">Nav0 Browser</span>
+            <span class="about-value" id="app-version">--</span>
+          </div>
+          <div class="about-row">
+            <span class="about-label">Electron</span>
+            <span class="about-value" id="electron-version">--</span>
+          </div>
+          <div class="about-row">
+            <span class="about-label">Chromium</span>
+            <span class="about-value" id="chromium-version">--</span>
+          </div>
+          <div class="about-row">
+            <span class="about-label">Node.js</span>
+            <span class="about-value" id="node-version">--</span>
+          </div>
+          <div class="about-row">
+            <span class="about-label">V8</span>
+            <span class="about-value" id="v8-version">--</span>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Integrity Card -->
-    <div class="about-card">
-      <div class="about-card-header">
-        <i data-lucide="shield-check" width="18" height="18"></i>
-        <span>Integrity</span>
-      </div>
-      <div class="about-card-body">
-        <div class="about-row about-row-stacked">
-          <span class="about-label">Executable Checksum (SHA-256)</span>
-          <code class="about-checksum" id="executable-checksum">computing...</code>
+      <!-- System Info Card -->
+      <div class="about-card">
+        <div class="about-card-header">
+          <i data-lucide="monitor" width="18" height="18"></i>
+          <span>System</span>
         </div>
-        <div class="about-row about-row-stacked">
-          <span class="about-label">Package Checksum (SHA-256)</span>
-          <code class="about-checksum" id="asar-checksum">computing...</code>
-        </div>
-        <div class="about-row about-row-stacked">
-          <span class="about-label">Application Path</span>
-          <code class="about-checksum" id="app-path">--</code>
-        </div>
-      </div>
-    </div>
-
-    <!-- Links Card -->
-    <div class="about-card">
-      <div class="about-card-header">
-        <i data-lucide="external-link" width="18" height="18"></i>
-        <span>Links</span>
-      </div>
-      <div class="about-card-body">
-        <div class="about-row about-row-clickable" id="link-release-notes">
-          <span class="about-label">Release Notes</span>
-          <i data-lucide="arrow-up-right" width="14" height="14" class="about-link-icon"></i>
-        </div>
-        <div class="about-row about-row-clickable" id="link-source-code">
-          <span class="about-label">Source Code</span>
-          <i data-lucide="arrow-up-right" width="14" height="14" class="about-link-icon"></i>
-        </div>
-        <div class="about-row about-row-clickable" id="link-report-issue">
-          <span class="about-label">Report an Issue</span>
-          <i data-lucide="arrow-up-right" width="14" height="14" class="about-link-icon"></i>
-        </div>
-        <div class="about-row about-row-clickable" id="link-license">
-          <span class="about-label">License</span>
-          <i data-lucide="arrow-up-right" width="14" height="14" class="about-link-icon"></i>
+        <div class="about-card-body">
+          <div class="about-row">
+            <span class="about-label">Platform</span>
+            <span class="about-value" id="platform">--</span>
+          </div>
+          <div class="about-row">
+            <span class="about-label">Architecture</span>
+            <span class="about-value" id="arch">--</span>
+          </div>
+          <div class="about-row">
+            <span class="about-label">OS Version</span>
+            <span class="about-value" id="os-version">--</span>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Footer -->
-    <div class="about-footer">
-      <p>Nav0 Browser is open-source software released under the MIT License.</p>
-      <p>No telemetry. No data collection. No accounts. Your browsing is your business.</p>
-    </div>
+      <!-- Integrity Card -->
+      <div class="about-card">
+        <div class="about-card-header">
+          <i data-lucide="shield-check" width="18" height="18"></i>
+          <span>Integrity</span>
+        </div>
+        <div class="about-card-body">
+          <div class="about-row about-row-stacked">
+            <span class="about-label">Executable Checksum (SHA-256)</span>
+            <code class="about-checksum" id="executable-checksum">computing...</code>
+          </div>
+          <div class="about-row about-row-stacked">
+            <span class="about-label">Package Checksum (SHA-256)</span>
+            <code class="about-checksum" id="asar-checksum">computing...</code>
+          </div>
+          <div class="about-row about-row-stacked">
+            <span class="about-label">Application Path</span>
+            <code class="about-checksum" id="app-path">--</code>
+          </div>
+        </div>
+      </div>
 
-  </main>
+      <!-- Links Card -->
+      <div class="about-card">
+        <div class="about-card-header">
+          <i data-lucide="external-link" width="18" height="18"></i>
+          <span>Links</span>
+        </div>
+        <div class="about-card-body">
+          <div class="about-row about-row-clickable" id="link-release-notes">
+            <span class="about-label">Release Notes</span>
+            <i data-lucide="arrow-up-right" width="14" height="14" class="about-link-icon"></i>
+          </div>
+          <div class="about-row about-row-clickable" id="link-source-code">
+            <span class="about-label">Source Code</span>
+            <i data-lucide="arrow-up-right" width="14" height="14" class="about-link-icon"></i>
+          </div>
+          <div class="about-row about-row-clickable" id="link-report-issue">
+            <span class="about-label">Report an Issue</span>
+            <i data-lucide="arrow-up-right" width="14" height="14" class="about-link-icon"></i>
+          </div>
+          <div class="about-row about-row-clickable" id="link-license">
+            <span class="about-label">License</span>
+            <i data-lucide="arrow-up-right" width="14" height="14" class="about-link-icon"></i>
+          </div>
+        </div>
+      </div>
 
-</body>
+      <!-- Footer -->
+      <div class="about-footer">
+        <p>Nav0 Browser is open-source software released under the MIT License.</p>
+        <p>No telemetry. No data collection. No accounts. Your browsing is your business.</p>
+      </div>
+    </main>
+  </body>
 </html>

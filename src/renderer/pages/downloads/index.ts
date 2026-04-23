@@ -1,11 +1,15 @@
-
 import { HtmlUtils } from '../../../renderer/common/html-utils';
 import './index.css';
 
 import { createIcons, icons } from 'lucide';
 import { FormatUtils } from '../../../renderer/common/format-utils';
 import { DownloadRecord } from '../../../types/download-record';
-import { TYPE_COLORS, getDisplayTypeFromExtension, hexToRgba, getFileIcon } from '../../../renderer/common/file-type-utils';
+import {
+  TYPE_COLORS,
+  getDisplayTypeFromExtension,
+  hexToRgba,
+  getFileIcon,
+} from '../../../renderer/common/file-type-utils';
 createIcons({ icons });
 
 // ---------------------------------------------------------------------------
@@ -22,7 +26,16 @@ let selectedItemId: string | null = null;
 let allLoadedItems: DownloadRecord[] = [];
 
 // Track active downloads by fileName
-const activeDownloads: Map<string, { receivedBytes: number; totalBytes: number; downloadId: string; dbRecordId: string; state: string }> = new Map();
+const activeDownloads: Map<
+  string,
+  {
+    receivedBytes: number;
+    totalBytes: number;
+    downloadId: string;
+    dbRecordId: string;
+    state: string;
+  }
+> = new Map();
 
 const getDisplayType = (item: DownloadRecord): string => {
   return getDisplayTypeFromExtension(item.fileExtension);
@@ -51,7 +64,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Seed activeDownloads with any downloads already in progress
   const inProgress = await window.BrowserAPI.fetchActiveDownloads();
   for (const d of inProgress) {
-    activeDownloads.set(d.fileName, { receivedBytes: d.receivedBytes, totalBytes: d.totalBytes, downloadId: d.downloadId, dbRecordId: d.dbRecordId, state: d.state });
+    activeDownloads.set(d.fileName, {
+      receivedBytes: d.receivedBytes,
+      totalBytes: d.totalBytes,
+      downloadId: d.downloadId,
+      dbRecordId: d.dbRecordId,
+      state: d.state,
+    });
   }
 
   loadDownloadsPage();
@@ -91,7 +110,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ---- Download lifecycle events ----
 
   window.BrowserAPI.onDownloadStarted((data) => {
-    activeDownloads.set(data.fileName, { receivedBytes: 0, totalBytes: data.totalBytes, downloadId: data.downloadId, dbRecordId: data.dbRecordId, state: 'progressing' });
+    activeDownloads.set(data.fileName, {
+      receivedBytes: 0,
+      totalBytes: data.totalBytes,
+      downloadId: data.downloadId,
+      dbRecordId: data.dbRecordId,
+      state: 'progressing',
+    });
     resetAndReload();
   });
 
@@ -111,7 +136,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       for (const row of rows) {
         const fileName = (row as HTMLElement).dataset.fileName;
         if (fileName && data.downloadId.endsWith(fileName)) {
-          activeDownloads.set(fileName, { receivedBytes: data.receivedBytes, totalBytes: data.totalBytes, downloadId: data.downloadId, dbRecordId: '', state: 'progressing' });
+          activeDownloads.set(fileName, {
+            receivedBytes: data.receivedBytes,
+            totalBytes: data.totalBytes,
+            downloadId: data.downloadId,
+            dbRecordId: '',
+            state: 'progressing',
+          });
           updateProgressBar(fileName, data.receivedBytes, data.totalBytes);
           break;
         }
@@ -123,7 +154,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     activeDownloads.delete(data.fileName);
     removeProgressBar(data.fileName);
     if (data.state === 'cancelled') {
-      const row = downloadsListElement.querySelector(`[data-file-name="${CSS.escape(data.fileName)}"]`);
+      const row = downloadsListElement.querySelector(
+        `[data-file-name="${CSS.escape(data.fileName)}"]`
+      );
       if (row) row.remove();
     }
   });
@@ -162,7 +195,10 @@ const loadDownloadsPage = async (): Promise<void> => {
   showLoadingIndicator();
 
   const downloadData: Array<DownloadRecord> = await window.BrowserAPI.fetchDownloads(
-    window.BrowserAPI.appWindowId, currentSearchTerm, PAGE_SIZE, currentOffset
+    window.BrowserAPI.appWindowId,
+    currentSearchTerm,
+    PAGE_SIZE,
+    currentOffset
   );
 
   removeLoadingIndicator();
@@ -198,7 +234,7 @@ const loadDownloadsPage = async (): Promise<void> => {
 
 const renderTypeFilters = (): void => {
   const typeCounts: Record<string, number> = {};
-  allLoadedItems.forEach(d => {
+  allLoadedItems.forEach((d) => {
     const displayType = getDisplayType(d);
     typeCounts[displayType] = (typeCounts[displayType] || 0) + 1;
   });
@@ -218,7 +254,7 @@ const renderTypeFilters = (): void => {
   });
   typeFiltersContainer.appendChild(allPill);
 
-  types.forEach(type => {
+  types.forEach((type) => {
     const pill = document.createElement('button');
     pill.className = `type-pill${selectedTypeFilter === type ? ' active' : ''}`;
     pill.dataset.type = type;
@@ -234,7 +270,7 @@ const renderTypeFilters = (): void => {
 
 const applyTypeFilter = (): void => {
   const rows = downloadsListElement.querySelectorAll('.download-item-wrapper');
-  rows.forEach(wrapper => {
+  rows.forEach((wrapper) => {
     const el = wrapper as HTMLElement;
     const fileType = el.dataset.fileType;
     if (selectedTypeFilter === 'all' || fileType === selectedTypeFilter) {
@@ -246,7 +282,7 @@ const applyTypeFilter = (): void => {
 
   // Hide/show detail panels based on filter
   const details = downloadsListElement.querySelectorAll('.detail-panel');
-  details.forEach(panel => {
+  details.forEach((panel) => {
     const el = panel as HTMLElement;
     const fileType = el.dataset.fileType;
     if (selectedTypeFilter === 'all' || fileType === selectedTypeFilter) {
@@ -257,7 +293,9 @@ const applyTypeFilter = (): void => {
   });
 
   // Check if any visible
-  const anyVisible = downloadsListElement.querySelector('.download-item-wrapper:not([style*="display: none"])');
+  const anyVisible = downloadsListElement.querySelector(
+    '.download-item-wrapper:not([style*="display: none"])'
+  );
   noDownloads.style.display = anyVisible ? 'none' : 'block';
 };
 
@@ -267,7 +305,7 @@ const applyTypeFilter = (): void => {
 
 const updateStorageGauge = (): void => {
   const byType: Record<string, number> = {};
-  allLoadedItems.forEach(d => {
+  allLoadedItems.forEach((d) => {
     const displayType = getDisplayType(d);
     byType[displayType] = (byType[displayType] || 0) + d.fileSize;
   });
@@ -336,16 +374,18 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
     const sourceHost = extractHostname(item.url);
 
     // Progress values
-    const pct = isActive && activeInfo.totalBytes > 0
-      ? Math.round((activeInfo.receivedBytes / activeInfo.totalBytes) * 100)
-      : 0;
+    const pct =
+      isActive && activeInfo.totalBytes > 0
+        ? Math.round((activeInfo.receivedBytes / activeInfo.totalBytes) * 100)
+        : 0;
 
     // Size display
     let sizeText = '';
     if (isActive && activeInfo.totalBytes > 0) {
       sizeText = `${FormatUtils.formatFileSize(activeInfo.receivedBytes)} / ${FormatUtils.formatFileSize(activeInfo.totalBytes)}`;
     } else if (isActive && activeInfo.totalBytes === 0) {
-      sizeText = activeInfo.receivedBytes > 0 ? FormatUtils.formatFileSize(activeInfo.receivedBytes) : '';
+      sizeText =
+        activeInfo.receivedBytes > 0 ? FormatUtils.formatFileSize(activeInfo.receivedBytes) : '';
     } else if (item.fileSize > 0) {
       sizeText = FormatUtils.formatFileSize(item.fileSize);
     }
@@ -486,7 +526,11 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
 // Detail panel
 // ---------------------------------------------------------------------------
 
-const toggleDetailPanel = (item: DownloadRecord, wrapper: HTMLElement, sourceHost: string): void => {
+const toggleDetailPanel = (
+  item: DownloadRecord,
+  wrapper: HTMLElement,
+  sourceHost: string
+): void => {
   // If already selected, close it
   if (selectedItemId === item.id) {
     selectedItemId = null;
@@ -499,7 +543,9 @@ const toggleDetailPanel = (item: DownloadRecord, wrapper: HTMLElement, sourceHos
   // Close any previously open panel
   const prevPanel = downloadsListElement.querySelector('.detail-panel');
   if (prevPanel) prevPanel.remove();
-  downloadsListElement.querySelectorAll('.download-item.selected').forEach(el => el.classList.remove('selected'));
+  downloadsListElement
+    .querySelectorAll('.download-item.selected')
+    .forEach((el) => el.classList.remove('selected'));
 
   selectedItemId = item.id;
   wrapper.querySelector('.download-item')?.classList.add('selected');
@@ -577,7 +623,9 @@ const toggleDetailPanel = (item: DownloadRecord, wrapper: HTMLElement, sourceHos
 // ---------------------------------------------------------------------------
 
 const updateProgressBar = (fileName: string, receivedBytes: number, totalBytes: number): void => {
-  const row = downloadsListElement.querySelector(`.download-item[data-file-name="${CSS.escape(fileName)}"]`);
+  const row = downloadsListElement.querySelector(
+    `.download-item[data-file-name="${CSS.escape(fileName)}"]`
+  );
   if (!row) return;
   row.classList.add('downloading');
   row.classList.remove('paused');
@@ -620,7 +668,9 @@ const updateProgressBar = (fileName: string, receivedBytes: number, totalBytes: 
 };
 
 const removeProgressBar = (fileName: string): void => {
-  const row = downloadsListElement.querySelector(`.download-item[data-file-name="${CSS.escape(fileName)}"]`);
+  const row = downloadsListElement.querySelector(
+    `.download-item[data-file-name="${CSS.escape(fileName)}"]`
+  );
   if (!row) return;
   row.classList.remove('downloading', 'paused');
   row.querySelector('.download-progress')?.remove();
@@ -636,7 +686,9 @@ const removeProgressBar = (fileName: string): void => {
 };
 
 const setRowPaused = (fileName: string): void => {
-  const row = downloadsListElement.querySelector(`.download-item[data-file-name="${CSS.escape(fileName)}"]`) as HTMLElement;
+  const row = downloadsListElement.querySelector(
+    `.download-item[data-file-name="${CSS.escape(fileName)}"]`
+  ) as HTMLElement;
   if (!row) return;
   row.classList.add('paused');
 
@@ -672,7 +724,9 @@ const setRowPaused = (fileName: string): void => {
 };
 
 const setRowResumed = (fileName: string): void => {
-  const row = downloadsListElement.querySelector(`.download-item[data-file-name="${CSS.escape(fileName)}"]`) as HTMLElement;
+  const row = downloadsListElement.querySelector(
+    `.download-item[data-file-name="${CSS.escape(fileName)}"]`
+  ) as HTMLElement;
   if (!row) return;
   row.classList.remove('paused');
 
@@ -694,7 +748,8 @@ const setRowResumed = (fileName: string): void => {
   // Restore progress bar color
   const progressFill = row.querySelector('.download-progress-fill') as HTMLElement;
   if (progressFill) {
-    const fileType = row.closest('.download-item-wrapper')?.getAttribute('data-file-type') || 'other';
+    const fileType =
+      row.closest('.download-item-wrapper')?.getAttribute('data-file-type') || 'other';
     progressFill.style.background = TYPE_COLORS[fileType] || '#a1a1aa';
   }
 
@@ -731,4 +786,3 @@ const extractHostname = (url: string): string => {
     return url;
   }
 };
-

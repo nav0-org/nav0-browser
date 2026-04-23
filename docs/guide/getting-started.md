@@ -1,6 +1,6 @@
 ---
-title: "Getting Started with Nav0 Browser — Installation & Setup"
-description: "Get started with Nav0 — a minimal, privacy-focused browser. Install on macOS, Windows, or Linux with no account, no setup dialogs, and no data collection."
+title: 'Getting Started with Nav0 Browser — Installation & Setup'
+description: 'Get started with Nav0 — a minimal, privacy-focused browser. Install on macOS, Windows, or Linux with no account, no setup dialogs, and no data collection.'
 head:
   - - script
     - type: application/ld+json
@@ -117,20 +117,21 @@ Just a browser, ready to use.
 
 ### Keyboard Shortcuts
 
-| Action | Windows/Linux | macOS |
-|--------|---------------|-------|
-| New Tab | `Ctrl+T` | `Cmd+T` |
-| Close Tab | `Ctrl+W` | `Cmd+W` |
-| Reload | `Ctrl+R` | `Cmd+R` |
-| Address Bar | `Ctrl+L` | `Cmd+L` |
-| Find in Page | `Ctrl+F` | `Cmd+F` |
-| Developer Tools | `F12` | `Cmd+Option+I` |
+| Action          | Windows/Linux | macOS          |
+| --------------- | ------------- | -------------- |
+| New Tab         | `Ctrl+T`      | `Cmd+T`        |
+| Close Tab       | `Ctrl+W`      | `Cmd+W`        |
+| Reload          | `Ctrl+R`      | `Cmd+R`        |
+| Address Bar     | `Ctrl+L`      | `Cmd+L`        |
+| Find in Page    | `Ctrl+F`      | `Cmd+F`        |
+| Developer Tools | `F12`         | `Cmd+Option+I` |
 
 ## Configuration
 
 Nav0 stores its configuration locally on your machine. No cloud sync, no account needed.
 
 Configuration location:
+
 - **Windows**: `%APPDATA%/nav0/`
 - **macOS**: `~/Library/Application Support/nav0/`
 - **Linux**: `~/.config/nav0/`

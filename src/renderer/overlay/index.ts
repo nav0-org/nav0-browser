@@ -10,15 +10,25 @@ import * as sslInfoPanel from './panels/ssl-info/ssl-info';
 import * as alertPanel from './panels/alert/alert';
 import * as basicAuthPanel from './panels/basic-auth/basic-auth';
 
-type PanelName = 'command-k' | 'command-o' | 'options-menu' | 'issue-report' | 'ssl-info' | 'alert' | 'basic-auth';
+type PanelName =
+  | 'command-k'
+  | 'command-o'
+  | 'options-menu'
+  | 'issue-report'
+  | 'ssl-info'
+  | 'alert'
+  | 'basic-auth';
 
-const panels: Record<PanelName, { init: (container: HTMLElement) => void; show: (data?: any) => void; hide: () => void }> = {
+const panels: Record<
+  PanelName,
+  { init: (container: HTMLElement) => void; show: (data?: any) => void; hide: () => void }
+> = {
   'command-k': commandKPanel,
   'command-o': commandOPanel,
   'options-menu': optionsMenuPanel,
   'issue-report': issueReportPanel,
   'ssl-info': sslInfoPanel,
-  'alert': alertPanel,
+  alert: alertPanel,
   'basic-auth': basicAuthPanel,
 };
 

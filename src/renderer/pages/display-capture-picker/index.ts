@@ -74,14 +74,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const pick = () => {
       selectedIdx = source.idx;
-      grid.querySelectorAll('.picker-source.selected').forEach((el) => el.classList.remove('selected'));
+      grid
+        .querySelectorAll('.picker-source.selected')
+        .forEach((el) => el.classList.remove('selected'));
       card.classList.add('selected');
       shareBtn.disabled = false;
     };
     card.addEventListener('click', pick);
-    card.addEventListener('dblclick', () => { pick(); commit(); });
+    card.addEventListener('dblclick', () => {
+      pick();
+      commit();
+    });
     card.addEventListener('keydown', (e: KeyboardEvent) => {
-      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); pick(); }
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        pick();
+      }
     });
     grid.appendChild(card);
   });

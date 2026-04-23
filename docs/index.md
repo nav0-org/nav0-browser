@@ -1,21 +1,21 @@
 ---
 layout: home
-title: "Nav0 — Minimal Privacy Browser | No Data Collection, No Bloat"
-description: "Nav0 is a free, open-source desktop browser that collects zero data. No telemetry, no AI, no crypto. Just a browser that browses. Windows, macOS, and Linux."
+title: 'Nav0 — Minimal Privacy Browser | No Data Collection, No Bloat'
+description: 'Nav0 is a free, open-source desktop browser that collects zero data. No telemetry, no AI, no crypto. Just a browser that browses. Windows, macOS, and Linux.'
 head:
   - - meta
     - property: og:title
-      content: "Nav0 — Minimal Privacy Browser | No Data Collection, No Bloat"
+      content: 'Nav0 — Minimal Privacy Browser | No Data Collection, No Bloat'
   - - meta
     - property: og:description
-      content: "Nav0 is a free, open-source desktop browser that collects zero data. No telemetry, no AI, no crypto. Just a browser that browses. Windows, macOS, and Linux."
+      content: 'Nav0 is a free, open-source desktop browser that collects zero data. No telemetry, no AI, no crypto. Just a browser that browses. Windows, macOS, and Linux.'
 hero:
   name: Nav0
   text: Browse. Nothing More.
   tagline: A minimal, privacy-focused web browser. No data collection. No bloat. No AI gimmicks. Just clean, safe browsing.
   image:
     src: /logo.svg
-    alt: "Nav0 logo"
+    alt: 'Nav0 logo'
   actions:
     - theme: brand
       text: Get Started
@@ -64,7 +64,7 @@ We believe a browser should do one thing well: let you browse the web. That's it
 Nav0 = navigate + nought (bloat)
 ```
 
-> **How do you pronounce Nav0?** It's **"Nav Nought"** — *nought* meaning zero, because your browser should collect nought.
+> **How do you pronounce Nav0?** It's **"Nav Nought"** — _nought_ meaning zero, because your browser should collect nought.
 
 ### The Problem with Modern Browsers
 

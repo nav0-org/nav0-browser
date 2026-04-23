@@ -1,10 +1,18 @@
-import { session, ipcMain, app, webContents } from "electron";
-import { DataStoreConstants, RendererToMainEventsForBrowserIPC, MULTI_PART_TLDS } from "../../constants/app-constants";
-import { DataStoreManager } from "../database/data-store-manager";
-import { DatabaseManager } from "../database/database-manager";
-import { BrowserSettings, DEFAULT_BROWSER_SETTINGS, USER_AGENT_PRESETS } from "../../types/settings-types";
-import { AD_BLOCK_DOMAINS, AD_URL_PATTERNS } from "../ad-blocker/ad-block-lists";
-import { applyClientHints, alignUAWithRealChromeVersion } from "../browser/ua-switcher";
+import { session, ipcMain, app, webContents } from 'electron';
+import {
+  DataStoreConstants,
+  RendererToMainEventsForBrowserIPC,
+  MULTI_PART_TLDS,
+} from '../../constants/app-constants';
+import { DataStoreManager } from '../database/data-store-manager';
+import { DatabaseManager } from '../database/database-manager';
+import {
+  BrowserSettings,
+  DEFAULT_BROWSER_SETTINGS,
+  USER_AGENT_PRESETS,
+} from '../../types/settings-types';
+import { AD_BLOCK_DOMAINS, AD_URL_PATTERNS } from '../ad-blocker/ad-block-lists';
+import { applyClientHints, alignUAWithRealChromeVersion } from '../browser/ua-switcher';
 
 export abstract class SettingsEnforcer {
   private static autoDeleteInterval: ReturnType<typeof setInterval> | null = null;
@@ -32,7 +40,9 @@ export abstract class SettingsEnforcer {
         if (wc.isDevToolsOpened()) {
           wc.closeDevTools();
         }
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
   }
 
@@ -54,18 +64,24 @@ export abstract class SettingsEnforcer {
       return true;
     });
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.CLEAR_BROWSING_DATA, async (event, options: {
-      timeRange: string;
-      browsingHistory: boolean;
-      downloadHistory: boolean;
-      cookiesSiteData: boolean;
-      cachedFiles: boolean;
-      autofillData: boolean;
-      savedPasswords: boolean;
-      sitePermissions: boolean;
-    }) => {
-      return SettingsEnforcer.clearBrowsingData(options);
-    });
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.CLEAR_BROWSING_DATA,
+      async (
+        event,
+        options: {
+          timeRange: string;
+          browsingHistory: boolean;
+          downloadHistory: boolean;
+          cookiesSiteData: boolean;
+          cachedFiles: boolean;
+          autofillData: boolean;
+          savedPasswords: boolean;
+          sitePermissions: boolean;
+        }
+      ) => {
+        return SettingsEnforcer.clearBrowsingData(options);
+      }
+    );
 
     ipcMain.handle(RendererToMainEventsForBrowserIPC.GET_COOKIE_COUNT, async () => {
       return SettingsEnforcer.getCookieCount();
@@ -126,7 +142,9 @@ export abstract class SettingsEnforcer {
         let isGoogleSignIn = false;
         try {
           isGoogleSignIn = new URL(details.url).hostname === 'accounts.google.com';
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
 
         if (isGoogleSignIn && !hasCustomUserAgent) {
           headers['User-Agent'] = SettingsEnforcer.getFirefoxUA();
@@ -150,14 +168,17 @@ export abstract class SettingsEnforcer {
   private static getFirefoxUA(): string {
     const rootUAs = {
       mac: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:FXVERSION.0) Gecko/20100101 Firefox/FXVERSION.0',
-      windows: 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:FXVERSION.0) Gecko/20100101 Firefox/FXVERSION.0',
-      linux: 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:FXVERSION.0) Gecko/20100101 Firefox/FXVERSION.0',
+      windows:
+        'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:FXVERSION.0) Gecko/20100101 Firefox/FXVERSION.0',
+      linux:
+        'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:FXVERSION.0) Gecko/20100101 Firefox/FXVERSION.0',
     };
     let rootUA: string;
     if (process.platform === 'win32') rootUA = rootUAs.windows;
     else if (process.platform === 'darwin') rootUA = rootUAs.mac;
     else rootUA = rootUAs.linux;
-    const fxVersion = 91 + Math.floor((Date.now() - 1628553600000) / (4.1 * 7 * 24 * 60 * 60 * 1000));
+    const fxVersion =
+      91 + Math.floor((Date.now() - 1628553600000) / (4.1 * 7 * 24 * 60 * 60 * 1000));
     return rootUA.replace(/FXVERSION/g, String(fxVersion));
   }
 
@@ -176,14 +197,18 @@ export abstract class SettingsEnforcer {
       return;
     }
 
-    if (settings.cookiePolicy === 'block-all-third-party' || settings.cookiePolicy === 'block-with-exceptions') {
+    if (
+      settings.cookiePolicy === 'block-all-third-party' ||
+      settings.cookiePolicy === 'block-with-exceptions'
+    ) {
       ses.webRequest.onHeadersReceived((details, callback) => {
         if (!details.responseHeaders) {
           callback({});
           return;
         }
 
-        const setCookieHeaders = details.responseHeaders['set-cookie'] || details.responseHeaders['Set-Cookie'];
+        const setCookieHeaders =
+          details.responseHeaders['set-cookie'] || details.responseHeaders['Set-Cookie'];
         if (!setCookieHeaders) {
           callback({ responseHeaders: details.responseHeaders });
           return;
@@ -209,7 +234,7 @@ export abstract class SettingsEnforcer {
           // Check exceptions
           if (settings.cookiePolicy === 'block-with-exceptions') {
             const requestDomain = requestUrl.hostname.toLowerCase();
-            const isExempt = settings.cookieExceptions.some(exception => {
+            const isExempt = settings.cookieExceptions.some((exception) => {
               const exDomain = exception.toLowerCase().trim();
               return requestDomain === exDomain || requestDomain.endsWith('.' + exDomain);
             });
@@ -281,7 +306,14 @@ export abstract class SettingsEnforcer {
 
   // ---- User Agent ----
   private static resolveUserAgentPreset(settings: BrowserSettings): string {
-    return settings.userAgentPreset || (process.platform === 'darwin' ? 'chrome-mac' : process.platform === 'linux' ? 'chrome-linux' : 'chrome-windows');
+    return (
+      settings.userAgentPreset ||
+      (process.platform === 'darwin'
+        ? 'chrome-mac'
+        : process.platform === 'linux'
+          ? 'chrome-linux'
+          : 'chrome-windows')
+    );
   }
 
   private static applyUserAgent(settings: BrowserSettings) {
@@ -339,7 +371,10 @@ export abstract class SettingsEnforcer {
     // Build domain blocklist from comprehensive ad/tracker domains
     SettingsEnforcer.adBlockDomains = new Set(AD_BLOCK_DOMAINS);
 
-    const requestHandler = (details: Electron.OnBeforeRequestListenerDetails, callback: (response: Electron.CallbackResponse) => void) => {
+    const requestHandler = (
+      details: Electron.OnBeforeRequestListenerDetails,
+      callback: (response: Electron.CallbackResponse) => void
+    ) => {
       const currentSettings = SettingsEnforcer.getSettings();
       if (!currentSettings.adBlockerEnabled) {
         callback({});
@@ -356,14 +391,18 @@ export abstract class SettingsEnforcer {
           try {
             const topUrl = new URL(topFrameUrl);
             const topDomain = topUrl.hostname;
-            if ((currentSettings.adBlockerAllowedSites || []).some(site => {
-              const siteDomain = site.toLowerCase().trim();
-              return topDomain === siteDomain || topDomain.endsWith('.' + siteDomain);
-            })) {
+            if (
+              (currentSettings.adBlockerAllowedSites || []).some((site) => {
+                const siteDomain = site.toLowerCase().trim();
+                return topDomain === siteDomain || topDomain.endsWith('.' + siteDomain);
+              })
+            ) {
               callback({});
               return;
             }
-          } catch { /* ignore */ }
+          } catch {
+            /* ignore */
+          }
         }
 
         // Check if hostname matches any blocked domain
@@ -386,7 +425,9 @@ export abstract class SettingsEnforcer {
             return;
           }
         }
-      } catch { /* ignore parse errors */ }
+      } catch {
+        /* ignore parse errors */
+      }
 
       callback({});
     };
@@ -439,7 +480,7 @@ export abstract class SettingsEnforcer {
       const days = parseInt(settings.retentionBrowsingHistory);
       if (!isNaN(days)) {
         const cutoff = new Date(now - days * 24 * 60 * 60 * 1000).toISOString();
-        db.prepare("DELETE FROM browsingHistory WHERE createdDate < ?").run(cutoff);
+        db.prepare('DELETE FROM browsingHistory WHERE createdDate < ?').run(cutoff);
       }
     }
 
@@ -448,7 +489,7 @@ export abstract class SettingsEnforcer {
       const days = parseInt(settings.retentionDownloadHistory);
       if (!isNaN(days)) {
         const cutoff = new Date(now - days * 24 * 60 * 60 * 1000).toISOString();
-        db.prepare("DELETE FROM download WHERE createdDate < ?").run(cutoff);
+        db.prepare('DELETE FROM download WHERE createdDate < ?').run(cutoff);
       }
     }
 
@@ -458,13 +499,15 @@ export abstract class SettingsEnforcer {
       if (!isNaN(days)) {
         const ses = session.fromPartition('persist:browsertabs');
         const cookies = await ses.cookies.get({});
-        const cutoff = (now / 1000) - (days * 24 * 60 * 60);
+        const cutoff = now / 1000 - days * 24 * 60 * 60;
         for (const cookie of cookies) {
           if (cookie.expirationDate && cookie.expirationDate < cutoff) {
             try {
               const url = `${cookie.secure ? 'https' : 'http'}://${cookie.domain?.replace(/^\./, '')}${cookie.path || '/'}`;
               await ses.cookies.remove(url, cookie.name);
-            } catch { /* ignore */ }
+            } catch {
+              /* ignore */
+            }
           }
         }
       }
@@ -516,20 +559,20 @@ export abstract class SettingsEnforcer {
 
     if (options.browsingHistory) {
       if (cutoff) {
-        const result = db.prepare("DELETE FROM browsingHistory WHERE createdDate >= ?").run(cutoff);
+        const result = db.prepare('DELETE FROM browsingHistory WHERE createdDate >= ?').run(cutoff);
         deletedCount += result.changes;
       } else {
-        const result = db.prepare("DELETE FROM browsingHistory").run();
+        const result = db.prepare('DELETE FROM browsingHistory').run();
         deletedCount += result.changes;
       }
     }
 
     if (options.downloadHistory) {
       if (cutoff) {
-        const result = db.prepare("DELETE FROM download WHERE createdDate >= ?").run(cutoff);
+        const result = db.prepare('DELETE FROM download WHERE createdDate >= ?').run(cutoff);
         deletedCount += result.changes;
       } else {
-        const result = db.prepare("DELETE FROM download").run();
+        const result = db.prepare('DELETE FROM download').run();
         deletedCount += result.changes;
       }
     }
@@ -548,15 +591,19 @@ export abstract class SettingsEnforcer {
   private static async clearAllHistory() {
     try {
       const db = DatabaseManager.getDatabase(false);
-      db.prepare("DELETE FROM browsingHistory").run();
-    } catch (e) { console.error('Failed to clear history:', e); }
+      db.prepare('DELETE FROM browsingHistory').run();
+    } catch (e) {
+      console.error('Failed to clear history:', e);
+    }
   }
 
   private static async clearAllCookies() {
     try {
       const ses = session.fromPartition('persist:browsertabs');
       await ses.clearStorageData({ storages: ['cookies', 'localstorage'] });
-    } catch (e) { console.error('Failed to clear cookies:', e); }
+    } catch (e) {
+      console.error('Failed to clear cookies:', e);
+    }
   }
 
   private static async clearAllCache() {
@@ -564,7 +611,9 @@ export abstract class SettingsEnforcer {
       const ses = session.fromPartition('persist:browsertabs');
       await ses.clearCache();
       await ses.clearCodeCaches({});
-    } catch (e) { console.error('Failed to clear cache:', e); }
+    } catch (e) {
+      console.error('Failed to clear cache:', e);
+    }
   }
 
   private static async getCookieCount(): Promise<{ count: number }> {

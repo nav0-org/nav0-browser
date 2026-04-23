@@ -23,8 +23,11 @@ contextBridge.exposeInMainWorld('__Nav0Geo', {
 });
 
 contextBridge.exposeInMainWorld('__Nav0Share', {
-  share: (data: { title?: string; text?: string; url?: string }): Promise<{ success: boolean; error?: string }> =>
-    ipcRenderer.invoke('web-share', data),
+  share: (data: {
+    title?: string;
+    text?: string;
+    url?: string;
+  }): Promise<{ success: boolean; error?: string }> => ipcRenderer.invoke('web-share', data),
 });
 
 // ─── Notification API Bridge ───────────────────────────────────────
@@ -47,10 +50,8 @@ contextBridge.exposeInMainWorld('__Nav0Notify', {
   close: (id: string): void => {
     ipcRenderer.send('notification:close', id);
   },
-  getPermissionSync: (): string =>
-    ipcRenderer.sendSync('notification:check-permission'),
-  requestPermission: (): Promise<string> =>
-    ipcRenderer.invoke('notification:request-permission'),
+  getPermissionSync: (): string => ipcRenderer.sendSync('notification:check-permission'),
+  requestPermission: (): Promise<string> => ipcRenderer.invoke('notification:request-permission'),
   onEvent: (callback: (data: { id: string; type: string }) => void): void => {
     notifEventCallback = callback;
   },
@@ -66,9 +67,16 @@ ipcRenderer.on('notification:event', (_event, data: { id: string; type: string }
 // returns a response — preserving site semantics (e.g. scripts that test
 // confirm()'s return value before continuing).
 contextBridge.exposeInMainWorld('__Nav0Dialog', {
-  requestSync: (payload: { kind: 'alert' | 'confirm' | 'prompt'; message: string; defaultValue?: string }): { confirmed: boolean; value?: string } => {
+  requestSync: (payload: {
+    kind: 'alert' | 'confirm' | 'prompt';
+    message: string;
+    defaultValue?: string;
+  }): { confirmed: boolean; value?: string } => {
     try {
-      return ipcRenderer.sendSync(RendererToMainEventsForBrowserIPC.WEB_CONTENT_DIALOG_REQUEST, payload);
+      return ipcRenderer.sendSync(
+        RendererToMainEventsForBrowserIPC.WEB_CONTENT_DIALOG_REQUEST,
+        payload
+      );
     } catch {
       return { confirmed: false };
     }
@@ -375,7 +383,8 @@ function injectPolyfill(): void {
       }
     }
 
-    const code = POLYFILL_CODE + SHARE_POLYFILL_CODE + NOTIFICATION_POLYFILL_CODE + DIALOG_POLYFILL_CODE;
+    const code =
+      POLYFILL_CODE + SHARE_POLYFILL_CODE + NOTIFICATION_POLYFILL_CODE + DIALOG_POLYFILL_CODE;
 
     // Use a blob URL instead of inline script to avoid CSP violations.
     // Blob URLs are allowed by most CSPs that include 'blob:' in script-src.
@@ -467,7 +476,9 @@ function injectGoogleChromeRuntimeStub(): void {
         }
       })();
     `;
-    webFrame.executeJavaScript(code).catch(() => { /* ignore */ });
+    webFrame.executeJavaScript(code).catch(() => {
+      /* ignore */
+    });
   } catch {
     // Ignore — preload should never throw into the page.
   }

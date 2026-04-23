@@ -15,17 +15,17 @@
   --text-color: #333;
   --text-secondary: #777;
   --text-light: #999;
-  
+
   /* Background colors */
   --bg-color: #f5f5f5;
   --bg-light: #fff;
-  --bg-hover: #D3D3D3;
+  --bg-hover: #d3d3d3;
   --bg-active: #f5f5f5;
-  
+
   /* Border colors */
   --border-color: #e0e0e0;
   --border-color-dark: #ccc;
-  
+
   /* Feedback colors */
   --error-color: #e74c3c;
   --error-light: #fdecea;
@@ -35,17 +35,17 @@
   --success-light: #eafaf1;
   --info-color: #3498db;
   --info-light: #ebf5fb;
-  
+
   /* Shadows */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 2px 10px rgba(0, 0, 0, 0.05);
   --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.12);
-  
+
   /* Animation speeds */
   --transition-fast: 0.15s;
   --transition-medium: 0.3s;
   --transition-slow: 0.5s;
-  
+
   /* Spacing variables */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
@@ -53,7 +53,7 @@
   --spacing-lg: 24px;
   --spacing-xl: 32px;
   --spacing-xxl: 48px;
-  
+
   /* Font sizes */
   --font-xs: 11px;
   --font-sm: 12px;
@@ -62,7 +62,7 @@
   --font-xl: 18px;
   --font-xxl: 24px;
   --font-xxxl: 32px;
-  
+
   /* Border radius */
   --radius-sm: 3px;
   --radius-md: 6px;
@@ -70,7 +70,7 @@
   --radius-xl: 12px;
   --radius-pill: 500px;
   --radius-circle: 50%;
-  
+
   /* Z-index layers */
   --z-dropdown: 100;
   --z-sticky: 200;
@@ -85,10 +85,11 @@
   box-sizing: border-box;
   /* margin: 0;
   padding: 0; */
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   width: 100%;
   overflow-x: hidden;
@@ -104,7 +105,12 @@ body {
   margin: 0px 0px 0px 0px;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: var(--text-color);
   font-weight: 600;
   line-height: 1.3;
@@ -429,7 +435,8 @@ img {
   cursor: not-allowed;
 }
 
-.btn i, .btn svg {
+.btn i,
+.btn svg {
   margin-right: var(--spacing-sm);
 }
 
@@ -735,7 +742,7 @@ img {
   .d-none-sm {
     display: none !important;
   }
-  
+
   .container {
     padding: 0 var(--spacing-sm);
   }
@@ -745,11 +752,11 @@ img {
   .d-sm-none {
     display: none !important;
   }
-  
+
   .d-sm-block {
     display: block !important;
   }
-  
+
   .d-sm-flex {
     display: flex !important;
   }
@@ -759,11 +766,11 @@ img {
   .d-md-none {
     display: none !important;
   }
-  
+
   .d-md-block {
     display: block !important;
   }
-  
+
   .d-md-flex {
     display: flex !important;
   }
@@ -773,11 +780,11 @@ img {
   .d-lg-none {
     display: none !important;
   }
-  
+
   .d-lg-block {
     display: block !important;
   }
-  
+
   .d-lg-flex {
     display: flex !important;
   }
@@ -787,11 +794,11 @@ img {
   .d-xl-none {
     display: none !important;
   }
-  
+
   .d-xl-block {
     display: block !important;
   }
-  
+
   .d-xl-flex {
     display: flex !important;
   }

@@ -23,6 +23,7 @@ curl -fsSL https://raw.githubusercontent.com/nav0-org/nav0-browser/main/install.
 ### Windows / Linux
 
 Download from [GitHub Releases](https://github.com/nav0-org/nav0-browser/releases):
+
 - **Windows**: `.exe` installer
 - **Linux**: `.deb` (Debian/Ubuntu) or `.rpm` (Fedora/RHEL)
 
@@ -76,4 +77,4 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-*Your browsing is your business. Not ours. Not anyone's.*
+_Your browsing is your business. Not ours. Not anyone's._

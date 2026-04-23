@@ -1,5 +1,5 @@
 ---
-title: "Nav0 vs Vivaldi: When Your Browser Tries to Be Everything"
+title: 'Nav0 vs Vivaldi: When Your Browser Tries to Be Everything'
 description: "Vivaldi is the most customizable browser ever built — mail client, calendar, RSS reader, note-taking, and hundreds of settings. Nav0 takes the opposite approach: do less, perfectly. Here's why a browser that does everything may not do the one thing you need it to."
 date: 2026-03-29
 author: Nav0 Team
@@ -10,7 +10,7 @@ head:
       content: article
   - - meta
     - property: article:published_time
-      content: "2026-03-29"
+      content: '2026-03-29'
   - - meta
     - property: article:author
       content: Nav0 Team
@@ -28,7 +28,7 @@ head:
       content: bloat
   - - meta
     - name: keywords
-      content: "Nav0 vs vivaldi, vivaldi browser privacy, vivaldi bloat, vivaldi telemetry, vivaldi mail calendar, vivaldi customization, minimal browser vs vivaldi, private browser comparison, vivaldi closed source browser, vivaldi resource usage memory, lightweight open source browser alternative, vivaldi vs minimal browser 2026, best privacy browser no telemetry, browser without cloud sync accounts"
+      content: 'Nav0 vs vivaldi, vivaldi browser privacy, vivaldi bloat, vivaldi telemetry, vivaldi mail calendar, vivaldi customization, minimal browser vs vivaldi, private browser comparison, vivaldi closed source browser, vivaldi resource usage memory, lightweight open source browser alternative, vivaldi vs minimal browser 2026, best privacy browser no telemetry, browser without cloud sync accounts'
   - - script
     - type: application/ld+json
     - |
@@ -106,23 +106,23 @@ These browsers represent opposite philosophies about what software should be. Vi
 
 ### Nav0 vs Vivaldi: Quick Comparison
 
-| Feature | Nav0 | Vivaldi |
-|---------|------|---------|
-| **Open source** | Fully open source (MIT) | UI layer is closed source |
-| **Telemetry** | Zero | Daily pings with unique installation ID |
-| **Cloud sync / accounts** | None — all data stays local | Vivaldi account with encrypted cloud sync |
-| **Built-in mail client** | No | Yes |
-| **Built-in calendar** | No | Yes |
-| **Built-in RSS reader** | No | Yes |
-| **Built-in note-taking** | No | Yes |
-| **Extension support** | No | Yes (Chrome extensions) |
-| **Ad blocker** | Built-in | Built-in |
-| **Reader mode** | Built-in | Built-in |
-| **Mobile apps** | No (desktop only) | Yes (iOS and Android) |
-| **Customization** | Minimal, opinionated defaults | Extremely customizable |
-| **Resource usage** | Lightweight, minimal background processes | Higher due to bundled features |
-| **Translation** | None (no data sent to third parties) | Lingvanex (page content sent to third-party servers) |
-| **License** | MIT | Proprietary (Chromium base is open source) |
+| Feature                   | Nav0                                      | Vivaldi                                              |
+| ------------------------- | ----------------------------------------- | ---------------------------------------------------- |
+| **Open source**           | Fully open source (MIT)                   | UI layer is closed source                            |
+| **Telemetry**             | Zero                                      | Daily pings with unique installation ID              |
+| **Cloud sync / accounts** | None — all data stays local               | Vivaldi account with encrypted cloud sync            |
+| **Built-in mail client**  | No                                        | Yes                                                  |
+| **Built-in calendar**     | No                                        | Yes                                                  |
+| **Built-in RSS reader**   | No                                        | Yes                                                  |
+| **Built-in note-taking**  | No                                        | Yes                                                  |
+| **Extension support**     | No                                        | Yes (Chrome extensions)                              |
+| **Ad blocker**            | Built-in                                  | Built-in                                             |
+| **Reader mode**           | Built-in                                  | Built-in                                             |
+| **Mobile apps**           | No (desktop only)                         | Yes (iOS and Android)                                |
+| **Customization**         | Minimal, opinionated defaults             | Extremely customizable                               |
+| **Resource usage**        | Lightweight, minimal background processes | Higher due to bundled features                       |
+| **Translation**           | None (no data sent to third parties)      | Lingvanex (page content sent to third-party servers) |
+| **License**               | MIT                                       | Proprietary (Chromium base is open source)           |
 
 ## The Everything App
 
@@ -270,4 +270,4 @@ Nav0 browses the web. Nothing more. And that's exactly enough.
 
 ---
 
-*Nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started).*
+_Nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started)._

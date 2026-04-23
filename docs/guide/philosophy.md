@@ -1,6 +1,6 @@
 ---
-title: "Nav0 Philosophy — Why We Built a Minimal Browser"
-description: "Nav0 exists because browsers got bloated. Read the philosophy behind building a browser that does one thing: browse the web."
+title: 'Nav0 Philosophy — Why We Built a Minimal Browser'
+description: 'Nav0 exists because browsers got bloated. Read the philosophy behind building a browser that does one thing: browse the web.'
 ---
 
 # Philosophy
@@ -67,6 +67,7 @@ Nav0 browses the web. That's it.
 This principle comes from the Unix philosophy: write programs that do one thing and do it well. A browser's job is to fetch web pages, render them correctly, keep you safe while doing so, and get out of the way. Everything else is scope creep.
 
 We don't try to be:
+
 - **Your AI assistant.** If you want AI, open an AI tool in a tab. Your browser doesn't need to embed one, and it definitely doesn't need to read your pages to power one.
 - **Your news source.** Algorithmic news feeds in browsers are engagement traps designed to keep you inside the vendor's ecosystem. If you want news, visit a news site.
 - **Your password manager.** Dedicated password managers like Bitwarden and KeePass are purpose-built, independently audited, and cross-platform. A browser-integrated password manager is a convenience that comes with lock-in.
@@ -99,6 +100,7 @@ This means Nav0 will always have fewer features than Chrome, Edge, or Firefox. T
 Your data belongs on your device, under your control.
 
 In Nav0:
+
 - **Bookmarks:** stored locally in a database on your machine
 - **History:** stored locally, never transmitted anywhere
 - **Settings:** local configuration, not synced to any server
@@ -128,6 +130,7 @@ This matters because trust in software must be verifiable. When a browser vendor
 Open source also provides a structural guarantee against enshittification. If Nav0 ever abandons its principles — if a future maintainer adds telemetry or inserts advertising — the community can fork the project and continue from the last trustworthy version. The code belongs to everyone. The project is bigger than any individual or organization.
 
 This transparency extends to what we don't do. Nav0 has:
+
 - No obfuscated code
 - No binary blobs with unknown functionality
 - No proprietary protocols
@@ -145,11 +148,13 @@ Most browser vendors have a fundamental conflict of interest. Their revenue depe
 Nav0 has no such conflict because we have no advertising business, no data brokerage, and no analytics platform.
 
 We succeed when:
+
 - **Users have a fast, responsive browser** that doesn't waste their time or their hardware's resources
 - **Users maintain their privacy** without needing to configure anything, disable anything, or opt out of anything
 - **Users trust their tools** because those tools are transparent, predictable, and honest about what they do
 
 We don't succeed by:
+
 - Collecting user metrics to optimize engagement
 - Building user profiles to sell targeted advertising
 - Monetizing user attention through algorithmic content
@@ -179,6 +184,7 @@ Simplicity is frequently misunderstood. When we say Nav0 is simple, we don't mea
 - **Incomplete.** Nav0 isn't a work in progress that will eventually grow into a full-featured browser. The minimal feature set is the finished product. We're not building toward complexity; we're maintaining simplicity.
 
 Simplicity means:
+
 - **Focused.** Every element of the interface serves a clear purpose related to browsing the web. There are no distractions, no promotional content, no features competing for your attention.
 - **Understandable.** You shouldn't need documentation to use a browser. Nav0's interface is self-explanatory because there's nothing extraneous to confuse you.
 - **Maintainable.** Simple software is easier to audit, easier to debug, and less likely to contain hidden defects. Fewer moving parts means fewer things that can break.
@@ -189,6 +195,7 @@ Simplicity means:
 Open source is more than a development methodology or a licensing choice. It's a statement about the relationship between software and the people who use it.
 
 Open source means:
+
 - **Transparency.** The code is visible. The development process is visible. There's nowhere to hide tracking code, data collection, or anti-user behavior.
 - **Trust through verification.** "Don't trust us — verify" is not a slogan. It's a genuine invitation. We expect users and security researchers to audit our code. We welcome it.
 - **Community ownership.** No single entity can take Nav0 away from its users. The code is published under the MIT License. If the project changes direction, the community can fork it. This structural guarantee against enshittification is one of the most important properties of open source software.
@@ -206,18 +213,18 @@ That's what a browser is. That's what Nav0 does.
 
 Choosing what not to build is as important as choosing what to build. These exclusions are not temporary gaps in our feature list — they are permanent, principled decisions.
 
-| Feature | Why It's Excluded |
-|---------|-------------------|
-| **User accounts / sign-in** | Accounts create persistent identifiers. No account means no profile, no tracking across sessions, no data to breach. |
-| **Sync services** | Sync requires cloud infrastructure, accounts, and server-side data storage. All of these conflict with local-first principles. |
-| **AI assistants** | AI features send page content to cloud servers, consume resources, add complexity, and create new data collection vectors. Use AI tools directly if you need them. |
-| **News feeds** | Algorithmic content feeds are engagement traps designed to keep you in the browser vendor's ecosystem. They are advertising, not a feature. |
-| **Cryptocurrency wallets** | A browser is not a financial application. Bundling a wallet adds attack surface and complexity for a feature unrelated to browsing. |
-| **Built-in VPN** | Browser VPNs are typically paid upsells that route your traffic through the vendor's servers. Use a dedicated, independently audited VPN if you need one. |
-| **Telemetry / analytics** | We don't collect usage data. Not "anonymized" data, not "optional" data, not "aggregated" data. Zero. |
-| **Shopping / coupon features** | These features monitor your purchases and insert the browser vendor into your transactions. They exist to monetize your browsing, not to help you. |
-| **Reading lists / collections** | Bookmarks and bookmark folders handle this. We don't need three different organizational features when one works fine. |
-| **Sidebar panels** | Sidebars are screen real estate claimed by the browser for features unrelated to the page you're viewing. Nav0 maximizes the space for actual web content. |
+| Feature                         | Why It's Excluded                                                                                                                                                  |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **User accounts / sign-in**     | Accounts create persistent identifiers. No account means no profile, no tracking across sessions, no data to breach.                                               |
+| **Sync services**               | Sync requires cloud infrastructure, accounts, and server-side data storage. All of these conflict with local-first principles.                                     |
+| **AI assistants**               | AI features send page content to cloud servers, consume resources, add complexity, and create new data collection vectors. Use AI tools directly if you need them. |
+| **News feeds**                  | Algorithmic content feeds are engagement traps designed to keep you in the browser vendor's ecosystem. They are advertising, not a feature.                        |
+| **Cryptocurrency wallets**      | A browser is not a financial application. Bundling a wallet adds attack surface and complexity for a feature unrelated to browsing.                                |
+| **Built-in VPN**                | Browser VPNs are typically paid upsells that route your traffic through the vendor's servers. Use a dedicated, independently audited VPN if you need one.          |
+| **Telemetry / analytics**       | We don't collect usage data. Not "anonymized" data, not "optional" data, not "aggregated" data. Zero.                                                              |
+| **Shopping / coupon features**  | These features monitor your purchases and insert the browser vendor into your transactions. They exist to monetize your browsing, not to help you.                 |
+| **Reading lists / collections** | Bookmarks and bookmark folders handle this. We don't need three different organizational features when one works fine.                                             |
+| **Sidebar panels**              | Sidebars are screen real estate claimed by the browser for features unrelated to the page you're viewing. Nav0 maximizes the space for actual web content.         |
 
 ## The Nav0 Way
 
@@ -226,6 +233,7 @@ Choosing what not to build is as important as choosing what to build. These excl
 The most important word in Nav0's vocabulary is "no."
 
 We say no to features that:
+
 - Collect data, whether the user knows about it or not
 - Require accounts or persistent identifiers
 - Add complexity without directly improving the core browsing experience
@@ -239,6 +247,7 @@ Saying no is difficult in an industry that measures progress by feature count. B
 ### We Say Yes
 
 We say yes to improvements that:
+
 - Make page loading measurably faster
 - Increase security against real, documented threats
 - Reduce memory usage and CPU consumption
@@ -252,12 +261,14 @@ We say yes to improvements that:
 The web evolves constantly. New standards emerge. Security threats change. Hardware capabilities advance. A browser must adapt to serve its users on the modern web.
 
 But adapting to change is not the same as chasing trends. Adapting means:
+
 - Supporting new web standards so sites render correctly
 - Updating security measures against emerging threats
 - Optimizing performance for modern hardware
 - Fixing compatibility issues as the web evolves
 
 Adapting does not mean:
+
 - Adding every feature competitors ship
 - Following hype cycles (AI, crypto, metaverse, whatever's next)
 - Copying the design decisions of browsers with different values
@@ -293,5 +304,5 @@ Let's build that browser.
 
 ---
 
-*"Perfection is achieved not when there is nothing more to add, but when there is nothing left to take away."*
+_"Perfection is achieved not when there is nothing more to add, but when there is nothing left to take away."_
 — Antoine de Saint-Exupéry

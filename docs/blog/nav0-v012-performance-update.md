@@ -1,6 +1,6 @@
 ---
-title: "Nav0 v0.1.2 Performance Update: Even Lighter on the Same Hardware"
-description: "We re-ran our Nav0 vs Chrome performance benchmark on the same MacBook Pro M1 with Nav0 v0.1.2. Memory dropped up to 21%, CPU dropped up to 36%, and Nav0 still uses 45% less memory and 77% less CPU than Chrome."
+title: 'Nav0 v0.1.2 Performance Update: Even Lighter on the Same Hardware'
+description: 'We re-ran our Nav0 vs Chrome performance benchmark on the same MacBook Pro M1 with Nav0 v0.1.2. Memory dropped up to 21%, CPU dropped up to 36%, and Nav0 still uses 45% less memory and 77% less CPU than Chrome.'
 date: 2026-04-05
 author: Nav0 Team
 tags: [performance, benchmark, chrome, memory, cpu, macos, update]
@@ -10,7 +10,7 @@ head:
       content: article
   - - meta
     - property: article:published_time
-      content: "2026-04-05"
+      content: '2026-04-05'
   - - meta
     - property: article:author
       content: Nav0 Team
@@ -31,7 +31,7 @@ head:
       content: update
   - - meta
     - name: keywords
-      content: "Nav0 v0.1.2 performance, Nav0 vs chrome 2026, browser performance benchmark update, chrome memory usage 50 tabs, Nav0 memory improvement, lightweight browser macos, chrome RAM usage, browser CPU benchmark M1, Nav0 browser update, best low memory browser 2026, chrome too many processes, browser benchmark macos M1, Nav0 vs chrome memory, electron browser performance, chrome high memory usage fix"
+      content: 'Nav0 v0.1.2 performance, Nav0 vs chrome 2026, browser performance benchmark update, chrome memory usage 50 tabs, Nav0 memory improvement, lightweight browser macos, chrome RAM usage, browser CPU benchmark M1, Nav0 browser update, best low memory browser 2026, chrome too many processes, browser benchmark macos M1, Nav0 vs chrome memory, electron browser performance, chrome high memory usage fix'
   - - script
     - type: application/ld+json
     - |
@@ -115,37 +115,37 @@ For full details on the testing methodology — how we measure memory, CPU, proc
 
 ### Memory Usage
 
-| Tabs | v0.0.6 | v0.1.2 | Improvement |
-|------|--------|--------|-------------|
-| 10 | 1,247 MB | 1,162 MB | -85 MB (-6.8%) |
-| 20 | 2,461 MB | 2,243 MB | -218 MB (-8.9%) |
-| 30 | 3,755 MB | 3,632 MB | -123 MB (-3.3%) |
-| 40 | 4,345 MB | 3,417 MB | -928 MB (-21.4%) |
-| 50 | 4,294 MB | 4,287 MB | -7 MB (-0.2%) |
+| Tabs | v0.0.6   | v0.1.2   | Improvement      |
+| ---- | -------- | -------- | ---------------- |
+| 10   | 1,247 MB | 1,162 MB | -85 MB (-6.8%)   |
+| 20   | 2,461 MB | 2,243 MB | -218 MB (-8.9%)  |
+| 30   | 3,755 MB | 3,632 MB | -123 MB (-3.3%)  |
+| 40   | 4,345 MB | 3,417 MB | -928 MB (-21.4%) |
+| 50   | 4,294 MB | 4,287 MB | -7 MB (-0.2%)    |
 
 Memory improved across every tab count. The biggest gain was at 40 tabs, where v0.1.2 uses nearly 1 GB less RAM than v0.0.6. The efficient scaling behavior we noted in the original benchmark — memory growth flattening at higher tab counts — is still present. At 50 tabs, Nav0 uses roughly the same memory as at 40 tabs on v0.0.6.
 
 ### CPU Usage
 
-| Tabs | v0.0.6 | v0.1.2 | Improvement |
-|------|--------|--------|-------------|
-| 10 | 8.0% | 5.5% | -2.5 pts (-31.3%) |
-| 20 | 9.1% | 5.8% | -3.3 pts (-36.3%) |
-| 30 | 11.8% | 11.4% | -0.4 pts (-3.1%) |
-| 40 | 12.0% | 8.9% | -3.1 pts (-26.2%) |
-| 50 | 24.4% | 20.0% | -4.4 pts (-18.0%) |
+| Tabs | v0.0.6 | v0.1.2 | Improvement       |
+| ---- | ------ | ------ | ----------------- |
+| 10   | 8.0%   | 5.5%   | -2.5 pts (-31.3%) |
+| 20   | 9.1%   | 5.8%   | -3.3 pts (-36.3%) |
+| 30   | 11.8%  | 11.4%  | -0.4 pts (-3.1%)  |
+| 40   | 12.0%  | 8.9%   | -3.1 pts (-26.2%) |
+| 50   | 24.4%  | 20.0%  | -4.4 pts (-18.0%) |
 
 CPU dropped at every tab count. The average across all tests went from 13.1% to 10.3%. At 10 and 20 tabs — where most people browse — CPU usage dropped by about a third.
 
 ### Process Count
 
 | Tabs | v0.0.6 | v0.1.2 | Improvement |
-|------|--------|--------|-------------|
-| 10 | 22 | 18 | -4 (-18.2%) |
-| 20 | 34 | 30 | -4 (-11.8%) |
-| 30 | 43 | 41 | -2 (-4.7%) |
-| 40 | 53 | 51 | -2 (-3.8%) |
-| 50 | 62 | 61 | -1 (-1.6%) |
+| ---- | ------ | ------ | ----------- |
+| 10   | 22     | 18     | -4 (-18.2%) |
+| 20   | 34     | 30     | -4 (-11.8%) |
+| 30   | 43     | 41     | -2 (-4.7%)  |
+| 40   | 53     | 51     | -2 (-3.8%)  |
+| 50   | 62     | 61     | -1 (-1.6%)  |
 
 Slightly fewer processes across the board, with the biggest reduction at lower tab counts.
 
@@ -155,13 +155,13 @@ Here's how v0.1.2 stacks up against the current version of Chrome on the same M1
 
 ### Memory Usage
 
-| Tabs | Chrome | Nav0 v0.1.2 | Difference |
-|------|--------|-------------|------------|
-| 10 | 1,174 MB | 1,162 MB | -12 MB (-1.0%) |
-| 20 | 4,155 MB | 2,243 MB | -1,912 MB (-46.0%) |
-| 30 | 5,377 MB | 3,632 MB | -1,745 MB (-32.5%) |
-| 40 | 6,012 MB | 3,417 MB | -2,595 MB (-43.2%) |
-| 50 | 10,292 MB | 4,287 MB | -6,005 MB (-58.3%) |
+| Tabs | Chrome    | Nav0 v0.1.2 | Difference         |
+| ---- | --------- | ----------- | ------------------ |
+| 10   | 1,174 MB  | 1,162 MB    | -12 MB (-1.0%)     |
+| 20   | 4,155 MB  | 2,243 MB    | -1,912 MB (-46.0%) |
+| 30   | 5,377 MB  | 3,632 MB    | -1,745 MB (-32.5%) |
+| 40   | 6,012 MB  | 3,417 MB    | -2,595 MB (-43.2%) |
+| 50   | 10,292 MB | 4,287 MB    | -6,005 MB (-58.3%) |
 
 At 50 tabs, Chrome consumed over 10 GB. Nav0 used 4.3 GB — saving nearly 6 GB of RAM. Chrome's behavior at 50 tabs is particularly striking: it jumped from 6 GB at 40 tabs to over 10 GB, suggesting the system was under pressure. Nav0 scaled gracefully from 3.4 GB to 4.3 GB.
 
@@ -169,13 +169,13 @@ At 50 tabs, Chrome consumed over 10 GB. Nav0 used 4.3 GB — saving nearly 6 GB 
 
 ### CPU Usage
 
-| Tabs | Chrome | Nav0 v0.1.2 | Difference |
-|------|--------|-------------|------------|
-| 10 | 15.4% | 5.5% | -9.9 pts (-64.2%) |
-| 20 | 15.3% | 5.8% | -9.5 pts (-62.1%) |
-| 30 | 39.2% | 11.4% | -27.8 pts (-70.8%) |
-| 40 | 37.5% | 8.9% | -28.7 pts (-76.4%) |
-| 50 | 118.0% | 20.0% | -98.0 pts (-83.1%) |
+| Tabs | Chrome | Nav0 v0.1.2 | Difference         |
+| ---- | ------ | ----------- | ------------------ |
+| 10   | 15.4%  | 5.5%        | -9.9 pts (-64.2%)  |
+| 20   | 15.3%  | 5.8%        | -9.5 pts (-62.1%)  |
+| 30   | 39.2%  | 11.4%       | -27.8 pts (-70.8%) |
+| 40   | 37.5%  | 8.9%        | -28.7 pts (-76.4%) |
+| 50   | 118.0% | 20.0%       | -98.0 pts (-83.1%) |
 
 At 50 tabs, Chrome was saturating more than one full CPU core (118%) just to keep idle tabs alive. Nav0 at the same count: 20%. At 40 tabs, Chrome used 37.5% CPU while Nav0 used 8.9%.
 
@@ -183,20 +183,20 @@ At 50 tabs, Chrome was saturating more than one full CPU core (118%) just to kee
 
 ### Process Count
 
-| Tabs | Chrome | Nav0 v0.1.2 | Difference |
-|------|--------|-------------|------------|
-| 10 | 30 | 18 | -12 (-40.0%) |
-| 20 | 74 | 30 | -44 (-59.5%) |
-| 30 | 84 | 41 | -43 (-51.2%) |
-| 40 | 97 | 51 | -46 (-47.4%) |
-| 50 | 108 | 61 | -47 (-43.5%) |
+| Tabs | Chrome | Nav0 v0.1.2 | Difference   |
+| ---- | ------ | ----------- | ------------ |
+| 10   | 30     | 18          | -12 (-40.0%) |
+| 20   | 74     | 30          | -44 (-59.5%) |
+| 30   | 84     | 41          | -43 (-51.2%) |
+| 40   | 97     | 51          | -46 (-47.4%) |
+| 50   | 108    | 61          | -47 (-43.5%) |
 
 ## Summary
 
-| Metric | v0.0.6 vs Chrome | v0.1.2 vs Chrome |
-|--------|-----------------|-----------------|
-| Avg Memory | -48.5% | **-45.4%** |
-| Avg CPU | -86.3% | **-77.1%** |
+| Metric     | v0.0.6 vs Chrome | v0.1.2 vs Chrome |
+| ---------- | ---------------- | ---------------- |
+| Avg Memory | -48.5%           | **-45.4%**       |
+| Avg CPU    | -86.3%           | **-77.1%**       |
 
 The margins vs Chrome shifted slightly because Chrome itself improved in newer versions — fewer processes, lower baseline memory at 10 tabs. But the story hasn't changed: Nav0 uses roughly half the memory and a fraction of the CPU of Chrome, and the gap widens as you open more tabs.
 
@@ -230,4 +230,4 @@ Nav0 v0.1.2 uses 45% less memory and 77% less CPU than Chrome in head-to-head be
 
 ---
 
-*Nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started).*
+_Nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started)._

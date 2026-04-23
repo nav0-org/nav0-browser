@@ -146,7 +146,9 @@ function showStatusWithLink(message: string, url: string): void {
     copyBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(url).then(() => {
         copyBtn.textContent = 'Copied!';
-        setTimeout(() => { copyBtn.textContent = 'Copy URL'; }, 2000);
+        setTimeout(() => {
+          copyBtn.textContent = 'Copy URL';
+        }, 2000);
       });
     });
     statusEl.appendChild(document.createTextNode(' '));
@@ -286,14 +288,16 @@ function resetForm(): void {
   if (statusEl) statusEl.style.display = 'none';
 
   // Clear attachments
-  attachedImages.forEach(img => URL.revokeObjectURL(img.previewUrl));
+  attachedImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
   attachedImages.length = 0;
   renderAttachmentPreviews();
 }
 
 async function submitIssue(): Promise<void> {
   const titleInput = containerEl.querySelector('#ir-issue-title') as HTMLInputElement;
-  const descriptionInput = containerEl.querySelector('#ir-issue-description') as HTMLTextAreaElement;
+  const descriptionInput = containerEl.querySelector(
+    '#ir-issue-description'
+  ) as HTMLTextAreaElement;
   const typeSelect = containerEl.querySelector('#ir-issue-type') as HTMLSelectElement;
   const submitBtn = containerEl.querySelector('#ir-issue-submit-btn') as HTMLButtonElement;
 
@@ -316,9 +320,10 @@ async function submitIssue(): Promise<void> {
   submitBtn.disabled = true;
   submitBtn.textContent = 'Submitting...';
 
-  const typeLabel = type === 'bug' ? 'Bug Report' : type === 'feature' ? 'Feature Request' : 'Other';
+  const typeLabel =
+    type === 'bug' ? 'Bug Report' : type === 'feature' ? 'Feature Request' : 'Other';
 
-  const images = attachedImages.map(img => ({
+  const images = attachedImages.map((img) => ({
     name: img.name.replace(/\.[^.]+$/, '.jpg'),
     base64: img.base64,
     mimeType: img.mimeType,
@@ -373,7 +378,9 @@ export function init(container: HTMLElement): void {
   // Populate system info preview
   const sysinfoEl = container.querySelector('#ir-sysinfo-preview') as HTMLElement;
   if (sysinfoEl) {
-    getSystemInfo().then(info => { sysinfoEl.textContent = info; });
+    getSystemInfo().then((info) => {
+      sysinfoEl.textContent = info;
+    });
   }
 
   // Attachment file input
@@ -426,7 +433,9 @@ export function show(_data?: any): void {
   // Re-populate system info
   const sysinfoEl = containerEl.querySelector('#ir-sysinfo-preview') as HTMLElement;
   if (sysinfoEl) {
-    getSystemInfo().then(info => { sysinfoEl.textContent = info; });
+    getSystemInfo().then((info) => {
+      sysinfoEl.textContent = info;
+    });
   }
 
   // Re-create icons

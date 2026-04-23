@@ -1,5 +1,5 @@
 ---
-title: "Nav0 vs Arc: Rethinking the Browser vs. Stripping It Down"
+title: 'Nav0 vs Arc: Rethinking the Browser vs. Stripping It Down'
 description: "Arc and Nav0 both reject Chrome's status quo, but from opposite directions. Arc adds more UI — Spaces, Easels, AI features, split views. Nav0 removes UI. This is maximalism vs. minimalism, and only one approach doesn't require your data."
 date: 2026-03-21
 author: Nav0 Team
@@ -10,7 +10,7 @@ head:
       content: article
   - - meta
     - property: article:published_time
-      content: "2026-03-21"
+      content: '2026-03-21'
   - - meta
     - property: article:author
       content: Nav0 Team
@@ -28,7 +28,7 @@ head:
       content: minimalism
   - - meta
     - name: keywords
-      content: "Nav0 vs arc, arc browser privacy, arc browser review, the browser company, arc browser data collection, arc browser account required, arc AI features, arc vs minimal browser, arc browser closed source, arc spaces, is arc browser safe for privacy, arc browser telemetry, arc browser alternative, arc browser open source, does arc browser collect data, arc browser VC funding, best private browser alternative to arc, arc browser security risks, arc browser vs privacy browser, minimal browser no tracking, lightweight browser no account"
+      content: 'Nav0 vs arc, arc browser privacy, arc browser review, the browser company, arc browser data collection, arc browser account required, arc AI features, arc vs minimal browser, arc browser closed source, arc spaces, is arc browser safe for privacy, arc browser telemetry, arc browser alternative, arc browser open source, does arc browser collect data, arc browser VC funding, best private browser alternative to arc, arc browser security risks, arc browser vs privacy browser, minimal browser no tracking, lightweight browser no account'
   - - script
     - type: application/ld+json
     - |
@@ -110,20 +110,20 @@ These are two fundamentally different answers to the same problem. Arc is maxima
 
 ## Nav0 vs Arc: Quick Comparison
 
-| Feature | Nav0 | Arc |
-|---|---|---|
-| **Telemetry** | Zero | Unknown (closed source) |
-| **Open Source** | Yes (MIT license) | No (fully closed source) |
-| **Account Required** | No | Yes (mandatory) |
-| **Cloud Sync** | None — all data local | Mandatory sync via The Browser Company servers |
-| **AI Features** | None | Arc Max (page previews, tab renaming, Browse for Me) |
-| **Data Sent to Third Parties** | None | Browsing data sent to AI providers |
-| **Business Model** | Free, community-maintained open source | VC-funded ($50M+), monetization TBD |
-| **Cross-Platform** | macOS, Windows, Linux | macOS, Windows, iOS, Android |
-| **Extensions** | None (privacy by design) | Chrome extensions supported |
-| **UI Philosophy** | Minimal — tabs, URL bar, web page | Maximalist — Spaces, sidebar, Easels, split views |
-| **Ad Blocker** | Built-in (EasyList, EasyPrivacy, Peter Lowe) | No built-in blocker |
-| **Attack Surface** | Minimal feature set, minimal code | Large feature set with custom JS injection (Boosts) |
+| Feature                        | Nav0                                         | Arc                                                  |
+| ------------------------------ | -------------------------------------------- | ---------------------------------------------------- |
+| **Telemetry**                  | Zero                                         | Unknown (closed source)                              |
+| **Open Source**                | Yes (MIT license)                            | No (fully closed source)                             |
+| **Account Required**           | No                                           | Yes (mandatory)                                      |
+| **Cloud Sync**                 | None — all data local                        | Mandatory sync via The Browser Company servers       |
+| **AI Features**                | None                                         | Arc Max (page previews, tab renaming, Browse for Me) |
+| **Data Sent to Third Parties** | None                                         | Browsing data sent to AI providers                   |
+| **Business Model**             | Free, community-maintained open source       | VC-funded ($50M+), monetization TBD                  |
+| **Cross-Platform**             | macOS, Windows, Linux                        | macOS, Windows, iOS, Android                         |
+| **Extensions**                 | None (privacy by design)                     | Chrome extensions supported                          |
+| **UI Philosophy**              | Minimal — tabs, URL bar, web page            | Maximalist — Spaces, sidebar, Easels, split views    |
+| **Ad Blocker**                 | Built-in (EasyList, EasyPrivacy, Peter Lowe) | No built-in blocker                                  |
+| **Attack Surface**             | Minimal feature set, minimal code            | Large feature set with custom JS injection (Boosts)  |
 
 ## Addition vs. Subtraction
 
@@ -154,7 +154,7 @@ Nav0 is open source under the MIT license. Every line of code is public. You can
 
 For a browser — an application that handles every website you visit, every password you enter, every search you make — the inability to audit the code is a fundamental trust problem. You're not just trusting Arc's stated privacy policy. You're trusting that the code matches the policy, that there are no undisclosed data flows, and that future updates won't change the behavior without your knowledge.
 
-Open source isn't a silver bullet. Open code can still have vulnerabilities, and most users don't personally audit source code. But open source means *someone can*. Security researchers, privacy advocates, and curious developers can inspect the code and flag issues. With closed-source software, you're trusting the company. With open-source software, you're trusting the process.
+Open source isn't a silver bullet. Open code can still have vulnerabilities, and most users don't personally audit source code. But open source means _someone can_. Security researchers, privacy advocates, and curious developers can inspect the code and flag issues. With closed-source software, you're trusting the company. With open-source software, you're trusting the process.
 
 ## The Account Requirement
 
@@ -290,4 +290,4 @@ Arc reimagined the browser. Nav0 remembered what it was supposed to be.
 
 ---
 
-*Nav0 is a minimal, open-source browser built on one principle: your browser should work for you, not for an ad company. Zero telemetry. Zero bloat. Zero BS. [Learn more](/guide/philosophy).*
+_Nav0 is a minimal, open-source browser built on one principle: your browser should work for you, not for an ad company. Zero telemetry. Zero bloat. Zero BS. [Learn more](/guide/philosophy)._

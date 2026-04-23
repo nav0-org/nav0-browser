@@ -1,0 +1,6 @@
+node_modules
+.webpack
+out
+dist
+docs/.vitepress/cache
+src/renderer/assets

@@ -1,5 +1,5 @@
 ---
-title: "Nav0 Browser Features — Privacy, Security & Performance"
+title: 'Nav0 Browser Features — Privacy, Security & Performance'
 description: "Explore Nav0's features: built-in ad blocker, reader mode, PDF viewer, tab pinning, private browsing, and more — with zero telemetry and no bloat."
 ---
 
@@ -256,15 +256,15 @@ Submit bug reports directly from the browser with image attachments. Screenshots
 
 We deliberately exclude:
 
-| Feature | Why It's Missing |
-|---------|------------------|
-| AI Assistant | Unnecessary complexity, often cloud-dependent |
-| News Feed | Distraction, usually ad-driven |
-| Sync Service | Requires accounts, cloud storage |
-| Rewards/Crypto | Not a browser's job |
-| Built-in VPN | Usually upsells, trust issues |
-| Reading List | Use bookmarks |
-| Collections | Use bookmark folders |
+| Feature        | Why It's Missing                              |
+| -------------- | --------------------------------------------- |
+| AI Assistant   | Unnecessary complexity, often cloud-dependent |
+| News Feed      | Distraction, usually ad-driven                |
+| Sync Service   | Requires accounts, cloud storage              |
+| Rewards/Crypto | Not a browser's job                           |
+| Built-in VPN   | Usually upsells, trust issues                 |
+| Reading List   | Use bookmarks                                 |
+| Collections    | Use bookmark folders                          |
 
 ## Customization
 

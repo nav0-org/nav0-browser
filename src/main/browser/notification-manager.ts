@@ -1,4 +1,9 @@
-import { Notification as ElectronNotification, ipcMain, webContents, BrowserWindow } from 'electron';
+import {
+  Notification as ElectronNotification,
+  ipcMain,
+  webContents,
+  BrowserWindow,
+} from 'electron';
 import { PermissionManager } from './permission-manager';
 
 type FindTabCallback = (webContentsId: number) => {
@@ -98,94 +103,100 @@ export class NotificationManager {
     });
 
     // Show a notification
-    ipcMain.handle('notification:show', (event, data: {
-      id: string;
-      title: string;
-      body: string;
-      icon: string;
-      tag: string;
-      silent: boolean;
-      requireInteraction: boolean;
-    }) => {
-      const sender = event.sender;
-      const origin = NotificationManager.getOriginFromWebContents(sender);
-
-      // Verify permission is granted
-      const state = PermissionManager.checkPermissionState(sender.id, origin, 'notifications');
-      if (state !== 'granted') {
-        return { error: 'permission_denied' };
-      }
-
-      // Check platform support
-      if (!ElectronNotification.isSupported()) {
-        return { error: 'not_supported' };
-      }
-
-      // Handle tag-based replacement: close existing notification with same origin+tag
-      if (data.tag) {
-        const tagKey = `${origin}::${data.tag}`;
-        const existingId = NotificationManager.tagMap.get(tagKey);
-        if (existingId) {
-          const existing = NotificationManager.activeNotifications.get(existingId);
-          if (existing) {
-            existing.notification.close();
-          }
-          NotificationManager.cleanup(existingId);
+    ipcMain.handle(
+      'notification:show',
+      (
+        event,
+        data: {
+          id: string;
+          title: string;
+          body: string;
+          icon: string;
+          tag: string;
+          silent: boolean;
+          requireInteraction: boolean;
         }
-      }
+      ) => {
+        const sender = event.sender;
+        const origin = NotificationManager.getOriginFromWebContents(sender);
 
-      try {
-        const notification = new ElectronNotification({
-          title: data.title || '',
-          body: data.body || '',
-          silent: data.silent || false,
-          urgency: data.requireInteraction ? 'critical' : 'normal',
-          timeoutType: data.requireInteraction ? 'never' : 'default',
-        });
+        // Verify permission is granted
+        const state = PermissionManager.checkPermissionState(sender.id, origin, 'notifications');
+        if (state !== 'granted') {
+          return { error: 'permission_denied' };
+        }
 
-        const notifId = data.id;
-        const webContentsId = sender.id;
+        // Check platform support
+        if (!ElectronNotification.isSupported()) {
+          return { error: 'not_supported' };
+        }
 
-        NotificationManager.activeNotifications.set(notifId, {
-          notification,
-          webContentsId,
-          origin,
-          tag: data.tag || '',
-        });
-
+        // Handle tag-based replacement: close existing notification with same origin+tag
         if (data.tag) {
-          NotificationManager.tagMap.set(`${origin}::${data.tag}`, notifId);
+          const tagKey = `${origin}::${data.tag}`;
+          const existingId = NotificationManager.tagMap.get(tagKey);
+          if (existingId) {
+            const existing = NotificationManager.activeNotifications.get(existingId);
+            if (existing) {
+              existing.notification.close();
+            }
+            NotificationManager.cleanup(existingId);
+          }
         }
 
-        notification.on('show', () => {
-          NotificationManager.sendEvent(webContentsId, notifId, 'show');
-        });
+        try {
+          const notification = new ElectronNotification({
+            title: data.title || '',
+            body: data.body || '',
+            silent: data.silent || false,
+            urgency: data.requireInteraction ? 'critical' : 'normal',
+            timeoutType: data.requireInteraction ? 'never' : 'default',
+          });
 
-        notification.on('click', () => {
-          // Focus the originating tab and window
-          const tabInfo = NotificationManager.findTabCallback?.(webContentsId);
-          if (tabInfo) {
-            NotificationManager.focusTabCallback?.(tabInfo.appWindowId, tabInfo.tabId);
+          const notifId = data.id;
+          const webContentsId = sender.id;
+
+          NotificationManager.activeNotifications.set(notifId, {
+            notification,
+            webContentsId,
+            origin,
+            tag: data.tag || '',
+          });
+
+          if (data.tag) {
+            NotificationManager.tagMap.set(`${origin}::${data.tag}`, notifId);
           }
-          NotificationManager.sendEvent(webContentsId, notifId, 'click');
-        });
 
-        notification.on('close', () => {
-          NotificationManager.sendEvent(webContentsId, notifId, 'close');
-          NotificationManager.cleanup(notifId);
-        });
+          notification.on('show', () => {
+            NotificationManager.sendEvent(webContentsId, notifId, 'show');
+          });
 
-        notification.on('failed', () => {
-          NotificationManager.sendEvent(webContentsId, notifId, 'error');
-          NotificationManager.cleanup(notifId);
-        });
+          notification.on('click', () => {
+            // Focus the originating tab and window
+            const tabInfo = NotificationManager.findTabCallback?.(webContentsId);
+            if (tabInfo) {
+              NotificationManager.focusTabCallback?.(tabInfo.appWindowId, tabInfo.tabId);
+            }
+            NotificationManager.sendEvent(webContentsId, notifId, 'click');
+          });
 
-        notification.show();
-        return { success: true };
-      } catch {
-        return { error: 'show_failed' };
+          notification.on('close', () => {
+            NotificationManager.sendEvent(webContentsId, notifId, 'close');
+            NotificationManager.cleanup(notifId);
+          });
+
+          notification.on('failed', () => {
+            NotificationManager.sendEvent(webContentsId, notifId, 'error');
+            NotificationManager.cleanup(notifId);
+          });
+
+          notification.show();
+          return { success: true };
+        } catch {
+          return { error: 'show_failed' };
+        }
       }
-    });
+    );
 
     // Close a notification programmatically
     ipcMain.on('notification:close', (_event, id: string) => {

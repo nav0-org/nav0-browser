@@ -10,7 +10,7 @@ head:
       content: article
   - - meta
     - property: article:published_time
-      content: "2026-03-31"
+      content: '2026-03-31'
   - - meta
     - property: article:author
       content: Nav0 Team
@@ -28,7 +28,7 @@ head:
       content: apple
   - - meta
     - name: keywords
-      content: "Nav0 vs Safari, Safari privacy, Safari tracking, Apple browser privacy, Safari iCloud, Safari telemetry, private browser comparison, minimal browser vs Safari, Safari ecosystem lock-in, open source browser, does Safari track you, is Safari really private, Safari vs privacy browser, Safari data collection, best private browser Mac, Safari alternative privacy, Safari Google search deal, Safari closed source, Safari iCloud sync privacy, Apple browser alternative, browser without telemetry Mac"
+      content: 'Nav0 vs Safari, Safari privacy, Safari tracking, Apple browser privacy, Safari iCloud, Safari telemetry, private browser comparison, minimal browser vs Safari, Safari ecosystem lock-in, open source browser, does Safari track you, is Safari really private, Safari vs privacy browser, Safari data collection, best private browser Mac, Safari alternative privacy, Safari Google search deal, Safari closed source, Safari iCloud sync privacy, Apple browser alternative, browser without telemetry Mac'
   - - script
     - type: application/ld+json
     - |
@@ -106,20 +106,20 @@ But "best of the mainstream" isn't the same as "private." Safari is still Apple'
 
 ## Nav0 vs Safari: Quick Comparison
 
-| Feature | Nav0 | Safari |
-|---|---|---|
-| **Telemetry** | Zero | Contacts Apple servers (updates, Safe Browsing, Siri Suggestions) |
-| **Open Source** | Yes (MIT license) | WebKit only; browser is closed source |
-| **Default Search Engine** | DuckDuckGo | Google ($20B/year deal with Apple) |
-| **Account Required** | No | Apple ID required for sync features |
-| **Cloud Sync** | None — all data local | iCloud sync (bookmarks, tabs, history, passwords) |
-| **Cross-Platform** | macOS, Windows, Linux | macOS, iOS, iPadOS only |
-| **Ad Blocker** | Built-in (EasyList, EasyPrivacy, Peter Lowe) | Content blockers via App Store extensions |
-| **AI Features** | None | Apple Intelligence integration (expanding) |
-| **Extensions** | None (privacy by design) | App Store only ($99/year developer fee) |
-| **Business Model** | Free, community-maintained open source | Bundled with Apple hardware; Google search revenue |
-| **Data Storage** | Local SQLite database only | Local + iCloud servers |
-| **Financial Integration** | None | Apple Pay built in |
+| Feature                   | Nav0                                         | Safari                                                            |
+| ------------------------- | -------------------------------------------- | ----------------------------------------------------------------- |
+| **Telemetry**             | Zero                                         | Contacts Apple servers (updates, Safe Browsing, Siri Suggestions) |
+| **Open Source**           | Yes (MIT license)                            | WebKit only; browser is closed source                             |
+| **Default Search Engine** | DuckDuckGo                                   | Google ($20B/year deal with Apple)                                |
+| **Account Required**      | No                                           | Apple ID required for sync features                               |
+| **Cloud Sync**            | None — all data local                        | iCloud sync (bookmarks, tabs, history, passwords)                 |
+| **Cross-Platform**        | macOS, Windows, Linux                        | macOS, iOS, iPadOS only                                           |
+| **Ad Blocker**            | Built-in (EasyList, EasyPrivacy, Peter Lowe) | Content blockers via App Store extensions                         |
+| **AI Features**           | None                                         | Apple Intelligence integration (expanding)                        |
+| **Extensions**            | None (privacy by design)                     | App Store only ($99/year developer fee)                           |
+| **Business Model**        | Free, community-maintained open source       | Bundled with Apple hardware; Google search revenue                |
+| **Data Storage**          | Local SQLite database only                   | Local + iCloud servers                                            |
+| **Financial Integration** | None                                         | Apple Pay built in                                                |
 
 ## Intelligent Tracking Prevention: Good, but Apple's Version of Good
 
@@ -295,4 +295,4 @@ Safari gives you Apple's version of privacy. Nav0 gives you privacy.
 
 ---
 
-*Nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started).*
+_Nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started)._

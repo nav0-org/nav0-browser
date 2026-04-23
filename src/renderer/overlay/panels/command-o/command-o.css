@@ -226,11 +226,11 @@
   opacity: 0.4;
 }
 
-.tab-card[draggable="true"] {
+.tab-card[draggable='true'] {
   cursor: grab;
 }
 
-.tab-card[draggable="true"]:active {
+.tab-card[draggable='true']:active {
   cursor: grabbing;
 }
 
@@ -306,4 +306,3 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
-

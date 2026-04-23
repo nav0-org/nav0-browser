@@ -1,4 +1,4 @@
-@import url("../../styles/global.css");
+@import url('../../styles/global.css');
 
 /* ==========================================================================
    Downloads Page — Redesigned UI
@@ -110,16 +110,36 @@
 }
 
 /* Type-specific active colors */
-.type-pill.active[data-type="document"] { background: #6366f1; }
-.type-pill.active[data-type="spreadsheet"] { background: #6366f1; }
-.type-pill.active[data-type="presentation"] { background: #6366f1; }
-.type-pill.active[data-type="image"] { background: #06b6d4; }
-.type-pill.active[data-type="video"] { background: #06b6d4; }
-.type-pill.active[data-type="installer"] { background: #f59e0b; }
-.type-pill.active[data-type="archive"] { background: #8b5cf6; }
-.type-pill.active[data-type="audio"] { background: #ec4899; }
-.type-pill.active[data-type="code"] { background: #10b981; }
-.type-pill.active[data-type="other"] { background: #a1a1aa; }
+.type-pill.active[data-type='document'] {
+  background: #6366f1;
+}
+.type-pill.active[data-type='spreadsheet'] {
+  background: #6366f1;
+}
+.type-pill.active[data-type='presentation'] {
+  background: #6366f1;
+}
+.type-pill.active[data-type='image'] {
+  background: #06b6d4;
+}
+.type-pill.active[data-type='video'] {
+  background: #06b6d4;
+}
+.type-pill.active[data-type='installer'] {
+  background: #f59e0b;
+}
+.type-pill.active[data-type='archive'] {
+  background: #8b5cf6;
+}
+.type-pill.active[data-type='audio'] {
+  background: #ec4899;
+}
+.type-pill.active[data-type='code'] {
+  background: #10b981;
+}
+.type-pill.active[data-type='other'] {
+  background: #a1a1aa;
+}
 
 /* --------------------------------------------------------------------------
    Storage Gauge
@@ -234,7 +254,10 @@
 .download-item {
   opacity: 0;
   transform: translateY(4px);
-  transition: opacity 0.25s ease, transform 0.25s ease, background var(--transition-fast) ease;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease,
+    background var(--transition-fast) ease;
 }
 
 .downloads-page.loaded .download-item {
@@ -342,7 +365,9 @@
   justify-content: center;
   padding: 0;
   color: var(--text-secondary);
-  transition: color var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .action-btn:hover {
@@ -387,8 +412,12 @@
 }
 
 @keyframes indeterminate {
-  0%   { transform: translateX(-100%); }
-  100% { transform: translateX(900%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(900%);
+  }
 }
 
 /* Active download row styling */
@@ -416,8 +445,14 @@
 }
 
 @keyframes panelIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .detail-inner {

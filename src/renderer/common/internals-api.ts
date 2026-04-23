@@ -25,16 +25,47 @@ declare global {
       goForward: (appWindowId: string, tabId: string) => Promise<any>;
       refreshTab: (appWindowId: string, tabId: string) => Promise<any>;
       hardReloadTab: (appWindowId: string, tabId: string) => Promise<any>;
-      addBookmark: (appWindowId: string, title: string, url: string, faviconUrl: string, type?: string) => Promise<any>;
+      addBookmark: (
+        appWindowId: string,
+        title: string,
+        url: string,
+        faviconUrl: string,
+        type?: string
+      ) => Promise<any>;
       removeBookmark: (appWindowId: string, bookmarkId: string) => Promise<any>;
       removeAllBookmarks: (appWindowId: string) => Promise<any>;
-      fetchBookmarks: (appWindowId: string, searchTerm: string, limit: number, offset: number) => Promise<any>;
+      fetchBookmarks: (
+        appWindowId: string,
+        searchTerm: string,
+        limit: number,
+        offset: number
+      ) => Promise<any>;
       updateBookmarkType: (appWindowId: string, bookmarkId: string, type: string) => Promise<any>;
-      fetchBookmarksWithStats: (appWindowId: string, type: string, searchTerm: string, limit: number, offset: number) => Promise<any>;
+      fetchBookmarksWithStats: (
+        appWindowId: string,
+        type: string,
+        searchTerm: string,
+        limit: number,
+        offset: number
+      ) => Promise<any>;
       removeDownload: (appWindowId: string, downloadId: string) => Promise<any>;
       removeAllDownloads: (appWindowId: string) => Promise<any>;
-      fetchDownloads: (appWindowId: string, searchTerm: string, limit: number, offset: number) => Promise<any>;
-      fetchActiveDownloads: () => Promise<Array<{ downloadId: string, fileName: string, receivedBytes: number, totalBytes: number, state: string, dbRecordId: string }>>;
+      fetchDownloads: (
+        appWindowId: string,
+        searchTerm: string,
+        limit: number,
+        offset: number
+      ) => Promise<any>;
+      fetchActiveDownloads: () => Promise<
+        Array<{
+          downloadId: string;
+          fileName: string;
+          receivedBytes: number;
+          totalBytes: number;
+          state: string;
+          dbRecordId: string;
+        }>
+      >;
       pauseDownload: (downloadId: string, appWindowId: string) => Promise<boolean>;
       resumeDownload: (downloadId: string, appWindowId: string) => Promise<boolean>;
       cancelDownload: (downloadId: string, appWindowId: string) => Promise<boolean>;
@@ -42,12 +73,26 @@ declare global {
       showItemInFolder: (filePath: string) => Promise<void>;
       removeBrowsingHistory: (appWindowId: string, historyId: string) => Promise<any>;
       removeAllBrowsingHistory: (appWindowId: string) => Promise<any>;
-      fetchBrowsingHistory: (appWindowId: string, searchTerm: string, limit: number, offset: number) => Promise<any>;
-      fetchBrowsingHistoryStats: (appWindowId: string) => Promise<Array<{ date: string; count: number; activeDuration: number }>>;
-      handleFileSelection: (appWindowId: string, tabId: string, extensions: string[]) => Promise<string[] | null>;
+      fetchBrowsingHistory: (
+        appWindowId: string,
+        searchTerm: string,
+        limit: number,
+        offset: number
+      ) => Promise<any>;
+      fetchBrowsingHistoryStats: (
+        appWindowId: string
+      ) => Promise<Array<{ date: string; count: number; activeDuration: number }>>;
+      handleFileSelection: (
+        appWindowId: string,
+        tabId: string,
+        extensions: string[]
+      ) => Promise<string[] | null>;
       openPdfFile: (appWindowId: string) => Promise<string | null>;
 
-      updateBrowserViewBounds: (appWindowId: string, bounds: { x: number, y: number, width: number, height: number }) => Promise<any>;
+      updateBrowserViewBounds: (
+        appWindowId: string,
+        bounds: { x: number; y: number; width: number; height: number }
+      ) => Promise<any>;
       closeAppWindow: (appWindowId: string) => Promise<any>;
       createNewAppWindow: () => Promise<any>;
       createNewPrivateAppWindow: () => Promise<any>;
@@ -59,54 +104,154 @@ declare global {
       hideCommandKOverlay: (appWindowId: string) => Promise<any>;
       showCommandOOverlay: (appWindowId: string) => Promise<any>;
       hideCommandOOverlay: (appWindowId: string) => Promise<any>;
-      fetchAllWindowsTabs: (isPrivate: boolean) => Promise<Array<{ windowId: string; windowName: string; isPrivate: boolean; tabs: Array<{ id: string; title: string; url: string; faviconUrl: string | null; isActive: boolean }> }>>;
-      moveTabToWindow: (sourceWindowId: string, tabId: string, targetWindowId: string) => Promise<{ success: boolean }>;
-      getAboutInfo: () => Promise<{ appVersion: string; electronVersion: string; chromiumVersion: string; nodeVersion: string; v8Version: string; platform: string; arch: string; osVersion: string; appPath: string; executableChecksum: string; asarChecksum: string }>;
+      fetchAllWindowsTabs: (isPrivate: boolean) => Promise<
+        Array<{
+          windowId: string;
+          windowName: string;
+          isPrivate: boolean;
+          tabs: Array<{
+            id: string;
+            title: string;
+            url: string;
+            faviconUrl: string | null;
+            isActive: boolean;
+          }>;
+        }>
+      >;
+      moveTabToWindow: (
+        sourceWindowId: string,
+        tabId: string,
+        targetWindowId: string
+      ) => Promise<{ success: boolean }>;
+      getAboutInfo: () => Promise<{
+        appVersion: string;
+        electronVersion: string;
+        chromiumVersion: string;
+        nodeVersion: string;
+        v8Version: string;
+        platform: string;
+        arch: string;
+        osVersion: string;
+        appPath: string;
+        executableChecksum: string;
+        asarChecksum: string;
+      }>;
       showFindInPage: (appWindowId: string) => Promise<any>;
       hideFindInPage: (appWindowId: string) => Promise<any>;
-      findInPage: (appWindowId: string, text: string, options?: { matchCase?: boolean }) => Promise<any>;
-      findInPageNext: (appWindowId: string, text: string, options?: { matchCase?: boolean }) => Promise<any>;
-      findInPagePrevious: (appWindowId: string, text: string, options?: { matchCase?: boolean }) => Promise<any>;
+      findInPage: (
+        appWindowId: string,
+        text: string,
+        options?: { matchCase?: boolean }
+      ) => Promise<any>;
+      findInPageNext: (
+        appWindowId: string,
+        text: string,
+        options?: { matchCase?: boolean }
+      ) => Promise<any>;
+      findInPagePrevious: (
+        appWindowId: string,
+        text: string,
+        options?: { matchCase?: boolean }
+      ) => Promise<any>;
       stopFindInPage: (appWindowId: string) => Promise<any>;
       printPage: (appWindowId: string) => Promise<any>;
       toggleDevTools: (appWindowId: string) => Promise<any>;
       showTabContextMenu: (appWindowId: string, tabId: string, isPinned: boolean) => void;
       showAboutPanel: () => Promise<any>;
       getSearchUrl: (searchTerm: string) => Promise<string>;
-      fetchOpenTabs: (appWindowId: string) => Promise<Array<{id: string, title: string, url: string, faviconUrl: string | null}>>;
-      fetchRecentlyClosedTabs: (appWindowId: string) => Promise<Array<{url: string, title: string, faviconUrl: string | null, closedAt: number}>>;
-      restoreClosedTab: (appWindowId: string) => Promise<{id: string, title: string, url: string} | null>;
-      restoreClosedTabByIndex: (appWindowId: string, index: number) => Promise<{id: string, title: string, url: string} | null>;
-      fetchClosedWindows: () => Promise<Array<{tabCount: number, tabs: Array<{url: string, title: string}>, closedAt: number}>>;
-      restoreClosedWindow: (index: number) => Promise<{ok: boolean} | null>;
-      fetchSessionState: () => Promise<{ windowCount: number; totalTabCount: number; savedAt: number } | null>;
+      fetchOpenTabs: (
+        appWindowId: string
+      ) => Promise<Array<{ id: string; title: string; url: string; faviconUrl: string | null }>>;
+      fetchRecentlyClosedTabs: (
+        appWindowId: string
+      ) => Promise<
+        Array<{ url: string; title: string; faviconUrl: string | null; closedAt: number }>
+      >;
+      restoreClosedTab: (
+        appWindowId: string
+      ) => Promise<{ id: string; title: string; url: string } | null>;
+      restoreClosedTabByIndex: (
+        appWindowId: string,
+        index: number
+      ) => Promise<{ id: string; title: string; url: string } | null>;
+      fetchClosedWindows: () => Promise<
+        Array<{ tabCount: number; tabs: Array<{ url: string; title: string }>; closedAt: number }>
+      >;
+      restoreClosedWindow: (index: number) => Promise<{ ok: boolean } | null>;
+      fetchSessionState: () => Promise<{
+        windowCount: number;
+        totalTabCount: number;
+        savedAt: number;
+      } | null>;
       restorePreviousSession: () => Promise<{ ok: boolean } | null>;
       toggleReaderMode: (appWindowId: string, tabId: string) => Promise<any>;
       downloadCurrentPdf: (appWindowId: string, tabId: string) => Promise<any>;
       // Event listeners
-      onNewTabCreated: (callback: (tab: {id: string, url: string, title: string}) => void) => void;
-      onTabActivated: (callback: (tab: {id: string, url: string}) => void) => void;
+      onNewTabCreated: (
+        callback: (tab: { id: string; url: string; title: string }) => void
+      ) => void;
+      onTabActivated: (callback: (tab: { id: string; url: string }) => void) => void;
       onTabClosed: (callback: (data: { id: string }) => void) => void;
-      onTabTitleUpdated: (callback: (data: { id: string, title: string }) => void) => void;
-      onTabUrlUpdated: (callback: (data: { id: string, url: string, isBookmark: boolean, bookmarkId: string | null, bookmarkType: 'reference' | 'queue' | null, canGoBack: boolean, canGoForward: boolean }) => void) => void;
-      onTabFaviconUpdated: (callback: (data: { id: string, faviconUrl: string }) => void) => void;
+      onTabTitleUpdated: (callback: (data: { id: string; title: string }) => void) => void;
+      onTabUrlUpdated: (
+        callback: (data: {
+          id: string;
+          url: string;
+          isBookmark: boolean;
+          bookmarkId: string | null;
+          bookmarkType: 'reference' | 'queue' | null;
+          canGoBack: boolean;
+          canGoForward: boolean;
+        }) => void
+      ) => void;
+      onTabFaviconUpdated: (callback: (data: { id: string; faviconUrl: string }) => void) => void;
       onNavigationFailed: (callback: (data: { id: string }) => void) => void;
-      onDownloadStarted: (callback: (data: { downloadId: string, dbRecordId: string, fileName: string, totalBytes: number }) => void) => void;
-      onDownloadProgress: (callback: (data: { downloadId: string, receivedBytes: number, totalBytes: number }) => void) => void;
-      onDownloadCompleted: (callback: (data: { downloadId: string, state: string, fileName: string, dbRecordId: string }) => void) => void;
-      onDownloadPaused: (callback: (data: { downloadId: string, fileName: string }) => void) => void;
-      onDownloadResumed: (callback: (data: { downloadId: string, fileName: string }) => void) => void;
-      onReaderModeAvailabilityChanged: (callback: (data: { id: string, isEligible: boolean }) => void) => void;
-      onReaderModeStateChanged: (callback: (data: { id: string, isActive: boolean }) => void) => void;
-      onFindInPageResult: (callback: (data: { activeMatchOrdinal: number, matches: number, finalUpdate: boolean }) => void) => void;
+      onDownloadStarted: (
+        callback: (data: {
+          downloadId: string;
+          dbRecordId: string;
+          fileName: string;
+          totalBytes: number;
+        }) => void
+      ) => void;
+      onDownloadProgress: (
+        callback: (data: { downloadId: string; receivedBytes: number; totalBytes: number }) => void
+      ) => void;
+      onDownloadCompleted: (
+        callback: (data: {
+          downloadId: string;
+          state: string;
+          fileName: string;
+          dbRecordId: string;
+        }) => void
+      ) => void;
+      onDownloadPaused: (
+        callback: (data: { downloadId: string; fileName: string }) => void
+      ) => void;
+      onDownloadResumed: (
+        callback: (data: { downloadId: string; fileName: string }) => void
+      ) => void;
+      onReaderModeAvailabilityChanged: (
+        callback: (data: { id: string; isEligible: boolean }) => void
+      ) => void;
+      onReaderModeStateChanged: (
+        callback: (data: { id: string; isActive: boolean }) => void
+      ) => void;
+      onFindInPageResult: (
+        callback: (data: {
+          activeMatchOrdinal: number;
+          matches: number;
+          finalUpdate: boolean;
+        }) => void
+      ) => void;
       onShowFindInPageBar: (callback: (data?: { searchText?: string }) => void) => void;
       onHideFindInPageBar: (callback: () => void) => void;
       onShowPermissionStrip: (callback: (data: any) => void) => void;
       onHidePermissionStrip: (callback: () => void) => void;
-      onShowOverlayPanel: (callback: (data: { type: string, data?: any }) => void) => void;
+      onShowOverlayPanel: (callback: (data: { type: string; data?: any }) => void) => void;
       onHideOverlayPanel: (callback: (data: { type: string }) => void) => void;
       signalOverlayRendererReady: () => void;
-      onTabLoadingChanged: (callback: (data: { id: string, isLoading: boolean }) => void) => void;
+      onTabLoadingChanged: (callback: (data: { id: string; isLoading: boolean }) => void) => void;
       onTabPinned: (callback: (data: { id: string }) => void) => void;
       onTabUnpinned: (callback: (data: { id: string }) => void) => void;
       onFullScreenChanged: (callback: (data: { isFullScreen: boolean }) => void) => void;
@@ -121,7 +266,10 @@ declare global {
       clearAllPermissions: () => Promise<any>;
 
       // SSL info overlay
-      showSSLInfo: (appWindowId: string, data: { sslStatus: string; sslDetails: any; url: string }) => void;
+      showSSLInfo: (
+        appWindowId: string,
+        data: { sslStatus: string; sslDetails: any; url: string }
+      ) => void;
       hideSSLInfo: (appWindowId: string) => void;
 
       // Issue report
@@ -129,11 +277,19 @@ declare global {
       hideIssueReport: (appWindowId: string) => Promise<any>;
 
       // Alert / confirm / prompt overlay
-      respondToDialog: (appWindowId: string, requestId: string, response: { confirmed: boolean; value?: string }) => void;
+      respondToDialog: (
+        appWindowId: string,
+        requestId: string,
+        response: { confirmed: boolean; value?: string }
+      ) => void;
       hideAlertOverlay: (appWindowId: string) => void;
 
       // Basic auth overlay
-      respondToBasicAuth: (appWindowId: string, requestId: string, creds: { username: string; password: string } | null) => void;
+      respondToBasicAuth: (
+        appWindowId: string,
+        requestId: string,
+        creds: { username: string; password: string } | null
+      ) => void;
       hideBasicAuthOverlay: (appWindowId: string) => void;
     };
   }

@@ -18,7 +18,9 @@ function showErrorDialogThrottled(title: string, message: string): void {
   lastErrorDialogAt = now;
   try {
     dialog.showErrorBox(title, message);
-  } catch { /* ignore dialog failures so we never re-enter */ }
+  } catch {
+    /* ignore dialog failures so we never re-enter */
+  }
 }
 process.on('uncaughtException', (err: Error) => {
   console.error('[main] uncaughtException:', err);
@@ -40,11 +42,10 @@ configureUserAgentFallback();
 // Disable Chromium features that trigger macOS "Local Network" permission dialog.
 // These features use mDNS/Bonjour for device discovery, which is unnecessary for
 // a privacy-focused browser and causes an unwanted system permission prompt on macOS.
-app.commandLine.appendSwitch('disable-features', [
-  'MediaRouter',
-  'DialMediaRouteProvider',
-  'GlobalMediaControls',
-].join(','));
+app.commandLine.appendSwitch(
+  'disable-features',
+  ['MediaRouter', 'DialMediaRouteProvider', 'GlobalMediaControls'].join(',')
+);
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling
 if (require('electron-squirrel-startup')) {
@@ -52,13 +53,15 @@ if (require('electron-squirrel-startup')) {
 }
 
 // Initialize main window when app is ready
-app.whenReady().then(async() => {
+app.whenReady().then(async () => {
   await DataStoreManager.init();
   await SettingsEnforcer.init();
   await AppWindowManager.init();
 
   // Start test control server after everything is initialized
-  const testPort = process.env.REMOTE_DEBUGGING_PORT ? parseInt(process.env.REMOTE_DEBUGGING_PORT, 10) : 0;
+  const testPort = process.env.REMOTE_DEBUGGING_PORT
+    ? parseInt(process.env.REMOTE_DEBUGGING_PORT, 10)
+    : 0;
   if (testPort > 0) {
     startTestControlServer(testPort);
   }

@@ -1,5 +1,5 @@
 ---
-title: "The Indie Browser Renaissance: Meet the Projects Rebuilding the Web on Their Own Terms"
+title: 'The Indie Browser Renaissance: Meet the Projects Rebuilding the Web on Their Own Terms'
 description: "A celebratory survey of today's indie browsers — Min, Helium, Ladybird, Zen, Orion, Qutebrowser, SigmaOS, Floorp, LibreWolf, Beaker, and Nav0 — and why a scrappy wave of small projects matters in a web dominated by four vendors."
 date: 2026-04-22
 author: Nav0 Team
@@ -10,7 +10,7 @@ head:
       content: article
   - - meta
     - property: article:published_time
-      content: "2026-04-22"
+      content: '2026-04-22'
   - - meta
     - property: article:author
       content: Nav0 Team
@@ -108,7 +108,7 @@ Three projects that take Firefox in three very different directions.
 
 Walk through the list and a pattern emerges.
 
-None of these projects is owned by an ad network. None of them exists to drive traffic to a search engine contract or an app store or a cloud subscription. Their business models — where they have one — are donations, paid tiers, search revenue that *flows to the user's chosen engine*, or simply "the developer felt like making this."
+None of these projects is owned by an ad network. None of them exists to drive traffic to a search engine contract or an app store or a cloud subscription. Their business models — where they have one — are donations, paid tiers, search revenue that _flows to the user's chosen engine_, or simply "the developer felt like making this."
 
 Most of them are open source. Most of them are honest about their tradeoffs. Most of them will tell you, in their own docs, what they deliberately don't do. That kind of clarity is in short supply in the big-vendor browser market, where feature lists mostly grow and privacy policies mostly get longer.
 
@@ -153,4 +153,4 @@ If you're here because you've been looking for an alternative to the big four, w
 
 ---
 
-*Nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started).*
+_Nav0 is a minimal, privacy-focused browser that collects zero data. It's open source, free, and built on the belief that your browser should do one thing well: let you browse the web. [Get started](/guide/getting-started)._

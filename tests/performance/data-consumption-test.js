@@ -38,9 +38,9 @@ const IS_LINUX = process.platform === 'linux';
 const NAV0_DEBUG_PORT = 9333;
 const CHROME_DEBUG_PORT = 9334;
 const PAGE_LOAD_TIMEOUT_MS = 30000;
-const POST_LOAD_SETTLE_MS = 5000;   // Wait after DOMContentLoaded for async resources
-const IDLE_MONITOR_SEC = 20;        // Monitor idle traffic after all pages loaded
-const NUM_RUNS = 1;                 // Number of test runs for averaging
+const POST_LOAD_SETTLE_MS = 5000; // Wait after DOMContentLoaded for async resources
+const IDLE_MONITOR_SEC = 20; // Monitor idle traffic after all pages loaded
+const NUM_RUNS = 1; // Number of test runs for averaging
 
 // Parse CLI args
 const args = process.argv.slice(2).reduce((acc, a) => {
@@ -79,14 +79,15 @@ const URL_SETS = {
 };
 
 const urlFilter = args['urls-only'];
-const TEST_URLS = urlFilter && URL_SETS[urlFilter]
-  ? URL_SETS[urlFilter]
-  : [...URL_SETS.light, ...URL_SETS.medium, ...URL_SETS.heavy];
+const TEST_URLS =
+  urlFilter && URL_SETS[urlFilter]
+    ? URL_SETS[urlFilter]
+    : [...URL_SETS.light, ...URL_SETS.medium, ...URL_SETS.heavy];
 
 // ─── Utility Functions ──────────────────────────────────────────────────────
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function timestamp() {
@@ -109,9 +110,15 @@ function formatBytes(bytes) {
 function getDescendantPids(pid) {
   try {
     // pgrep -P works on both Linux and macOS
-    const out = execSync(`pgrep -P ${pid} 2>/dev/null`, { encoding: 'utf-8', timeout: 5000 }).trim();
+    const out = execSync(`pgrep -P ${pid} 2>/dev/null`, {
+      encoding: 'utf-8',
+      timeout: 5000,
+    }).trim();
     if (!out) return [];
-    const children = out.split('\n').map(Number).filter(n => !isNaN(n) && n > 0);
+    const children = out
+      .split('\n')
+      .map(Number)
+      .filter((n) => !isNaN(n) && n > 0);
     let all = [...children];
     for (const child of children) {
       all = all.concat(getDescendantPids(child));
@@ -125,9 +132,13 @@ function getDescendantPids(pid) {
 function killTree(pid) {
   const descendants = getDescendantPids(pid);
   for (const p of descendants.reverse()) {
-    try { process.kill(p, 'SIGKILL'); } catch {}
+    try {
+      process.kill(p, 'SIGKILL');
+    } catch {}
   }
-  try { process.kill(pid, 'SIGKILL'); } catch {}
+  try {
+    process.kill(pid, 'SIGKILL');
+  } catch {}
 }
 
 function findPidOnPort(port) {
@@ -156,7 +167,9 @@ function ensurePortFree(port) {
     log(`Port ${port} in use by PID ${pid}, killing...`);
     killTree(pid);
     // Give OS time to release the port
-    try { execSync('sleep 1'); } catch {}
+    try {
+      execSync('sleep 1');
+    } catch {}
   }
 }
 
@@ -169,9 +182,18 @@ function waitForPort(port, timeoutMs = 120000) {
       }
       const sock = new net.Socket();
       sock.setTimeout(1000);
-      sock.once('connect', () => { sock.destroy(); resolve(); });
-      sock.once('error', () => { sock.destroy(); setTimeout(attempt, 500); });
-      sock.once('timeout', () => { sock.destroy(); setTimeout(attempt, 500); });
+      sock.once('connect', () => {
+        sock.destroy();
+        resolve();
+      });
+      sock.once('error', () => {
+        sock.destroy();
+        setTimeout(attempt, 500);
+      });
+      sock.once('timeout', () => {
+        sock.destroy();
+        setTimeout(attempt, 500);
+      });
       sock.connect(port, '127.0.0.1');
     };
     attempt();
@@ -180,14 +202,19 @@ function waitForPort(port, timeoutMs = 120000) {
 
 function httpGetJson(url) {
   return new Promise((resolve, reject) => {
-    http.get(url, (res) => {
-      let data = '';
-      res.on('data', (chunk) => data += chunk);
-      res.on('end', () => {
-        try { resolve(JSON.parse(data)); }
-        catch (e) { reject(new Error(`JSON parse error from ${url}`)); }
-      });
-    }).on('error', reject);
+    http
+      .get(url, (res) => {
+        let data = '';
+        res.on('data', (chunk) => (data += chunk));
+        res.on('end', () => {
+          try {
+            resolve(JSON.parse(data));
+          } catch (e) {
+            reject(new Error(`JSON parse error from ${url}`));
+          }
+        });
+      })
+      .on('error', reject);
   });
 }
 
@@ -200,12 +227,7 @@ function findChromeBinary() {
         '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
         '/Applications/Chromium.app/Contents/MacOS/Chromium',
       ]
-    : [
-        'google-chrome-stable',
-        'google-chrome',
-        'chromium-browser',
-        'chromium',
-      ];
+    : ['google-chrome-stable', 'google-chrome', 'chromium-browser', 'chromium'];
 
   for (const candidate of candidates) {
     try {
@@ -259,9 +281,7 @@ function findNav0Binary() {
     } catch {}
   }
 
-  throw new Error(
-    'Could not find installed Nav0. Install Nav0 or set NAV0_BIN env var.'
-  );
+  throw new Error('Could not find installed Nav0. Install Nav0 or set NAV0_BIN env var.');
 }
 
 const NAV0_BIN = process.env.NAV0_BIN || findNav0Binary();
@@ -278,7 +298,8 @@ function ensureDisplay() {
   // Headless Linux (CI) — start Xvfb
   log('No DISPLAY detected (headless Linux). Starting Xvfb on :99...');
   xvfbProcess = spawn('Xvfb', [':99', '-screen', '0', '1920x1080x24', '-nolisten', 'tcp'], {
-    stdio: 'ignore', detached: true,
+    stdio: 'ignore',
+    detached: true,
   });
   xvfbProcess.unref();
   process.env.DISPLAY = ':99';
@@ -287,8 +308,12 @@ function ensureDisplay() {
 
 function cleanupDisplay() {
   if (xvfbProcess) {
-    try { process.kill(-xvfbProcess.pid, 'SIGTERM'); } catch {}
-    try { xvfbProcess.kill('SIGTERM'); } catch {}
+    try {
+      process.kill(-xvfbProcess.pid, 'SIGTERM');
+    } catch {}
+    try {
+      xvfbProcess.kill('SIGTERM');
+    } catch {}
     xvfbProcess = null;
   }
 }
@@ -300,11 +325,11 @@ function cleanupDisplay() {
  * Returns a collector object with methods to start/stop and retrieve results.
  */
 function createNetworkCollector() {
-  const requests = [];       // All completed requests with sizes
-  const activeRequests = {};  // requestId -> partial data
-  let totalEncodedReceived = 0;   // Bytes on the wire (compressed)
-  let totalDecodedReceived = 0;   // Bytes after decompression
-  let totalRequestBytes = 0;      // Bytes sent (headers + body)
+  const requests = []; // All completed requests with sizes
+  const activeRequests = {}; // requestId -> partial data
+  let totalEncodedReceived = 0; // Bytes on the wire (compressed)
+  let totalDecodedReceived = 0; // Bytes after decompression
+  let totalRequestBytes = 0; // Bytes sent (headers + body)
   let requestCount = 0;
   let wsFramesReceived = 0;
   let wsFramesSent = 0;
@@ -376,12 +401,12 @@ function createNetworkCollector() {
 
   function handleWebSocketFrameReceived(params) {
     wsFramesReceived++;
-    wsBytesReceived += (params.response?.payloadData?.length || 0);
+    wsBytesReceived += params.response?.payloadData?.length || 0;
   }
 
   function handleWebSocketFrameSent(params) {
     wsFramesSent++;
-    wsbytesSent += (params.response?.payloadData?.length || 0);
+    wsbytesSent += params.response?.payloadData?.length || 0;
   }
 
   function estimateHeaderSize(headers) {
@@ -418,7 +443,7 @@ function createNetworkCollector() {
     },
     reset() {
       requests.length = 0;
-      Object.keys(activeRequests).forEach(k => delete activeRequests[k]);
+      Object.keys(activeRequests).forEach((k) => delete activeRequests[k]);
       totalEncodedReceived = 0;
       totalDecodedReceived = 0;
       totalRequestBytes = 0;
@@ -542,14 +567,22 @@ async function testChromeDataConsumption() {
     const idleData = collector.getResults();
     const idleResult = {
       ...summarizeResults(idleData),
-      requests: idleData.requests.map(r => ({ url: r.url, type: r.type, bytes: r.totalEncodedLength || 0 })),
+      requests: idleData.requests.map((r) => ({
+        url: r.url,
+        type: r.type,
+        bytes: r.totalEncodedLength || 0,
+      })),
     };
 
     // Close all tabs
     for (const { page } of pages) {
-      try { await page.close(); } catch {}
+      try {
+        await page.close();
+      } catch {}
     }
-    try { await idlePage.close(); } catch {}
+    try {
+      await idlePage.close();
+    } catch {}
 
     browser.disconnect();
 
@@ -559,7 +592,9 @@ async function testChromeDataConsumption() {
     killTree(pid);
     await sleep(2000);
     // Clean up temp profile
-    try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch {}
+    try {
+      fs.rmSync(userDataDir, { recursive: true, force: true });
+    } catch {}
   }
 }
 
@@ -618,10 +653,15 @@ async function testNav0DataConsumption() {
     if (!mainPage) {
       for (const page of pages) {
         try {
-          const hasApi = await page.evaluate(() =>
-            typeof window.BrowserAPI === 'object' && typeof window.BrowserAPI.createTab === 'function'
+          const hasApi = await page.evaluate(
+            () =>
+              typeof window.BrowserAPI === 'object' &&
+              typeof window.BrowserAPI.createTab === 'function'
           );
-          if (hasApi) { mainPage = page; break; }
+          if (hasApi) {
+            mainPage = page;
+            break;
+          }
         } catch {}
       }
     }
@@ -641,7 +681,7 @@ async function testNav0DataConsumption() {
       const url = TEST_URLS[i];
 
       // Snapshot existing targets so we can identify the new one
-      const existingTargets = new Set((await browser.targets()).map(t => t._targetId || t.url()));
+      const existingTargets = new Set((await browser.targets()).map((t) => t._targetId || t.url()));
 
       // Set up a listener for the new target BEFORE creating the tab
       const targetPromise = new Promise((resolve) => {
@@ -656,7 +696,9 @@ async function testNav0DataConsumption() {
               try {
                 const p = await target.page();
                 resolve(p);
-              } catch { resolve(null); }
+              } catch {
+                resolve(null);
+              }
             }
           }
         };
@@ -706,7 +748,9 @@ async function testNav0DataConsumption() {
         }
       }
 
-      log(`[Nav0]   [${i + 1}/${TEST_URLS.length}] Opened tab: ${url}${targetPage ? '' : ' (target not found)'}`);
+      log(
+        `[Nav0]   [${i + 1}/${TEST_URLS.length}] Opened tab: ${url}${targetPage ? '' : ' (target not found)'}`
+      );
       tabPages.push({ url, targetPage });
     }
 
@@ -727,12 +771,19 @@ async function testNav0DataConsumption() {
         log(`[Nav0]   [${i + 1}/${TEST_URLS.length}] ${url} (measuring...)`);
 
         try {
-          await targetPage.goto(url, { waitUntil: 'domcontentloaded', timeout: PAGE_LOAD_TIMEOUT_MS });
+          await targetPage.goto(url, {
+            waitUntil: 'domcontentloaded',
+            timeout: PAGE_LOAD_TIMEOUT_MS,
+          });
         } catch (e) {
-          log(`[Nav0]   [${i + 1}/${TEST_URLS.length}] Navigation warning: ${e.message.slice(0, 80)}`);
+          log(
+            `[Nav0]   [${i + 1}/${TEST_URLS.length}] Navigation warning: ${e.message.slice(0, 80)}`
+          );
         }
       } else {
-        log(`[Nav0]   [${i + 1}/${TEST_URLS.length}] ${url} (target not detected, data may be incomplete)`);
+        log(
+          `[Nav0]   [${i + 1}/${TEST_URLS.length}] ${url} (target not detected, data may be incomplete)`
+        );
       }
       await sleep(POST_LOAD_SETTLE_MS);
 
@@ -756,13 +807,19 @@ async function testNav0DataConsumption() {
     const idleData = idleCollector.getResults();
     const idleResult = {
       ...summarizeResults(idleData),
-      requests: idleData.requests.map(r => ({ url: r.url, type: r.type, bytes: r.totalEncodedLength || 0 })),
+      requests: idleData.requests.map((r) => ({
+        url: r.url,
+        type: r.type,
+        bytes: r.totalEncodedLength || 0,
+      })),
     };
 
     // Close all tabs
     for (const { targetPage } of tabPages) {
       if (targetPage) {
-        try { await targetPage.close(); } catch {}
+        try {
+          await targetPage.close();
+        } catch {}
       }
     }
 
@@ -773,7 +830,9 @@ async function testNav0DataConsumption() {
     killTree(spawnPid);
     await sleep(2000);
     // Clean up temp profile
-    try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch {}
+    try {
+      fs.rmSync(userDataDir, { recursive: true, force: true });
+    } catch {}
   }
 }
 
@@ -792,7 +851,13 @@ function summarizeResults(data) {
 }
 
 function categorizeRequests(requests, pageUrl) {
-  const pageHost = (() => { try { return new URL(pageUrl).hostname; } catch { return ''; } })();
+  const pageHost = (() => {
+    try {
+      return new URL(pageUrl).hostname;
+    } catch {
+      return '';
+    }
+  })();
 
   const categories = {
     firstParty: { count: 0, bytes: 0 },
@@ -849,8 +914,8 @@ function categorizeRequests(requests, pageUrl) {
   for (const req of requests) {
     if (req.failed) {
       const err = (req.errorText || '').toLowerCase();
-      const isBlocked = BLOCKED_ERRORS.some(b => err.includes(b.toLowerCase()));
-      const isTracker = TRACKER_PATTERNS.some(p => p.test(req.url));
+      const isBlocked = BLOCKED_ERRORS.some((b) => err.includes(b.toLowerCase()));
+      const isTracker = TRACKER_PATTERNS.some((p) => p.test(req.url));
       if (isBlocked && isTracker) {
         categories.blockedTracker.count++;
       } else if (isBlocked) {
@@ -862,7 +927,13 @@ function categorizeRequests(requests, pageUrl) {
     }
 
     const bytes = req.totalEncodedLength || 0;
-    const reqHost = (() => { try { return new URL(req.url).hostname; } catch { return ''; } })();
+    const reqHost = (() => {
+      try {
+        return new URL(req.url).hostname;
+      } catch {
+        return '';
+      }
+    })();
 
     // Classify by type
     const type = req.type || 'Other';
@@ -878,7 +949,7 @@ function categorizeRequests(requests, pageUrl) {
     }
 
     // Tracker detection
-    const isTracker = TRACKER_PATTERNS.some(p => p.test(req.url));
+    const isTracker = TRACKER_PATTERNS.some((p) => p.test(req.url));
     if (isTracker) {
       categories.tracker.count++;
       categories.tracker.bytes += bytes;
@@ -909,7 +980,9 @@ function generateDataReport(chromeData, nav0Data) {
   lines.push('          DATA CONSUMPTION COMPARISON: Nav0 vs Chrome');
   lines.push(sep);
   lines.push('');
-  lines.push(`  System:      ${os.type()} ${os.arch()} | ${os.cpus().length} CPUs | ${(os.totalmem() / 1073741824).toFixed(1)} GB RAM`);
+  lines.push(
+    `  System:      ${os.type()} ${os.arch()} | ${os.cpus().length} CPUs | ${(os.totalmem() / 1073741824).toFixed(1)} GB RAM`
+  );
   lines.push(`  Date:        ${new Date().toISOString()}`);
   lines.push(`  Test URLs:   ${TEST_URLS.length} pages`);
   lines.push(`  Idle monitor: ${IDLE_MONITOR}s`);
@@ -922,7 +995,9 @@ function generateDataReport(chromeData, nav0Data) {
   lines.push(thin);
   lines.push('  PER-PAGE DATA CONSUMPTION (wire bytes received)');
   lines.push(thin);
-  lines.push('  ' + pad('URL', 42) + pad('Chrome', 16) + pad('Nav0', 16) + pad('Diff', 18) + 'Winner');
+  lines.push(
+    '  ' + pad('URL', 42) + pad('Chrome', 16) + pad('Nav0', 16) + pad('Diff', 18) + 'Winner'
+  );
   lines.push('  ' + '-'.repeat(86));
 
   let chromeTotalBytes = 0;
@@ -954,17 +1029,23 @@ function generateDataReport(chromeData, nav0Data) {
     const nav0Incomplete = nBytes === 0 && cBytes > 0 && !nav0CdpOk;
     const pct = cBytes > 0 ? ((diff / cBytes) * 100).toFixed(1) : 'N/A';
     const sign = diff >= 0 ? '+' : '';
-    const winner = bothZero ? 'Both N/A'
-      : chromeFailed ? 'Chrome N/A'
-      : nav0Incomplete ? 'Nav0 N/A*'
-      : nBytes <= cBytes ? 'Nav0' : 'Chrome';
+    const winner = bothZero
+      ? 'Both N/A'
+      : chromeFailed
+        ? 'Chrome N/A'
+        : nav0Incomplete
+          ? 'Nav0 N/A*'
+          : nBytes <= cBytes
+            ? 'Nav0'
+            : 'Chrome';
 
-    lines.push('  ' +
-      pad(shortUrl, 42) +
-      pad(formatBytes(cBytes), 16) +
-      pad(formatBytes(nBytes), 16) +
-      pad(`${sign}${pct}%`, 18) +
-      winner
+    lines.push(
+      '  ' +
+        pad(shortUrl, 42) +
+        pad(formatBytes(cBytes), 16) +
+        pad(formatBytes(nBytes), 16) +
+        pad(`${sign}${pct}%`, 18) +
+        winner
     );
   }
 
@@ -975,12 +1056,13 @@ function generateDataReport(chromeData, nav0Data) {
     const pct = chromeTotalBytes > 0 ? ((diff / chromeTotalBytes) * 100).toFixed(1) : 'N/A';
     const sign = diff >= 0 ? '+' : '';
     const winner = nav0TotalBytes <= chromeTotalBytes ? 'Nav0' : 'Chrome';
-    lines.push('  ' +
-      pad('TOTAL RECEIVED', 42) +
-      pad(formatBytes(chromeTotalBytes), 16) +
-      pad(formatBytes(nav0TotalBytes), 16) +
-      pad(`${sign}${pct}%`, 18) +
-      winner
+    lines.push(
+      '  ' +
+        pad('TOTAL RECEIVED', 42) +
+        pad(formatBytes(chromeTotalBytes), 16) +
+        pad(formatBytes(nav0TotalBytes), 16) +
+        pad(`${sign}${pct}%`, 18) +
+        winner
     );
   }
   {
@@ -988,20 +1070,22 @@ function generateDataReport(chromeData, nav0Data) {
     const pct = chromeTotalSent > 0 ? ((diff / chromeTotalSent) * 100).toFixed(1) : 'N/A';
     const sign = diff >= 0 ? '+' : '';
     const winner = nav0TotalSent <= chromeTotalSent ? 'Nav0' : 'Chrome';
-    lines.push('  ' +
-      pad('TOTAL SENT', 42) +
-      pad(formatBytes(chromeTotalSent), 16) +
-      pad(formatBytes(nav0TotalSent), 16) +
-      pad(`${sign}${pct}%`, 18) +
-      winner
+    lines.push(
+      '  ' +
+        pad('TOTAL SENT', 42) +
+        pad(formatBytes(chromeTotalSent), 16) +
+        pad(formatBytes(nav0TotalSent), 16) +
+        pad(`${sign}${pct}%`, 18) +
+        winner
     );
   }
-  lines.push('  ' +
-    pad('TOTAL REQUESTS', 42) +
-    pad(String(chromeTotalRequests), 16) +
-    pad(String(nav0TotalRequests), 16) +
-    pad(`${nav0TotalRequests - chromeTotalRequests}`, 18) +
-    (nav0TotalRequests <= chromeTotalRequests ? 'Nav0' : 'Chrome')
+  lines.push(
+    '  ' +
+      pad('TOTAL REQUESTS', 42) +
+      pad(String(chromeTotalRequests), 16) +
+      pad(String(nav0TotalRequests), 16) +
+      pad(`${nav0TotalRequests - chromeTotalRequests}`, 18) +
+      (nav0TotalRequests <= chromeTotalRequests ? 'Nav0' : 'Chrome')
   );
   lines.push('');
 
@@ -1013,18 +1097,34 @@ function generateDataReport(chromeData, nav0Data) {
   const chromeAgg = aggregateCategories(chromeData.perPageResults);
   const nav0Agg = aggregateCategories(nav0Data.perPageResults);
 
-  lines.push('  ' + pad('Category', 24) + pad('Chrome Reqs', 14) + pad('Chrome Bytes', 16) + pad('Nav0 Reqs', 14) + pad('Nav0 Bytes', 16));
+  lines.push(
+    '  ' +
+      pad('Category', 24) +
+      pad('Chrome Reqs', 14) +
+      pad('Chrome Bytes', 16) +
+      pad('Nav0 Reqs', 14) +
+      pad('Nav0 Bytes', 16)
+  );
   lines.push('  ' + '-'.repeat(84));
 
-  for (const cat of ['firstParty', 'thirdParty', 'tracker', 'cached', 'blocked', 'blockedTracker', 'failed']) {
+  for (const cat of [
+    'firstParty',
+    'thirdParty',
+    'tracker',
+    'cached',
+    'blocked',
+    'blockedTracker',
+    'failed',
+  ]) {
     const cCat = chromeAgg[cat] || { count: 0, bytes: 0 };
     const nCat = nav0Agg[cat] || { count: 0, bytes: 0 };
-    lines.push('  ' +
-      pad(cat, 24) +
-      pad(String(cCat.count), 14) +
-      pad(formatBytes(cCat.bytes || 0), 16) +
-      pad(String(nCat.count), 14) +
-      pad(formatBytes(nCat.bytes || 0), 16)
+    lines.push(
+      '  ' +
+        pad(cat, 24) +
+        pad(String(cCat.count), 14) +
+        pad(formatBytes(cCat.bytes || 0), 16) +
+        pad(String(nCat.count), 14) +
+        pad(formatBytes(nCat.bytes || 0), 16)
     );
   }
   lines.push('');
@@ -1033,25 +1133,36 @@ function generateDataReport(chromeData, nav0Data) {
   lines.push(thin);
   lines.push('  RESOURCE TYPE BREAKDOWN');
   lines.push(thin);
-  lines.push('  ' + pad('Type', 20) + pad('Chrome Reqs', 14) + pad('Chrome Bytes', 16) + pad('Nav0 Reqs', 14) + pad('Nav0 Bytes', 16));
+  lines.push(
+    '  ' +
+      pad('Type', 20) +
+      pad('Chrome Reqs', 14) +
+      pad('Chrome Bytes', 16) +
+      pad('Nav0 Reqs', 14) +
+      pad('Nav0 Bytes', 16)
+  );
   lines.push('  ' + '-'.repeat(80));
 
-  const allTypes = new Set([...Object.keys(chromeAgg.byType || {}), ...Object.keys(nav0Agg.byType || {})]);
+  const allTypes = new Set([
+    ...Object.keys(chromeAgg.byType || {}),
+    ...Object.keys(nav0Agg.byType || {}),
+  ]);
   const sortedTypes = [...allTypes].sort((a, b) => {
-    const cb = (chromeAgg.byType?.[b]?.bytes || 0);
-    const ca = (chromeAgg.byType?.[a]?.bytes || 0);
+    const cb = chromeAgg.byType?.[b]?.bytes || 0;
+    const ca = chromeAgg.byType?.[a]?.bytes || 0;
     return cb - ca;
   });
 
   for (const type of sortedTypes) {
     const cType = chromeAgg.byType?.[type] || { count: 0, bytes: 0 };
     const nType = nav0Agg.byType?.[type] || { count: 0, bytes: 0 };
-    lines.push('  ' +
-      pad(type, 20) +
-      pad(String(cType.count), 14) +
-      pad(formatBytes(cType.bytes), 16) +
-      pad(String(nType.count), 14) +
-      pad(formatBytes(nType.bytes), 16)
+    lines.push(
+      '  ' +
+        pad(type, 20) +
+        pad(String(cType.count), 14) +
+        pad(formatBytes(cType.bytes), 16) +
+        pad(String(nType.count), 14) +
+        pad(formatBytes(nType.bytes), 16)
     );
   }
   lines.push('');
@@ -1060,21 +1171,29 @@ function generateDataReport(chromeData, nav0Data) {
   lines.push(thin);
   lines.push(`  IDLE/BACKGROUND TRAFFIC (${IDLE_MONITOR}s monitoring period)`);
   lines.push(thin);
-  lines.push(`  Chrome: ${chromeData.idleResult.totalRequests} requests, ${formatBytes(chromeData.idleResult.totalBytesReceived)} received, ${formatBytes(chromeData.idleResult.totalBytesSent)} sent`);
-  lines.push(`  Nav0:   ${nav0Data.idleResult.totalRequests} requests, ${formatBytes(nav0Data.idleResult.totalBytesReceived)} received, ${formatBytes(nav0Data.idleResult.totalBytesSent)} sent`);
+  lines.push(
+    `  Chrome: ${chromeData.idleResult.totalRequests} requests, ${formatBytes(chromeData.idleResult.totalBytesReceived)} received, ${formatBytes(chromeData.idleResult.totalBytesSent)} sent`
+  );
+  lines.push(
+    `  Nav0:   ${nav0Data.idleResult.totalRequests} requests, ${formatBytes(nav0Data.idleResult.totalBytesReceived)} received, ${formatBytes(nav0Data.idleResult.totalBytesSent)} sent`
+  );
 
   if (chromeData.idleResult.requests.length > 0) {
     lines.push('');
     lines.push('  Chrome idle requests:');
     for (const r of chromeData.idleResult.requests.slice(0, 20)) {
-      lines.push(`    ${r.type.padEnd(12)} ${formatBytes(r.bytes).padEnd(12)} ${r.url.slice(0, 70)}`);
+      lines.push(
+        `    ${r.type.padEnd(12)} ${formatBytes(r.bytes).padEnd(12)} ${r.url.slice(0, 70)}`
+      );
     }
   }
   if (nav0Data.idleResult.requests.length > 0) {
     lines.push('');
     lines.push('  Nav0 idle requests:');
     for (const r of nav0Data.idleResult.requests.slice(0, 20)) {
-      lines.push(`    ${r.type.padEnd(12)} ${formatBytes(r.bytes).padEnd(12)} ${r.url.slice(0, 70)}`);
+      lines.push(
+        `    ${r.type.padEnd(12)} ${formatBytes(r.bytes).padEnd(12)} ${r.url.slice(0, 70)}`
+      );
     }
   }
   lines.push('');
@@ -1087,17 +1206,21 @@ function generateDataReport(chromeData, nav0Data) {
 
   const totalChrome = chromeTotalBytes + chromeTotalSent;
   const totalNav0 = nav0TotalBytes + nav0TotalSent;
-  const savings = totalChrome > 0 ? (((totalChrome - totalNav0) / totalChrome) * 100).toFixed(1) : 'N/A';
+  const savings =
+    totalChrome > 0 ? (((totalChrome - totalNav0) / totalChrome) * 100).toFixed(1) : 'N/A';
 
   lines.push(`  Total data transferred (sent + received):`);
   lines.push(`    Chrome:  ${formatBytes(totalChrome)}`);
   lines.push(`    Nav0:    ${formatBytes(totalNav0)}`);
-  lines.push(`    ${totalNav0 <= totalChrome ? `Nav0 saves ${savings}% data` : `Chrome saves ${(((totalNav0 - totalChrome) / totalNav0) * 100).toFixed(1)}% data`}`);
+  lines.push(
+    `    ${totalNav0 <= totalChrome ? `Nav0 saves ${savings}% data` : `Chrome saves ${(((totalNav0 - totalChrome) / totalNav0) * 100).toFixed(1)}% data`}`
+  );
   lines.push('');
 
-  const trackerSavings = chromeAgg.tracker.bytes > 0
-    ? `Nav0 blocks ${formatBytes(chromeAgg.tracker.bytes - (nav0Agg.tracker.bytes || 0))} of tracker data`
-    : 'No tracker data detected';
+  const trackerSavings =
+    chromeAgg.tracker.bytes > 0
+      ? `Nav0 blocks ${formatBytes(chromeAgg.tracker.bytes - (nav0Agg.tracker.bytes || 0))} of tracker data`
+      : 'No tracker data detected';
   lines.push(`  Tracker data: ${trackerSavings}`);
   const blockedTrackers = nav0Agg.blockedTracker?.count || 0;
   if (blockedTrackers > 0) {
@@ -1105,7 +1228,9 @@ function generateDataReport(chromeData, nav0Data) {
   }
 
   const reqSavings = chromeTotalRequests - nav0TotalRequests;
-  lines.push(`  Request reduction: ${reqSavings > 0 ? `Nav0 makes ${reqSavings} fewer requests (${((reqSavings / chromeTotalRequests) * 100).toFixed(1)}% fewer)` : `Nav0 makes ${-reqSavings} more requests`}`);
+  lines.push(
+    `  Request reduction: ${reqSavings > 0 ? `Nav0 makes ${reqSavings} fewer requests (${((reqSavings / chromeTotalRequests) * 100).toFixed(1)}% fewer)` : `Nav0 makes ${-reqSavings} more requests`}`
+  );
   lines.push('');
   lines.push(sep);
 
@@ -1186,7 +1311,9 @@ function aggregateCategories(perPageResults) {
   return agg;
 }
 
-function pad(str, len) { return String(str).padEnd(len); }
+function pad(str, len) {
+  return String(str).padEnd(len);
+}
 
 // ─── Main ───────────────────────────────────────────────────────────────────
 
@@ -1242,11 +1369,12 @@ async function main() {
       lines.push('  ' + '-'.repeat(86));
       for (const p of data.perPageResults) {
         const shortUrl = new URL(p.url).hostname.replace('www.', '').slice(0, 38);
-        lines.push('  ' +
-          pad(shortUrl, 42) +
-          pad(formatBytes(p.totalBytesReceived), 16) +
-          pad(formatBytes(p.totalBytesSent), 16) +
-          String(p.totalRequests)
+        lines.push(
+          '  ' +
+            pad(shortUrl, 42) +
+            pad(formatBytes(p.totalBytesReceived), 16) +
+            pad(formatBytes(p.totalBytesSent), 16) +
+            String(p.totalRequests)
         );
       }
       console.log(lines.join('\n'));

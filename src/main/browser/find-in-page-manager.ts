@@ -1,12 +1,14 @@
-import { BrowserWindow } from "electron";
-import { MainToRendererEventsForBrowserIPC } from "../../constants/app-constants";
+import { BrowserWindow } from 'electron';
+import { MainToRendererEventsForBrowserIPC } from '../../constants/app-constants';
 
 export class FindInPageManager {
   private appWindowId: string;
   private lastSearchText: string = '';
   private currentTabWebContents: Electron.WebContents | null = null;
   private browserWindowWebContents: Electron.WebContents | null = null;
-  private foundInPageHandler: ((event: Electron.Event, result: Electron.FoundInPageResult) => void) | null = null;
+  private foundInPageHandler:
+    | ((event: Electron.Event, result: Electron.FoundInPageResult) => void)
+    | null = null;
   private _isVisible = false;
 
   constructor(appWindowId: string) {
@@ -23,7 +25,9 @@ export class FindInPageManager {
 
   show(searchText?: string): void {
     this._isVisible = true;
-    this.browserWindowWebContents?.send(MainToRendererEventsForBrowserIPC.SHOW_FIND_IN_PAGE_BAR, { searchText });
+    this.browserWindowWebContents?.send(MainToRendererEventsForBrowserIPC.SHOW_FIND_IN_PAGE_BAR, {
+      searchText,
+    });
   }
 
   hide(): void {

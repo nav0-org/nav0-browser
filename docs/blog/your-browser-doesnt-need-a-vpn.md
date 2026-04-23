@@ -10,7 +10,7 @@ head:
       content: article
   - - meta
     - property: article:published_time
-      content: "2026-02-06"
+      content: '2026-02-06'
   - - meta
     - property: article:author
       content: Nav0 Team
@@ -136,6 +136,7 @@ Here's the fundamental problem: when your browser vendor offers you a VPN, they'
 The core issue with any VPN is trust. You're routing all your traffic through a single point. If you trust that point less than your ISP, you've made things worse.
 
 With a browser VPN, you're trusting the same company that:
+
 - Builds the software that renders every page you visit
 - Has access to your cookies, history, bookmarks, and saved passwords
 - May have financial incentives tied to advertising or data monetization
@@ -150,12 +151,14 @@ A standalone VPN provider's entire business depends on their reputation for priv
 This is the part that browser vendors don't advertise: their VPN doesn't protect you from **them**.
 
 When you use Chrome with Google's VPN, Chrome still:
+
 - Sends URLs to Google's Safe Browsing servers
 - Syncs your data to your Google account (if signed in)
 - Reports crash data and usage statistics
 - Runs the Topics API for ad interest categorization
 
 When you use Edge with its Secure Network, Edge still:
+
 - Sends telemetry to Microsoft
 - Transmits URLs to Bing's API
 - Runs its shopping and rewards features
@@ -228,4 +231,4 @@ Privacy isn't a feature you bolt on. It's a design principle you build from the 
 
 ---
 
-*Nav0 is a minimal, privacy-focused browser. No built-in VPN because we don't need to protect you from ourselves. No telemetry. No data collection. Just browsing. [Learn more](/guide/philosophy).*
+_Nav0 is a minimal, privacy-focused browser. No built-in VPN because we don't need to protect you from ourselves. No telemetry. No data collection. Just browsing. [Learn more](/guide/philosophy)._

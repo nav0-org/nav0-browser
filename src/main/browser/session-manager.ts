@@ -1,6 +1,11 @@
-import { DataStoreConstants, InAppUrls, SessionState, SessionWindowRecord } from "../../constants/app-constants";
-import { DataStoreManager } from "../database/data-store-manager";
-import { AppWindowManager } from "./app-window-manager";
+import {
+  DataStoreConstants,
+  InAppUrls,
+  SessionState,
+  SessionWindowRecord,
+} from '../../constants/app-constants';
+import { DataStoreManager } from '../database/data-store-manager';
+import { AppWindowManager } from './app-window-manager';
 
 export abstract class SessionManager {
   private static periodicSaveTimer: ReturnType<typeof setInterval> | null = null;
@@ -30,7 +35,12 @@ export abstract class SessionManager {
       const tabs = win.getTabs();
       const activeTabId = win.getActiveTabId();
 
-      const filteredTabs: { url: string; title: string; faviconUrl: string | null; isActive: boolean }[] = [];
+      const filteredTabs: {
+        url: string;
+        title: string;
+        faviconUrl: string | null;
+        isActive: boolean;
+      }[] = [];
       for (const tab of tabs) {
         const url = tab.getUrl();
         if (!url || url === '' || url.startsWith(InAppUrls.PREFIX)) continue;
@@ -44,11 +54,11 @@ export abstract class SessionManager {
 
       if (filteredTabs.length === 0) continue;
 
-      let activeTabIndex = filteredTabs.findIndex(t => t.isActive);
+      let activeTabIndex = filteredTabs.findIndex((t) => t.isActive);
       if (activeTabIndex === -1) activeTabIndex = 0;
 
       sessionWindows.push({
-        tabs: filteredTabs.map(t => ({ url: t.url, title: t.title, faviconUrl: t.faviconUrl })),
+        tabs: filteredTabs.map((t) => ({ url: t.url, title: t.title, faviconUrl: t.faviconUrl })),
         activeTabIndex,
       });
     }

@@ -1,6 +1,6 @@
 ---
-title: "Big Tech Owns Your Browser"
-description: "Google, Microsoft, and Apple control how billions of people access the web. When your browser is made by an ad company or a platform gatekeeper, whose interests does it really serve?"
+title: 'Big Tech Owns Your Browser'
+description: 'Google, Microsoft, and Apple control how billions of people access the web. When your browser is made by an ad company or a platform gatekeeper, whose interests does it really serve?'
 date: 2026-02-04
 author: Nav0 Team
 tags: [big-tech, browsers, open-web, privacy]
@@ -10,7 +10,7 @@ head:
       content: article
   - - meta
     - property: article:published_time
-      content: "2026-02-04"
+      content: '2026-02-04'
   - - meta
     - property: article:author
       content: Nav0 Team
@@ -109,6 +109,7 @@ Google's revenue in 2025 exceeded $340 billion, with the vast majority coming fr
 The US Department of Justice's antitrust case against Google revealed that Google pays Apple approximately $20 billion per year to remain the default search engine in Safari. Google pays Mozilla around $500 million annually for the same privilege in Firefox. These aren't charitable donations. Each click through a default search engine generates advertising revenue.
 
 Chrome's design decisions consistently favor Google's interests:
+
 - **Manifest V3** changed the extension API in ways that limit the effectiveness of ad blockers, directly protecting Google's advertising revenue.
 - **Privacy Sandbox and Topics API** replaced third-party cookies not with actual privacy, but with a Google-controlled system that still enables ad targeting, just with Google as the gatekeeper.
 - **Chrome sign-in** was made [increasingly aggressive](/blog/why-your-browser-wants-you-to-sign-in) over the years, linking browser usage to Google accounts and enabling cross-device tracking.
@@ -154,6 +155,7 @@ Market share numbers understate the concentration of power because most browsers
 This means Google effectively controls the web's rendering engine. When Google decides to change how Chromium handles extensions, ads, or web standards, the entire ecosystem follows. Individual browsers can modify Chromium's behavior at the margins, but the fundamental architecture, priorities, and direction are set by Google.
 
 The consequences are real:
+
 - When Google deprecated Manifest V2 extensions in Chromium, every Chromium-based browser had to adapt or fork the entire engine (a massive ongoing maintenance burden).
 - When Google adds new APIs to Chromium that serve its advertising interests, they become de facto web standards through sheer market dominance.
 - When Google decides which web features to prioritize, those priorities shape what's possible on the web for everyone.
@@ -234,4 +236,4 @@ An independent browser is one built without conflicting business interests like 
 
 ---
 
-*Nav0 is a minimal, open-source browser built on one principle: your browser should work for you, not for big tech. Zero telemetry. Zero bloat. Zero conflicts of interest. [Learn more](/guide/philosophy).*
+_Nav0 is a minimal, open-source browser built on one principle: your browser should work for you, not for big tech. Zero telemetry. Zero bloat. Zero conflicts of interest. [Learn more](/guide/philosophy)._

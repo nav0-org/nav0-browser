@@ -1,4 +1,12 @@
-import { session, WebContents, ipcMain, net, clipboard, desktopCapturer, BrowserWindow } from 'electron';
+import {
+  session,
+  WebContents,
+  ipcMain,
+  net,
+  clipboard,
+  desktopCapturer,
+  BrowserWindow,
+} from 'electron';
 import { v4 as uuid } from 'uuid';
 import { RendererToMainEventsForBrowserIPC } from '../../constants/app-constants';
 import type { Database as DatabaseType } from 'better-sqlite3';
@@ -39,7 +47,9 @@ type ShowPromptCallback = (appWindowId: string, request: PermissionRequest) => v
 type HidePromptCallback = (appWindowId: string) => void;
 
 // Callback type for finding tab info from a webContents
-type FindTabCallback = (webContentsId: number) => { appWindowId: string; tabId: string; isPrivate: boolean } | null;
+type FindTabCallback = (
+  webContentsId: number
+) => { appWindowId: string; tabId: string; isPrivate: boolean } | null;
 
 export class PermissionManager {
   private static db: DatabaseType;
@@ -63,11 +73,7 @@ export class PermissionManager {
   ]);
 
   // Sensitive permissions that require HTTPS
-  static readonly SENSITIVE_PERMISSIONS = new Set([
-    'media',
-    'geolocation',
-    'display-capture',
-  ]);
+  static readonly SENSITIVE_PERMISSIONS = new Set(['media', 'geolocation', 'display-capture']);
 
   static readonly FLOOD_LIMIT = 3;
   static readonly FLOOD_WINDOW_MS = 10000;
@@ -95,106 +101,115 @@ export class PermissionManager {
     const isPrivate = partitionName === 'persist:private';
     const ses = session.fromPartition(partitionName);
 
-    ses.setPermissionRequestHandler((
-      webContents: WebContents,
-      permission: string,
-      callback: (granted: boolean) => void,
-      details: Electron.PermissionRequest | Electron.MediaAccessPermissionRequest | Electron.FilesystemPermissionRequest | Electron.OpenExternalPermissionRequest
-    ) => {
-      // Auto-grant certain permissions
-      if (PermissionManager.AUTO_GRANT_PERMISSIONS.has(permission)) {
-        callback(true);
-        return;
-      }
-
-      const iframeOrigin = PermissionManager.extractOrigin(details.requestingUrl);
-      // Iframe delegation: when the request originates from a sub-frame, key
-      // the prompt + persistent decision against the top-frame origin the user
-      // recognises. Still require the iframe itself to be on a secure origin
-      // so we don't let a mixed-content embed inherit a stored grant.
-      const detailsAny = details as unknown as { isMainFrame?: boolean };
-      const isSubFrame = detailsAny.isMainFrame === false;
-      let topOrigin = iframeOrigin;
-      if (isSubFrame) {
-        try {
-          const topUrl = webContents.getURL();
-          if (topUrl) topOrigin = PermissionManager.extractOrigin(topUrl);
-        } catch { /* fall through to iframe origin */ }
-      }
-      const origin = topOrigin;
-      const iframeIsSecure = PermissionManager.isSecureOrigin(iframeOrigin);
-      const topIsSecure = PermissionManager.isSecureOrigin(topOrigin);
-
-      const tabInfo = PermissionManager.findTabCallback?.(webContents.id);
-
-      if (!tabInfo) {
-        callback(false);
-        return;
-      }
-
-      const { appWindowId, tabId } = tabInfo;
-      const isSecure = topIsSecure;
-
-      // Block sensitive permissions unless BOTH the top frame and the
-      // requesting sub-frame are on secure origins.
-      const isInsecureBlocked = PermissionManager.SENSITIVE_PERMISSIONS.has(permission)
-        && (!topIsSecure || !iframeIsSecure);
-
-      // Check stored persistent decisions (not in private mode)
-      if (!isPrivate && !isInsecureBlocked) {
-        const persistent = PermissionManager.getPersistentDecision(origin, permission);
-        if (persistent === 'allowed_persistent') {
-          PermissionManager.touchPersistentDecision(origin, permission);
+    ses.setPermissionRequestHandler(
+      (
+        webContents: WebContents,
+        permission: string,
+        callback: (granted: boolean) => void,
+        details:
+          | Electron.PermissionRequest
+          | Electron.MediaAccessPermissionRequest
+          | Electron.FilesystemPermissionRequest
+          | Electron.OpenExternalPermissionRequest
+      ) => {
+        // Auto-grant certain permissions
+        if (PermissionManager.AUTO_GRANT_PERMISSIONS.has(permission)) {
           callback(true);
           return;
         }
-        if (persistent === 'denied_persistent') {
+
+        const iframeOrigin = PermissionManager.extractOrigin(details.requestingUrl);
+        // Iframe delegation: when the request originates from a sub-frame, key
+        // the prompt + persistent decision against the top-frame origin the user
+        // recognises. Still require the iframe itself to be on a secure origin
+        // so we don't let a mixed-content embed inherit a stored grant.
+        const detailsAny = details as unknown as { isMainFrame?: boolean };
+        const isSubFrame = detailsAny.isMainFrame === false;
+        let topOrigin = iframeOrigin;
+        if (isSubFrame) {
+          try {
+            const topUrl = webContents.getURL();
+            if (topUrl) topOrigin = PermissionManager.extractOrigin(topUrl);
+          } catch {
+            /* fall through to iframe origin */
+          }
+        }
+        const origin = topOrigin;
+        const iframeIsSecure = PermissionManager.isSecureOrigin(iframeOrigin);
+        const topIsSecure = PermissionManager.isSecureOrigin(topOrigin);
+
+        const tabInfo = PermissionManager.findTabCallback?.(webContents.id);
+
+        if (!tabInfo) {
           callback(false);
           return;
         }
+
+        const { appWindowId, tabId } = tabInfo;
+        const isSecure = topIsSecure;
+
+        // Block sensitive permissions unless BOTH the top frame and the
+        // requesting sub-frame are on secure origins.
+        const isInsecureBlocked =
+          PermissionManager.SENSITIVE_PERMISSIONS.has(permission) &&
+          (!topIsSecure || !iframeIsSecure);
+
+        // Check stored persistent decisions (not in private mode)
+        if (!isPrivate && !isInsecureBlocked) {
+          const persistent = PermissionManager.getPersistentDecision(origin, permission);
+          if (persistent === 'allowed_persistent') {
+            PermissionManager.touchPersistentDecision(origin, permission);
+            callback(true);
+            return;
+          }
+          if (persistent === 'denied_persistent') {
+            callback(false);
+            return;
+          }
+        }
+
+        // Check session decisions
+        const sessionKey = PermissionManager.sessionKey(tabId, origin, permission);
+        const sessionDecision = PermissionManager.sessionPermissions.get(sessionKey);
+        if (sessionDecision === 'allowed_session') {
+          callback(true);
+          return;
+        }
+        if (sessionDecision === 'denied_session') {
+          callback(false);
+          return;
+        }
+
+        // Check flooding
+        const isFloodBlocked = PermissionManager.isFlooding(origin);
+
+        // Build permission info
+        const permInfo = PermissionManager.getPermissionInfo(permission, details);
+
+        // Create request
+        const request: PermissionRequest = {
+          id: uuid(),
+          webContentsId: webContents.id,
+          tabId,
+          appWindowId,
+          origin,
+          permission,
+          permissions: [permInfo],
+          isSecure,
+          isPrivate,
+          faviconUrl: null,
+          callback,
+          timestamp: Date.now(),
+          isInsecureBlocked,
+          isFloodBlocked,
+        };
+
+        // Track request timestamp for flood detection
+        PermissionManager.trackRequestTimestamp(origin);
+
+        PermissionManager.enqueueRequest(request);
       }
-
-      // Check session decisions
-      const sessionKey = PermissionManager.sessionKey(tabId, origin, permission);
-      const sessionDecision = PermissionManager.sessionPermissions.get(sessionKey);
-      if (sessionDecision === 'allowed_session') {
-        callback(true);
-        return;
-      }
-      if (sessionDecision === 'denied_session') {
-        callback(false);
-        return;
-      }
-
-      // Check flooding
-      const isFloodBlocked = PermissionManager.isFlooding(origin);
-
-      // Build permission info
-      const permInfo = PermissionManager.getPermissionInfo(permission, details);
-
-      // Create request
-      const request: PermissionRequest = {
-        id: uuid(),
-        webContentsId: webContents.id,
-        tabId,
-        appWindowId,
-        origin,
-        permission,
-        permissions: [permInfo],
-        isSecure,
-        isPrivate,
-        faviconUrl: null,
-        callback,
-        timestamp: Date.now(),
-        isInsecureBlocked,
-        isFloodBlocked,
-      };
-
-      // Track request timestamp for flood detection
-      PermissionManager.trackRequestTimestamp(origin);
-
-      PermissionManager.enqueueRequest(request);
-    });
+    );
 
     // Note: setPermissionCheckHandler is intentionally not used. Electron's boolean
     // return can't express "undecided — please prompt". Returning false maps to
@@ -230,10 +245,13 @@ export class PermissionManager {
   // Map keyed by the picker window's webContents id so concurrent requests
   // (one per session) don't interfere.
 
-  private static pendingPickers: Map<number, {
-    sources: Electron.DesktopCapturerSource[];
-    resolve: (source: Electron.DesktopCapturerSource | null) => void;
-  }> = new Map();
+  private static pendingPickers: Map<
+    number,
+    {
+      sources: Electron.DesktopCapturerSource[];
+      resolve: (source: Electron.DesktopCapturerSource | null) => void;
+    }
+  > = new Map();
 
   private static async showDisplayMediaPicker(): Promise<Electron.DesktopCapturerSource | null> {
     const sources = await desktopCapturer.getSources({
@@ -283,13 +301,18 @@ export class PermissionManager {
 
       pickerWin.on('closed', () => done(null));
 
-      pickerWin.loadURL(DISPLAY_CAPTURE_PICKER_WEBPACK_ENTRY)
-        .then(() => { if (!pickerWin.isDestroyed()) pickerWin.show(); })
+      pickerWin
+        .loadURL(DISPLAY_CAPTURE_PICKER_WEBPACK_ENTRY)
+        .then(() => {
+          if (!pickerWin.isDestroyed()) pickerWin.show();
+        })
         .catch(() => done(null));
     });
   }
 
-  private static getSourcesForPicker(webContentsId: number): Array<{ idx: number; name: string; type: 'Screen' | 'Window'; thumbnail: string }> {
+  private static getSourcesForPicker(
+    webContentsId: number
+  ): Array<{ idx: number; name: string; type: 'Screen' | 'Window'; thumbnail: string }> {
     const pending = PermissionManager.pendingPickers.get(webContentsId);
     if (!pending) return [];
     return pending.sources.map((s, i) => ({
@@ -303,7 +326,8 @@ export class PermissionManager {
   private static resolvePicker(webContentsId: number, idx: number | null): void {
     const pending = PermissionManager.pendingPickers.get(webContentsId);
     if (!pending) return;
-    const source = idx !== null && idx >= 0 && idx < pending.sources.length ? pending.sources[idx] : null;
+    const source =
+      idx !== null && idx >= 0 && idx < pending.sources.length ? pending.sources[idx] : null;
     pending.resolve(source);
   }
 
@@ -340,7 +364,10 @@ export class PermissionManager {
     // Find the active prompt by requestId across all tabs
     let request: PermissionRequest | null = null;
     for (const [, prompt] of PermissionManager.activePrompts) {
-      if (prompt.id === requestId) { request = prompt; break; }
+      if (prompt.id === requestId) {
+        request = prompt;
+        break;
+      }
     }
     if (!request) return;
 
@@ -464,12 +491,17 @@ export class PermissionManager {
 
   // ─── Persistent Permission Storage (SQLite) ──────────────────────
 
-  private static getPersistentDecision(origin: string, permissionType: string): PersistentDecision | null {
+  private static getPersistentDecision(
+    origin: string,
+    permissionType: string
+  ): PersistentDecision | null {
     if (!PermissionManager.db) return null;
     try {
-      const row = PermissionManager.db.prepare(
-        'SELECT decision, lastAccessedAt FROM site_permission WHERE origin = ? AND permissionType = ?'
-      ).get(origin, permissionType) as PermissionRecord | undefined;
+      const row = PermissionManager.db
+        .prepare(
+          'SELECT decision, lastAccessedAt FROM site_permission WHERE origin = ? AND permissionType = ?'
+        )
+        .get(origin, permissionType) as PermissionRecord | undefined;
 
       if (!row) return null;
 
@@ -478,9 +510,9 @@ export class PermissionManager {
         const lastAccessed = new Date(row.lastAccessedAt).getTime();
         const daysSinceAccess = (Date.now() - lastAccessed) / (1000 * 60 * 60 * 24);
         if (daysSinceAccess > PermissionManager.PERMISSION_EXPIRY_DAYS) {
-          PermissionManager.db.prepare(
-            'DELETE FROM site_permission WHERE origin = ? AND permissionType = ?'
-          ).run(origin, permissionType);
+          PermissionManager.db
+            .prepare('DELETE FROM site_permission WHERE origin = ? AND permissionType = ?')
+            .run(origin, permissionType);
           return null;
         }
       }
@@ -491,22 +523,28 @@ export class PermissionManager {
     }
   }
 
-  private static storePersistentDecision(origin: string, permissionType: string, decision: PersistentDecision): void {
+  private static storePersistentDecision(
+    origin: string,
+    permissionType: string,
+    decision: PersistentDecision
+  ): void {
     if (!PermissionManager.db) return;
     try {
       const now = new Date().toISOString();
-      const existing = PermissionManager.db.prepare(
-        'SELECT id FROM site_permission WHERE origin = ? AND permissionType = ?'
-      ).get(origin, permissionType) as { id: string } | undefined;
+      const existing = PermissionManager.db
+        .prepare('SELECT id FROM site_permission WHERE origin = ? AND permissionType = ?')
+        .get(origin, permissionType) as { id: string } | undefined;
 
       if (existing) {
-        PermissionManager.db.prepare(
-          'UPDATE site_permission SET decision = ?, lastAccessedAt = ? WHERE id = ?'
-        ).run(decision, now, existing.id);
+        PermissionManager.db
+          .prepare('UPDATE site_permission SET decision = ?, lastAccessedAt = ? WHERE id = ?')
+          .run(decision, now, existing.id);
       } else {
-        PermissionManager.db.prepare(
-          'INSERT INTO site_permission (id, origin, permissionType, decision, createdAt, lastAccessedAt) VALUES (?, ?, ?, ?, ?, ?)'
-        ).run(uuid(), origin, permissionType, decision, now, now);
+        PermissionManager.db
+          .prepare(
+            'INSERT INTO site_permission (id, origin, permissionType, decision, createdAt, lastAccessedAt) VALUES (?, ?, ?, ?, ?, ?)'
+          )
+          .run(uuid(), origin, permissionType, decision, now, now);
       }
     } catch (err) {
       console.error('Failed to store permission decision:', err);
@@ -516,9 +554,11 @@ export class PermissionManager {
   private static touchPersistentDecision(origin: string, permissionType: string): void {
     if (!PermissionManager.db) return;
     try {
-      PermissionManager.db.prepare(
-        'UPDATE site_permission SET lastAccessedAt = ? WHERE origin = ? AND permissionType = ?'
-      ).run(new Date().toISOString(), origin, permissionType);
+      PermissionManager.db
+        .prepare(
+          'UPDATE site_permission SET lastAccessedAt = ? WHERE origin = ? AND permissionType = ?'
+        )
+        .run(new Date().toISOString(), origin, permissionType);
     } catch {
       // Ignore
     }
@@ -538,13 +578,15 @@ export class PermissionManager {
         FROM site_permission p
       `;
       if (searchTerm) {
-        return PermissionManager.db.prepare(
-          `${baseSelect} WHERE p.origin LIKE ? OR p.permissionType LIKE ? ORDER BY p.origin, p.permissionType`
-        ).all(`%${searchTerm}%`, `%${searchTerm}%`) as PermissionRecord[];
+        return PermissionManager.db
+          .prepare(
+            `${baseSelect} WHERE p.origin LIKE ? OR p.permissionType LIKE ? ORDER BY p.origin, p.permissionType`
+          )
+          .all(`%${searchTerm}%`, `%${searchTerm}%`) as PermissionRecord[];
       }
-      return PermissionManager.db.prepare(
-        `${baseSelect} ORDER BY p.origin, p.permissionType`
-      ).all() as PermissionRecord[];
+      return PermissionManager.db
+        .prepare(`${baseSelect} ORDER BY p.origin, p.permissionType`)
+        .all() as PermissionRecord[];
     } catch {
       return [];
     }
@@ -572,9 +614,9 @@ export class PermissionManager {
     if (!PermissionManager.db) return false;
     try {
       const now = new Date().toISOString();
-      const result = PermissionManager.db.prepare(
-        'UPDATE site_permission SET decision = ?, lastAccessedAt = ? WHERE id = ?'
-      ).run(decision, now, id);
+      const result = PermissionManager.db
+        .prepare('UPDATE site_permission SET decision = ?, lastAccessedAt = ? WHERE id = ?')
+        .run(decision, now, id);
       return result.changes > 0;
     } catch (err) {
       console.error('Failed to update permission decision:', err);
@@ -632,10 +674,13 @@ export class PermissionManager {
     webContentsId: number,
     origin: string,
     permission: string,
-    callback: (granted: boolean) => void,
+    callback: (granted: boolean) => void
   ): void {
     const tabInfo = PermissionManager.findTabCallback?.(webContentsId);
-    if (!tabInfo) { callback(false); return; }
+    if (!tabInfo) {
+      callback(false);
+      return;
+    }
 
     const { appWindowId, tabId, isPrivate } = tabInfo;
     const isSecure = PermissionManager.isSecureOrigin(origin);
@@ -649,14 +694,23 @@ export class PermissionManager {
         callback(true);
         return;
       }
-      if (persistent === 'denied_persistent') { callback(false); return; }
+      if (persistent === 'denied_persistent') {
+        callback(false);
+        return;
+      }
     }
 
     // Check session decisions
     const sessionKey = PermissionManager.sessionKey(tabId, origin, permission);
     const sessionDecision = PermissionManager.sessionPermissions.get(sessionKey);
-    if (sessionDecision === 'allowed_session') { callback(true); return; }
-    if (sessionDecision === 'denied_session') { callback(false); return; }
+    if (sessionDecision === 'allowed_session') {
+      callback(true);
+      return;
+    }
+    if (sessionDecision === 'denied_session') {
+      callback(false);
+      return;
+    }
 
     const isFloodBlocked = PermissionManager.isFlooding(origin);
     const permInfo = PermissionManager.getPermissionInfo(permission);
@@ -718,17 +772,17 @@ export class PermissionManager {
     }
 
     const info: Record<string, { label: string; icon: string }> = {
-      'media': { label: 'camera/microphone', icon: 'camera' },
-      'geolocation': { label: 'location', icon: 'map-pin' },
-      'notifications': { label: 'notifications', icon: 'bell' },
-      'midi': { label: 'MIDI devices', icon: 'music' },
-      'midiSysex': { label: 'MIDI system exclusive', icon: 'music' },
-      'pointerLock': { label: 'pointer lock', icon: 'lock' },
-      'openExternal': { label: 'external application', icon: 'app-window' },
+      media: { label: 'camera/microphone', icon: 'camera' },
+      geolocation: { label: 'location', icon: 'map-pin' },
+      notifications: { label: 'notifications', icon: 'bell' },
+      midi: { label: 'MIDI devices', icon: 'music' },
+      midiSysex: { label: 'MIDI system exclusive', icon: 'music' },
+      pointerLock: { label: 'pointer lock', icon: 'lock' },
+      openExternal: { label: 'external application', icon: 'app-window' },
       'clipboard-read': { label: 'clipboard', icon: 'clipboard' },
       'idle-detection': { label: 'idle detection', icon: 'moon' },
       'display-capture': { label: 'screen sharing', icon: 'monitor' },
-      'mediaKeySystem': { label: 'protected content', icon: 'hard-drive' },
+      mediaKeySystem: { label: 'protected content', icon: 'hard-drive' },
       'accessibility-events': { label: 'accessibility events', icon: 'eye' },
       'storage-access': { label: 'storage access', icon: 'hard-drive' },
       'window-management': { label: 'window management', icon: 'app-window' },
@@ -736,10 +790,10 @@ export class PermissionManager {
       'screen-wake-lock': { label: 'screen wake lock', icon: 'monitor' },
       'speaker-selection': { label: 'speaker selection', icon: 'speaker' },
       'keyboard-lock': { label: 'keyboard lock', icon: 'keyboard' },
-      'usb': { label: 'USB devices', icon: 'usb' },
-      'serial': { label: 'serial ports', icon: 'usb' },
-      'bluetooth': { label: 'Bluetooth devices', icon: 'bluetooth' },
-      'hid': { label: 'HID devices', icon: 'keyboard' },
+      usb: { label: 'USB devices', icon: 'usb' },
+      serial: { label: 'serial ports', icon: 'usb' },
+      bluetooth: { label: 'Bluetooth devices', icon: 'bluetooth' },
+      hid: { label: 'HID devices', icon: 'keyboard' },
     };
 
     const found = info[permission];
@@ -750,77 +804,92 @@ export class PermissionManager {
   // ─── IPC Listeners ───────────────────────────────────────────────
 
   private static initIPCListeners(): void {
-    ipcMain.on(RendererToMainEventsForBrowserIPC.PERMISSION_PROMPT_RESPONSE, (
-      _event: Electron.IpcMainEvent,
-      _appWindowId: string,
-      requestId: string,
-      decision: string
-    ) => {
-      PermissionManager.handlePromptResponse(requestId, decision);
-    });
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.PERMISSION_PROMPT_RESPONSE,
+      (
+        _event: Electron.IpcMainEvent,
+        _appWindowId: string,
+        requestId: string,
+        decision: string
+      ) => {
+        PermissionManager.handlePromptResponse(requestId, decision);
+      }
+    );
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.FETCH_PERMISSIONS, (
-      _event: Electron.IpcMainInvokeEvent,
-      searchTerm?: string
-    ) => {
-      return PermissionManager.getAllPersistentPermissions(searchTerm);
-    });
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.FETCH_PERMISSIONS,
+      (_event: Electron.IpcMainInvokeEvent, searchTerm?: string) => {
+        return PermissionManager.getAllPersistentPermissions(searchTerm);
+      }
+    );
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.REMOVE_PERMISSION, (
-      _event: Electron.IpcMainInvokeEvent,
-      permissionId: string
-    ) => {
-      PermissionManager.removePersistentPermission(permissionId);
-      return true;
-    });
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.REMOVE_PERMISSION,
+      (_event: Electron.IpcMainInvokeEvent, permissionId: string) => {
+        PermissionManager.removePersistentPermission(permissionId);
+        return true;
+      }
+    );
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.REMOVE_ALL_PERMISSIONS_FOR_ORIGIN, (
-      _event: Electron.IpcMainInvokeEvent,
-      origin: string
-    ) => {
-      PermissionManager.removeAllPermissionsForOrigin(origin);
-      return true;
-    });
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.REMOVE_ALL_PERMISSIONS_FOR_ORIGIN,
+      (_event: Electron.IpcMainInvokeEvent, origin: string) => {
+        PermissionManager.removeAllPermissionsForOrigin(origin);
+        return true;
+      }
+    );
 
     ipcMain.handle(RendererToMainEventsForBrowserIPC.CLEAR_ALL_PERMISSIONS, () => {
       PermissionManager.clearAllPersistentPermissions();
       return true;
     });
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.UPDATE_PERMISSION_DECISION, (
-      _event: Electron.IpcMainInvokeEvent,
-      permissionId: string,
-      decision: string
-    ) => {
-      return PermissionManager.updatePersistentPermissionDecision(permissionId, decision as PersistentDecision);
-    });
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.UPDATE_PERMISSION_DECISION,
+      (_event: Electron.IpcMainInvokeEvent, permissionId: string, decision: string) => {
+        return PermissionManager.updatePersistentPermissionDecision(
+          permissionId,
+          decision as PersistentDecision
+        );
+      }
+    );
 
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.DISPLAY_CAPTURE_PICKER_GET_SOURCES, (
-      event: Electron.IpcMainInvokeEvent
-    ) => {
-      return PermissionManager.getSourcesForPicker(event.sender.id);
-    });
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.DISPLAY_CAPTURE_PICKER_GET_SOURCES,
+      (event: Electron.IpcMainInvokeEvent) => {
+        return PermissionManager.getSourcesForPicker(event.sender.id);
+      }
+    );
 
-    ipcMain.on(RendererToMainEventsForBrowserIPC.DISPLAY_CAPTURE_PICKER_SELECT, (
-      event: Electron.IpcMainEvent,
-      idx: number | null
-    ) => {
-      PermissionManager.resolvePicker(event.sender.id, idx);
-    });
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.DISPLAY_CAPTURE_PICKER_SELECT,
+      (event: Electron.IpcMainEvent, idx: number | null) => {
+        PermissionManager.resolvePicker(event.sender.id, idx);
+      }
+    );
 
     ipcMain.handle('get-ip-geolocation', async () => {
       const services = [
         {
           url: 'https://ipapi.co/json/',
-          parse: (d: Record<string, unknown>) => ({ lat: d.latitude as number, lon: d.longitude as number }),
+          parse: (d: Record<string, unknown>) => ({
+            lat: d.latitude as number,
+            lon: d.longitude as number,
+          }),
         },
         {
           url: 'https://ipwho.is/',
-          parse: (d: Record<string, unknown>) => ({ lat: d.latitude as number, lon: d.longitude as number }),
+          parse: (d: Record<string, unknown>) => ({
+            lat: d.latitude as number,
+            lon: d.longitude as number,
+          }),
         },
         {
           url: 'https://freeipapi.com/api/json',
-          parse: (d: Record<string, unknown>) => ({ lat: d.latitude as number, lon: d.longitude as number }),
+          parse: (d: Record<string, unknown>) => ({
+            lat: d.latitude as number,
+            lon: d.longitude as number,
+          }),
         },
       ];
       for (const svc of services) {
@@ -839,26 +908,29 @@ export class PermissionManager {
       return null;
     });
 
-    ipcMain.handle('web-share', async (
-      _event: Electron.IpcMainInvokeEvent,
-      data: { title?: string; text?: string; url?: string }
-    ) => {
-      try {
-        const parts: string[] = [];
-        if (data.title) parts.push(data.title);
-        if (data.text) parts.push(data.text);
-        if (data.url) parts.push(data.url);
+    ipcMain.handle(
+      'web-share',
+      async (
+        _event: Electron.IpcMainInvokeEvent,
+        data: { title?: string; text?: string; url?: string }
+      ) => {
+        try {
+          const parts: string[] = [];
+          if (data.title) parts.push(data.title);
+          if (data.text) parts.push(data.text);
+          if (data.url) parts.push(data.url);
 
-        const textToCopy = parts.join('\n');
-        if (!textToCopy) {
-          return { success: false, error: 'Nothing to share' };
+          const textToCopy = parts.join('\n');
+          if (!textToCopy) {
+            return { success: false, error: 'Nothing to share' };
+          }
+
+          clipboard.writeText(textToCopy);
+          return { success: true };
+        } catch {
+          return { success: false, error: 'Failed to copy to clipboard' };
         }
-
-        clipboard.writeText(textToCopy);
-        return { success: true };
-      } catch {
-        return { success: false, error: 'Failed to copy to clipboard' };
       }
-    });
+    );
   }
 }

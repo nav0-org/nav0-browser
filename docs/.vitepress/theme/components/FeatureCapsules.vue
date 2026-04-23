@@ -49,5 +49,5 @@ const allFeatures = [
   'No crypto / rewards',
   'No built-in VPN',
   'No forced accounts',
-]
+];
 </script>

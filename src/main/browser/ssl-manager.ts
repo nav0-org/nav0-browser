@@ -20,7 +20,7 @@ export class SSLManager {
   static isHostBypassed(hostname: string): boolean {
     const bypassedAt = SSLManager.bypassedHosts.get(hostname);
     if (!bypassedAt) return false;
-    if ((Date.now() - bypassedAt) < SSL_BYPASS_TTL_MS) return true;
+    if (Date.now() - bypassedAt < SSL_BYPASS_TTL_MS) return true;
     SSLManager.bypassedHosts.delete(hostname);
     return false;
   }
@@ -45,7 +45,7 @@ export class SSLManager {
   static showWarning(
     wc: WebContents,
     url: string,
-    errorCode: string,
+    errorCode: string
   ): Promise<'proceed' | 'go-back'> {
     const html = SSLManager.generateWarningPage(url, errorCode);
     wc.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
@@ -57,7 +57,9 @@ export class SSLManager {
           cleanup();
           try {
             SSLManager.addBypass(new URL(url).hostname);
-          } catch { /* ignore */ }
+          } catch {
+            /* ignore */
+          }
           resolve('proceed');
         }
       };

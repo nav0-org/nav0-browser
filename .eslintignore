@@ -1,0 +1,5 @@
+node_modules
+.webpack
+out
+dist
+docs/.vitepress/cache
