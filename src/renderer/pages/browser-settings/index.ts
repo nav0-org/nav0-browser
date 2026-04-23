@@ -1121,6 +1121,7 @@ interface PermissionRecord {
   decision: string;
   createdAt: string;
   lastAccessedAt: string;
+  faviconUrl?: string | null;
 }
 
 let permissionsSearchTimeout: ReturnType<typeof setTimeout> | null = null;
