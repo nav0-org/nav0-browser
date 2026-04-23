@@ -189,10 +189,11 @@ function initSettingsSearch() {
       }
       return;
     }
-    // Find matching sections
+    // Find matching sections — look for .page-title first (new), fall back to .section-title (legacy)
     document.querySelectorAll('.settings-section').forEach(section => {
       const keywords = (section as HTMLElement).dataset.keywords || '';
-      const title = section.querySelector('.section-title')?.textContent || '';
+      const titleEl = section.querySelector('.page-title') || section.querySelector('.section-title');
+      const title = titleEl?.textContent || '';
       const allText = (keywords + ' ' + title).toLowerCase();
       if (allText.indexOf(query) >= 0) {
         section.classList.add('active');
@@ -525,8 +526,8 @@ function renderFilterLists() {
           <span class="toggle-slider"></span>
         </label>
         <div>
-          <div class="list-item-text">${list.name}</div>
-          <div class="list-item-description">${list.description}</div>
+          <div class="list-item-text" style="font-family: var(--n0-sans); font-weight: 500;">${list.name}</div>
+          <div class="list-item-description" style="font-family: var(--n0-sans);">${list.description}</div>
         </div>
       </div>
       ${!list.isBuiltIn ? `<div class="list-item-actions"><button class="list-item-btn" data-idx="${idx}" title="Remove"><i data-lucide="x" width="14" height="14"></i></button></div>` : ''}
@@ -812,7 +813,8 @@ function initUserAgentSettings() {
     } else {
       ua = USER_AGENT_PRESETS[preset]?.value || navigator.userAgent;
     }
-    preview.textContent = `Current: ${ua}`;
+    // HTML now has a separate "Current" label, so just set the UA string
+    preview.textContent = ua;
   }
 }
 
@@ -947,7 +949,7 @@ function renderShortcutsTable() {
         <span class="shortcut-key">${formatShortcutDisplay(shortcut.currentShortcut)}</span>
       </td>
       <td>
-        <button class="shortcut-reset-btn" data-action-id="${shortcut.id}" title="Reset to default">&#8634;</button>
+        <button class="shortcut-reset-btn" data-action-id="${shortcut.id}" title="Reset to default"><i data-lucide="rotate-ccw" width="13" height="13"></i></button>
       </td>
     `;
 
@@ -957,7 +959,8 @@ function renderShortcutsTable() {
 
     // Reset button
     const resetBtn = tr.querySelector('.shortcut-reset-btn') as HTMLElement;
-    resetBtn?.addEventListener('click', () => {
+    resetBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
       shortcut.currentShortcut = shortcut.defaultShortcut;
       if (settings.keyboardShortcuts?.[shortcut.id]) {
         delete settings.keyboardShortcuts[shortcut.id];
@@ -968,6 +971,8 @@ function renderShortcutsTable() {
 
     tbody.appendChild(tr);
   });
+
+  createIcons({ icons });
 }
 
 function startRecording(cell: HTMLElement, shortcut: KeyboardShortcutAction) {
@@ -1071,7 +1076,7 @@ function handleShortcutRecording(e: KeyboardEvent) {
 }
 
 function formatShortcutDisplay(combo: string): string {
-  if (!combo) return '<span style="color: var(--text-secondary); font-style: italic;">None</span>';
+  if (!combo) return '<span style="color: var(--n0-text-3); font-style: italic;">None</span>';
   return combo.split('+').map(part => {
     let display = part;
     if (part === 'mod') display = modKey;
@@ -1144,9 +1149,6 @@ async function initPermissionsSettings() {
     refresh();
   });
 
-  // Re-fetch whenever the Permissions sidebar link is clicked — this is the
-  // most reliable trigger since visibilitychange doesn't fire consistently
-  // for WebContentsView tabs in Electron.
   document.addEventListener('settings-section-activated', (e) => {
     const detail = (e as CustomEvent).detail;
     if (detail?.sectionId === 'permissions') {
@@ -1154,7 +1156,6 @@ async function initPermissionsSettings() {
     }
   });
 
-  // Fallback: also refresh on window focus (tab switch)
   window.addEventListener('focus', refresh);
 }
 
@@ -1217,14 +1218,13 @@ function renderPermissions(permissions: PermissionRecord[]) {
         <span class="permission-origin-name">${escapeHtml(origin)}</span>
       </span>
       <span class="permission-origin-actions">
-        <button class="btn btn-sm btn-secondary permission-remove-all-btn"><i data-lucide="trash-2" width="12" height="12"></i> Remove All</button>
+        <button class="btn btn-sm btn-danger permission-remove-all-btn"><i data-lucide="trash-2" width="12" height="12"></i> Remove All</button>
       </span>
     `;
     header.querySelector('.permission-remove-all-btn')!.addEventListener('click', async () => {
       await (window as any).BrowserAPI.removeAllPermissionsForOrigin(origin);
       group.remove();
       showToast(`Permissions removed for ${origin}`);
-      // Check if list is now empty
       if (container.children.length === 0) {
         emptyState.style.display = '';
         footer.style.display = 'none';
@@ -1254,19 +1254,16 @@ function renderPermissions(permissions: PermissionRecord[]) {
         <button class="permission-entry-remove" title="Remove permission"><i data-lucide="x" width="14" height="14"></i></button>
       `;
 
-      // Decision change handler
       const select = entry.querySelector('.permission-decision-select') as HTMLSelectElement;
       select.addEventListener('change', async () => {
         await (window as any).BrowserAPI.updatePermissionDecision(perm.id, select.value);
         showToast(`${label} ${select.value === 'allowed_persistent' ? 'allowed' : 'denied'} for ${origin}`);
       });
 
-      // Remove handler
       entry.querySelector('.permission-entry-remove')!.addEventListener('click', async () => {
         await (window as any).BrowserAPI.removePermission(perm.id);
         entry.remove();
         showToast(`${label} permission removed`);
-        // If group is now empty (only header remains), remove group
         if (group.querySelectorAll('.permission-entry').length === 0) {
           group.remove();
           if (container.children.length === 0) {
