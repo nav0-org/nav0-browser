@@ -257,6 +257,10 @@ export default defineConfig({
           ],
         },
         {
+          text: 'Un-features',
+          items: [{ text: "What Nav0 Doesn't Do", link: '/guide/un-features' }],
+        },
+        {
           text: 'Core Principles',
           items: [
             { text: 'Privacy', link: '/guide/privacy' },
