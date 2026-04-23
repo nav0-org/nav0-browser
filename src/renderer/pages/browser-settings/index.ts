@@ -1121,6 +1121,7 @@ interface PermissionRecord {
   decision: string;
   createdAt: string;
   lastAccessedAt: string;
+  faviconUrl?: string | null;
 }
 
 let permissionsSearchTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -1208,8 +1209,15 @@ function renderPermissions(permissions: PermissionRecord[]) {
     // Header
     const header = document.createElement('div');
     header.className = 'permission-origin-header';
+    const favicon = perms[0].faviconUrl;
+    const faviconHtml = favicon
+      ? `<img class="permission-origin-favicon" src="${escapeHtml(favicon)}" alt="" onerror="this.outerHTML='<i data-lucide=\\'globe\\' class=\\'permission-origin-favicon\\' width=\\'16\\' height=\\'16\\'></i>'">`
+      : `<i data-lucide="globe" class="permission-origin-favicon" width="16" height="16"></i>`;
     header.innerHTML = `
-      <span class="permission-origin-name">${escapeHtml(origin)}</span>
+      <span class="permission-origin-title">
+        ${faviconHtml}
+        <span class="permission-origin-name">${escapeHtml(origin)}</span>
+      </span>
       <span class="permission-origin-actions">
         <button class="btn btn-sm btn-danger permission-remove-all-btn"><i data-lucide="trash-2" width="12" height="12"></i> Remove All</button>
       </span>

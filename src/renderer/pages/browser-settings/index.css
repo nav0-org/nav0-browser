@@ -1284,6 +1284,22 @@
   border-bottom: 1px solid var(--n0-border-subtle);
 }
 
+.permission-origin-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.permission-origin-favicon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border-radius: 3px;
+  object-fit: contain;
+  color: var(--n0-text-2);
+}
+
 .permission-origin-name {
   font-family: var(--n0-mono);
   font-size: 14px;
