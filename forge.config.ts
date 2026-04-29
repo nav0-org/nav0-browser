@@ -17,6 +17,13 @@ const config: ForgeConfig = {
     asar: true,
     icon: 'src/renderer/assets/logo',
     extraResource: [],
+    extendInfo: {
+      NSAudioCaptureUsageDescription:
+        'Nav0 needs audio capture access to share system audio during screen sharing.',
+      NSCameraUsageDescription: 'Nav0 needs camera access when a website you visit requests it.',
+      NSMicrophoneUsageDescription:
+        'Nav0 needs microphone access when a website you visit requests it.',
+    },
   },
   rebuildConfig: {
     force: true,
