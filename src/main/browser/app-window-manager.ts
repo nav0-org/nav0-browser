@@ -143,10 +143,11 @@ export abstract class AppWindowManager {
       });
       browserWindow.on('close', () => {
         AppWindowManager.recordWindowTabs(window);
-        // Clear pending timers on all tabs to prevent callbacks after window removal
-        for (const tab of window.getTabs()) {
-          tab.clearPendingTimers();
-        }
+        // Tear down every tab's WebContentsView before the BrowserWindow is
+        // destroyed. Inactive tabs' views are orphaned (not children of
+        // contentView) and would otherwise keep running — playing audio,
+        // holding WebSockets open, etc. — long after the window is gone.
+        window.destroyAllTabs();
       });
       browserWindow.on('closed', () => {
         AppWindowManager.windows.delete(window.id);
