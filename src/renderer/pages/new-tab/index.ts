@@ -84,10 +84,30 @@ function getTimeBasedGreeting(): string {
   return bucket.phrases[Math.floor(Math.random() * bucket.phrases.length)];
 }
 
+const BACKGROUND_GRADIENTS: string[] = [
+  'linear-gradient(135deg, #fde6dc 0%, #fce4ec 50%, #e8eaf6 100%)',
+  'linear-gradient(135deg, #ffe0b2 0%, #fce4ec 50%, #e1bee7 100%)',
+  'linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%)',
+  'linear-gradient(135deg, #f1f8e9 0%, #e0f7fa 100%)',
+  'linear-gradient(135deg, #fff8e1 0%, #fce4ec 100%)',
+  'linear-gradient(135deg, #e1f5fe 0%, #ede7f6 100%)',
+  'linear-gradient(135deg, #fce4ec 0%, #fff3e0 100%)',
+  'linear-gradient(135deg, #f3e5f5 0%, #e8eaf6 50%, #e0f7fa 100%)',
+  'linear-gradient(135deg, #fff5f0 0%, #f0f4ff 100%)',
+  'linear-gradient(135deg, #fef6e4 0%, #f4e9f7 100%)',
+];
+
+function pickRandomBackground(): string {
+  return BACKGROUND_GRADIENTS[Math.floor(Math.random() * BACKGROUND_GRADIENTS.length)];
+}
+
 const greetingEl = document.getElementById('greeting');
 if (greetingEl) {
   greetingEl.textContent = getTimeBasedGreeting();
 }
+
+document.body.style.backgroundImage = pickRandomBackground();
+document.body.style.backgroundAttachment = 'fixed';
 
 // Handle search input
 const searchBar = document.getElementById('search-bar') as HTMLInputElement;
