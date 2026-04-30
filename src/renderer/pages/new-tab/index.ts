@@ -3,6 +3,147 @@ import './index.css';
 import { createIcons, icons } from 'lucide';
 createIcons({ icons });
 
+const GREETINGS_BY_HOUR: { range: [number, number]; phrases: string[] }[] = [
+  {
+    range: [5, 8],
+    phrases: [
+      'Good morning',
+      'Rise and shine',
+      'Early bird',
+      'Morning has broken',
+      'Up with the sun',
+      'Bright and early',
+      'A fresh start',
+      'The day is young',
+      'First light',
+      'Quiet mornings are the best',
+    ],
+  },
+  {
+    range: [8, 12],
+    phrases: [
+      'Good morning',
+      'Morning',
+      "Hope your morning's going well",
+      'A fine morning to browse',
+      'Hello, sunshine',
+      "Let's make it a good one",
+      'Fresh coffee somewhere?',
+      'Off to a good start?',
+      'Morning, friend',
+      'Plenty of day ahead',
+    ],
+  },
+  {
+    range: [12, 14],
+    phrases: [
+      'Good afternoon',
+      'Lunchtime already?',
+      'Midday check-in',
+      'Afternoon',
+      'Halfway through the day',
+      'High noon',
+      'Take a breather',
+      "Don't forget to eat",
+      'Quick break?',
+      'Sun is high',
+    ],
+  },
+  {
+    range: [14, 17],
+    phrases: [
+      'Good afternoon',
+      'Afternoon',
+      "Hope your day's going well",
+      'Powering through?',
+      'Keep it going',
+      'Almost there',
+      'Afternoon momentum',
+      'Stay focused',
+      'You got this',
+      'A little further',
+    ],
+  },
+  {
+    range: [17, 21],
+    phrases: [
+      'Good evening',
+      'Evening',
+      'Winding down?',
+      'Hope you had a good day',
+      'Time to unwind',
+      'Sun is setting',
+      'Easy does it',
+      'Evening, friend',
+      'Done for the day?',
+      'Slow it down',
+    ],
+  },
+  {
+    range: [21, 24],
+    phrases: [
+      'Good evening',
+      'Getting late',
+      "Evening's wrapping up",
+      "Hope you're relaxing",
+      'Almost bedtime',
+      'Day is winding down',
+      'Take it easy',
+      'Cozy hours',
+      'Quiet time',
+      'A calm end to the day',
+    ],
+  },
+  {
+    range: [0, 5],
+    phrases: [
+      "It's a bit late",
+      'Burning the midnight oil?',
+      'Night owl mode',
+      'Still up?',
+      'Late night browsing',
+      'The world is asleep',
+      'Quiet hours',
+      'Up past midnight',
+      "Don't forget to rest",
+      'The small hours',
+    ],
+  },
+];
+
+function getTimeBasedGreeting(): string {
+  const hour = new Date().getHours();
+  const bucket =
+    GREETINGS_BY_HOUR.find(({ range: [start, end] }) => hour >= start && hour < end) ??
+    GREETINGS_BY_HOUR[0];
+  return bucket.phrases[Math.floor(Math.random() * bucket.phrases.length)];
+}
+
+const BACKGROUND_GRADIENTS: string[] = [
+  'linear-gradient(135deg, #fde6dc 0%, #fce4ec 50%, #e8eaf6 100%)',
+  'linear-gradient(135deg, #ffe0b2 0%, #fce4ec 50%, #e1bee7 100%)',
+  'linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%)',
+  'linear-gradient(135deg, #f1f8e9 0%, #e0f7fa 100%)',
+  'linear-gradient(135deg, #fff8e1 0%, #fce4ec 100%)',
+  'linear-gradient(135deg, #e1f5fe 0%, #ede7f6 100%)',
+  'linear-gradient(135deg, #fce4ec 0%, #fff3e0 100%)',
+  'linear-gradient(135deg, #f3e5f5 0%, #e8eaf6 50%, #e0f7fa 100%)',
+  'linear-gradient(135deg, #fff5f0 0%, #f0f4ff 100%)',
+  'linear-gradient(135deg, #fef6e4 0%, #f4e9f7 100%)',
+];
+
+function pickRandomBackground(): string {
+  return BACKGROUND_GRADIENTS[Math.floor(Math.random() * BACKGROUND_GRADIENTS.length)];
+}
+
+const greetingEl = document.getElementById('greeting');
+if (greetingEl) {
+  greetingEl.textContent = getTimeBasedGreeting();
+}
+
+document.body.style.backgroundImage = pickRandomBackground();
+document.body.style.backgroundAttachment = 'fixed';
+
 // Handle search input
 const searchBar = document.getElementById('search-bar') as HTMLInputElement;
 searchBar?.focus();
