@@ -185,6 +185,42 @@ export class AppWindow {
     this.browserWindowInstance.on('resize', this.handleResizing.bind(this));
   }
 
+  /**
+   * Tear down every tab's WebContentsView. Inactive tabs are not children of
+   * the BrowserWindow's contentView (activateTab removes the previous view on
+   * tab switch), so their WebContents wouldn't otherwise be destroyed when the
+   * window closes — they'd keep running, holding open WebSockets and playing
+   * audio (e.g. WhatsApp Web message pings). Call this from every window-close
+   * path before the BrowserWindow is destroyed.
+   */
+  public destroyAllTabs(): void {
+    for (const [id, tab] of this.tabs) {
+      try {
+        tab.finalizePageTime();
+      } catch {
+        /* best-effort */
+      }
+      tab.clearPendingTimers();
+      PermissionManager.clearSessionPermissionsForTab(id);
+      const view = tab.getWebContentsViewInstance();
+      if (!view) continue;
+      try {
+        NotificationManager.clearNotificationsForWebContents(view.webContents.id);
+      } catch {
+        /* best-effort */
+      }
+      try {
+        view.webContents.removeAllListeners();
+        view.removeAllListeners();
+        if (!view.webContents.isDestroyed()) {
+          view.webContents.close();
+        }
+      } catch {
+        /* best-effort */
+      }
+    }
+  }
+
   public closeWindow(clearSession: boolean) {
     for (const tab of this.tabs.values()) {
       tab.clearPendingTimers();
