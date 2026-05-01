@@ -81,14 +81,6 @@
           >
             <i data-lucide="refresh-cw" width="18" height="18"></i>
           </button>
-          <button
-            id="command-k-button"
-            title="Super search with Command K"
-            class="btn-icon btn-ghost rounded-circle p-0"
-            style="width: 32px; height: 32px"
-          >
-            <i data-lucide="terminal" width="18" height="18"></i>
-          </button>
         </div>
 
         <div class="address-bar">
@@ -116,6 +108,17 @@
             </svg>
           </button>
           <input type="text" class="url-input" id="url-input" />
+          <button
+            id="command-k-hint"
+            class="command-k-hint"
+            title="Focus address bar"
+            type="button"
+          >
+            <kbd class="command-k-hint-key">
+              <i data-lucide="command" width="12" height="12"></i>
+            </kbd>
+            <kbd class="command-k-hint-key">L</kbd>
+          </button>
           <button
             id="reader-mode-button"
             title="Reader Mode"
