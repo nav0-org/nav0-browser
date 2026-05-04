@@ -71,53 +71,6 @@
   margin: 0 2px;
 }
 
-/* Action buttons */
-#overlay-command-k .action-buttons {
-  display: flex;
-  gap: var(--spacing-sm);
-  padding: 12px var(--spacing-md);
-  border-bottom: 1px solid #eaeaea;
-  overflow-x: auto;
-  scrollbar-width: none; /* Firefox */
-}
-
-#overlay-command-k .action-buttons::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
-}
-
-#overlay-command-k .action-btn {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background-color: var(--bg-color);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 10px 16px 10px 16px;
-  font-size: var(--font-sm);
-  color: var(--text-color);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s;
-}
-
-#overlay-command-k .action-btn:hover {
-  border-color: var(--border-color-dark);
-}
-
-#overlay-command-k .action-btn i {
-  color: var(--primary-color);
-}
-
-#overlay-command-k .action-btn.primary {
-  background-color: var(--primary-light);
-  border-color: #d4d4d4;
-  color: var(--primary-color);
-}
-
-#overlay-command-k .action-btn.primary:hover {
-  background-color: #e5e5e5;
-}
-
 /* Results section */
 #overlay-command-k .results-container {
   flex: 1;
