@@ -10,7 +10,6 @@ type ResultItem = {
   tabId?: string;
 };
 
-let activeFilter: 'all' | 'tabs' | 'bookmarks' | 'history' | 'downloads' = 'all';
 let activeIndex = -1;
 let currentResults: ResultItem[] = [];
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -20,7 +19,6 @@ let searchInput: HTMLInputElement;
 let resultsContainer: HTMLElement;
 let emptyState: HTMLElement;
 let loadingIndicator: HTMLElement;
-let actionButtons: NodeListOf<HTMLButtonElement>;
 
 const COMMAND_K_HTML = `
   <div class="command-container">
@@ -34,30 +32,6 @@ const COMMAND_K_HTML = `
         <span class="key">\u2193</span>
         <span class="key">Enter</span>
       </div>
-    </div>
-
-    <!-- Action buttons -->
-    <div class="action-buttons">
-      <button class="action-btn primary" data-filter="all">
-        <i data-lucide="layers" width="16" height="16"></i>
-        All
-      </button>
-      <button class="action-btn" data-filter="bookmarks">
-        <i data-lucide="bookmark" width="16" height="16"></i>
-        Bookmarks
-      </button>
-      <button class="action-btn" data-filter="history">
-        <i data-lucide="history" width="16" height="16"></i>
-        History
-      </button>
-      <button class="action-btn" data-filter="tabs">
-        <i data-lucide="app-window" width="16" height="16"></i>
-        Tabs
-      </button>
-      <button class="action-btn" data-filter="downloads">
-        <i data-lucide="download" width="16" height="16"></i>
-        Downloads
-      </button>
     </div>
 
     <!-- Results section -->
@@ -283,33 +257,11 @@ const performSearch = async (query: string) => {
     const results: ResultItem[] = [];
     const lowerQuery = query.toLowerCase();
 
-    // Fetch open tabs (filtered client-side)
-    const fetchTabs =
-      activeFilter === 'all' || activeFilter === 'tabs'
-        ? window.BrowserAPI.fetchOpenTabs(window.BrowserAPI.appWindowId)
-        : Promise.resolve([]);
-
-    // Fetch data based on active filter
-    const fetchBookmarks =
-      activeFilter === 'all' || activeFilter === 'bookmarks'
-        ? window.BrowserAPI.fetchBookmarks(window.BrowserAPI.appWindowId, query, 5, 0)
-        : Promise.resolve([]);
-
-    const fetchHistory =
-      activeFilter === 'all' || activeFilter === 'history'
-        ? window.BrowserAPI.fetchBrowsingHistory(window.BrowserAPI.appWindowId, query, 5, 0)
-        : Promise.resolve([]);
-
-    const fetchDownloads =
-      activeFilter === 'all' || activeFilter === 'downloads'
-        ? window.BrowserAPI.fetchDownloads(window.BrowserAPI.appWindowId, query, 5, 0)
-        : Promise.resolve([]);
-
     const [openTabs, bookmarks, history, downloads] = await Promise.all([
-      fetchTabs,
-      fetchBookmarks,
-      fetchHistory,
-      fetchDownloads,
+      window.BrowserAPI.fetchOpenTabs(window.BrowserAPI.appWindowId),
+      window.BrowserAPI.fetchBookmarks(window.BrowserAPI.appWindowId, query, 5, 0),
+      window.BrowserAPI.fetchBrowsingHistory(window.BrowserAPI.appWindowId, query, 5, 0),
+      window.BrowserAPI.fetchDownloads(window.BrowserAPI.appWindowId, query, 5, 0),
     ]);
 
     // Filter tabs client-side by title and URL
@@ -484,18 +436,6 @@ export function init(container: HTMLElement): void {
   resultsContainer = container.querySelector('#cmdk-results-container') as HTMLElement;
   emptyState = container.querySelector('#cmdk-empty-state') as HTMLElement;
   loadingIndicator = container.querySelector('#cmdk-loading-indicator') as HTMLElement;
-  actionButtons = container.querySelectorAll<HTMLButtonElement>('.action-btn');
-
-  // Filter button handling
-  actionButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-      actionButtons.forEach((b) => b.classList.remove('primary'));
-      button.classList.add('primary');
-      activeFilter = (button.dataset.filter as typeof activeFilter) || 'all';
-      const query = searchInput.value;
-      performSearch(query);
-    });
-  });
 
   // Listen at document level so Escape/Tab/arrows work regardless of focus
   document.addEventListener('keydown', handleKeydown);
@@ -509,15 +449,9 @@ export function init(container: HTMLElement): void {
 
 export function show(_data?: any): void {
   // Reset state
-  activeFilter = 'all';
   activeIndex = -1;
   currentResults = [];
   if (debounceTimer) clearTimeout(debounceTimer);
-
-  // Reset filter buttons
-  actionButtons.forEach((b) => b.classList.remove('primary'));
-  const allBtn = containerEl.querySelector('.action-btn[data-filter="all"]') as HTMLButtonElement;
-  if (allBtn) allBtn.classList.add('primary');
 
   // Clear and focus search input
   if (searchInput) {
