@@ -16,10 +16,18 @@
       <stop offset="0%" stop-color="#1d4ed8" />
       <stop offset="100%" stop-color="#1e40af" />
     </linearGradient>
+    <mask id="ringMask" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+      <rect width="512" height="512" fill="white"/>
+      <g transform="rotate(-22 256 256)">
+        <!-- North gap: trapezoid sides parallel to north needle edges -->
+        <polygon points="247.09,30 264.91,30 272.69,95 239.31,95" fill="black"/>
+        <!-- South gap: trapezoid sides parallel to south needle edges -->
+        <polygon points="239.31,417 272.69,417 264.91,482 247.09,482" fill="black"/>
+      </g>
+    </mask>
   </defs>
-  <rect width="512" height="512" rx="112" fill="#000000" />
-  <!-- White 0 ring -->
-  <ellipse cx="256" cy="256" rx="140" ry="210" stroke="#ffffff" stroke-width="28" fill="none" />
+  <!-- White 0 ring with breaks where the needle crosses -->
+  <ellipse cx="256" cy="256" rx="138" ry="208" stroke="#bacbde" stroke-width="38" fill="none" mask="url(#ringMask)" />
   <!-- Needle group — tilted left -->
   <g transform="rotate(-22 256 256)">
     <!-- Red north needle — sleek, ends before center -->
@@ -30,6 +38,6 @@
     <path d="M256 506 L284 272 L256 286 Z" fill="url(#blueR)" />
   </g>
   <!-- Center pivot -->
-  <circle cx="256" cy="256" r="12" fill="#ffffff" />
-  <circle cx="256" cy="256" r="5" fill="#000000" />
+  <circle cx="256" cy="256" r="15" fill="#64748b" />
+  <circle cx="256" cy="256" r="7" fill="#000000" />
 </svg>
