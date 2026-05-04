@@ -11,7 +11,6 @@ export class BrowserTabManager {
   private backButton: HTMLButtonElement;
   private forwardButton: HTMLButtonElement;
   private refreshButton: HTMLButtonElement;
-  private commandKHint: HTMLButtonElement;
   private urlInput: HTMLInputElement;
   private optionsButton: HTMLButtonElement;
   private bookmarkButton: HTMLButtonElement;
@@ -76,7 +75,6 @@ export class BrowserTabManager {
     this.backButton = document.getElementById('back-button') as HTMLButtonElement;
     this.forwardButton = document.getElementById('forward-button') as HTMLButtonElement;
     this.refreshButton = document.getElementById('refresh-button') as HTMLButtonElement;
-    this.commandKHint = document.getElementById('command-k-hint') as HTMLButtonElement;
     this.urlInput = document.getElementById('url-input') as HTMLInputElement;
     this.optionsButton = document.getElementById('options-button') as HTMLButtonElement;
     this.bookmarkButton = document.getElementById('bookmark-button') as HTMLButtonElement;
@@ -119,11 +117,6 @@ export class BrowserTabManager {
       } else {
         window.BrowserAPI.refreshTab(this.appWindowId, this.activeTabId);
       }
-    });
-
-    this.commandKHint.addEventListener('click', () => {
-      this.urlInput.focus();
-      this.urlInput.select();
     });
 
     // Click 1: Not bookmarked → add as reference bookmark
