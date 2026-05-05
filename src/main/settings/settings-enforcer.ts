@@ -141,7 +141,11 @@ export abstract class SettingsEnforcer {
         // chosen preset.
         let isGoogleSignIn = false;
         try {
-          isGoogleSignIn = new URL(details.url).hostname === 'accounts.google.com';
+          const host = new URL(details.url).hostname;
+          isGoogleSignIn =
+            host === 'accounts.google.com' ||
+            host.endsWith('.accounts.google.com') ||
+            host === 'accounts.youtube.com';
         } catch {
           /* ignore */
         }
@@ -162,24 +166,19 @@ export abstract class SettingsEnforcer {
     }
   }
 
-  // Firefox UA generator (adapted from Min browser's UASwitcher.js).
-  // Estimates the current Firefox major version: v91 was released on
-  // 2021-08-10, and new major versions ship roughly every 4.1 weeks.
+  // Pinned to a recently-released Firefox stable. Bump on each Electron
+  // upgrade. Extrapolating a Firefox major from a 2021 baseline drifts ahead
+  // of any released build, which trips Google's anomaly detection on the
+  // sign-in path.
   private static getFirefoxUA(): string {
-    const rootUAs = {
-      mac: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:FXVERSION.0) Gecko/20100101 Firefox/FXVERSION.0',
-      windows:
-        'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:FXVERSION.0) Gecko/20100101 Firefox/FXVERSION.0',
-      linux:
-        'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:FXVERSION.0) Gecko/20100101 Firefox/FXVERSION.0',
-    };
-    let rootUA: string;
-    if (process.platform === 'win32') rootUA = rootUAs.windows;
-    else if (process.platform === 'darwin') rootUA = rootUAs.mac;
-    else rootUA = rootUAs.linux;
-    const fxVersion =
-      91 + Math.floor((Date.now() - 1628553600000) / (4.1 * 7 * 24 * 60 * 60 * 1000));
-    return rootUA.replace(/FXVERSION/g, String(fxVersion));
+    const FX_VERSION = 138;
+    if (process.platform === 'win32') {
+      return `Mozilla/5.0 (Windows NT 10.0; WOW64; rv:${FX_VERSION}.0) Gecko/20100101 Firefox/${FX_VERSION}.0`;
+    }
+    if (process.platform === 'darwin') {
+      return `Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:${FX_VERSION}.0) Gecko/20100101 Firefox/${FX_VERSION}.0`;
+    }
+    return `Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:${FX_VERSION}.0) Gecko/20100101 Firefox/${FX_VERSION}.0`;
   }
 
   // ---- Response Header Policy (Cookie Jar Enforcement) ----
