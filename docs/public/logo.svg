@@ -20,14 +20,14 @@
       <rect width="512" height="512" fill="white"/>
       <g transform="rotate(-22 256 256)">
         <!-- North gap: trapezoid sides parallel to north needle edges -->
-        <polygon points="247.09,30 264.91,30 272.69,95 239.31,95" fill="black"/>
+        <polygon points="245.4,20 266.6,20 274.85,105 237.15,105" fill="black"/>
         <!-- South gap: trapezoid sides parallel to south needle edges -->
-        <polygon points="239.31,417 272.69,417 264.91,482 247.09,482" fill="black"/>
+        <polygon points="237.15,407 274.85,407 266.6,492 245.4,492" fill="black"/>
       </g>
     </mask>
   </defs>
   <!-- White 0 ring with breaks where the needle crosses -->
-  <ellipse cx="256" cy="256" rx="138" ry="208" stroke="#bacbde" stroke-width="38" fill="none" mask="url(#ringMask)" />
+  <ellipse cx="256" cy="256" rx="138" ry="208" stroke="#94a3b8" stroke-width="56" fill="none" mask="url(#ringMask)" />
   <!-- Needle group — tilted left -->
   <g transform="rotate(-22 256 256)">
     <!-- Red north needle — sleek, ends before center -->

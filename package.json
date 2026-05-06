@@ -22,6 +22,7 @@
     "test:data": "node tests/performance/data-consumption-test.js",
     "postinstall": "electron-rebuild -f -w better-sqlite3",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
+    "generate-icons": "node scripts/generate-logo-assets.js",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -90,6 +91,7 @@
     "node-loader": "^2.1.0",
     "prettier": "^3.8.3",
     "puppeteer-core": "^24.42.0",
+    "sharp": "^0.33.5",
     "style-loader": "^3.3.4",
     "stylelint": "^17.8.0",
     "stylelint-config-standard": "^40.0.0",
