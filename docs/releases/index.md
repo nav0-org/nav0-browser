@@ -10,10 +10,18 @@ What's new in every release of Nav0 Browser.
 ---
 
 <div class="release-list-item">
+  <a href="/releases/v0.2.6">
+    <h2>v0.2.6</h2>
+  </a>
+  <div class="release-meta">May 6, 2026 <span class="release-badge latest">Latest</span></div>
+  <p class="release-excerpt">Fixed packaging breakage from the Electron 41 upgrade, restored Google sign-in by refreshing Firefox UA cap and Chrome preset, and softened the new-tab gradient background.</p>
+</div>
+
+<div class="release-list-item">
   <a href="/releases/v0.2.5">
     <h2>v0.2.5</h2>
   </a>
-  <div class="release-meta">May 5, 2026 <span class="release-badge latest">Latest</span></div>
+  <div class="release-meta">May 5, 2026</div>
   <p class="release-excerpt">Time-based greetings and a pastel-gradient new-tab page, fixed WebContents cleanup on window close, a streamlined Command-K, the new compass logo across the app, and an Electron 41 upgrade.</p>
 </div>
 
