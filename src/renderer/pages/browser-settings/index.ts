@@ -860,18 +860,6 @@ function initUserAgentSettings() {
     showToast('Custom user agent saved');
   });
 
-  const resetIdentityBtn = document.getElementById('reset-device-identity-btn');
-  resetIdentityBtn?.addEventListener('click', async () => {
-    if (
-      confirm(
-        "Reset the device identity Nav0 sends to Google sign-in? Sites you're signed into may ask you to log in again."
-      )
-    ) {
-      await (window as any).BrowserAPI.resetDeviceIdentity();
-      showToast('Device identity reset');
-    }
-  });
-
   function updateUAPreview() {
     const preset = select.value;
     let ua: string;

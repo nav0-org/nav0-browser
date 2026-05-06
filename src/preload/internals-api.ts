@@ -440,9 +440,6 @@ export function init() {
     getStorageEstimate: async () => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GET_STORAGE_ESTIMATE);
     },
-    resetDeviceIdentity: async () => {
-      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.RESET_DEVICE_IDENTITY);
-    },
 
     // Event listeners
     onNewTabCreated: (callback: (tab: { id: string; url: string; title: string }) => void) => {

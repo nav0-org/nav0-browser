@@ -3,7 +3,6 @@ import {
   DataStoreConstants,
   RendererToMainEventsForBrowserIPC,
   MULTI_PART_TLDS,
-  PinnedDeviceIdentity,
 } from '../../constants/app-constants';
 import { DataStoreManager } from '../database/data-store-manager';
 import { DatabaseManager } from '../database/database-manager';
@@ -18,11 +17,6 @@ import { applyClientHints, alignUAWithRealChromeVersion } from '../browser/ua-sw
 export abstract class SettingsEnforcer {
   private static autoDeleteInterval: ReturnType<typeof setInterval> | null = null;
   private static readonly AUTO_DELETE_CHECK_MS = 6 * 60 * 60 * 1000; // 6 hours
-  // Tracks the UA preset last applied by applyUserAgent(). When it changes
-  // (i.e. the user picks a different preset), the pinned device identity is
-  // cleared so the new preset gets a fresh Firefox major. `undefined` means
-  // applyUserAgent has not run yet, so we won't clear on the first call.
-  private static previousAppliedPreset: string | undefined = undefined;
 
   public static async init() {
     SettingsEnforcer.initIPCHandlers();
@@ -95,14 +89,6 @@ export abstract class SettingsEnforcer {
 
     ipcMain.handle(RendererToMainEventsForBrowserIPC.GET_STORAGE_ESTIMATE, async () => {
       return SettingsEnforcer.getStorageEstimate();
-    });
-
-    ipcMain.handle(RendererToMainEventsForBrowserIPC.RESET_DEVICE_IDENTITY, async () => {
-      SettingsEnforcer.clearPinnedDeviceIdentity();
-      // Re-apply the user agent so the pin is regenerated and any in-flight
-      // sessions immediately see the freshly pinned Firefox major.
-      SettingsEnforcer.applyUserAgent(SettingsEnforcer.getSettings());
-      return true;
     });
   }
 
@@ -180,12 +166,12 @@ export abstract class SettingsEnforcer {
     }
   }
 
-  // Firefox UA used for Google sign-in. The major version is pinned to the
-  // user's profile on first use (see getPinnedFirefoxMajor), so it stays
-  // stable across Electron/Nav0 upgrades. Otherwise every upgrade would shift
-  // the Firefox major, triggering Google's "unusual sign-in" check.
+  // Pinned to a recently-released Firefox stable. Bump on each Electron
+  // upgrade. Extrapolating a Firefox major from a 2021 baseline drifts ahead
+  // of any released build, which trips Google's anomaly detection on the
+  // sign-in path.
   private static getFirefoxUA(): string {
-    const FX_VERSION = SettingsEnforcer.getPinnedFirefoxMajor();
+    const FX_VERSION = 138;
     if (process.platform === 'win32') {
       return `Mozilla/5.0 (Windows NT 10.0; WOW64; rv:${FX_VERSION}.0) Gecko/20100101 Firefox/${FX_VERSION}.0`;
     }
@@ -193,34 +179,6 @@ export abstract class SettingsEnforcer {
       return `Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:${FX_VERSION}.0) Gecko/20100101 Firefox/${FX_VERSION}.0`;
     }
     return `Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:${FX_VERSION}.0) Gecko/20100101 Firefox/${FX_VERSION}.0`;
-  }
-
-  // Maintainer-controlled "current" Firefox major to advertise on fresh
-  // installs and after a device-identity reset. Bump on each Electron upgrade
-  // to track real Firefox stable. Existing users keep their pinned value.
-  private static currentFirefoxMajor(): number {
-    return 138;
-  }
-
-  // Returns the pinned Firefox major, pinning the current value on first call.
-  // Persisting via DataStoreManager keeps the value stable across upgrades.
-  private static getPinnedFirefoxMajor(): number {
-    const stored = DataStoreManager.get(
-      DataStoreConstants.PINNED_DEVICE_IDENTITY
-    ) as PinnedDeviceIdentity | undefined;
-    if (stored && typeof stored.firefoxMajor === 'number') {
-      return stored.firefoxMajor;
-    }
-    const major = SettingsEnforcer.currentFirefoxMajor();
-    DataStoreManager.set(DataStoreConstants.PINNED_DEVICE_IDENTITY, {
-      firefoxMajor: major,
-      pinnedAt: new Date().toISOString(),
-    });
-    return major;
-  }
-
-  private static clearPinnedDeviceIdentity(): void {
-    DataStoreManager.set(DataStoreConstants.PINNED_DEVICE_IDENTITY, null);
   }
 
   // ---- Response Header Policy (Cookie Jar Enforcement) ----
@@ -362,18 +320,6 @@ export abstract class SettingsEnforcer {
     const privateSes = session.fromPartition('persist:private');
 
     const preset = SettingsEnforcer.resolveUserAgentPreset(settings);
-
-    // If the user switched presets, clear the pinned device identity so the
-    // new preset re-pins to the current Firefox major. A user changing their
-    // UA preset is already accepting that downstream sites may treat them as
-    // a new client.
-    if (
-      SettingsEnforcer.previousAppliedPreset !== undefined &&
-      SettingsEnforcer.previousAppliedPreset !== preset
-    ) {
-      SettingsEnforcer.clearPinnedDeviceIdentity();
-    }
-    SettingsEnforcer.previousAppliedPreset = preset;
 
     let userAgent: string;
 

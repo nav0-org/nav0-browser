@@ -51,15 +51,6 @@ export abstract class DataStoreManager {
         } as Record<string, any>,
       })
     );
-    DataStoreManager.stores.set(
-      DataStoreConstants.PINNED_DEVICE_IDENTITY,
-      new Store({
-        name: DataStoreConstants.PINNED_DEVICE_IDENTITY,
-        defaults: {
-          default: DataStoreManager.getDefaultValue(DataStoreConstants.PINNED_DEVICE_IDENTITY),
-        } as Record<string, any>,
-      })
-    );
   }
 
   private static initListeners(): void {
@@ -165,9 +156,6 @@ export abstract class DataStoreManager {
         returnValue = [];
         break;
       case DataStoreConstants.SESSION_STATE:
-        returnValue = null;
-        break;
-      case DataStoreConstants.PINNED_DEVICE_IDENTITY:
         returnValue = null;
         break;
       default:
