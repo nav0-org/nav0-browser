@@ -166,6 +166,7 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly GET_COOKIE_COUNT = 'browser:get-cookie-count';
   public static readonly APPLY_SETTINGS = 'browser:apply-settings';
   public static readonly GET_STORAGE_ESTIMATE = 'browser:get-storage-estimate';
+  public static readonly RESET_DEVICE_IDENTITY = 'browser:reset-device-identity';
 
   // Permission system
   public static readonly PERMISSION_PROMPT_RESPONSE = 'browser:permission-prompt-response';
@@ -244,6 +245,12 @@ export abstract class DataStoreConstants {
   public static readonly BROWSER_SETTINGS = 'browser-settings';
   public static readonly CLOSED_WINDOWS = 'closed-windows';
   public static readonly SESSION_STATE = 'session-state';
+  public static readonly PINNED_DEVICE_IDENTITY = 'pinned-device-identity';
+}
+
+export interface PinnedDeviceIdentity {
+  firefoxMajor: number;
+  pinnedAt: string;
 }
 
 export interface ClosedTabRecord {
