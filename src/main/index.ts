@@ -90,8 +90,19 @@ app.on('before-quit', async () => {
   await SettingsEnforcer.onBeforeQuit();
 });
 
-// Re-create window when dock icon is clicked (macOS)
+// Restore an existing window when the dock icon is clicked (macOS). Only fall
+// back to creating a new window if every window has been closed — matching the
+// platform convention used by Safari, Chrome, and Finder.
 app.on('activate', () => {
+  const existing = AppWindowManager.getActiveWindow() ?? AppWindowManager.getWindows()[0];
+  if (existing) {
+    const bw = existing.getBrowserWindowInstance();
+    if (bw) {
+      if (bw.isMinimized()) bw.restore();
+      bw.focus();
+      return;
+    }
+  }
   AppWindowManager.createWindow(false);
 });
 
