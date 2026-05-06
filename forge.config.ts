@@ -12,10 +12,15 @@ import { FuseV1Options, FuseVersion } from '@electron/fuses';
 import { mainConfig } from './webpack.main.config';
 import { rendererConfig } from './webpack.renderer.config';
 
+const ICON_BASE = path.resolve(__dirname, 'src/renderer/assets/logo');
+const ICON_PNG = `${ICON_BASE}.png`;
+const ICON_ICNS = `${ICON_BASE}.icns`;
+const ICON_ICO = path.resolve(__dirname, 'src/renderer/assets/favicon.ico');
+
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
-    icon: 'src/renderer/assets/logo',
+    icon: ICON_BASE,
     extraResource: [],
     extendInfo: {
       NSAudioCaptureUsageDescription:
@@ -31,18 +36,24 @@ const config: ForgeConfig = {
   makers: [
     new MakerSquirrel({
       name: 'Nav0',
+      setupIcon: ICON_ICO,
     }),
     new MakerZIP({}, ['darwin']),
     new MakerDeb({
       options: {
-        icon: 'src/renderer/assets/logo.png',
+        icon: ICON_PNG,
       },
     }),
-    new MakerRpm({}),
+    new MakerRpm({
+      options: {
+        icon: ICON_PNG,
+      },
+    }),
     {
       name: '@electron-forge/maker-dmg',
       config: {
         format: 'ULFO',
+        icon: ICON_ICNS,
       },
     },
   ],

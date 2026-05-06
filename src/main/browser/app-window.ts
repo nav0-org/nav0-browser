@@ -1,4 +1,5 @@
-import { BrowserWindow, screen, session } from 'electron';
+import { app, BrowserWindow, screen, session } from 'electron';
+import path from 'path';
 import { v4 as uuid } from 'uuid';
 import { Tab } from './tab';
 import {
@@ -78,7 +79,10 @@ export class AppWindow {
       fullscreen: true,
       show: false,
       title: AppConstants.APP_NAME,
-      icon: '../../renderer/assets/logo.png',
+      icon:
+        process.platform === 'linux'
+          ? path.join(app.getAppPath(), 'src/renderer/assets/logo.png')
+          : undefined,
       titleBarStyle: isMac ? 'hiddenInset' : 'hidden',
       ...(isWindows
         ? {
