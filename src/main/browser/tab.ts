@@ -34,6 +34,40 @@ const domainPattern = /^[^\s]+\.[^\s]+$/;
 const EXTERNAL_PROTOCOL_RE =
   /^(mailto|tel|callto|sms|facetime|webcal|slack|zoommtg|zoomus|msteams|discord|spotify|vscode|vscode-insiders|obsidian|notion|figma|linear|raycast):/i;
 
+// Pick the sharpest favicon Chromium already discovered for the page, using
+// URL heuristics only — no extra network requests. Chromium hands us every
+// `<link rel="icon">` URL it found, but unsorted, so taking the last entry
+// often yields the smallest 16×16 ICO when a 180×180 apple-touch-icon or
+// 192×192 PNG is also available. Falls back to the previous behavior (last
+// entry) when no better signal is found.
+function pickBestFaviconUrl(faviconUrls: string[]): string {
+  if (faviconUrls.length <= 1) return faviconUrls[faviconUrls.length - 1];
+
+  const squareSize = /(\d{2,4})x\1/i;
+  const trailingSize = /[-_](\d{2,4})\.(?:png|webp|jpe?g|ico|svg)(?:[?#]|$)/i;
+
+  const score = (url: string): number => {
+    const lower = url.toLowerCase();
+    const m = lower.match(squareSize) ?? lower.match(trailingSize);
+    let s = m ? parseInt(m[1], 10) : 0;
+    if (lower.includes('.svg')) s = Math.max(s, 256);
+    if (lower.includes('apple-touch-icon')) s = Math.max(s, 120);
+    if (s === 0 && /\.(png|webp|svg)(?:[?#]|$)/i.test(lower)) s = 32;
+    return s;
+  };
+
+  let best = faviconUrls[faviconUrls.length - 1];
+  let bestScore = -1;
+  for (const url of faviconUrls) {
+    const s = score(url);
+    if (s > bestScore) {
+      bestScore = s;
+      best = url;
+    }
+  }
+  return best;
+}
+
 export class Tab {
   public readonly id: string = uuid();
   private url: string;
@@ -397,7 +431,7 @@ export class Tab {
       async (event, faviconUrls: string[]) => {
         if (this._destroyed) return;
         if (!this.url.startsWith(InAppUrls.PREFIX) && this.url !== '') {
-          const faviconUrl = faviconUrls[faviconUrls.length - 1];
+          const faviconUrl = pickBestFaviconUrl(faviconUrls);
           this.faviconUrl = faviconUrl;
 
           // Fetch the favicon from the main process using net.fetch to avoid

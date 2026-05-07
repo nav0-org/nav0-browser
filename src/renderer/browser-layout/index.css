@@ -169,6 +169,7 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
   margin-left: 5px;
   margin-right: 5px;
   flex-shrink: 0;
+  image-rendering: -webkit-optimize-contrast;
 }
 
 .tab-loader {
