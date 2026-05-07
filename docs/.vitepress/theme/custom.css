@@ -493,18 +493,28 @@ a.blog-card:hover {
   padding-top: 0;
 }
 
-/* Byline (first <p> after h1) — already has inline color/size from markdown */
-.blog-post-page .vp-doc h1 + p {
-  display: inline-flex;
+/* Allow markdown emphasis in the title to pick up the accent gradient */
+.blog-post-page .vp-doc h1 em {
+  font-style: italic;
+  background: var(--blog-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Byline — first <p> direct child of .vp-doc (the markdown-authored byline) */
+.blog-post-page .vp-doc > p:first-of-type {
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.625rem;
+  flex-wrap: wrap;
   font-size: 0.875rem !important;
   color: var(--vp-c-text-3) !important;
   letter-spacing: -0.005em;
   margin: 0 0 2rem;
 }
 
-.blog-post-page .vp-doc h1 + p::before {
+.blog-post-page .vp-doc > p:first-of-type::before {
   content: 'N0';
   display: inline-grid;
   place-items: center;
@@ -520,8 +530,9 @@ a.blog-card:hover {
   flex-shrink: 0;
 }
 
-/* Lede — second <p> after h1 (i.e. first prose paragraph) */
-.blog-post-page .vp-doc h1 + p + p {
+/* Lede — second <p> direct child of .vp-doc (the first prose paragraph,
+   tolerant of any <img> or other block between byline and prose) */
+.blog-post-page .vp-doc > p:nth-of-type(2) {
   font-family: 'Newsreader', var(--blog-serif);
   font-size: 1.375rem;
   line-height: 1.5;
@@ -645,10 +656,10 @@ a.blog-card:hover {
     margin-top: 2.5rem;
   }
   .blog-post-page .vp-doc p,
-  .blog-post-page .vp-doc h1 + p + p {
+  .blog-post-page .vp-doc > p:nth-of-type(2) {
     font-size: 1.0625rem;
   }
-  .blog-post-page .vp-doc h1 + p + p {
+  .blog-post-page .vp-doc > p:nth-of-type(2) {
     padding-left: 1rem;
   }
   .blog-post-page .vp-doc blockquote p {
