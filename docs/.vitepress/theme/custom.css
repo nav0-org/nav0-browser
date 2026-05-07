@@ -986,3 +986,402 @@ html.dark .nav0-bg {
   --vp-nav-screen-bg-color: rgba(22, 22, 24, 0.85);
   --vp-local-nav-bg-color: rgba(22, 22, 24, 0.85);
 }
+
+/* ============================================
+   Guide Page Redesign (Apple-style)
+   Scoped to .nav0-guide so home/blog/releases stay untouched.
+   Tokens ported from /tmp/design/.../pages/nav0-shared.css
+   and pages/guide.html.
+   ============================================ */
+
+/* ---- Design tokens (light) ---- */
+.nav0-guide {
+  --vp-c-bg: #ffffff;
+  --vp-c-bg-alt: #fafafa;
+  --vp-c-bg-soft: #f5f5f7;
+  --vp-c-bg-elv: #ffffff;
+
+  --vp-c-text-1: #1d1d1f;
+  --vp-c-text-2: #424245;
+  --vp-c-text-3: #6e6e73;
+
+  --vp-c-divider: #d2d2d7;
+  --vp-c-divider-light: #e8e8ed;
+  --vp-c-gutter: #e8e8ed;
+  --vp-c-border: #d2d2d7;
+
+  --vp-c-brand-1: #0071e3;
+  --vp-c-brand-2: #0077ed;
+  --vp-c-brand-3: #0077ed;
+  --vp-c-brand-soft: rgba(0, 113, 227, 0.08);
+
+  --vp-button-brand-border: #0071e3;
+  --vp-button-brand-text: #ffffff;
+  --vp-button-brand-bg: #0071e3;
+  --vp-button-brand-hover-border: #0077ed;
+  --vp-button-brand-hover-text: #ffffff;
+  --vp-button-brand-hover-bg: #0077ed;
+  --vp-button-brand-active-border: #0077ed;
+  --vp-button-brand-active-text: #ffffff;
+  --vp-button-brand-active-bg: #0077ed;
+
+  --vp-font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display',
+    'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --vp-font-family-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --nav0-good: #1f8b4c;
+  --nav0-bad: #c43c3c;
+  --nav0-warn: #c46a00;
+  --nav0-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.04);
+  --nav0-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06), 0 24px 48px -12px rgba(0, 0, 0, 0.1);
+
+  --vp-nav-bg-color: color-mix(in oklab, #ffffff 78%, transparent);
+  --vp-sidebar-bg-color: #ffffff;
+  --vp-local-nav-bg-color: color-mix(in oklab, #ffffff 78%, transparent);
+}
+
+/* ---- Design tokens (dark) ---- */
+html.dark .nav0-guide {
+  --vp-c-bg: #000000;
+  --vp-c-bg-alt: #08080a;
+  --vp-c-bg-soft: #0b0b0d;
+  --vp-c-bg-elv: #111114;
+
+  --vp-c-text-1: #f5f5f7;
+  --vp-c-text-2: #d2d2d7;
+  --vp-c-text-3: #a1a1a6;
+
+  --vp-c-divider: #2a2a2e;
+  --vp-c-divider-light: #1a1a1d;
+  --vp-c-gutter: #1a1a1d;
+  --vp-c-border: #2a2a2e;
+
+  --vp-c-brand-1: #2997ff;
+  --vp-c-brand-2: #4ea7ff;
+  --vp-c-brand-3: #4ea7ff;
+  --vp-c-brand-soft: rgba(41, 151, 255, 0.12);
+
+  --vp-button-brand-border: #2997ff;
+  --vp-button-brand-bg: #2997ff;
+  --vp-button-brand-hover-border: #4ea7ff;
+  --vp-button-brand-hover-bg: #4ea7ff;
+  --vp-button-brand-active-border: #4ea7ff;
+  --vp-button-brand-active-bg: #4ea7ff;
+
+  --vp-nav-bg-color: color-mix(in oklab, #000000 78%, transparent);
+  --vp-sidebar-bg-color: #000000;
+  --vp-local-nav-bg-color: color-mix(in oklab, #000000 78%, transparent);
+}
+
+/* ---- Body type tweaks on guide pages ---- */
+.nav0-guide,
+.nav0-guide body {
+  font-family: var(--vp-font-family-base);
+  letter-spacing: -0.003em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---- Disable trade-winds background on guide ---- */
+.nav0-guide .nav0-bg-pattern,
+.nav0-guide .nav0-bg-vignette {
+  display: none;
+}
+html:not(.dark) .nav0-bg.nav0-guide {
+  background-color: var(--vp-c-bg);
+}
+html.dark .nav0-bg.nav0-guide {
+  background-color: var(--vp-c-bg);
+}
+
+/* ---- Glassy top nav ---- */
+.nav0-guide .VPNav,
+.nav0-guide .VPNavBar {
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--vp-c-divider-light);
+}
+
+/* ---- vp-doc headings ---- */
+.nav0-guide .vp-doc h1 {
+  font-size: clamp(40px, 5vw, 56px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  margin: 0 0 14px;
+  border-top: none;
+  padding-top: 0;
+}
+
+.nav0-guide .vp-doc h2 {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  margin: 56px 0 16px;
+  scroll-margin-top: 80px;
+  border-top: none;
+  padding-top: 0;
+}
+
+.nav0-guide .vp-doc h3 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  margin: 36px 0 10px;
+}
+
+.nav0-guide .vp-doc h4 {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  margin: 28px 0 8px;
+}
+
+/* ---- vp-doc body text ---- */
+.nav0-guide .vp-doc p,
+.nav0-guide .vp-doc li {
+  font-size: 17px;
+  line-height: 1.6;
+  letter-spacing: -0.005em;
+  color: var(--vp-c-text-1);
+}
+
+.nav0-guide .vp-doc ul,
+.nav0-guide .vp-doc ol {
+  padding-left: 22px;
+  margin: 0 0 24px;
+}
+
+.nav0-guide .vp-doc li {
+  margin-bottom: 8px;
+}
+
+/* ---- Lead paragraph (first p after h1) ---- */
+.nav0-guide .vp-doc h1 + p {
+  font-size: 21px;
+  color: var(--vp-c-text-2);
+  line-height: 1.4;
+  letter-spacing: -0.012em;
+  margin: 0 0 40px;
+  max-width: 56ch;
+}
+
+/* ---- Inline code ---- */
+.nav0-guide .vp-doc :not(pre) > code {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.9em;
+  background: var(--vp-c-bg-soft);
+  padding: 2px 6px;
+  border-radius: 5px;
+  border: 1px solid var(--vp-c-divider-light);
+  color: var(--vp-c-text-1);
+}
+
+/* ---- Links ---- */
+.nav0-guide .vp-doc a {
+  color: var(--vp-c-brand-1);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in oklab, var(--vp-c-brand-1) 30%, transparent);
+  transition: border-color 120ms ease;
+}
+.nav0-guide .vp-doc a:hover {
+  border-bottom-color: var(--vp-c-brand-1);
+}
+/* Don't underline anchor links rendered next to headings */
+.nav0-guide .vp-doc a.header-anchor {
+  border-bottom: none;
+}
+
+/* ---- Code blocks ---- */
+.nav0-guide .vp-doc div[class*='language-'] {
+  background: #0c0c10;
+  border-radius: 14px;
+  border: 1px solid #2a2a2e;
+  margin: 16px 0 28px;
+  box-shadow: var(--nav0-shadow-sm);
+}
+
+.nav0-guide .vp-doc div[class*='language-'] pre {
+  padding: 20px 22px;
+  font-family: var(--vp-font-family-mono);
+  font-size: 13.5px;
+  line-height: 1.65;
+  background: transparent;
+}
+
+.nav0-guide .vp-doc div[class*='language-'] code {
+  font-family: var(--vp-font-family-mono);
+  font-size: 13.5px;
+  color: #f5f5f7;
+}
+
+.nav0-guide .vp-doc div[class*='language-'] .lang {
+  color: #2997ff;
+  font-weight: 500;
+  font-size: 12px;
+  font-family: var(--vp-font-family-base);
+}
+
+.nav0-guide .vp-doc div[class*='language-'] > button.copy {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #f5f5f7;
+}
+.nav0-guide .vp-doc div[class*='language-'] > button.copy:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Force shiki dark token palette to stay readable on the dark code bg */
+.nav0-guide .vp-doc div[class*='language-'] .shiki,
+.nav0-guide .vp-doc div[class*='language-'] .shiki span {
+  background: transparent !important;
+}
+
+/* ---- Custom blocks (callouts) ---- */
+.nav0-guide .vp-doc .custom-block {
+  border-left: 3px solid var(--vp-c-brand-1);
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  background: var(--vp-c-brand-soft);
+  padding: 18px 22px;
+  border-radius: 12px;
+  margin: 24px 0;
+  font-size: 15px;
+  color: var(--vp-c-text-1);
+}
+
+.nav0-guide .vp-doc .custom-block .custom-block-title {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--vp-c-brand-1);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.nav0-guide .vp-doc .custom-block p,
+.nav0-guide .vp-doc .custom-block li {
+  font-size: 15px;
+  margin: 0;
+}
+
+.nav0-guide .vp-doc .custom-block.warning {
+  border-left-color: var(--nav0-warn);
+  background: color-mix(in oklab, var(--nav0-warn) 10%, transparent);
+}
+.nav0-guide .vp-doc .custom-block.warning .custom-block-title {
+  color: var(--nav0-warn);
+}
+
+.nav0-guide .vp-doc .custom-block.danger {
+  border-left-color: var(--nav0-bad);
+  background: color-mix(in oklab, var(--nav0-bad) 10%, transparent);
+}
+.nav0-guide .vp-doc .custom-block.danger .custom-block-title {
+  color: var(--nav0-bad);
+}
+
+/* ---- Sidebar (left nav) ---- */
+.nav0-guide .VPSidebar {
+  font-size: 13px;
+}
+
+.nav0-guide .VPSidebarItem.level-0 > .item > .text {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--vp-c-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.nav0-guide .VPSidebarItem.is-link > .item .link {
+  color: var(--vp-c-text-2);
+  border-radius: 8px;
+  padding: 7px 10px;
+  transition: background 120ms, color 120ms;
+}
+
+.nav0-guide .VPSidebarItem.is-link > .item .link:hover {
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-1);
+}
+
+.nav0-guide .VPSidebarItem.is-active > .item .link,
+.nav0-guide .VPSidebarItem.is-active > .item .link .text {
+  background: var(--vp-c-brand-soft);
+  color: var(--vp-c-brand-1);
+  font-weight: 500;
+}
+
+/* ---- Right outline / TOC ---- */
+.nav0-guide .VPDocAsideOutline {
+  font-size: 13px;
+}
+
+.nav0-guide .VPDocAsideOutline .outline-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--vp-c-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+
+.nav0-guide .VPDocAsideOutline .outline-link {
+  display: block;
+  padding: 4px 12px;
+  border-left: 2px solid var(--vp-c-divider-light);
+  color: var(--vp-c-text-3);
+  line-height: 1.4;
+  transition: color 120ms, border-color 120ms;
+}
+
+.nav0-guide .VPDocAsideOutline .outline-link:hover {
+  color: var(--vp-c-text-1);
+}
+
+.nav0-guide .VPDocAsideOutline .outline-link.active {
+  color: var(--vp-c-brand-1);
+  border-left-color: var(--vp-c-brand-1);
+}
+
+.nav0-guide .VPDocAsideOutline .outline-link.nested {
+  padding-left: 24px;
+  font-size: 12px;
+}
+
+/* ---- Prev/next pager ---- */
+.nav0-guide .VPDocFooter {
+  border-top: 1px solid var(--vp-c-divider-light);
+  padding-top: 32px;
+  margin-top: 64px;
+}
+
+.nav0-guide .pager-link {
+  background: var(--vp-c-bg);
+  border: 1px solid var(--vp-c-divider-light);
+  border-radius: 14px;
+  padding: 18px 22px;
+  transition: border-color 120ms, background 120ms;
+}
+
+.nav0-guide .pager-link:hover {
+  border-color: var(--vp-c-brand-1);
+}
+
+.nav0-guide .pager-link .desc {
+  font-size: 12px;
+  color: var(--vp-c-text-3);
+  margin-bottom: 4px;
+}
+
+.nav0-guide .pager-link .title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--vp-c-text-1);
+}
