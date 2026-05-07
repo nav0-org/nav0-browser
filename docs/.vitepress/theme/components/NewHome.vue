@@ -11,7 +11,7 @@
           A minimal, privacy-focused web browser. Zero telemetry. No bloat. No AI gimmicks.
         </p>
         <div class="nv-cta-row">
-          <a class="nv-btn nv-btn--primary nv-btn--lg" href="/install">Download</a>
+          <a class="nv-btn nv-btn--primary nv-btn--lg" href="#install">Download for Mac</a>
           <a class="nv-btn nv-btn--ghost" href="https://github.com/nav0-org/nav0-browser"
             >View on GitHub</a
           >
@@ -212,7 +212,7 @@
           <div class="nv-section-eyebrow nv-endcap-eyebrow">Ready when you are</div>
           <h2 class="nv-endcap-title">Take back your browsing experience.</h2>
           <p class="nv-endcap-sub">
-            Free. Open source. No account.
+            Free. Open source. No account. 38 MB. Sha-256 verified.
           </p>
           <div class="nv-download-row">
             <a class="nv-btn nv-btn--primary nv-btn--lg" href="/install">Download for macOS</a>
@@ -230,18 +230,20 @@ import { computed, h } from 'vue';
 import { data as posts } from '../posts.data';
 import Nav0BrowserMock from './Nav0BrowserMock.vue';
 
-const Icon = (paths, opts = {}) =>
-  () =>
+const Icon = (paths, opts = {}) => {
+  const size = opts.size || 16;
+  const strokeWidth = opts.strokeWidth || 1.75;
+  return () =>
     h(
       'svg',
       {
         xmlns: 'http://www.w3.org/2000/svg',
-        width: 20,
-        height: 20,
+        width: size,
+        height: size,
         viewBox: '0 0 24 24',
         fill: 'none',
         stroke: 'currentColor',
-        'stroke-width': opts.strokeWidth || 1.75,
+        'stroke-width': strokeWidth,
         'stroke-linecap': 'round',
         'stroke-linejoin': 'round',
         'aria-hidden': 'true',
@@ -250,62 +252,77 @@ const Icon = (paths, opts = {}) =>
         d.tag === 'circle'
           ? h('circle', { cx: d.cx, cy: d.cy, r: d.r })
           : d.tag === 'line'
-          ? h('line', { x1: d.x1, y1: d.y1, x2: d.x2, y2: d.y2 })
-          : d.tag === 'polyline'
-          ? h('polyline', { points: d.points })
-          : h('path', { d: d.d })
+            ? h('line', { x1: d.x1, y1: d.y1, x2: d.x2, y2: d.y2 })
+            : d.tag === 'polyline'
+              ? h('polyline', { points: d.points })
+              : h('path', { d: d.d })
       )
     );
+};
 
-const IconShield = Icon([
-  { tag: 'path', d: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z' },
-]);
-const IconZap = Icon([
-  { tag: 'path', d: 'M13 2 3 14h9l-1 8 10-12h-9l1-8z' },
-]);
-const IconFeather = Icon([
-  { tag: 'path', d: 'M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z' },
-  { tag: 'line', x1: 16, y1: 8, x2: 2, y2: 22 },
-  { tag: 'line', x1: 17.5, y1: 15, x2: 9, y2: 15 },
-]);
-const IconLock = Icon([
-  { tag: 'path', d: 'M5 11h14v10H5z' },
-  { tag: 'path', d: 'M7 11V7a5 5 0 0 1 10 0v4' },
-]);
-const IconWifiOff = Icon([
-  { tag: 'line', x1: 1, y1: 1, x2: 23, y2: 23 },
-  { tag: 'path', d: 'M16.72 11.06A10.94 10.94 0 0 1 19 12.55' },
-  { tag: 'path', d: 'M5 12.55a10.94 10.94 0 0 1 5.17-2.39' },
-  { tag: 'path', d: 'M10.71 5.05A16 16 0 0 1 22.58 9' },
-  { tag: 'path', d: 'M1.42 9a15.91 15.91 0 0 1 4.7-2.88' },
-  { tag: 'path', d: 'M8.53 16.11a6 6 0 0 1 6.95 0' },
-  { tag: 'line', x1: 12, y1: 20, x2: 12.01, y2: 20 },
-]);
-const IconGitBranch = Icon([
-  { tag: 'line', x1: 6, y1: 3, x2: 6, y2: 15 },
-  { tag: 'circle', cx: 18, cy: 6, r: 3 },
-  { tag: 'circle', cx: 6, cy: 18, r: 3 },
-  { tag: 'path', d: 'M18 9a9 9 0 0 1-9 9' },
-]);
-const IconArrowRight = Icon(
-  [
-    { tag: 'line', x1: 5, y1: 12, x2: 19, y2: 12 },
-    { tag: 'polyline', points: '12 5 19 12 12 19' },
-  ],
-  { strokeWidth: 2 }
+const PILLAR_ICON_OPTS = { size: 20 };
+const IconShield = Icon(
+  [{ tag: 'path', d: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z' }],
+  PILLAR_ICON_OPTS
 );
+const IconZap = Icon(
+  [{ tag: 'path', d: 'M13 2 3 14h9l-1 8 10-12h-9l1-8z' }],
+  PILLAR_ICON_OPTS
+);
+const IconFeather = Icon(
+  [
+    { tag: 'path', d: 'M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z' },
+    { tag: 'line', x1: 16, y1: 8, x2: 2, y2: 22 },
+    { tag: 'line', x1: 17.5, y1: 15, x2: 9, y2: 15 },
+  ],
+  PILLAR_ICON_OPTS
+);
+const IconLock = Icon(
+  [
+    { tag: 'path', d: 'M5 11h14v10H5z' },
+    { tag: 'path', d: 'M7 11V7a5 5 0 0 1 10 0v4' },
+  ],
+  PILLAR_ICON_OPTS
+);
+const IconWifiOff = Icon(
+  [
+    { tag: 'line', x1: 1, y1: 1, x2: 23, y2: 23 },
+    { tag: 'path', d: 'M16.72 11.06A10.94 10.94 0 0 1 19 12.55' },
+    { tag: 'path', d: 'M5 12.55a10.94 10.94 0 0 1 5.17-2.39' },
+    { tag: 'path', d: 'M10.71 5.05A16 16 0 0 1 22.58 9' },
+    { tag: 'path', d: 'M1.42 9a15.91 15.91 0 0 1 4.7-2.88' },
+    { tag: 'path', d: 'M8.53 16.11a6 6 0 0 1 6.95 0' },
+    { tag: 'line', x1: 12, y1: 20, x2: 12.01, y2: 20 },
+  ],
+  PILLAR_ICON_OPTS
+);
+const IconGitBranch = Icon(
+  [
+    { tag: 'line', x1: 6, y1: 3, x2: 6, y2: 15 },
+    { tag: 'circle', cx: 18, cy: 6, r: 3 },
+    { tag: 'circle', cx: 6, cy: 18, r: 3 },
+    { tag: 'path', d: 'M18 9a9 9 0 0 1-9 9' },
+  ],
+  PILLAR_ICON_OPTS
+);
+const IconArrowRight = Icon([
+  { tag: 'line', x1: 5, y1: 12, x2: 19, y2: 12 },
+  { tag: 'polyline', points: '12 5 19 12 12 19' },
+]);
 
+// Pillar order matches design's PILLAR_LUCIDE positional mapping:
+// [shield, zap, feather, lock, wifi-off, git-branch]
 const pillars = [
   {
     id: 'lightweight',
-    icon: IconZap,
+    icon: IconShield,
     title: 'Lightweight',
     body: 'Built for speed and efficiency. Minimal system resources, fast startup, no idle network chatter.',
     metric: '~120 MB cold start',
   },
   {
     id: 'privacy',
-    icon: IconShield,
+    icon: IconZap,
     title: 'Privacy First',
     body: "Your data stays yours. No telemetry, no tracking, no analytics. We don't know who you are, and we like it that way.",
     metric: '0 phone-home requests',
@@ -326,14 +343,14 @@ const pillars = [
   },
   {
     id: 'open',
-    icon: IconGitBranch,
+    icon: IconWifiOff,
     title: 'Open Source',
     body: "Fully transparent. Audit it, fork it, contribute. Your browser should have nothing to hide — ours doesn’t.",
     metric: 'MIT licensed',
   },
   {
     id: 'modern',
-    icon: IconWifiOff,
+    icon: IconGitBranch,
     title: 'Modern Engine',
     body: 'Powered by Electron and Chromium for compatibility with the modern web while respecting your privacy.',
     metric: 'Chromium 130',
