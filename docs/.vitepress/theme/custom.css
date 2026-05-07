@@ -995,7 +995,7 @@ html.dark .nav0-bg {
    ============================================ */
 
 /* ---- Design tokens (light) ---- */
-.nav0-guide {
+html:not(.dark) .nav0-bg.nav0-guide {
   --vp-c-bg: #ffffff;
   --vp-c-bg-alt: #fafafa;
   --vp-c-bg-soft: #f5f5f7;
@@ -1025,6 +1025,13 @@ html.dark .nav0-bg {
   --vp-button-brand-active-text: #ffffff;
   --vp-button-brand-active-bg: #0077ed;
 
+  --vp-nav-bg-color: color-mix(in oklab, #ffffff 78%, transparent);
+  --vp-sidebar-bg-color: #ffffff;
+  --vp-local-nav-bg-color: color-mix(in oklab, #ffffff 78%, transparent);
+}
+
+/* Shared (light + dark) on guide */
+.nav0-bg.nav0-guide {
   --vp-font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display',
     'Helvetica Neue', Helvetica, Arial, sans-serif;
   --vp-font-family-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -1034,14 +1041,10 @@ html.dark .nav0-bg {
   --nav0-warn: #c46a00;
   --nav0-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.04);
   --nav0-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06), 0 24px 48px -12px rgba(0, 0, 0, 0.1);
-
-  --vp-nav-bg-color: color-mix(in oklab, #ffffff 78%, transparent);
-  --vp-sidebar-bg-color: #ffffff;
-  --vp-local-nav-bg-color: color-mix(in oklab, #ffffff 78%, transparent);
 }
 
 /* ---- Design tokens (dark) ---- */
-html.dark .nav0-guide {
+html.dark .nav0-bg.nav0-guide {
   --vp-c-bg: #000000;
   --vp-c-bg-alt: #08080a;
   --vp-c-bg-soft: #0b0b0d;
@@ -1074,8 +1077,7 @@ html.dark .nav0-guide {
 }
 
 /* ---- Body type tweaks on guide pages ---- */
-.nav0-guide,
-.nav0-guide body {
+.nav0-guide {
   font-family: var(--vp-font-family-base);
   letter-spacing: -0.003em;
   -webkit-font-smoothing: antialiased;
@@ -1100,7 +1102,6 @@ html.dark .nav0-bg.nav0-guide {
 .nav0-guide .VPNavBar {
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: 1px solid var(--vp-c-divider-light);
 }
 
 /* ---- vp-doc headings ---- */
@@ -1176,7 +1177,6 @@ html.dark .nav0-bg.nav0-guide {
   padding: 2px 6px;
   border-radius: 5px;
   border: 1px solid var(--vp-c-divider-light);
-  color: var(--vp-c-text-1);
 }
 
 /* ---- Links ---- */
@@ -1194,7 +1194,7 @@ html.dark .nav0-bg.nav0-guide {
   border-bottom: none;
 }
 
-/* ---- Code blocks ---- */
+/* ---- Code blocks: always dark, with dark shiki tokens forced in light mode ---- */
 .nav0-guide .vp-doc div[class*='language-'] {
   background: #0c0c10;
   border-radius: 14px;
@@ -1214,7 +1214,16 @@ html.dark .nav0-bg.nav0-guide {
 .nav0-guide .vp-doc div[class*='language-'] code {
   font-family: var(--vp-font-family-mono);
   font-size: 13.5px;
-  color: #f5f5f7;
+}
+
+/* Force dark shiki tokens in BOTH modes so text stays legible on the always-dark bg */
+html:not(.dark) .nav0-guide .vp-doc div[class*='language-'] .shiki span,
+html:not(.dark) .nav0-guide .vp-doc div[class*='language-'] code span {
+  color: var(--shiki-dark, #e6edf3) !important;
+  background-color: transparent !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
 }
 
 .nav0-guide .vp-doc div[class*='language-'] .lang {
@@ -1232,12 +1241,6 @@ html.dark .nav0-bg.nav0-guide {
 }
 .nav0-guide .vp-doc div[class*='language-'] > button.copy:hover {
   background: rgba(255, 255, 255, 0.12);
-}
-
-/* Force shiki dark token palette to stay readable on the dark code bg */
-.nav0-guide .vp-doc div[class*='language-'] .shiki,
-.nav0-guide .vp-doc div[class*='language-'] .shiki span {
-  background: transparent !important;
 }
 
 /* ---- Custom blocks (callouts) ---- */
@@ -1321,6 +1324,11 @@ html.dark .nav0-bg.nav0-guide {
 /* ---- Right outline / TOC ---- */
 .nav0-guide .VPDocAsideOutline {
   font-size: 13px;
+}
+
+/* Hide the floating active-marker strip; we use static borders + active color */
+.nav0-guide .VPDocAsideOutline .outline-marker {
+  display: none;
 }
 
 .nav0-guide .VPDocAsideOutline .outline-title {
