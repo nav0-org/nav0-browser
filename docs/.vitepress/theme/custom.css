@@ -345,14 +345,77 @@ a.blog-card:hover {
   line-height: 1.6;
 }
 
-/* ========== Release List Page ========== */
+/* ========== Release List Page (Redesigned) ========== */
+/* Page-level treatment for the release index page, scoped via :has() */
+.vp-doc:has(.release-list-item) > div > h1 {
+  font-family: var(--vp-font-family-base);
+  font-size: clamp(2.25rem, 5vw, 3.75rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  margin: 0.5rem 0 1rem;
+  border-top: none;
+  padding-top: 0;
+  text-align: center;
+}
+
+.vp-doc:has(.release-list-item) > div > p:first-of-type {
+  text-align: center;
+  font-size: 1.2rem;
+  color: var(--vp-c-text-2);
+  max-width: 56ch;
+  margin: 0 auto 2.75rem;
+  line-height: 1.4;
+  letter-spacing: -0.012em;
+  font-weight: 400;
+}
+
+.vp-doc:has(.release-list-item) > div > hr {
+  display: none;
+}
+
+/* Release card */
 .release-list-item {
-  padding: 1.5rem 0;
-  border-bottom: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 18px;
+  padding: 1.75rem 2rem;
+  margin: 0 0 0.85rem;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.03),
+    0 4px 12px rgba(0, 0, 0, 0.03);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
 }
 
 .release-list-item:last-child {
-  border-bottom: none;
+  border-bottom: 1px solid var(--vp-c-divider);
+  margin-bottom: 0;
+}
+
+.release-list-item:hover {
+  border-color: var(--vp-c-text-3);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    0 24px 48px -12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Latest release: subtle accent gradient header */
+.release-list-item:has(.release-badge.latest) {
+  border-color: var(--vp-c-brand-soft);
+  background: linear-gradient(180deg, var(--vp-c-brand-soft) 0%, transparent 96px), var(--vp-c-bg);
+}
+
+.release-list-item:has(.release-badge.latest):hover {
+  border-color: var(--vp-c-brand-1);
+}
+
+/* Alpha release: muted look */
+.release-list-item:has(.release-badge.alpha) {
+  background: var(--vp-c-bg-soft);
 }
 
 .release-list-item a {
@@ -361,11 +424,15 @@ a.blog-card:hover {
 }
 
 .release-list-item h2 {
-  font-size: 1.3rem;
+  font-family: var(--vp-font-family-mono);
+  font-size: 1.4rem;
   font-weight: 600;
-  margin-bottom: 0.4rem;
+  letter-spacing: -0.015em;
+  margin: 0 0 0.5rem;
   border-top: none;
   padding-top: 0;
+  color: var(--vp-c-text-1);
+  transition: color 160ms ease;
 }
 
 .release-list-item h2:hover {
@@ -373,23 +440,26 @@ a.blog-card:hover {
 }
 
 .release-list-item .release-meta {
-  font-size: 0.8rem;
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.78rem;
   color: var(--vp-c-text-3);
-  margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.65rem;
+  margin: 0 0 0.95rem;
 }
 
 .release-list-item .release-meta .release-badge {
-  font-size: 0.7rem;
-  padding: 0.1rem 0.5rem;
+  font-size: 0.65rem;
+  padding: 0.18rem 0.6rem;
 }
 
 .release-list-item .release-excerpt {
   color: var(--vp-c-text-2);
-  font-size: 0.92rem;
-  line-height: 1.6;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  letter-spacing: -0.005em;
+  margin: 0;
 }
 
 /* ========== Divider ========== */
@@ -809,7 +879,116 @@ a.blog-card:hover {
   }
 }
 
-/* ========== Release Notes ========== */
+/* ========== Release Detail Page (Redesigned) ========== */
+/* Pill-shaped badges, used on both index and detail pages */
+.release-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.22rem 0.7rem;
+  border-radius: 999px;
+  font-family: var(--vp-font-family-base);
+}
+
+.release-badge.latest {
+  color: var(--vp-c-brand-1);
+  background: var(--vp-c-brand-soft);
+}
+
+.release-badge.alpha {
+  color: var(--vp-c-warning-1, #c46a00);
+  background: var(--vp-c-warning-soft, rgba(196, 106, 0, 0.12));
+}
+
+/* Release detail header — scoped via :has(.release-date-meta) */
+.vp-doc:has(.release-date-meta) > div > h1 {
+  font-family: var(--vp-font-family-mono);
+  font-size: clamp(2.5rem, 6vw, 4.25rem);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 0.95;
+  margin: 1rem 0 1rem;
+  border-top: none;
+  padding-top: 0;
+  color: var(--vp-c-text-1);
+}
+
+/* Badge sits between version and date on detail pages */
+.vp-doc:has(.release-date-meta) > div > h1 + p {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.vp-doc:has(.release-date-meta) > div > h1 + p .release-badge {
+  font-size: 0.72rem;
+  padding: 0.28rem 0.8rem;
+}
+
+/* Date meta — divider strip below the header */
+.release-date-meta {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.875rem;
+  color: var(--vp-c-text-3);
+  margin: 0.5rem 0 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--vp-c-divider);
+  letter-spacing: 0.01em;
+}
+
+/* Section headings on release detail pages */
+.vp-doc:has(.release-date-meta) h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-top: 2.75rem;
+  margin-bottom: 1.1rem;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-top: none;
+  color: var(--vp-c-text-1);
+}
+
+.vp-doc:has(.release-date-meta) h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  margin-top: 1.5rem;
+  margin-bottom: 0.6rem;
+  color: var(--vp-c-text-1);
+}
+
+/* Body lists */
+.vp-doc:has(.release-date-meta) ul {
+  margin-top: 0.5rem;
+  padding-left: 1.25rem;
+}
+
+.vp-doc:has(.release-date-meta) ul li {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--vp-c-text-2);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.003em;
+}
+
+.vp-doc:has(.release-date-meta) ul li strong {
+  color: var(--vp-c-text-1);
+  font-weight: 600;
+}
+
+.vp-doc:has(.release-date-meta) ul li code {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.85em;
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  padding: 0.08rem 0.4rem;
+  border-radius: 5px;
+}
+
+/* Legacy classes preserved for backward compatibility */
 .release-note {
   padding: 1.5rem 0;
   border-bottom: 1px solid var(--vp-c-divider);
@@ -831,32 +1010,6 @@ a.blog-card:hover {
   margin: 0;
   border-top: none;
   padding-top: 0;
-}
-
-.release-badge {
-  font-size: 0.72rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.2rem 0.6rem;
-  border-radius: 4px;
-}
-
-.release-badge.latest {
-  color: var(--vp-c-brand-1);
-  background: var(--vp-c-brand-soft);
-}
-
-.release-badge.alpha {
-  color: var(--vp-c-warning-1, #e2a72e);
-  background: var(--vp-c-warning-soft, rgba(226, 167, 46, 0.12));
-}
-
-.release-date-meta {
-  font-size: 0.8rem;
-  color: var(--vp-c-text-3);
-  margin-bottom: 1rem;
-  margin-top: 0.25rem;
 }
 
 .release-note h3 {
@@ -884,6 +1037,28 @@ a.blog-card:hover {
   margin-bottom: 0.5rem;
 }
 
+/* Dark-mode tweaks for redesigned release pages */
+html.dark .release-list-item {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+html.dark .release-list-item:hover {
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.4),
+    0 24px 48px -12px rgba(0, 0, 0, 0.5);
+}
+
+html.dark .release-list-item:has(.release-badge.alpha) {
+  background: var(--vp-c-bg-soft);
+}
+
+html.dark .release-badge.alpha {
+  color: #e2a72e;
+  background: rgba(226, 167, 46, 0.16);
+}
+
 /* ========== Responsive ========== */
 @media (max-width: 768px) {
   .capsules-grid {
@@ -906,6 +1081,19 @@ a.blog-card:hover {
 
   .feature-capsules-inner {
     padding: 3rem 1rem 4rem;
+  }
+
+  .release-list-item {
+    padding: 1.25rem 1.25rem;
+    border-radius: 14px;
+  }
+
+  .release-list-item h2 {
+    font-size: 1.2rem;
+  }
+
+  .vp-doc:has(.release-date-meta) > div > h1 {
+    font-size: clamp(2.25rem, 9vw, 3rem);
   }
 }
 
