@@ -374,9 +374,9 @@ a.blog-card:hover {
   display: none;
 }
 
-/* Release card */
+/* Release card — elevated surface, soft shadow, hover lift */
 .release-list-item {
-  background: var(--vp-c-bg);
+  background: var(--vp-c-bg-elv, var(--vp-c-bg));
   border: 1px solid var(--vp-c-divider);
   border-radius: 18px;
   padding: 1.75rem 2rem;
@@ -391,7 +391,6 @@ a.blog-card:hover {
 }
 
 .release-list-item:last-child {
-  border-bottom: 1px solid var(--vp-c-divider);
   margin-bottom: 0;
 }
 
@@ -406,7 +405,9 @@ a.blog-card:hover {
 /* Latest release: subtle accent gradient header */
 .release-list-item:has(.release-badge.latest) {
   border-color: var(--vp-c-brand-soft);
-  background: linear-gradient(180deg, var(--vp-c-brand-soft) 0%, transparent 96px), var(--vp-c-bg);
+  background:
+    linear-gradient(180deg, var(--vp-c-brand-soft) 0%, transparent 96px),
+    var(--vp-c-bg-elv, var(--vp-c-bg));
 }
 
 .release-list-item:has(.release-badge.latest):hover {
@@ -456,10 +457,21 @@ a.blog-card:hover {
 
 .release-list-item .release-excerpt {
   color: var(--vp-c-text-2);
-  font-size: 0.95rem;
-  line-height: 1.55;
-  letter-spacing: -0.005em;
+  font-size: 1.05rem;
+  line-height: 1.45;
+  letter-spacing: -0.012em;
+  font-weight: 400;
   margin: 0;
+}
+
+.release-list-item .release-excerpt code {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.85em;
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  padding: 0.06rem 0.36rem;
+  border-radius: 5px;
+  color: var(--vp-c-text-1);
 }
 
 /* ========== Divider ========== */
@@ -913,7 +925,15 @@ a.blog-card:hover {
   margin: 1rem 0 1rem;
   border-top: none;
   padding-top: 0;
-  color: var(--vp-c-text-1);
+  background: linear-gradient(180deg, var(--vp-c-text-1) 0%, var(--vp-c-text-2) 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.vp-doc:has(.release-date-meta) > div > h1 .header-anchor {
+  -webkit-text-fill-color: var(--vp-c-text-3);
+  background: none;
 }
 
 /* Badge sits between version and date on detail pages */
