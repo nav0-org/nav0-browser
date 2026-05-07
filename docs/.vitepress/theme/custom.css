@@ -306,14 +306,90 @@ a.blog-card:hover {
   text-decoration: underline;
 }
 
-/* ========== Blog List Page ========== */
-.blog-post-item {
-  padding: 1.5rem 0;
-  border-bottom: 1px solid var(--vp-c-divider);
+/* ========== Blog Pages — Apple-style v2 redesign ========== */
+
+/* Apple-style design tokens scoped to blog pages */
+.blog-list-page,
+.blog-post-page {
+  --blog-accent: #0071e3;
+  --blog-accent-hover: #0077ed;
+  --blog-accent-soft: rgba(0, 113, 227, 0.08);
+  --blog-gradient: linear-gradient(120deg, #0071e3 0%, #b347d9 50%, #ff5e7a 100%);
+  --blog-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.04);
+  --blog-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06), 0 24px 48px -12px rgba(0, 0, 0, 0.1);
+  --blog-shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.08), 0 40px 80px -16px rgba(0, 0, 0, 0.18);
+  --blog-serif: 'Iowan Old Style', 'Charter', 'Source Serif Pro', Georgia, 'Times New Roman', serif;
 }
 
-.blog-post-item:last-child {
-  border-bottom: none;
+.dark .blog-list-page,
+.dark .blog-post-page {
+  --blog-accent: #2997ff;
+  --blog-accent-hover: #4ea7ff;
+  --blog-accent-soft: rgba(41, 151, 255, 0.12);
+  --blog-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --blog-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4), 0 24px 48px -12px rgba(0, 0, 0, 0.6);
+  --blog-shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.5), 0 40px 80px -16px rgba(0, 0, 0, 0.7);
+}
+
+/* ========== Blog List Page ========== */
+
+/* Page hero — eyebrow + larger title + subtitle */
+.blog-list-page .vp-doc > h1:first-child {
+  font-size: clamp(2.5rem, 6vw, 4.25rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  text-align: center;
+  margin: 1.5rem auto 1.125rem;
+  max-width: 18ch;
+  border-top: none;
+  padding-top: 0;
+}
+
+.blog-list-page .vp-doc > h1:first-child::before {
+  content: 'Writing';
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--blog-accent);
+  margin-bottom: 0.875rem;
+  letter-spacing: -0.005em;
+  text-transform: none;
+}
+
+.blog-list-page .vp-doc > h1 + p {
+  text-align: center;
+  font-size: 1.3125rem;
+  color: var(--vp-c-text-2);
+  max-width: 56ch;
+  margin: 0 auto 2.75rem;
+  line-height: 1.4;
+  letter-spacing: -0.012em;
+  font-weight: 400;
+}
+
+.blog-list-page .vp-doc > hr:first-of-type {
+  display: none;
+}
+
+/* Post cards — vertical stack with featured-style first item */
+.blog-post-item {
+  background: var(--vp-c-bg);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 22px;
+  padding: 1.5rem 1.75rem;
+  margin: 0 0 1rem;
+  box-shadow: var(--blog-shadow-sm);
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease;
+}
+
+.blog-post-item:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--blog-shadow-md);
+  border-color: color-mix(in oklab, var(--blog-accent) 25%, var(--vp-c-divider));
 }
 
 .blog-post-item a {
@@ -322,27 +398,262 @@ a.blog-card:hover {
 }
 
 .blog-post-item h2 {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   font-weight: 600;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.625rem;
+  letter-spacing: -0.022em;
+  line-height: 1.2;
   border-top: none;
   padding-top: 0;
 }
 
 .blog-post-item h2:hover {
-  color: var(--vp-c-brand-1);
+  color: var(--blog-accent);
 }
 
 .blog-post-item .post-meta {
-  font-size: 0.8rem;
+  font-size: 0.8125rem;
   color: var(--vp-c-text-3);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.625rem;
+  font-feature-settings: 'tnum';
 }
 
 .blog-post-item .post-excerpt {
   color: var(--vp-c-text-2);
-  font-size: 0.92rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  letter-spacing: -0.005em;
+  margin-bottom: 0;
+}
+
+/* Featured: first post in the list gets a larger, eyebrow-marked treatment */
+.blog-list-page .blog-post-item:first-of-type {
+  border-radius: 24px;
+  padding: 2.25rem;
+  box-shadow: var(--blog-shadow-md);
+  margin-bottom: 2rem;
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--blog-accent-soft) 60%, var(--vp-c-bg)) 0%,
+    var(--vp-c-bg) 60%
+  );
+}
+
+.blog-list-page .blog-post-item:first-of-type::before {
+  content: '★ Featured';
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--blog-accent);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.blog-list-page .blog-post-item:first-of-type h2 {
+  font-size: clamp(1.625rem, 2.8vw, 2.125rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 0.875rem;
+}
+
+.blog-list-page .blog-post-item:first-of-type .post-excerpt {
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 640px) {
+  .blog-post-item,
+  .blog-list-page .blog-post-item:first-of-type {
+    padding: 1.25rem 1.25rem;
+    border-radius: 18px;
+  }
+  .blog-list-page .vp-doc > h1:first-child {
+    font-size: 2rem;
+  }
+  .blog-list-page .vp-doc > h1 + p {
+    font-size: 1.05rem;
+    margin-bottom: 1.75rem;
+  }
+}
+
+/* ========== Blog Post Detail Page ========== */
+
+/* Page-head treatment for the title — accent eyebrow above the headline */
+.blog-post-page .vp-doc h1 {
+  font-family: 'Newsreader', var(--blog-serif);
+  font-weight: 500;
+  font-size: clamp(2.25rem, 5.4vw, 3.75rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 1rem 0 1.25rem;
+  border-top: none;
+  padding-top: 0;
+}
+
+/* Byline (first <p> after h1) — already has inline color/size from markdown */
+.blog-post-page .vp-doc h1 + p {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem !important;
+  color: var(--vp-c-text-3) !important;
+  letter-spacing: -0.005em;
+  margin: 0 0 2rem;
+}
+
+.blog-post-page .vp-doc h1 + p::before {
+  content: 'N0';
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--blog-gradient);
+  color: #fff;
+  font-family: var(--vp-font-family-base);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
+}
+
+/* Lede — second <p> after h1 (i.e. first prose paragraph) */
+.blog-post-page .vp-doc h1 + p + p {
+  font-family: 'Newsreader', var(--blog-serif);
+  font-size: 1.375rem;
+  line-height: 1.5;
+  color: var(--vp-c-text-2);
+  font-style: italic;
+  border-left: 3px solid var(--blog-accent);
+  padding-left: 1.375rem;
+  margin: 0 0 2.25rem;
+}
+
+.blog-post-page .vp-doc h2 {
+  font-family: 'Newsreader', var(--blog-serif);
+  font-weight: 600;
+  font-size: 1.875rem;
+  letter-spacing: -0.018em;
+  line-height: 1.18;
+  margin: 3.5rem 0 0.875rem;
+  border-top: none;
+  padding-top: 0;
+  scroll-margin-top: 5rem;
+}
+
+.blog-post-page .vp-doc h3 {
+  font-family: var(--vp-font-family-base);
+  font-size: 1.1875rem;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  margin: 2.25rem 0 0.5rem;
+  color: var(--vp-c-text-1);
+}
+
+.blog-post-page .vp-doc p {
+  font-family: 'Newsreader', var(--blog-serif);
+  font-size: 1.1875rem;
   line-height: 1.6;
+  color: var(--vp-c-text-1);
+  margin: 0 0 1.25rem;
+  letter-spacing: -0.005em;
+}
+
+.blog-post-page .vp-doc p strong {
+  font-weight: 600;
+}
+
+.blog-post-page .vp-doc a {
+  color: var(--blog-accent);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in oklab, var(--blog-accent) 30%, transparent);
+  transition:
+    border-bottom-color 160ms ease,
+    color 160ms ease;
+}
+
+.blog-post-page .vp-doc a:hover {
+  border-bottom-color: var(--blog-accent);
+  color: var(--blog-accent-hover);
+}
+
+.blog-post-page .vp-doc ul,
+.blog-post-page .vp-doc ol {
+  font-family: var(--vp-font-family-base);
+  font-size: 1rem;
+  line-height: 1.55;
+  padding-left: 1.25rem;
+  margin: 0 0 1.5rem;
+}
+
+.blog-post-page .vp-doc li {
+  margin-bottom: 0.625rem;
+  letter-spacing: -0.005em;
+  color: var(--vp-c-text-1);
+}
+
+.blog-post-page .vp-doc li > p {
+  font-family: var(--vp-font-family-base);
+  font-size: inherit;
+  line-height: inherit;
+  margin: 0;
+}
+
+.blog-post-page .vp-doc blockquote {
+  margin: 1.75rem 0;
+  padding: 1.375rem 1.75rem;
+  background: var(--vp-c-bg-soft);
+  border-left: 4px solid var(--vp-c-text-1);
+  border-radius: 0 14px 14px 0;
+  color: var(--vp-c-text-1);
+}
+
+.blog-post-page .vp-doc blockquote p {
+  font-family: 'Newsreader', var(--blog-serif);
+  font-size: 1.3125rem;
+  line-height: 1.5;
+  margin: 0;
+  color: inherit;
+}
+
+.blog-post-page .vp-doc hr {
+  margin: 3rem 0;
+  border: none;
+  border-top: 1px solid var(--vp-c-divider);
+}
+
+/* End-of-post italic CTA paragraph (the standard "Nav0 is..." footer) */
+.blog-post-page .vp-doc hr + p:last-child em {
+  font-style: italic;
+  color: var(--vp-c-text-2);
+}
+
+/* Constrain the prose column for readability on the detail page */
+.blog-post-page .VPDoc:not(.has-aside) .content-container {
+  max-width: 760px;
+}
+
+@media (max-width: 760px) {
+  .blog-post-page .vp-doc h1 {
+    font-size: 2.125rem;
+  }
+  .blog-post-page .vp-doc h2 {
+    font-size: 1.5rem;
+    margin-top: 2.5rem;
+  }
+  .blog-post-page .vp-doc p,
+  .blog-post-page .vp-doc h1 + p + p {
+    font-size: 1.0625rem;
+  }
+  .blog-post-page .vp-doc h1 + p + p {
+    padding-left: 1rem;
+  }
+  .blog-post-page .vp-doc blockquote p {
+    font-size: 1.125rem;
+  }
 }
 
 /* ========== Release List Page ========== */
