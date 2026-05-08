@@ -1299,17 +1299,18 @@ html:not(.dark) .nav0-guide .vp-doc div[class*='language-'] code span {
   font-size: 13px;
 }
 
-/* Drop the horizontal rule VitePress draws between groups; design uses margin only */
-.nav0-guide .VPSidebar .VPSidebarGroup + .VPSidebarGroup,
-.nav0-guide .VPSidebar .VPSidebarItem.level-0 + .VPSidebarItem.level-0,
-.nav0-guide .VPSidebar .VPSidebarItem.level-0 + .VPSidebarItem.level-0 > .item {
+/* Drop the horizontal rule VitePress draws between groups; design uses margin only.
+   VitePress wraps each top-level group in <div class="group">, so .group + .group
+   is the selector that actually matches (not VPSidebarGroup, which doesn't exist). */
+.nav0-guide .VPSidebar .group + .group,
+.nav0-guide .VPSidebar .VPSidebarItem.level-0 + .VPSidebarItem.level-0 {
   border-top: none;
   padding-top: 0;
+  margin-top: 28px;
 }
 
-.nav0-guide .VPSidebar .VPSidebarGroup + .VPSidebarGroup,
-.nav0-guide .VPSidebar .VPSidebarItem.level-0 + .VPSidebarItem.level-0 {
-  margin-top: 28px;
+.nav0-guide .VPSidebar div[role='separator'] {
+  display: none;
 }
 
 .nav0-guide .VPSidebarItem.level-0 > .item > .text {
