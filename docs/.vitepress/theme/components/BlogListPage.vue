@@ -57,7 +57,6 @@ async function copyRss() {
   <div class="bl-page">
     <!-- PAGE HEAD -->
     <section class="bl-page-head">
-      <div class="bl-page-eyebrow">Writing</div>
       <h1 class="bl-page-title">Notes from a small <em>browser project.</em></h1>
       <p class="bl-page-sub">
         Thoughts on privacy, browsers, performance, and the open web. Published when there's
