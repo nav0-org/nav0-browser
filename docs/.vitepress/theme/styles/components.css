@@ -1,0 +1,309 @@
+/* ============================================================
+   nav0 theme — VitePress component overrides
+   Touches the bits the default theme renders so they match brand.
+   ============================================================ */
+
+/* ----------------------------------------------------------------
+   navbar — frosted glass
+   ---------------------------------------------------------------- */
+
+.VPNav {
+  position: fixed;
+  background: var(--nav0-nav-bg);
+  -webkit-backdrop-filter: var(--nav0-nav-blur);
+          backdrop-filter: var(--nav0-nav-blur);
+  border-bottom: 1px solid transparent;
+  transition: background var(--nav0-dur-base) var(--nav0-ease),
+              border-color var(--nav0-dur-base) var(--nav0-ease);
+}
+
+.VPNav.has-sidebar,
+.VPNav.scrolled {
+  background: var(--nav0-nav-bg-scrolled);
+  border-bottom-color: var(--nav0-nav-border);
+}
+
+.VPNavBar {
+  height: 64px;
+}
+
+.VPNavBar .container {
+  max-width: 1280px;
+}
+
+.VPNavBar .title {
+  font-family: var(--nav0-font-display);
+  font-weight: 700;
+  letter-spacing: var(--nav0-tracking-tight);
+  font-size: 1.0625rem;
+  text-transform: lowercase;
+}
+
+.VPNavBarMenuLink,
+.VPNavBarMenuGroup .VPMenuLink a {
+  font-family: var(--nav0-font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-transform: lowercase;
+  color: var(--vp-c-text-2);
+  transition: color var(--nav0-dur-fast) var(--nav0-ease);
+}
+
+.VPNavBarMenuLink:hover,
+.VPNavBarMenuLink.active {
+  color: var(--vp-c-text-1);
+}
+
+/* ----------------------------------------------------------------
+   sidebar
+   ---------------------------------------------------------------- */
+
+.VPSidebar {
+  background: transparent;
+  padding-top: 96px !important;
+}
+
+.VPSidebarItem .text {
+  font-family: var(--nav0-font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-transform: lowercase;
+}
+
+.VPSidebarItem.level-0 > .item > .text {
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+}
+
+.VPSidebarItem.is-active > .item .link .text {
+  color: var(--vp-c-brand-1);
+}
+
+.VPSidebarItem .link:hover .text {
+  color: var(--vp-c-brand-1);
+}
+
+/* ----------------------------------------------------------------
+   buttons (action buttons on home, in-content buttons)
+   ---------------------------------------------------------------- */
+
+.VPButton {
+  font-family: var(--nav0-font-mono);
+  font-size: 0.875rem !important;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-transform: lowercase;
+  border-radius: var(--nav0-radius-pill) !important;
+  padding: 0.6875rem 1.5rem !important;
+  height: auto !important;
+  line-height: 1 !important;
+  transition: transform var(--nav0-dur-fast) var(--nav0-ease),
+              box-shadow var(--nav0-dur-fast) var(--nav0-ease),
+              background-color var(--nav0-dur-fast) var(--nav0-ease) !important;
+}
+
+.VPButton.brand {
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset,
+              0 6px 16px -6px rgba(99, 102, 241, 0.5);
+}
+
+.VPButton.brand:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset,
+              0 10px 24px -6px rgba(99, 102, 241, 0.6);
+}
+
+.VPButton.alt:hover {
+  transform: translateY(-1px);
+}
+
+/* ----------------------------------------------------------------
+   doc layout — generous max-width, prose width
+   ---------------------------------------------------------------- */
+
+.VPDoc {
+  padding-top: 96px !important;
+}
+
+.VPDoc .container {
+  max-width: 1280px !important;
+}
+
+.VPDoc .content-container {
+  max-width: 760px !important;
+}
+
+.VPDoc.has-aside .content-container {
+  max-width: 760px !important;
+}
+
+/* ----------------------------------------------------------------
+   page-aside (TOC on right)
+   ---------------------------------------------------------------- */
+
+.VPDocAsideOutline .outline-title {
+  font-family: var(--nav0-font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: var(--nav0-tracking-eyebrow);
+  text-transform: lowercase;
+  color: var(--vp-c-text-3);
+}
+
+.VPDocAsideOutline .outline-link {
+  font-family: var(--nav0-font-mono);
+  font-size: 0.8125rem;
+  letter-spacing: -0.01em;
+  text-transform: lowercase;
+  color: var(--vp-c-text-2);
+  transition: color var(--nav0-dur-fast) var(--nav0-ease);
+}
+
+.VPDocAsideOutline .outline-link.active,
+.VPDocAsideOutline .outline-link:hover {
+  color: var(--vp-c-brand-1);
+}
+
+/* ----------------------------------------------------------------
+   prev/next at bottom of pages
+   ---------------------------------------------------------------- */
+
+.VPDocFooter {
+  border-top: 1px solid var(--vp-c-divider);
+  padding-top: 2rem;
+  margin-top: 4rem;
+}
+
+.pager-link {
+  border: 1px solid var(--vp-c-border) !important;
+  border-radius: var(--nav0-radius-md) !important;
+  padding: 1rem 1.25rem !important;
+  background: var(--vp-c-bg-soft);
+  transition: border-color var(--nav0-dur-fast) var(--nav0-ease),
+              transform var(--nav0-dur-fast) var(--nav0-ease) !important;
+}
+
+.pager-link:hover {
+  border-color: var(--vp-c-brand-1) !important;
+  transform: translateY(-1px);
+}
+
+.pager-link .desc {
+  font-family: var(--nav0-font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: var(--nav0-tracking-eyebrow);
+  text-transform: lowercase;
+  color: var(--vp-c-text-3);
+}
+
+.pager-link .title {
+  font-family: var(--nav0-font-display);
+  font-weight: 600;
+  letter-spacing: var(--nav0-tracking-tight);
+  font-size: 1rem;
+  margin-top: 0.25rem;
+}
+
+/* ----------------------------------------------------------------
+   custom block (tip/warning/info)
+   ---------------------------------------------------------------- */
+
+.vp-doc .custom-block {
+  border-radius: var(--nav0-radius-md);
+  border: 1px solid var(--vp-c-border);
+  border-left-width: 2px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  font-size: 0.9375rem;
+}
+
+.vp-doc .custom-block-title {
+  font-family: var(--nav0-font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: var(--nav0-tracking-eyebrow);
+  text-transform: lowercase;
+  margin-bottom: 0.5rem;
+}
+
+.vp-doc .tip       { border-left-color: var(--vp-c-brand-1); }
+.vp-doc .warning   { border-left-color: #f59e0b; }
+.vp-doc .danger    { border-left-color: var(--nav0-red); }
+.vp-doc .info      { border-left-color: var(--vp-c-text-3); }
+
+/* ----------------------------------------------------------------
+   default home overrides — apply only when our custom hero ISN'T used
+   (gives a clean fallback if user has plain markdown index.md)
+   ---------------------------------------------------------------- */
+
+.VPHero .name,
+.VPHero .text {
+  font-family: var(--nav0-font-display);
+  font-weight: 800;
+  letter-spacing: var(--nav0-tracking-display);
+  line-height: 1.0;
+}
+
+.VPHero .name {
+  background: linear-gradient(
+    180deg,
+    var(--vp-c-text-1) 0%,
+    var(--vp-c-text-2) 100%
+  );
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.VPHero .tagline {
+  font-family: var(--nav0-font-body);
+  font-size: 1.25rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--vp-c-text-2);
+  margin-top: 1.5rem;
+  max-width: 560px;
+}
+
+.VPFeature {
+  border-radius: var(--nav0-radius-lg) !important;
+  border: 1px solid var(--vp-c-border) !important;
+  background: var(--vp-c-bg-soft) !important;
+  padding: 1.75rem !important;
+  transition: transform var(--nav0-dur-base) var(--nav0-ease),
+              border-color var(--nav0-dur-base) var(--nav0-ease),
+              box-shadow var(--nav0-dur-base) var(--nav0-ease) !important;
+}
+
+.VPFeature:hover {
+  transform: translateY(-2px);
+  border-color: var(--vp-c-brand-1) !important;
+  box-shadow: var(--nav0-shadow-md);
+}
+
+.VPFeature .title {
+  font-family: var(--nav0-font-display);
+  font-weight: 600;
+  letter-spacing: var(--nav0-tracking-tight);
+  font-size: 1.125rem;
+}
+
+.VPFeature .details {
+  font-family: var(--nav0-font-body);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--vp-c-text-2);
+}
+
+/* ----------------------------------------------------------------
+   mobile nav
+   ---------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .VPDoc {
+    padding-top: 80px !important;
+  }
+  .VPNavBar { height: 56px; }
+}

@@ -1,0 +1,198 @@
+/* ============================================================
+   nav0 theme — design tokens
+   Overrides VitePress defaults. Apple-principles + nav0 brand.
+   ============================================================ */
+
+:root {
+  /* -------- brand -------- */
+  --nav0-indigo:        #6366f1;
+  --nav0-indigo-2:      #4f46e5;
+  --nav0-indigo-3:      #4338ca;
+  --nav0-indigo-soft:   #eef0ff;
+  --nav0-red:           #ef4444;     /* compass north */
+
+  /* -------- typography stacks -------- */
+  --nav0-font-display:
+    'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+  --nav0-font-body:
+    'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    'Helvetica Neue', Arial, sans-serif;
+  --nav0-font-mono:
+    'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+
+  /* -------- type scale (display-driven, generous) -------- */
+  --nav0-fs-display:    clamp(3rem, 7.5vw, 6.5rem);
+  --nav0-fs-h1:         clamp(2.25rem, 4.5vw, 3.75rem);
+  --nav0-fs-h2:         clamp(1.75rem, 3vw, 2.5rem);
+  --nav0-fs-h3:         clamp(1.25rem, 2vw, 1.625rem);
+  --nav0-fs-eyebrow:    0.75rem;
+  --nav0-fs-body:       1.0625rem;
+  --nav0-fs-small:      0.875rem;
+
+  --nav0-tracking-display: -0.04em;
+  --nav0-tracking-tight:   -0.025em;
+  --nav0-tracking-eyebrow: 0.18em;
+
+  /* -------- spacing rhythm -------- */
+  --nav0-space-xs:  0.5rem;
+  --nav0-space-sm:  1rem;
+  --nav0-space-md:  1.5rem;
+  --nav0-space-lg:  2.5rem;
+  --nav0-space-xl:  4rem;
+  --nav0-space-2xl: 6.5rem;
+  --nav0-space-3xl: 9rem;
+
+  /* -------- shape -------- */
+  --nav0-radius-sm:  6px;
+  --nav0-radius-md:  12px;
+  --nav0-radius-lg:  20px;
+  --nav0-radius-xl:  28px;
+  --nav0-radius-pill: 999px;
+
+  /* -------- motion -------- */
+  --nav0-ease:        cubic-bezier(0.22, 1, 0.36, 1);   /* easeOutQuart-ish, the apple curve */
+  --nav0-ease-in:     cubic-bezier(0.55, 0, 1, 0.45);
+  --nav0-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --nav0-dur-fast:    180ms;
+  --nav0-dur-base:    320ms;
+  --nav0-dur-slow:    560ms;
+
+  /* -------- shadows (light) -------- */
+  --nav0-shadow-sm:  0 1px 2px rgba(15, 15, 20, 0.04),
+                     0 1px 3px rgba(15, 15, 20, 0.06);
+  --nav0-shadow-md:  0 4px 12px rgba(15, 15, 20, 0.06),
+                     0 2px 4px rgba(15, 15, 20, 0.04);
+  --nav0-shadow-lg:  0 24px 48px -12px rgba(15, 15, 20, 0.18),
+                     0 8px 16px -8px rgba(15, 15, 20, 0.08);
+  --nav0-shadow-glow: 0 0 0 1px rgba(99, 102, 241, 0.18),
+                      0 12px 32px -8px rgba(99, 102, 241, 0.32);
+
+  /* ============================================================
+     LIGHT MODE (default)
+     ============================================================ */
+
+  /* surfaces */
+  --vp-c-bg:          #ffffff;
+  --vp-c-bg-alt:      #f8f7f4;          /* warm near-white */
+  --vp-c-bg-elv:      #ffffff;
+  --vp-c-bg-soft:     #fbfaf7;
+
+  /* text */
+  --vp-c-text-1:      #0a0a0a;
+  --vp-c-text-2:      #4a4a55;
+  --vp-c-text-3:      #8a8a95;
+
+  /* borders */
+  --vp-c-border:        rgba(15, 15, 20, 0.08);
+  --vp-c-divider:       rgba(15, 15, 20, 0.06);
+  --vp-c-gutter:        rgba(15, 15, 20, 0.04);
+
+  /* brand mapping */
+  --vp-c-brand-1:       var(--nav0-indigo-2);
+  --vp-c-brand-2:       var(--nav0-indigo);
+  --vp-c-brand-3:       var(--nav0-indigo-3);
+  --vp-c-brand-soft:    var(--nav0-indigo-soft);
+  --vp-c-brand:         var(--nav0-indigo);
+  --vp-c-brand-light:   var(--nav0-indigo);
+  --vp-c-brand-lighter: #818cf8;
+  --vp-c-brand-dark:    var(--nav0-indigo-3);
+  --vp-c-brand-darker:  #312e81;
+
+  /* component-level */
+  --vp-button-brand-bg:           var(--nav0-indigo);
+  --vp-button-brand-hover-bg:     var(--nav0-indigo-2);
+  --vp-button-brand-active-bg:    var(--nav0-indigo-3);
+  --vp-button-brand-text:         #ffffff;
+  --vp-button-brand-border:       transparent;
+  --vp-button-brand-hover-border: transparent;
+  --vp-button-brand-active-border:transparent;
+  --vp-button-brand-hover-text:   #ffffff;
+  --vp-button-brand-active-text:  #ffffff;
+
+  --vp-button-alt-bg:           rgba(15, 15, 20, 0.05);
+  --vp-button-alt-hover-bg:     rgba(15, 15, 20, 0.09);
+  --vp-button-alt-active-bg:    rgba(15, 15, 20, 0.12);
+  --vp-button-alt-text:         var(--vp-c-text-1);
+  --vp-button-alt-border:       transparent;
+  --vp-button-alt-hover-border: transparent;
+  --vp-button-alt-active-border:transparent;
+  --vp-button-alt-hover-text:   var(--vp-c-text-1);
+  --vp-button-alt-active-text:  var(--vp-c-text-1);
+
+  /* code */
+  --vp-code-color:       #0a0a0a;
+  --vp-code-bg:          #f4f3f0;
+  --vp-code-block-bg:    #0c0c10;
+  --vp-code-block-color: #e8e8ec;
+
+  /* nav frosted glass */
+  --nav0-nav-bg:         rgba(255, 255, 255, 0.72);
+  --nav0-nav-bg-scrolled:rgba(255, 255, 255, 0.86);
+  --nav0-nav-blur:       saturate(180%) blur(20px);
+  --nav0-nav-border:     rgba(15, 15, 20, 0.06);
+
+  /* surface — glass card on light */
+  --nav0-glass-bg:       rgba(255, 255, 255, 0.68);
+  --nav0-glass-border:   rgba(15, 15, 20, 0.08);
+  --nav0-glass-shadow:   var(--nav0-shadow-md);
+
+  /* gradient mesh tokens */
+  --nav0-mesh-1: radial-gradient(60% 80% at 20% 10%, rgba(99,102,241,0.18), transparent 60%);
+  --nav0-mesh-2: radial-gradient(50% 70% at 90% 30%, rgba(239,68,68,0.10), transparent 60%);
+  --nav0-mesh-3: radial-gradient(70% 60% at 50% 100%, rgba(99,102,241,0.10), transparent 60%);
+}
+
+/* ============================================================
+   DARK MODE
+   ============================================================ */
+
+.dark {
+  --vp-c-bg:        #050507;
+  --vp-c-bg-alt:    #0b0b10;
+  --vp-c-bg-elv:    #0f0f15;
+  --vp-c-bg-soft:   #0a0a0e;
+
+  --vp-c-text-1:    #f5f5f7;
+  --vp-c-text-2:    #a1a1aa;
+  --vp-c-text-3:    #6b6b75;
+
+  --vp-c-border:    rgba(255, 255, 255, 0.08);
+  --vp-c-divider:   rgba(255, 255, 255, 0.06);
+  --vp-c-gutter:    rgba(255, 255, 255, 0.04);
+
+  --vp-c-brand-1:       #a5b4fc;
+  --vp-c-brand-2:       #818cf8;
+  --vp-c-brand-3:       #6366f1;
+  --vp-c-brand-soft:    rgba(99, 102, 241, 0.16);
+  --vp-c-brand:         #818cf8;
+  --vp-c-brand-light:   #a5b4fc;
+  --vp-c-brand-lighter: #c7d2fe;
+  --vp-c-brand-dark:    #6366f1;
+  --vp-c-brand-darker:  #4f46e5;
+
+  --vp-button-brand-bg:        #6366f1;
+  --vp-button-brand-hover-bg:  #818cf8;
+  --vp-button-brand-active-bg: #4f46e5;
+
+  --vp-button-alt-bg:        rgba(255, 255, 255, 0.06);
+  --vp-button-alt-hover-bg:  rgba(255, 255, 255, 0.10);
+  --vp-button-alt-active-bg: rgba(255, 255, 255, 0.14);
+
+  --vp-code-color:       #e8e8ec;
+  --vp-code-bg:          rgba(255, 255, 255, 0.06);
+  --vp-code-block-bg:    #0a0a0e;
+  --vp-code-block-color: #e8e8ec;
+
+  --nav0-nav-bg:         rgba(5, 5, 7, 0.72);
+  --nav0-nav-bg-scrolled:rgba(5, 5, 7, 0.86);
+  --nav0-nav-border:     rgba(255, 255, 255, 0.06);
+
+  --nav0-glass-bg:       rgba(20, 20, 26, 0.6);
+  --nav0-glass-border:   rgba(255, 255, 255, 0.08);
+  --nav0-glass-shadow:   0 24px 48px -12px rgba(0,0,0,0.6),
+                          0 1px 0 rgba(255,255,255,0.04) inset;
+
+  --nav0-mesh-1: radial-gradient(60% 80% at 20% 10%, rgba(129,140,248,0.18), transparent 60%);
+  --nav0-mesh-2: radial-gradient(50% 70% at 90% 30%, rgba(239,68,68,0.10), transparent 60%);
+  --nav0-mesh-3: radial-gradient(70% 60% at 50% 100%, rgba(99,102,241,0.14), transparent 60%);
+}

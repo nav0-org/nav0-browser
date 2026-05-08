@@ -1,0 +1,280 @@
+/* ============================================================
+   nav0 theme — base & typography
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;          /* nav offset for anchors */
+  font-feature-settings: 'ss01', 'ss02', 'cv01', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--nav0-font-body);
+  font-size:   var(--nav0-fs-body);
+  line-height: 1.65;
+  color:       var(--vp-c-text-1);
+  background:  var(--vp-c-bg);
+  letter-spacing: -0.005em;
+  font-weight: 400;
+}
+
+/* selection */
+::selection {
+  background: var(--nav0-indigo);
+  color: #fff;
+}
+.dark ::selection {
+  background: #6366f1;
+  color: #fff;
+}
+
+/* ----------------------------------------------------------------
+   headings — JetBrains Mono everywhere, tight tracking, bold weights
+   ---------------------------------------------------------------- */
+
+h1, h2, h3, h4, h5, h6,
+.vp-doc h1, .vp-doc h2, .vp-doc h3, .vp-doc h4, .vp-doc h5, .vp-doc h6 {
+  font-family: var(--nav0-font-display);
+  font-weight: 700;
+  letter-spacing: var(--nav0-tracking-tight);
+  line-height: 1.1;
+  color: var(--vp-c-text-1);
+}
+
+.vp-doc h1 {
+  font-size: var(--nav0-fs-h1);
+  font-weight: 800;
+  letter-spacing: var(--nav0-tracking-display);
+  line-height: 1.05;
+  margin-bottom: 1.5rem;
+  text-wrap: balance;
+}
+
+.vp-doc h2 {
+  font-size: var(--nav0-fs-h2);
+  margin-top: 4rem;
+  margin-bottom: 1.25rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--vp-c-divider);
+  text-wrap: balance;
+}
+
+.vp-doc h3 {
+  font-size: var(--nav0-fs-h3);
+  font-weight: 600;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+/* eyebrow / kicker label utility */
+.nav0-eyebrow {
+  font-family: var(--nav0-font-mono);
+  font-size: var(--nav0-fs-eyebrow);
+  font-weight: 500;
+  letter-spacing: var(--nav0-tracking-eyebrow);
+  text-transform: lowercase;
+  color: var(--vp-c-text-3);
+  display: inline-block;
+}
+
+/* ----------------------------------------------------------------
+   prose — generous reading rhythm
+   ---------------------------------------------------------------- */
+
+.vp-doc p {
+  font-size: var(--nav0-fs-body);
+  line-height: 1.7;
+  color: var(--vp-c-text-1);
+  margin: 1.25rem 0;
+  text-wrap: pretty;
+}
+
+.vp-doc p:has(+ h2),
+.vp-doc p:has(+ h3) {
+  margin-bottom: 0;
+}
+
+.vp-doc p > strong {
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+}
+
+/* lead paragraph (first p after h1) gets larger */
+.vp-doc h1 + p {
+  font-size: 1.25rem;
+  line-height: 1.55;
+  color: var(--vp-c-text-2);
+  margin-bottom: 2.5rem;
+  font-weight: 400;
+}
+
+/* ----------------------------------------------------------------
+   links
+   ---------------------------------------------------------------- */
+
+.vp-doc a {
+  color: var(--vp-c-brand-1);
+  font-weight: 500;
+  text-decoration: none;
+  background-image: linear-gradient(
+    transparent calc(100% - 1px),
+    var(--vp-c-brand-1) calc(100% - 1px)
+  );
+  background-size: 0% 100%;
+  background-repeat: no-repeat;
+  transition: background-size var(--nav0-dur-base) var(--nav0-ease),
+              color var(--nav0-dur-fast) var(--nav0-ease);
+}
+
+.vp-doc a:hover {
+  background-size: 100% 100%;
+  color: var(--vp-c-brand-2);
+}
+
+/* ----------------------------------------------------------------
+   code
+   ---------------------------------------------------------------- */
+
+.vp-doc :not(pre) > code {
+  font-family: var(--nav0-font-mono);
+  font-size: 0.875em;
+  font-weight: 500;
+  padding: 0.15em 0.45em;
+  border-radius: var(--nav0-radius-sm);
+  background: var(--vp-code-bg);
+  border: 1px solid var(--vp-c-border);
+}
+
+.vp-doc div[class*='language-'] {
+  border-radius: var(--nav0-radius-md);
+  border: 1px solid var(--vp-c-border);
+  margin: 1.5rem 0;
+  background: var(--vp-code-block-bg);
+  box-shadow: var(--nav0-shadow-sm);
+}
+
+.vp-doc div[class*='language-'] pre {
+  font-family: var(--nav0-font-mono);
+  font-size: 0.875rem;
+  line-height: 1.65;
+  padding: 1.25rem 1.5rem;
+}
+
+/* lang badge in top-right of code blocks */
+.vp-doc div[class*='language-']::before {
+  font-family: var(--nav0-font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: lowercase;
+  color: var(--vp-c-text-3);
+  top: 0.625rem;
+  right: 0.875rem;
+}
+
+/* ----------------------------------------------------------------
+   blockquote — apple-ish big quote with vertical line
+   ---------------------------------------------------------------- */
+
+.vp-doc blockquote {
+  border-left: 2px solid var(--vp-c-brand-1);
+  padding: 0.5rem 0 0.5rem 1.5rem;
+  margin: 2rem 0;
+  font-size: 1.125rem;
+  line-height: 1.55;
+  color: var(--vp-c-text-2);
+  font-weight: 400;
+  background: transparent;
+}
+
+.vp-doc blockquote > p {
+  font-size: inherit;
+}
+
+/* ----------------------------------------------------------------
+   tables
+   ---------------------------------------------------------------- */
+
+.vp-doc table {
+  border-collapse: collapse;
+  margin: 2rem 0;
+  width: 100%;
+  font-size: 0.9375rem;
+}
+
+.vp-doc th,
+.vp-doc td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--vp-c-divider);
+  text-align: left;
+}
+
+.vp-doc th {
+  font-family: var(--nav0-font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  color: var(--vp-c-text-2);
+  border-bottom: 1px solid var(--vp-c-border);
+}
+
+.vp-doc tr {
+  background: transparent;
+  border-top: none;
+}
+
+/* ----------------------------------------------------------------
+   horizontal rule
+   ---------------------------------------------------------------- */
+
+.vp-doc hr {
+  border: none;
+  height: 1px;
+  background: var(--vp-c-divider);
+  margin: 3rem 0;
+}
+
+/* ----------------------------------------------------------------
+   images — soft rounding + subtle ring
+   ---------------------------------------------------------------- */
+
+.vp-doc img {
+  border-radius: var(--nav0-radius-md);
+  border: 1px solid var(--vp-c-border);
+  box-shadow: var(--nav0-shadow-sm);
+}
+
+/* ----------------------------------------------------------------
+   focus rings — keyboard accessible
+   ---------------------------------------------------------------- */
+
+:where(a, button, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: 3px;
+  border-radius: var(--nav0-radius-sm);
+}
+
+/* ----------------------------------------------------------------
+   scrollbar — minimal
+   ---------------------------------------------------------------- */
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--vp-c-divider);
+  border-radius: 999px;
+  border: 3px solid var(--vp-c-bg);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--vp-c-text-3);
+}
