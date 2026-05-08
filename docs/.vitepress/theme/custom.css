@@ -359,11 +359,10 @@ a.blog-card:hover {
 }
 
 .releases-page-head .releases-eyebrow {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  color: var(--vp-c-brand-1);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  color: var(--vp-c-text-3);
+  letter-spacing: -0.005em;
   margin-bottom: 1rem;
 }
 
