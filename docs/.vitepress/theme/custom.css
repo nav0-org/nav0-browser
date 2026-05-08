@@ -1045,3 +1045,8 @@ html.dark .nav0-bg {
 .nav0-home-page .VPDocAside {
   display: none !important;
 }
+
+/* Hide VitePress's default site footer on the home page; the redesign ships its own. */
+.nav0-home-page .VPFooter {
+  display: none !important;
+}

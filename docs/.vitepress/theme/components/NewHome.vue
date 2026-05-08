@@ -211,9 +211,7 @@
         <div class="nv-wrap">
           <div class="nv-section-eyebrow nv-endcap-eyebrow">Ready when you are</div>
           <h2 class="nv-endcap-title">Take back your browsing experience.</h2>
-          <p class="nv-endcap-sub">
-            Free. Open source. No account. 38 MB. Sha-256 verified.
-          </p>
+          <p class="nv-endcap-sub">Free. Open source. No account. 38 MB. Sha-256 verified.</p>
           <div class="nv-download-row">
             <a class="nv-btn nv-btn--primary nv-btn--lg" href="/install">Download for macOS</a>
             <a class="nv-btn nv-btn--secondary nv-btn--lg" href="/install">Linux .deb</a>
@@ -222,6 +220,55 @@
         </div>
       </div>
     </section>
+
+    <!-- FOOTER -->
+    <footer class="nv-foot">
+      <div class="nv-wrap">
+        <div class="nv-foot-grid">
+          <div>
+            <a class="nv-brand" href="/">
+              <span class="nv-brand-mark" aria-hidden="true" />
+              <span>Nav0</span>
+            </a>
+            <p class="nv-foot-tag">
+              A minimal, privacy-focused web browser. Built by a small team, supported by a small
+              community, owned by no one.
+            </p>
+          </div>
+          <div>
+            <h4>Product</h4>
+            <ul>
+              <li><a href="/install">Install</a></li>
+              <li><a href="#features">Features</a></li>
+              <li><a href="/releases/">Release notes</a></li>
+              <li><a href="/guide/features">Roadmap</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4>Project</h4>
+            <ul>
+              <li><a href="https://github.com/nav0-org/nav0-browser">GitHub</a></li>
+              <li><a href="/guide/getting-started">Guide</a></li>
+              <li><a href="/blog/">Blog</a></li>
+              <li><a href="/faq">FAQ</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4>Legal</h4>
+            <ul>
+              <li><a href="/privacy-policy">Privacy policy</a></li>
+              <li><a href="/terms-of-use">Terms of use</a></li>
+              <li><a href="/disclaimer">Disclaimer</a></li>
+              <li><a href="https://opensource.org/licenses/MIT">License (MIT)</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="nv-foot-bottom">
+          <span>© 2026 Nav0 · Released under the MIT License</span>
+          <span>Nav · Nought · Nothing more</span>
+        </div>
+      </div>
+    </footer>
   </div>
 </template>
 
@@ -362,24 +409,27 @@ const featuredPosts = computed(() => posts.slice(0, 5));
 
 <style scoped>
 .nv-home {
-  --nv-bg: var(--vp-c-bg);
-  --nv-bg-muted: var(--vp-c-bg-soft);
-  --nv-bg-soft: var(--vp-c-bg-elv);
-  --nv-bg-card: var(--vp-c-bg);
-  --nv-ink: var(--vp-c-text-1);
-  --nv-ink-2: var(--vp-c-text-2);
-  --nv-ink-3: var(--vp-c-text-3);
-  --nv-ink-4: var(--vp-c-text-3);
-  --nv-rule: var(--vp-c-divider);
-  --nv-rule-soft: var(--vp-c-divider);
+  --nv-bg: #ffffff;
+  --nv-bg-muted: #f5f5f7;
+  --nv-bg-soft: #fafafa;
+  --nv-bg-card: #ffffff;
+  --nv-ink: #1d1d1f;
+  --nv-ink-2: #424245;
+  --nv-ink-3: #6e6e73;
+  --nv-ink-4: #86868b;
+  --nv-rule: #d2d2d7;
+  --nv-rule-soft: #e8e8ed;
   --nv-accent: #0071e3;
   --nv-accent-hover: #0077ed;
   --nv-accent-soft: rgba(0, 113, 227, 0.08);
   --nv-good: #1f8b4c;
   --nv-bad: #c43c3c;
-  --nv-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.04);
-  --nv-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06), 0 24px 48px -12px rgba(0, 0, 0, 0.1);
-  --nv-shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.08), 0 40px 80px -16px rgba(0, 0, 0, 0.18);
+  --nv-shadow-sm:
+    0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.04);
+  --nv-shadow-md:
+    0 4px 16px rgba(0, 0, 0, 0.06), 0 24px 48px -12px rgba(0, 0, 0, 0.1);
+  --nv-shadow-lg:
+    0 12px 24px rgba(0, 0, 0, 0.08), 0 40px 80px -16px rgba(0, 0, 0, 0.18);
   --nv-sans:
     'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Helvetica,
     Arial, sans-serif;
@@ -390,16 +440,32 @@ const featuredPosts = computed(() => posts.slice(0, 5));
   line-height: 1.47;
   letter-spacing: -0.003em;
   color: var(--nv-ink);
+  background: var(--nv-bg);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 :global(html.dark) .nv-home {
+  --nv-bg: #000000;
+  --nv-bg-muted: #0b0b0d;
+  --nv-bg-soft: #08080a;
+  --nv-bg-card: #111114;
+  --nv-ink: #f5f5f7;
+  --nv-ink-2: #d2d2d7;
+  --nv-ink-3: #a1a1a6;
+  --nv-ink-4: #6e6e73;
+  --nv-rule: #2a2a2e;
+  --nv-rule-soft: #1a1a1d;
   --nv-accent: #2997ff;
   --nv-accent-hover: #4ea7ff;
   --nv-accent-soft: rgba(41, 151, 255, 0.12);
-  --nv-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
-  --nv-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4), 0 24px 48px -12px rgba(0, 0, 0, 0.6);
-  --nv-shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.5), 0 40px 80px -16px rgba(0, 0, 0, 0.7);
+  --nv-shadow-sm:
+    0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --nv-shadow-md:
+    0 4px 16px rgba(0, 0, 0, 0.4), 0 24px 48px -12px rgba(0, 0, 0, 0.6);
+  --nv-shadow-lg:
+    0 12px 24px rgba(0, 0, 0, 0.5), 0 40px 80px -16px rgba(0, 0, 0, 0.7);
 }
 
 .nv-home :deep(*) {
@@ -794,6 +860,7 @@ const featuredPosts = computed(() => posts.slice(0, 5));
   color: transparent;
   border-top: none;
   padding-top: 0;
+  white-space: nowrap;
 }
 .nv-perf-card.warm .nv-perf-stat {
   background: linear-gradient(135deg, #ff8c20 0%, #ff5e7a 100%);
@@ -1109,6 +1176,86 @@ const featuredPosts = computed(() => posts.slice(0, 5));
   background: rgba(255, 255, 255, 0.12);
 }
 
+/* ====== FOOTER ====== */
+.nv-foot {
+  padding: 56px 0 32px;
+  background: var(--nv-bg);
+  border-top: 1px solid var(--nv-rule-soft);
+}
+.nv-foot-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+.nv-foot h4 {
+  font-family: var(--nv-sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--nv-ink);
+  margin: 0 0 18px;
+  letter-spacing: -0.005em;
+  border-top: none;
+  padding-top: 0;
+}
+.nv-foot ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.nv-foot li {
+  padding: 6px 0;
+  font-size: 13px;
+}
+.nv-foot li a {
+  text-decoration: none;
+  color: var(--nv-ink-3);
+  transition: color 120ms;
+}
+.nv-foot li a:hover {
+  color: var(--nv-ink);
+}
+.nv-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  color: var(--nv-ink);
+}
+.nv-brand-mark {
+  width: 24px;
+  height: 24px;
+  background-image: url('/logo.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  display: inline-block;
+}
+.nv-foot-tag {
+  font-family: var(--nv-sans);
+  font-size: 13px;
+  color: var(--nv-ink-3);
+  line-height: 1.5;
+  margin: 14px 0 0;
+  max-width: 32ch;
+  letter-spacing: -0.005em;
+}
+.nv-foot-bottom {
+  border-top: 1px solid var(--nv-rule-soft);
+  margin-top: 48px;
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--nv-sans);
+  font-size: 12px;
+  color: var(--nv-ink-3);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
 @media (max-width: 960px) {
   .nv-pillars {
     grid-template-columns: 1fr 1fr;
@@ -1128,6 +1275,9 @@ const featuredPosts = computed(() => posts.slice(0, 5));
   .nv-definition-card {
     position: static;
   }
+  .nv-foot-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 640px) {
@@ -1135,7 +1285,8 @@ const featuredPosts = computed(() => posts.slice(0, 5));
   .nv-perf-hero,
   .nv-manifesto-grid,
   .nv-hero-meta,
-  .nv-blog-grid {
+  .nv-blog-grid,
+  .nv-foot-grid {
     grid-template-columns: 1fr;
   }
   .nv-post.feat {
