@@ -1300,17 +1300,28 @@ html:not(.dark) .nav0-guide .vp-doc div[class*='language-'] code span {
 }
 
 /* Drop the horizontal rule VitePress draws between groups; design uses margin only.
-   VitePress wraps each top-level group in <div class="group">, so .group + .group
-   is the selector that actually matches (not VPSidebarGroup, which doesn't exist). */
+   VitePress emits each top-level group as <div class="group">, but the divider rule
+   ships from a scoped <style> block (extra attr-selector specificity), so we use
+   !important and cast a wide net to catch it regardless of the exact selector. */
 .nav0-guide .VPSidebar .group + .group,
-.nav0-guide .VPSidebar .VPSidebarItem.level-0 + .VPSidebarItem.level-0 {
-  border-top: none;
-  padding-top: 0;
-  margin-top: 28px;
+.nav0-guide .VPSidebar nav.nav > * + *,
+.nav0-guide .VPSidebar .VPSidebarItem.level-0 + .VPSidebarItem.level-0,
+.nav0-guide .VPSidebar .VPSidebarGroup + .VPSidebarGroup {
+  border-top: 0 !important;
+  border-top-color: transparent !important;
+  padding-top: 0 !important;
+  margin-top: 28px !important;
 }
 
-.nav0-guide .VPSidebar div[role='separator'] {
-  display: none;
+.nav0-guide .VPSidebar div[role='separator'],
+.nav0-guide .VPSidebar hr {
+  display: none !important;
+}
+
+/* Also strip top borders that VitePress sometimes puts on the inner .item */
+.nav0-guide .VPSidebar .VPSidebarItem.level-0 + .VPSidebarItem.level-0 > .item {
+  border-top: 0 !important;
+  padding-top: 0 !important;
 }
 
 .nav0-guide .VPSidebarItem.level-0 > .item > .text {
@@ -1320,19 +1331,35 @@ html:not(.dark) .nav0-guide .vp-doc div[class*='language-'] code span {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+/* Tighten leaf-link spacing — force line-height + margin so VitePress's 24px
+   default doesn't keep rows at ~38px. Design rows are ~32px (13px font · 1.4
+   line-height + 7px×2 padding). */
+.nav0-guide .VPSidebarItem.is-link {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.nav0-guide .VPSidebarItem.is-link > .item {
+  padding: 0 !important;
 }
 
 .nav0-guide .VPSidebarItem.is-link > .item .link {
+  display: block;
   color: var(--vp-c-text-2);
   border-radius: 8px;
-  padding: 7px 10px;
-  line-height: 1.4;
+  padding: 7px 10px !important;
+  line-height: 1.4 !important;
+  margin: 0 !important;
   transition: background 120ms, color 120ms;
 }
 
 .nav0-guide .VPSidebarItem.is-link > .item .link .text {
-  line-height: 1.4;
-  font-size: 13px;
+  line-height: 1.4 !important;
+  font-size: 13px !important;
+  padding: 0 !important;
 }
 
 .nav0-guide .VPSidebarItem.is-link > .item .link:hover {
