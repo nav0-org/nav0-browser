@@ -997,6 +997,188 @@ a.blog-card:hover {
   display: inline-block;
 }
 
+/* ============================================================
+   Left meta rail (rendered by <BlogPostMetaRail /> via doc-before)
+
+   The rail is rendered inside .content-container as a sibling of
+   <main class="main">. We turn .content-container into a 2-column
+   grid so the rail sits to the left of the prose, and we widen the
+   container so 220px (rail) + 56px (gap) + 660px (prose) all fit.
+   On screens too narrow for both, the rail collapses above the prose.
+   ============================================================ */
+
+.blog-post-page .VPDoc.has-aside .content-container {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 660px);
+  column-gap: 56px;
+  max-width: 936px !important;
+  margin: 0 auto !important;
+  align-items: start;
+}
+
+/* Place every default child of .content-container in the prose column */
+.blog-post-page .VPDoc.has-aside .content-container > * {
+  grid-column: 2;
+  min-width: 0;
+}
+
+/* Override the rail back to column 1 and make it sticky */
+.blog-post-page .bp-meta-rail {
+  grid-column: 1;
+  grid-row: 1;
+  position: sticky;
+  top: calc(var(--vp-nav-height, 64px) + 24px);
+  font-size: 13px;
+  align-self: start;
+}
+
+.bp-meta-card {
+  background: var(--blog-bg-card);
+  border: 1px solid var(--blog-rule-soft);
+  border-radius: 14px;
+  padding: 4px 18px;
+  margin-bottom: 24px;
+  box-shadow: var(--blog-shadow-sm);
+}
+
+.bp-meta-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  font-size: 13px;
+  border-bottom: 1px solid var(--blog-rule-soft);
+}
+
+.bp-meta-row:last-child {
+  border-bottom: none;
+}
+
+.bp-meta-k {
+  color: var(--blog-ink-3);
+}
+
+.bp-meta-v {
+  color: var(--blog-ink);
+  font-weight: 500;
+  text-align: right;
+}
+
+.bp-meta-section {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--blog-ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 12px;
+}
+
+.bp-share-btn {
+  width: 100%;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--blog-rule-soft);
+  background: var(--blog-bg-card);
+  color: var(--blog-ink-2);
+  font-family: var(--vp-font-family-base);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  transition:
+    background 120ms,
+    color 120ms,
+    border-color 120ms;
+}
+
+.bp-share-btn:hover {
+  background: var(--blog-bg-muted);
+  color: var(--blog-ink);
+  border-color: var(--blog-rule);
+}
+
+/* Below 1200px, drop the side rail and let the prose center on its own */
+@media (max-width: 1199px) {
+  .blog-post-page .VPDoc.has-aside .content-container {
+    display: block;
+    max-width: 688px !important;
+  }
+  .blog-post-page .bp-meta-rail {
+    position: static;
+    width: 100%;
+    margin-bottom: 24px;
+  }
+}
+
+/* ============================================================
+   Right TOC — restyle VitePress's VPDocAsideOutline to match the
+   design's "On this page" rail (per-link border-left, blue active
+   state, no moving marker).
+   ============================================================ */
+
+.blog-post-page .VPDocAsideOutline {
+  font-size: 13px;
+}
+
+.blog-post-page .VPDocAsideOutline .outline-marker {
+  display: none;
+}
+
+.blog-post-page .VPDocAsideOutline .outline-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--blog-ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 12px;
+}
+
+.blog-post-page .VPDocAsideOutline .content {
+  /* VitePress puts the outline content in a positioned wrapper that
+     hosts the marker; we don't need that since we styled per-link. */
+  position: static;
+  border-left: none;
+  padding-left: 0;
+}
+
+.blog-post-page .VPDocOutlineItem {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.blog-post-page .VPDocOutlineItem.nested {
+  padding-left: 12px;
+}
+
+.blog-post-page .VPDocOutlineItem li {
+  margin: 4px 0;
+}
+
+.blog-post-page .VPDocOutlineItem .outline-link {
+  display: block;
+  padding: 5px 12px;
+  border-left: 2px solid var(--blog-rule-soft);
+  color: var(--blog-ink-3);
+  text-decoration: none;
+  line-height: 1.4;
+  font-size: 13px;
+  font-weight: 400;
+  transition:
+    color 120ms,
+    border-color 120ms;
+}
+
+.blog-post-page .VPDocOutlineItem .outline-link:hover {
+  color: var(--blog-ink);
+}
+
+.blog-post-page .VPDocOutlineItem .outline-link.active {
+  color: var(--blog-accent);
+  border-left-color: var(--blog-accent);
+  font-weight: 500;
+}
+
 /* Hide the markdown-authored title and byline since the hero owns them */
 .blog-post-page .vp-doc > h1:first-child,
 .blog-post-page .vp-doc > p:first-of-type {

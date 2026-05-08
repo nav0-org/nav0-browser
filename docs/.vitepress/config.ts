@@ -303,8 +303,9 @@ export default defineConfig({
       pageData.frontmatter.pageClass = 'blog-list-page';
     } else if (pageData.relativePath.startsWith('blog/')) {
       pageData.frontmatter.pageClass = 'blog-post-page';
+      // Drop the all-posts left sidebar (the design uses the meta rail instead)
+      // but keep the aside on so VitePress renders the right TOC + scrollspy.
       pageData.frontmatter.sidebar = false;
-      pageData.frontmatter.aside = false;
     }
 
     // Inject SoftwareApplication schema only on relevant pages

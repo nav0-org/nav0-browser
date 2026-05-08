@@ -22,6 +22,13 @@ function shortReadTime(content: string): string {
   return `${minutes} min`;
 }
 
+function approxWordCount(content: string): string {
+  const words = content.trim().split(/\s+/).length;
+  // Round to nearest 100 for the "~2,400 words" feel.
+  const rounded = Math.max(100, Math.round(words / 100) * 100);
+  return `~${rounded.toLocaleString()} words`;
+}
+
 function formatDate(date: string | Date): string {
   return new Date(date).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -129,6 +136,7 @@ export interface BlogPost {
   category: string;
   readTime: string;
   shortReadTime: string;
+  wordCount: string;
   author: string;
   artGradient: string;
   artGlyph: string;
@@ -158,6 +166,7 @@ export default createContentLoader('blog/*.md', {
           category: pickCategory(tags),
           readTime: calculateReadTime(page.src || ''),
           shortReadTime: shortReadTime(page.src || ''),
+          wordCount: approxWordCount(page.src || ''),
           author: page.frontmatter.author || 'Nav0 Team',
           artGradient: art.gradient,
           artGlyph: art.glyph,

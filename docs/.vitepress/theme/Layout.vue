@@ -3,6 +3,7 @@ import DefaultTheme from 'vitepress/theme';
 import { useData } from 'vitepress';
 import { computed } from 'vue';
 import BlogPostHero from './components/BlogPostHero.vue';
+import BlogPostMetaRail from './components/BlogPostMetaRail.vue';
 
 const { Layout } = DefaultTheme;
 const { page } = useData();
@@ -19,6 +20,9 @@ const isBlogPost = computed(
     <Layout>
       <template #doc-top>
         <BlogPostHero v-if="isBlogPost" />
+      </template>
+      <template #doc-before>
+        <BlogPostMetaRail v-if="isBlogPost" />
       </template>
     </Layout>
   </div>
