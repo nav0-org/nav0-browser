@@ -299,6 +299,12 @@ export default defineConfig({
       ['meta', { property: 'og:url', content: canonicalUrl }]
     );
 
+    if (pageData.relativePath === 'releases/index.md') {
+      pageData.frontmatter.pageClass = 'releases-index-page';
+    } else if (pageData.relativePath.startsWith('releases/')) {
+      pageData.frontmatter.pageClass = 'release-detail-page';
+    }
+
     // Inject SoftwareApplication schema only on relevant pages
     const softwareAppPages = ['index.md', 'install.md', 'guide/features.md'];
     if (softwareAppPages.includes(pageData.relativePath)) {

@@ -5,6 +5,8 @@ import FeatureCapsules from './components/FeatureCapsules.vue';
 import BlogList from './components/BlogList.vue';
 import HomeContent from './components/HomeContent.vue';
 import DownloadsPage from './components/DownloadsPage.vue';
+import ReleasesStats from './components/ReleasesStats.vue';
+import ReleasesLatestHero from './components/ReleasesLatestHero.vue';
 import './custom.css';
 
 export default {
@@ -15,5 +17,7 @@ export default {
     app.component('BlogList', BlogList);
     app.component('HomeContent', HomeContent);
     app.component('DownloadsPage', DownloadsPage);
+    app.component('ReleasesStats', ReleasesStats);
+    app.component('ReleasesLatestHero', ReleasesLatestHero);
   },
 } satisfies Theme;

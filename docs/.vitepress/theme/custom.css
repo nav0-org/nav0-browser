@@ -346,32 +346,338 @@ a.blog-card:hover {
 }
 
 /* ========== Release List Page (Redesigned) ========== */
-/* Page-level treatment for the release index page, scoped via :has() */
-.vp-doc:has(.release-list-item) > div > h1 {
-  font-family: var(--vp-font-family-base);
-  font-size: clamp(2.25rem, 5vw, 3.75rem);
-  font-weight: 700;
-  letter-spacing: -0.035em;
-  line-height: 1.05;
-  margin: 0.5rem 0 1rem;
-  border-top: none;
-  padding-top: 0;
-  text-align: center;
+/* Page header: eyebrow + gradient title + sub */
+.releases-index-page .vp-doc {
+  --release-content-max: 880px;
 }
 
-.vp-doc:has(.release-list-item) > div > p:first-of-type {
+.releases-page-head {
   text-align: center;
-  font-size: 1.2rem;
+  padding: 1.5rem 0 2.5rem;
+  max-width: var(--release-content-max, 880px);
+  margin: 0 auto;
+}
+
+.releases-page-head .releases-eyebrow {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--vp-c-brand-1);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.releases-page-head h1 {
+  font-family: var(--vp-font-family-base);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  margin: 0 auto 1rem;
+  border-top: none;
+  padding-top: 0;
+  max-width: 18ch;
+  color: var(--vp-c-text-1);
+}
+
+.releases-page-head h1 em {
+  font-style: normal;
+  background: linear-gradient(
+    120deg,
+    var(--vp-c-brand-1) 0%,
+    #a855f7 35%,
+    #ec4899 70%,
+    #f97316 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.releases-page-head .releases-page-sub {
+  font-size: 1.15rem;
   color: var(--vp-c-text-2);
   max-width: 56ch;
-  margin: 0 auto 2.75rem;
-  line-height: 1.4;
+  margin: 0 auto;
+  line-height: 1.45;
   letter-spacing: -0.012em;
   font-weight: 400;
 }
 
-.vp-doc:has(.release-list-item) > div > hr {
+.releases-index-page .vp-doc > div > hr {
   display: none;
+}
+
+/* Stats strip */
+.rel-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin: 0 auto 3rem;
+  max-width: var(--release-content-max, 880px);
+}
+
+.rel-stat {
+  background: var(--vp-c-bg-elv, var(--vp-c-bg));
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 18px;
+  padding: 1.25rem 1.5rem;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.03),
+    0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.rel-stat-key {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--vp-c-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.5rem;
+}
+
+.rel-stat-value {
+  font-family: var(--vp-font-family-mono);
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  color: var(--vp-c-text-1);
+}
+
+.rel-stat-value.rel-stat-accent {
+  background: linear-gradient(135deg, var(--vp-c-brand-1) 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.rel-stat-sub {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.78rem;
+  color: var(--vp-c-text-3);
+  margin-top: 0.4rem;
+}
+
+/* Latest hero — dark gradient panel */
+.rel-latest-hero {
+  background: linear-gradient(160deg, #060607 0%, #1a1a1f 100%);
+  color: #f5f5f7;
+  border-radius: 24px;
+  padding: 2.5rem;
+  margin: 0 auto 2.5rem;
+  position: relative;
+  overflow: hidden;
+  max-width: var(--release-content-max, 880px);
+}
+
+.rel-latest-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 500px 300px at 80% 0%, rgba(82, 39, 219, 0.28) 0%, transparent 60%),
+    radial-gradient(ellipse 500px 300px at 0% 100%, rgba(180, 71, 217, 0.2) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.rel-latest-hero-inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.rel-latest-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #d2d2d7;
+  letter-spacing: 0.02em;
+  margin-bottom: 1.1rem;
+}
+
+.rel-latest-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #1f8b4c;
+  box-shadow: 0 0 0 0 rgba(31, 139, 76, 0.5);
+  animation: rel-latest-pulse 2s infinite;
+}
+
+@keyframes rel-latest-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(31, 139, 76, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 0 8px rgba(31, 139, 76, 0);
+  }
+}
+
+.rel-latest-version {
+  font-family: var(--vp-font-family-base);
+  font-size: clamp(3rem, 7vw, 5rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin: 0 0 0.85rem;
+  background: linear-gradient(180deg, #ffffff 0%, #b3b7c3 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.rel-latest-headline {
+  font-size: 1.2rem;
+  color: #d2d2d7;
+  line-height: 1.4;
+  margin: 0 0 1.5rem;
+  letter-spacing: -0.012em;
+}
+
+.rel-latest-cta-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.rel-latest-cta-primary,
+.rel-latest-cta-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 1.1rem;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  text-decoration: none;
+  letter-spacing: -0.005em;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.rel-latest-cta-primary {
+  background: #fff;
+  color: #060607;
+}
+
+.rel-latest-cta-primary:hover {
+  background: #e5e5e7;
+  text-decoration: none;
+}
+
+.rel-latest-cta-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f5f5f7;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.rel-latest-cta-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  text-decoration: none;
+}
+
+.rel-latest-hero-summary {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 1.25rem 1.4rem;
+  backdrop-filter: blur(20px);
+}
+
+.rel-latest-hero-summary h4 {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #a1a1a6;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0 0 0.85rem;
+  border-top: none;
+  padding-top: 0;
+}
+
+.rel-latest-hero-summary ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.88rem;
+  color: #d2d2d7;
+}
+
+.rel-latest-hero-summary li {
+  padding: 0.3rem 0 0.3rem 1.4rem;
+  line-height: 1.4;
+  position: relative;
+  letter-spacing: -0.005em;
+}
+
+.rel-latest-hero-summary li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  top: 0.32rem;
+  color: #4ea7ff;
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.85rem;
+}
+
+.rel-latest-hero-summary li code {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.05rem 0.35rem;
+  border-radius: 4px;
+  color: #f5f5f7;
+}
+
+/* Timeline — vertical line + dots running down the cards */
+.releases-timeline {
+  position: relative;
+  padding-left: 2rem;
+  max-width: var(--release-content-max, 880px);
+  margin: 0 auto;
+}
+
+.releases-timeline::before {
+  content: '';
+  position: absolute;
+  left: 0.5rem;
+  top: 1.75rem;
+  bottom: 1.75rem;
+  width: 2px;
+  background: linear-gradient(180deg, var(--vp-c-divider) 0%, transparent 100%);
+}
+
+.releases-timeline .release-list-item {
+  position: relative;
+}
+
+.releases-timeline .release-list-item::before {
+  content: '';
+  position: absolute;
+  left: -2rem;
+  top: 1.75rem;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--vp-c-bg);
+  border: 2px solid var(--vp-c-text-3);
+  box-sizing: border-box;
+  z-index: 1;
+}
+
+.releases-timeline .release-list-item:has(.release-badge.alpha)::before {
+  border-color: var(--vp-c-warning-1, #c46a00);
 }
 
 /* Release card — elevated surface, soft shadow, hover lift */
@@ -915,39 +1221,117 @@ a.blog-card:hover {
   background: var(--vp-c-warning-soft, rgba(196, 106, 0, 0.12));
 }
 
-/* Release detail header — scoped via :has(.release-date-meta) */
-.vp-doc:has(.release-date-meta) > div > h1 {
+/* Detail page hero — dark gradient card around version, badge, date-meta */
+.release-detail-page .vp-doc > div {
+  position: relative;
+}
+
+.release-detail-page .vp-doc > div::before {
+  content: '';
+  position: absolute;
+  top: -2.5rem;
+  left: -2rem;
+  right: -2rem;
+  height: 18rem;
+  background:
+    radial-gradient(ellipse 500px 280px at 85% 20%, rgba(82, 39, 219, 0.22) 0%, transparent 60%),
+    radial-gradient(ellipse 400px 240px at 5% 100%, rgba(180, 71, 217, 0.18) 0%, transparent 60%),
+    linear-gradient(160deg, #060607 0%, #1a1a1f 100%);
+  border-radius: 24px;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.release-detail-page .vp-doc > div > * {
+  position: relative;
+  z-index: 1;
+}
+
+.release-detail-page .vp-doc > div > h1 {
   font-family: var(--vp-font-family-mono);
   font-size: clamp(2.5rem, 6vw, 4.25rem);
   font-weight: 700;
   letter-spacing: -0.045em;
   line-height: 0.95;
-  margin: 1rem 0 1rem;
+  margin: 1.5rem 0 1.25rem;
   border-top: none;
   padding-top: 0;
-  background: linear-gradient(180deg, var(--vp-c-text-1) 0%, var(--vp-c-text-2) 95%);
+  background: linear-gradient(180deg, #ffffff 0%, #b3b7c3 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
-.vp-doc:has(.release-date-meta) > div > h1 .header-anchor {
-  -webkit-text-fill-color: var(--vp-c-text-3);
+.release-detail-page .vp-doc > div > h1 .header-anchor {
+  -webkit-text-fill-color: rgba(255, 255, 255, 0.4);
   background: none;
 }
 
-/* Badge sits between version and date on detail pages */
-.vp-doc:has(.release-date-meta) > div > h1 + p {
+/* Status pill — light text on dark, with green pulse for latest */
+.release-detail-page .vp-doc > div > h1 + p {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
-.vp-doc:has(.release-date-meta) > div > h1 + p .release-badge {
+.release-detail-page .vp-doc > div > h1 + p .release-badge {
   font-size: 0.72rem;
-  padding: 0.28rem 0.8rem;
+  padding: 0.32rem 0.85rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #d2d2d7;
+  gap: 0.45rem;
 }
 
-/* Date meta — divider strip below the header */
+.release-detail-page .vp-doc > div > h1 + p .release-badge.latest::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #1f8b4c;
+  display: inline-block;
+  box-shadow: 0 0 0 0 rgba(31, 139, 76, 0.5);
+  animation: rel-detail-pulse 2s infinite;
+}
+
+.release-detail-page .vp-doc > div > h1 + p .release-badge.alpha {
+  color: #ffd478;
+  border-color: rgba(196, 106, 0, 0.4);
+  background: rgba(196, 106, 0, 0.18);
+}
+
+@keyframes rel-detail-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(31, 139, 76, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 0 6px rgba(31, 139, 76, 0);
+  }
+}
+
+/* Date meta on dark — light text, divider strip */
+.release-detail-page .release-date-meta {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.875rem;
+  color: #a1a1a6;
+  margin: 0.5rem 0 4rem;
+  padding-bottom: 1.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  letter-spacing: 0.01em;
+}
+
+/* Fallback for any release detail not getting the pageClass */
+.vp-doc:has(.release-date-meta):not(.release-detail-page .vp-doc) > div > h1 {
+  font-family: var(--vp-font-family-mono);
+  font-size: clamp(2.5rem, 6vw, 4.25rem);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 0.95;
+  margin: 1rem 0;
+  border-top: none;
+  padding-top: 0;
+  color: var(--vp-c-text-1);
+}
+
 .release-date-meta {
   font-family: var(--vp-font-family-mono);
   font-size: 0.875rem;
@@ -1114,6 +1498,47 @@ html.dark .release-badge.alpha {
 
   .vp-doc:has(.release-date-meta) > div > h1 {
     font-size: clamp(2.25rem, 9vw, 3rem);
+  }
+
+  .rel-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .rel-stats .rel-stat:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  .rel-latest-hero {
+    padding: 1.75rem 1.5rem;
+    border-radius: 18px;
+  }
+
+  .rel-latest-hero-inner {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .releases-timeline {
+    padding-left: 1.5rem;
+  }
+
+  .releases-timeline::before {
+    left: 0;
+  }
+
+  .releases-timeline .release-list-item::before {
+    left: -1.5rem;
+  }
+
+  .releases-page-head {
+    padding: 1rem 0 1.5rem;
+  }
+
+  .release-detail-page .vp-doc > div::before {
+    left: -1rem;
+    right: -1rem;
+    height: 16rem;
+    border-radius: 16px;
   }
 }
 
