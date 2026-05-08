@@ -301,8 +301,10 @@ export default defineConfig({
 
     if (pageData.relativePath === 'releases/index.md') {
       pageData.frontmatter.pageClass = 'releases-index-page';
+      pageData.frontmatter.layout = 'page';
     } else if (pageData.relativePath.startsWith('releases/')) {
       pageData.frontmatter.pageClass = 'release-detail-page';
+      pageData.frontmatter.layout = 'page';
     }
 
     // Inject SoftwareApplication schema only on relevant pages
