@@ -873,18 +873,26 @@ a.blog-card:hover {
    Blog Post Detail Page
    ============================================================ */
 
-/* Hero (rendered by <BlogPostHero /> via Layout #doc-before slot).
-   The negative horizontal margins break out of .content-container (688px) so
-   the hero's gradient backdrop fills the available column width. */
+/* Hero (rendered by <BlogPostHero /> via Layout #doc-top slot — sits at the
+   top of .VPDoc, OUTSIDE .container, so it stretches the full content column
+   instead of being clipped by .content-container's 688px cap. The negative
+   margins absorb VPDoc's padding (32px 24px on small, 48px 32px on >=768px)
+   so the gradient backdrop bleeds to the column edges. */
 .bp-hero {
   position: relative;
   background:
     radial-gradient(ellipse 900px 500px at 50% -80px, var(--blog-accent-soft) 0%, transparent 60%),
     var(--blog-bg);
   border-bottom: 1px solid var(--blog-rule-soft);
-  padding: 48px 32px 40px;
-  margin: -32px -32px 48px;
-  border-radius: 0;
+  margin: -32px -24px 40px;
+  padding: 32px 24px 32px;
+}
+
+@media (min-width: 768px) {
+  .bp-hero {
+    margin: -48px -32px 56px;
+    padding: 48px 32px 40px;
+  }
 }
 
 .bp-hero-inner {

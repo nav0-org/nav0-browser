@@ -17,8 +17,8 @@ const isBlogPost = computed(
     <div class="nav0-bg-pattern"></div>
     <div class="nav0-bg-vignette"></div>
     <Layout>
-      <template v-if="isBlogPost" #doc-before>
-        <BlogPostHero />
+      <template #doc-top>
+        <BlogPostHero v-if="isBlogPost" />
       </template>
     </Layout>
   </div>
