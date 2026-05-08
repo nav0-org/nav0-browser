@@ -303,6 +303,8 @@ export default defineConfig({
       pageData.frontmatter.pageClass = 'blog-list-page';
     } else if (pageData.relativePath.startsWith('blog/')) {
       pageData.frontmatter.pageClass = 'blog-post-page';
+      pageData.frontmatter.sidebar = false;
+      pageData.frontmatter.aside = false;
     }
 
     // Inject SoftwareApplication schema only on relevant pages
