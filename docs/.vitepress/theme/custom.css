@@ -310,7 +310,18 @@ a.blog-card:hover {
 
 /* Apple-style design tokens scoped to blog pages */
 .blog-list-page,
-.blog-post-page {
+.blog-post-page,
+.bl-page,
+.bp-hero {
+  --blog-bg: var(--vp-c-bg);
+  --blog-bg-card: var(--vp-c-bg);
+  --blog-bg-muted: var(--vp-c-bg-soft);
+  --blog-ink: var(--vp-c-text-1);
+  --blog-ink-2: var(--vp-c-text-2);
+  --blog-ink-3: var(--vp-c-text-3);
+  --blog-ink-4: var(--vp-c-text-3);
+  --blog-rule: var(--vp-c-divider);
+  --blog-rule-soft: var(--vp-c-divider);
   --blog-accent: #0071e3;
   --blog-accent-hover: #0077ed;
   --blog-accent-soft: rgba(0, 113, 227, 0.08);
@@ -319,10 +330,13 @@ a.blog-card:hover {
   --blog-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06), 0 24px 48px -12px rgba(0, 0, 0, 0.1);
   --blog-shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.08), 0 40px 80px -16px rgba(0, 0, 0, 0.18);
   --blog-serif: 'Iowan Old Style', 'Charter', 'Source Serif Pro', Georgia, 'Times New Roman', serif;
+  --blog-mono: var(--vp-font-family-mono);
 }
 
 .dark .blog-list-page,
-.dark .blog-post-page {
+.dark .blog-post-page,
+.dark .bl-page,
+.dark .bp-hero {
   --blog-accent: #2997ff;
   --blog-accent-hover: #4ea7ff;
   --blog-accent-soft: rgba(41, 151, 255, 0.12);
@@ -331,170 +345,605 @@ a.blog-card:hover {
   --blog-shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.5), 0 40px 80px -16px rgba(0, 0, 0, 0.7);
 }
 
-/* ========== Blog List Page ========== */
-
-/* Page hero — eyebrow + larger title + subtitle */
-.blog-list-page .vp-doc > h1:first-child {
-  font-size: clamp(2.5rem, 6vw, 4.25rem);
-  font-weight: 700;
-  letter-spacing: -0.035em;
-  line-height: 1.05;
-  text-align: center;
-  margin: 1.5rem auto 1.125rem;
-  max-width: 18ch;
-  border-top: none;
-  padding-top: 0;
+/* The blog list and blog post layouts pull users into the design's clean
+   white aesthetic — disable the global trade-winds backdrop on these pages. */
+.nav0-bg:has(.bl-page) .nav0-bg-pattern,
+.nav0-bg:has(.bl-page) .nav0-bg-vignette,
+.nav0-bg:has(.blog-post-page) .nav0-bg-pattern,
+.nav0-bg:has(.blog-post-page) .nav0-bg-vignette {
+  display: none;
 }
 
-.blog-list-page .vp-doc > h1:first-child::before {
-  content: 'Writing';
-  display: block;
-  font-size: 0.8125rem;
+/* ============================================================
+   Blog List Page (rendered by <BlogListPage />)
+   ============================================================ */
+
+.bl-page {
+  font-family: var(--vp-font-family-base);
+  color: var(--blog-ink);
+}
+
+/* PAGE HEAD */
+.bl-page-head {
+  text-align: center;
+  padding: 96px 24px 64px;
+  border-bottom: 1px solid var(--blog-rule-soft);
+  background:
+    radial-gradient(ellipse 800px 400px at 50% -50px, var(--blog-accent-soft) 0%, transparent 65%),
+    var(--blog-bg);
+}
+
+.bl-page-eyebrow {
+  font-size: 13px;
   font-weight: 600;
   color: var(--blog-accent);
-  margin-bottom: 0.875rem;
+  margin-bottom: 14px;
   letter-spacing: -0.005em;
-  text-transform: none;
 }
 
-.blog-list-page .vp-doc > h1 + p {
-  text-align: center;
-  font-size: 1.3125rem;
-  color: var(--vp-c-text-2);
+.bl-page-title {
+  font-family: var(--vp-font-family-base);
+  font-weight: 700;
+  font-size: clamp(40px, 6vw, 72px);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  margin: 0 auto 18px;
+  max-width: 18ch;
+  color: var(--blog-ink);
+}
+
+.bl-page-title em {
+  font-style: normal;
+  background: var(--blog-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.bl-page-sub {
+  font-size: 21px;
+  color: var(--blog-ink-2);
   max-width: 56ch;
-  margin: 0 auto 2.75rem;
+  margin: 0 auto;
   line-height: 1.4;
   letter-spacing: -0.012em;
   font-weight: 400;
 }
 
-.blog-list-page .vp-doc > hr:first-of-type {
-  display: none;
+/* SHELL */
+.bl-shell {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 56px 32px 96px;
 }
 
-/* Post cards — vertical stack with featured-style first item */
-.blog-post-item {
-  background: var(--vp-c-bg);
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 22px;
-  padding: 1.5rem 1.75rem;
-  margin: 0 0 1rem;
-  box-shadow: var(--blog-shadow-sm);
+/* FILTERS */
+.bl-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 48px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--blog-rule-soft);
+}
+
+.bl-filter-label {
+  font-size: 12px;
+  color: var(--blog-ink-3);
+  margin-right: 8px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.bl-chip {
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--blog-ink-2);
+  background: var(--blog-bg-card);
+  border: 1px solid var(--blog-rule-soft);
+  border-radius: 999px;
+  cursor: pointer;
   transition:
-    transform 220ms ease,
-    box-shadow 220ms ease,
-    border-color 220ms ease;
-}
-
-.blog-post-item:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--blog-shadow-md);
-  border-color: color-mix(in oklab, var(--blog-accent) 25%, var(--vp-c-divider));
-}
-
-.blog-post-item a {
-  text-decoration: none;
-  color: inherit;
-}
-
-.blog-post-item h2 {
-  font-size: 1.4rem;
-  font-weight: 600;
-  margin-bottom: 0.625rem;
-  letter-spacing: -0.022em;
-  line-height: 1.2;
-  border-top: none;
-  padding-top: 0;
-}
-
-.blog-post-item h2:hover {
-  color: var(--blog-accent);
-}
-
-.blog-post-item .post-meta {
-  font-size: 0.8125rem;
-  color: var(--vp-c-text-3);
-  margin-bottom: 0.625rem;
-  font-feature-settings: 'tnum';
-}
-
-.blog-post-item .post-excerpt {
-  color: var(--vp-c-text-2);
-  font-size: 0.9375rem;
-  line-height: 1.55;
+    background 120ms,
+    color 120ms,
+    border-color 120ms;
+  font-family: var(--vp-font-family-base);
   letter-spacing: -0.005em;
-  margin-bottom: 0;
-}
-
-/* Featured: first post in the list gets a larger, eyebrow-marked treatment */
-.blog-list-page .blog-post-item:first-of-type {
-  border-radius: 24px;
-  padding: 2.25rem;
-  box-shadow: var(--blog-shadow-md);
-  margin-bottom: 2rem;
-  background: linear-gradient(
-    135deg,
-    color-mix(in oklab, var(--blog-accent-soft) 60%, var(--vp-c-bg)) 0%,
-    var(--vp-c-bg) 60%
-  );
-}
-
-.blog-list-page .blog-post-item:first-of-type::before {
-  content: '★ Featured';
   display: inline-flex;
   align-items: center;
-  font-size: 0.72rem;
+  gap: 4px;
+}
+
+.bl-chip:hover {
+  background: var(--blog-bg-muted);
+}
+
+.bl-chip.is-active {
+  background: var(--blog-ink);
+  color: var(--blog-bg);
+  border-color: var(--blog-ink);
+}
+
+.bl-chip-count {
+  font-size: 11px;
+  color: var(--blog-ink-3);
+  font-family: var(--blog-mono);
+}
+
+.bl-chip.is-active .bl-chip-count {
+  color: var(--blog-ink-3);
+}
+
+.bl-search {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--blog-bg-card);
+  border: 1px solid var(--blog-rule-soft);
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--blog-ink-3);
+}
+
+.bl-kbd {
+  font-family: var(--blog-mono);
+  font-size: 11px;
+  background: var(--blog-bg-muted);
+  border: 1px solid var(--blog-rule-soft);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* FEATURED POST */
+.bl-featured {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 0;
+  background: var(--blog-bg-card);
+  border: 1px solid var(--blog-rule-soft);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: var(--blog-shadow-md);
+  margin-bottom: 64px;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    box-shadow 240ms,
+    transform 240ms;
+}
+
+.bl-featured:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--blog-shadow-lg);
+}
+
+.bl-featured-art {
+  min-height: 360px;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.bl-featured-art::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 400px 200px at 30% 30%, rgba(255, 255, 255, 0.25) 0%, transparent 60%),
+    radial-gradient(ellipse 300px 200px at 70% 80%, rgba(0, 0, 0, 0.18) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.bl-featured-marks {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  padding: 32px;
+  width: 100%;
+  max-width: 460px;
+}
+
+.bl-indie-mark {
+  aspect-ratio: 1;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.18);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  display: grid;
+  place-items: center;
+  font-family: var(--vp-font-family-base);
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.03em;
+}
+
+.bl-indie-mark.is-us {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.bl-featured-glyph {
+  position: relative;
+  font-family: var(--vp-font-family-base);
+  font-size: 96px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1;
+}
+
+.bl-featured-body {
+  padding: 48px 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.bl-featured-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--blog-accent);
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  margin-bottom: 0.75rem;
+  margin-bottom: 16px;
 }
 
-.blog-list-page .blog-post-item:first-of-type h2 {
-  font-size: clamp(1.625rem, 2.8vw, 2.125rem);
+.bl-featured-eyebrow::before {
+  content: '★';
+  font-size: 13px;
+}
+
+.bl-featured h2 {
+  font-size: clamp(28px, 3.4vw, 40px);
   font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1.1;
-  margin-bottom: 0.875rem;
+  margin: 0 0 16px;
+  color: var(--blog-ink);
 }
 
-.blog-list-page .blog-post-item:first-of-type .post-excerpt {
-  font-size: 1rem;
+.bl-featured p {
+  font-size: 16px;
+  color: var(--blog-ink-2);
   line-height: 1.55;
+  margin: 0 0 24px;
+  letter-spacing: -0.005em;
+}
+
+.bl-featured-meta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--blog-ink-3);
+}
+
+.bl-tag {
+  background: var(--blog-accent-soft);
+  color: var(--blog-accent);
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.bl-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--blog-ink-4);
+  display: inline-block;
+}
+
+/* GRID */
+.bl-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 56px;
+}
+
+.bl-post-card {
+  background: var(--blog-bg-card);
+  border: 1px solid var(--blog-rule-soft);
+  border-radius: 22px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--blog-shadow-sm);
+  transition:
+    transform 220ms,
+    box-shadow 220ms;
+}
+
+.bl-post-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--blog-shadow-md);
+}
+
+.bl-post-art {
+  height: 140px;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 700;
+}
+
+.bl-post-art::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 280px 140px at 30% 30%, rgba(255, 255, 255, 0.22) 0%, transparent 60%),
+    radial-gradient(ellipse 200px 140px at 70% 80%, rgba(0, 0, 0, 0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.bl-post-glyph {
+  position: relative;
+  font-family: var(--vp-font-family-base);
+  font-size: 56px;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.bl-post-body {
+  padding: 22px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.bl-post-tag {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--blog-accent);
+  background: var(--blog-accent-soft);
+  padding: 3px 10px;
+  border-radius: 999px;
+  margin-bottom: 12px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.bl-post-card h3 {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  line-height: 1.2;
+  margin: 0 0 10px;
+  color: var(--blog-ink);
+}
+
+.bl-post-card p {
+  font-size: 14px;
+  color: var(--blog-ink-2);
+  line-height: 1.5;
+  margin: 0 0 18px;
+  letter-spacing: -0.005em;
+  flex: 1;
+}
+
+.bl-post-foot {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--blog-ink-3);
+  padding-top: 14px;
+  border-top: 1px solid var(--blog-rule-soft);
+}
+
+/* SUBSCRIBE */
+.bl-subscribe {
+  margin-top: 64px;
+  padding: 48px;
+  background: linear-gradient(135deg, var(--blog-bg-muted) 0%, var(--blog-bg) 100%);
+  border: 1px solid var(--blog-rule-soft);
+  border-radius: 24px;
+  text-align: center;
+}
+
+.bl-subscribe h3 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin: 0 0 8px;
+  color: var(--blog-ink);
+}
+
+.bl-subscribe > p {
+  font-size: 16px;
+  color: var(--blog-ink-2);
+  margin: 0 auto 24px;
+  max-width: 48ch;
+  letter-spacing: -0.005em;
+  line-height: 1.5;
+}
+
+.bl-subscribe-form {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.bl-subscribe-input {
+  flex: 1;
+  min-width: 220px;
+  padding: 0 18px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--blog-rule);
+  background: var(--blog-bg-card);
+  color: var(--blog-ink);
+  font-family: var(--vp-font-family-base);
+  font-size: 15px;
+  letter-spacing: -0.005em;
+}
+
+.bl-subscribe-input:focus {
+  outline: 2px solid var(--blog-accent);
+  outline-offset: 1px;
+}
+
+.bl-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 22px;
+  background: var(--blog-accent);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font-family: var(--vp-font-family-base);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.bl-btn-primary:hover {
+  background: var(--blog-accent-hover);
+}
+
+.bl-subscribe-note {
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--blog-ink-3);
+  font-family: var(--blog-mono);
+}
+
+@media (max-width: 980px) {
+  .bl-featured {
+    grid-template-columns: 1fr;
+  }
+  .bl-featured-art {
+    min-height: 220px;
+  }
+  .bl-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 640px) {
-  .blog-post-item,
-  .blog-list-page .blog-post-item:first-of-type {
-    padding: 1.25rem 1.25rem;
-    border-radius: 18px;
+  .bl-grid {
+    grid-template-columns: 1fr;
   }
-  .blog-list-page .vp-doc > h1:first-child {
-    font-size: 2rem;
+  .bl-shell {
+    padding: 32px 16px 64px;
   }
-  .blog-list-page .vp-doc > h1 + p {
-    font-size: 1.05rem;
-    margin-bottom: 1.75rem;
+  .bl-search {
+    display: none;
+  }
+  .bl-featured-body {
+    padding: 32px 24px;
+  }
+  .bl-page-head {
+    padding: 64px 16px 48px;
+  }
+  .bl-subscribe {
+    padding: 32px 20px;
   }
 }
 
-/* ========== Blog Post Detail Page ========== */
+/* ============================================================
+   Blog Post Detail Page
+   ============================================================ */
 
-/* Page-head treatment for the title — accent eyebrow above the headline */
-.blog-post-page .vp-doc h1 {
+/* Hero (rendered by <BlogPostHero /> via Layout #doc-before slot).
+   The negative horizontal margins break out of .content-container (688px) so
+   the hero's gradient backdrop fills the available column width. */
+.bp-hero {
+  position: relative;
+  background:
+    radial-gradient(ellipse 900px 500px at 50% -80px, var(--blog-accent-soft) 0%, transparent 60%),
+    var(--blog-bg);
+  border-bottom: 1px solid var(--blog-rule-soft);
+  padding: 48px 32px 40px;
+  margin: -32px -32px 48px;
+  border-radius: 0;
+}
+
+.bp-hero-inner {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.bp-breadcrumb {
+  font-size: 13px;
+  color: var(--blog-ink-3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.bp-breadcrumb a {
+  color: var(--blog-accent);
+  text-decoration: none;
+}
+
+.bp-breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.bp-sep {
+  color: var(--blog-ink-4);
+}
+
+.bp-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--blog-accent);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+.bp-eyebrow .bp-tag {
+  background: var(--blog-accent-soft);
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.bp-headline {
   font-family: 'Newsreader', var(--blog-serif);
   font-weight: 500;
-  font-size: clamp(2.25rem, 5.4vw, 3.75rem);
+  font-size: clamp(38px, 5.4vw, 64px);
   line-height: 1.05;
   letter-spacing: -0.02em;
-  margin: 1rem 0 1.25rem;
-  border-top: none;
-  padding-top: 0;
+  margin: 0 0 24px;
+  color: var(--blog-ink);
 }
 
-/* Allow markdown emphasis in the title to pick up the accent gradient */
-.blog-post-page .vp-doc h1 em {
+.bp-headline em {
   font-style: italic;
   background: var(--blog-gradient);
   -webkit-background-clip: text;
@@ -502,41 +951,57 @@ a.blog-card:hover {
   color: transparent;
 }
 
-/* Byline — first <p> direct child of .vp-doc (the markdown-authored byline) */
-.blog-post-page .vp-doc > p:first-of-type {
+.bp-byline {
   display: flex;
+  gap: 14px;
   align-items: center;
-  gap: 0.625rem;
   flex-wrap: wrap;
-  font-size: 0.875rem !important;
-  color: var(--vp-c-text-3) !important;
-  letter-spacing: -0.005em;
-  margin: 0 0 2rem;
+  font-size: 14px;
+  color: var(--blog-ink-3);
 }
 
-.blog-post-page .vp-doc > p:first-of-type::before {
-  content: 'N0';
-  display: inline-grid;
-  place-items: center;
+.bp-author {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--blog-ink);
+  font-weight: 500;
+}
+
+.bp-avatar {
   width: 28px;
   height: 28px;
   border-radius: 999px;
   background: var(--blog-gradient);
   color: #fff;
-  font-family: var(--vp-font-family-base);
-  font-size: 0.6875rem;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: -0.01em;
-  flex-shrink: 0;
 }
 
-/* Lede — second <p> direct child of .vp-doc (the first prose paragraph,
-   tolerant of any <img> or other block between byline and prose) */
+.bp-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--blog-ink-4);
+  display: inline-block;
+}
+
+/* Hide the markdown-authored title and byline since the hero owns them */
+.blog-post-page .vp-doc > h1:first-child,
+.blog-post-page .vp-doc > p:first-of-type {
+  display: none;
+}
+
+/* Lede — first prose paragraph (now p:first-of-type because byline is hidden,
+   but we still want the 2nd p semantically — use nth-of-type) */
 .blog-post-page .vp-doc > p:nth-of-type(2) {
   font-family: 'Newsreader', var(--blog-serif);
   font-size: 1.375rem;
   line-height: 1.5;
-  color: var(--vp-c-text-2);
+  color: var(--blog-ink-2);
   font-style: italic;
   border-left: 3px solid var(--blog-accent);
   padding-left: 1.375rem;
@@ -553,6 +1018,7 @@ a.blog-card:hover {
   border-top: none;
   padding-top: 0;
   scroll-margin-top: 5rem;
+  color: var(--blog-ink);
 }
 
 .blog-post-page .vp-doc h3 {
@@ -561,14 +1027,14 @@ a.blog-card:hover {
   font-weight: 600;
   letter-spacing: -0.018em;
   margin: 2.25rem 0 0.5rem;
-  color: var(--vp-c-text-1);
+  color: var(--blog-ink);
 }
 
 .blog-post-page .vp-doc p {
   font-family: 'Newsreader', var(--blog-serif);
   font-size: 1.1875rem;
   line-height: 1.6;
-  color: var(--vp-c-text-1);
+  color: var(--blog-ink);
   margin: 0 0 1.25rem;
   letter-spacing: -0.005em;
 }
@@ -603,7 +1069,7 @@ a.blog-card:hover {
 .blog-post-page .vp-doc li {
   margin-bottom: 0.625rem;
   letter-spacing: -0.005em;
-  color: var(--vp-c-text-1);
+  color: var(--blog-ink);
 }
 
 .blog-post-page .vp-doc li > p {
@@ -616,10 +1082,10 @@ a.blog-card:hover {
 .blog-post-page .vp-doc blockquote {
   margin: 1.75rem 0;
   padding: 1.375rem 1.75rem;
-  background: var(--vp-c-bg-soft);
-  border-left: 4px solid var(--vp-c-text-1);
+  background: var(--blog-bg-muted);
+  border-left: 4px solid var(--blog-ink);
   border-radius: 0 14px 14px 0;
-  color: var(--vp-c-text-1);
+  color: var(--blog-ink);
 }
 
 .blog-post-page .vp-doc blockquote p {
@@ -633,23 +1099,18 @@ a.blog-card:hover {
 .blog-post-page .vp-doc hr {
   margin: 3rem 0;
   border: none;
-  border-top: 1px solid var(--vp-c-divider);
+  border-top: 1px solid var(--blog-rule-soft);
 }
 
-/* End-of-post italic CTA paragraph (the standard "Nav0 is..." footer) */
 .blog-post-page .vp-doc hr + p:last-child em {
   font-style: italic;
-  color: var(--vp-c-text-2);
-}
-
-/* Constrain the prose column for readability on the detail page */
-.blog-post-page .VPDoc:not(.has-aside) .content-container {
-  max-width: 760px;
+  color: var(--blog-ink-2);
 }
 
 @media (max-width: 760px) {
-  .blog-post-page .vp-doc h1 {
-    font-size: 2.125rem;
+  .bp-hero {
+    padding: 40px 0 32px;
+    margin: -32px -16px 32px;
   }
   .blog-post-page .vp-doc h2 {
     font-size: 1.5rem;
