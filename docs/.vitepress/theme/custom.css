@@ -1022,8 +1022,9 @@ a.blog-card:hover {
   min-width: 0;
 }
 
-/* Override the rail back to column 1 and make it sticky */
-.blog-post-page .bp-meta-rail {
+/* Override the rail back to column 1 and make it sticky.
+   Selector specificity must beat the catch-all above. */
+.blog-post-page .VPDoc.has-aside .content-container > .bp-meta-rail {
   grid-column: 1;
   grid-row: 1;
   position: sticky;
@@ -1115,6 +1116,39 @@ a.blog-card:hover {
    design's "On this page" rail (per-link border-left, blue active
    state, no moving marker).
    ============================================================ */
+
+/* VitePress's .aside-container is position:fixed, top:0, which makes
+   it pin to the viewport and overlap the hero band. Switch to sticky
+   inside .aside so it naturally sits below the hero (which lives in
+   .VPDoc > #doc-top, before .container). */
+.blog-post-page .VPDoc.has-aside .aside-container {
+  position: sticky;
+  top: calc(var(--vp-nav-height, 64px) + 24px);
+  height: auto;
+  max-height: calc(100vh - var(--vp-nav-height, 64px) - 48px);
+  padding-top: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.blog-post-page .VPDoc.has-aside .aside-curtain {
+  display: none;
+}
+
+.blog-post-page .VPDoc.has-aside .aside {
+  /* widen aside to fit the design's right rail comfortably */
+  max-width: 224px;
+}
+
+/* Widen .container so the meta rail (220) + gap + prose (660) +
+   gap + aside (224) can sit side-by-side. */
+.blog-post-page .VPDoc.has-aside .container {
+  max-width: 1280px !important;
+}
+
+.blog-post-page .VPDoc.has-aside .content {
+  max-width: none !important;
+}
 
 .blog-post-page .VPDocAsideOutline {
   font-size: 13px;
