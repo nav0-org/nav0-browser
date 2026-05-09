@@ -299,6 +299,15 @@ export default defineConfig({
       ['meta', { property: 'og:url', content: canonicalUrl }]
     );
 
+    if (pageData.relativePath === 'blog/index.md') {
+      pageData.frontmatter.pageClass = 'blog-list-page';
+    } else if (pageData.relativePath.startsWith('blog/')) {
+      pageData.frontmatter.pageClass = 'blog-post-page';
+      // Drop the all-posts left sidebar (the design uses the meta rail instead)
+      // but keep the aside on so VitePress renders the right TOC + scrollspy.
+      pageData.frontmatter.sidebar = false;
+    }
+
     // Inject SoftwareApplication schema only on relevant pages
     const softwareAppPages = ['index.md', 'install.md', 'guide/features.md'];
     if (softwareAppPages.includes(pageData.relativePath)) {
