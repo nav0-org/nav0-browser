@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Install Nav0 — Mac, Windows, Linux</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="nav0-shared.css" />
+<style>
+  /* HERO */
+  .install-hero {
+    padding: 88px 0 24px;
+    text-align: center;
+    background:
+      radial-gradient(ellipse 900px 460px at 50% -50px, var(--accent-soft) 0%, transparent 65%),
+      var(--bg);
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .install-hero .latest-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--rule-soft);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px; font-weight: 500;
+    color: var(--ink-2);
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .install-hero .latest-pill .dot {
+    width: 6px; height: 6px;
+    border-radius: 999px;
+    background: var(--good);
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--good) 50%, transparent);
+    animation: ipulse 2.4s infinite;
+  }
+  @keyframes ipulse {
+    0%   { box-shadow: 0 0 0 0 color-mix(in oklab, var(--good) 50%, transparent); }
+    100% { box-shadow: 0 0 0 8px color-mix(in oklab, var(--good) 0%,  transparent); }
+  }
+  .install-hero h1 {
+    font-family: var(--sans); font-weight: 700;
+    font-size: clamp(48px, 6.5vw, 80px); line-height: 1.04;
+    letter-spacing: -0.04em; margin: 0 auto 22px;
+    max-width: 14ch;
+  }
+  .install-hero h1 em {
+    font-style: normal;
+    background: linear-gradient(120deg, var(--accent) 0%, #b347d9 50%, #ff5e7a 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .install-hero p.lead {
+    font-size: 21px; color: var(--ink-2);
+    max-width: 56ch; margin: 0 auto 8px;
+    line-height: 1.4; letter-spacing: -0.012em; font-weight: 400;
+  }
+  .auto-detect {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 20px;
+    font-size: 13px; color: var(--ink-3);
+  }
+  .auto-detect .platform {
+    color: var(--accent); font-weight: 500;
+  }
+
+  /* PLATFORM TILES */
+  .install-shell {
+    max-width: 1080px; margin: 0 auto;
+    padding: 56px 24px 64px;
+  }
+  .platforms {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+  .platform-card {
+    background: var(--bg-card);
+    border: 1px solid var(--rule-soft);
+    border-radius: 22px;
+    padding: 32px 24px;
+    box-shadow: var(--shadow-sm);
+    display: flex; flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: border-color 200ms, transform 200ms, box-shadow 200ms;
+    position: relative;
+    overflow: hidden;
+  }
+  .platform-card::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 220px 140px at 100% 0%, var(--card-tint, transparent) 0%, transparent 60%);
+    pointer-events: none;
+    opacity: 0.6;
+  }
+  .platform-card:hover {
+    border-color: var(--rule);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .platform-card.featured {
+    border-color: color-mix(in oklab, var(--accent) 26%, var(--rule-soft));
+    background: linear-gradient(180deg, color-mix(in oklab, var(--accent-soft) 60%, transparent) 0%, var(--bg-card) 100px);
+  }
+  .platform-card .featured-badge {
+    position: absolute; top: 16px; right: 16px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 4px 8px; border-radius: 999px;
+  }
+  .platform-icon {
+    width: 56px; height: 56px;
+    border-radius: 16px;
+    display: grid; place-items: center;
+    color: var(--ink);
+    margin-bottom: 16px;
+    background: var(--bg-soft);
+    border: 1px solid var(--rule-soft);
+  }
+  .platform-icon svg { width: 26px; height: 26px; }
+  .platform-card.mac .platform-icon { background: linear-gradient(180deg, #f5f5f7, #e9e9ee); color: #1d1d1f; }
+  [data-theme="dark"] .platform-card.mac .platform-icon { background: linear-gradient(180deg, #2a2a2e, #1a1a1d); color: #f5f5f7; }
+  .platform-card.win .platform-icon { background: linear-gradient(135deg, rgba(0,113,227,0.12), rgba(0,113,227,0.04)); color: var(--accent); }
+  .platform-card.lin .platform-icon { background: linear-gradient(135deg, rgba(255,140,32,0.14), rgba(255,140,32,0.04)); color: #ff8c20; }
+
+  .platform-name {
+    font-size: 18px; font-weight: 600;
+    letter-spacing: -0.018em;
+    margin: 0;
+  }
+
+  /* MAC TERMINAL CARD */
+  .mac-curl {
+    background: linear-gradient(180deg, var(--bg-soft), var(--bg-card));
+    border: 1px solid var(--rule-soft);
+    border-radius: 22px;
+    padding: 36px 40px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+  }
+  .mac-curl-head {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 22px;
+  }
+  .mac-curl-head .mac-icon {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #f5f5f7, #e9e9ee);
+    color: #1d1d1f;
+    display: grid; place-items: center;
+    border: 1px solid var(--rule-soft);
+  }
+  [data-theme="dark"] .mac-curl-head .mac-icon { background: linear-gradient(180deg, #2a2a2e, #1a1a1d); color: #f5f5f7; }
+  .mac-curl-head .mac-icon svg { width: 18px; height: 18px; }
+  .mac-curl-head h3 {
+    font-size: 19px; font-weight: 600; letter-spacing: -0.02em;
+    margin: 0 0 2px;
+  }
+  .mac-curl-head .sub {
+    font-size: 13px; color: var(--ink-3);
+  }
+
+  /* TERMINAL */
+  .terminal {
+    background: #08080a; color: #f5f5f7;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #2a2a2e;
+    box-shadow: 0 12px 40px -12px rgba(0,0,0,0.4);
+    margin-bottom: 16px;
+  }
+  .terminal-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px;
+    background: #131316;
+    border-bottom: 1px solid #2a2a2e;
+  }
+  .terminal-bar .lights {
+    display: flex; gap: 6px;
+  }
+  .terminal-bar .light {
+    width: 11px; height: 11px; border-radius: 999px; background: #424245;
+  }
+  .terminal-bar .light.r { background: #ff5f57; }
+  .terminal-bar .light.y { background: #febc2e; }
+  .terminal-bar .light.g { background: #28c840; }
+  .terminal-bar .title {
+    flex: 1; text-align: center;
+    font-family: var(--mono); font-size: 11px; color: #6e7681;
+    letter-spacing: 0.02em;
+  }
+  .terminal-bar .copy-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #d2d2d7;
+    font-family: var(--mono); font-size: 11px;
+    padding: 4px 10px; border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: background 120ms, color 120ms;
+  }
+  .terminal-bar .copy-btn:hover { background: rgba(255,255,255,0.10); color: #fff; }
+  .terminal-bar .copy-btn svg { width: 12px; height: 12px; }
+  .terminal-bar .copy-btn.is-copied { color: #28c840; border-color: rgba(40,200,64,0.4); }
+  .terminal-body {
+    padding: 18px 22px;
+    font-family: var(--mono); font-size: 13.5px; line-height: 1.7;
+    overflow-x: auto;
+  }
+  .terminal-body .prompt { color: #6e7681; user-select: none; }
+  .terminal-body .cmd { color: #f5f5f7; }
+  .terminal-body .flag { color: #79c0ff; }
+  .terminal-body .url { color: #d2a8ff; }
+  .terminal-body .pipe { color: #ff7b72; }
+  .terminal-body .out { color: #6e7681; font-size: 12.5px; padding-top: 6px; display: block; }
+  .terminal-body .out .ok { color: #56d364; }
+
+  .mac-curl .desc {
+    font-size: 14px; color: var(--ink-2);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .mac-curl .desc-row {
+    display: flex; gap: 24px; align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .mac-curl .desc-row > div {
+    flex: 1 1 220px;
+    display: flex; gap: 10px;
+  }
+  .mac-curl .desc-row .desc-icon {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    flex: none; display: grid; place-items: center;
+  }
+  .mac-curl .desc-row .desc-icon svg { width: 14px; height: 14px; }
+  .mac-curl .desc-row .desc-title {
+    font-size: 13px; font-weight: 600; color: var(--ink);
+    margin-bottom: 2px;
+  }
+  .mac-curl .desc-row .desc-text {
+    font-size: 13px; color: var(--ink-3); line-height: 1.5;
+  }
+
+  /* SECTION HEADERS */
+  .section-block {
+    margin-top: 56px;
+  }
+  .section-block h2 {
+    font-size: 32px; font-weight: 700;
+    letter-spacing: -0.025em; margin: 0 0 8px;
+  }
+  .section-block .section-lead {
+    font-size: 16px; color: var(--ink-2);
+    margin: 0 0 28px;
+    max-width: 60ch; line-height: 1.5;
+  }
+
+  /* SOURCE BUILD */
+  .source-build {
+    background: var(--bg-card);
+    border: 1px solid var(--rule-soft);
+    border-radius: 22px;
+    padding: 36px 40px;
+    box-shadow: var(--shadow-sm);
+  }
+  .source-grid {
+    display: grid; grid-template-columns: 1fr 1.4fr;
+    gap: 36px;
+    align-items: start;
+  }
+  .source-grid h3 {
+    font-size: 22px; font-weight: 600; letter-spacing: -0.022em;
+    margin: 0 0 12px;
+  }
+  .source-grid p {
+    font-size: 15px; color: var(--ink-2);
+    line-height: 1.55; margin: 0 0 14px;
+  }
+  .req-list {
+    list-style: none; padding: 0; margin: 18px 0 0;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .req-list li {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: var(--ink-2);
+  }
+  .req-list .req-ico {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: grid; place-items: center;
+    flex: none;
+  }
+  .req-list .req-ico svg { width: 12px; height: 12px; }
+  .req-list code {
+    font-family: var(--mono); font-size: 12px;
+    background: var(--bg-soft); border: 1px solid var(--rule-soft);
+    padding: 1px 6px; border-radius: 5px;
+  }
+
+  /* VERIFY */
+  .verify-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px; margin-top: 24px;
+  }
+  .verify-card {
+    background: var(--bg-card);
+    border: 1px solid var(--rule-soft);
+    border-radius: 18px;
+    padding: 22px 24px;
+    box-shadow: var(--shadow-sm);
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .verify-ico {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: grid; place-items: center;
+    flex: none;
+  }
+  .verify-ico svg { width: 16px; height: 16px; }
+  .verify-card h4 {
+    font-size: 15px; font-weight: 600; letter-spacing: -0.012em;
+    margin: 0 0 4px;
+  }
+  .verify-card p {
+    font-size: 13px; color: var(--ink-3);
+    line-height: 1.5; margin: 0;
+  }
+  .verify-card a { color: var(--accent); text-decoration: none; font-weight: 500; }
+
+  /* FAQ */
+  .faq-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px; margin-top: 24px;
+  }
+  .faq {
+    background: var(--bg-card);
+    border: 1px solid var(--rule-soft);
+    border-radius: 14px;
+    padding: 20px 22px;
+  }
+  .faq h4 {
+    font-size: 14px; font-weight: 600;
+    letter-spacing: -0.012em;
+    margin: 0 0 6px;
+    color: var(--ink);
+  }
+  .faq p {
+    font-size: 13.5px; color: var(--ink-3);
+    line-height: 1.55; margin: 0;
+  }
+  .faq code {
+    font-family: var(--mono); font-size: 12px;
+    background: var(--bg-soft);
+    border: 1px solid var(--rule-soft);
+    padding: 1px 5px; border-radius: 4px;
+  }
+
+  /* LICENSE FOOTER */
+  .license-strip {
+    margin-top: 56px;
+    padding: 32px 36px;
+    background: var(--bg-soft);
+    border-radius: 18px;
+    border: 1px solid var(--rule-soft);
+    display: flex; align-items: center; gap: 24px;
+    flex-wrap: wrap;
+  }
+  .license-strip .lhs { flex: 1 1 320px; }
+  .license-strip h3 {
+    font-size: 17px; font-weight: 600; letter-spacing: -0.018em;
+    margin: 0 0 4px;
+  }
+  .license-strip p {
+    font-size: 13.5px; color: var(--ink-3);
+    margin: 0; line-height: 1.5;
+  }
+  .license-strip .rhs { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  @media (max-width: 920px) {
+    .platforms { grid-template-columns: 1fr; }
+    .source-grid { grid-template-columns: 1fr; gap: 24px; }
+    .verify-row, .faq-grid { grid-template-columns: 1fr; }
+    .mac-curl, .source-build { padding: 28px 24px; }
+  }
+</style>
+<script src="https://unpkg.com/lucide@0.475.0/dist/umd/lucide.min.js"></script>
+<script src="nav0-icons.js" defer></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>Nav0</span>
+    </a>
+    <nav class="nav">
+      <a href="/">Home</a>
+      <a href="guide.html">Guide</a>
+      <a href="install.html" class="is-active">Install</a>
+      <a href="blog.html">Blog</a>
+      <a href="releases.html">Releases</a>
+    </nav>
+    <div class="top-actions">
+      <button class="icon-btn" id="theme-toggle" title="toggle theme" aria-label="toggle theme"><i data-lucide="moon"></i></button>
+      <a class="btn btn--primary btn--sm" href="release-detail.html">v0.2.6</a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="install-hero">
+  <div class="latest-pill"><span class="dot"></span> Nav0 v0.2.6 · Released May 6, 2026</div>
+  <h1>Install Nav0 in <em>about a minute.</em></h1>
+  <p class="lead">macOS, Windows, Linux. Free. Open source. No account, no email, no telemetry.</p>
+</section>
+
+<div class="install-shell">
+
+  <!-- THREE TILES -->
+  <div class="platforms">
+    <a href="#mac" class="platform-card mac">
+      <div class="platform-icon">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+      </div>
+      <h3 class="platform-name">macOS</h3>
+    </a>
+
+    <a href="#win" class="platform-card win">
+      <div class="platform-icon">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.6L10.5 4.6V11.5H3V5.6M3 12.5H10.5V19.4L3 18.4V12.5M11.4 4.4L21 3V11.5H11.4V4.4M11.4 12.5H21V21L11.4 19.6V12.5Z"/></svg>
+      </div>
+      <h3 class="platform-name">Windows</h3>
+    </a>
+
+    <a href="#lin" class="platform-card lin">
+      <div class="platform-icon">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14.62 8.35c-.42.28-1.75.84-1.93 1.07-.36.35-.69.32-.94.21-.32-.16-.45-.61-.45-.61-.16-.55-.55-1-.83-1.45-.28-.42-.69-.71-.69-.93 0-.13.16-.32.32-.42.32-.32.74-.39 1.13-.42.71-.06 1.16.13 1.55.42.39.29.45.55.45.94 0 .27-.16.55-.32.74-.13.13-.29.32-.29.45zm-2.78-3.96c-.96 0-1.74.78-1.74 1.74 0 .96.78 1.74 1.74 1.74.96 0 1.74-.78 1.74-1.74 0-.96-.78-1.74-1.74-1.74zM7.96 7.05c.74 0 1.35-.61 1.35-1.35s-.61-1.35-1.35-1.35-1.35.61-1.35 1.35.61 1.35 1.35 1.35zm.36 1.61c.42-.13 1.16-.13 1.74.16.57.29.97 1.16.84 1.93-.13.71-.74 1.16-1.45 1.16s-1.45-.42-1.74-1.16c-.29-.74.19-1.96.61-2.09zm10.66 9.04c-.61-.55-.84-1.35-1.13-2.06s-.45-1.35-.61-1.96c-.16-.61 0-1.35.13-2.06.13-.74.29-1.55.13-2.32-.16-.74-.71-1.45-1.45-1.93-.74-.45-1.74-.71-2.61-.45-.45.13-.84.42-1.13.84-.29.42-.45.94-.55 1.45-.16.71-.29 1.45-.42 2.16-.13.71-.29 1.35-.45 1.93-.16.61-.42 1.13-.71 1.55-.42.61-1.13 1.13-1.93 1.45-.45.16-.94.29-1.45.42-.42.16-.84.29-1.13.55-.42.42-.42 1.16-.13 1.61.29.45.84.74 1.45.94.61.16 1.35.16 1.93-.13.61-.29 1.13-.61 1.61-.94.74-.55 1.55-1.13 2.45-1.16.84 0 1.61.32 2.32.71.74.42 1.61.84 2.45 1.13.32.13.71.29 1.13.16.42-.16.71-.45.84-.74.13-.29 0-.74-.42-1.16z"/></svg>
+      </div>
+      <h3 class="platform-name">Linux</h3>
+    </a>
+  </div>
+
+  <!-- MAC -->
+  <div class="mac-curl" id="mac">
+    <div class="mac-curl-head">
+      <div class="mac-icon">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+      </div>
+      <div>
+        <h3>Install on macOS</h3>
+        <div class="sub">Run this in Terminal — that's it.</div>
+      </div>
+    </div>
+
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="lights">
+          <span class="light r"></span><span class="light y"></span><span class="light g"></span>
+        </div>
+        <div class="title">~ — bash — 80×8</div>
+        <button class="copy-btn" id="copy-curl"><i data-lucide="copy"></i> Copy</button>
+      </div>
+      <div class="terminal-body">
+        <div><span class="prompt">$ </span><span class="cmd">curl <span class="flag">-fsSL</span> <span class="url">https://raw.githubusercontent.com/nav0-org/nav0-browser/main/install.sh</span> <span class="pipe">|</span> bash</span></div>
+        <span class="out">→ Fetching latest release (v0.2.6)…&nbsp;&nbsp;<span class="ok">✓</span></span>
+        <span class="out">→ Installing to /Applications/Nav0.app …&nbsp;&nbsp;<span class="ok">✓</span></span>
+        <span class="out">→ Clearing Gatekeeper quarantine attribute …&nbsp;&nbsp;<span class="ok">✓</span></span>
+        <span class="out">→ Done. Launch with: <span style="color: #f5f5f7;">open -a Nav0</span></span>
+      </div>
+    </div>
+
+    <div class="desc-row">
+      <div>
+        <div class="desc-icon"><i data-lucide="download"></i></div>
+        <div>
+          <div class="desc-title">Latest release</div>
+          <div class="desc-text">Always pulls v0.2.6 from GitHub. No third-party CDN.</div>
+        </div>
+      </div>
+      <div>
+        <div class="desc-icon"><i data-lucide="folder-open"></i></div>
+        <div>
+          <div class="desc-title">Installs to /Applications</div>
+          <div class="desc-text">Standard Mac app location. Drag to Trash to uninstall.</div>
+        </div>
+      </div>
+      <div>
+        <div class="desc-icon"><i data-lucide="shield-check"></i></div>
+        <div>
+          <div class="desc-title">Handles Gatekeeper</div>
+          <div class="desc-text">Auto-clears the quarantine attribute. No right-click → Open dance.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WIN + LIN combo row -->
+  <div class="section-block" id="win">
+    <h2>Windows</h2>
+    <p class="section-lead">A single x64 installer for Windows 10 and 11. Code-signed. No telemetry, no first-run sign-up, no Bing.</p>
+    <div class="verify-row">
+      <a class="verify-card" href="#">
+        <div class="verify-ico"><i data-lucide="download"></i></div>
+        <div>
+          <h4>Nav0-0.2.6.Setup.exe</h4>
+          <p>44 MB · x64 · Win 10 / 11 · Code-signed by the Nav0 maintainer key</p>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="section-block" id="lin">
+    <h2>Linux</h2>
+    <p class="section-lead">Native packages for Debian-family and RHEL-family distros. AppImage in the works.</p>
+    <div class="verify-row">
+      <a class="verify-card" href="#">
+        <div class="verify-ico"><i data-lucide="download"></i></div>
+        <div>
+          <h4>Nav0_0.2.6_amd64.deb</h4>
+          <p>41 MB · Debian, Ubuntu, Mint, Pop!_OS · <code>sudo dpkg -i Nav0_0.2.6_amd64.deb</code></p>
+        </div>
+      </a>
+      <a class="verify-card" href="#">
+        <div class="verify-ico"><i data-lucide="download"></i></div>
+        <div>
+          <h4>Nav0-0.2.6-1.x86_64.rpm</h4>
+          <p>42 MB · Fedora, RHEL, openSUSE · <code>sudo rpm -i Nav0-0.2.6-1.x86_64.rpm</code></p>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- BUILD FROM SOURCE -->
+  <div class="section-block" id="source">
+    <h2>Build from source</h2>
+    <p class="section-lead">For maximum trust, or if you'd like to hack on Nav0. Clone, install, run. All three platforms are supported.</p>
+    <div class="source-build">
+      <div class="source-grid">
+        <div>
+          <h3>Why build it yourself?</h3>
+          <p>You don't have to take our word for it. Reproducing the binaries from source is the strongest privacy guarantee we can offer. The full build is hermetic and the output is byte-equivalent to the published installers.</p>
+          <ul class="req-list">
+            <li><span class="req-ico"><i data-lucide="check"></i></span> <code>node</code> 22.0 or newer</li>
+            <li><span class="req-ico"><i data-lucide="check"></i></span> <code>npm</code> 10+</li>
+            <li><span class="req-ico"><i data-lucide="check"></i></span> ~3 GB free disk</li>
+            <li><span class="req-ico"><i data-lucide="check"></i></span> Roughly 4 minutes on an M1</li>
+          </ul>
+        </div>
+        <div>
+          <div class="terminal" style="margin-bottom: 16px;">
+            <div class="terminal-bar">
+              <div class="lights">
+                <span class="light r"></span><span class="light y"></span><span class="light g"></span>
+              </div>
+              <div class="title">~/projects — bash</div>
+              <button class="copy-btn" id="copy-build"><i data-lucide="copy"></i> Copy</button>
+            </div>
+            <div class="terminal-body">
+              <div><span class="prompt">$ </span><span class="cmd">git clone <span class="url">https://github.com/nav0-org/nav0-browser.git</span></span></div>
+              <div><span class="prompt">$ </span><span class="cmd">cd nav0-browser</span></div>
+              <div><span class="prompt">$ </span><span class="cmd">npm install</span></div>
+              <div><span class="prompt">$ </span><span class="cmd">npm run make</span></div>
+              <span class="out">→ Built artifact at <span style="color: #f5f5f7;">out/Nav0-darwin-arm64/Nav0.app</span></span>
+            </div>
+          </div>
+          <p style="font-size: 13.5px; color: var(--ink-3); margin: 0; line-height: 1.55;">The built app lands in the <code style="font-family: var(--mono); font-size: 12px; background: var(--bg-soft); border: 1px solid var(--rule-soft); padding: 1px 5px; border-radius: 4px;">out/</code> directory. See the README for cross-compilation flags and code-signing details.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LICENSE -->
+  <div class="license-strip">
+    <div class="lhs">
+      <h3>Open source under the MIT License</h3>
+      <p>Nav0 is built in the open by Ketan Patil and a handful of contributors. Read, fork, or send a patch.</p>
+    </div>
+    <div class="rhs">
+      <a class="btn btn--secondary btn--sm" href="#"><i data-lucide="github" style="width:14px;height:14px;"></i> View source</a>
+      <a class="btn btn--secondary btn--sm" href="#"><i data-lucide="file-text" style="width:14px;height:14px;"></i> MIT License</a>
+    </div>
+  </div>
+
+</div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a class="brand" href="/">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>Nav0</span>
+        </a>
+        <p class="foot-tag">A minimal, privacy-focused browser. Built by a small team, supported by a small community, owned by no one.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <ul>
+          <li><a href="install.html">Install</a></li>
+          <li><a href="releases.html">Release notes</a></li>
+          <li><a href="guide.html">Guide</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Project</h4>
+        <ul>
+          <li><a href="#">GitHub</a></li>
+          <li><a href="blog.html">Blog</a></li>
+          <li><a href="#">FAQ</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Privacy policy</a></li>
+          <li><a href="#">License (MIT)</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Nav0 · Released under the MIT License</span>
+      <span>Nav · Nought · Nothing more</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Theme toggle (matches the rest of the site)
+  const themeBtn = document.getElementById('theme-toggle');
+  const setTheme = (t) => {
+    document.documentElement.setAttribute('data-theme', t);
+    themeBtn.innerHTML = '<i data-lucide="' + (t === 'dark' ? 'sun' : 'moon') + '"></i>';
+    if (window.lucide) window.lucide.createIcons({ attrs: { 'stroke-width': 1.75 } });
+    try { localStorage.setItem('nav0-theme', t); } catch (e) {}
+  };
+  setTheme(localStorage.getItem('nav0-theme') || 'light');
+  themeBtn.addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme') || 'light';
+    setTheme(cur === 'dark' ? 'light' : 'dark');
+  });
+
+  // Copy buttons
+  function wireCopy(btnId, text) {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        await navigator.clipboard.writeText(text);
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check"></i> Copied';
+        btn.classList.add('is-copied');
+        if (window.lucide) window.lucide.createIcons({ attrs: { 'stroke-width': 1.75 } });
+        setTimeout(() => {
+          btn.innerHTML = orig;
+          btn.classList.remove('is-copied');
+          if (window.lucide) window.lucide.createIcons({ attrs: { 'stroke-width': 1.75 } });
+        }, 1800);
+      } catch (err) { /* ignore */ }
+    });
+  }
+  wireCopy('copy-curl', 'curl -fsSL https://raw.githubusercontent.com/nav0-org/nav0-browser/main/install.sh | bash');
+  wireCopy('copy-build', 'git clone https://github.com/nav0-org/nav0-browser.git\ncd nav0-browser\nnpm install\nnpm run make');
+</script>
+
+</body>
+</html>

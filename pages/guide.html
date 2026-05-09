@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Getting started — Nav0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="nav0-shared.css" />
+<style>
+  /* GUIDE-SPECIFIC */
+  .guide-shell {
+    display: grid;
+    grid-template-columns: 240px 1fr 220px;
+    gap: 64px;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 56px 32px 96px;
+    align-items: start;
+  }
+  .side-nav {
+    position: sticky;
+    top: 80px;
+    font-size: 13px;
+  }
+  .side-nav .group {
+    margin-bottom: 28px;
+  }
+  .side-nav .grouplabel {
+    font-size: 11px; font-weight: 600;
+    color: var(--ink-3); text-transform: uppercase;
+    letter-spacing: 0.06em; margin-bottom: 10px; padding-left: 10px;
+  }
+  .side-nav a {
+    display: block;
+    padding: 7px 10px;
+    border-radius: 8px;
+    color: var(--ink-2);
+    text-decoration: none;
+    line-height: 1.4;
+    transition: background 120ms, color 120ms;
+  }
+  .side-nav a:hover { background: var(--bg-muted); color: var(--ink); }
+  .side-nav a.is-active {
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .guide-content {
+    min-width: 0;
+  }
+  .guide-breadcrumb {
+    font-size: 13px;
+    color: var(--ink-3);
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .guide-breadcrumb a { text-decoration: none; color: var(--accent); }
+  .guide-breadcrumb .sep { color: var(--ink-4); }
+  .guide-h1 {
+    font-size: clamp(40px, 5vw, 56px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    margin: 0 0 14px;
+  }
+  .guide-lead {
+    font-size: 21px;
+    color: var(--ink-2);
+    line-height: 1.4;
+    letter-spacing: -0.012em;
+    margin: 0 0 40px;
+    max-width: 56ch;
+  }
+  .guide-meta {
+    display: flex; gap: 16px; align-items: center;
+    font-size: 12px; color: var(--ink-3);
+    padding: 12px 16px; margin-bottom: 48px;
+    border-radius: 12px; background: var(--bg-muted);
+    font-family: var(--mono);
+  }
+  .guide-meta strong { color: var(--ink); font-family: var(--sans); font-weight: 500; }
+  .guide-meta .dot { width: 4px; height: 4px; border-radius: 999px; background: var(--ink-4); }
+
+  .guide-content h2 {
+    font-size: 32px; font-weight: 700;
+    letter-spacing: -0.025em; line-height: 1.15;
+    margin: 56px 0 16px;
+    scroll-margin-top: 80px;
+  }
+  .guide-content h3 {
+    font-size: 22px; font-weight: 600;
+    letter-spacing: -0.018em;
+    margin: 36px 0 10px;
+  }
+  .guide-content p {
+    font-size: 17px; color: var(--ink);
+    line-height: 1.6; margin: 0 0 16px;
+    letter-spacing: -0.005em;
+  }
+  .guide-content ul, .guide-content ol {
+    padding-left: 22px; margin: 0 0 24px;
+    font-size: 17px; color: var(--ink); line-height: 1.6;
+  }
+  .guide-content li { margin-bottom: 8px; letter-spacing: -0.005em; }
+  .guide-content code {
+    font-family: var(--mono);
+    font-size: 0.9em;
+    background: var(--bg-muted);
+    padding: 2px 6px;
+    border-radius: 5px;
+    border: 1px solid var(--rule-soft);
+  }
+  .guide-content a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
+  }
+  .guide-content a:hover { border-bottom-color: var(--accent); }
+
+  .codeblock {
+    background: #0c0c10;
+    color: #f5f5f7;
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin: 16px 0 28px;
+    font-family: var(--mono);
+    font-size: 13.5px;
+    line-height: 1.65;
+    overflow-x: auto;
+    border: 1px solid #2a2a2e;
+    position: relative;
+  }
+  .codeblock-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin: -20px -22px 16px;
+    padding: 10px 16px;
+    border-bottom: 1px solid #2a2a2e;
+    background: #07070a;
+    border-radius: 14px 14px 0 0;
+    font-family: var(--sans); font-size: 12px; color: #86868b;
+  }
+  .codeblock-head .lang { color: var(--accent); font-weight: 500; }
+  .codeblock-copy {
+    background: rgba(255,255,255,0.06);
+    color: #f5f5f7;
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .codeblock .tok-c { color: #6e7681; }
+  .codeblock .tok-k { color: #ff7b72; }
+  .codeblock .tok-s { color: #a5d6ff; }
+  .codeblock .tok-y { color: #d2a8ff; }
+  .codeblock .tok-n { color: #79c0ff; }
+
+  .step-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px; margin: 24px 0 40px;
+  }
+  .step-card {
+    background: var(--bg-card);
+    border: 1px solid var(--rule-soft);
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: var(--shadow-sm);
+  }
+  .step-num {
+    width: 28px; height: 28px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 13px; font-weight: 600;
+    display: grid; place-items: center;
+    margin-bottom: 14px;
+  }
+  .step-card h4 {
+    font-size: 17px; font-weight: 600; letter-spacing: -0.018em;
+    margin: 0 0 6px;
+  }
+  .step-card p {
+    font-size: 14px; color: var(--ink-2); line-height: 1.5; margin: 0;
+  }
+
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    padding: 18px 22px;
+    border-radius: 12px;
+    margin: 24px 0;
+    font-size: 15px;
+    color: var(--ink);
+  }
+  .callout strong { display: block; margin-bottom: 4px; color: var(--accent); font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+
+  .platform-tabs {
+    display: flex; gap: 4px; padding: 4px;
+    background: var(--bg-muted);
+    border-radius: 12px;
+    width: fit-content;
+    margin-bottom: 16px;
+  }
+  .platform-tab {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px; font-weight: 500;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: background 120ms, color 120ms;
+    border: none; background: transparent;
+    font-family: var(--sans);
+  }
+  .platform-tab.is-active {
+    background: var(--bg-card);
+    color: var(--ink);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+
+  .toc {
+    position: sticky;
+    top: 80px;
+    font-size: 13px;
+  }
+  .toc-label {
+    font-size: 11px; font-weight: 600;
+    color: var(--ink-3); text-transform: uppercase;
+    letter-spacing: 0.06em; margin-bottom: 12px;
+  }
+  .toc ul { list-style: none; padding: 0; margin: 0; }
+  .toc li { margin: 6px 0; }
+  .toc a {
+    display: block;
+    padding: 4px 12px;
+    border-left: 2px solid var(--rule-soft);
+    color: var(--ink-3);
+    text-decoration: none;
+    line-height: 1.4;
+    transition: color 120ms, border-color 120ms;
+  }
+  .toc a:hover { color: var(--ink); }
+  .toc a.is-active { color: var(--accent); border-left-color: var(--accent); }
+  .toc .sub { padding-left: 24px; font-size: 12px; }
+
+  .pager {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px; margin-top: 64px;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .pager a {
+    background: var(--bg-card);
+    border: 1px solid var(--rule-soft);
+    border-radius: 14px;
+    padding: 18px 22px;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 120ms, background 120ms;
+  }
+  .pager a:hover { border-color: var(--accent); }
+  .pager .label { font-size: 12px; color: var(--ink-3); margin-bottom: 4px; }
+  .pager .name { font-size: 16px; font-weight: 500; color: var(--ink); }
+  .pager .next { text-align: right; }
+
+  /* KEYBOARD SHORTCUTS TABLE */
+  .kbd-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0 32px;
+    font-size: 14.5px;
+    background: var(--bg-card);
+    border: 1px solid var(--rule-soft);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .kbd-table th, .kbd-table td {
+    padding: 12px 18px;
+    text-align: left;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .kbd-table th {
+    background: var(--bg-soft);
+    font-size: 12px;
+    color: var(--ink-3);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .kbd-table tr:last-child td { border-bottom: 0; }
+  .kbd-table td:first-child { color: var(--ink); font-weight: 500; }
+  .kbd-table kbd {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--bg-muted);
+    border: 1px solid var(--rule-soft);
+    padding: 3px 8px;
+    border-radius: 6px;
+    color: var(--ink);
+  }
+
+  @media (max-width: 1080px) {
+    .guide-shell { grid-template-columns: 220px 1fr; }
+    .toc { display: none; }
+  }
+  @media (max-width: 760px) {
+    .guide-shell { grid-template-columns: 1fr; gap: 32px; padding: 32px 16px 64px; }
+    .side-nav { position: static; }
+    .step-grid { grid-template-columns: 1fr; }
+  }
+</style>
+<script src="https://unpkg.com/lucide@0.475.0/dist/umd/lucide.min.js"></script>
+<script src="nav0-icons.js" defer></script>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>Nav0</span>
+    </a>
+    <nav class="nav">
+      <a href="/">Home</a>
+      <a href="guide.html" class="is-active">Guide</a>
+      <a href="blog.html">Blog</a>
+      <a href="releases.html">Releases</a>
+      <a href="/#install">Install</a>
+    </nav>
+    <div class="top-actions">
+      <button class="icon-btn" id="theme-toggle" title="toggle theme" aria-label="toggle theme"><i data-lucide="moon"></i></button>
+      <a class="btn btn--primary btn--sm" href="/#install">Download</a>
+    </div>
+  </div>
+</header>
+
+<!-- LAYOUT -->
+<div class="guide-shell">
+  <!-- LEFT NAV -->
+  <aside class="side-nav">
+    <div class="group">
+      <div class="grouplabel">Introduction</div>
+      <a href="#" class="is-active">Getting Started</a>
+      <a href="#">Features</a>
+    </div>
+    <div class="group">
+      <div class="grouplabel">Feature Guides</div>
+      <a href="#">Ad Blocker</a>
+      <a href="#">Privacy &amp; Tracking Protection</a>
+      <a href="#">Private Browsing</a>
+      <a href="#">Tab Management</a>
+      <a href="#">Keyboard Shortcuts</a>
+    </div>
+    <div class="group">
+      <div class="grouplabel">Un-features</div>
+      <a href="#">What Nav0 Doesn't Do</a>
+    </div>
+    <div class="group">
+      <div class="grouplabel">Core Principles</div>
+      <a href="#">Privacy</a>
+      <a href="#">Philosophy</a>
+    </div>
+    <div class="group">
+      <div class="grouplabel">Community</div>
+      <a href="#">Contributing</a>
+    </div>
+  </aside>
+
+  <!-- CONTENT -->
+  <main class="guide-content">
+    <div class="guide-breadcrumb">
+      <a href="/">Nav0</a>
+      <span class="sep">›</span>
+      <a href="guide.html">Guide</a>
+      <span class="sep">›</span>
+      <span>Getting started</span>
+    </div>
+
+    <h1 class="guide-h1">Getting Started</h1>
+    <p class="guide-lead">
+      Nav0 is a minimal web browser built on Electron that prioritizes your privacy and system resources.
+    </p>
+
+    <div class="guide-meta">
+      <span><strong>Read time</strong></span>
+      <span class="dot"></span>
+      <span>5 min</span>
+      <span class="dot"></span>
+      <span><strong>Last updated</strong></span>
+      <span>May 8, 2026</span>
+      <span class="dot"></span>
+      <span><strong>Applies to</strong></span>
+      <span>v0.2.6 +</span>
+    </div>
+
+    <h2 id="installation">Installation</h2>
+
+    <h3 id="macos">macOS</h3>
+    <p>Run this command in Terminal to install Nav0:</p>
+    <div class="codeblock">
+      <div class="codeblock-head">
+        <span class="lang">bash</span>
+        <button class="codeblock-copy">Copy</button>
+      </div>
+curl <span class="tok-s">-fsSL</span> https://raw.githubusercontent.com/nav0-org/nav0-browser/main/install.sh | bash
+    </div>
+
+    <h3 id="windows">Windows</h3>
+    <p>Download the <code>.exe</code> installer from <a href="https://github.com/nav0-org/nav0-browser/releases">GitHub Releases</a>.</p>
+
+    <h3 id="linux">Linux</h3>
+    <p>Download <code>.deb</code> (Debian/Ubuntu) or <code>.rpm</code> (Fedora/RHEL) packages from <a href="https://github.com/nav0-org/nav0-browser/releases">GitHub Releases</a>.</p>
+
+    <h3 id="build-from-source">Build from Source</h3>
+    <p>On any platform, you can also build Nav0 from source:</p>
+    <div class="codeblock">
+      <div class="codeblock-head">
+        <span class="lang">bash</span>
+        <button class="codeblock-copy">Copy</button>
+      </div>
+<span class="tok-c"># Clone the repository</span>
+git clone https://github.com/nav0-org/nav0-browser.git
+cd nav0-browser
+
+<span class="tok-c"># Install dependencies</span>
+npm install
+
+<span class="tok-c"># Build the app</span>
+npm run make
+    </div>
+    <p>The built app will be in the <code>out/</code> directory. Requires <a href="https://nodejs.org">Node.js</a> 22+ and npm.</p>
+
+    <h2 id="first-launch">First Launch</h2>
+    <p>When you first open Nav0, you'll notice something different: <strong>nothing asks for your data</strong>.</p>
+    <ul>
+      <li>No account creation prompts</li>
+      <li>No "personalization" setup</li>
+      <li>No telemetry consent dialogs</li>
+    </ul>
+    <p>Just a browser, ready to use.</p>
+
+    <h2 id="basic-usage">Basic Usage</h2>
+
+    <h3 id="navigation">Navigation</h3>
+    <ul>
+      <li><strong>Address Bar</strong>: Type URLs or search terms</li>
+      <li><strong>Back/Forward</strong>: Navigate your history</li>
+      <li><strong>Refresh</strong>: Reload the current page</li>
+      <li><strong>Home</strong>: Return to your start page</li>
+    </ul>
+
+    <h3 id="keyboard-shortcuts">Keyboard Shortcuts</h3>
+    <table class="kbd-table">
+      <thead>
+        <tr><th>Action</th><th>Windows / Linux</th><th>macOS</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>New Tab</td><td><kbd>Ctrl + T</kbd></td><td><kbd>Cmd + T</kbd></td></tr>
+        <tr><td>Close Tab</td><td><kbd>Ctrl + W</kbd></td><td><kbd>Cmd + W</kbd></td></tr>
+        <tr><td>Reload</td><td><kbd>Ctrl + R</kbd></td><td><kbd>Cmd + R</kbd></td></tr>
+        <tr><td>Address Bar</td><td><kbd>Ctrl + L</kbd></td><td><kbd>Cmd + L</kbd></td></tr>
+        <tr><td>Find in Page</td><td><kbd>Ctrl + F</kbd></td><td><kbd>Cmd + F</kbd></td></tr>
+        <tr><td>Developer Tools</td><td><kbd>F12</kbd></td><td><kbd>Cmd + Option + I</kbd></td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="configuration">Configuration</h2>
+    <p>Nav0 stores its configuration locally on your machine. No cloud sync, no account needed.</p>
+    <p>Configuration location:</p>
+    <ul>
+      <li><strong>Windows</strong>: <code>%APPDATA%/nav0/</code></li>
+      <li><strong>macOS</strong>: <code>~/Library/Application Support/nav0/</code></li>
+      <li><strong>Linux</strong>: <code>~/.config/nav0/</code></li>
+    </ul>
+
+    <h2 id="not-included">What's Not Included</h2>
+    <p>By design, Nav0 does <strong>not</strong> include:</p>
+    <ul>
+      <li>User accounts or sign-in</li>
+      <li>Sync services</li>
+      <li>AI assistants or chatbots</li>
+      <li>News feeds or content recommendations</li>
+      <li>Cryptocurrency wallets</li>
+      <li>Built-in VPN upsells</li>
+      <li>Telemetry or analytics</li>
+    </ul>
+    <p>If you need these features, Nav0 isn't for you—and that's okay. We built Nav0 for users who want less, not more.</p>
+
+    <h2 id="next-steps">Next Steps</h2>
+    <ul>
+      <li>Learn about Nav0's <a href="#">Features</a></li>
+      <li>Understand our <a href="privacy-policy.html">Privacy</a> commitment</li>
+      <li>Read about our <a href="#">Philosophy</a></li>
+    </ul>
+
+    <div class="pager">
+      <a href="/">
+        <div class="label">‹ Previous</div>
+        <div class="name">Home</div>
+      </a>
+      <a href="#" class="next">
+        <div class="label">Next ›</div>
+        <div class="name">Features</div>
+      </a>
+    </div>
+  </main>
+
+  <!-- TOC -->
+  <aside class="toc">
+    <div class="toc-label">On this page</div>
+    <ul>
+      <li><a href="#installation" class="is-active">Installation</a></li>
+      <li class="sub"><a href="#macos">macOS</a></li>
+      <li class="sub"><a href="#windows">Windows</a></li>
+      <li class="sub"><a href="#linux">Linux</a></li>
+      <li class="sub"><a href="#build-from-source">Build from Source</a></li>
+      <li><a href="#first-launch">First Launch</a></li>
+      <li><a href="#basic-usage">Basic Usage</a></li>
+      <li class="sub"><a href="#navigation">Navigation</a></li>
+      <li class="sub"><a href="#keyboard-shortcuts">Keyboard Shortcuts</a></li>
+      <li><a href="#configuration">Configuration</a></li>
+      <li><a href="#not-included">What's Not Included</a></li>
+      <li><a href="#next-steps">Next Steps</a></li>
+    </ul>
+  </aside>
+</div>
+
+<!-- FOOTER -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a class="brand" href="/">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>Nav0</span>
+        </a>
+        <p class="foot-tag">A minimal, privacy-focused browser. Built by a small team, supported by a small community, owned by no one.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/#install">Install</a></li>
+          <li><a href="/#features">Features</a></li>
+          <li><a href="releases.html">Release notes</a></li>
+          <li><a href="#">Roadmap</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Project</h4>
+        <ul>
+          <li><a href="#">GitHub</a></li>
+          <li><a href="guide.html">Guide</a></li>
+          <li><a href="blog.html">Blog</a></li>
+          <li><a href="#">FAQ</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Privacy policy</a></li>
+          <li><a href="#">Terms of use</a></li>
+          <li><a href="#">License (MIT)</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Nav0 · Released under the MIT License</span>
+      <span>Nav · Nought · Nothing more</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Theme toggle (persisted)
+  const themeBtn = document.getElementById('theme-toggle');
+  const setTheme = (t) => {
+    document.documentElement.setAttribute('data-theme', t);
+    themeBtn.innerHTML = '<i data-lucide="' + (t === 'dark' ? 'sun' : 'moon') + '"></i>';
+    if (window.lucide) window.lucide.createIcons({ attrs: { 'stroke-width': 1.75 } });
+    try { localStorage.setItem('nav0-theme', t); } catch (e) {}
+  };
+  setTheme(localStorage.getItem('nav0-theme') || 'light');
+  themeBtn.addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme') || 'light';
+    setTheme(cur === 'dark' ? 'light' : 'dark');
+  });
+
+  // Platform tabs
+  document.querySelectorAll('.platform-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const which = tab.dataset.tab;
+      document.querySelectorAll('.platform-tab').forEach(t => t.classList.toggle('is-active', t === tab));
+      document.querySelectorAll('[data-pane]').forEach(p => {
+        p.hidden = p.dataset.pane !== which;
+      });
+    });
+  });
+
+  // TOC scrollspy
+  const tocLinks = document.querySelectorAll('.toc a');
+  const sections = [...document.querySelectorAll('.guide-content h2[id]')];
+  const onScroll = () => {
+    let active = sections[0];
+    for (const s of sections) {
+      if (s.getBoundingClientRect().top < 120) active = s;
+    }
+    tocLinks.forEach(a => a.classList.toggle('is-active', a.getAttribute('href') === '#' + active.id));
+  };
+  document.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+</script>
+
+</body>
+</html>
