@@ -11,6 +11,7 @@ import DownloadsPage from './components/DownloadsPage.vue';
 import NewHome from './components/NewHome.vue';
 import ReleasesStats from './components/ReleasesStats.vue';
 import ReleasesLatestHero from './components/ReleasesLatestHero.vue';
+import FaqPage from './components/FaqPage.vue';
 import './tokens.css';
 import './custom.css';
 
@@ -28,5 +29,6 @@ export default {
     app.component('NewHome', NewHome);
     app.component('ReleasesStats', ReleasesStats);
     app.component('ReleasesLatestHero', ReleasesLatestHero);
+    app.component('FaqPage', FaqPage);
   },
 } satisfies Theme;

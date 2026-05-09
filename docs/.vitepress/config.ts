@@ -320,6 +320,9 @@ export default defineConfig({
       pageData.frontmatter.pageClass = 'legal-page';
     } else if (pageData.relativePath === 'guide/getting-started.md') {
       pageData.frontmatter.pageClass = 'guide-page';
+    } else if (pageData.relativePath === 'faq.md') {
+      pageData.frontmatter.pageClass = 'faq-page-v2';
+      pageData.frontmatter.layout = 'page';
     }
 
     // Inject SoftwareApplication schema only on relevant pages
