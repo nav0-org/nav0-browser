@@ -3183,6 +3183,72 @@ html.dark .nav0-bg {
   flex: 1;
 }
 
+/* LEFT SIDEBAR (VPSidebar) on legal/guide pages -----------------
+   Style VitePress's left cross-page sidebar so it visually matches
+   the right-side Contents TOC: uppercase group eyebrows, 13px link
+   rows with a left border that fills with the accent color on the
+   active page. The expand/collapse behaviour stays VitePress's. */
+
+:is(.legal-page, .guide-page) .VPSidebar {
+  font-family: var(--ds-font-sans);
+}
+
+/* Group titles (h2.text inside .level-0) — same as .lp-toc-label */
+:is(.legal-page, .guide-page) .VPSidebarItem.level-0 > .item > .text {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ds-ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  margin-bottom: 6px;
+  padding-left: 12px;
+}
+
+/* Hide the default vertical indicator — we use border-left on the
+   link itself, mirroring .lp-toc-link. */
+:is(.legal-page, .guide-page) .VPSidebarItem .indicator {
+  display: none;
+}
+
+/* Link rows under each group — same as .lp-toc-link */
+:is(.legal-page, .guide-page) .VPSidebarItem.level-1.is-link > .item {
+  margin: 2px 0;
+}
+:is(.legal-page, .guide-page) .VPSidebarItem.level-1.is-link > .item > .link {
+  display: block;
+  padding: 7px 12px;
+  border-left: 2px solid var(--ds-rule-soft);
+  line-height: 1.4;
+  transition:
+    color 120ms,
+    border-color 120ms,
+    background 120ms;
+}
+:is(.legal-page, .guide-page) .VPSidebarItem.level-1.is-link > .item > .link > .text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ds-ink-2);
+  line-height: 1.4;
+}
+
+/* Hover */
+:is(.legal-page, .guide-page) .VPSidebarItem.level-1.is-link > .item > .link:hover {
+  background: var(--ds-bg-soft);
+}
+:is(.legal-page, .guide-page) .VPSidebarItem.level-1.is-link > .item > .link:hover > .text {
+  color: var(--ds-ink);
+}
+
+/* Active (current page) */
+:is(.legal-page, .guide-page) .VPSidebarItem.level-1.is-active > .item > .link {
+  border-left-color: var(--ds-accent);
+  background: var(--ds-accent-soft);
+}
+:is(.legal-page, .guide-page) .VPSidebarItem.level-1.is-active > .item > .link > .text {
+  color: var(--ds-accent);
+}
+
 /* PROSE -------------------------------------------------------- */
 :is(.legal-page, .guide-page) .vp-doc {
   min-width: 0;
