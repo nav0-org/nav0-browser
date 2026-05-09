@@ -312,6 +312,21 @@ export default defineConfig({
     } else if (pageData.relativePath.startsWith('releases/')) {
       pageData.frontmatter.pageClass = 'release-detail-page';
       pageData.frontmatter.layout = 'page';
+    } else if (
+      pageData.relativePath === 'disclaimer.md' ||
+      pageData.relativePath === 'terms-of-use.md' ||
+      pageData.relativePath === 'privacy-policy.md'
+    ) {
+      pageData.frontmatter.pageClass = 'legal-page';
+      // We render our own left numbered TOC; tell VitePress not to
+      // render its right-side aside so .content takes full width.
+      pageData.frontmatter.aside = false;
+      pageData.frontmatter.outline = false;
+    } else if (pageData.relativePath === 'guide/getting-started.md') {
+      pageData.frontmatter.pageClass = 'guide-page';
+    } else if (pageData.relativePath === 'faq.md') {
+      pageData.frontmatter.pageClass = 'faq-page-v2';
+      pageData.frontmatter.layout = 'page';
     }
 
     // Inject SoftwareApplication schema only on relevant pages
