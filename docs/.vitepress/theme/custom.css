@@ -4419,3 +4419,113 @@ body:has(.install-page-v2) .VPDocFooter {
     padding-left: 22px;
   }
 }
+
+/* ============================================================
+   Local search modal (VPLocalSearchBox) — Apple-style theming
+   VitePress exposes --vp-local-search-* variables; map them to
+   our --ds-* palette so the modal blends with the rest of the
+   docs (rounded card, accent highlights, soft borders).
+   ============================================================ */
+
+:root {
+  --vp-local-search-bg: var(--ds-bg-card);
+  --vp-local-search-result-bg: var(--ds-bg);
+  --vp-local-search-result-border: transparent;
+  --vp-local-search-result-selected-bg: var(--ds-accent-soft);
+  --vp-local-search-result-selected-border: var(--ds-accent);
+  --vp-local-search-highlight-bg: var(--ds-accent-soft);
+  --vp-local-search-highlight-text: var(--ds-accent);
+}
+
+/* Modal shell — softer corner radius and shadow on desktop. The
+   mobile fullscreen breakpoint already hard-resets these; we only
+   restyle the floating card. */
+.VPLocalSearchBox .shell {
+  font-family: var(--ds-font-sans);
+  border: 1px solid var(--ds-rule-soft);
+}
+@media (min-width: 768px) {
+  .VPLocalSearchBox .shell {
+    border-radius: var(--ds-radius-xl);
+    box-shadow: var(--ds-shadow-lg);
+  }
+}
+
+/* Search bar (input row) — pill input with accent focus ring */
+.VPLocalSearchBox .search-bar {
+  border-radius: var(--ds-radius-md);
+  border-color: var(--ds-rule-soft);
+  background: var(--ds-bg-soft);
+  transition: border-color 120ms, box-shadow 120ms;
+}
+.VPLocalSearchBox .search-bar:focus-within {
+  border-color: var(--ds-accent);
+  box-shadow: 0 0 0 3px var(--ds-accent-soft);
+}
+.VPLocalSearchBox .search-input {
+  font-size: 15px;
+  color: var(--ds-ink);
+}
+.VPLocalSearchBox .search-input::placeholder {
+  color: var(--ds-ink-3);
+}
+.VPLocalSearchBox .local-search-icon {
+  color: var(--ds-ink-3);
+}
+
+/* Each result row — clean card with hover lift, selected pill */
+.VPLocalSearchBox .result {
+  border-radius: var(--ds-radius-md);
+  border-width: 1px;
+  border-color: var(--ds-rule-soft);
+  background: var(--ds-bg);
+  color: var(--ds-ink-2);
+  transition: background 120ms, border-color 120ms, color 120ms;
+}
+.VPLocalSearchBox .result:hover {
+  background: var(--ds-bg-soft);
+}
+.VPLocalSearchBox .result.selected {
+  border-color: var(--ds-accent);
+  background: var(--ds-accent-soft);
+  color: var(--ds-ink);
+}
+
+/* Title / breadcrumb / snippet inside results */
+.VPLocalSearchBox .titles {
+  color: var(--ds-ink);
+  font-weight: 500;
+}
+.VPLocalSearchBox .title {
+  color: var(--ds-ink);
+}
+.VPLocalSearchBox .excerpt-wrapper {
+  color: var(--ds-ink-3);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Empty state */
+.VPLocalSearchBox .no-results {
+  color: var(--ds-ink-3);
+  font-size: 14px;
+  padding: 24px 12px;
+}
+
+/* Footer keyboard shortcuts — match the meta-pill aesthetic */
+.VPLocalSearchBox .search-keyboard-shortcuts {
+  color: var(--ds-ink-3);
+  border-top: 1px solid var(--ds-rule-soft);
+  padding-top: 12px;
+}
+.VPLocalSearchBox .search-keyboard-shortcuts kbd {
+  font-family: var(--ds-font-mono);
+  font-size: 11px;
+  background: var(--ds-bg-soft);
+  border: 1px solid var(--ds-rule-soft);
+  color: var(--ds-ink-2);
+  border-radius: 6px;
+  padding: 2px 6px;
+  box-shadow: none;
+  min-width: auto;
+}
