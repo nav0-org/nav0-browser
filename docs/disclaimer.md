@@ -1,6 +1,12 @@
 ---
 title: 'Nav0 Browser Disclaimer — Important Legal Information'
 description: 'Read the full disclaimer for Nav0 Browser. Understand the terms of use, limitations, and legal notices for this open-source, privacy-focused web browser.'
+eyebrow: Legal
+tagline: 'Important legal information governing your use of the Nav0 Browser software and the Nav0 website. By using Nav0, you acknowledge that you have read and accept the terms below.'
+effective: 'March 7, 2026'
+lastUpdated: 'March 7, 2026'
+version: 'Provided as-is'
+versionIcon: alert
 ---
 
 # Disclaimer
@@ -162,6 +168,7 @@ If you have questions or concerns about this disclaimer, you may:
 - Open an issue on the [Nav0 GitHub repository](https://github.com/nav0-org/nav0-browser)
 - Engage with the community through the project's discussion channels
 
----
-
-**In summary**: Nav0 is a free, open-source browser built by volunteers who believe in privacy and simplicity. We do our best to build a trustworthy tool, but we provide it without warranties. You use it at your own risk, and you are responsible for your own online activities. The internet is a vast and sometimes dangerous place—no browser, including Nav0, can change that fundamental reality.
+<div class="doc-bottomline">
+  <strong>In summary: Nav0 is a free, open-source browser built by volunteers who believe in privacy and simplicity.</strong>
+  <span>We do our best to build a trustworthy tool, but we provide it without warranties. You use it at your own risk, and you are responsible for your own online activities. The internet is a vast and sometimes dangerous place — no browser, including Nav0, can change that fundamental reality.</span>
+</div>

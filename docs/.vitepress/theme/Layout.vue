@@ -6,6 +6,8 @@ import BlogPostHero from './components/BlogPostHero.vue';
 import BlogPostMetaRail from './components/BlogPostMetaRail.vue';
 import ReleaseDetailHero from './components/ReleaseDetailHero.vue';
 import ReleaseDetailSidebar from './components/ReleaseDetailSidebar.vue';
+import LegalPageHero from './components/LegalPageHero.vue';
+import LegalPageTOC from './components/LegalPageTOC.vue';
 
 const { Layout } = DefaultTheme;
 const { page } = useData();
@@ -17,6 +19,10 @@ const isReleaseDetail = computed(() => {
   const path = page.value.relativePath || '';
   return path.startsWith('releases/') && path !== 'releases/index.md';
 });
+const isLegalPage = computed(() => {
+  const path = page.value.relativePath || '';
+  return path === 'disclaimer.md' || path === 'terms-of-use.md' || path === 'privacy-policy.md';
+});
 </script>
 
 <template>
@@ -26,9 +32,11 @@ const isReleaseDetail = computed(() => {
     <Layout>
       <template #doc-top>
         <BlogPostHero v-if="isBlogPost" />
+        <LegalPageHero v-if="isLegalPage" />
       </template>
       <template #doc-before>
         <BlogPostMetaRail v-if="isBlogPost" />
+        <LegalPageTOC v-if="isLegalPage" />
       </template>
       <template v-if="isReleaseDetail" #page-top>
         <ReleaseDetailHero />

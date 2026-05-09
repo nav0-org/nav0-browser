@@ -2955,54 +2955,203 @@ html.dark .nav0-bg {
 
 /* ============================================================
    LEGAL PAGES — disclaimer / terms-of-use / privacy-policy
-   Apple-style restyle layered over VitePress's default doc layout.
-   The markdown content is unchanged; the h1 + first paragraph
-   become a hero, h2s get an accent border, and the right-side
-   aside (TOC) is restyled with numbered, sticky entries to match
-   the design.
+   Apple-style restyle: full-width hero (rendered by LegalPageHero
+   in #doc-top), left numbered TOC (LegalPageTOC in #doc-before),
+   prose column on the right, no right-side VitePress aside.
    ============================================================ */
 
-/* Hero: bigger title + accent gradient + subtle radial bg behind the
-   first heading. We hijack the first h1 + p in .vp-doc as the page-head.
-   VitePress wraps markdown content in `.vp-doc > div`, so we target
-   that wrapping div. */
-.legal-page .vp-doc {
-  position: relative;
+/* Hide the right-side VitePress TOC aside — we use a left numbered TOC. */
+.legal-page .VPDocAside,
+.legal-page .VPDoc .aside {
+  display: none !important;
 }
-.legal-page .vp-doc > div > h1:first-child {
-  font-family: var(--ds-font-sans);
-  font-size: clamp(40px, 5.5vw, 64px);
-  font-weight: 700;
-  letter-spacing: -0.035em;
-  line-height: 1.05;
-  margin: 32px 0 16px;
-  max-width: 22ch;
-  color: var(--ds-ink);
-}
-.legal-page .vp-doc > div > h1:first-child + p {
-  font-size: 19px;
-  color: var(--ds-ink-2);
-  line-height: 1.5;
-  letter-spacing: -0.008em;
-  margin: 0 0 24px;
-  max-width: 64ch;
+.legal-page .VPDoc.has-aside .content {
+  padding-right: 0 !important;
 }
 
-/* Eyebrow before title (added as a small uppercase label via ::before) */
-.legal-page .vp-doc > div > h1:first-child::before {
-  content: 'Legal';
-  display: block;
+/* Hide the markdown's h1 — the hero renders the title. */
+.legal-page .vp-doc > div > h1:first-child {
+  display: none;
+}
+
+/* HERO --------------------------------------------------------- */
+/* Rendered via #doc-top, sits at the top of .VPDoc OUTSIDE .container.
+   Use negative side margins (matching VitePress's container padding) so
+   the bottom border bleeds to the column edges, then center the inner
+   content at the same max-width as the body grid below. */
+.lp-hero {
+  position: relative;
+  margin: -32px -24px 48px;
+  padding: 64px 24px 36px;
+  border-bottom: 1px solid var(--ds-rule-soft);
+}
+@media (min-width: 768px) {
+  .lp-hero {
+    margin: -48px -32px 56px;
+    padding: 72px 32px 36px;
+  }
+}
+.lp-hero-inner {
+  max-width: 1136px;
+  margin: 0 auto;
+}
+.lp-eyebrow {
   font-size: 12px;
   font-weight: 600;
   color: var(--ds-accent);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin-bottom: 14px;
-  background: none;
-  -webkit-text-fill-color: var(--ds-accent);
+}
+.lp-title {
+  font-family: var(--ds-font-sans);
+  font-size: clamp(40px, 5.5vw, 64px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  margin: 0 0 14px;
+  max-width: 22ch;
+  color: var(--ds-ink);
+}
+.lp-tagline {
+  font-size: 19px;
+  color: var(--ds-ink-2);
+  line-height: 1.45;
+  letter-spacing: -0.008em;
+  margin: 0 0 24px;
+  max-width: 64ch;
+}
+.lp-meta-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  font-family: var(--ds-font-mono);
+  font-size: 12.5px;
+  color: var(--ds-ink-3);
+}
+.lp-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--ds-bg-soft);
+  border: 1px solid var(--ds-rule-soft);
+  color: var(--ds-ink-2);
+}
+.lp-pill strong {
+  color: var(--ds-ink);
+  font-weight: 500;
+  font-family: var(--ds-font-sans);
+}
+.lp-pill .lp-pill-mono {
+  font-family: var(--ds-font-mono);
+}
+.lp-pill .lp-pill-ico {
+  flex: none;
+  color: var(--ds-ink-3);
 }
 
-/* Section headings: clean accent border, more breathing room */
+/* TWO-COLUMN GRID --------------------------------------------- */
+/* The TOC (rendered in #doc-before) and the .main (with markdown
+   content) are siblings inside .content-container. Grid them so TOC
+   sits left and content right. */
+.legal-page .VPDoc .content-container {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 760px);
+  column-gap: 56px;
+  max-width: 1080px !important;
+  margin: 0 auto !important;
+  align-items: start;
+}
+/* Default children of .content-container go in the prose column... */
+.legal-page .VPDoc .content-container > * {
+  grid-column: 2;
+  min-width: 0;
+}
+/* ...except the TOC, which we anchor to column 1 and make sticky. */
+.legal-page .VPDoc .content-container > .lp-toc {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: start;
+}
+
+/* TOC ---------------------------------------------------------- */
+.lp-toc {
+  position: sticky;
+  top: 88px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding-right: 8px;
+  font-size: 13px;
+}
+.lp-toc-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ds-ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+  padding-left: 12px;
+}
+.lp-toc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.lp-toc-list > li {
+  margin: 2px 0;
+}
+.lp-toc-link {
+  display: flex;
+  gap: 10px;
+  padding: 7px 12px;
+  border-left: 2px solid var(--ds-rule-soft);
+  color: var(--ds-ink-2);
+  text-decoration: none;
+  line-height: 1.4;
+  transition:
+    color 120ms,
+    border-color 120ms,
+    background 120ms;
+}
+.lp-toc-link:hover {
+  color: var(--ds-ink);
+  background: var(--ds-bg-soft);
+}
+.lp-toc-link.is-active {
+  color: var(--ds-accent);
+  border-left-color: var(--ds-accent);
+  background: var(--ds-accent-soft);
+}
+.lp-toc-num {
+  font-family: var(--ds-font-mono);
+  font-size: 11px;
+  color: var(--ds-ink-4);
+  flex: none;
+  padding-top: 1px;
+}
+.lp-toc-link.is-active .lp-toc-num {
+  color: var(--ds-accent);
+}
+.lp-toc-text {
+  flex: 1;
+}
+
+/* PROSE -------------------------------------------------------- */
+.legal-page .vp-doc {
+  min-width: 0;
+  max-width: 760px;
+  counter-reset: legal-section;
+}
+.legal-page .vp-doc > div > p:first-of-type {
+  /* Lead paragraph after hero — slightly larger. */
+  font-size: 17px;
+  color: var(--ds-ink-2);
+  line-height: 1.6;
+  letter-spacing: -0.005em;
+}
 .legal-page .vp-doc h2 {
   font-family: var(--ds-font-sans);
   font-size: 28px;
@@ -3013,6 +3162,24 @@ html.dark .nav0-bg {
   padding-top: 24px;
   border-top: 1px solid var(--ds-rule-soft);
   scroll-margin-top: 80px;
+  counter-increment: legal-section;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+.legal-page .vp-doc h2:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+  margin-top: 0;
+}
+.legal-page .vp-doc h2::before {
+  content: counter(legal-section, decimal-leading-zero);
+  font-family: var(--ds-font-mono);
+  font-size: 13px;
+  color: var(--ds-ink-3);
+  font-weight: 500;
+  letter-spacing: 0;
+  flex: none;
 }
 .legal-page .vp-doc h3 {
   font-family: var(--ds-font-sans);
@@ -3023,8 +3190,6 @@ html.dark .nav0-bg {
   scroll-margin-top: 80px;
   color: var(--ds-ink);
 }
-
-/* Prose typography */
 .legal-page .vp-doc p,
 .legal-page .vp-doc li {
   font-size: 16px;
@@ -3045,8 +3210,6 @@ html.dark .nav0-bg {
 .legal-page .vp-doc li {
   margin-bottom: 8px;
 }
-
-/* Inline code */
 .legal-page .vp-doc :not(pre) > code {
   font-family: var(--ds-font-mono);
   font-size: 0.88em;
@@ -3056,8 +3219,6 @@ html.dark .nav0-bg {
   border: 1px solid var(--ds-rule-soft);
   color: var(--ds-ink);
 }
-
-/* Links */
 .legal-page .vp-doc a {
   color: var(--ds-accent);
   text-decoration: none;
@@ -3067,8 +3228,11 @@ html.dark .nav0-bg {
 .legal-page .vp-doc a:hover {
   border-bottom-color: var(--ds-accent);
 }
+.legal-page .vp-doc hr {
+  display: none;
+}
 
-/* Tables — apply doc-table styling to all VitePress tables on legal pages */
+/* TABLES ------------------------------------------------------- */
 .legal-page .vp-doc table {
   display: table;
   width: 100%;
@@ -3110,48 +3274,7 @@ html.dark .nav0-bg {
   border: 0;
 }
 
-/* Right-side TOC aside — restyle to match the design's numbered TOC */
-.legal-page .VPDocAside {
-  font-size: 13px;
-}
-.legal-page .VPDocAsideOutline .outline-title {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--ds-ink-3);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 14px;
-  padding-left: 12px;
-}
-.legal-page .VPDocAsideOutline .outline-link {
-  display: block;
-  padding: 7px 12px;
-  border-left: 2px solid var(--ds-rule-soft);
-  color: var(--ds-ink-2);
-  text-decoration: none;
-  line-height: 1.4;
-  font-size: 13px;
-  font-weight: 400;
-  transition:
-    color 120ms,
-    border-color 120ms,
-    background 120ms;
-}
-.legal-page .VPDocAsideOutline .outline-link:hover {
-  color: var(--ds-ink);
-  background: var(--ds-bg-soft);
-}
-.legal-page .VPDocAsideOutline .outline-link.active {
-  color: var(--ds-accent);
-  border-left-color: var(--ds-accent);
-  font-weight: 500;
-}
-.legal-page .VPDocAsideOutline .outline-link.nested {
-  padding-left: 24px;
-  font-size: 12.5px;
-}
-
-/* Optional callout / bottom-line classes — usable in markdown via raw <div>. */
+/* CALLOUT + BOTTOMLINE ---------------------------------------- */
 .legal-page .vp-doc .doc-callout {
   background: linear-gradient(180deg, var(--ds-accent-soft) 0%, transparent 100%);
   border: 1px solid color-mix(in oklab, var(--ds-accent) 22%, var(--ds-rule-soft));
@@ -3166,7 +3289,6 @@ html.dark .nav0-bg {
   font-weight: 500;
   letter-spacing: -0.008em;
 }
-
 .legal-page .vp-doc .doc-bottomline {
   margin: 48px 0 16px;
   padding: 28px 32px;
@@ -3181,6 +3303,54 @@ html.dark .nav0-bg {
   font-weight: 600;
   color: var(--ds-ink);
   letter-spacing: -0.012em;
+}
+.legal-page .vp-doc .doc-bottomline span {
+  display: block;
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--ds-ink-3);
+  line-height: 1.6;
+}
+
+/* Hide VitePress's default markdown-rendered title block, footer, and
+   prev/next navigation since the legal hero owns the title and the
+   pages don't sit in a sidebar group. */
+.legal-page .VPDocFooter {
+  display: none !important;
+}
+
+/* Responsive: stack TOC above prose below 980px. */
+@media (max-width: 980px) {
+  .legal-page .VPDoc.has-aside .content-container,
+  .legal-page .VPDoc .content-container {
+    grid-template-columns: 1fr !important;
+    gap: 32px;
+    padding-bottom: 64px;
+  }
+  .legal-page .VPDoc .content-container > * {
+    grid-column: 1;
+  }
+  .legal-page .VPDoc .content-container > .lp-toc {
+    grid-column: 1;
+  }
+  .lp-toc {
+    position: static;
+    max-height: none;
+    padding-right: 0;
+  }
+  .lp-toc-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 12px;
+  }
+  .legal-page .VPDoc .container {
+    padding: 0 20px !important;
+  }
+}
+@media (max-width: 600px) {
+  .lp-toc-list {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ============================================================
