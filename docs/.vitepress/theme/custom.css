@@ -2809,6 +2809,10 @@ html.dark .release-badge.alpha {
 .nav0-bg {
   min-height: 100vh;
   background-color: var(--vp-c-bg);
+  /* Make the left sidebar share the page background so the column
+     reads as a single surface (VitePress defaults the sidebar to the
+     slightly off-tone --vp-c-bg-alt). */
+  --vp-sidebar-bg-color: var(--vp-c-bg);
 }
 
 /* ============================================
