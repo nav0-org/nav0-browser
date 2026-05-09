@@ -2948,3 +2948,322 @@ html.dark .nav0-bg {
 .nav0-home-page .VPFooter {
   display: none !important;
 }
+
+/* ============================================================
+   LEGAL PAGES — disclaimer / terms-of-use / privacy-policy
+   Apple-style restyle layered over VitePress's default doc layout.
+   The markdown content is unchanged; the h1 + first paragraph
+   become a hero, h2s get an accent border, and the right-side
+   aside (TOC) is restyled with numbered, sticky entries to match
+   the design.
+   ============================================================ */
+
+/* Hero: bigger title + accent gradient + subtle radial bg behind the
+   first heading. We hijack the first h1 + p in .vp-doc as the page-head. */
+.legal-page .vp-doc {
+  position: relative;
+  padding-top: 16px;
+}
+.legal-page .vp-doc > h1:first-child {
+  font-family: var(--ds-font-sans);
+  font-size: clamp(40px, 5.5vw, 64px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  margin: 32px 0 16px;
+  max-width: 22ch;
+  background: var(--ds-gradient-rainbow);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.legal-page .vp-doc > h1:first-child + p {
+  font-size: 19px;
+  color: var(--ds-ink-2);
+  line-height: 1.5;
+  letter-spacing: -0.008em;
+  margin: 0 0 24px;
+  max-width: 64ch;
+}
+
+/* Eyebrow before title (added as a small uppercase label via ::before) */
+.legal-page .vp-doc > h1:first-child::before {
+  content: 'Legal';
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ds-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+  background: none;
+  -webkit-text-fill-color: var(--ds-accent);
+}
+
+/* Section headings: clean accent border, more breathing room */
+.legal-page .vp-doc h2 {
+  font-family: var(--ds-font-sans);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  margin: 56px 0 16px;
+  padding-top: 24px;
+  border-top: 1px solid var(--ds-rule-soft);
+  scroll-margin-top: 80px;
+}
+.legal-page .vp-doc h3 {
+  font-family: var(--ds-font-sans);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  margin: 32px 0 10px;
+  scroll-margin-top: 80px;
+  color: var(--ds-ink);
+}
+
+/* Prose typography */
+.legal-page .vp-doc p,
+.legal-page .vp-doc li {
+  font-size: 16px;
+  line-height: 1.65;
+  letter-spacing: -0.003em;
+  color: var(--ds-ink-2);
+}
+.legal-page .vp-doc p strong,
+.legal-page .vp-doc li strong {
+  color: var(--ds-ink);
+  font-weight: 600;
+}
+.legal-page .vp-doc ul,
+.legal-page .vp-doc ol {
+  padding-left: 22px;
+  margin: 0 0 22px;
+}
+.legal-page .vp-doc li {
+  margin-bottom: 8px;
+}
+
+/* Inline code */
+.legal-page .vp-doc :not(pre) > code {
+  font-family: var(--ds-font-mono);
+  font-size: 0.88em;
+  background: var(--ds-bg-muted);
+  padding: 2px 6px;
+  border-radius: 5px;
+  border: 1px solid var(--ds-rule-soft);
+  color: var(--ds-ink);
+}
+
+/* Links */
+.legal-page .vp-doc a {
+  color: var(--ds-accent);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in oklab, var(--ds-accent) 28%, transparent);
+  transition: border-color 120ms;
+}
+.legal-page .vp-doc a:hover {
+  border-bottom-color: var(--ds-accent);
+}
+
+/* Tables — apply doc-table styling to all VitePress tables on legal pages */
+.legal-page .vp-doc table {
+  display: table;
+  width: 100%;
+  margin: 20px 0 32px;
+  font-size: 14.5px;
+  background: var(--ds-bg-card);
+  border: 1px solid var(--ds-rule-soft);
+  border-radius: 14px;
+  overflow: hidden;
+  border-collapse: collapse;
+}
+.legal-page .vp-doc table th,
+.legal-page .vp-doc table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--ds-rule-soft);
+  border-right: 0;
+  border-left: 0;
+  vertical-align: top;
+  line-height: 1.5;
+}
+.legal-page .vp-doc table th {
+  background: var(--ds-bg-soft);
+  font-size: 11.5px;
+  color: var(--ds-ink-3);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.legal-page .vp-doc table tr:last-child td {
+  border-bottom: 0;
+}
+.legal-page .vp-doc table td:first-child {
+  color: var(--ds-ink);
+  font-weight: 500;
+}
+.legal-page .vp-doc table tr {
+  background: transparent;
+  border: 0;
+}
+
+/* Right-side TOC aside — restyle to match the design's numbered TOC */
+.legal-page .VPDocAside {
+  font-size: 13px;
+}
+.legal-page .VPDocAsideOutline .outline-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ds-ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+  padding-left: 12px;
+}
+.legal-page .VPDocAsideOutline .outline-link {
+  display: block;
+  padding: 7px 12px;
+  border-left: 2px solid var(--ds-rule-soft);
+  color: var(--ds-ink-2);
+  text-decoration: none;
+  line-height: 1.4;
+  font-size: 13px;
+  font-weight: 400;
+  transition:
+    color 120ms,
+    border-color 120ms,
+    background 120ms;
+}
+.legal-page .VPDocAsideOutline .outline-link:hover {
+  color: var(--ds-ink);
+  background: var(--ds-bg-soft);
+}
+.legal-page .VPDocAsideOutline .outline-link.active {
+  color: var(--ds-accent);
+  border-left-color: var(--ds-accent);
+  font-weight: 500;
+}
+.legal-page .VPDocAsideOutline .outline-link.nested {
+  padding-left: 24px;
+  font-size: 12.5px;
+}
+
+/* Optional callout / bottom-line classes — usable in markdown via raw <div>. */
+.legal-page .vp-doc .doc-callout {
+  background: linear-gradient(180deg, var(--ds-accent-soft) 0%, transparent 100%);
+  border: 1px solid color-mix(in oklab, var(--ds-accent) 22%, var(--ds-rule-soft));
+  border-radius: 16px;
+  padding: 22px 26px;
+  margin: 24px 0 28px;
+}
+.legal-page .vp-doc .doc-callout p {
+  font-size: 17px;
+  color: var(--ds-ink);
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: -0.008em;
+}
+
+.legal-page .vp-doc .doc-bottomline {
+  margin: 48px 0 16px;
+  padding: 28px 32px;
+  background: var(--ds-bg-soft);
+  border: 1px solid var(--ds-rule-soft);
+  border-radius: 18px;
+  text-align: center;
+}
+.legal-page .vp-doc .doc-bottomline strong {
+  display: block;
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--ds-ink);
+  letter-spacing: -0.012em;
+}
+
+/* ============================================================
+   GUIDE — getting-started
+   Light typography polish over the default docs layout.
+   ============================================================ */
+
+.guide-page .vp-doc > h1:first-child {
+  font-family: var(--ds-font-sans);
+  font-size: clamp(40px, 5vw, 56px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  margin: 32px 0 14px;
+}
+.guide-page .vp-doc > h1:first-child + p {
+  font-size: 21px;
+  color: var(--ds-ink-2);
+  line-height: 1.4;
+  letter-spacing: -0.012em;
+  margin: 0 0 32px;
+  max-width: 56ch;
+}
+.guide-page .vp-doc h2 {
+  font-family: var(--ds-font-sans);
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  margin: 56px 0 16px;
+}
+.guide-page .vp-doc h3 {
+  font-family: var(--ds-font-sans);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  margin: 36px 0 10px;
+}
+/* kbd badges in shortcut tables */
+.guide-page .vp-doc kbd {
+  font-family: var(--ds-font-mono);
+  font-size: 12px;
+  background: var(--ds-bg-muted);
+  border: 1px solid var(--ds-rule-soft);
+  padding: 3px 8px;
+  border-radius: 6px;
+  color: var(--ds-ink);
+  box-shadow: none;
+}
+/* Table styling on guide pages — same look as legal pages */
+.guide-page .vp-doc table {
+  display: table;
+  width: 100%;
+  margin: 16px 0 32px;
+  font-size: 14.5px;
+  background: var(--ds-bg-card);
+  border: 1px solid var(--ds-rule-soft);
+  border-radius: 14px;
+  overflow: hidden;
+  border-collapse: collapse;
+}
+.guide-page .vp-doc table th,
+.guide-page .vp-doc table td {
+  padding: 12px 18px;
+  text-align: left;
+  border-bottom: 1px solid var(--ds-rule-soft);
+  border-right: 0;
+  border-left: 0;
+}
+.guide-page .vp-doc table th {
+  background: var(--ds-bg-soft);
+  font-size: 12px;
+  color: var(--ds-ink-3);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.guide-page .vp-doc table tr:last-child td {
+  border-bottom: 0;
+}
+.guide-page .vp-doc table td:first-child {
+  color: var(--ds-ink);
+  font-weight: 500;
+}
+.guide-page .vp-doc table tr {
+  background: transparent;
+  border: 0;
+}
