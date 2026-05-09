@@ -986,3 +986,67 @@ html.dark .nav0-bg {
   --vp-nav-screen-bg-color: rgba(22, 22, 24, 0.85);
   --vp-local-nav-bg-color: rgba(22, 22, 24, 0.85);
 }
+
+/* ============================================
+   Nav0 Home (redesigned) — full-bleed page
+   ============================================ */
+
+/* Hide trade-winds background on the redesigned home page */
+.nav0-home-page .nav0-bg-pattern,
+.nav0-home-page .nav0-bg-vignette {
+  display: none;
+}
+
+.nav0-home-page.nav0-bg,
+.nav0-home-page .nav0-bg {
+  background-color: var(--vp-c-bg);
+}
+
+/* Break out of VitePress's content container so sections go full-width */
+.nav0-home-page .VPDoc {
+  padding: 0 !important;
+}
+.nav0-home-page .VPDoc > .container {
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.nav0-home-page .VPDoc .content {
+  max-width: 100% !important;
+  padding: 0 !important;
+}
+.nav0-home-page .VPDoc .content-container {
+  max-width: 100% !important;
+}
+.nav0-home-page .VPDoc .vp-doc {
+  padding: 0 !important;
+}
+
+/* The default theme adds a top border on first heading inside vp-doc — neutralize for the home */
+.nav0-home-page .vp-doc h1,
+.nav0-home-page .vp-doc h2,
+.nav0-home-page .vp-doc h3 {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+/* Make sure links inside the home don't pick up VitePress's default underline-on-hover style */
+.nav0-home-page .vp-doc a {
+  font-weight: inherit;
+  text-decoration: none;
+}
+.nav0-home-page .vp-doc a:hover {
+  text-decoration: none;
+}
+
+/* Hide the page footer "Last updated" / "edit" controls on home */
+.nav0-home-page .VPDocFooter,
+.nav0-home-page .VPDocAside {
+  display: none !important;
+}
+
+/* Hide VitePress's default site footer on the home page; the redesign ships its own. */
+.nav0-home-page .VPFooter {
+  display: none !important;
+}
