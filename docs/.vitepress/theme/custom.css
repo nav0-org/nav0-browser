@@ -3011,21 +3011,28 @@ html.dark .nav0-bg {
 /* HERO --------------------------------------------------------- */
 /* Spans the full column width. We've zeroed VPDoc/container/content
    padding above so this just sits flush with the screen edges of its
-   max-width column. */
+   max-width column.
+
+   The 32px horizontal padding lives on `.lp-hero-inner`, not the
+   outer `.lp-hero`, so the eyebrow / title / tagline align with the
+   article body's left edge below — `.content-container` also caps at
+   max-width 1136px with 32px padding, so matching the offset on the
+   inner element keeps the two text columns vertically aligned. */
 .lp-hero {
   position: relative;
-  padding: 64px 32px 36px;
+  padding: 64px 0 36px;
   border-bottom: 1px solid var(--ds-rule-soft);
   margin-bottom: 0;
 }
 @media (min-width: 768px) {
   .lp-hero {
-    padding: 72px 32px 40px;
+    padding: 72px 0 40px;
   }
 }
 .lp-hero-inner {
   max-width: 1136px;
   margin: 0 auto;
+  padding: 0 32px;
 }
 .lp-eyebrow {
   font-size: 12px;
