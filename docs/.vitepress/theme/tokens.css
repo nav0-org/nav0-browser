@@ -1,0 +1,109 @@
+/* ============================================================
+   Nav0 Design Tokens — single source of truth for the docs site.
+
+   - "Theme-aware" tokens flip between light and dark with `html.dark`.
+   - "Fixed" tokens are constant and used inside dark hero panels,
+     status pills, and other surfaces that don't track the page theme.
+
+   Page- and component-level token sets (`--nv-*`, `--blog-*`) should
+   alias these tokens instead of redefining values.
+   ============================================================ */
+
+:root {
+  /* --- Surfaces (theme-aware) --- */
+  --ds-bg: #ffffff;
+  --ds-bg-soft: #fafafa;
+  --ds-bg-muted: #f5f5f7;
+  --ds-bg-card: #ffffff;
+
+  /* --- Ink / text (theme-aware) --- */
+  --ds-ink: #1d1d1f;
+  --ds-ink-2: #424245;
+  --ds-ink-3: #6e6e73;
+  --ds-ink-4: #86868b;
+
+  /* --- Rules / borders (theme-aware) --- */
+  --ds-rule: #d2d2d7;
+  --ds-rule-soft: #e8e8ed;
+
+  /* --- Accent / interactive (theme-aware) --- */
+  --ds-accent: #0071e3;
+  --ds-accent-hover: #0077ed;
+  --ds-accent-soft: rgba(0, 113, 227, 0.08);
+
+  /* --- Shadows (theme-aware) --- */
+  --ds-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.04);
+  --ds-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06), 0 24px 48px -12px rgba(0, 0, 0, 0.1);
+  --ds-shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.08), 0 40px 80px -16px rgba(0, 0, 0, 0.18);
+
+  /* --- Status (fixed) --- */
+  --ds-good: #1f8b4c;
+  --ds-bad: #c43c3c;
+  --ds-warn: #c46a00;
+
+  /* --- Always-dark panels (fixed) ---
+     Used inside hero gradients/cards that stay dark in both themes. */
+  --ds-on-dark-bg-1: #060607;
+  --ds-on-dark-bg-2: #1a1a1f;
+  --ds-on-dark-ink: #f5f5f7;
+  --ds-on-dark-ink-2: #d2d2d7;
+  --ds-on-dark-ink-3: #a1a1a6;
+  --ds-on-dark-ink-4: #86868b;
+  --ds-on-dark-accent: #4ea7ff;
+
+  /* --- Brand gradients (fixed) --- */
+  --ds-gradient-hero-dark:
+    linear-gradient(160deg, var(--ds-on-dark-bg-1) 0%, var(--ds-on-dark-bg-2) 100%);
+  /* Rainbow / blue-purple gradients start from the brand color so they
+     invert with light/dark mode (black on light, white on dark). */
+  --ds-gradient-rainbow:
+    linear-gradient(120deg, var(--vp-c-brand-1) 0%, #a855f7 35%, #ec4899 70%, #f97316 100%);
+  --ds-gradient-blue-purple:
+    linear-gradient(135deg, var(--vp-c-brand-1) 0%, #a855f7 100%);
+  --ds-gradient-silver:
+    linear-gradient(180deg, #ffffff 0%, #b3b7c3 100%);
+
+  /* --- Type stacks (fixed) --- */
+  --ds-font-sans:
+    'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Helvetica,
+    Arial, sans-serif;
+  --ds-font-serif:
+    'Newsreader', 'Iowan Old Style', 'Charter', 'Source Serif Pro', Georgia, 'Times New Roman',
+    serif;
+  --ds-font-mono:
+    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* --- Radii (fixed) --- */
+  --ds-radius-sm: 8px;
+  --ds-radius-md: 14px;
+  --ds-radius-lg: 18px;
+  --ds-radius-xl: 24px;
+}
+
+html.dark {
+  /* --- Surfaces (dark) --- */
+  --ds-bg: #000000;
+  --ds-bg-soft: #08080a;
+  --ds-bg-muted: #0b0b0d;
+  --ds-bg-card: #111114;
+
+  /* --- Ink / text (dark) --- */
+  --ds-ink: #f5f5f7;
+  --ds-ink-2: #d2d2d7;
+  --ds-ink-3: #a1a1a6;
+  --ds-ink-4: #6e6e73;
+
+  /* --- Rules (dark) --- */
+  --ds-rule: #2a2a2e;
+  --ds-rule-soft: #1a1a1d;
+
+  /* --- Accent (dark) --- */
+  --ds-accent: #2997ff;
+  --ds-accent-hover: #4ea7ff;
+  --ds-accent-soft: rgba(41, 151, 255, 0.12);
+
+  /* --- Shadows (dark) --- */
+  --ds-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --ds-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4), 0 24px 48px -12px rgba(0, 0, 0, 0.6);
+  --ds-shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.5), 0 40px 80px -16px rgba(0, 0, 0, 0.7);
+}

@@ -11,6 +11,7 @@ import DownloadsPage from './components/DownloadsPage.vue';
 import NewHome from './components/NewHome.vue';
 import ReleasesStats from './components/ReleasesStats.vue';
 import ReleasesLatestHero from './components/ReleasesLatestHero.vue';
+import './tokens.css';
 import './custom.css';
 
 export default {

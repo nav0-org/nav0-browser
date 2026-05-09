@@ -308,7 +308,8 @@ a.blog-card:hover {
 
 /* ========== Blog Pages — Apple-style v2 redesign ========== */
 
-/* Apple-style design tokens scoped to blog pages */
+/* Blog page tokens. Aliased to the central design tokens (see theme/tokens.css);
+   surface/ink colors track VitePress so the blog blends with the docs chrome. */
 .blog-list-page,
 .blog-post-page,
 .bl-page,
@@ -322,27 +323,15 @@ a.blog-card:hover {
   --blog-ink-4: var(--vp-c-text-3);
   --blog-rule: var(--vp-c-divider);
   --blog-rule-soft: var(--vp-c-divider);
-  --blog-accent: #0071e3;
-  --blog-accent-hover: #0077ed;
-  --blog-accent-soft: rgba(0, 113, 227, 0.08);
+  --blog-accent: var(--ds-accent);
+  --blog-accent-hover: var(--ds-accent-hover);
+  --blog-accent-soft: var(--ds-accent-soft);
   --blog-gradient: linear-gradient(120deg, #0071e3 0%, #b347d9 50%, #ff5e7a 100%);
-  --blog-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.04);
-  --blog-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06), 0 24px 48px -12px rgba(0, 0, 0, 0.1);
-  --blog-shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.08), 0 40px 80px -16px rgba(0, 0, 0, 0.18);
-  --blog-serif: 'Iowan Old Style', 'Charter', 'Source Serif Pro', Georgia, 'Times New Roman', serif;
-  --blog-mono: var(--vp-font-family-mono);
-}
-
-.dark .blog-list-page,
-.dark .blog-post-page,
-.dark .bl-page,
-.dark .bp-hero {
-  --blog-accent: #2997ff;
-  --blog-accent-hover: #4ea7ff;
-  --blog-accent-soft: rgba(41, 151, 255, 0.12);
-  --blog-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
-  --blog-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4), 0 24px 48px -12px rgba(0, 0, 0, 0.6);
-  --blog-shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.5), 0 40px 80px -16px rgba(0, 0, 0, 0.7);
+  --blog-shadow-sm: var(--ds-shadow-sm);
+  --blog-shadow-md: var(--ds-shadow-md);
+  --blog-shadow-lg: var(--ds-shadow-lg);
+  --blog-serif: var(--ds-font-serif);
+  --blog-mono: var(--ds-font-mono);
 }
 
 /* The blog list and blog post layouts pull users into the design's clean
@@ -942,7 +931,7 @@ a.blog-card:hover {
 }
 
 .bp-headline {
-  font-family: 'Newsreader', var(--blog-serif);
+  font-family: var(--ds-font-serif);
   font-weight: 500;
   font-size: clamp(38px, 5.4vw, 64px);
   line-height: 1.05;
@@ -1222,7 +1211,7 @@ a.blog-card:hover {
 /* Lede — first prose paragraph (now p:first-of-type because byline is hidden,
    but we still want the 2nd p semantically — use nth-of-type) */
 .blog-post-page .vp-doc > p:nth-of-type(2) {
-  font-family: 'Newsreader', var(--blog-serif);
+  font-family: var(--ds-font-serif);
   font-size: 1.375rem;
   line-height: 1.5;
   color: var(--blog-ink-2);
@@ -1233,7 +1222,7 @@ a.blog-card:hover {
 }
 
 .blog-post-page .vp-doc h2 {
-  font-family: 'Newsreader', var(--blog-serif);
+  font-family: var(--ds-font-serif);
   font-weight: 600;
   font-size: 1.875rem;
   letter-spacing: -0.018em;
@@ -1255,7 +1244,7 @@ a.blog-card:hover {
 }
 
 .blog-post-page .vp-doc p {
-  font-family: 'Newsreader', var(--blog-serif);
+  font-family: var(--ds-font-serif);
   font-size: 1.1875rem;
   line-height: 1.6;
   color: var(--blog-ink);
@@ -1313,7 +1302,7 @@ a.blog-card:hover {
 }
 
 .blog-post-page .vp-doc blockquote p {
-  font-family: 'Newsreader', var(--blog-serif);
+  font-family: var(--ds-font-serif);
   font-size: 1.3125rem;
   line-height: 1.5;
   margin: 0;
@@ -1388,13 +1377,7 @@ a.blog-card:hover {
 
 .releases-page-head h1 em {
   font-style: normal;
-  background: linear-gradient(
-    120deg,
-    var(--vp-c-brand-1) 0%,
-    #a855f7 35%,
-    #ec4899 70%,
-    #f97316 100%
-  );
+  background: var(--ds-gradient-rainbow);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -1452,7 +1435,7 @@ a.blog-card:hover {
 }
 
 .rel-stat-value.rel-stat-accent {
-  background: linear-gradient(135deg, var(--vp-c-brand-1) 0%, #a855f7 100%);
+  background: var(--ds-gradient-blue-purple);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -1467,8 +1450,8 @@ a.blog-card:hover {
 
 /* Latest hero — dark gradient panel */
 .rel-latest-hero {
-  background: linear-gradient(160deg, #060607 0%, #1a1a1f 100%);
-  color: #f5f5f7;
+  background: var(--ds-gradient-hero-dark);
+  color: var(--ds-on-dark-ink);
   border-radius: 24px;
   padding: 2.5rem;
   margin: 0 auto 2.5rem;
@@ -1505,7 +1488,7 @@ a.blog-card:hover {
   border-radius: 999px;
   font-size: 0.78rem;
   font-weight: 500;
-  color: #d2d2d7;
+  color: var(--ds-on-dark-ink-2);
   letter-spacing: 0.02em;
   margin-bottom: 1.1rem;
 }
@@ -1514,7 +1497,7 @@ a.blog-card:hover {
   width: 6px;
   height: 6px;
   border-radius: 999px;
-  background: #1f8b4c;
+  background: var(--ds-good);
   box-shadow: 0 0 0 0 rgba(31, 139, 76, 0.5);
   animation: rel-latest-pulse 2s infinite;
 }
@@ -1535,7 +1518,7 @@ a.blog-card:hover {
   letter-spacing: -0.04em;
   line-height: 1;
   margin: 0 0 0.85rem;
-  background: linear-gradient(180deg, #ffffff 0%, #b3b7c3 100%);
+  background: var(--ds-gradient-silver);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -1543,7 +1526,7 @@ a.blog-card:hover {
 
 .rel-latest-headline {
   font-size: 1.2rem;
-  color: #d2d2d7;
+  color: var(--ds-on-dark-ink-2);
   line-height: 1.4;
   margin: 0 0 1.5rem;
   letter-spacing: -0.012em;
@@ -1574,7 +1557,7 @@ a.blog-card:hover {
 
 .rel-latest-cta-primary {
   background: #fff;
-  color: #060607;
+  color: var(--ds-on-dark-bg-1);
 }
 
 .rel-latest-cta-primary:hover {
@@ -1584,7 +1567,7 @@ a.blog-card:hover {
 
 .rel-latest-cta-secondary {
   background: rgba(255, 255, 255, 0.06);
-  color: #f5f5f7;
+  color: var(--ds-on-dark-ink);
   border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
@@ -1604,7 +1587,7 @@ a.blog-card:hover {
 .rel-latest-hero-summary h4 {
   font-size: 0.7rem;
   font-weight: 600;
-  color: #a1a1a6;
+  color: var(--ds-on-dark-ink-3);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   margin: 0 0 0.85rem;
@@ -1617,7 +1600,7 @@ a.blog-card:hover {
   padding: 0;
   margin: 0;
   font-size: 0.88rem;
-  color: #d2d2d7;
+  color: var(--ds-on-dark-ink-2);
 }
 
 .rel-latest-hero-summary li {
@@ -1632,7 +1615,7 @@ a.blog-card:hover {
   position: absolute;
   left: 0;
   top: 0.32rem;
-  color: #4ea7ff;
+  color: var(--ds-on-dark-accent);
   font-family: var(--vp-font-family-mono);
   font-size: 0.85rem;
 }
@@ -1643,7 +1626,7 @@ a.blog-card:hover {
   background: rgba(255, 255, 255, 0.08);
   padding: 0.05rem 0.35rem;
   border-radius: 4px;
-  color: #f5f5f7;
+  color: var(--ds-on-dark-ink);
 }
 
 /* Timeline — vertical line + dots running down the cards */
@@ -2326,8 +2309,8 @@ a.blog-card:hover {
 
 /* Dark hero — full bleed */
 .rel-detail-hero {
-  background: linear-gradient(160deg, #060607 0%, #1a1a1f 100%);
-  color: #f5f5f7;
+  background: var(--ds-gradient-hero-dark);
+  color: var(--ds-on-dark-ink);
   padding: 3.5rem 1.5rem 4.5rem;
   position: relative;
   overflow: hidden;
@@ -2353,7 +2336,7 @@ a.blog-card:hover {
 /* Breadcrumb */
 .rel-detail-breadcrumb {
   font-size: 0.85rem;
-  color: #86868b;
+  color: var(--ds-on-dark-ink-4);
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -2362,7 +2345,7 @@ a.blog-card:hover {
 }
 
 .rel-detail-breadcrumb a {
-  color: #4ea7ff;
+  color: var(--ds-on-dark-accent);
   text-decoration: none;
   transition: color 160ms ease;
 }
@@ -2377,7 +2360,7 @@ a.blog-card:hover {
 }
 
 .rel-detail-breadcrumb .current {
-  color: #d2d2d7;
+  color: var(--ds-on-dark-ink-2);
 }
 
 /* Status pill */
@@ -2391,7 +2374,7 @@ a.blog-card:hover {
   border-radius: 999px;
   font-size: 0.78rem;
   font-weight: 500;
-  color: #d2d2d7;
+  color: var(--ds-on-dark-ink-2);
   letter-spacing: 0.02em;
   margin-bottom: 1.5rem;
 }
@@ -2405,7 +2388,7 @@ a.blog-card:hover {
   width: 6px;
   height: 6px;
   border-radius: 999px;
-  background: #1f8b4c;
+  background: var(--ds-good);
   box-shadow: 0 0 0 0 rgba(31, 139, 76, 0.6);
   animation: rel-detail-pulse 2s infinite;
 }
@@ -2427,7 +2410,7 @@ a.blog-card:hover {
   letter-spacing: -0.045em;
   line-height: 0.95;
   margin: 0 0 1.25rem;
-  background: linear-gradient(180deg, #ffffff 0%, #b3b7c3 100%);
+  background: var(--ds-gradient-silver);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -2437,7 +2420,7 @@ a.blog-card:hover {
 .rel-detail-headline {
   font-size: 1.4rem;
   line-height: 1.4;
-  color: #d2d2d7;
+  color: var(--ds-on-dark-ink-2);
   letter-spacing: -0.012em;
   font-weight: 400;
   max-width: 56ch;
@@ -2471,7 +2454,7 @@ a.blog-card:hover {
 
 .rel-detail-cta-primary {
   background: #fff;
-  color: #060607;
+  color: var(--ds-on-dark-bg-1);
 }
 
 .rel-detail-cta-primary:hover {
@@ -2481,7 +2464,7 @@ a.blog-card:hover {
 
 .rel-detail-cta-secondary {
   background: rgba(255, 255, 255, 0.06);
-  color: #f5f5f7;
+  color: var(--ds-on-dark-ink);
   border: 1px solid rgba(255, 255, 255, 0.14);
 }
 

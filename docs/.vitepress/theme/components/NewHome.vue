@@ -409,31 +409,27 @@ const featuredPosts = computed(() => posts.slice(0, 5));
 
 <style scoped>
 .nv-home {
-  --nv-bg: #ffffff;
-  --nv-bg-muted: #f5f5f7;
-  --nv-bg-soft: #fafafa;
-  --nv-bg-card: #ffffff;
-  --nv-ink: #1d1d1f;
-  --nv-ink-2: #424245;
-  --nv-ink-3: #6e6e73;
-  --nv-ink-4: #86868b;
-  --nv-rule: #d2d2d7;
-  --nv-rule-soft: #e8e8ed;
-  --nv-accent: #0071e3;
-  --nv-accent-hover: #0077ed;
-  --nv-accent-soft: rgba(0, 113, 227, 0.08);
-  --nv-good: #1f8b4c;
-  --nv-bad: #c43c3c;
-  --nv-shadow-sm:
-    0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.04);
-  --nv-shadow-md:
-    0 4px 16px rgba(0, 0, 0, 0.06), 0 24px 48px -12px rgba(0, 0, 0, 0.1);
-  --nv-shadow-lg:
-    0 12px 24px rgba(0, 0, 0, 0.08), 0 40px 80px -16px rgba(0, 0, 0, 0.18);
-  --nv-sans:
-    'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Helvetica,
-    Arial, sans-serif;
-  --nv-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Alias the central design tokens (see theme/tokens.css). */
+  --nv-bg: var(--ds-bg);
+  --nv-bg-muted: var(--ds-bg-muted);
+  --nv-bg-soft: var(--ds-bg-soft);
+  --nv-bg-card: var(--ds-bg-card);
+  --nv-ink: var(--ds-ink);
+  --nv-ink-2: var(--ds-ink-2);
+  --nv-ink-3: var(--ds-ink-3);
+  --nv-ink-4: var(--ds-ink-4);
+  --nv-rule: var(--ds-rule);
+  --nv-rule-soft: var(--ds-rule-soft);
+  --nv-accent: var(--ds-accent);
+  --nv-accent-hover: var(--ds-accent-hover);
+  --nv-accent-soft: var(--ds-accent-soft);
+  --nv-good: var(--ds-good);
+  --nv-bad: var(--ds-bad);
+  --nv-shadow-sm: var(--ds-shadow-sm);
+  --nv-shadow-md: var(--ds-shadow-md);
+  --nv-shadow-lg: var(--ds-shadow-lg);
+  --nv-sans: var(--ds-font-sans);
+  --nv-mono: var(--ds-font-mono);
 
   font-family: var(--nv-sans);
   font-size: 17px;
@@ -444,28 +440,6 @@ const featuredPosts = computed(() => posts.slice(0, 5));
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-}
-
-:global(html.dark) .nv-home {
-  --nv-bg: #000000;
-  --nv-bg-muted: #0b0b0d;
-  --nv-bg-soft: #08080a;
-  --nv-bg-card: #111114;
-  --nv-ink: #f5f5f7;
-  --nv-ink-2: #d2d2d7;
-  --nv-ink-3: #a1a1a6;
-  --nv-ink-4: #6e6e73;
-  --nv-rule: #2a2a2e;
-  --nv-rule-soft: #1a1a1d;
-  --nv-accent: #2997ff;
-  --nv-accent-hover: #4ea7ff;
-  --nv-accent-soft: rgba(41, 151, 255, 0.12);
-  --nv-shadow-sm:
-    0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
-  --nv-shadow-md:
-    0 4px 16px rgba(0, 0, 0, 0.4), 0 24px 48px -12px rgba(0, 0, 0, 0.6);
-  --nv-shadow-lg:
-    0 12px 24px rgba(0, 0, 0, 0.5), 0 40px 80px -16px rgba(0, 0, 0, 0.7);
 }
 
 .nv-home :deep(*) {
