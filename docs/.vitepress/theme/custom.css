@@ -3193,6 +3193,20 @@ html.dark .nav0-bg {
   font-family: var(--ds-font-sans);
 }
 
+/* Reset the default browser margins on the .text elements (h2 for
+   group titles, p for link rows) so spacing only comes from our
+   rules below — without this each link row gets ~16px of phantom
+   margin top + bottom from the <p> default style. */
+:is(.legal-page, .guide-page) .VPSidebarItem .text {
+  margin: 0;
+}
+
+/* Tighten the gap between groups; VitePress default is 24px which
+   reads too airy next to the right TOC. */
+:is(.legal-page, .guide-page) .VPSidebarItem.level-0 {
+  padding-bottom: 14px;
+}
+
 /* Group titles (h2.text inside .level-0) — same as .lp-toc-label */
 :is(.legal-page, .guide-page) .VPSidebarItem.level-0 > .item > .text {
   font-size: 11px;
@@ -3201,7 +3215,7 @@ html.dark .nav0-bg {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   line-height: 1.4;
-  margin-bottom: 6px;
+  margin: 0 0 6px;
   padding-left: 12px;
 }
 
@@ -3213,13 +3227,14 @@ html.dark .nav0-bg {
 
 /* Link rows under each group — same as .lp-toc-link */
 :is(.legal-page, .guide-page) .VPSidebarItem.level-1.is-link > .item {
-  margin: 2px 0;
+  margin: 1px 0;
 }
 :is(.legal-page, .guide-page) .VPSidebarItem.level-1.is-link > .item > .link {
   display: block;
-  padding: 7px 12px;
+  padding: 6px 12px;
   border-left: 2px solid var(--ds-rule-soft);
   line-height: 1.4;
+  border-radius: 0;
   transition:
     color 120ms,
     border-color 120ms,
@@ -3230,9 +3245,10 @@ html.dark .nav0-bg {
   font-weight: 500;
   color: var(--ds-ink-2);
   line-height: 1.4;
+  margin: 0;
 }
 
-/* Hover */
+/* Hover — match .lp-toc-link:hover exactly */
 :is(.legal-page, .guide-page) .VPSidebarItem.level-1.is-link > .item > .link:hover {
   background: var(--ds-bg-soft);
 }
@@ -3241,11 +3257,13 @@ html.dark .nav0-bg {
 }
 
 /* Active (current page) */
-:is(.legal-page, .guide-page) .VPSidebarItem.level-1.is-active > .item > .link {
+:is(.legal-page, .guide-page) .VPSidebarItem.level-1.is-active > .item > .link,
+:is(.legal-page, .guide-page) .VPSidebarItem.level-1.is-active > .item > .link:hover {
   border-left-color: var(--ds-accent);
   background: var(--ds-accent-soft);
 }
-:is(.legal-page, .guide-page) .VPSidebarItem.level-1.is-active > .item > .link > .text {
+:is(.legal-page, .guide-page) .VPSidebarItem.level-1.is-active > .item > .link > .text,
+:is(.legal-page, .guide-page) .VPSidebarItem.level-1.is-active > .item > .link:hover > .text {
   color: var(--ds-accent);
 }
 
