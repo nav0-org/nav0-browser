@@ -3439,3 +3439,594 @@ html.dark .nav0-bg {
   background: transparent;
   border: 0;
 }
+
+/* ============================================================
+   INSTALL PAGE — DownloadsPage.vue redesign
+   Apple-style hero, three platform tiles, terminal mocks with copy
+   buttons, and a build-from-source 2-col block.
+   ============================================================ */
+
+.install-page-v2 {
+  font-family: var(--ds-font-sans);
+}
+.install-page-v2 * {
+  box-sizing: border-box;
+}
+
+.install-page-v2 .install-hero {
+  padding: 64px 0 24px;
+  text-align: center;
+  background:
+    radial-gradient(ellipse 900px 460px at 50% -50px, var(--ds-accent-soft) 0%, transparent 65%),
+    var(--ds-bg);
+  border-bottom: 1px solid var(--ds-rule-soft);
+  margin: -32px -24px 0;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+@media (min-width: 768px) {
+  .install-page-v2 .install-hero {
+    margin: -48px -32px 0;
+    padding: 88px 32px 24px;
+  }
+}
+.install-page-v2 .install-hero-inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+.install-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--ds-bg-card);
+  border: 1px solid var(--ds-rule-soft);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ds-ink-2);
+  margin-bottom: 24px;
+  box-shadow: var(--ds-shadow-sm);
+}
+.install-pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--ds-good);
+  box-shadow: 0 0 0 0 color-mix(in oklab, var(--ds-good) 50%, transparent);
+  animation: install-pulse 2.4s infinite;
+}
+@keyframes install-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--ds-good) 50%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 8px color-mix(in oklab, var(--ds-good) 0%, transparent);
+  }
+}
+.install-h1 {
+  font-family: var(--ds-font-sans);
+  font-weight: 700;
+  font-size: clamp(40px, 6.5vw, 72px);
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+  margin: 0 auto 22px;
+  max-width: 14ch;
+  color: var(--ds-ink);
+}
+.install-h1 em {
+  font-style: normal;
+  background: linear-gradient(120deg, var(--ds-accent) 0%, #b347d9 50%, #ff5e7a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+.install-lead {
+  font-size: 19px;
+  color: var(--ds-ink-2);
+  max-width: 56ch;
+  margin: 0 auto;
+  line-height: 1.4;
+  letter-spacing: -0.012em;
+  font-weight: 400;
+}
+
+.install-shell {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 56px 0 64px;
+}
+
+/* PLATFORM TILES ---------------------------------------------- */
+.ip-platforms {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 48px;
+}
+.ip-tile {
+  background: var(--ds-bg-card);
+  border: 1px solid var(--ds-rule-soft);
+  border-radius: 22px;
+  padding: 32px 24px;
+  box-shadow: var(--ds-shadow-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  text-decoration: none;
+  color: var(--ds-ink);
+  transition:
+    border-color 200ms,
+    transform 200ms,
+    box-shadow 200ms;
+}
+.ip-tile:hover {
+  border-color: var(--ds-rule);
+  transform: translateY(-2px);
+  box-shadow: var(--ds-shadow-md);
+}
+.ip-tile-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 16px;
+  background: var(--ds-bg-soft);
+  border: 1px solid var(--ds-rule-soft);
+}
+.ip-tile-icon svg {
+  width: 26px;
+  height: 26px;
+}
+.ip-tile--mac .ip-tile-icon {
+  background: linear-gradient(180deg, #f5f5f7, #e9e9ee);
+  color: #1d1d1f;
+}
+html.dark .ip-tile--mac .ip-tile-icon {
+  background: linear-gradient(180deg, #2a2a2e, #1a1a1d);
+  color: #f5f5f7;
+}
+.ip-tile--win .ip-tile-icon {
+  background: linear-gradient(135deg, rgba(0, 113, 227, 0.12), rgba(0, 113, 227, 0.04));
+  color: var(--ds-accent);
+}
+.ip-tile--lin .ip-tile-icon {
+  background: linear-gradient(135deg, rgba(255, 140, 32, 0.14), rgba(255, 140, 32, 0.04));
+  color: #ff8c20;
+}
+.ip-tile-name {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  margin: 0;
+}
+
+/* MAC CARD ----------------------------------------------------- */
+.ip-mac-card {
+  background: linear-gradient(180deg, var(--ds-bg-soft), var(--ds-bg-card));
+  border: 1px solid var(--ds-rule-soft);
+  border-radius: 22px;
+  padding: 36px 40px;
+  margin-bottom: 16px;
+  box-shadow: var(--ds-shadow-sm);
+  scroll-margin-top: 80px;
+}
+.ip-mac-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.ip-mac-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #f5f5f7, #e9e9ee);
+  color: #1d1d1f;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--ds-rule-soft);
+  flex: none;
+}
+html.dark .ip-mac-icon {
+  background: linear-gradient(180deg, #2a2a2e, #1a1a1d);
+  color: #f5f5f7;
+}
+.ip-mac-icon svg {
+  width: 18px;
+  height: 18px;
+}
+.ip-mac-head h3 {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 2px;
+  color: var(--ds-ink);
+}
+.ip-mac-sub {
+  font-size: 13px;
+  color: var(--ds-ink-3);
+}
+
+/* TERMINAL ----------------------------------------------------- */
+.ip-terminal {
+  background: #08080a;
+  color: #f5f5f7;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #2a2a2e;
+  box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.4);
+  margin-bottom: 16px;
+}
+.ip-terminal-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #131316;
+  border-bottom: 1px solid #2a2a2e;
+}
+.ip-lights {
+  display: flex;
+  gap: 6px;
+}
+.ip-light {
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  background: #424245;
+}
+.ip-light-r {
+  background: #ff5f57;
+}
+.ip-light-y {
+  background: #febc2e;
+}
+.ip-light-g {
+  background: #28c840;
+}
+.ip-terminal-title {
+  flex: 1;
+  text-align: center;
+  font-family: var(--ds-font-mono);
+  font-size: 11px;
+  color: #6e7681;
+  letter-spacing: 0.02em;
+}
+.ip-copy-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #d2d2d7;
+  font-family: var(--ds-font-mono);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition:
+    background 120ms,
+    color 120ms;
+}
+.ip-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+.ip-copy-btn.is-copied {
+  color: #28c840;
+  border-color: rgba(40, 200, 64, 0.4);
+}
+.ip-terminal-body {
+  padding: 18px 22px;
+  font-family: var(--ds-font-mono);
+  font-size: 13.5px;
+  line-height: 1.7;
+  overflow-x: auto;
+  white-space: pre;
+}
+.ip-terminal-body > div {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.ip-prompt {
+  color: #6e7681;
+  user-select: none;
+}
+.ip-cmd {
+  color: #f5f5f7;
+}
+.ip-flag {
+  color: #79c0ff;
+}
+.ip-url {
+  color: #d2a8ff;
+  word-break: break-all;
+}
+.ip-pipe {
+  color: #ff7b72;
+}
+.ip-out {
+  color: #6e7681;
+  font-size: 12.5px;
+  display: block;
+  white-space: normal;
+}
+.ip-ok {
+  color: #56d364;
+}
+
+/* MAC DESCRIPTION ROW ----------------------------------------- */
+.ip-desc-row {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.ip-desc-item {
+  flex: 1 1 220px;
+  display: flex;
+  gap: 10px;
+}
+.ip-desc-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--ds-accent-soft);
+  color: var(--ds-accent);
+  flex: none;
+  display: grid;
+  place-items: center;
+}
+.ip-desc-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ds-ink);
+  margin-bottom: 2px;
+}
+.ip-desc-text {
+  font-size: 13px;
+  color: var(--ds-ink-3);
+  line-height: 1.5;
+}
+
+/* SECTIONS ----------------------------------------------------- */
+.ip-section {
+  margin-top: 56px;
+  scroll-margin-top: 80px;
+}
+.ip-section-h2 {
+  font-family: var(--ds-font-sans);
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin: 0 0 8px;
+  color: var(--ds-ink);
+  border: 0;
+  padding: 0;
+}
+.ip-section-lead {
+  font-size: 16px;
+  color: var(--ds-ink-2);
+  margin: 0 0 28px;
+  max-width: 60ch;
+  line-height: 1.5;
+}
+
+/* DOWNLOAD CARDS ---------------------------------------------- */
+.ip-dl-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.ip-dl-card {
+  background: var(--ds-bg-card);
+  border: 1px solid var(--ds-rule-soft);
+  border-radius: 18px;
+  padding: 22px 24px;
+  box-shadow: var(--ds-shadow-sm);
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  text-decoration: none;
+  color: var(--ds-ink);
+  transition:
+    border-color 160ms,
+    transform 120ms,
+    box-shadow 160ms;
+}
+.ip-dl-card:hover {
+  border-color: color-mix(in oklab, var(--ds-accent) 30%, var(--ds-rule-soft));
+  transform: translateY(-1px);
+  box-shadow: var(--ds-shadow-md);
+}
+.ip-dl-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--ds-accent-soft);
+  color: var(--ds-accent);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.ip-dl-card h4 {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  margin: 0 0 4px;
+  color: var(--ds-ink);
+}
+.ip-dl-card p {
+  font-size: 13px;
+  color: var(--ds-ink-3);
+  line-height: 1.5;
+  margin: 0;
+}
+.ip-dl-card code {
+  font-family: var(--ds-font-mono);
+  font-size: 12px;
+  background: var(--ds-bg-soft);
+  border: 1px solid var(--ds-rule-soft);
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: var(--ds-ink);
+}
+
+/* BUILD FROM SOURCE ------------------------------------------- */
+.ip-source-build {
+  background: var(--ds-bg-card);
+  border: 1px solid var(--ds-rule-soft);
+  border-radius: 22px;
+  padding: 36px 40px;
+  box-shadow: var(--ds-shadow-sm);
+}
+.ip-source-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 36px;
+  align-items: start;
+}
+.ip-source-grid h3 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  margin: 0 0 12px;
+  color: var(--ds-ink);
+}
+.ip-source-grid p {
+  font-size: 15px;
+  color: var(--ds-ink-2);
+  line-height: 1.55;
+  margin: 0 0 14px;
+}
+.ip-req-list {
+  list-style: none;
+  padding: 0;
+  margin: 18px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ip-req-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--ds-ink-2);
+}
+.ip-req-ico {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--ds-accent-soft);
+  color: var(--ds-accent);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.ip-req-list code {
+  font-family: var(--ds-font-mono);
+  font-size: 12px;
+  background: var(--ds-bg-soft);
+  border: 1px solid var(--ds-rule-soft);
+  padding: 1px 6px;
+  border-radius: 5px;
+}
+.ip-source-foot {
+  font-size: 13px;
+  color: var(--ds-ink-3);
+  margin: 0;
+  line-height: 1.55;
+}
+.ip-source-foot code {
+  font-family: var(--ds-font-mono);
+  font-size: 12px;
+  background: var(--ds-bg-soft);
+  border: 1px solid var(--ds-rule-soft);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+.ip-source-foot a {
+  color: var(--ds-accent);
+  text-decoration: none;
+}
+
+/* LICENSE STRIP ----------------------------------------------- */
+.ip-license {
+  margin-top: 56px;
+  padding: 32px 36px;
+  background: var(--ds-bg-soft);
+  border-radius: 18px;
+  border: 1px solid var(--ds-rule-soft);
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.ip-license-lhs {
+  flex: 1 1 320px;
+}
+.ip-license h3 {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  margin: 0 0 4px;
+  color: var(--ds-ink);
+}
+.ip-license p {
+  font-size: 13.5px;
+  color: var(--ds-ink-3);
+  margin: 0;
+  line-height: 1.5;
+}
+.ip-license-rhs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--ds-bg-card);
+  color: var(--ds-ink);
+  border: 1px solid var(--ds-rule);
+  padding: 0 14px;
+  height: 32px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 999px;
+  text-decoration: none;
+  transition:
+    background 120ms,
+    border-color 120ms;
+}
+.ip-btn:hover {
+  background: var(--ds-bg-muted);
+}
+
+/* Hide the install page's prev/next pager since this is a one-off page. */
+body:has(.install-page-v2) .VPDocFooter {
+  display: none !important;
+}
+
+@media (max-width: 920px) {
+  .ip-platforms {
+    grid-template-columns: 1fr;
+  }
+  .ip-source-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .ip-dl-row {
+    grid-template-columns: 1fr;
+  }
+  .ip-mac-card,
+  .ip-source-build {
+    padding: 28px 24px;
+  }
+}
