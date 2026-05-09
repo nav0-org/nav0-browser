@@ -318,6 +318,10 @@ export default defineConfig({
       pageData.relativePath === 'privacy-policy.md'
     ) {
       pageData.frontmatter.pageClass = 'legal-page';
+      // We render our own left numbered TOC; tell VitePress not to
+      // render its right-side aside so .content takes full width.
+      pageData.frontmatter.aside = false;
+      pageData.frontmatter.outline = false;
     } else if (pageData.relativePath === 'guide/getting-started.md') {
       pageData.frontmatter.pageClass = 'guide-page';
     } else if (pageData.relativePath === 'faq.md') {
