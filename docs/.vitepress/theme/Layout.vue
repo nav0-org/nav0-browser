@@ -41,6 +41,8 @@ const showDocHero = computed(() => isLegalPage.value || isGuidePage.value);
       </template>
       <template #doc-before>
         <BlogPostMetaRail v-if="isBlogPost" />
+      </template>
+      <template #doc-after>
         <LegalPageTOC v-if="showDocHero" />
       </template>
       <template v-if="isReleaseDetail" #page-top>
