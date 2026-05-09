@@ -339,7 +339,11 @@ a.blog-card:hover {
 .nav0-bg:has(.bl-page) .nav0-bg-pattern,
 .nav0-bg:has(.bl-page) .nav0-bg-vignette,
 .nav0-bg:has(.blog-post-page) .nav0-bg-pattern,
-.nav0-bg:has(.blog-post-page) .nav0-bg-vignette {
+.nav0-bg:has(.blog-post-page) .nav0-bg-vignette,
+.nav0-bg:has(.legal-page) .nav0-bg-pattern,
+.nav0-bg:has(.legal-page) .nav0-bg-vignette,
+.nav0-bg:has(.guide-page) .nav0-bg-pattern,
+.nav0-bg:has(.guide-page) .nav0-bg-vignette {
   display: none;
 }
 
@@ -2959,12 +2963,13 @@ html.dark .nav0-bg {
    ============================================================ */
 
 /* Hero: bigger title + accent gradient + subtle radial bg behind the
-   first heading. We hijack the first h1 + p in .vp-doc as the page-head. */
+   first heading. We hijack the first h1 + p in .vp-doc as the page-head.
+   VitePress wraps markdown content in `.vp-doc > div`, so we target
+   that wrapping div. */
 .legal-page .vp-doc {
   position: relative;
-  padding-top: 16px;
 }
-.legal-page .vp-doc > h1:first-child {
+.legal-page .vp-doc > div > h1:first-child {
   font-family: var(--ds-font-sans);
   font-size: clamp(40px, 5.5vw, 64px);
   font-weight: 700;
@@ -2976,8 +2981,9 @@ html.dark .nav0-bg {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  -webkit-text-fill-color: transparent;
 }
-.legal-page .vp-doc > h1:first-child + p {
+.legal-page .vp-doc > div > h1:first-child + p {
   font-size: 19px;
   color: var(--ds-ink-2);
   line-height: 1.5;
@@ -2987,7 +2993,7 @@ html.dark .nav0-bg {
 }
 
 /* Eyebrow before title (added as a small uppercase label via ::before) */
-.legal-page .vp-doc > h1:first-child::before {
+.legal-page .vp-doc > div > h1:first-child::before {
   content: 'Legal';
   display: block;
   font-size: 12px;
@@ -3186,7 +3192,7 @@ html.dark .nav0-bg {
    Light typography polish over the default docs layout.
    ============================================================ */
 
-.guide-page .vp-doc > h1:first-child {
+.guide-page .vp-doc > div > h1:first-child {
   font-family: var(--ds-font-sans);
   font-size: clamp(40px, 5vw, 56px);
   font-weight: 700;
@@ -3194,7 +3200,7 @@ html.dark .nav0-bg {
   line-height: 1.05;
   margin: 32px 0 14px;
 }
-.guide-page .vp-doc > h1:first-child + p {
+.guide-page .vp-doc > div > h1:first-child + p {
   font-size: 21px;
   color: var(--ds-ink-2);
   line-height: 1.4;
