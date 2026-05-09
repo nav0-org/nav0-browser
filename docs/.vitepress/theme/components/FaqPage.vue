@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { marked } from 'marked';
-import { faqData } from '../faq.data';
+import { faqData } from '../faq-data';
 
 marked.setOptions({ gfm: true, breaks: false });
 
