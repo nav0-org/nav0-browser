@@ -322,8 +322,12 @@ export default defineConfig({
       // render its right-side aside so .content takes full width.
       pageData.frontmatter.aside = false;
       pageData.frontmatter.outline = false;
-    } else if (pageData.relativePath === 'guide/getting-started.md') {
+    } else if (pageData.relativePath.startsWith('guide/')) {
       pageData.frontmatter.pageClass = 'guide-page';
+      // The Apple-style hero+left-TOC layout fills the column itself;
+      // disable VitePress's right-side aside so the content isn't squeezed.
+      pageData.frontmatter.aside = false;
+      pageData.frontmatter.outline = false;
     } else if (pageData.relativePath === 'faq.md') {
       pageData.frontmatter.pageClass = 'faq-page-v2';
       pageData.frontmatter.layout = 'page';

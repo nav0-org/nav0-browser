@@ -1,6 +1,7 @@
 ---
 title: 'Getting Started with Nav0 Browser — Installation & Setup'
 description: 'Get started with Nav0 — a minimal, privacy-focused browser. Install on macOS, Windows, or Linux with no account, no setup dialogs, and no data collection.'
+eyebrow: Introduction
 head:
   - - script
     - type: application/ld+json

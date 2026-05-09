@@ -1,6 +1,7 @@
 ---
 title: 'Contributing to Nav0 Browser — Open Source Development Guide'
 description: 'How to contribute to Nav0: report bugs, submit code, improve documentation, and help the community. Setup instructions, guidelines, and code of conduct.'
+eyebrow: Community
 ---
 
 # Contributing

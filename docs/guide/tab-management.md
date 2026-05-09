@@ -1,6 +1,7 @@
 ---
 title: 'Nav0 Tab Management — Tabs, Pinning, Hibernation & Multi-Window'
 description: 'Nav0 offers full tab management with pinning, hibernation, drag-and-drop between windows, tab restoration, Command-K search, and the Cmd+O tab switcher.'
+eyebrow: Feature Guide
 head:
   - - meta
     - property: og:type

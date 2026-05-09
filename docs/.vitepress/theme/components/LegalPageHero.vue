@@ -10,7 +10,11 @@ const title = computed(() => {
   // Strip any " — ..." subtitle suffix that pages use for SEO titles.
   return (t || '').split('—')[0].trim();
 });
-const tagline = computed(() => frontmatter.value.tagline as string | undefined);
+const tagline = computed(
+  () =>
+    (frontmatter.value.tagline as string | undefined) ||
+    (frontmatter.value.description as string | undefined)
+);
 const effective = computed(() => frontmatter.value.effective as string | undefined);
 const lastUpdated = computed(() => frontmatter.value.lastUpdated as string | undefined);
 const version = computed(() => frontmatter.value.version as string | undefined);

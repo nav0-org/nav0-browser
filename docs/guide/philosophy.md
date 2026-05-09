@@ -1,6 +1,7 @@
 ---
 title: 'Nav0 Philosophy — Why We Built a Minimal Browser'
 description: 'Nav0 exists because browsers got bloated. Read the philosophy behind building a browser that does one thing: browse the web.'
+eyebrow: Core Principles
 ---
 
 # Philosophy

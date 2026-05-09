@@ -1,6 +1,7 @@
 ---
 title: "What Nav0 Doesn't Do — Un-features & Roadmap"
 description: 'Transparent list of features Nav0 intentionally omits, would like to build, or is considering — so you know exactly what you are getting.'
+eyebrow: Un-features
 ---
 
 # What Nav0 Doesn't Do

@@ -2962,30 +2962,37 @@ html.dark .nav0-bg {
 
 /* Hide the right-side VitePress TOC aside — we use a left numbered TOC. */
 .legal-page .VPDocAside,
-.legal-page .VPDoc .aside {
+.legal-page .VPDoc .aside,
+.guide-page .VPDocAside,
+.guide-page .VPDoc .aside {
   display: none !important;
 }
-.legal-page .VPDoc.has-aside .content {
+.legal-page .VPDoc.has-aside .content,
+.guide-page .VPDoc.has-aside .content {
   padding-right: 0 !important;
 }
 
 /* Strip VitePress's default doc widths so our hero can bleed full-width
    and the content-container grid below can use the available space. */
-.legal-page .VPDoc {
+.legal-page .VPDoc,
+.guide-page .VPDoc {
   padding: 0 !important;
 }
-.legal-page .VPDoc > .container {
+.legal-page .VPDoc > .container,
+.guide-page .VPDoc > .container {
   max-width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
 }
-.legal-page .VPDoc .content {
+.legal-page .VPDoc .content,
+.guide-page .VPDoc .content {
   max-width: 100% !important;
   padding: 0 !important;
 }
 
 /* Hide the markdown's h1 — the hero renders the title. */
-.legal-page .vp-doc > div > h1:first-child {
+:is(.legal-page, .guide-page) .vp-doc > div > h1:first-child,
+.guide-page .vp-doc > div > h1:first-child {
   display: none;
 }
 
@@ -3070,7 +3077,8 @@ html.dark .nav0-bg {
 /* The TOC (rendered in #doc-before) and the .main (with markdown
    content) are siblings inside .content-container. Grid them so TOC
    sits left and content right. */
-.legal-page .VPDoc .content-container {
+.legal-page .VPDoc .content-container,
+.guide-page .VPDoc .content-container {
   display: grid;
   grid-template-columns: 240px minmax(0, 760px);
   column-gap: 56px;
@@ -3080,12 +3088,14 @@ html.dark .nav0-bg {
   align-items: start;
 }
 /* Default children of .content-container go in the prose column... */
-.legal-page .VPDoc .content-container > * {
+.legal-page .VPDoc .content-container > *,
+.guide-page .VPDoc .content-container > * {
   grid-column: 2;
   min-width: 0;
 }
 /* ...except the TOC, which we anchor to column 1 and make sticky. */
-.legal-page .VPDoc .content-container > .lp-toc {
+.legal-page .VPDoc .content-container > .lp-toc,
+.guide-page .VPDoc .content-container > .lp-toc {
   grid-column: 1;
   grid-row: 1;
   align-self: start;
@@ -3154,19 +3164,19 @@ html.dark .nav0-bg {
 }
 
 /* PROSE -------------------------------------------------------- */
-.legal-page .vp-doc {
+:is(.legal-page, .guide-page) .vp-doc {
   min-width: 0;
   max-width: 760px;
   counter-reset: legal-section;
 }
-.legal-page .vp-doc > div > p:first-of-type {
+:is(.legal-page, .guide-page) .vp-doc > div > p:first-of-type {
   /* Lead paragraph after hero — slightly larger. */
   font-size: 17px;
   color: var(--ds-ink-2);
   line-height: 1.6;
   letter-spacing: -0.005em;
 }
-.legal-page .vp-doc h2 {
+:is(.legal-page, .guide-page) .vp-doc h2 {
   font-family: var(--ds-font-sans);
   font-size: 28px;
   font-weight: 700;
@@ -3181,12 +3191,12 @@ html.dark .nav0-bg {
   align-items: baseline;
   gap: 14px;
 }
-.legal-page .vp-doc h2:first-of-type {
+:is(.legal-page, .guide-page) .vp-doc h2:first-of-type {
   border-top: 0;
   padding-top: 0;
   margin-top: 0;
 }
-.legal-page .vp-doc h2::before {
+:is(.legal-page, .guide-page) .vp-doc h2::before {
   content: counter(legal-section, decimal-leading-zero);
   font-family: var(--ds-font-mono);
   font-size: 13px;
@@ -3195,7 +3205,7 @@ html.dark .nav0-bg {
   letter-spacing: 0;
   flex: none;
 }
-.legal-page .vp-doc h3 {
+:is(.legal-page, .guide-page) .vp-doc h3 {
   font-family: var(--ds-font-sans);
   font-size: 18px;
   font-weight: 600;
@@ -3204,27 +3214,27 @@ html.dark .nav0-bg {
   scroll-margin-top: 80px;
   color: var(--ds-ink);
 }
-.legal-page .vp-doc p,
-.legal-page .vp-doc li {
+:is(.legal-page, .guide-page) .vp-doc p,
+:is(.legal-page, .guide-page) .vp-doc li {
   font-size: 16px;
   line-height: 1.65;
   letter-spacing: -0.003em;
   color: var(--ds-ink-2);
 }
-.legal-page .vp-doc p strong,
-.legal-page .vp-doc li strong {
+:is(.legal-page, .guide-page) .vp-doc p strong,
+:is(.legal-page, .guide-page) .vp-doc li strong {
   color: var(--ds-ink);
   font-weight: 600;
 }
-.legal-page .vp-doc ul,
-.legal-page .vp-doc ol {
+:is(.legal-page, .guide-page) .vp-doc ul,
+:is(.legal-page, .guide-page) .vp-doc ol {
   padding-left: 22px;
   margin: 0 0 22px;
 }
-.legal-page .vp-doc li {
+:is(.legal-page, .guide-page) .vp-doc li {
   margin-bottom: 8px;
 }
-.legal-page .vp-doc :not(pre) > code {
+:is(.legal-page, .guide-page) .vp-doc :not(pre) > code {
   font-family: var(--ds-font-mono);
   font-size: 0.88em;
   background: var(--ds-bg-muted);
@@ -3233,21 +3243,21 @@ html.dark .nav0-bg {
   border: 1px solid var(--ds-rule-soft);
   color: var(--ds-ink);
 }
-.legal-page .vp-doc a {
+:is(.legal-page, .guide-page) .vp-doc a {
   color: var(--ds-accent);
   text-decoration: none;
   border-bottom: 1px solid color-mix(in oklab, var(--ds-accent) 28%, transparent);
   transition: border-color 120ms;
 }
-.legal-page .vp-doc a:hover {
+:is(.legal-page, .guide-page) .vp-doc a:hover {
   border-bottom-color: var(--ds-accent);
 }
-.legal-page .vp-doc hr {
+:is(.legal-page, .guide-page) .vp-doc hr {
   display: none;
 }
 
 /* TABLES ------------------------------------------------------- */
-.legal-page .vp-doc table {
+:is(.legal-page, .guide-page) .vp-doc table {
   display: table;
   width: 100%;
   margin: 20px 0 32px;
@@ -3258,8 +3268,8 @@ html.dark .nav0-bg {
   overflow: hidden;
   border-collapse: collapse;
 }
-.legal-page .vp-doc table th,
-.legal-page .vp-doc table td {
+:is(.legal-page, .guide-page) .vp-doc table th,
+:is(.legal-page, .guide-page) .vp-doc table td {
   padding: 12px 16px;
   text-align: left;
   border-bottom: 1px solid var(--ds-rule-soft);
@@ -3268,7 +3278,7 @@ html.dark .nav0-bg {
   vertical-align: top;
   line-height: 1.5;
 }
-.legal-page .vp-doc table th {
+:is(.legal-page, .guide-page) .vp-doc table th {
   background: var(--ds-bg-soft);
   font-size: 11.5px;
   color: var(--ds-ink-3);
@@ -3276,34 +3286,34 @@ html.dark .nav0-bg {
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
-.legal-page .vp-doc table tr:last-child td {
+:is(.legal-page, .guide-page) .vp-doc table tr:last-child td {
   border-bottom: 0;
 }
-.legal-page .vp-doc table td:first-child {
+:is(.legal-page, .guide-page) .vp-doc table td:first-child {
   color: var(--ds-ink);
   font-weight: 500;
 }
-.legal-page .vp-doc table tr {
+:is(.legal-page, .guide-page) .vp-doc table tr {
   background: transparent;
   border: 0;
 }
 
 /* CALLOUT + BOTTOMLINE ---------------------------------------- */
-.legal-page .vp-doc .doc-callout {
+:is(.legal-page, .guide-page) .vp-doc .doc-callout {
   background: linear-gradient(180deg, var(--ds-accent-soft) 0%, transparent 100%);
   border: 1px solid color-mix(in oklab, var(--ds-accent) 22%, var(--ds-rule-soft));
   border-radius: 16px;
   padding: 22px 26px;
   margin: 24px 0 28px;
 }
-.legal-page .vp-doc .doc-callout p {
+:is(.legal-page, .guide-page) .vp-doc .doc-callout p {
   font-size: 17px;
   color: var(--ds-ink);
   margin: 0;
   font-weight: 500;
   letter-spacing: -0.008em;
 }
-.legal-page .vp-doc .doc-bottomline {
+:is(.legal-page, .guide-page) .vp-doc .doc-bottomline {
   margin: 48px 0 16px;
   padding: 28px 32px;
   background: var(--ds-bg-soft);
@@ -3311,14 +3321,14 @@ html.dark .nav0-bg {
   border-radius: 18px;
   text-align: center;
 }
-.legal-page .vp-doc .doc-bottomline strong {
+:is(.legal-page, .guide-page) .vp-doc .doc-bottomline strong {
   display: block;
   font-size: 19px;
   font-weight: 600;
   color: var(--ds-ink);
   letter-spacing: -0.012em;
 }
-.legal-page .vp-doc .doc-bottomline span {
+:is(.legal-page, .guide-page) .vp-doc .doc-bottomline span {
   display: block;
   margin-top: 8px;
   font-size: 14px;
@@ -3329,22 +3339,22 @@ html.dark .nav0-bg {
 /* Hide VitePress's default markdown-rendered title block, footer, and
    prev/next navigation since the legal hero owns the title and the
    pages don't sit in a sidebar group. */
-.legal-page .VPDocFooter {
+:is(.legal-page, .guide-page) .VPDocFooter {
   display: none !important;
 }
 
 /* Responsive: stack TOC above prose below 980px. */
 @media (max-width: 980px) {
-  .legal-page .VPDoc.has-aside .content-container,
-  .legal-page .VPDoc .content-container {
+  :is(.legal-page, .guide-page) .VPDoc.has-aside .content-container,
+  :is(.legal-page, .guide-page) .VPDoc .content-container {
     grid-template-columns: 1fr !important;
     gap: 32px;
     padding-bottom: 64px;
   }
-  .legal-page .VPDoc .content-container > * {
+  :is(.legal-page, .guide-page) .VPDoc .content-container > * {
     grid-column: 1;
   }
-  .legal-page .VPDoc .content-container > .lp-toc {
+  :is(.legal-page, .guide-page) .VPDoc .content-container > .lp-toc {
     grid-column: 1;
   }
   .lp-toc {
@@ -3357,7 +3367,7 @@ html.dark .nav0-bg {
     grid-template-columns: 1fr 1fr;
     gap: 0 12px;
   }
-  .legal-page .VPDoc .container {
+  :is(.legal-page, .guide-page) .VPDoc .container {
     padding: 0 20px !important;
   }
 }
@@ -3368,42 +3378,11 @@ html.dark .nav0-bg {
 }
 
 /* ============================================================
-   GUIDE — getting-started
-   Light typography polish over the default docs layout.
+   GUIDE — keep kbd badges on shortcut tables (legal pages don't use kbd).
+   The hero, TOC, prose typography, and table styles are shared with
+   legal pages above via :is(.legal-page, .guide-page).
    ============================================================ */
 
-.guide-page .vp-doc > div > h1:first-child {
-  font-family: var(--ds-font-sans);
-  font-size: clamp(40px, 5vw, 56px);
-  font-weight: 700;
-  letter-spacing: -0.035em;
-  line-height: 1.05;
-  margin: 32px 0 14px;
-}
-.guide-page .vp-doc > div > h1:first-child + p {
-  font-size: 21px;
-  color: var(--ds-ink-2);
-  line-height: 1.4;
-  letter-spacing: -0.012em;
-  margin: 0 0 32px;
-  max-width: 56ch;
-}
-.guide-page .vp-doc h2 {
-  font-family: var(--ds-font-sans);
-  font-size: 32px;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  line-height: 1.15;
-  margin: 56px 0 16px;
-}
-.guide-page .vp-doc h3 {
-  font-family: var(--ds-font-sans);
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: -0.018em;
-  margin: 36px 0 10px;
-}
-/* kbd badges in shortcut tables */
 .guide-page .vp-doc kbd {
   font-family: var(--ds-font-mono);
   font-size: 12px;
@@ -3413,45 +3392,6 @@ html.dark .nav0-bg {
   border-radius: 6px;
   color: var(--ds-ink);
   box-shadow: none;
-}
-/* Table styling on guide pages — same look as legal pages */
-.guide-page .vp-doc table {
-  display: table;
-  width: 100%;
-  margin: 16px 0 32px;
-  font-size: 14.5px;
-  background: var(--ds-bg-card);
-  border: 1px solid var(--ds-rule-soft);
-  border-radius: 14px;
-  overflow: hidden;
-  border-collapse: collapse;
-}
-.guide-page .vp-doc table th,
-.guide-page .vp-doc table td {
-  padding: 12px 18px;
-  text-align: left;
-  border-bottom: 1px solid var(--ds-rule-soft);
-  border-right: 0;
-  border-left: 0;
-}
-.guide-page .vp-doc table th {
-  background: var(--ds-bg-soft);
-  font-size: 12px;
-  color: var(--ds-ink-3);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-.guide-page .vp-doc table tr:last-child td {
-  border-bottom: 0;
-}
-.guide-page .vp-doc table td:first-child {
-  color: var(--ds-ink);
-  font-weight: 500;
-}
-.guide-page .vp-doc table tr {
-  background: transparent;
-  border: 0;
 }
 
 /* ============================================================

@@ -1,6 +1,7 @@
 ---
 title: 'Nav0 Ad Blocker — Built-In Ad & Tracker Blocking'
 description: "Nav0's built-in ad blocker blocks ads, trackers, and video ads at the network level with zero configuration. No extensions required. Learn how it works."
+eyebrow: Feature Guide
 head:
   - - meta
     - property: og:type

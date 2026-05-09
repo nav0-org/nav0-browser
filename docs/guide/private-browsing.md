@@ -1,6 +1,7 @@
 ---
 title: 'Nav0 Private Browsing — How Private Mode Works'
 description: "Nav0's private browsing mode uses a separate database partition, clears all data on window close, and blocks cross-contamination with normal windows. Learn how it works."
+eyebrow: Feature Guide
 head:
   - - meta
     - property: og:type

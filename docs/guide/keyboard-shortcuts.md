@@ -1,6 +1,7 @@
 ---
 title: 'Nav0 Keyboard Shortcuts — Full Reference & Customization Guide'
 description: 'Complete list of Nav0 browser keyboard shortcuts for tabs, navigation, bookmarks, zoom, developer tools, and more. All 21 shortcuts are fully customizable.'
+eyebrow: Feature Guide
 head:
   - - meta
     - property: og:type

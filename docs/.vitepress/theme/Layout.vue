@@ -23,6 +23,11 @@ const isLegalPage = computed(() => {
   const path = page.value.relativePath || '';
   return path === 'disclaimer.md' || path === 'terms-of-use.md' || path === 'privacy-policy.md';
 });
+const isGuidePage = computed(() => {
+  const path = page.value.relativePath || '';
+  return path.startsWith('guide/');
+});
+const showDocHero = computed(() => isLegalPage.value || isGuidePage.value);
 </script>
 
 <template>
@@ -32,11 +37,11 @@ const isLegalPage = computed(() => {
     <Layout>
       <template #doc-top>
         <BlogPostHero v-if="isBlogPost" />
-        <LegalPageHero v-if="isLegalPage" />
+        <LegalPageHero v-if="showDocHero" />
       </template>
       <template #doc-before>
         <BlogPostMetaRail v-if="isBlogPost" />
-        <LegalPageTOC v-if="isLegalPage" />
+        <LegalPageTOC v-if="showDocHero" />
       </template>
       <template v-if="isReleaseDetail" #page-top>
         <ReleaseDetailHero />

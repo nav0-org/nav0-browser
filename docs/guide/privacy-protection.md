@@ -1,6 +1,7 @@
 ---
 title: 'Nav0 Privacy & Tracking Protection — Cookies, Fingerprinting, HTTPS & Data Retention'
 description: 'Nav0 blocks third-party cookies, prevents fingerprinting, enforces HTTPS, spoofs user agents, and auto-deletes browsing data. Learn how every layer works.'
+eyebrow: Feature Guide
 head:
   - - meta
     - property: og:type
