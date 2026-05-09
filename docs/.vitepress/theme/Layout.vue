@@ -1,9 +1,11 @@
-<script setup>
+<script setup lang="ts">
 import DefaultTheme from 'vitepress/theme';
 import { useData } from 'vitepress';
 import { computed } from 'vue';
 import BlogPostHero from './components/BlogPostHero.vue';
 import BlogPostMetaRail from './components/BlogPostMetaRail.vue';
+import ReleaseDetailHero from './components/ReleaseDetailHero.vue';
+import ReleaseDetailSidebar from './components/ReleaseDetailSidebar.vue';
 
 const { Layout } = DefaultTheme;
 const { page } = useData();
@@ -11,6 +13,10 @@ const { page } = useData();
 const isBlogPost = computed(
   () => page.value.relativePath.startsWith('blog/') && page.value.relativePath !== 'blog/index.md'
 );
+const isReleaseDetail = computed(() => {
+  const path = page.value.relativePath || '';
+  return path.startsWith('releases/') && path !== 'releases/index.md';
+});
 </script>
 
 <template>
@@ -23,6 +29,12 @@ const isBlogPost = computed(
       </template>
       <template #doc-before>
         <BlogPostMetaRail v-if="isBlogPost" />
+      </template>
+      <template v-if="isReleaseDetail" #page-top>
+        <ReleaseDetailHero />
+      </template>
+      <template v-if="isReleaseDetail" #page-bottom>
+        <ReleaseDetailSidebar />
       </template>
     </Layout>
   </div>

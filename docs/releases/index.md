@@ -3,19 +3,30 @@ title: 'Release Notes — Nav0 Browser'
 description: "Release notes and changelog for Nav0 Browser. See what's new in every release — features, fixes, and improvements."
 ---
 
-# Release Notes
+<div class="releases-page-head">
+  <div class="releases-eyebrow">Release notes</div>
 
-What's new in every release of Nav0 Browser.
+# Every <em>shipped</em> change, in one place.
 
----
-
-<div class="release-list-item">
-  <a href="/releases/v0.2.6">
-    <h2>v0.2.6</h2>
-  </a>
-  <div class="release-meta">May 6, 2026 <span class="release-badge latest">Latest</span></div>
-  <p class="release-excerpt">Fixed packaging breakage from the Electron 41 upgrade, restored Google sign-in by refreshing Firefox UA cap and Chrome preset, and softened the new-tab gradient background.</p>
+  <p class="releases-page-sub">Nav0 ships small and often. No "AI-powered" features hidden in patch notes — just real changes you can read in under a minute each.</p>
 </div>
+
+<ReleasesStats />
+
+<ReleasesLatestHero>
+Fixed packaging breakage from the Electron 41 upgrade, restored Google sign-in by refreshing Firefox UA cap and Chrome preset, and softened the new-tab gradient background.
+
+<template #summary>
+
+- Restored `package.json` `main` to `.webpack/main` so `electron-forge package` works again
+- Refreshed Firefox UA cap and widened Google sign-in host match
+- Bumped Chrome preset to Electron 41's Chromium 146
+- Softened new-tab pastel gradient to read essentially white at a glance
+
+</template>
+</ReleasesLatestHero>
+
+<div class="releases-timeline">
 
 <div class="release-list-item">
   <a href="/releases/v0.2.5">
@@ -159,4 +170,6 @@ What's new in every release of Nav0 Browser.
   </a>
   <div class="release-meta">February 12, 2026 <span class="release-badge alpha">Alpha</span></div>
   <p class="release-excerpt">First alpha release — Electron-based browser with Chromium engine, Command-K search, tab management, bookmarks, and download manager.</p>
+</div>
+
 </div>

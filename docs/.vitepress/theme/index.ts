@@ -9,6 +9,8 @@ import BlogPostMetaRail from './components/BlogPostMetaRail.vue';
 import HomeContent from './components/HomeContent.vue';
 import DownloadsPage from './components/DownloadsPage.vue';
 import NewHome from './components/NewHome.vue';
+import ReleasesStats from './components/ReleasesStats.vue';
+import ReleasesLatestHero from './components/ReleasesLatestHero.vue';
 import './custom.css';
 
 export default {
@@ -23,5 +25,7 @@ export default {
     app.component('HomeContent', HomeContent);
     app.component('DownloadsPage', DownloadsPage);
     app.component('NewHome', NewHome);
+    app.component('ReleasesStats', ReleasesStats);
+    app.component('ReleasesLatestHero', ReleasesLatestHero);
   },
 } satisfies Theme;

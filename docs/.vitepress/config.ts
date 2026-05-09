@@ -306,6 +306,12 @@ export default defineConfig({
       // Drop the all-posts left sidebar (the design uses the meta rail instead)
       // but keep the aside on so VitePress renders the right TOC + scrollspy.
       pageData.frontmatter.sidebar = false;
+    } else if (pageData.relativePath === 'releases/index.md') {
+      pageData.frontmatter.pageClass = 'releases-index-page';
+      pageData.frontmatter.layout = 'page';
+    } else if (pageData.relativePath.startsWith('releases/')) {
+      pageData.frontmatter.pageClass = 'release-detail-page';
+      pageData.frontmatter.layout = 'page';
     }
 
     // Inject SoftwareApplication schema only on relevant pages
