@@ -347,6 +347,18 @@ a.blog-card:hover {
   display: none;
 }
 
+/* The pattern + vignette are absolutely positioned, so .nav0-bg uses
+   `overflow: hidden` to clip them. On pages where we hide both layers,
+   that clipping context also breaks `position: sticky` for the in-page
+   TOC (sticky binds to the nearest clipping ancestor). Lift the clip
+   on those pages so descendants can sticky against the viewport. */
+.nav0-bg:has(.legal-page),
+.nav0-bg:has(.guide-page),
+.nav0-bg:has(.blog-post-page),
+.nav0-bg:has(.bl-page) {
+  overflow: visible;
+}
+
 /* ============================================================
    Blog List Page (rendered by <BlogListPage />)
    ============================================================ */
