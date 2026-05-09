@@ -2969,26 +2969,39 @@ html.dark .nav0-bg {
   padding-right: 0 !important;
 }
 
+/* Strip VitePress's default doc widths so our hero can bleed full-width
+   and the content-container grid below can use the available space. */
+.legal-page .VPDoc {
+  padding: 0 !important;
+}
+.legal-page .VPDoc > .container {
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.legal-page .VPDoc .content {
+  max-width: 100% !important;
+  padding: 0 !important;
+}
+
 /* Hide the markdown's h1 — the hero renders the title. */
 .legal-page .vp-doc > div > h1:first-child {
   display: none;
 }
 
 /* HERO --------------------------------------------------------- */
-/* Rendered via #doc-top, sits at the top of .VPDoc OUTSIDE .container.
-   Use negative side margins (matching VitePress's container padding) so
-   the bottom border bleeds to the column edges, then center the inner
-   content at the same max-width as the body grid below. */
+/* Spans the full column width. We've zeroed VPDoc/container/content
+   padding above so this just sits flush with the screen edges of its
+   max-width column. */
 .lp-hero {
   position: relative;
-  margin: -32px -24px 48px;
-  padding: 64px 24px 36px;
+  padding: 64px 32px 36px;
   border-bottom: 1px solid var(--ds-rule-soft);
+  margin-bottom: 0;
 }
 @media (min-width: 768px) {
   .lp-hero {
-    margin: -48px -32px 56px;
-    padding: 72px 32px 36px;
+    padding: 72px 32px 40px;
   }
 }
 .lp-hero-inner {
@@ -3061,8 +3074,9 @@ html.dark .nav0-bg {
   display: grid;
   grid-template-columns: 240px minmax(0, 760px);
   column-gap: 56px;
-  max-width: 1080px !important;
+  max-width: 1136px !important;
   margin: 0 auto !important;
+  padding: 56px 32px 96px !important;
   align-items: start;
 }
 /* Default children of .content-container go in the prose column... */
