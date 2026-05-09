@@ -334,30 +334,6 @@ a.blog-card:hover {
   --blog-mono: var(--ds-font-mono);
 }
 
-/* The blog list and blog post layouts pull users into the design's clean
-   white aesthetic — disable the global trade-winds backdrop on these pages. */
-.nav0-bg:has(.bl-page) .nav0-bg-pattern,
-.nav0-bg:has(.bl-page) .nav0-bg-vignette,
-.nav0-bg:has(.blog-post-page) .nav0-bg-pattern,
-.nav0-bg:has(.blog-post-page) .nav0-bg-vignette,
-.nav0-bg:has(.legal-page) .nav0-bg-pattern,
-.nav0-bg:has(.legal-page) .nav0-bg-vignette,
-.nav0-bg:has(.guide-page) .nav0-bg-pattern,
-.nav0-bg:has(.guide-page) .nav0-bg-vignette {
-  display: none;
-}
-
-/* The pattern + vignette are absolutely positioned, so .nav0-bg uses
-   `overflow: hidden` to clip them. On pages where we hide both layers,
-   that clipping context also breaks `position: sticky` for the in-page
-   TOC (sticky binds to the nearest clipping ancestor). Lift the clip
-   on those pages so descendants can sticky against the viewport. */
-.nav0-bg:has(.legal-page),
-.nav0-bg:has(.guide-page),
-.nav0-bg:has(.blog-post-page),
-.nav0-bg:has(.bl-page) {
-  overflow: visible;
-}
 
 /* ============================================================
    Blog List Page (rendered by <BlogListPage />)
@@ -2827,94 +2803,17 @@ html.dark .release-badge.alpha {
    Nav0 — Trade Winds Background
    ============================================ */
 
-/* ---- Container ---- */
+/* The site-wide wrapper around <Layout/>. Used to be a positioning
+   context for an SVG pattern + vignette overlay; that's gone now and
+   every page just shows VitePress's standard theme background. */
 .nav0-bg {
-  position: relative;
-  overflow: hidden;
   min-height: 100vh;
-}
-
-/* ---- Pattern Layer ---- */
-.nav0-bg-pattern {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size: cover;
-}
-
-/* ---- Vignette Layer ---- */
-.nav0-bg-vignette {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  opacity: 0.5;
-}
-
-/* ---- Content ---- */
-.nav0-bg > *:not(.nav0-bg-pattern, .nav0-bg-vignette) {
-  position: relative;
-  z-index: 2;
-}
-
-/* ---- Dark Theme ---- */
-html.dark .nav0-bg {
-  background-color: #0a0a0a;
-}
-
-html.dark .nav0-bg .nav0-bg-pattern {
-  background-image: url('./trade-winds-dark.svg');
-}
-
-html.dark .nav0-bg .nav0-bg-vignette {
-  background: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 40%, #0a0a0a 100%);
-}
-
-/* ---- Light Theme ---- */
-html:not(.dark) .nav0-bg {
-  background-color: #fafafa;
-}
-
-html:not(.dark) .nav0-bg .nav0-bg-pattern {
-  background-image: url('./trade-winds-light.svg');
-}
-
-html:not(.dark) .nav0-bg .nav0-bg-vignette {
-  background: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 40%, #fafafa 100%);
-}
-
-/* ---- Semi-transparent sidebar & nav so pattern shows through ---- */
-html:not(.dark) .nav0-bg {
-  --vp-sidebar-bg-color: rgba(246, 246, 247, 0.85);
-  --vp-nav-bg-color: rgba(246, 246, 247, 0.85);
-  --vp-nav-screen-bg-color: rgba(246, 246, 247, 0.85);
-  --vp-local-nav-bg-color: rgba(246, 246, 247, 0.85);
-}
-
-html.dark .nav0-bg {
-  --vp-sidebar-bg-color: rgba(22, 22, 24, 0.85);
-  --vp-nav-bg-color: rgba(22, 22, 24, 0.85);
-  --vp-nav-screen-bg-color: rgba(22, 22, 24, 0.85);
-  --vp-local-nav-bg-color: rgba(22, 22, 24, 0.85);
+  background-color: var(--vp-c-bg);
 }
 
 /* ============================================
    Nav0 Home (redesigned) — full-bleed page
    ============================================ */
-
-/* Hide trade-winds background on the redesigned home page */
-.nav0-home-page .nav0-bg-pattern,
-.nav0-home-page .nav0-bg-vignette {
-  display: none;
-}
-
-.nav0-home-page.nav0-bg,
-.nav0-home-page .nav0-bg {
-  background-color: var(--vp-c-bg);
-}
 
 /* Break out of VitePress's content container so sections go full-width */
 .nav0-home-page .VPDoc {
@@ -4106,10 +4005,6 @@ body:has(.install-page-v2) .VPDocFooter {
 }
 .faq-page-v2 .VPPage {
   padding: 0;
-}
-.nav0-bg:has(.faq-page-v2) .nav0-bg-pattern,
-.nav0-bg:has(.faq-page-v2) .nav0-bg-vignette {
-  display: none;
 }
 
 .faq-page-v2 {

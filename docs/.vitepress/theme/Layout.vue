@@ -32,8 +32,6 @@ const showDocHero = computed(() => isLegalPage.value || isGuidePage.value);
 
 <template>
   <div class="nav0-bg">
-    <div class="nav0-bg-pattern"></div>
-    <div class="nav0-bg-vignette"></div>
     <Layout>
       <template #doc-top>
         <BlogPostHero v-if="isBlogPost" />
