@@ -981,11 +981,15 @@ function updateProxyFormVisibility(mode: string) {
 }
 
 // ---- Keyboard Shortcuts ----
+function effectiveDefault(s: KeyboardShortcutAction): string {
+  return (isMac && s.defaultShortcutMac) || s.defaultShortcut;
+}
+
 function initKeyboardShortcuts() {
   // Build shortcuts list from defaults + overrides
   shortcuts = DEFAULT_KEYBOARD_SHORTCUTS.map((s) => ({
     ...s,
-    currentShortcut: settings.keyboardShortcuts?.[s.id] || s.defaultShortcut,
+    currentShortcut: settings.keyboardShortcuts?.[s.id] || effectiveDefault(s),
   }));
 
   renderShortcutsTable();
@@ -1010,7 +1014,10 @@ function initKeyboardShortcuts() {
     if (confirm('Reset all keyboard shortcuts to defaults?')) {
       settings.keyboardShortcuts = {};
       saveSettings();
-      shortcuts = DEFAULT_KEYBOARD_SHORTCUTS.map((s) => ({ ...s }));
+      shortcuts = DEFAULT_KEYBOARD_SHORTCUTS.map((s) => ({
+        ...s,
+        currentShortcut: effectiveDefault(s),
+      }));
       renderShortcutsTable();
       showToast('All shortcuts reset to defaults');
     }
@@ -1045,7 +1052,7 @@ function renderShortcutsTable() {
     tr.innerHTML = `
       <td>${shortcut.label}</td>
       <td><span class="shortcut-category-badge">${shortcut.category}</span></td>
-      <td>${formatShortcutDisplay(shortcut.defaultShortcut)}</td>
+      <td>${formatShortcutDisplay(effectiveDefault(shortcut))}</td>
       <td class="shortcut-key-cell" data-action-id="${shortcut.id}">
         <span class="shortcut-key">${formatShortcutDisplay(shortcut.currentShortcut)}</span>
       </td>
@@ -1062,7 +1069,7 @@ function renderShortcutsTable() {
     const resetBtn = tr.querySelector('.shortcut-reset-btn') as HTMLElement;
     resetBtn?.addEventListener('click', (e) => {
       e.stopPropagation();
-      shortcut.currentShortcut = shortcut.defaultShortcut;
+      shortcut.currentShortcut = effectiveDefault(shortcut);
       if (settings.keyboardShortcuts?.[shortcut.id]) {
         delete settings.keyboardShortcuts[shortcut.id];
       }

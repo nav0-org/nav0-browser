@@ -162,11 +162,11 @@ export abstract class AppMenuManager {
           { type: 'separator' as const },
           {
             label: 'Close Tab',
+            accelerator: 'CmdOrCtrl+W',
             click: async () => {
-              AppWindowManager.getActiveWindow().closeTab(
-                AppWindowManager.getActiveWindow().getActiveTabId(),
-                true
-              );
+              const activeWindow = AppWindowManager.getActiveWindow();
+              if (!activeWindow) return;
+              activeWindow.closeTab(activeWindow.getActiveTabId(), true);
             },
           },
           {
@@ -180,6 +180,33 @@ export abstract class AppMenuManager {
       {
         label: 'Go To',
         submenu: [
+          {
+            label: 'Back',
+            accelerator: isMac ? 'Cmd+[' : 'Alt+Left',
+            click: () => {
+              const activeWindow = AppWindowManager.getActiveWindow();
+              if (!activeWindow) return;
+              const activeTab = activeWindow.getActiveTab();
+              const wc = activeTab?.getWebContentsViewInstance()?.webContents;
+              if (wc?.navigationHistory.canGoBack()) {
+                wc.navigationHistory.goBack();
+              }
+            },
+          },
+          {
+            label: 'Forward',
+            accelerator: isMac ? 'Cmd+]' : 'Alt+Right',
+            click: () => {
+              const activeWindow = AppWindowManager.getActiveWindow();
+              if (!activeWindow) return;
+              const activeTab = activeWindow.getActiveTab();
+              const wc = activeTab?.getWebContentsViewInstance()?.webContents;
+              if (wc?.navigationHistory.canGoForward()) {
+                wc.navigationHistory.goForward();
+              }
+            },
+          },
+          { type: 'separator' as const },
           {
             label: 'Bookmarks',
             accelerator: 'CmdOrCtrl+Shift+B',

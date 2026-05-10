@@ -46,7 +46,7 @@ const COMMAND_O_HTML = `
   <div class="cmdo-overlay-container">
     <!-- Search bar -->
     <div class="search-bar">
-      <span class="shortcut-badge">&#8984;O</span>
+      <span class="shortcut-badge" id="cmdo-shortcut-badge"></span>
       <i data-lucide="search" class="search-icon" width="16" height="16"></i>
       <input type="text" id="cmdo-search-input" class="search-input" placeholder="Search across all tabs..." autofocus>
       <span class="tab-count" id="cmdo-tab-count">0 tabs</span>
@@ -335,6 +335,11 @@ export function init(container: HTMLElement): void {
   tabCountEl = container.querySelector('#cmdo-tab-count') as HTMLElement;
   footerPrivate = container.querySelector('#cmdo-footer-private') as HTMLElement;
   footerDragHint = container.querySelector('#cmdo-footer-drag-hint') as HTMLElement;
+
+  const shortcutBadge = container.querySelector('#cmdo-shortcut-badge') as HTMLElement;
+  if (shortcutBadge) {
+    shortcutBadge.textContent = window.BrowserAPI.platform === 'darwin' ? '⌘O' : 'Ctrl+O';
+  }
 
   if (window.BrowserAPI.isPrivate) {
     footerPrivate.style.display = '';

@@ -53,8 +53,10 @@ export class Tab {
     this.tabElement.title = this.title || 'New Tab';
 
     // Add close button event listener
-    const closeButton = this.tabElement.querySelector('#tab-close-button');
+    const closeButton = this.tabElement.querySelector('#tab-close-button') as HTMLElement | null;
     if (closeButton) {
+      const isMac = window.BrowserAPI.platform === 'darwin';
+      closeButton.title = `Close tab (${isMac ? '⌘W' : 'Ctrl+W'})`;
       closeButton.addEventListener('click', (e) => {
         e.stopPropagation();
         window.BrowserAPI.closeTab(appWindowId, this.id, true);
