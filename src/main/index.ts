@@ -1,3 +1,4 @@
+import path from 'path';
 import { app, dialog } from 'electron';
 import { AppWindowManager } from './browser/app-window-manager';
 import { DataStoreManager } from './database/data-store-manager';
@@ -38,6 +39,18 @@ process.on('unhandledRejection', (reason: unknown) => {
 // Cloudflare Turnstile) don't flag webContents we haven't explicitly configured.
 // Must run before any BrowserWindow / WebContentsView is created.
 configureUserAgentFallback();
+
+// Isolate dev from the installed Nav0 and avoid the macOS Keychain dependency.
+// The dev binary runs from node_modules/electron (CFBundleName "Electron"),
+// so it would otherwise share userData with the installed app but try to
+// derive its OSCrypt key from a different keychain entry — and on unsigned
+// dev builds that entry often can't be created at all, leaving Chromium with
+// a per-process random key and cookies that vanish on the next launch.
+// Production keeps real OSCrypt via the EnableCookieEncryption fuse.
+if (!app.isPackaged) {
+  app.setPath('userData', path.join(app.getPath('appData'), 'Nav0 (Dev)'));
+  app.commandLine.appendSwitch('use-mock-keychain');
+}
 
 // Disable Chromium features that trigger macOS "Local Network" permission dialog.
 // These features use mDNS/Bonjour for device discovery, which is unnecessary for
