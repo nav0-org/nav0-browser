@@ -49,6 +49,11 @@ const ISSUE_REPORT_HTML = `
         </div>
 
         <div class="form-group">
+          <label class="form-label" for="ir-issue-reported-by">Reported By <span class="form-label-optional">(optional)</span></label>
+          <input type="text" class="form-control" id="ir-issue-reported-by" placeholder="Your name, email, or GitHub handle" maxlength="200" />
+        </div>
+
+        <div class="form-group">
           <label class="form-label">Attachments</label>
           <div class="attachment-area" id="ir-attachment-area">
             <label class="attachment-drop-zone" id="ir-attachment-drop-zone" for="ir-attachment-input">
@@ -79,10 +84,14 @@ const ISSUE_REPORT_HTML = `
 
 async function getSystemInfo(): Promise<string> {
   const platform = window.BrowserAPI?.platform || navigator.platform;
+  let appVersion = 'unknown';
+  let buildMode = 'unknown';
   let electronVersion = 'unknown';
   let chromeVersion = 'unknown';
   try {
     const info = await window.BrowserAPI.getAboutInfo();
+    appVersion = info.appVersion || 'unknown';
+    buildMode = info.isPackaged ? 'Installed' : 'Development';
     electronVersion = info.electronVersion || 'unknown';
     chromeVersion = info.chromiumVersion || 'unknown';
   } catch {
@@ -93,6 +102,8 @@ async function getSystemInfo(): Promise<string> {
     chromeVersion = chromeMatch ? chromeMatch[1] : 'unknown';
   }
   const lines = [
+    `Nav0 Version: ${appVersion}`,
+    `Build Mode: ${buildMode}`,
     `Platform: ${platform}`,
     `Electron: ${electronVersion}`,
     `Chrome: ${chromeVersion}`,
@@ -280,11 +291,15 @@ function resetForm(): void {
   const titleInput = containerEl.querySelector('#ir-issue-title') as HTMLInputElement;
   const descInput = containerEl.querySelector('#ir-issue-description') as HTMLTextAreaElement;
   const typeSelect = containerEl.querySelector('#ir-issue-type') as HTMLSelectElement;
+  const reportedByInput = containerEl.querySelector(
+    '#ir-issue-reported-by'
+  ) as HTMLInputElement;
   const statusEl = containerEl.querySelector('#ir-issue-report-status') as HTMLElement;
 
   if (titleInput) titleInput.value = '';
   if (descInput) descInput.value = '';
   if (typeSelect) typeSelect.value = 'bug';
+  if (reportedByInput) reportedByInput.value = '';
   if (statusEl) statusEl.style.display = 'none';
 
   // Clear attachments
@@ -299,11 +314,15 @@ async function submitIssue(): Promise<void> {
     '#ir-issue-description'
   ) as HTMLTextAreaElement;
   const typeSelect = containerEl.querySelector('#ir-issue-type') as HTMLSelectElement;
+  const reportedByInput = containerEl.querySelector(
+    '#ir-issue-reported-by'
+  ) as HTMLInputElement;
   const submitBtn = containerEl.querySelector('#ir-issue-submit-btn') as HTMLButtonElement;
 
   const title = titleInput.value.trim();
   const description = descriptionInput.value.trim();
   const type = typeSelect.value;
+  const reportedBy = reportedByInput?.value.trim() || '';
 
   if (!title) {
     showStatus('Please enter a title.', 'error');
@@ -330,7 +349,8 @@ async function submitIssue(): Promise<void> {
   }));
 
   const sysInfo = await getSystemInfo();
-  const body = `**Type:** ${typeLabel}\n\n**Description:**\n${description}\n\n---\n**System Info:**\n\`\`\`\n${sysInfo}\n\`\`\`\n\n*Submitted from Nav0 Browser in-app issue reporter*`;
+  const reportedBySection = reportedBy ? `**Reported By:** ${reportedBy}\n\n` : '';
+  const body = `**Type:** ${typeLabel}\n\n${reportedBySection}**Description:**\n${description}\n\n---\n**System Info:**\n\`\`\`\n${sysInfo}\n\`\`\`\n\n*Submitted from Nav0 Browser in-app issue reporter*`;
 
   try {
     const response = await fetch(WORKER_URL, {

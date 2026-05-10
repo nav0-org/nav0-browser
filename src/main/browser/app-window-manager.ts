@@ -953,6 +953,7 @@ export abstract class AppWindowManager {
 
       return {
         appVersion: app.getVersion(),
+        isPackaged: app.isPackaged,
         electronVersion: process.versions.electron,
         chromiumVersion: process.versions.chrome,
         nodeVersion: process.versions.node,
