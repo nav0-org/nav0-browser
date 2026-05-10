@@ -23,6 +23,7 @@ export interface KeyboardShortcutAction {
   label: string;
   category: string;
   defaultShortcut: string;
+  defaultShortcutMac?: string;
   currentShortcut: string;
   isReserved?: boolean;
 }
@@ -259,13 +260,6 @@ export const DEFAULT_KEYBOARD_SHORTCUTS: KeyboardShortcutAction[] = [
     currentShortcut: 'mod+Shift+N',
   },
   {
-    id: 'focus-url-bar',
-    label: 'Focus URL Bar',
-    category: 'Navigation',
-    defaultShortcut: 'mod+L',
-    currentShortcut: 'mod+L',
-  },
-  {
     id: 'reload-page',
     label: 'Reload Page',
     category: 'Navigation',
@@ -322,13 +316,6 @@ export const DEFAULT_KEYBOARD_SHORTCUTS: KeyboardShortcutAction[] = [
     currentShortcut: 'mod+Shift+H',
   },
   {
-    id: 'bookmark-page',
-    label: 'Bookmark Page',
-    category: 'Bookmarks',
-    defaultShortcut: 'mod+D',
-    currentShortcut: 'mod+D',
-  },
-  {
     id: 'open-bookmarks',
     label: 'Open Bookmarks',
     category: 'Bookmarks',
@@ -340,6 +327,7 @@ export const DEFAULT_KEYBOARD_SHORTCUTS: KeyboardShortcutAction[] = [
     label: 'Toggle DevTools',
     category: 'Developer',
     defaultShortcut: 'mod+Shift+I',
+    defaultShortcutMac: 'mod+Alt+I',
     currentShortcut: 'mod+Shift+I',
   },
   {
@@ -369,6 +357,13 @@ export const DEFAULT_KEYBOARD_SHORTCUTS: KeyboardShortcutAction[] = [
     category: 'Utilities',
     defaultShortcut: 'mod+K',
     currentShortcut: 'mod+K',
+  },
+  {
+    id: 'tab-switcher',
+    label: 'Tab Switcher',
+    category: 'Tabs',
+    defaultShortcut: 'mod+O',
+    currentShortcut: 'mod+O',
   },
 ];
 
