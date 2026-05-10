@@ -94,6 +94,15 @@ export class BrowserTabManager {
     this.sslIndicator = document.getElementById('ssl-indicator') as HTMLButtonElement;
 
     this.setupSSLIndicator();
+    this.setupShortcutTooltips();
+  }
+
+  private setupShortcutTooltips(): void {
+    const isMac = window.BrowserAPI.platform === 'darwin';
+    const mod = isMac ? '⌘' : 'Ctrl+';
+    this.backButton.title = `Go back (${isMac ? '⌘[' : 'Alt+Left'})`;
+    this.forwardButton.title = `Go forward (${isMac ? '⌘]' : 'Alt+Right'})`;
+    this.refreshButton.title = `Refresh (${mod}R)`;
   }
 
   private setupEventListeners(): void {
