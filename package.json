@@ -5,9 +5,6 @@
   "private": true,
   "main": ".webpack/main",
   "scripts": {
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs",
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
@@ -95,8 +92,7 @@
     "stylelint-config-standard": "^40.0.0",
     "ts-loader": "^9.5.2",
     "ts-node": "10.9.2",
-    "typescript": "5.8.3",
-    "vitepress": "^1.5.0"
+    "typescript": "5.8.3"
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
