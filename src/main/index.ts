@@ -63,25 +63,29 @@ const gotSingleInstanceLock = app.requestSingleInstanceLock();
 if (!gotSingleInstanceLock) {
   app.quit();
 } else {
+  let appReady: Promise<void> = Promise.resolve();
+
   app.on('second-instance', (_event, argv) => {
-    const args = parseCLIArgs(argv);
-    if (hasCLIOverride(args)) {
-      void openCLIRequestedWindow(args);
-    } else {
-      // Plain `nav0` re-invocation — surface an existing window.
-      const existing = AppWindowManager.getActiveWindow() ?? AppWindowManager.getWindows()[0];
-      const bw = existing?.getBrowserWindowInstance();
-      if (bw) {
-        if (bw.isMinimized()) bw.restore();
-        bw.focus();
+    void appReady.then(() => {
+      const args = parseCLIArgs(argv);
+      if (hasCLIOverride(args)) {
+        void openCLIRequestedWindow(args);
       } else {
-        AppWindowManager.createWindow(false);
+        // Plain `nav0` re-invocation — surface an existing window.
+        const existing = AppWindowManager.getActiveWindow() ?? AppWindowManager.getWindows()[0];
+        const bw = existing?.getBrowserWindowInstance();
+        if (bw) {
+          if (bw.isMinimized()) bw.restore();
+          bw.focus();
+        } else {
+          AppWindowManager.createWindow(false);
+        }
       }
-    }
+    });
   });
 
   // Initialize main window when app is ready
-  app.whenReady().then(async () => {
+  appReady = app.whenReady().then(async () => {
     await DataStoreManager.init();
     await SettingsEnforcer.init();
     const cliOverride = hasCLIOverride(initialCLIArgs);

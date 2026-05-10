@@ -3,6 +3,7 @@ import { AppConstants, DataStoreConstants, InAppUrls } from '../../constants/app
 import { AppWindowManager } from './app-window-manager';
 import { DataStoreManager } from '../database/data-store-manager';
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from '../../types/settings-types';
+import { CLIInstaller, showInstallCLIDialog } from '../cli/cli-installer';
 
 export abstract class AppMenuManager {
   private static menu: Electron.Menu;
@@ -31,6 +32,16 @@ export abstract class AppMenuManager {
                       InAppUrls.BROWSER_SETTINGS,
                       true
                     );
+                  },
+                },
+                { type: 'separator' as const },
+                {
+                  label: CLIInstaller.isInstalled()
+                    ? "Manage 'nav0' Command in PATH..."
+                    : "Install 'nav0' Command in PATH...",
+                  click: async () => {
+                    const win = AppWindowManager.getActiveWindow()?.getBrowserWindowInstance();
+                    await showInstallCLIDialog(win ?? undefined);
                   },
                 },
                 { type: 'separator' as const },
@@ -322,6 +333,19 @@ export abstract class AppMenuManager {
               await AppWindowManager.getActiveWindow().createTab(InAppUrls.ABOUT, true);
             },
           },
+          ...(process.platform === 'win32'
+            ? [
+                {
+                  label: CLIInstaller.isInstalled()
+                    ? "Manage 'nav0' Command in PATH..."
+                    : "Install 'nav0' Command in PATH...",
+                  click: async () => {
+                    const win = AppWindowManager.getActiveWindow()?.getBrowserWindowInstance();
+                    await showInstallCLIDialog(win ?? undefined);
+                  },
+                },
+              ]
+            : []),
           {
             label: 'Privacy Policy',
             click: async () => {
