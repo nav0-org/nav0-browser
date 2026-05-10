@@ -103,6 +103,7 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly GO_FORWARD = 'browser:go-forward';
   public static readonly REFRESH = 'browser:refresh';
   public static readonly HARD_RELOAD = 'browser:hard-reload';
+  public static readonly STOP_LOADING = 'browser:stop-loading';
   public static readonly ADD_BOOKMARK = 'browser:add-bookmark';
   public static readonly REMOVE_BOOKMARK = 'browser:remove-bookmark';
   public static readonly REMOVE_ALL_BOOKMARKS = 'browser:remove-all-bookmarks';
