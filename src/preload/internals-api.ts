@@ -76,6 +76,13 @@ export function init() {
     hardReloadTab: async (appWindowId: string, tabId: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.HARD_RELOAD, appWindowId, tabId);
     },
+    stopLoadingTab: async (appWindowId: string, tabId: string) => {
+      return ipcRenderer.invoke(
+        RendererToMainEventsForBrowserIPC.STOP_LOADING,
+        appWindowId,
+        tabId
+      );
+    },
     addBookmark: async (
       appWindowId: string,
       title: string,

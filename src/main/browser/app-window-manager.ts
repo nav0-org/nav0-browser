@@ -483,6 +483,28 @@ export abstract class AppWindowManager {
     );
 
     ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.STOP_LOADING,
+      async (event, appWindowId: string, tabId: string) => {
+        let appWindow: AppWindow;
+        let tab: Tab;
+        if (appWindowId) {
+          appWindow = AppWindowManager.getWindowById(appWindowId);
+        } else {
+          appWindow = AppWindowManager.getActiveWindow();
+        }
+        if (appWindow && tabId) {
+          tab = AppWindowManager.getWindowById(appWindowId).getTabById(tabId);
+        } else if (appWindow) {
+          tab = appWindow.getActiveTab();
+        }
+
+        if (tab && tab.getWebContentsViewInstance()) {
+          return tab.getWebContentsViewInstance().webContents.stop();
+        }
+      }
+    );
+
+    ipcMain.handle(
       RendererToMainEventsForBrowserIPC.UPDATE_BROWSER_VIEW_BOUNDS,
       async (
         event,
