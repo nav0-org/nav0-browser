@@ -171,7 +171,7 @@ export abstract class AppMenuManager {
         submenu: [
           {
             label: 'Back',
-            accelerator: 'Alt+Left',
+            accelerator: isMac ? 'Cmd+[' : 'Alt+Left',
             click: () => {
               const activeWindow = AppWindowManager.getActiveWindow();
               if (!activeWindow) return;
@@ -184,7 +184,7 @@ export abstract class AppMenuManager {
           },
           {
             label: 'Forward',
-            accelerator: 'Alt+Right',
+            accelerator: isMac ? 'Cmd+]' : 'Alt+Right',
             click: () => {
               const activeWindow = AppWindowManager.getActiveWindow();
               if (!activeWindow) return;

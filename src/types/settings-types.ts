@@ -278,6 +278,7 @@ export const DEFAULT_KEYBOARD_SHORTCUTS: KeyboardShortcutAction[] = [
     label: 'Back',
     category: 'Navigation',
     defaultShortcut: 'Alt+Left',
+    defaultShortcutMac: 'mod+[',
     currentShortcut: 'Alt+Left',
   },
   {
@@ -285,6 +286,7 @@ export const DEFAULT_KEYBOARD_SHORTCUTS: KeyboardShortcutAction[] = [
     label: 'Forward',
     category: 'Navigation',
     defaultShortcut: 'Alt+Right',
+    defaultShortcutMac: 'mod+]',
     currentShortcut: 'Alt+Right',
   },
   {
