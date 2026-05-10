@@ -25,6 +25,7 @@ declare global {
       goForward: (appWindowId: string, tabId: string) => Promise<any>;
       refreshTab: (appWindowId: string, tabId: string) => Promise<any>;
       hardReloadTab: (appWindowId: string, tabId: string) => Promise<any>;
+      stopLoadingTab: (appWindowId: string, tabId: string) => Promise<any>;
       addBookmark: (
         appWindowId: string,
         title: string,
