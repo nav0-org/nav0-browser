@@ -103,7 +103,6 @@ export class Tab {
         webContents: Electron.WebContents
       ) => void)
     | null = null;
-  private pdfDownloadBypass = false;
   private isSuspended = false;
   private lastActivatedAt: Date = new Date();
   private pageStartTime: number | null = null;
@@ -244,8 +243,12 @@ export class Tab {
   }
 
   /**
-   * Registers a session-level handler that forces PDF responses to display inline
-   * instead of triggering a download. Only registers once per session partition.
+   * Registers a session-level handler that strips non-attachment Content-Disposition
+   * headers from PDF responses so they render inline instead of being saved.
+   * Explicit `attachment` dispositions are preserved — those signal an intentional
+   * download (e.g. Gmail's "Download attachment" link) and force-rendering them
+   * inline can crash the sandboxed PDF-viewer renderer.
+   * Only registers once per session partition.
    */
   private registerPdfHandler(): void {
     if (Tab.pdfSessionsRegistered.has(this.partitionSetting)) return;
@@ -271,18 +274,39 @@ export class Tab {
           }
         }
 
-        if (isPdf) {
-          // Remove Content-Disposition header to force inline display
-          const newHeaders = { ...headers };
-          for (const key of Object.keys(newHeaders)) {
-            if (key.toLowerCase() === 'content-disposition') {
-              delete newHeaders[key];
-            }
-          }
-          callback({ responseHeaders: newHeaders });
-        } else {
+        if (!isPdf) {
           callback({ responseHeaders: headers });
+          return;
         }
+
+        // Preserve explicit attachment dispositions — server is signaling a
+        // download. Stripping them forces Chromium's PDF viewer to load in a
+        // cross-origin context that crashes the sandboxed renderer.
+        let isAttachment = false;
+        for (const key of Object.keys(headers)) {
+          if (key.toLowerCase() === 'content-disposition') {
+            const value = (headers[key]?.[0] || '').toLowerCase();
+            if (value.trim().startsWith('attachment')) {
+              isAttachment = true;
+            }
+            break;
+          }
+        }
+
+        if (isAttachment) {
+          callback({ responseHeaders: headers });
+          return;
+        }
+
+        // Remove non-attachment Content-Disposition (e.g. `inline`) so PDFs
+        // render in-tab via the built-in viewer.
+        const newHeaders = { ...headers };
+        for (const key of Object.keys(newHeaders)) {
+          if (key.toLowerCase() === 'content-disposition') {
+            delete newHeaders[key];
+          }
+        }
+        callback({ responseHeaders: newHeaders });
       }
     );
   }
@@ -360,29 +384,6 @@ export class Tab {
       const isCrossSessionResume = DownloadManager.isResuming(downloadId);
       if (!isCrossSessionResume && downloadWebContents !== this.webContentsViewInstance.webContents)
         return;
-
-      const fileName = item.getFilename();
-      const mimeType = item.getMimeType();
-
-      // Intercept PDF downloads and open them in-tab instead,
-      // unless the user explicitly requested a PDF download
-      // or this is a cross-session resume.
-      if (
-        !isCrossSessionResume &&
-        (mimeType === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf'))
-      ) {
-        if (this.pdfDownloadBypass) {
-          this.pdfDownloadBypass = false;
-          // Fall through to handleDownload below
-        } else {
-          const pdfUrl = item.getURL();
-          item.cancel();
-          if (pdfUrl) {
-            this.navigate(pdfUrl);
-          }
-          return;
-        }
-      }
 
       await this.handleDownload(item);
     };
@@ -1267,7 +1268,6 @@ export class Tab {
     if (!this.webContentsViewInstance) return;
     const url = this.webContentsViewInstance.webContents.getURL();
     if (!url) return;
-    this.pdfDownloadBypass = true;
     this.webContentsViewInstance.webContents.downloadURL(url);
   }
 
