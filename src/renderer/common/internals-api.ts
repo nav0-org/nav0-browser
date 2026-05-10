@@ -125,6 +125,7 @@ declare global {
       ) => Promise<{ success: boolean }>;
       getAboutInfo: () => Promise<{
         appVersion: string;
+        isPackaged: boolean;
         electronVersion: string;
         chromiumVersion: string;
         nodeVersion: string;
