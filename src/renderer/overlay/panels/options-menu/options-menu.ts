@@ -161,13 +161,13 @@ function initializeDomElements(): void {
 
   setShortcut('om-new-tab-shortcut', [modKey, 'T']);
   setShortcut('om-new-window-shortcut', [modKey, 'N']);
-  setShortcut('om-new-private-window-shortcut', [modKey, 'Shift', 'T']);
+  setShortcut('om-new-private-window-shortcut', [modKey, 'Shift', 'N']);
   setShortcut('om-print-shortcut', [modKey, 'P']);
   setShortcut('om-find-in-page-shortcut', [modKey, 'F']);
   setShortcut('om-downloads-shortcut', [modKey, 'Shift', 'D']);
   setShortcut('om-history-shortcut', [modKey, 'Shift', 'H']);
   setShortcut('om-bookmarks-shortcut', [modKey, 'Shift', 'B']);
-  setShortcut('om-browser-settings-shortcut', [modKey, 'Shift', ',']);
+  setShortcut('om-browser-settings-shortcut', [modKey, ',']);
   const devtoolsMod = window.BrowserAPI.platform === 'darwin' ? 'Opt' : 'Shift';
   setShortcut('om-devtools-shortcut', [modKey, devtoolsMod, 'I']);
 
