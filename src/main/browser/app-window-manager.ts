@@ -30,7 +30,7 @@ export abstract class AppWindowManager {
   private static readonly HIBERNATION_CHECK_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
   private static readonly HIBERNATION_THRESHOLD_MS = 72 * 60 * 60 * 1000; // 72 hours
 
-  public static async init() {
+  public static async init(options?: { skipDefaultStartup?: boolean }) {
     AppWindowManager.windows = new Map();
     AppWindowManager.activeWindowId = null;
     DatabaseManager.init();
@@ -104,7 +104,9 @@ export abstract class AppWindowManager {
     // method awaits session restoration or window readiness below.
     AppWindowManager.initIPCHandlers();
 
-    if (startupMode === 'continue') {
+    if (options?.skipDefaultStartup) {
+      // Caller (CLI launcher) will create the requested window itself.
+    } else if (startupMode === 'continue') {
       const sessionRestored = await SessionManager.restoreSession();
       if (!sessionRestored) {
         AppWindowManager.createWindow();

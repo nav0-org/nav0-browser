@@ -42,11 +42,13 @@ const config: ForgeConfig = {
     new MakerDeb({
       options: {
         icon: ICON_PNG,
+        bin: 'nav0',
       },
     }),
     new MakerRpm({
       options: {
         icon: ICON_PNG,
+        bin: 'nav0',
       },
     }),
     {

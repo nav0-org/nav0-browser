@@ -1,11 +1,13 @@
 import { app, dialog } from 'electron';
 import { AppWindowManager } from './browser/app-window-manager';
+import { AppWindow } from './browser/app-window';
 import { DataStoreManager } from './database/data-store-manager';
 import { DownloadManager } from './browser/download-manager';
 import { SessionManager } from './browser/session-manager';
 import { SettingsEnforcer } from './settings/settings-enforcer';
 import { configureUserAgentFallback } from './browser/ua-switcher';
 import { startTestControlServer } from './test-control-server';
+import { CLIArgs, hasCLIOverride, parseCLIArgs } from './cli/cli-args';
 
 // Global error handlers — keep the browser alive when a stray exception
 // or unhandled rejection escapes a handler. Without these, Electron shows
@@ -52,20 +54,72 @@ if (require('electron-squirrel-startup')) {
   app.quit();
 }
 
-// Initialize main window when app is ready
-app.whenReady().then(async () => {
-  await DataStoreManager.init();
-  await SettingsEnforcer.init();
-  await AppWindowManager.init();
+const initialCLIArgs = parseCLIArgs(process.argv);
 
-  // Start test control server after everything is initialized
-  const testPort = process.env.REMOTE_DEBUGGING_PORT
-    ? parseInt(process.env.REMOTE_DEBUGGING_PORT, 10)
-    : 0;
-  if (testPort > 0) {
-    startTestControlServer(testPort);
+// Single-instance lock — when a user runs `nav0 ...` while Nav0 is already
+// running, route the new args to the existing instance instead of starting a
+// second app. The second invocation exits immediately.
+const gotSingleInstanceLock = app.requestSingleInstanceLock();
+if (!gotSingleInstanceLock) {
+  app.quit();
+} else {
+  app.on('second-instance', (_event, argv) => {
+    const args = parseCLIArgs(argv);
+    if (hasCLIOverride(args)) {
+      void openCLIRequestedWindow(args);
+    } else {
+      // Plain `nav0` re-invocation — surface an existing window.
+      const existing = AppWindowManager.getActiveWindow() ?? AppWindowManager.getWindows()[0];
+      const bw = existing?.getBrowserWindowInstance();
+      if (bw) {
+        if (bw.isMinimized()) bw.restore();
+        bw.focus();
+      } else {
+        AppWindowManager.createWindow(false);
+      }
+    }
+  });
+
+  // Initialize main window when app is ready
+  app.whenReady().then(async () => {
+    await DataStoreManager.init();
+    await SettingsEnforcer.init();
+    const cliOverride = hasCLIOverride(initialCLIArgs);
+    await AppWindowManager.init({ skipDefaultStartup: cliOverride });
+    if (cliOverride) {
+      await openCLIRequestedWindow(initialCLIArgs);
+    }
+
+    // Start test control server after everything is initialized
+    const testPort = process.env.REMOTE_DEBUGGING_PORT
+      ? parseInt(process.env.REMOTE_DEBUGGING_PORT, 10)
+      : 0;
+    if (testPort > 0) {
+      startTestControlServer(testPort);
+    }
+  });
+}
+
+async function openCLIRequestedWindow(args: CLIArgs): Promise<void> {
+  const window: AppWindow = AppWindowManager.createWindow(args.isPrivate);
+  await window.whenReady();
+  if (args.urls.length === 0) return;
+
+  const defaultTabs = window.getTabs();
+  if (defaultTabs.length > 0) {
+    defaultTabs[0].navigate(args.urls[0]);
+  } else {
+    await window.createTab(args.urls[0], true);
   }
-});
+  for (let i = 1; i < args.urls.length; i++) {
+    await window.createTab(args.urls[i], false);
+  }
+  const allTabs = window.getTabs();
+  if (allTabs.length > 0) {
+    window.activateTab(allTabs[0].getId());
+  }
+  AppWindowManager.activateWindow(window.id);
+}
 
 // Save session state before quit (must run before downloads/settings cleanup)
 app.on('before-quit', () => {
