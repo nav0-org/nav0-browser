@@ -451,6 +451,25 @@ function injectGoogleChromeRuntimeStub(): void {
       host !== 'drive.google.com';
     if (!isGoogleHost) return;
 
+    // Skip on hosts where settings-enforcer overrides the outgoing User-Agent
+    // to Firefox (accounts.google.com and friends, for Google's sign-in path).
+    // Real Firefox does not have window.chrome.runtime, so exposing it while
+    // the request advertises Firefox is a fingerprint inconsistency Google
+    // flags — and was breaking Gmail sign-in. Keep this list in sync with the
+    // isGoogleSignIn check in settings-enforcer.ts applyRequestHeaderPolicy.
+    const isAccountsHost =
+      host === 'accounts.google.com' ||
+      host.endsWith('.accounts.google.com') ||
+      host === 'accounts.youtube.com';
+    if (isAccountsHost) return;
+
+    // Also skip when the user has selected a non-Chromium UA preset (Firefox,
+    // Safari) — same consistency reason, applied session-wide rather than
+    // per-host.
+    const ua = navigator.userAgent;
+    const isChromiumUA = /Chrome\/|Chromium\/|Edg\//.test(ua);
+    if (!isChromiumUA) return;
+
     const code = `
       (function () {
         if (window.chrome && window.chrome.runtime) return;
@@ -484,4 +503,66 @@ function injectGoogleChromeRuntimeStub(): void {
   }
 }
 
+// ─── navigator.userAgent override for Google sign-in hosts ────────────
+// settings-enforcer overrides the User-Agent HTTP header to Firefox on
+// accounts.google.com (and friends) so Google serves its Firefox-path
+// sign-in page, which skips the Chromium/Electron embedded-browser block.
+// But session.setUserAgent() — not the per-request header override — is
+// what feeds navigator.userAgent on the resulting page. Without this
+// override, Google's sign-in page receives Firefox over the wire but
+// reads Chrome from JS, and the mismatch trips anomaly detection and
+// blocks sign-in.
+//
+// Keep FX_VERSION and the platform branches in sync with
+// settings-enforcer.ts getFirefoxUA(). navigator.platform is used here
+// because the preload doesn't expose process.platform to the page world;
+// the strings come from Chromium so they're stable.
+function overrideUserAgentForGoogleSignIn(): void {
+  try {
+    const host = window.location.hostname;
+    const isAccountsHost =
+      host === 'accounts.google.com' ||
+      host.endsWith('.accounts.google.com') ||
+      host === 'accounts.youtube.com';
+    if (!isAccountsHost) return;
+
+    const FX_VERSION = 149;
+    const platform = navigator.platform || '';
+    let fxUA: string;
+    if (/Win/i.test(platform)) {
+      fxUA = `Mozilla/5.0 (Windows NT 10.0; WOW64; rv:${FX_VERSION}.0) Gecko/20100101 Firefox/${FX_VERSION}.0`;
+    } else if (/Mac/i.test(platform)) {
+      fxUA = `Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:${FX_VERSION}.0) Gecko/20100101 Firefox/${FX_VERSION}.0`;
+    } else {
+      fxUA = `Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:${FX_VERSION}.0) Gecko/20100101 Firefox/${FX_VERSION}.0`;
+    }
+    const fxAppVersion = fxUA.replace(/^Mozilla\//, '');
+
+    const code = `
+      (function () {
+        try {
+          var ua = ${JSON.stringify(fxUA)};
+          var av = ${JSON.stringify(fxAppVersion)};
+          Object.defineProperty(navigator, 'userAgent', { get: function () { return ua; }, configurable: true });
+          Object.defineProperty(navigator, 'appVersion', { get: function () { return av; }, configurable: true });
+          // Real Firefox does not implement navigator.userAgentData. Set it
+          // to undefined so feature-detect code on the Firefox sign-in path
+          // doesn't see the Chromium Client Hints API.
+          if ('userAgentData' in navigator) {
+            try {
+              Object.defineProperty(navigator, 'userAgentData', { get: function () { return undefined; }, configurable: true });
+            } catch (_) { /* some Chromium builds make it non-configurable */ }
+          }
+        } catch (_) { /* swallow */ }
+      })();
+    `;
+    webFrame.executeJavaScript(code).catch(() => {
+      /* ignore */
+    });
+  } catch {
+    // Ignore — preload should never throw into the page.
+  }
+}
+
+overrideUserAgentForGoogleSignIn();
 injectGoogleChromeRuntimeStub();

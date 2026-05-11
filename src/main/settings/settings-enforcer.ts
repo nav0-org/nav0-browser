@@ -166,12 +166,13 @@ export abstract class SettingsEnforcer {
     }
   }
 
-  // Pinned to a recently-released Firefox stable. Bump on each Electron
-  // upgrade. Extrapolating a Firefox major from a 2021 baseline drifts ahead
-  // of any released build, which trips Google's anomaly detection on the
-  // sign-in path.
+  // Pinned to a current Firefox stable. Firefox follows a ~4-week release
+  // cycle, so this needs periodic review — both an old version (Google flags
+  // it as anomalous on the sign-in path) and a future version (claims a build
+  // that has not shipped) trip the same anomaly detection. Last reviewed
+  // 2026-05-11; Firefox 149 was released April 2026.
   private static getFirefoxUA(): string {
-    const FX_VERSION = 138;
+    const FX_VERSION = 149;
     if (process.platform === 'win32') {
       return `Mozilla/5.0 (Windows NT 10.0; WOW64; rv:${FX_VERSION}.0) Gecko/20100101 Firefox/${FX_VERSION}.0`;
     }

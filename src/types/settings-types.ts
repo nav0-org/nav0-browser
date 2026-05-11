@@ -202,15 +202,15 @@ export const USER_AGENT_PRESETS: Record<string, { label: string; value: string }
   },
   'firefox-windows': {
     label: 'Firefox on Windows',
-    value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0',
+    value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:149.0) Gecko/20100101 Firefox/149.0',
   },
   'firefox-mac': {
     label: 'Firefox on macOS',
-    value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:138.0) Gecko/20100101 Firefox/138.0',
+    value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:149.0) Gecko/20100101 Firefox/149.0',
   },
   'firefox-linux': {
     label: 'Firefox on Linux',
-    value: 'Mozilla/5.0 (X11; Linux x86_64; rv:138.0) Gecko/20100101 Firefox/138.0',
+    value: 'Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0',
   },
   'edge-windows': {
     label: 'Edge on Windows',
