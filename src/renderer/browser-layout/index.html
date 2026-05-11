@@ -115,7 +115,13 @@
               <path d="m21 21-4.3-4.3" />
             </svg>
           </button>
-          <input type="text" class="url-input" id="url-input" />
+          <input
+            type="text"
+            class="url-input"
+            id="url-input"
+            autocomplete="off"
+            spellcheck="false"
+          />
           <button
             id="reader-mode-button"
             title="Reader Mode"
@@ -241,6 +247,12 @@
               >Insecure site — allow blocked</span
             >
           </div>
+        </div>
+      </div>
+      <!-- URL Autocomplete dropdown (hidden by default) -->
+      <div id="url-autocomplete-bar" class="url-autocomplete-bar" style="display: none">
+        <div class="url-autocomplete-panel" id="url-autocomplete-panel">
+          <div class="url-autocomplete-results" id="url-autocomplete-results"></div>
         </div>
       </div>
       <!-- Find in Page Bar (hidden by default) -->

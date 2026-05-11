@@ -1,0 +1,99 @@
+.url-autocomplete-bar {
+  position: relative;
+  background-color: var(--bg-light);
+  border-bottom: 1px solid var(--border-color);
+  z-index: 10;
+}
+
+.url-autocomplete-panel {
+  position: absolute;
+  top: 0;
+  background-color: var(--bg-light);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 2px;
+}
+
+.url-autocomplete-results {
+  padding: var(--spacing-xs) 0;
+}
+
+.url-ac-section-title {
+  padding: 6px var(--spacing-md) 4px;
+  font-size: var(--font-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.url-ac-item {
+  display: flex;
+  align-items: center;
+  padding: 6px var(--spacing-md);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.url-ac-item.active {
+  background-color: var(--bg-color);
+}
+
+.url-ac-icon,
+.url-ac-favicon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-hover);
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.url-ac-favicon img {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+}
+
+.url-ac-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.url-ac-title {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-color);
+}
+
+.url-ac-subtitle {
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.url-ac-meta {
+  margin-left: var(--spacing-sm);
+  font-size: var(--font-xs);
+  color: var(--text-light);
+  flex-shrink: 0;
+}
+
+.url-ac-search {
+  border-top: 1px solid var(--border-color);
+  margin-top: 4px;
+  padding-top: 8px;
+}

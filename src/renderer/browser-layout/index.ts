@@ -2,6 +2,7 @@ import { BrowserTabManager } from './browser-manager';
 import './index.css';
 import './find-in-page.css';
 import './permission-prompt.css';
+import './url-autocomplete.css';
 import { initFindInPage } from './find-in-page';
 import { initPermissionPrompt } from './permission-prompt';
 
