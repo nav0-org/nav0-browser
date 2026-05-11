@@ -40,16 +40,11 @@ process.on('unhandledRejection', (reason: unknown) => {
 // Must run before any BrowserWindow / WebContentsView is created.
 configureUserAgentFallback();
 
-// Isolate dev from the installed Nav0 and avoid the macOS Keychain dependency.
-// The dev binary runs from node_modules/electron (CFBundleName "Electron"),
-// so it would otherwise share userData with the installed app but try to
-// derive its OSCrypt key from a different keychain entry — and on unsigned
-// dev builds that entry often can't be created at all, leaving Chromium with
-// a per-process random key and cookies that vanish on the next launch.
-// Production keeps real OSCrypt via the EnableCookieEncryption fuse.
+// Isolate dev from the installed Nav0 so the two don't share the same userData
+// directory (cookie store, history DB, settings). Lets you run both side-by-side
+// and keeps experimental dev runs from clobbering the installed app's state.
 if (!app.isPackaged) {
   app.setPath('userData', path.join(app.getPath('appData'), 'Nav0 (Dev)'));
-  app.commandLine.appendSwitch('use-mock-keychain');
 }
 
 // Disable Chromium features that trigger macOS "Local Network" permission dialog.
