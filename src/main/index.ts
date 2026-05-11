@@ -1,3 +1,4 @@
+import path from 'path';
 import { app, dialog } from 'electron';
 import { AppWindowManager } from './browser/app-window-manager';
 import { AppWindow } from './browser/app-window';
@@ -40,6 +41,13 @@ process.on('unhandledRejection', (reason: unknown) => {
 // Cloudflare Turnstile) don't flag webContents we haven't explicitly configured.
 // Must run before any BrowserWindow / WebContentsView is created.
 configureUserAgentFallback();
+
+// Isolate dev from the installed Nav0 so the two don't share the same userData
+// directory (cookie store, history DB, settings). Lets you run both side-by-side
+// and keeps experimental dev runs from clobbering the installed app's state.
+if (!app.isPackaged) {
+  app.setPath('userData', path.join(app.getPath('appData'), 'Nav0 (Dev)'));
+}
 
 // Disable Chromium features that trigger macOS "Local Network" permission dialog.
 // These features use mDNS/Bonjour for device discovery, which is unnecessary for
