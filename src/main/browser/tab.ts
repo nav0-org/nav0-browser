@@ -34,14 +34,15 @@ const domainPattern = /^[^\s]+\.[^\s]+$/;
 const EXTERNAL_PROTOCOL_RE =
   /^(mailto|tel|callto|sms|facetime|webcal|slack|zoommtg|zoomus|msteams|discord|spotify|vscode|vscode-insiders|obsidian|notion|figma|linear|raycast):/i;
 
-// Pick the sharpest favicon Chromium already discovered for the page, using
-// URL heuristics only — no extra network requests. Chromium hands us every
-// `<link rel="icon">` URL it found, but unsorted, so taking the last entry
-// often yields the smallest 16×16 ICO when a 180×180 apple-touch-icon or
-// 192×192 PNG is also available. Falls back to the previous behavior (last
-// entry) when no better signal is found.
-function pickBestFaviconUrl(faviconUrls: string[]): string {
-  if (faviconUrls.length <= 1) return faviconUrls[faviconUrls.length - 1];
+// Rank Chromium's discovered favicons by URL size hints so the caller can try
+// the sharpest first and fall back if a fetch fails. Chromium hands us every
+// `<link rel="icon">` URL it found, including ones the site advertises but
+// doesn't actually serve (most commonly `apple-touch-icon` boilerplate that
+// 404s). Strictly picking the largest left tabs with broken favicons on those
+// sites, so we return the full list ordered best-first and let the handler
+// walk it until one fetches successfully.
+function rankFaviconUrls(faviconUrls: string[]): string[] {
+  if (faviconUrls.length <= 1) return faviconUrls.slice();
 
   const squareSize = /(\d{2,4})x\1/i;
   const trailingSize = /[-_](\d{2,4})\.(?:png|webp|jpe?g|ico|svg)(?:[?#]|$)/i;
@@ -56,16 +57,10 @@ function pickBestFaviconUrl(faviconUrls: string[]): string {
     return s;
   };
 
-  let best = faviconUrls[faviconUrls.length - 1];
-  let bestScore = -1;
-  for (const url of faviconUrls) {
-    const s = score(url);
-    if (s > bestScore) {
-      bestScore = s;
-      best = url;
-    }
-  }
-  return best;
+  return faviconUrls
+    .map((url, i) => ({ url, score: score(url), i }))
+    .sort((a, b) => b.score - a.score || b.i - a.i)
+    .map((entry) => entry.url);
 }
 
 export class Tab {
@@ -431,45 +426,59 @@ export class Tab {
       WebContentsEvents.PAGE_FAVICON_UPDATED,
       async (event, faviconUrls: string[]) => {
         if (this._destroyed) return;
-        if (!this.url.startsWith(InAppUrls.PREFIX) && this.url !== '') {
-          const faviconUrl = pickBestFaviconUrl(faviconUrls);
-          this.faviconUrl = faviconUrl;
+        if (this.url.startsWith(InAppUrls.PREFIX) || this.url === '') return;
 
-          // Fetch the favicon from the main process using net.fetch to avoid
-          // Sec-Fetch-Site/Sec-Fetch-Dest headers that CDNs (e.g. Cloudflare)
-          // use to block cross-site image requests from the renderer's <img> tag.
-          let faviconToSend = faviconUrl;
+        const candidates = rankFaviconUrls(faviconUrls);
+        if (candidates.length === 0) return;
+
+        // Fetch from the main process using net.fetch so the bytes don't go
+        // through the renderer's <img> tag — some CDNs (e.g. Cloudflare) block
+        // cross-site image requests based on Sec-Fetch-Site/Sec-Fetch-Dest, so
+        // we base64-encode the bytes ourselves to sidestep that. Walk the
+        // candidates best-first and stop at the first one that fetches: many
+        // sites advertise an apple-touch-icon (or other sized variant) they
+        // don't actually serve, and we want to fall back instead of stamping a
+        // broken URL onto the tab.
+        let faviconToSend: string | null = null;
+        for (const candidate of candidates) {
+          if (this._destroyed) return;
+          if (!candidate.startsWith('http')) {
+            faviconToSend = candidate;
+            break;
+          }
           try {
-            if (faviconUrl.startsWith('http')) {
-              const response = await (
-                net.fetch as (input: string, init?: Record<string, unknown>) => Promise<Response>
-              )(faviconUrl, { session: this.webContentsViewInstance?.webContents.session });
-              if (response.ok) {
-                const contentType = response.headers.get('content-type') || 'image/x-icon';
-                const buffer = Buffer.from(await response.arrayBuffer());
-                faviconToSend = `data:${contentType};base64,${buffer.toString('base64')}`;
-                this.faviconUrl = faviconToSend;
-              }
+            const response = await (
+              net.fetch as (input: string, init?: Record<string, unknown>) => Promise<Response>
+            )(candidate, { session: this.webContentsViewInstance?.webContents.session });
+            if (response.ok) {
+              const contentType = response.headers.get('content-type') || 'image/x-icon';
+              const buffer = Buffer.from(await response.arrayBuffer());
+              faviconToSend = `data:${contentType};base64,${buffer.toString('base64')}`;
+              break;
             }
           } catch {
-            // Fall back to the original URL — renderer onerror will handle failures
+            // try the next candidate
           }
+        }
 
-          if (this._destroyed) return;
-          this.parentAppWindow
-            .getBrowserWindowInstance()
-            ?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_FAVICON_UPDATED, {
-              id: this.id,
-              faviconUrl: faviconToSend,
-            });
-          // Update the history record with the actual favicon
-          if (this.lastHistoryRecordId) {
-            await BrowsingHistoryManager.updateRecordFavicon(
-              this.parentAppWindow.id,
-              this.lastHistoryRecordId,
-              faviconToSend
-            );
-          }
+        // Every candidate failed — send the best URL and let the renderer's
+        // onerror handler swap in the empty-favicon placeholder.
+        if (faviconToSend === null) faviconToSend = candidates[0];
+
+        this.faviconUrl = faviconToSend;
+        if (this._destroyed) return;
+        this.parentAppWindow
+          .getBrowserWindowInstance()
+          ?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_FAVICON_UPDATED, {
+            id: this.id,
+            faviconUrl: faviconToSend,
+          });
+        if (this.lastHistoryRecordId) {
+          await BrowsingHistoryManager.updateRecordFavicon(
+            this.parentAppWindow.id,
+            this.lastHistoryRecordId,
+            faviconToSend
+          );
         }
       }
     );
