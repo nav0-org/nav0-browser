@@ -175,7 +175,12 @@ const config: ForgeConfig = {
     new FusesPlugin({
       version: FuseVersion.V1,
       [FuseV1Options.RunAsNode]: false,
-      [FuseV1Options.EnableCookieEncryption]: false,
+      // Disabled on macOS: without an Apple Developer ID, OSCrypt can't
+      // reliably persist its key in the Keychain, so cookies become
+      // unreadable on the next launch and users get logged out. Windows
+      // (DPAPI) and Linux (libsecret) don't need a signed binary, so we
+      // keep encryption on there.
+      [FuseV1Options.EnableCookieEncryption]: process.platform !== 'darwin',
       [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
       [FuseV1Options.EnableNodeCliInspectArguments]: false,
       [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
