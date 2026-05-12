@@ -78,6 +78,11 @@ const config: ForgeConfig = {
   },
   plugins: [
     new WebpackPlugin({
+      // Forge defaults (loggerPort 9000, port 3000) frequently collide with
+      // other dev tools on macOS and the failure surfaces as a silent exit
+      // during "Launching dev servers". Pin to less-common ports.
+      loggerPort: 9876,
+      port: 3856,
       mainConfig,
       devContentSecurityPolicy: "connect-src 'self' * 'unsafe-eval'",
       renderer: {
