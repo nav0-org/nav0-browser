@@ -11,6 +11,7 @@
     "publish": "electron-forge publish",
     "lint": "npm run lint:ts && npm run lint:css && npm run lint:html",
     "lint:ts": "eslint --ext .ts,.tsx .",
+    "typecheck": "tsc --noEmit",
     "lint:css": "stylelint \"**/*.css\"",
     "lint:html": "htmlhint \"src/**/*.html\"",
     "format": "prettier --write .",
