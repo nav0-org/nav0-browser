@@ -8,7 +8,10 @@ import {
   BrowserWindow,
 } from 'electron';
 import { v4 as uuid } from 'uuid';
-import { RendererToMainEventsForBrowserIPC } from '../../constants/app-constants';
+import {
+  PartitionNames,
+  RendererToMainEventsForBrowserIPC,
+} from '../../constants/app-constants';
 import type { Database as DatabaseType } from 'better-sqlite3';
 
 // Types
@@ -98,7 +101,7 @@ export class PermissionManager {
     if (PermissionManager.initializedSessions.has(partitionName)) return;
     PermissionManager.initializedSessions.add(partitionName);
 
-    const isPrivate = partitionName === 'persist:private';
+    const isPrivate = partitionName === PartitionNames.PRIVATE;
     const ses = session.fromPartition(partitionName);
 
     ses.setPermissionRequestHandler(

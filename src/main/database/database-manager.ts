@@ -26,6 +26,10 @@ export abstract class DatabaseManager {
       app.getPath('userData'),
       'private-database.db'
     );
+    // Delete any stale private database left over from a previous run — for
+    // example after a crash or hard kill that bypassed the normal close path.
+    // Private browsing data must never survive a process exit.
+    DatabaseManager.deletePrivateDatabaseFile();
     DatabaseManager.dbForPrivateBrowsing = new Database(
       DatabaseManager.dbPathForPrivateBrowsing,
       {}
@@ -44,10 +48,31 @@ export abstract class DatabaseManager {
   }
 
   public static closePrivateDatabase() {
-    if (fs.existsSync(DatabaseManager.dbPathForPrivateBrowsing)) {
-      fs.unlinkSync(DatabaseManager.dbPathForPrivateBrowsing);
+    try {
+      DatabaseManager.dbForPrivateBrowsing?.close();
+    } catch {
+      /* best-effort — fall through to file deletion */
     }
+    DatabaseManager.deletePrivateDatabaseFile();
     DatabaseManager.dbForPrivateBrowsing = new Database(DatabaseManager.dbPathForPrivateBrowsing);
+    const schemaManager = new SchemaManager(DatabaseManager.dbForPrivateBrowsing);
+    schemaManager.applySchemas();
+  }
+
+  // Remove the private SQLite database file and its WAL/SHM sidecars. Called
+  // both at startup (to drop any stale db left from a crash) and when the
+  // last private window closes.
+  private static deletePrivateDatabaseFile() {
+    for (const suffix of ['', '-wal', '-shm']) {
+      const filePath = DatabaseManager.dbPathForPrivateBrowsing + suffix;
+      if (fs.existsSync(filePath)) {
+        try {
+          fs.unlinkSync(filePath);
+        } catch (e) {
+          console.error(`Failed to delete ${filePath}:`, e);
+        }
+      }
+    }
   }
 
   public static getDatabase(isPrivate: boolean): DatabaseType {
