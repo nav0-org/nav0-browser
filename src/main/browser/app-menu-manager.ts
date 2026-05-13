@@ -348,7 +348,7 @@ export abstract class AppMenuManager {
                 { type: 'separator' as const },
                 { role: 'window' as const },
               ]
-            : [{ role: 'close' as const }]),
+            : []),
         ],
       },
       {
