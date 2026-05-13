@@ -386,14 +386,15 @@ export abstract class SettingsEnforcer {
 
         // Check allowed sites (per-site disable)
         const topFrameUrl = details.frame?.url || details.referrer || '';
+        let topHostname = '';
         if (topFrameUrl) {
           try {
             const topUrl = new URL(topFrameUrl);
-            const topDomain = topUrl.hostname;
+            topHostname = topUrl.hostname;
             if (
               (currentSettings.adBlockerAllowedSites || []).some((site) => {
                 const siteDomain = site.toLowerCase().trim();
-                return topDomain === siteDomain || topDomain.endsWith('.' + siteDomain);
+                return topHostname === siteDomain || topHostname.endsWith('.' + siteDomain);
               })
             ) {
               callback({});
@@ -410,6 +411,16 @@ export abstract class SettingsEnforcer {
             callback({ cancel: true });
             return;
           }
+        }
+
+        // Skip generic URL pattern matching for first-party (same-host)
+        // requests. The patterns are designed to catch third-party ad URLs
+        // and produce false positives on legitimate site assets whose paths
+        // happen to contain generic words like "popup", "banner", or "ads"
+        // (e.g. Bitrix CMS components served under /.../popup/script.js).
+        if (topHostname && topHostname === hostname) {
+          callback({});
+          return;
         }
 
         // Check URL path patterns for ad-related content
