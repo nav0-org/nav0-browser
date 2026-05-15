@@ -608,6 +608,9 @@ export function init() {
         callback(data)
       );
     },
+    onFocusUrlBar: (callback: () => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.FOCUS_URL_BAR, () => callback());
+    },
     // Permission system
     respondToPermissionPrompt: (appWindowId: string, requestId: string, decision: string) => {
       ipcRenderer.send(
