@@ -12,7 +12,10 @@ export abstract class DatabaseManager {
   private static db: DatabaseType;
   private static dbForPrivateBrowsing: DatabaseType;
   private static dbPath: string;
-  private static dbPathForPrivateBrowsing: string;
+  // Filesystem path used by older builds for the private SQLite database.
+  // The private db is now in-memory, but we still need this path so we can
+  // delete any leftover file (and its WAL/SHM sidecars) at startup.
+  private static legacyPrivateDbPath: string;
 
   public static init() {
     DatabaseManager.dbPath = path.join(app.getPath('userData'), 'database.db');
@@ -22,22 +25,17 @@ export abstract class DatabaseManager {
     DatabaseManager.db.pragma('cache_size = 20000');
     DatabaseManager.db.pragma('synchronous = NORMAL');
 
-    DatabaseManager.dbPathForPrivateBrowsing = path.join(
+    // Older builds stored the private db on disk at <userData>/private-database.db
+    // and only deleted it on a graceful close. A crash or `kill -9` left the
+    // file readable until the next launch. Delete any such leftover, then
+    // create a fresh in-memory db so private browsing data is never written
+    // to disk in the first place.
+    DatabaseManager.legacyPrivateDbPath = path.join(
       app.getPath('userData'),
       'private-database.db'
     );
-    // Delete any stale private database left over from a previous run — for
-    // example after a crash or hard kill that bypassed the normal close path.
-    // Private browsing data must never survive a process exit.
-    DatabaseManager.deletePrivateDatabaseFile();
-    DatabaseManager.dbForPrivateBrowsing = new Database(
-      DatabaseManager.dbPathForPrivateBrowsing,
-      {}
-    );
-    DatabaseManager.dbForPrivateBrowsing.pragma('journal_mode = WAL');
-    DatabaseManager.dbForPrivateBrowsing.pragma('page_size = 8192');
-    DatabaseManager.dbForPrivateBrowsing.pragma('cache_size = 20000');
-    DatabaseManager.dbForPrivateBrowsing.pragma('synchronous = NORMAL');
+    DatabaseManager.deleteLegacyPrivateDbFile();
+    DatabaseManager.dbForPrivateBrowsing = new Database(':memory:');
 
     DatabaseManager.buildSchema();
 
@@ -51,20 +49,20 @@ export abstract class DatabaseManager {
     try {
       DatabaseManager.dbForPrivateBrowsing?.close();
     } catch {
-      /* best-effort — fall through to file deletion */
+      /* best-effort — fall through to recreate */
     }
-    DatabaseManager.deletePrivateDatabaseFile();
-    DatabaseManager.dbForPrivateBrowsing = new Database(DatabaseManager.dbPathForPrivateBrowsing);
+    // Re-open an empty in-memory db so any subsequent private browsing
+    // session starts with zero history, downloads, etc.
+    DatabaseManager.dbForPrivateBrowsing = new Database(':memory:');
     const schemaManager = new SchemaManager(DatabaseManager.dbForPrivateBrowsing);
     schemaManager.applySchemas();
   }
 
-  // Remove the private SQLite database file and its WAL/SHM sidecars. Called
-  // both at startup (to drop any stale db left from a crash) and when the
-  // last private window closes.
-  private static deletePrivateDatabaseFile() {
+  // Remove the on-disk private SQLite database left over from older builds
+  // (file + WAL/SHM sidecars). Called once at startup.
+  private static deleteLegacyPrivateDbFile() {
     for (const suffix of ['', '-wal', '-shm']) {
-      const filePath = DatabaseManager.dbPathForPrivateBrowsing + suffix;
+      const filePath = DatabaseManager.legacyPrivateDbPath + suffix;
       if (fs.existsSync(filePath)) {
         try {
           fs.unlinkSync(filePath);

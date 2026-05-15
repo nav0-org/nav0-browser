@@ -240,10 +240,11 @@ export class AppWindow {
   /**
    * Wipe every trace of the private session. Called when the last private
    * window closes (or when the app quits with private windows still open).
-   * The private partition is in-memory so most of this is belt-and-braces,
-   * but `closeAllConnections` actively tears down any sockets the session
-   * still owns and `DatabaseManager.closePrivateDatabase()` removes the
-   * private SQLite database (history, downloads, etc.) from disk.
+   * Both the Electron session partition and the SQLite private db are
+   * in-memory, so this resets RAM-resident state — there is nothing on disk
+   * to remove. `closeAllConnections` actively tears down any sockets the
+   * session still owns, and `closePrivateDatabase()` drops the in-memory db
+   * so the next private sitting starts empty.
    */
   public static clearPrivateSession(): void {
     PermissionManager.clearMemoryPermissions();
@@ -263,7 +264,7 @@ export class AppWindow {
     try {
       DatabaseManager.closePrivateDatabase();
     } catch (e) {
-      console.error('Failed to delete private database:', e);
+      console.error('Failed to reset private database:', e);
     }
   }
 
