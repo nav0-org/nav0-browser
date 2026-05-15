@@ -617,15 +617,17 @@ export class AppWindow {
     await this.overlayInitPromise;
     await this.unifiedOverlayManager.whenReady();
     this.urlAutocompleteBounds = data.bounds;
-    this.ensureOverlayViewAdded();
-    if (this.unifiedOverlayManager.isVisible('url-autocomplete')) {
+    const alreadyVisible = this.unifiedOverlayManager.isVisible('url-autocomplete');
+    if (!alreadyVisible) {
+      // Mark visible first so computeOverlayBounds returns the small region.
+      this.unifiedOverlayManager.showOverlay('url-autocomplete', data);
+    } else {
       this.unifiedOverlayManager.updateUrlAutocomplete({
         results: data.results as never,
         activeIndex: data.activeIndex,
       });
-    } else {
-      this.unifiedOverlayManager.showOverlay('url-autocomplete', data);
     }
+    this.ensureOverlayViewAdded();
   }
 
   updateUrlAutocompleteOverlay(data: { results: unknown[]; activeIndex: number }): void {
