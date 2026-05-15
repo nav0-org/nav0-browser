@@ -160,9 +160,13 @@ const navigate = (direction: number) => {
 };
 
 const openDropdown = () => {
-  if (isOpen) return;
-  isOpen = true;
   bar.style.display = 'flex';
+  if (isOpen) {
+    // Already open — just trigger a resize because content height may have changed
+    window.dispatchEvent(new Event('resize'));
+    return;
+  }
+  isOpen = true;
   window.dispatchEvent(new Event('resize'));
 };
 
@@ -236,9 +240,9 @@ const fetchSuggestions = async (query: string) => {
 
       currentResults = results;
       activeIndex = results.length > 0 ? 0 : -1;
+      renderResults();
       if (results.length > 0) openDropdown();
       else closeDropdown();
-      renderResults();
       return;
     }
 
@@ -301,8 +305,8 @@ const fetchSuggestions = async (query: string) => {
 
     currentResults = results;
     activeIndex = results.length > 0 ? 0 : -1;
-    openDropdown();
     renderResults();
+    openDropdown();
   } catch {
     if (requestedAt !== lastQueryAt) return;
     currentResults = [
@@ -314,8 +318,8 @@ const fetchSuggestions = async (query: string) => {
       },
     ];
     activeIndex = 0;
-    openDropdown();
     renderResults();
+    openDropdown();
   }
 };
 
