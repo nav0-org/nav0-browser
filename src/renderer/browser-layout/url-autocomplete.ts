@@ -1,5 +1,3 @@
-import { createIcons, icons } from 'lucide';
-
 type SuggestionType = 'tab' | 'bookmark' | 'history' | 'search';
 
 type Suggestion = {
@@ -22,14 +20,14 @@ type BookmarkRecord = HistoryRecord;
 
 const DEBOUNCE_MS = 120;
 const MAX_PER_GROUP = 4;
+const DROPDOWN_MAX_HEIGHT = 360;
+const ITEM_HEIGHT = 44;
+const SECTION_HEADER_HEIGHT = 24;
 
 let urlInput: HTMLInputElement;
-let bar: HTMLElement;
-let resultsContainer: HTMLElement;
-
 let appWindowId = '';
 let getActiveTabId: () => string | null = () => null;
-let onSelectionEnter: ((url: string) => void) = () => undefined;
+let onSelectionEnter: (url: string) => void = () => undefined;
 
 let currentResults: Suggestion[] = [];
 let activeIndex = -1;
@@ -37,20 +35,6 @@ let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 let isOpen = false;
 let lastQueryAt = 0;
 let suppressNextOpen = false;
-
-const escapeHtml = (str: string): string => {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-};
-
-const getFaviconLetter = (url: string): string => {
-  try {
-    return new URL(url).hostname.replace('www.', '').charAt(0).toUpperCase() || '?';
-  } catch {
-    return url.charAt(0).toUpperCase() || '?';
-  }
-};
 
 const formatDate = (dateStr: string): string => {
   const date = new Date(dateStr);
@@ -64,110 +48,48 @@ const formatDate = (dateStr: string): string => {
   return date.toLocaleDateString();
 };
 
-const renderResults = () => {
-  resultsContainer.innerHTML = '';
+const estimateDropdownHeight = (results: Suggestion[]): number => {
+  if (results.length === 0) return 0;
+  const groups = new Set(results.map((r) => r.type));
+  // Search type has no section heading
+  const headerCount = (['tab', 'bookmark', 'history'] as const).filter((t) => groups.has(t)).length;
+  const padding = 16;
+  return Math.min(
+    DROPDOWN_MAX_HEIGHT,
+    padding + headerCount * SECTION_HEADER_HEIGHT + results.length * ITEM_HEIGHT
+  );
+};
 
-  if (currentResults.length === 0) {
-    closeDropdown();
-    return;
-  }
-
-  const fragment = document.createDocumentFragment();
-
-  const addSection = (title: string, type: SuggestionType) => {
-    const items = currentResults.filter((r) => r.type === type);
-    if (items.length === 0) return;
-    const heading = document.createElement('div');
-    heading.className = 'url-ac-section-title';
-    heading.textContent = title;
-    fragment.appendChild(heading);
-    items.forEach((item) => {
-      const idx = currentResults.indexOf(item);
-      fragment.appendChild(buildItemElement(item, idx));
-    });
+const computeBounds = () => {
+  const addressBar = urlInput.closest('.address-bar') as HTMLElement | null;
+  const rect = (addressBar ?? urlInput).getBoundingClientRect();
+  return {
+    x: Math.round(rect.left),
+    y: Math.round(rect.bottom + 4),
+    width: Math.round(rect.width),
+    height: estimateDropdownHeight(currentResults),
   };
-
-  addSection('Open Tabs', 'tab');
-  addSection('Bookmarks', 'bookmark');
-  addSection('History', 'history');
-
-  const searchItems = currentResults.filter((r) => r.type === 'search');
-  searchItems.forEach((item) => {
-    const idx = currentResults.indexOf(item);
-    fragment.appendChild(buildItemElement(item, idx));
-  });
-
-  resultsContainer.appendChild(fragment);
-  createIcons({ icons });
 };
 
-const buildItemElement = (item: Suggestion, index: number): HTMLElement => {
-  const el = document.createElement('div');
-  el.className = `url-ac-item${index === activeIndex ? ' active' : ''}${item.type === 'search' ? ' url-ac-search' : ''}`;
-  el.dataset.index = String(index);
-
-  let iconHtml = '';
-  if (item.type === 'search') {
-    iconHtml = `<div class="url-ac-icon"><i data-lucide="search" width="14" height="14"></i></div>`;
-  } else if (item.faviconUrl) {
-    iconHtml = `<div class="url-ac-favicon"><img src="${escapeHtml(item.faviconUrl)}" onerror="this.parentElement.textContent='${getFaviconLetter(item.url)}'"></div>`;
-  } else if (item.type === 'tab') {
-    iconHtml = `<div class="url-ac-icon"><i data-lucide="app-window" width="14" height="14"></i></div>`;
-  } else if (item.type === 'bookmark') {
-    iconHtml = `<div class="url-ac-icon"><i data-lucide="bookmark" width="14" height="14"></i></div>`;
-  } else {
-    iconHtml = `<div class="url-ac-favicon">${getFaviconLetter(item.url)}</div>`;
-  }
-
-  const subtitle = item.type === 'search' ? (item.meta || '') : item.url;
-
-  el.innerHTML = `
-    ${iconHtml}
-    <div class="url-ac-content">
-      <div class="url-ac-title">${escapeHtml(item.title)}</div>
-      ${subtitle ? `<div class="url-ac-subtitle">${escapeHtml(subtitle)}</div>` : ''}
-    </div>
-    ${item.meta && item.type !== 'search' ? `<div class="url-ac-meta">${escapeHtml(item.meta)}</div>` : ''}
-  `;
-
-  el.addEventListener('mousedown', (e) => {
-    e.preventDefault();
-    selectSuggestion(item);
-  });
-  el.addEventListener('mouseenter', () => {
-    setActiveIndex(index, false);
-  });
-
-  return el;
-};
-
-const setActiveIndex = (index: number, scroll: boolean) => {
-  activeIndex = index;
-  const items = resultsContainer.querySelectorAll<HTMLElement>('.url-ac-item');
-  items.forEach((el) => {
-    const i = parseInt(el.dataset.index || '-1', 10);
-    el.classList.toggle('active', i === activeIndex);
-    if (scroll && i === activeIndex) {
-      el.scrollIntoView({ block: 'nearest' });
-    }
-  });
-};
-
-const navigate = (direction: number) => {
-  if (currentResults.length === 0) return;
-  const next = (activeIndex + direction + currentResults.length) % currentResults.length;
-  setActiveIndex(next, true);
-};
-
-const openDropdown = () => {
-  bar.style.display = 'flex';
-  if (isOpen) {
-    // Already open — just trigger a resize because content height may have changed
-    window.dispatchEvent(new Event('resize'));
+const pushToOverlay = (showIfHidden: boolean) => {
+  const payload = {
+    results: currentResults,
+    activeIndex,
+  };
+  if (!isOpen) {
+    if (!showIfHidden || currentResults.length === 0) return;
+    isOpen = true;
+    window.BrowserAPI.showUrlAutocompleteOverlay(appWindowId, {
+      bounds: computeBounds(),
+      ...payload,
+    });
     return;
   }
-  isOpen = true;
-  window.dispatchEvent(new Event('resize'));
+  // Already open — bounds may have changed if result count changed
+  window.BrowserAPI.showUrlAutocompleteOverlay(appWindowId, {
+    bounds: computeBounds(),
+    ...payload,
+  });
 };
 
 const closeDropdown = () => {
@@ -175,9 +97,13 @@ const closeDropdown = () => {
   isOpen = false;
   activeIndex = -1;
   currentResults = [];
-  resultsContainer.innerHTML = '';
-  bar.style.display = 'none';
-  window.dispatchEvent(new Event('resize'));
+  window.BrowserAPI.hideUrlAutocompleteOverlay(appWindowId);
+};
+
+const navigate = (direction: number) => {
+  if (currentResults.length === 0) return;
+  activeIndex = (activeIndex + direction + currentResults.length) % currentResults.length;
+  pushToOverlay(false);
 };
 
 const selectSuggestion = (item: Suggestion) => {
@@ -240,8 +166,7 @@ const fetchSuggestions = async (query: string) => {
 
       currentResults = results;
       activeIndex = results.length > 0 ? 0 : -1;
-      renderResults();
-      if (results.length > 0) openDropdown();
+      if (results.length > 0) pushToOverlay(true);
       else closeDropdown();
       return;
     }
@@ -305,8 +230,7 @@ const fetchSuggestions = async (query: string) => {
 
     currentResults = results;
     activeIndex = results.length > 0 ? 0 : -1;
-    renderResults();
-    openDropdown();
+    pushToOverlay(true);
   } catch {
     if (requestedAt !== lastQueryAt) return;
     currentResults = [
@@ -318,8 +242,7 @@ const fetchSuggestions = async (query: string) => {
       },
     ];
     activeIndex = 0;
-    renderResults();
-    openDropdown();
+    pushToOverlay(true);
   }
 };
 
@@ -339,10 +262,10 @@ const handleFocus = () => {
 };
 
 const handleBlur = () => {
-  // Delay so click on a result can fire first
+  // Defer slightly so result clicks (which fire mousedown) have time to execute first
   setTimeout(() => {
     if (document.activeElement !== urlInput) closeDropdown();
-  }, 100);
+  }, 150);
 };
 
 const handleKeydown = (e: KeyboardEvent) => {
@@ -368,13 +291,6 @@ const handleKeydown = (e: KeyboardEvent) => {
   }
 };
 
-const handleDocumentMouseDown = (e: MouseEvent) => {
-  if (!isOpen) return;
-  const target = e.target as HTMLElement;
-  if (target.closest('#url-autocomplete-bar') || target === urlInput) return;
-  closeDropdown();
-};
-
 export type UrlAutocompleteOptions = {
   appWindowId: string;
   urlInput: HTMLInputElement;
@@ -384,7 +300,6 @@ export type UrlAutocompleteOptions = {
 
 export function initUrlAutocomplete(opts: UrlAutocompleteOptions): {
   hasOpenSuggestion: () => boolean;
-  getActiveSuggestionUrl: () => string | null;
   consumeActiveSuggestion: () => Suggestion | null;
   close: () => void;
 } {
@@ -393,21 +308,26 @@ export function initUrlAutocomplete(opts: UrlAutocompleteOptions): {
   getActiveTabId = opts.getActiveTabId;
   onSelectionEnter = opts.onSelectionEnter;
 
-  bar = document.getElementById('url-autocomplete-bar') as HTMLElement;
-  resultsContainer = document.getElementById('url-autocomplete-results') as HTMLElement;
-
   urlInput.addEventListener('focus', handleFocus);
   urlInput.addEventListener('blur', handleBlur);
   urlInput.addEventListener('input', handleInput);
   urlInput.addEventListener('keydown', handleKeydown);
-  document.addEventListener('mousedown', handleDocumentMouseDown);
+
+  // Reposition the overlay if the window resizes while open
+  window.addEventListener('resize', () => {
+    if (isOpen) pushToOverlay(false);
+  });
+
+  // Result clicked in the overlay panel — forwarded back to us
+  window.BrowserAPI.onUrlAutocompleteResultForwarded(
+    (data: { index: number; item: Suggestion }) => {
+      if (!data?.item) return;
+      selectSuggestion(data.item);
+    }
+  );
 
   return {
     hasOpenSuggestion: () => isOpen && activeIndex >= 0 && activeIndex < currentResults.length,
-    getActiveSuggestionUrl: () => {
-      if (activeIndex < 0 || activeIndex >= currentResults.length) return null;
-      return currentResults[activeIndex].url || null;
-    },
     consumeActiveSuggestion: () => {
       if (activeIndex < 0 || activeIndex >= currentResults.length) return null;
       const item = currentResults[activeIndex];

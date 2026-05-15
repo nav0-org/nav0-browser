@@ -7,6 +7,10 @@ import { IssueReportHandler } from './overlay-handlers/issue-report-handler';
 import { SSLInfoHandler } from './overlay-handlers/ssl-info-handler';
 import { AlertHandler } from './overlay-handlers/alert-handler';
 import { BasicAuthHandler } from './overlay-handlers/basic-auth-handler';
+import {
+  UrlAutocompleteHandler,
+  UrlAutocompleteSuggestion,
+} from './overlay-handlers/url-autocomplete-handler';
 
 export type OverlayType =
   | 'command-k'
@@ -15,7 +19,8 @@ export type OverlayType =
   | 'issue-report'
   | 'ssl-info'
   | 'alert'
-  | 'basic-auth';
+  | 'basic-auth'
+  | 'url-autocomplete';
 
 export class UnifiedOverlayManager {
   private webContentsViewInstance: WebContentsView;
@@ -23,6 +28,7 @@ export class UnifiedOverlayManager {
   private handlers: Map<OverlayType, OverlayHandler> = new Map();
   private readyPromise: Promise<void>;
   private sslInfoHandler: SSLInfoHandler;
+  private urlAutocompleteHandler: UrlAutocompleteHandler;
 
   constructor(appWindowId: string, isPrivate: boolean, partitionSetting: string) {
     this.webContentsViewInstance = new WebContentsView({
@@ -49,6 +55,9 @@ export class UnifiedOverlayManager {
     this.handlers.set('ssl-info', this.sslInfoHandler);
     this.handlers.set('alert', new AlertHandler());
     this.handlers.set('basic-auth', new BasicAuthHandler());
+
+    this.urlAutocompleteHandler = new UrlAutocompleteHandler();
+    this.handlers.set('url-autocomplete', this.urlAutocompleteHandler);
 
     // Set up SSL info listeners
     this.sslInfoHandler.setupListeners(this.webContentsViewInstance.webContents);
@@ -106,5 +115,14 @@ export class UnifiedOverlayManager {
 
   async getSSLContentHeight(): Promise<number> {
     return this.sslInfoHandler.getContentHeight(this.webContentsViewInstance.webContents);
+  }
+
+  // URL autocomplete: push live updates while the panel is visible
+  updateUrlAutocomplete(data: {
+    results: UrlAutocompleteSuggestion[];
+    activeIndex: number;
+  }): void {
+    if (!this.visibleOverlays.has('url-autocomplete')) return;
+    this.urlAutocompleteHandler.update(this.webContentsViewInstance.webContents, data);
   }
 }

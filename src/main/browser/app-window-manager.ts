@@ -615,6 +615,46 @@ export abstract class AppWindowManager {
     );
 
     ipcMain.on(
+      RendererToMainEventsForBrowserIPC.SHOW_URL_AUTOCOMPLETE_OVERLAY,
+      async (event, appWindowId: string, data) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (window) return window.showUrlAutocompleteOverlay(data);
+      }
+    );
+
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.UPDATE_URL_AUTOCOMPLETE_OVERLAY,
+      (event, appWindowId: string, data) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (window) window.updateUrlAutocompleteOverlay(data);
+      }
+    );
+
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.HIDE_URL_AUTOCOMPLETE_OVERLAY,
+      (event, appWindowId: string) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (window) window.hideUrlAutocompleteOverlay();
+      }
+    );
+
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.URL_AUTOCOMPLETE_RESULT_CLICKED,
+      (event, appWindowId: string, data) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (window) window.forwardUrlAutocompleteResultClicked(data);
+      }
+    );
+
+    ipcMain.on(
       RendererToMainEventsForBrowserIPC.SHOW_COMMAND_O_OVERLAY,
       async (event, appWindowId: string) => {
         const window = appWindowId

@@ -42,6 +42,8 @@ export class AppWindow {
   private partitionSetting: string;
   private unifiedOverlayManager: UnifiedOverlayManager | null = null;
   private overlayInitPromise: Promise<void>;
+  private urlAutocompleteBounds: { x: number; y: number; width: number; height: number } | null =
+    null;
   private findInPageManager: FindInPageManager | null = null;
   private findInPageState: Map<string, { searchText: string }> = new Map(); // per-tab find state
   private permissionPrompts: Map<string, PermissionPromptData> = new Map(); // per-tab permission data
@@ -258,10 +260,45 @@ export class AppWindow {
     if (!this.unifiedOverlayManager || !this.browserWindowInstance) return;
     const overlayView = this.unifiedOverlayManager.getWebContentsViewInstance();
     if (!this.browserWindowInstance.contentView.children.includes(overlayView)) {
-      const parentBounds = this.browserWindowInstance.contentView.getBounds();
-      overlayView.setBounds(parentBounds);
+      overlayView.setBounds(this.computeOverlayBounds());
       this.browserWindowInstance.contentView.addChildView(overlayView);
+    } else {
+      overlayView.setBounds(this.computeOverlayBounds());
     }
+  }
+
+  private computeOverlayBounds(): { x: number; y: number; width: number; height: number } {
+    if (!this.browserWindowInstance) return { x: 0, y: 0, width: 0, height: 0 };
+    const parentBounds = this.browserWindowInstance.contentView.getBounds();
+    // If url-autocomplete is the only visible overlay, restrict bounds to its region
+    // so the rest of the page (including the URL input) keeps receiving mouse events.
+    if (
+      this.unifiedOverlayManager &&
+      this.unifiedOverlayManager.isVisible('url-autocomplete') &&
+      this.urlAutocompleteBounds
+    ) {
+      const otherVisible = (
+        [
+          'command-k',
+          'command-o',
+          'options-menu',
+          'issue-report',
+          'ssl-info',
+          'alert',
+          'basic-auth',
+        ] as const
+      ).some((t) => this.unifiedOverlayManager!.isVisible(t));
+      if (!otherVisible) {
+        const b = this.urlAutocompleteBounds;
+        return {
+          x: Math.max(0, Math.round(b.x)),
+          y: Math.max(0, Math.round(b.y)),
+          width: Math.max(0, Math.min(Math.round(b.width), parentBounds.width)),
+          height: Math.max(0, Math.min(Math.round(b.height), parentBounds.height)),
+        };
+      }
+    }
+    return parentBounds;
   }
 
   private removeOverlayViewIfEmpty(): void {
@@ -313,7 +350,7 @@ export class AppWindow {
     if (this.unifiedOverlayManager && this.unifiedOverlayManager.hasAnyVisible()) {
       const overlayView = this.unifiedOverlayManager.getWebContentsViewInstance();
       if (this.browserWindowInstance.contentView.children.includes(overlayView)) {
-        overlayView.setBounds(parentBounds);
+        overlayView.setBounds(this.computeOverlayBounds());
       }
     }
   }
@@ -570,6 +607,49 @@ export class AppWindow {
       this.unifiedOverlayManager.hideOverlay('command-o');
       this.removeOverlayViewIfEmpty();
     }
+  }
+
+  async showUrlAutocompleteOverlay(data: {
+    bounds: { x: number; y: number; width: number; height: number };
+    results: unknown[];
+    activeIndex: number;
+  }): Promise<void> {
+    await this.overlayInitPromise;
+    await this.unifiedOverlayManager.whenReady();
+    this.urlAutocompleteBounds = data.bounds;
+    this.ensureOverlayViewAdded();
+    if (this.unifiedOverlayManager.isVisible('url-autocomplete')) {
+      this.unifiedOverlayManager.updateUrlAutocomplete({
+        results: data.results as never,
+        activeIndex: data.activeIndex,
+      });
+    } else {
+      this.unifiedOverlayManager.showOverlay('url-autocomplete', data);
+    }
+  }
+
+  updateUrlAutocompleteOverlay(data: { results: unknown[]; activeIndex: number }): void {
+    if (!this.unifiedOverlayManager?.isVisible('url-autocomplete')) return;
+    this.unifiedOverlayManager.updateUrlAutocomplete({
+      results: data.results as never,
+      activeIndex: data.activeIndex,
+    });
+  }
+
+  hideUrlAutocompleteOverlay(): void {
+    if (this.unifiedOverlayManager?.isVisible('url-autocomplete')) {
+      this.unifiedOverlayManager.hideOverlay('url-autocomplete');
+      this.urlAutocompleteBounds = null;
+      this.removeOverlayViewIfEmpty();
+    }
+  }
+
+  forwardUrlAutocompleteResultClicked(data: unknown): void {
+    if (!this.browserWindowInstance) return;
+    this.browserWindowInstance.webContents.send(
+      MainToRendererEventsForBrowserIPC.URL_AUTOCOMPLETE_RESULT_FORWARDED,
+      data
+    );
   }
 
   broadcastToTabs(channel: string, data: any): void {

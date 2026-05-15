@@ -9,6 +9,7 @@ import * as issueReportPanel from './panels/issue-report/issue-report';
 import * as sslInfoPanel from './panels/ssl-info/ssl-info';
 import * as alertPanel from './panels/alert/alert';
 import * as basicAuthPanel from './panels/basic-auth/basic-auth';
+import * as urlAutocompletePanel from './panels/url-autocomplete/url-autocomplete';
 
 type PanelName =
   | 'command-k'
@@ -17,7 +18,8 @@ type PanelName =
   | 'issue-report'
   | 'ssl-info'
   | 'alert'
-  | 'basic-auth';
+  | 'basic-auth'
+  | 'url-autocomplete';
 
 const panels: Record<
   PanelName,
@@ -30,6 +32,7 @@ const panels: Record<
   'ssl-info': sslInfoPanel,
   alert: alertPanel,
   'basic-auth': basicAuthPanel,
+  'url-autocomplete': urlAutocompletePanel,
 };
 
 document.addEventListener('DOMContentLoaded', () => {

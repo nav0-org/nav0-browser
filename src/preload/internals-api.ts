@@ -285,6 +285,44 @@ export function init() {
         appWindowId
       );
     },
+    showUrlAutocompleteOverlay: (appWindowId: string, data: any) => {
+      ipcRenderer.send(
+        RendererToMainEventsForBrowserIPC.SHOW_URL_AUTOCOMPLETE_OVERLAY,
+        appWindowId,
+        data
+      );
+    },
+    updateUrlAutocompleteOverlay: (appWindowId: string, data: any) => {
+      ipcRenderer.send(
+        RendererToMainEventsForBrowserIPC.UPDATE_URL_AUTOCOMPLETE_OVERLAY,
+        appWindowId,
+        data
+      );
+    },
+    hideUrlAutocompleteOverlay: (appWindowId: string) => {
+      ipcRenderer.send(
+        RendererToMainEventsForBrowserIPC.HIDE_URL_AUTOCOMPLETE_OVERLAY,
+        appWindowId
+      );
+    },
+    sendUrlAutocompleteResultClicked: (appWindowId: string, data: any) => {
+      ipcRenderer.send(
+        RendererToMainEventsForBrowserIPC.URL_AUTOCOMPLETE_RESULT_CLICKED,
+        appWindowId,
+        data
+      );
+    },
+    onUrlAutocompleteResultForwarded: (callback: (data: any) => void) => {
+      ipcRenderer.on(
+        MainToRendererEventsForBrowserIPC.URL_AUTOCOMPLETE_RESULT_FORWARDED,
+        (_event, data) => callback(data)
+      );
+    },
+    onUrlAutocompleteUpdate: (callback: (data: any) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.URL_AUTOCOMPLETE_UPDATE, (_event, data) =>
+        callback(data)
+      );
+    },
     showCommandOOverlay: async (appWindowId: string) => {
       return ipcRenderer.send(
         RendererToMainEventsForBrowserIPC.SHOW_COMMAND_O_OVERLAY,

@@ -105,6 +105,12 @@ declare global {
       hideCommandKOverlay: (appWindowId: string) => Promise<any>;
       showCommandOOverlay: (appWindowId: string) => Promise<any>;
       hideCommandOOverlay: (appWindowId: string) => Promise<any>;
+      showUrlAutocompleteOverlay: (appWindowId: string, data: any) => void;
+      updateUrlAutocompleteOverlay: (appWindowId: string, data: any) => void;
+      hideUrlAutocompleteOverlay: (appWindowId: string) => void;
+      sendUrlAutocompleteResultClicked: (appWindowId: string, data: any) => void;
+      onUrlAutocompleteResultForwarded: (callback: (data: any) => void) => void;
+      onUrlAutocompleteUpdate: (callback: (data: any) => void) => void;
       fetchAllWindowsTabs: (isPrivate: boolean) => Promise<
         Array<{
           windowId: string;
