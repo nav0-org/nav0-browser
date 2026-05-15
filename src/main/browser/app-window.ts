@@ -7,7 +7,9 @@ import {
   ClosedTabRecord,
   InAppUrls,
   MainToRendererEventsForBrowserIPC,
+  PartitionNames,
 } from '../../constants/app-constants';
+import { DatabaseManager } from '../database/database-manager';
 import { DownloadManager } from './download-manager';
 import { PermissionManager } from './permission-manager';
 import { NotificationManager } from './notification-manager';
@@ -65,9 +67,9 @@ export class AppWindow {
 
   private init() {
     if (this.isPrivate) {
-      this.partitionSetting = 'persist:private';
+      this.partitionSetting = PartitionNames.PRIVATE;
     } else {
-      this.partitionSetting = 'persist:browsertabs';
+      this.partitionSetting = PartitionNames.BROWSING;
     }
     PermissionManager.setupSession(this.partitionSetting);
     const isMac = process.platform === 'darwin';
@@ -230,19 +232,40 @@ export class AppWindow {
       tab.clearPendingTimers();
     }
     if (clearSession) {
-      PermissionManager.clearMemoryPermissions();
-      const currentSession = session.fromPartition('persist:private');
-      currentSession?.clearAuthCache();
-      currentSession?.clearStorageData();
-      currentSession?.clearCache();
-      currentSession?.clearHostResolverCache();
-      currentSession?.clearCodeCaches({});
-      currentSession?.clearSharedDictionaryCache();
-      currentSession?.clearStorageData();
-      currentSession?.closeAllConnections();
-      currentSession?.clearData();
+      AppWindow.clearPrivateSession();
     }
     this.browserWindowInstance.close();
+  }
+
+  /**
+   * Wipe every trace of the private session. Called when the last private
+   * window closes (or when the app quits with private windows still open).
+   * Both the Electron session partition and the SQLite private db are
+   * in-memory, so this resets RAM-resident state — there is nothing on disk
+   * to remove. `closeAllConnections` actively tears down any sockets the
+   * session still owns, and `closePrivateDatabase()` drops the in-memory db
+   * so the next private sitting starts empty.
+   */
+  public static clearPrivateSession(): void {
+    PermissionManager.clearMemoryPermissions();
+    try {
+      const privateSession = session.fromPartition(PartitionNames.PRIVATE);
+      privateSession?.closeAllConnections();
+      privateSession?.clearAuthCache();
+      privateSession?.clearHostResolverCache();
+      privateSession?.clearCache();
+      privateSession?.clearCodeCaches({});
+      privateSession?.clearSharedDictionaryCache();
+      privateSession?.clearStorageData();
+      privateSession?.clearData();
+    } catch (e) {
+      console.error('Failed to clear private session:', e);
+    }
+    try {
+      DatabaseManager.closePrivateDatabase();
+    } catch (e) {
+      console.error('Failed to reset private database:', e);
+    }
   }
 
   public getViewBounds(): { x: number; y: number; width: number; height: number } | null {

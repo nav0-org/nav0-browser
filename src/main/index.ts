@@ -156,6 +156,16 @@ app.on('before-quit', async () => {
   await SettingsEnforcer.onBeforeQuit();
 });
 
+// If the app is quitting while a private window is still open, the normal
+// "last private window closed" cleanup path never runs. Wipe the private
+// session here so private browsing data doesn't survive on disk.
+app.on('before-quit', () => {
+  const hasPrivateWindow = AppWindowManager.getWindows().some((w) => w.isPrivate);
+  if (hasPrivateWindow) {
+    AppWindow.clearPrivateSession();
+  }
+});
+
 // Restore an existing window when the dock icon is clicked (macOS). Only fall
 // back to creating a new window if every window has been closed — matching the
 // platform convention used by Safari, Chrome, and Finder.
