@@ -297,6 +297,13 @@ export const DEFAULT_KEYBOARD_SHORTCUTS: KeyboardShortcutAction[] = [
     currentShortcut: 'mod+F',
   },
   {
+    id: 'focus-address-bar',
+    label: 'Focus Address Bar',
+    category: 'Navigation',
+    defaultShortcut: 'mod+L',
+    currentShortcut: 'mod+L',
+  },
+  {
     id: 'open-settings',
     label: 'Open Settings',
     category: 'Utilities',

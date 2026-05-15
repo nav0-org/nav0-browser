@@ -595,6 +595,15 @@ export class AppWindow {
     }
   }
 
+  focusUrlBar(): void {
+    this.hideOptionsMenuOverlay();
+    this.hideCommandKOverlay();
+    this.hideCommandOOverlay();
+    if (!this.browserWindowInstance) return;
+    this.browserWindowInstance.webContents.focus();
+    this.browserWindowInstance.webContents.send(MainToRendererEventsForBrowserIPC.FOCUS_URL_BAR);
+  }
+
   broadcastToTabs(channel: string, data: any): void {
     this.tabs.forEach((tab) => {
       try {
