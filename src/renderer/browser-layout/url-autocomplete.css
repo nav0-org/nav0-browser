@@ -1,20 +1,32 @@
 .url-autocomplete-bar {
-  position: relative;
+  display: flex;
+  align-items: stretch;
   background-color: var(--bg-light);
   border-bottom: 1px solid var(--border-color);
-  z-index: 10;
+  padding: 0 5px 6px;
+}
+
+/* Left spacer matches nav-controls width (4 buttons @ 32px + spacing) */
+.url-ac-spacer-left {
+  width: calc(32px * 4 + var(--spacing-xs));
+  flex-shrink: 0;
+}
+
+/* Right spacer matches downloads + options buttons */
+.url-ac-spacer-right {
+  width: calc(32px * 2 + var(--spacing-xs) * 2);
+  flex-shrink: 0;
 }
 
 .url-autocomplete-panel {
-  position: absolute;
-  top: 0;
+  flex: 1;
   background-color: var(--bg-light);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   max-height: 400px;
   overflow-y: auto;
-  margin-top: 2px;
+  min-width: 0;
 }
 
 .url-autocomplete-results {

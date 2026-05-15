@@ -25,7 +25,6 @@ const MAX_PER_GROUP = 4;
 
 let urlInput: HTMLInputElement;
 let bar: HTMLElement;
-let panel: HTMLElement;
 let resultsContainer: HTMLElement;
 
 let appWindowId = '';
@@ -163,7 +162,7 @@ const navigate = (direction: number) => {
 const openDropdown = () => {
   if (isOpen) return;
   isOpen = true;
-  bar.style.display = 'block';
+  bar.style.display = 'flex';
   window.dispatchEvent(new Event('resize'));
 };
 
@@ -391,19 +390,7 @@ export function initUrlAutocomplete(opts: UrlAutocompleteOptions): {
   onSelectionEnter = opts.onSelectionEnter;
 
   bar = document.getElementById('url-autocomplete-bar') as HTMLElement;
-  panel = document.getElementById('url-autocomplete-panel') as HTMLElement;
   resultsContainer = document.getElementById('url-autocomplete-results') as HTMLElement;
-
-  // Align panel under the address bar (recompute on resize)
-  const addressBar = urlInput.closest('.address-bar') as HTMLElement | null;
-  const positionPanel = () => {
-    if (!addressBar) return;
-    const rect = addressBar.getBoundingClientRect();
-    panel.style.left = `${Math.round(rect.left)}px`;
-    panel.style.width = `${Math.round(rect.width)}px`;
-  };
-  positionPanel();
-  window.addEventListener('resize', positionPanel);
 
   urlInput.addEventListener('focus', handleFocus);
   urlInput.addEventListener('blur', handleBlur);
