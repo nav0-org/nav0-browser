@@ -17,9 +17,9 @@
 
 #overlay-url-autocomplete .url-autocomplete-panel {
   flex: 1;
-  background-color: var(--bg-light);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  background-color: var(--bg-0);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-lg);
   box-shadow: var(--shadow-md);
   overflow-y: auto;
   max-height: 100%;
@@ -38,7 +38,7 @@
 
 #overlay-url-autocomplete .url-ac-item:hover,
 #overlay-url-autocomplete .url-ac-item.active {
-  background-color: var(--bg-color);
+  background-color: var(--bg-3);
 }
 
 #overlay-url-autocomplete .url-ac-icon,
@@ -49,9 +49,9 @@
   align-items: center;
   justify-content: center;
   margin-right: 10px;
-  border-radius: var(--radius-sm);
-  background-color: var(--bg-hover);
-  color: var(--text-secondary);
+  border-radius: var(--r-sm);
+  background-color: var(--bg-3);
+  color: var(--fg-3);
   flex-shrink: 0;
   font-weight: bold;
   font-size: 12px;
@@ -97,5 +97,5 @@
 }
 
 #overlay-url-autocomplete .url-ac-bookmark-flag {
-  color: var(--primary-color, #3b82f6);
+  color: var(--accent);
 }

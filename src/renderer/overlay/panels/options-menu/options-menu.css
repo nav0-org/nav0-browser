@@ -10,14 +10,14 @@
   top: 80px;
   right: 0;
   width: 320px;
-  background-color: var(--bg-light);
-  border-radius: var(--radius-lg);
+  background-color: var(--bg-0);
+  border-radius: var(--r-lg);
   box-shadow: var(--shadow-lg);
   z-index: 9999;
   padding: var(--spacing-xs) 0;
   margin-top: var(--spacing-xs);
   display: block;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-1);
   text-align: left;
   margin-right: 10px;
 }
@@ -41,13 +41,13 @@
 
 #overlay-options-menu .divider {
   height: 1px;
-  background-color: var(--border-color);
+  background-color: var(--border-1);
   margin-top: 2px;
   margin-bottom: 2px;
 }
 
 #overlay-options-menu .dropdown-item:hover {
-  background-color: var(--bg-hover);
+  background-color: var(--bg-3);
 }
 
 #overlay-options-menu .dropdown-item i {
@@ -82,13 +82,13 @@
   top: 0;
   right: 100%;
   width: 250px;
-  background-color: var(--bg-light);
-  border-radius: var(--radius-lg);
+  background-color: var(--bg-0);
+  border-radius: var(--r-lg);
   box-shadow: var(--shadow-lg);
   z-index: var(--z-dropdown);
   padding: var(--spacing-xs) 0;
   display: none;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-1);
 }
 
 .has-submenu:hover .submenu,
@@ -148,7 +148,7 @@
 
 .closed-tab-item:hover,
 .closed-window-item:hover {
-  background-color: var(--bg-hover);
+  background-color: var(--bg-3);
 }
 
 .closed-tab-favicon {

@@ -8,43 +8,89 @@
    CSS Variables for Theming
    -------------------------------------------------------------------------- */
 :root {
-  /* Color palette */
+  /* ----------------------------------------------------------------
+     Nav0 Design System tokens — brand ramps from the compass logo.
+     Sharp corners, hairline borders, paper-flat shadows.
+     ---------------------------------------------------------------- */
+  --nav0-red-500: #ef4444;
+  --nav0-red-600: #dc2626;
+  --nav0-red-700: #b91c1c;
+  --nav0-red-800: #991b1b;
+  --nav0-blue-500: #3b82f6;
+  --nav0-blue-600: #2563eb;
+  --nav0-blue-700: #1d4ed8;
+  --nav0-blue-800: #1e40af;
+  --nav0-slate-300: #cbd5e1;
+  --nav0-slate-400: #94a3b8;
+  --nav0-slate-500: #64748b;
+  --nav0-slate-700: #334155;
+  --nav0-slate-900: #0f172a;
+
+  /* Nav0 bg/fg scale — paired with the legacy aliases below. */
+  --bg-0: #ffffff; /* canvas / cards */
+  --bg-1: #fafafa; /* page background */
+  --bg-2: #f5f5f5; /* subtle surface, input fields */
+  --bg-3: #ebebeb; /* hover */
+  --bg-inverse: #0a0a0a;
+  --fg-1: #0a0a0a;
+  --fg-2: #333333;
+  --fg-3: #6b7280;
+  --fg-4: #9ca3af;
+  --fg-on-dark: #ffffff;
+  --border-1: #e5e5e5; /* hairline */
+  --border-2: #d4d4d4; /* heavier separator */
+  --accent: var(--nav0-blue-600);
+  --accent-hover: var(--nav0-blue-700);
+  --danger: var(--nav0-red-600);
+  --danger-soft: #fdecea;
+  --success: #16a34a;
+  --success-soft: #ecfdf5;
+  --warning: #d97706;
+  --warning-soft: #fef3c7;
+  --private-bg: var(--nav0-red-700);
+  --private-fg: #ffffff;
+
+  /* Focus rings */
+  --shadow-focus: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  --shadow-focus-accent: 0 0 0 3px rgba(37, 99, 235, 0.18);
+
+  /* ----------------------------------------------------------------
+     Legacy aliases — kept so existing pages keep working, mapped onto
+     the Nav0 ramp. New code should prefer the Nav0 tokens above.
+     ---------------------------------------------------------------- */
   --primary-color: #000000;
-  --primary-light: #f5f5f5;
+  --primary-light: var(--bg-2);
   --primary-dark: #171717;
-  --text-color: #333;
-  --text-secondary: #777;
-  --text-light: #999;
+  --text-color: var(--fg-2);
+  --text-secondary: var(--fg-3);
+  --text-light: var(--fg-4);
+  --bg-color: var(--bg-2);
+  --bg-light: var(--bg-0);
+  --bg-hover: var(--bg-3);
+  --bg-active: var(--bg-2);
+  --border-color: var(--border-1);
+  --border-color-dark: var(--border-2);
+  --error-color: var(--danger);
+  --error-light: var(--danger-soft);
+  --warning-color: var(--warning);
+  --warning-light: var(--warning-soft);
+  --success-color: var(--success);
+  --success-light: var(--success-soft);
+  --info-color: var(--accent);
+  --info-light: #eff4ff;
 
-  /* Background colors */
-  --bg-color: #f5f5f5;
-  --bg-light: #fff;
-  --bg-hover: #d3d3d3;
-  --bg-active: #f5f5f5;
-
-  /* Border colors */
-  --border-color: #e0e0e0;
-  --border-color-dark: #ccc;
-
-  /* Feedback colors */
-  --error-color: #e74c3c;
-  --error-light: #fdecea;
-  --warning-color: #f39c12;
-  --warning-light: #fef5e7;
-  --success-color: #2ecc71;
-  --success-light: #eafaf1;
-  --info-color: #3498db;
-  --info-light: #ebf5fb;
-
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 2px 10px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.12);
+  /* Shadows — subtle, paper-flat. No coloured glows. */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
 
   /* Animation speeds */
-  --transition-fast: 0.15s;
-  --transition-medium: 0.3s;
-  --transition-slow: 0.5s;
+  --dur-fast: 120ms;
+  --dur-med: 220ms;
+  --dur-slow: 400ms;
+  --transition-fast: var(--dur-fast);
+  --transition-medium: var(--dur-med);
+  --transition-slow: var(--dur-slow);
 
   /* Spacing variables */
   --spacing-xs: 4px;
@@ -63,13 +109,25 @@
   --font-xxl: 24px;
   --font-xxxl: 32px;
 
-  /* Border radius */
-  --radius-sm: 3px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
-  --radius-pill: 500px;
-  --radius-circle: 50%;
+  /* ----------------------------------------------------------------
+     Border radii — tightened toward Nav0's utilitarian aesthetic.
+     Source app used 6/8/12/pill; Nav0 spec is 2/3/4/6 plus circle.
+     "URL-bar pill" is a softly rounded rectangle (6px), not 500px.
+     ---------------------------------------------------------------- */
+  --r-xs: 2px;
+  --r-sm: 3px;
+  --r-md: 4px;
+  --r-lg: 6px;
+  --r-pill: 6px;
+  --r-full: 50%;
+
+  /* Legacy aliases mapped onto the Nav0 radii. */
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+  --radius-xl: var(--r-lg);
+  --radius-pill: var(--r-pill);
+  --radius-circle: var(--r-full);
 
   /* Z-index layers */
   --z-dropdown: 100;

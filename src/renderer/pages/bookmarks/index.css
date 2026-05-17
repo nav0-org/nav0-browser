@@ -56,16 +56,17 @@
   box-sizing: border-box;
   font-size: var(--font-md);
   padding: 10px 16px 10px 40px;
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
+  border: none;
+  border-radius: var(--r-md);
   outline: none;
   color: var(--text-color);
-  background: var(--bg-light);
-  transition: border-color var(--transition-fast);
+  background: var(--bg-2);
+  transition: background var(--transition-fast);
 }
 
 .search-input:focus {
-  border-color: var(--primary-color);
+  background: var(--bg-0);
+  box-shadow: var(--shadow-focus);
 }
 
 .search-icon {
@@ -94,7 +95,7 @@
   background: var(--bg-color);
   border: none;
   padding: 5px 14px;
-  border-radius: 20px;
+  border-radius: var(--r-pill);
   cursor: pointer;
   transition: all var(--transition-fast) ease;
 }
@@ -127,7 +128,7 @@
   background: var(--bg-color);
   border: none;
   padding: 5px 14px;
-  border-radius: 20px;
+  border-radius: var(--r-pill);
   cursor: pointer;
   transition: all var(--transition-fast) ease;
 }
@@ -148,7 +149,7 @@
   margin-bottom: 28px;
   padding: 14px 20px;
   background: var(--bg-color);
-  border-radius: 10px;
+  border-radius: var(--r-lg);
   border: 1px solid var(--border-color);
 }
 
@@ -169,7 +170,7 @@
   background: var(--bg-light);
   border: 1px solid var(--border-color);
   padding: 5px 14px;
-  border-radius: 20px;
+  border-radius: var(--r-pill);
   cursor: pointer;
   transition: background var(--transition-fast);
 }
@@ -205,7 +206,7 @@
 .stale-review-item .bk-favicon {
   width: 30px;
   height: 30px;
-  border-radius: 7px;
+  border-radius: var(--r-md);
   background: var(--bg-color);
   flex-shrink: 0;
   display: flex;
@@ -278,7 +279,7 @@
 }
 
 .bookmark-item:hover {
-  background: #fcfcfc;
+  background: var(--bg-1);
 }
 
 /* Stagger animation */
@@ -300,7 +301,7 @@
 .bk-favicon {
   width: 30px;
   height: 30px;
-  border-radius: 7px;
+  border-radius: var(--r-md);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -311,7 +312,7 @@
 .bk-favicon img {
   width: 16px;
   height: 16px;
-  border-radius: 2px;
+  border-radius: var(--r-xs);
 }
 
 .bk-favicon svg {

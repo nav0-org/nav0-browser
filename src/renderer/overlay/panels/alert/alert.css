@@ -28,12 +28,10 @@
   position: relative;
   width: 420px;
   max-width: 90%;
-  background-color: var(--bg-light);
-  border-radius: var(--radius-xl);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.18),
-    0 2px 8px rgba(0, 0, 0, 0.08);
-  border: 1px solid var(--border-color);
+  background-color: var(--bg-0);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-1);
   overflow: hidden;
   z-index: 1;
   animation: alertSlideIn 0.18s ease-out;
@@ -62,8 +60,8 @@
   padding: 14px 18px 8px 18px;
   font-size: var(--font-sm);
   font-weight: 500;
-  color: var(--text-secondary);
-  border-bottom: 1px solid var(--border-color);
+  color: var(--fg-3);
+  border-bottom: 1px solid var(--border-1);
   word-break: break-all;
 }
 
@@ -90,17 +88,18 @@
   width: 100%;
   padding: 8px 12px;
   font-size: var(--font-md);
-  color: var(--text-color);
-  background-color: var(--bg-color);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  color: var(--fg-2);
+  background-color: var(--bg-2);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-md);
   box-sizing: border-box;
   font-family: inherit;
 }
 
 .alert-input:focus {
   outline: none;
-  border-color: var(--primary-color);
+  background-color: var(--bg-0);
+  box-shadow: var(--shadow-focus);
 }
 
 .alert-actions {
@@ -108,14 +107,14 @@
   justify-content: flex-end;
   gap: 8px;
   padding: 10px 18px 14px 18px;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-1);
 }
 
 .alert-btn {
   padding: 7px 18px;
   font-size: var(--font-sm);
   font-weight: 500;
-  border-radius: var(--radius-md);
+  border-radius: var(--r-md);
   cursor: pointer;
   transition: all var(--transition-fast);
   border: 1px solid transparent;
@@ -133,14 +132,14 @@
 }
 
 .alert-btn-secondary {
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  border-color: var(--border-color);
+  background-color: var(--bg-2);
+  color: var(--fg-2);
+  border-color: var(--border-1);
 }
 
 .alert-btn-secondary:hover {
-  background-color: var(--bg-hover, var(--bg-color));
-  border-color: var(--text-secondary);
+  background-color: var(--bg-3);
+  border-color: var(--fg-3);
 }
 
 .alert-btn:focus-visible {

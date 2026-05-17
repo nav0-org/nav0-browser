@@ -1,27 +1,9 @@
 @import url('../styles/global.css');
 
-/* ============================================================
-   Nav0 Design System tokens (browser chrome scope)
-   "Browse. Nothing more." — flush, segmented, hairline.
-   ============================================================ */
+/* Tokens scoped to the chrome (rest are in global.css). */
 :root {
-  --nav0-red-600: #dc2626;
-  --nav0-red-700: #b91c1c;
-  --bg-0: #ffffff;
-  --bg-2: #f5f5f5;
-  --bg-3: #ebebeb;
   --tab-strip-bg: #e2e2e2;
   --tab-divider: rgba(0, 0, 0, 0.08);
-  --fg-1: #0a0a0a;
-  --fg-2: #333333;
-  --fg-3: #6b7280;
-  --fg-4: #9ca3af;
-  --border-1: #e5e5e5;
-  --success: #16a34a;
-  --danger: #dc2626;
-  --r-pill: 6px;
-  --shadow-focus: 0 0 0 2px rgba(0, 0, 0, 0.1);
-  --dur-fast: 120ms;
 }
 
 .browser-layout-container {

@@ -112,7 +112,7 @@
 .heatmap-legend-cell {
   width: 10px;
   height: 10px;
-  border-radius: 2px;
+  border-radius: var(--r-xs);
 }
 
 /* Heatmap tooltip */
@@ -175,14 +175,14 @@
   flex: 1;
   height: 4px;
   background: var(--border-color);
-  border-radius: 2px;
+  border-radius: var(--r-xs);
   overflow: hidden;
 }
 
 .domain-bar-fill {
   height: 100%;
   background: var(--primary-color);
-  border-radius: 2px;
+  border-radius: var(--r-xs);
   transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -217,13 +217,13 @@
   flex: 1;
   height: 4px;
   background: var(--border-color);
-  border-radius: 2px;
+  border-radius: var(--r-xs);
   overflow: hidden;
 }
 
 .category-bar-fill {
   height: 100%;
-  border-radius: 2px;
+  border-radius: var(--r-xs);
   transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -248,16 +248,17 @@
   box-sizing: border-box;
   font-size: var(--font-md);
   padding: 10px 16px 10px 40px;
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
+  border: none;
+  border-radius: var(--r-md);
   outline: none;
   color: var(--text-color);
-  background: var(--bg-light);
-  transition: border-color var(--transition-fast);
+  background: var(--bg-2);
+  transition: background var(--transition-fast);
 }
 
 .search-input:focus {
-  border-color: var(--primary-color);
+  background: var(--bg-0);
+  box-shadow: var(--shadow-focus);
 }
 
 .search-icon {
@@ -284,7 +285,7 @@
   background: var(--bg-color);
   border: none;
   padding: 5px 14px;
-  border-radius: 20px;
+  border-radius: var(--r-pill);
   cursor: pointer;
   transition: all var(--transition-fast) ease;
 }
@@ -330,7 +331,7 @@
 }
 
 .history-entry:hover {
-  background: #fcfcfc;
+  background: var(--bg-1);
 }
 
 .entry-time {
@@ -345,7 +346,7 @@
 .entry-favicon {
   width: 30px;
   height: 30px;
-  border-radius: 7px;
+  border-radius: var(--r-md);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -356,7 +357,7 @@
 .entry-favicon img {
   width: 16px;
   height: 16px;
-  border-radius: 2px;
+  border-radius: var(--r-xs);
 }
 
 .entry-favicon svg {

@@ -28,12 +28,10 @@
   position: relative;
   width: 420px;
   max-width: 90%;
-  background-color: var(--bg-light);
-  border-radius: var(--radius-xl);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.18),
-    0 2px 8px rgba(0, 0, 0, 0.08);
-  border: 1px solid var(--border-color);
+  background-color: var(--bg-0);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-1);
   overflow: hidden;
   z-index: 1;
   animation: basicAuthSlideIn 0.18s ease-out;
@@ -63,10 +61,10 @@
   align-items: center;
   gap: 8px;
   padding: 14px 18px 12px 18px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-1);
   font-size: var(--font-lg);
   font-weight: 600;
-  color: var(--text-color);
+  color: var(--fg-2);
 }
 
 .basic-auth-body {
@@ -94,9 +92,9 @@
   gap: 6px;
   padding: 8px 10px;
   margin: 6px 0 12px 0;
-  background-color: var(--error-light, rgba(231, 76, 60, 0.08));
-  color: var(--error-color, #c0392b);
-  border-radius: var(--radius-md);
+  background-color: var(--danger-soft);
+  color: var(--danger);
+  border-radius: var(--r-md);
   font-size: var(--font-xs);
 }
 
@@ -113,17 +111,18 @@
   width: 100%;
   padding: 8px 12px;
   font-size: var(--font-md);
-  color: var(--text-color);
-  background-color: var(--bg-color);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  color: var(--fg-2);
+  background-color: var(--bg-2);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-md);
   box-sizing: border-box;
   font-family: inherit;
 }
 
 .basic-auth-input:focus {
   outline: none;
-  border-color: var(--primary-color);
+  background-color: var(--bg-0);
+  box-shadow: var(--shadow-focus);
 }
 
 .basic-auth-actions {
@@ -131,7 +130,7 @@
   justify-content: flex-end;
   gap: 8px;
   padding: 12px 18px 14px 18px;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-1);
   margin-top: 8px;
 }
 
@@ -139,7 +138,7 @@
   padding: 7px 18px;
   font-size: var(--font-sm);
   font-weight: 500;
-  border-radius: var(--radius-md);
+  border-radius: var(--r-md);
   cursor: pointer;
   transition: all var(--transition-fast);
   border: 1px solid transparent;
@@ -157,13 +156,13 @@
 }
 
 .basic-auth-btn-secondary {
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  border-color: var(--border-color);
+  background-color: var(--bg-2);
+  color: var(--fg-2);
+  border-color: var(--border-1);
 }
 
 .basic-auth-btn-secondary:hover {
-  border-color: var(--text-secondary);
+  border-color: var(--fg-3);
 }
 
 .basic-auth-btn:focus-visible {
