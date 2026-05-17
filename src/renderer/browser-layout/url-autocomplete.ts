@@ -7,6 +7,7 @@ type Suggestion = {
   faviconUrl?: string | null;
   meta?: string;
   tabId?: string;
+  isBookmark?: boolean;
 };
 
 type TabRecord = { id: string; title: string; url: string; faviconUrl: string | null };
@@ -16,13 +17,18 @@ type HistoryRecord = {
   faviconUrl: string | null;
   createdDate: string;
 };
-type BookmarkRecord = HistoryRecord;
+type BookmarkRow = {
+  title: string | null;
+  url: string;
+  faviconUrl: string | null;
+  createdDate: string;
+  type: 'reference' | 'queue';
+};
 
 const DEBOUNCE_MS = 120;
 const MAX_PER_GROUP = 4;
 const DROPDOWN_MAX_HEIGHT = 360;
 const ITEM_HEIGHT = 44;
-const SECTION_HEADER_HEIGHT = 24;
 
 let urlInput: HTMLInputElement;
 let appWindowId = '';
@@ -50,13 +56,21 @@ const formatDate = (dateStr: string): string => {
 
 const estimateDropdownHeight = (results: Suggestion[]): number => {
   if (results.length === 0) return 0;
-  const groups = new Set(results.map((r) => r.type));
-  // Search type has no section heading
-  const headerCount = (['tab', 'bookmark', 'history'] as const).filter((t) => groups.has(t)).length;
   const padding = 16;
-  return Math.min(
-    DROPDOWN_MAX_HEIGHT,
-    padding + headerCount * SECTION_HEADER_HEIGHT + results.length * ITEM_HEIGHT
+  return Math.min(DROPDOWN_MAX_HEIGHT, padding + results.length * ITEM_HEIGHT);
+};
+
+const dedupeHistoryByUrl = (history: HistoryRecord[]): HistoryRecord[] => {
+  // Keep the entry with the latest createdDate per URL.
+  const byUrl = new Map<string, HistoryRecord>();
+  for (const record of history) {
+    const existing = byUrl.get(record.url);
+    if (!existing || new Date(record.createdDate) > new Date(existing.createdDate)) {
+      byUrl.set(record.url, record);
+    }
+  }
+  return Array.from(byUrl.values()).sort(
+    (a, b) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime()
   );
 };
 
@@ -132,49 +146,15 @@ const fetchSuggestions = async (query: string) => {
   const trimmed = query.trim();
 
   try {
-    if (!trimmed) {
-      const [openTabs, history] = await Promise.all([
-        window.BrowserAPI.fetchOpenTabs(appWindowId),
-        window.BrowserAPI.fetchBrowsingHistory(appWindowId, '', 6, 0),
-      ]);
-      if (requestedAt !== lastQueryAt) return;
-
-      const results: Suggestion[] = [];
-      const activeTabId = getActiveTabId();
-      openTabs
-        .filter((tab: TabRecord) => tab.id !== activeTabId)
-        .slice(0, MAX_PER_GROUP)
-        .forEach((tab: TabRecord) => {
-          results.push({
-            type: 'tab',
-            title: tab.title || tab.url || 'New Tab',
-            url: tab.url || '',
-            faviconUrl: tab.faviconUrl,
-            meta: 'Switch to tab',
-            tabId: tab.id,
-          });
-        });
-      history.forEach((record: HistoryRecord) => {
-        results.push({
-          type: 'history',
-          title: record.title || record.url,
-          url: record.url,
-          faviconUrl: record.faviconUrl,
-          meta: formatDate(record.createdDate),
-        });
-      });
-
-      currentResults = results;
-      activeIndex = results.length > 0 ? 0 : -1;
-      if (results.length > 0) pushToOverlay(true);
-      else closeDropdown();
-      return;
-    }
-
     const [openTabs, bookmarks, history] = await Promise.all([
       window.BrowserAPI.fetchOpenTabs(appWindowId),
-      window.BrowserAPI.fetchBookmarks(appWindowId, trimmed, MAX_PER_GROUP, 0),
-      window.BrowserAPI.fetchBrowsingHistory(appWindowId, trimmed, MAX_PER_GROUP, 0),
+      window.BrowserAPI.fetchBookmarks(appWindowId, trimmed, MAX_PER_GROUP * 3, 0),
+      window.BrowserAPI.fetchBrowsingHistory(
+        appWindowId,
+        trimmed,
+        trimmed ? MAX_PER_GROUP * 3 : 20,
+        0
+      ),
     ]);
     if (requestedAt !== lastQueryAt) return;
 
@@ -182,9 +162,15 @@ const fetchSuggestions = async (query: string) => {
     const activeTabId = getActiveTabId();
     const results: Suggestion[] = [];
 
+    // Reference bookmarks only — these are what surface as bookmarks in the dropdown
+    // and what earn the bookmark icon on the right.
+    const referenceBookmarks = (bookmarks as BookmarkRow[]).filter((b) => b.type === 'reference');
+    const bookmarkedUrls = new Set(referenceBookmarks.map((b) => b.url));
+
     openTabs
       .filter((tab: TabRecord) => {
         if (tab.id === activeTabId) return false;
+        if (!trimmed) return true;
         const t = (tab.title || '').toLowerCase();
         const u = (tab.url || '').toLowerCase();
         return t.includes(lower) || u.includes(lower);
@@ -198,39 +184,48 @@ const fetchSuggestions = async (query: string) => {
           faviconUrl: tab.faviconUrl,
           meta: 'Switch to tab',
           tabId: tab.id,
+          isBookmark: bookmarkedUrls.has(tab.url || ''),
         });
       });
 
-    bookmarks.forEach((record: BookmarkRecord) => {
+    referenceBookmarks.slice(0, MAX_PER_GROUP).forEach((record) => {
       results.push({
         type: 'bookmark',
         title: record.title || record.url,
         url: record.url,
         faviconUrl: record.faviconUrl,
-        meta: formatDate(record.createdDate),
+        isBookmark: true,
       });
     });
 
-    history.forEach((record: HistoryRecord) => {
+    // History: dedupe by URL (keep latest), drop entries already shown as bookmarks.
+    const deduped = dedupeHistoryByUrl(history as HistoryRecord[]);
+    deduped
+      .filter((record) => !bookmarkedUrls.has(record.url))
+      .slice(0, MAX_PER_GROUP)
+      .forEach((record) => {
+        results.push({
+          type: 'history',
+          title: record.title || record.url,
+          url: record.url,
+          faviconUrl: record.faviconUrl,
+          meta: formatDate(record.createdDate),
+        });
+      });
+
+    if (trimmed) {
       results.push({
-        type: 'history',
-        title: record.title || record.url,
-        url: record.url,
-        faviconUrl: record.faviconUrl,
-        meta: formatDate(record.createdDate),
+        type: 'search',
+        title: trimmed,
+        url: '',
+        meta: 'Search with default search engine',
       });
-    });
-
-    results.push({
-      type: 'search',
-      title: trimmed,
-      url: '',
-      meta: 'Search with default search engine',
-    });
+    }
 
     currentResults = results;
     activeIndex = results.length > 0 ? 0 : -1;
-    pushToOverlay(true);
+    if (results.length > 0) pushToOverlay(true);
+    else closeDropdown();
   } catch {
     if (requestedAt !== lastQueryAt) return;
     currentResults = [

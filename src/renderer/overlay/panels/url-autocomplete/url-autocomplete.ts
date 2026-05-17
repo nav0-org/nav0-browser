@@ -8,6 +8,7 @@ type Suggestion = {
   faviconUrl?: string | null;
   meta?: string;
   tabId?: string;
+  isBookmark?: boolean;
 };
 
 let resultsContainer: HTMLElement;
@@ -31,7 +32,7 @@ const getFaviconLetter = (url: string): string => {
 
 const buildItem = (item: Suggestion, index: number): HTMLElement => {
   const el = document.createElement('div');
-  el.className = `url-ac-item${index === activeIndex ? ' active' : ''}${item.type === 'search' ? ' url-ac-search' : ''}`;
+  el.className = `url-ac-item${index === activeIndex ? ' active' : ''}`;
   el.dataset.index = String(index);
 
   let iconHtml = '';
@@ -41,13 +42,20 @@ const buildItem = (item: Suggestion, index: number): HTMLElement => {
     iconHtml = `<div class="url-ac-favicon"><img src="${escapeHtml(item.faviconUrl)}" onerror="this.parentElement.textContent='${getFaviconLetter(item.url)}'"></div>`;
   } else if (item.type === 'tab') {
     iconHtml = `<div class="url-ac-icon"><i data-lucide="app-window" width="14" height="14"></i></div>`;
-  } else if (item.type === 'bookmark') {
-    iconHtml = `<div class="url-ac-icon"><i data-lucide="bookmark" width="14" height="14"></i></div>`;
   } else {
     iconHtml = `<div class="url-ac-favicon">${getFaviconLetter(item.url)}</div>`;
   }
 
   const subtitle = item.type === 'search' ? item.meta || '' : item.url;
+
+  let trailingHtml = '';
+  if (item.isBookmark) {
+    trailingHtml =
+      '<div class="url-ac-trailing url-ac-bookmark-flag" title="Bookmarked">' +
+      '<i data-lucide="bookmark" width="14" height="14"></i></div>';
+  } else if (item.meta && item.type !== 'search') {
+    trailingHtml = `<div class="url-ac-trailing url-ac-meta">${escapeHtml(item.meta)}</div>`;
+  }
 
   el.innerHTML = `
     ${iconHtml}
@@ -55,7 +63,7 @@ const buildItem = (item: Suggestion, index: number): HTMLElement => {
       <div class="url-ac-title">${escapeHtml(item.title)}</div>
       ${subtitle ? `<div class="url-ac-subtitle">${escapeHtml(subtitle)}</div>` : ''}
     </div>
-    ${item.meta && item.type !== 'search' ? `<div class="url-ac-meta">${escapeHtml(item.meta)}</div>` : ''}
+    ${trailingHtml}
   `;
 
   el.addEventListener('mousedown', (e) => {
@@ -74,29 +82,7 @@ const render = () => {
   if (currentResults.length === 0) return;
 
   const fragment = document.createDocumentFragment();
-  const addSection = (title: string, type: Suggestion['type']) => {
-    const items = currentResults.filter((r) => r.type === type);
-    if (items.length === 0) return;
-    const heading = document.createElement('div');
-    heading.className = 'url-ac-section-title';
-    heading.textContent = title;
-    fragment.appendChild(heading);
-    items.forEach((item) => {
-      const idx = currentResults.indexOf(item);
-      fragment.appendChild(buildItem(item, idx));
-    });
-  };
-
-  addSection('Open Tabs', 'tab');
-  addSection('Bookmarks', 'bookmark');
-  addSection('History', 'history');
-  currentResults
-    .filter((r) => r.type === 'search')
-    .forEach((item) => {
-      const idx = currentResults.indexOf(item);
-      fragment.appendChild(buildItem(item, idx));
-    });
-
+  currentResults.forEach((item, idx) => fragment.appendChild(buildItem(item, idx)));
   resultsContainer.appendChild(fragment);
   createIcons({ icons });
 };
