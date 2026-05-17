@@ -14,6 +14,7 @@ import {
 } from '../../types/settings-types';
 import { AD_BLOCK_DOMAINS, AD_URL_PATTERNS } from '../ad-blocker/ad-block-lists';
 import { applyClientHints, alignUAWithRealChromeVersion } from '../browser/ua-switcher';
+import { STREAMING_SITES } from '../../constants/app-constants';
 
 export abstract class SettingsEnforcer {
   private static autoDeleteInterval: ReturnType<typeof setInterval> | null = null;
@@ -420,6 +421,24 @@ export abstract class SettingsEnforcer {
         // happen to contain generic words like "popup", "banner", or "ads"
         // (e.g. Bitrix CMS components served under /.../popup/script.js).
         if (topHostname && topHostname === hostname) {
+          callback({});
+          return;
+        }
+
+        // Skip URL-pattern matching for sub-resources of streaming sites.
+        // YouTube's videoplayback range requests to *.googlevideo.com carry
+        // parameters like `&ad_module=` and ad-rule metadata that match the
+        // generic `[?&]ad_` pattern and get canceled, breaking video seeks
+        // (especially in private mode, where the in-memory cache is small
+        // and seeks to unbuffered positions reliably re-fetch). Domain-level
+        // blocking still applies, so video ad networks like imasdk are
+        // still blocked.
+        if (
+          topHostname &&
+          STREAMING_SITES.some(
+            (site) => topHostname === site || topHostname.endsWith('.' + site)
+          )
+        ) {
           callback({});
           return;
         }
