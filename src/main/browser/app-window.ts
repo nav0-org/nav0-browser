@@ -578,6 +578,12 @@ export class AppWindow {
 
   async showOptionsMenuOverlay(): Promise<void> {
     this.hideCommandKOverlay();
+    this.hideCommandOOverlay();
+    // The autocomplete overlay shares the same WebContentsView and its panel
+    // fills the view at 100%/100%; leaving it open while the menu opens would
+    // either clip the menu to the small autocomplete region or, conversely,
+    // let the autocomplete cover the entire window.
+    this.hideUrlAutocompleteOverlay();
     await this.overlayInitPromise;
     if (this.unifiedOverlayManager.isVisible('options-menu')) return;
     await this.unifiedOverlayManager.whenReady();
@@ -637,6 +643,12 @@ export class AppWindow {
     results: unknown[];
     activeIndex: number;
   }): Promise<void> {
+    // Other overlays share this WebContentsView. If any of them are open,
+    // computeOverlayBounds returns the full window — and the autocomplete
+    // panel (sized 100%/100%) would cover the entire browser chrome.
+    this.hideOptionsMenuOverlay();
+    this.hideCommandKOverlay();
+    this.hideCommandOOverlay();
     await this.overlayInitPromise;
     await this.unifiedOverlayManager.whenReady();
     this.urlAutocompleteBounds = data.bounds;
