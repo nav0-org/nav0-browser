@@ -137,6 +137,12 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly HIDE_COMMAND_K_OVERLAY = 'browser:hide-command-k-overlay';
   public static readonly SHOW_COMMAND_O_OVERLAY = 'browser:show-command-o-overlay';
   public static readonly HIDE_COMMAND_O_OVERLAY = 'browser:hide-command-o-overlay';
+  public static readonly SHOW_URL_AUTOCOMPLETE_OVERLAY = 'browser:show-url-autocomplete-overlay';
+  public static readonly UPDATE_URL_AUTOCOMPLETE_OVERLAY =
+    'browser:update-url-autocomplete-overlay';
+  public static readonly HIDE_URL_AUTOCOMPLETE_OVERLAY = 'browser:hide-url-autocomplete-overlay';
+  public static readonly URL_AUTOCOMPLETE_RESULT_CLICKED =
+    'browser:url-autocomplete-result-clicked';
   public static readonly FETCH_ALL_WINDOWS_TABS = 'browser:fetch-all-windows-tabs';
   public static readonly MOVE_TAB_TO_WINDOW = 'browser:move-tab-to-window';
   public static readonly CREATE_NEW_APP_WINDOW = 'browser:create-new-app-window';
@@ -234,6 +240,9 @@ export abstract class MainToRendererEventsForBrowserIPC {
   // Unified overlay
   public static readonly SHOW_OVERLAY_PANEL = 'overlay:show-panel';
   public static readonly HIDE_OVERLAY_PANEL = 'overlay:hide-panel';
+  public static readonly URL_AUTOCOMPLETE_UPDATE = 'overlay:url-autocomplete-update';
+  public static readonly URL_AUTOCOMPLETE_RESULT_FORWARDED =
+    'browser:url-autocomplete-result-forwarded';
   public static readonly TAB_LOADING_CHANGED = 'browser:tab-loading-changed';
   public static readonly TAB_PINNED = 'browser:tab-pinned';
   public static readonly TAB_UNPINNED = 'browser:tab-unpinned';

@@ -1,5 +1,6 @@
 import { Tab } from './tab';
 import { InAppUrls } from '../../constants/app-constants';
+import { initUrlAutocomplete } from './url-autocomplete';
 
 export class BrowserTabManager {
   // DOM Elements
@@ -30,6 +31,7 @@ export class BrowserTabManager {
   private activeTabId: string | null = null;
   private appWindowId: string | null = null;
   private isPrivate = false;
+  private urlAutocomplete: ReturnType<typeof initUrlAutocomplete> | null = null;
 
   constructor() {
     this.appWindowId = window.BrowserAPI.appWindowId;
@@ -56,6 +58,7 @@ export class BrowserTabManager {
       this.initializeDomElements();
       this.setupEventListeners();
       this.setupIpcListeners();
+      this.setupUrlAutocomplete();
 
       //to handle resizing
       this.updateBrowserViewBounds();
@@ -180,11 +183,17 @@ export class BrowserTabManager {
       window.BrowserAPI.downloadCurrentPdf(this.appWindowId, this.activeTabId);
     });
 
-    // URL input - navigate on Enter key
-    this.urlInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        this.navigateToURL();
+    // URL input - navigate on Enter key. If a suggestion is highlighted in the
+    // autocomplete dropdown, defer to it; otherwise treat the input value as the target.
+    this.urlInput.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      if (this.urlAutocomplete?.hasOpenSuggestion()) {
+        this.urlAutocomplete.consumeActiveSuggestion();
+        return;
       }
+      this.urlAutocomplete?.close();
+      this.navigateToURL();
     });
 
     this.downloadsButton.addEventListener('click', () => {
@@ -481,11 +490,23 @@ export class BrowserTabManager {
     this.scrollActiveTabIntoView();
   }
 
-  private navigateToURL(): void {
-    const url = this.urlInput.value.trim();
-    if (url) {
-      window.BrowserAPI.navigate(this.appWindowId, this.activeTabId, url);
+  private navigateToURL(url?: string): void {
+    const target = (url ?? this.urlInput.value).trim();
+    if (target) {
+      window.BrowserAPI.navigate(this.appWindowId, this.activeTabId, target);
     }
+  }
+
+  private setupUrlAutocomplete(): void {
+    this.urlAutocomplete = initUrlAutocomplete({
+      appWindowId: this.appWindowId,
+      urlInput: this.urlInput,
+      getActiveTabId: () => this.activeTabId,
+      onSelectionEnter: (url: string) => {
+        this.urlInput.value = url;
+        this.navigateToURL(url);
+      },
+    });
   }
 
   private updateDownloadProgress(): void {
