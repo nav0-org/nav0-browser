@@ -1,29 +1,27 @@
 @import url('../styles/global.css');
 
-.browser-container {
-  width: 100%;
-  margin: 0 auto;
-  background-color: var(--bg-light);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  overflow: hidden;
-  border: 1px solid var(--border-color);
-}
-
-.private-window-identifier {
-  height: 30px;
-  margin: 0px 6px 0px 0px;
-  border-radius: 10px;
-  background-color: var(--primary-dark);
-  color: white;
-  padding: 0px 10px 0px 10px;
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-
-body.is-private .private-window-identifier {
-  display: flex;
+/* ============================================================
+   Nav0 Design System tokens (browser chrome scope)
+   "Browse. Nothing more." — flush, segmented, hairline.
+   ============================================================ */
+:root {
+  --nav0-red-600: #dc2626;
+  --nav0-red-700: #b91c1c;
+  --bg-0: #ffffff;
+  --bg-2: #f5f5f5;
+  --bg-3: #ebebeb;
+  --tab-strip-bg: #e2e2e2;
+  --tab-divider: rgba(0, 0, 0, 0.08);
+  --fg-1: #0a0a0a;
+  --fg-2: #333333;
+  --fg-3: #6b7280;
+  --fg-4: #9ca3af;
+  --border-1: #e5e5e5;
+  --success: #16a34a;
+  --danger: #dc2626;
+  --r-pill: 6px;
+  --shadow-focus: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  --dur-fast: 120ms;
 }
 
 .browser-layout-container {
@@ -41,13 +39,18 @@ body.is-private .private-window-identifier {
   min-height: 0;
 }
 
-/* Tab Bar */
+/* === Tab strip ===========================================
+   Flush, segmented blocks on a single gray band. Active tab
+   drops out to white, anchored by a 2-px compass-red bar on
+   its left edge. Hairline dividers replace per-tab outlines. */
 .tab-bar {
   display: flex;
-  align-items: center;
-  padding: 0 var(--spacing-xs);
-  border-bottom: 2px solid var(--primary-color);
-  background-color: var(--bg-color);
+  align-items: stretch;
+  height: 38px;
+  padding: 0;
+  background-color: var(--tab-strip-bg);
+  border-bottom: 1px solid var(--border-1);
+  flex-shrink: 0;
   -webkit-app-region: drag;
 }
 
@@ -56,19 +59,45 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
   padding-left: 78px;
 }
 
+/* Private mode — dark strip with red accent */
+body.is-private .tab-bar {
+  background-color: #2a0a0a;
+  border-bottom-color: #4a1414;
+}
+
 /* All interactive elements inside tab bar must be non-draggable */
 .tab-bar button,
 .tab-bar .tab,
 .tab-bar .tabs-container,
-.tab-bar .private-window-identifier,
-.tab-bar #controls-wrapper {
+.tab-bar .private-window-identifier {
   -webkit-app-region: no-drag;
+}
+
+/* Private badge — flush block at the strip's leading edge */
+.private-window-identifier {
+  display: none;
+  align-items: center;
+  gap: 4px;
+  align-self: stretch;
+  padding: 0 10px;
+  margin: 3px;
+  border-radius: 3px;
+  background-color: var(--nav0-red-700);
+  color: #ffffff;
+  font-size: var(--font-sm);
+  font-weight: 500;
+}
+
+body.is-private .private-window-identifier {
+  display: inline-flex;
 }
 
 .tabs-container {
   display: flex;
   flex: 1;
-  padding-top: 6px;
+  align-items: stretch;
+  height: 100%;
+  padding: 0;
   overflow-x: auto;
   overflow-y: hidden;
   flex-wrap: nowrap;
@@ -79,95 +108,139 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
   display: none;
 }
 
-/* Scroll arrow buttons */
+/* Scroll arrow buttons — flush, surface only when overflow */
 .tab-scroll-btn {
   display: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 100%;
+  align-self: stretch;
+  background: transparent;
+  border: 0;
+  color: var(--fg-3);
+  cursor: pointer;
+  padding: 0;
+  transition:
+    background var(--dur-fast),
+    color var(--dur-fast);
+}
+
+.tab-scroll-btn:hover {
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--fg-1);
 }
 
 .tab-scroll-btn.visible {
   display: inline-flex;
 }
 
+body.is-private .tab-scroll-btn {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+body.is-private .tab-scroll-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+}
+
 .tab {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  padding: 6px 4px;
-  margin-right: 4px;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
-  min-width: 100px;
-  width: 200px;
-  max-width: 200px;
+  gap: 6px;
+  height: 100%;
+  padding: 0 10px;
+  min-width: 120px;
+  flex: 1 1 160px;
+  max-width: 220px;
   font-size: var(--font-sm);
+  font-weight: 500;
   cursor: pointer;
   transition:
-    background-color var(--transition-fast),
-    width var(--transition-fast);
+    background-color var(--dur-fast),
+    color var(--dur-fast);
   white-space: nowrap;
-  color: var(--text-secondary);
+  color: var(--fg-3);
   position: relative;
-  flex-shrink: 1;
+  background: transparent;
+  border: 0;
+  border-right: 1px solid var(--tab-divider);
+  overflow: hidden;
 }
 
-/* Style for icon-only tabs */
-.tab.icon-only {
-  padding: 6px 2px;
-  justify-content: center;
+.tab:first-child {
+  border-left: 1px solid var(--tab-divider);
 }
 
-.tab.icon-only .tab-favicon {
-  margin-right: 0;
+.tab:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+  color: var(--fg-2);
 }
 
-.tab.icon-only .tab-close {
+.tab.active {
+  color: var(--fg-1);
+  background-color: var(--bg-0);
+  padding-left: 14px;
+  border-left: 0;
+  border-right: 0;
+}
+
+.tab.active::before {
+  content: '';
   position: absolute;
-  /* top: -3px;
-  right: -3px;
-  margin: 0;
-  width: 14px;
-  height: 14px; */
-  opacity: 1;
-  background-color: var(--bg-hover);
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: var(--nav0-red-600);
 }
 
-.tab.icon-only:hover .tab-close {
-  opacity: 1;
+/* Strip the preceding tab's right divider so nothing sits to the
+   left of the red anchor bar. */
+.tab:has(+ .tab.active) {
+  border-right: 0;
+}
+
+.tab.active + .tab {
+  border-left: 0;
+}
+
+/* Private-mode tab colors */
+body.is-private .tab {
+  color: rgba(255, 255, 255, 0.55);
+  border-right-color: rgba(255, 255, 255, 0.08);
+}
+
+body.is-private .tab:first-child {
+  border-left-color: rgba(255, 255, 255, 0.08);
+}
+
+body.is-private .tab:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+body.is-private .tab.active {
+  color: var(--fg-1);
+  background-color: #ffffff;
 }
 
 .tab.pinned {
   min-width: 36px;
   width: 36px;
   max-width: 36px;
+  flex: 0 0 36px;
   justify-content: center;
-  padding: 6px 0;
+  padding: 0;
 }
 
 .tab.pinned .tab-favicon {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.tab:not(.active) {
-  border: 1px solid var(--border-color);
-  border-bottom: none;
-}
-
-.tab:hover {
-  background-color: var(--bg-hover);
-}
-
-.tab.active {
-  color: var(--text-color);
-  background-color: var(--bg-hover);
-  border: 2px solid var(--primary-color);
-  border-bottom: none;
-  /* margin-bottom: -6px; */
+  margin: 0;
 }
 
 .tab-favicon {
-  height: 18px;
-  width: 18px;
-  margin-left: 5px;
-  margin-right: 5px;
+  height: 16px;
+  width: 16px;
   flex-shrink: 0;
   image-rendering: -webkit-optimize-contrast;
 }
@@ -175,11 +248,9 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
 .tab-loader {
   height: 14px;
   width: 14px;
-  margin-left: 6px;
-  margin-right: 6px;
   flex-shrink: 0;
-  border: 2px solid var(--border-color, #ccc);
-  border-top-color: var(--primary-color, #666);
+  border: 2px solid var(--border-1);
+  border-top-color: var(--nav0-red-600);
   border-radius: 50%;
   animation: tab-loader-spin 0.8s linear infinite;
 }
@@ -201,95 +272,149 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
 .tab-close {
   width: 16px;
   height: 16px;
-  border-radius: var(--radius-circle);
+  border-radius: 4px;
   background: none;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: var(--spacing-xs);
-  color: var(--text-secondary);
+  margin-left: auto;
+  color: var(--fg-3);
   cursor: pointer;
   padding: 0;
   opacity: 0;
+  flex-shrink: 0;
   transition:
-    opacity var(--transition-fast),
-    background-color var(--transition-fast);
+    opacity var(--dur-fast),
+    background-color var(--dur-fast),
+    color var(--dur-fast);
 }
 
-.tab:hover .tab-close {
-  opacity: 1;
-}
-
+.tab:hover .tab-close,
 .tab.active .tab-close {
   opacity: 1;
 }
 
 .tab-close:hover {
-  background-color: var(--border-color);
-  color: var(--text-color);
+  background-color: rgba(0, 0, 0, 0.08);
+  color: var(--fg-1);
 }
 
-/* Navigation Bar */
+body.is-private .tab .tab-close {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+body.is-private .tab.active .tab-close {
+  color: var(--fg-3);
+}
+
+/* "+" new-tab button — flush block, not a floating circle */
+.new-tab-btn {
+  width: 38px;
+  height: 100%;
+  align-self: stretch;
+  background: transparent;
+  border: 0;
+  border-right: 1px solid var(--tab-divider);
+  color: var(--fg-3);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition:
+    background var(--dur-fast),
+    color var(--dur-fast);
+}
+
+.new-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--fg-1);
+}
+
+body.is-private .new-tab-btn {
+  color: rgba(255, 255, 255, 0.55);
+  border-right-color: rgba(255, 255, 255, 0.08);
+}
+
+body.is-private .new-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* === Nav bar — utility row, original height ============ */
 .nav-bar {
   display: flex;
   align-items: center;
+  gap: 4px;
   padding: 5px;
-  background-color: var(--bg-light);
-  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-0);
+  border-bottom: 1px solid var(--border-1);
+}
+
+/* Icon hover backgrounds — rounded square instead of circle.
+   Matches the tab shape radius (--r-md = 4px). */
+.nav-bar .btn-icon.rounded-circle,
+.address-bar .btn-icon.rounded-circle {
+  border-radius: 4px;
 }
 
 .nav-controls {
   display: flex;
-  margin-right: var(--spacing-xs);
+  gap: 2px;
+  margin-right: 4px;
 }
 
 .address-bar {
   flex: 1;
   display: flex;
   align-items: center;
-  background-color: var(--bg-color);
-  border-radius: var(--radius-pill);
-  padding-top: 0px;
-  padding-bottom: 0px;
+  gap: 2px;
+  height: 32px;
+  padding: 0 4px;
+  background-color: var(--bg-2);
+  border-radius: 4px;
+  transition:
+    background-color var(--dur-fast),
+    box-shadow var(--dur-fast);
 }
 
 .address-bar:focus-within {
-  background-color: var(--bg-light);
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  background-color: var(--bg-0);
+  box-shadow: var(--shadow-focus);
 }
 
 /* SSL Indicator */
 .ssl-indicator {
-  color: var(--text-secondary);
-  margin-right: var(--spacing-xs);
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-xs);
-  border-radius: var(--radius-circle);
+  padding: 0;
+  border-radius: 4px;
   background: none;
   border: none;
+  color: var(--fg-3);
+  cursor: pointer;
   transition:
     color 0.2s ease,
     background-color 0.2s ease;
 }
 
 .ssl-indicator:hover {
-  background-color: var(--bg-hover);
+  background-color: var(--bg-3);
+  color: var(--fg-1);
 }
 
 .ssl-indicator.ssl-search {
-  color: var(--text-secondary);
+  color: var(--fg-3);
 }
 
 .ssl-indicator.ssl-search:hover {
-  color: var(--text-color);
+  color: var(--fg-1);
 }
 
 .ssl-indicator.ssl-secure {
-  color: #16a34a;
+  color: var(--success);
 }
 
 .ssl-indicator.ssl-secure:hover {
@@ -297,13 +422,13 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
 }
 
 .ssl-indicator.ssl-insecure {
-  color: #dc2626;
+  color: var(--danger);
   background-color: rgba(220, 38, 38, 0.08);
   animation: ssl-pulse 2s ease-in-out infinite;
 }
 
 .ssl-indicator.ssl-insecure:hover {
-  color: #b91c1c;
+  color: var(--nav0-red-700);
   background-color: rgba(220, 38, 38, 0.15);
 }
 
@@ -313,7 +438,7 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
     opacity: 1;
   }
   50% {
-    opacity: 0.6;
+    opacity: 0.65;
   }
 }
 
@@ -322,7 +447,11 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
   border: none;
   background: transparent;
   outline: none;
-  color: var(--text-color);
+  color: var(--fg-1);
+  font-family: inherit;
+  font-size: var(--font-md);
+  padding: 0 4px;
+  min-width: 0;
 }
 
 /* Reader Mode Button */
@@ -392,7 +521,7 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
 }
 
 .download-progress-ring-fill {
-  stroke: var(--primary-color);
+  stroke: var(--nav0-red-600);
   stroke-linecap: round;
   stroke-dasharray: 87.96;
   stroke-dashoffset: 87.96;
