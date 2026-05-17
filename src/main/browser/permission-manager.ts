@@ -26,10 +26,16 @@ export interface PermissionRequest {
   origin: string;
   permission: string;
   permissions: Array<{ type: string; label: string; icon: string }>;
+  // Union of media types ('video' / 'audio') requested across coalesced media
+  // requests. Empty for non-media permissions.
+  mediaTypes: string[];
   isSecure: boolean;
   isPrivate: boolean;
   faviconUrl: string | null;
-  callback: (granted: boolean) => void;
+  // Multiple callbacks when concurrent media requests are coalesced into a
+  // single prompt (Meet/Zoom/Teams call getUserMedia separately for camera
+  // and microphone — both promises must be resolved with the same decision).
+  callbacks: Array<(granted: boolean) => void>;
   timestamp: number;
   isInsecureBlocked: boolean;
   isFloodBlocked: boolean;
@@ -187,6 +193,7 @@ export class PermissionManager {
         const isFloodBlocked = PermissionManager.isFlooding(origin);
 
         // Build permission info
+        const mediaTypes = PermissionManager.extractMediaTypes(permission, details);
         const permInfo = PermissionManager.getPermissionInfo(permission, details);
 
         // Create request
@@ -198,10 +205,11 @@ export class PermissionManager {
           origin,
           permission,
           permissions: [permInfo],
+          mediaTypes,
           isSecure,
           isPrivate,
           faviconUrl: null,
-          callback,
+          callbacks: [callback],
           timestamp: Date.now(),
           isInsecureBlocked,
           isFloodBlocked,
@@ -338,13 +346,54 @@ export class PermissionManager {
 
   private static enqueueRequest(request: PermissionRequest): void {
     const tabId = request.tabId;
-    if (PermissionManager.activePrompts.has(tabId)) {
-      // Same tab already has an active prompt — queue for that tab
-      const queue = PermissionManager.pendingQueues.get(tabId) || [];
+
+    // Coalesce concurrent media requests for the same origin into a single
+    // prompt. Meet/Zoom/Teams call getUserMedia separately for camera and
+    // microphone in quick succession; if we queue them as two prompts, the
+    // second getUserMedia call typically times out before the user reaches
+    // its prompt, leaving the page stuck on "permission not granted".
+    const active = PermissionManager.activePrompts.get(tabId);
+    if (active && PermissionManager.canCoalesce(active, request)) {
+      PermissionManager.coalesceInto(active, request);
+      return;
+    }
+    const queue = PermissionManager.pendingQueues.get(tabId) || [];
+    for (const queued of queue) {
+      if (PermissionManager.canCoalesce(queued, request)) {
+        PermissionManager.coalesceInto(queued, request);
+        return;
+      }
+    }
+
+    if (active) {
       queue.push(request);
       PermissionManager.pendingQueues.set(tabId, queue);
     } else {
       PermissionManager.showPromptForRequest(request);
+    }
+  }
+
+  // Two requests can share one prompt when they're both media requests from
+  // the same top-level origin. Non-media permissions (geolocation,
+  // notifications, etc.) are never coalesced.
+  private static canCoalesce(existing: PermissionRequest, incoming: PermissionRequest): boolean {
+    return (
+      existing.permission === 'media' &&
+      incoming.permission === 'media' &&
+      existing.origin === incoming.origin
+    );
+  }
+
+  private static coalesceInto(existing: PermissionRequest, incoming: PermissionRequest): void {
+    const merged = new Set([...existing.mediaTypes, ...incoming.mediaTypes]);
+    existing.mediaTypes = Array.from(merged);
+    existing.permissions = [PermissionManager.buildMediaPermissionInfo(existing.mediaTypes)];
+    existing.callbacks.push(...incoming.callbacks);
+    // If the coalesced-into request is the one currently being shown, refresh
+    // the strip so the label reflects the merged media types (e.g. switch from
+    // "microphone" to "camera and microphone").
+    if (PermissionManager.activePrompts.get(existing.tabId) === existing) {
+      PermissionManager.showPromptCallback?.(existing.appWindowId, existing);
     }
   }
 
@@ -358,7 +407,39 @@ export class PermissionManager {
     if (!queue || queue.length === 0) return;
     const next = queue.shift()!;
     if (queue.length === 0) PermissionManager.pendingQueues.delete(tabId);
+
+    // A decision recorded by the just-completed prompt may now satisfy this
+    // queued request (e.g. user picked "always allow" for media — any queued
+    // media request for the same origin should auto-resolve, not re-prompt).
+    const decided = PermissionManager.evaluateStoredDecision(next);
+    if (decided !== null) {
+      for (const cb of next.callbacks) cb(decided);
+      // Continue draining the queue without forcing a UI roundtrip.
+      setTimeout(() => PermissionManager.processNextInQueue(tabId), 0);
+      return;
+    }
+
     PermissionManager.showPromptForRequest(next);
+  }
+
+  // Returns true/false if a stored session or persistent decision applies,
+  // null if the request still needs to prompt.
+  private static evaluateStoredDecision(request: PermissionRequest): boolean | null {
+    const { tabId, origin, permission, isPrivate, isInsecureBlocked } = request;
+    if (isInsecureBlocked) return null;
+    if (!isPrivate) {
+      const persistent = PermissionManager.getPersistentDecision(origin, permission);
+      if (persistent === 'allowed_persistent') {
+        PermissionManager.touchPersistentDecision(origin, permission);
+        return true;
+      }
+      if (persistent === 'denied_persistent') return false;
+    }
+    const sessionKey = PermissionManager.sessionKey(tabId, origin, permission);
+    const sessionDecision = PermissionManager.sessionPermissions.get(sessionKey);
+    if (sessionDecision === 'allowed_session') return true;
+    if (sessionDecision === 'denied_session') return false;
+    return null;
   }
 
   // ─── Prompt Response ─────────────────────────────────────────────
@@ -375,13 +456,16 @@ export class PermissionManager {
     if (!request) return;
 
     PermissionManager.activePrompts.delete(request.tabId);
-    const { tabId, origin, permission, callback, isPrivate } = request;
+    const { tabId, origin, permission, callbacks, isPrivate } = request;
     const sessionKey = PermissionManager.sessionKey(tabId, origin, permission);
+    const invokeAll = (granted: boolean): void => {
+      for (const cb of callbacks) cb(granted);
+    };
 
     switch (decision) {
       case 'allow_once':
         PermissionManager.sessionPermissions.set(sessionKey, 'allowed_session');
-        callback(true);
+        invokeAll(true);
         break;
 
       case 'always_allow':
@@ -390,12 +474,12 @@ export class PermissionManager {
         } else {
           PermissionManager.storePersistentDecision(origin, permission, 'allowed_persistent');
         }
-        callback(true);
+        invokeAll(true);
         break;
 
       case 'deny_once':
         PermissionManager.sessionPermissions.set(sessionKey, 'denied_session');
-        callback(false);
+        invokeAll(false);
         break;
 
       case 'always_deny':
@@ -404,11 +488,11 @@ export class PermissionManager {
         } else {
           PermissionManager.storePersistentDecision(origin, permission, 'denied_persistent');
         }
-        callback(false);
+        invokeAll(false);
         break;
 
       default:
-        callback(false);
+        invokeAll(false);
         break;
     }
 
@@ -479,7 +563,7 @@ export class PermissionManager {
     // Cancel pending queue for this tab
     const queue = PermissionManager.pendingQueues.get(tabId);
     if (queue) {
-      queue.forEach((req: PermissionRequest) => req.callback(false));
+      queue.forEach((req: PermissionRequest) => req.callbacks.forEach((cb) => cb(false)));
       PermissionManager.pendingQueues.delete(tabId);
     }
 
@@ -487,7 +571,7 @@ export class PermissionManager {
     const active = PermissionManager.activePrompts.get(tabId);
     if (active) {
       PermissionManager.activePrompts.delete(tabId);
-      active.callback(false);
+      active.callbacks.forEach((cb) => cb(false));
       PermissionManager.hidePromptCallback?.(active.appWindowId);
     }
   }
@@ -726,10 +810,11 @@ export class PermissionManager {
       origin,
       permission,
       permissions: [permInfo],
+      mediaTypes: [],
       isSecure,
       isPrivate,
       faviconUrl: null,
-      callback,
+      callbacks: [callback],
       timestamp: Date.now(),
       isInsecureBlocked,
       isFloodBlocked,
@@ -760,22 +845,43 @@ export class PermissionManager {
     }
   }
 
+  static extractMediaTypes(
+    permission: string,
+    details: unknown
+  ): string[] {
+    if (permission !== 'media') return [];
+    const mediaDetails = details as Electron.MediaAccessPermissionRequest | undefined;
+    const types = mediaDetails?.mediaTypes;
+    if (Array.isArray(types) && types.length > 0) return [...types];
+    return [];
+  }
+
+  static buildMediaPermissionInfo(mediaTypes: string[]): {
+    type: string;
+    label: string;
+    icon: string;
+  } {
+    const hasVideo = mediaTypes.includes('video');
+    const hasAudio = mediaTypes.includes('audio');
+    if (hasVideo && hasAudio) {
+      return { type: 'media', label: 'camera and microphone', icon: 'camera' };
+    }
+    if (hasVideo) return { type: 'media', label: 'camera', icon: 'camera' };
+    if (hasAudio) return { type: 'media', label: 'microphone', icon: 'mic' };
+    return { type: 'media', label: 'camera/microphone', icon: 'camera' };
+  }
+
   static getPermissionInfo(
     permission: string,
     details?: Electron.PermissionRequest | Electron.MediaAccessPermissionRequest
   ): { type: string; label: string; icon: string } {
-    const mediaDetails = details as Electron.MediaAccessPermissionRequest | undefined;
-    if (permission === 'media' && mediaDetails?.mediaTypes) {
-      const types = mediaDetails.mediaTypes;
-      if (types.includes('video') && types.includes('audio')) {
-        return { type: 'media', label: 'camera and microphone', icon: 'camera' };
-      }
-      if (types.includes('video')) return { type: 'media', label: 'camera', icon: 'camera' };
-      if (types.includes('audio')) return { type: 'media', label: 'microphone', icon: 'mic' };
+    if (permission === 'media') {
+      return PermissionManager.buildMediaPermissionInfo(
+        PermissionManager.extractMediaTypes(permission, details)
+      );
     }
 
     const info: Record<string, { label: string; icon: string }> = {
-      media: { label: 'camera/microphone', icon: 'camera' },
       geolocation: { label: 'location', icon: 'map-pin' },
       notifications: { label: 'notifications', icon: 'bell' },
       midi: { label: 'MIDI devices', icon: 'music' },
