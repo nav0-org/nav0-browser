@@ -116,7 +116,13 @@ const closeDropdown = () => {
 
 const navigate = (direction: number) => {
   if (currentResults.length === 0) return;
-  activeIndex = (activeIndex + direction + currentResults.length) % currentResults.length;
+  // From the unselected state (-1), ArrowDown lands on the first item and ArrowUp
+  // lands on the last item.
+  if (activeIndex < 0) {
+    activeIndex = direction > 0 ? 0 : currentResults.length - 1;
+  } else {
+    activeIndex = (activeIndex + direction + currentResults.length) % currentResults.length;
+  }
   pushToOverlay(false);
 };
 
@@ -223,7 +229,9 @@ const fetchSuggestions = async (query: string) => {
     }
 
     currentResults = results;
-    activeIndex = results.length > 0 ? 0 : -1;
+    // Leave no suggestion highlighted by default so pressing Enter navigates to
+    // whatever the user typed. They can ArrowDown/ArrowUp to pick a suggestion.
+    activeIndex = -1;
     if (results.length > 0) pushToOverlay(true);
     else closeDropdown();
   } catch {
@@ -236,7 +244,7 @@ const fetchSuggestions = async (query: string) => {
         meta: 'Search with default search engine',
       },
     ];
-    activeIndex = 0;
+    activeIndex = -1;
     pushToOverlay(true);
   }
 };
