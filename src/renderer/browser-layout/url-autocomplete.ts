@@ -116,7 +116,14 @@ const closeDropdown = () => {
 
 const navigate = (direction: number) => {
   if (currentResults.length === 0) return;
-  activeIndex = (activeIndex + direction + currentResults.length) % currentResults.length;
+  // The unselected state (-1) is part of the cycle, so the user can always get
+  // back to "no suggestion highlighted" and press Enter to navigate to the typed
+  // input. Cycle order going down: -1 → 0 → 1 → ... → N-1 → -1.
+  const n = currentResults.length;
+  const next = activeIndex + direction;
+  if (next >= n) activeIndex = -1;
+  else if (next < -1) activeIndex = n - 1;
+  else activeIndex = next;
   pushToOverlay(false);
 };
 
@@ -223,7 +230,9 @@ const fetchSuggestions = async (query: string) => {
     }
 
     currentResults = results;
-    activeIndex = results.length > 0 ? 0 : -1;
+    // Leave no suggestion highlighted by default so pressing Enter navigates to
+    // whatever the user typed. They can ArrowDown/ArrowUp to pick a suggestion.
+    activeIndex = -1;
     if (results.length > 0) pushToOverlay(true);
     else closeDropdown();
   } catch {
@@ -236,7 +245,7 @@ const fetchSuggestions = async (query: string) => {
         meta: 'Search with default search engine',
       },
     ];
-    activeIndex = 0;
+    activeIndex = -1;
     pushToOverlay(true);
   }
 };
