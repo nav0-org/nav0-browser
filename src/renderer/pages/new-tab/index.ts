@@ -120,16 +120,16 @@ function getTimeBasedGreeting(): string {
 }
 
 const BACKGROUND_GRADIENTS: string[] = [
-  'linear-gradient(135deg, #fbf8f6 0%, #fbf9fa 50%, #f9f9fb 100%)',
-  'linear-gradient(135deg, #fcfaf6 0%, #fbf9fa 50%, #faf8fb 100%)',
-  'linear-gradient(135deg, #f8fafc 0%, #fbf9fc 100%)',
-  'linear-gradient(135deg, #fafbf7 0%, #f8fbfc 100%)',
-  'linear-gradient(135deg, #fcfbf5 0%, #fbf9fa 100%)',
-  'linear-gradient(135deg, #f8fbfd 0%, #faf9fc 100%)',
-  'linear-gradient(135deg, #fbf9fa 0%, #fcfaf6 100%)',
-  'linear-gradient(135deg, #fbf9fc 0%, #f9f9fb 50%, #f8fbfc 100%)',
-  'linear-gradient(135deg, #fcfaf8 0%, #f9fafd 100%)',
-  'linear-gradient(135deg, #fcfbf5 0%, #fbf9fc 100%)',
+  'linear-gradient(135deg, #e7e4e2 0%, #e7e5e6 50%, #e5e5e7 100%)',
+  'linear-gradient(135deg, #e8e6e2 0%, #e7e5e6 50%, #e6e4e7 100%)',
+  'linear-gradient(135deg, #e4e6e8 0%, #e7e5e8 100%)',
+  'linear-gradient(135deg, #e6e7e3 0%, #e4e7e8 100%)',
+  'linear-gradient(135deg, #e8e7e1 0%, #e7e5e6 100%)',
+  'linear-gradient(135deg, #e4e7e9 0%, #e6e5e8 100%)',
+  'linear-gradient(135deg, #e7e5e6 0%, #e8e6e2 100%)',
+  'linear-gradient(135deg, #e7e5e8 0%, #e5e5e7 50%, #e4e7e8 100%)',
+  'linear-gradient(135deg, #e8e6e4 0%, #e5e6e9 100%)',
+  'linear-gradient(135deg, #e8e7e1 0%, #e7e5e8 100%)',
 ];
 
 function pickRandomBackground(): string {
