@@ -116,13 +116,14 @@ const closeDropdown = () => {
 
 const navigate = (direction: number) => {
   if (currentResults.length === 0) return;
-  // From the unselected state (-1), ArrowDown lands on the first item and ArrowUp
-  // lands on the last item.
-  if (activeIndex < 0) {
-    activeIndex = direction > 0 ? 0 : currentResults.length - 1;
-  } else {
-    activeIndex = (activeIndex + direction + currentResults.length) % currentResults.length;
-  }
+  // The unselected state (-1) is part of the cycle, so the user can always get
+  // back to "no suggestion highlighted" and press Enter to navigate to the typed
+  // input. Cycle order going down: -1 → 0 → 1 → ... → N-1 → -1.
+  const n = currentResults.length;
+  const next = activeIndex + direction;
+  if (next >= n) activeIndex = -1;
+  else if (next < -1) activeIndex = n - 1;
+  else activeIndex = next;
   pushToOverlay(false);
 };
 
