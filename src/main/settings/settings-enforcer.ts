@@ -1,6 +1,7 @@
 import { session, ipcMain, app, webContents } from 'electron';
 import {
   DataStoreConstants,
+  PartitionNames,
   RendererToMainEventsForBrowserIPC,
   MULTI_PART_TLDS,
 } from '../../constants/app-constants';
@@ -106,8 +107,8 @@ export abstract class SettingsEnforcer {
   //      embedded-browser block. Technique borrowed from Min browser:
   //      https://github.com/minbrowser/min/blob/master/main/UASwitcher.js
   private static applyRequestHeaderPolicy(settings: BrowserSettings) {
-    const browsingSes = session.fromPartition('persist:browsertabs');
-    const privateSes = session.fromPartition('persist:private');
+    const browsingSes = session.fromPartition(PartitionNames.BROWSING);
+    const privateSes = session.fromPartition(PartitionNames.PRIVATE);
     const stripCookies = settings.blockAllCookies;
     const preset = SettingsEnforcer.resolveUserAgentPreset(settings);
     // Respect an explicit custom UA — don't override it for Google sign-in.
@@ -183,7 +184,7 @@ export abstract class SettingsEnforcer {
 
   // ---- Response Header Policy (Cookie Jar Enforcement) ----
   private static applyResponseHeaderPolicy(settings: BrowserSettings) {
-    const ses = session.fromPartition('persist:browsertabs');
+    const ses = session.fromPartition(PartitionNames.BROWSING);
     ses.webRequest.onHeadersReceived(null);
 
     if (settings.blockAllCookies) {
@@ -266,7 +267,7 @@ export abstract class SettingsEnforcer {
 
   // ---- Proxy Settings ----
   private static applyProxySettings(settings: BrowserSettings) {
-    const ses = session.fromPartition('persist:browsertabs');
+    const ses = session.fromPartition(PartitionNames.BROWSING);
 
     switch (settings.proxyMode) {
       case 'direct':
@@ -316,8 +317,8 @@ export abstract class SettingsEnforcer {
   }
 
   private static applyUserAgent(settings: BrowserSettings) {
-    const browsingSes = session.fromPartition('persist:browsertabs');
-    const privateSes = session.fromPartition('persist:private');
+    const browsingSes = session.fromPartition(PartitionNames.BROWSING);
+    const privateSes = session.fromPartition(PartitionNames.PRIVATE);
 
     const preset = SettingsEnforcer.resolveUserAgentPreset(settings);
 
@@ -357,8 +358,8 @@ export abstract class SettingsEnforcer {
   private static adBlockDomains: Set<string> = new Set();
 
   private static applyAdBlocker(settings: BrowserSettings) {
-    const browsingSes = session.fromPartition('persist:browsertabs');
-    const privateSes = session.fromPartition('persist:private');
+    const browsingSes = session.fromPartition(PartitionNames.BROWSING);
+    const privateSes = session.fromPartition(PartitionNames.PRIVATE);
 
     if (!settings.adBlockerEnabled) {
       browsingSes.webRequest.onBeforeRequest(null);
@@ -386,14 +387,15 @@ export abstract class SettingsEnforcer {
 
         // Check allowed sites (per-site disable)
         const topFrameUrl = details.frame?.url || details.referrer || '';
+        let topHostname = '';
         if (topFrameUrl) {
           try {
             const topUrl = new URL(topFrameUrl);
-            const topDomain = topUrl.hostname;
+            topHostname = topUrl.hostname;
             if (
               (currentSettings.adBlockerAllowedSites || []).some((site) => {
                 const siteDomain = site.toLowerCase().trim();
-                return topDomain === siteDomain || topDomain.endsWith('.' + siteDomain);
+                return topHostname === siteDomain || topHostname.endsWith('.' + siteDomain);
               })
             ) {
               callback({});
@@ -410,6 +412,16 @@ export abstract class SettingsEnforcer {
             callback({ cancel: true });
             return;
           }
+        }
+
+        // Skip generic URL pattern matching for first-party (same-host)
+        // requests. The patterns are designed to catch third-party ad URLs
+        // and produce false positives on legitimate site assets whose paths
+        // happen to contain generic words like "popup", "banner", or "ads"
+        // (e.g. Bitrix CMS components served under /.../popup/script.js).
+        if (topHostname && topHostname === hostname) {
+          callback({});
+          return;
         }
 
         // Check URL path patterns for ad-related content
@@ -496,7 +508,7 @@ export abstract class SettingsEnforcer {
     if (settings.retentionCookiesSiteData !== 'never') {
       const days = parseInt(settings.retentionCookiesSiteData);
       if (!isNaN(days)) {
-        const ses = session.fromPartition('persist:browsertabs');
+        const ses = session.fromPartition(PartitionNames.BROWSING);
         const cookies = await ses.cookies.get({});
         const cutoff = now / 1000 - days * 24 * 60 * 60;
         for (const cookie of cookies) {
@@ -598,7 +610,7 @@ export abstract class SettingsEnforcer {
 
   private static async clearAllCookies() {
     try {
-      const ses = session.fromPartition('persist:browsertabs');
+      const ses = session.fromPartition(PartitionNames.BROWSING);
       await ses.clearStorageData({ storages: ['cookies', 'localstorage'] });
     } catch (e) {
       console.error('Failed to clear cookies:', e);
@@ -607,7 +619,7 @@ export abstract class SettingsEnforcer {
 
   private static async clearAllCache() {
     try {
-      const ses = session.fromPartition('persist:browsertabs');
+      const ses = session.fromPartition(PartitionNames.BROWSING);
       await ses.clearCache();
       await ses.clearCodeCaches({});
     } catch (e) {
@@ -617,7 +629,7 @@ export abstract class SettingsEnforcer {
 
   private static async getCookieCount(): Promise<{ count: number }> {
     try {
-      const ses = session.fromPartition('persist:browsertabs');
+      const ses = session.fromPartition(PartitionNames.BROWSING);
       const cookies = await ses.cookies.get({});
       return { count: cookies.length };
     } catch {
@@ -627,7 +639,7 @@ export abstract class SettingsEnforcer {
 
   private static async getStorageEstimate(): Promise<{ bytes: number }> {
     try {
-      const ses = session.fromPartition('persist:browsertabs');
+      const ses = session.fromPartition(PartitionNames.BROWSING);
       const cookies = await ses.cookies.get({});
       // Rough estimate: ~200 bytes per cookie + cache estimate
       const cookieBytes = cookies.length * 200;

@@ -4,6 +4,7 @@ import {
   RendererToMainEventsForBrowserIPC,
   MainToRendererEventsForBrowserIPC,
   DataStoreConstants,
+  PartitionNames,
 } from '../../constants/app-constants';
 import { AppMenuManager } from './app-menu-manager';
 import { AppWindow, PermissionPromptData } from './app-window';
@@ -33,6 +34,7 @@ export abstract class AppWindowManager {
   public static async init(options?: { skipDefaultStartup?: boolean }) {
     AppWindowManager.windows = new Map();
     AppWindowManager.activeWindowId = null;
+    AppWindowManager.cleanupLeftoverPrivatePartition();
     DatabaseManager.init();
     PermissionManager.init(DatabaseManager.getDatabase(false));
     PermissionManager.setCallbacks(
@@ -132,6 +134,27 @@ export abstract class AppWindowManager {
     AppWindowManager.startHibernationChecker();
     SessionManager.startPeriodicSave();
   }
+  // Earlier builds used a `persist:private` partition, which caused Electron
+  // to write the entire private browsing session (cookies, cache, local
+  // storage, IndexedDB, code caches, etc.) to <userData>/Partitions/private/
+  // and never delete it. The partition is now in-memory, but any user who
+  // upgrades from an older build still has that directory on disk. Wipe it
+  // on startup so old private-mode artifacts don't linger forever.
+  private static cleanupLeftoverPrivatePartition(): void {
+    const legacyDir = path.join(
+      app.getPath('userData'),
+      'Partitions',
+      PartitionNames.LEGACY_PRIVATE_DIRNAME
+    );
+    if (fs.existsSync(legacyDir)) {
+      try {
+        fs.rmSync(legacyDir, { recursive: true, force: true });
+      } catch (e) {
+        console.error('Failed to remove legacy private partition directory:', e);
+      }
+    }
+  }
+
   static createWindow(isPrivate = false): AppWindow {
     const window = new AppWindow(isPrivate, DatabaseManager.getDatabase(isPrivate));
     AppWindowManager.windows.set(window.id, window);

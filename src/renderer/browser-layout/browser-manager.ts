@@ -106,6 +106,7 @@ export class BrowserTabManager {
     this.backButton.title = `Go back (${isMac ? '⌘[' : 'Alt+Left'})`;
     this.forwardButton.title = `Go forward (${isMac ? '⌘]' : 'Alt+Right'})`;
     this.refreshButton.title = `Refresh (${mod}R)`;
+    this.urlInput.title = `Search or enter address (${mod}L)`;
   }
 
   private setupEventListeners(): void {
@@ -387,6 +388,12 @@ export class BrowserTabManager {
           this.updateReaderModeButton();
         }
       }
+    });
+
+    // Focus address bar (CmdOrCtrl+L)
+    window.BrowserAPI.onFocusUrlBar?.(() => {
+      this.urlInput.focus();
+      this.urlInput.select();
     });
   }
 

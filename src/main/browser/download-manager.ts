@@ -2,6 +2,7 @@ import { ipcMain, session, shell } from 'electron';
 import * as fs from 'fs';
 import {
   MainToRendererEventsForBrowserIPC,
+  PartitionNames,
   RendererToMainEventsForBrowserIPC,
 } from '../../constants/app-constants';
 import { DownloadRecord } from '../../types/download-record';
@@ -199,7 +200,7 @@ export abstract class DownloadManager {
 
     const urlChain: string[] = JSON.parse(record.urlChain || '[]');
     if (urlChain.length === 0) urlChain.push(record.url);
-    const partition = isPrivate ? 'persist:private' : 'persist:browsertabs';
+    const partition = isPrivate ? PartitionNames.PRIVATE : PartitionNames.BROWSING;
     const ses = session.fromPartition(partition);
 
     // Build the expected downloadId so handleDownload can detect the resume

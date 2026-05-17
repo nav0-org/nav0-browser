@@ -263,6 +263,7 @@ declare global {
       onTabPinned: (callback: (data: { id: string }) => void) => void;
       onTabUnpinned: (callback: (data: { id: string }) => void) => void;
       onFullScreenChanged: (callback: (data: { isFullScreen: boolean }) => void) => void;
+      onFocusUrlBar: (callback: () => void) => void;
       // Permission system
       respondToPermissionPrompt: (appWindowId: string, requestId: string, decision: string) => void;
       onPermissionPromptShow: (callback: (data: any) => void) => void;

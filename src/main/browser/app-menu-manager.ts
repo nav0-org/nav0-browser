@@ -238,6 +238,14 @@ export abstract class AppMenuManager {
           },
           { type: 'separator' as const },
           {
+            label: 'Focus Address Bar',
+            accelerator: 'CmdOrCtrl+L',
+            click: () => {
+              AppWindowManager.getActiveWindow()?.focusUrlBar();
+            },
+          },
+          { type: 'separator' as const },
+          {
             label: 'Command K Interface',
             accelerator: 'CmdOrCtrl+K',
             click: async () => {
@@ -348,7 +356,7 @@ export abstract class AppMenuManager {
                 { type: 'separator' as const },
                 { role: 'window' as const },
               ]
-            : [{ role: 'close' as const }]),
+            : []),
         ],
       },
       {

@@ -247,6 +247,7 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly TAB_PINNED = 'browser:tab-pinned';
   public static readonly TAB_UNPINNED = 'browser:tab-unpinned';
   public static readonly FULLSCREEN_CHANGED = 'browser:fullscreen-changed';
+  public static readonly FOCUS_URL_BAR = 'browser:focus-url-bar';
 }
 
 export abstract class DataStoreConstants {
@@ -388,4 +389,18 @@ export abstract class ImageBase64Strings {
 
 export abstract class AppConstants {
   public static readonly APP_NAME = 'Nav0';
+}
+
+// Session partition names. The `persist:` prefix tells Electron to persist
+// session data to disk under <userData>/Partitions/<rest>/. Private mode
+// intentionally omits the prefix so the session is in-memory only and is
+// wiped automatically when the last private window closes — nothing about
+// the private session is ever written to disk.
+export abstract class PartitionNames {
+  public static readonly BROWSING = 'persist:browsertabs';
+  public static readonly PRIVATE = 'private';
+  // Directory name (under <userData>/Partitions/) used by older builds that
+  // used the persistent `persist:private` partition. Kept so we can delete
+  // any leftover data on startup after upgrading.
+  public static readonly LEGACY_PRIVATE_DIRNAME = 'private';
 }
