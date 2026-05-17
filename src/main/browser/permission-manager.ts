@@ -214,12 +214,64 @@ export class PermissionManager {
       }
     );
 
-    // Note: setPermissionCheckHandler is intentionally not used. Electron's boolean
-    // return can't express "undecided — please prompt". Returning false maps to
-    // PermissionStatus::DENIED in Chromium, which prevents setPermissionRequestHandler
-    // from being called for some permissions (notably geolocation). Without a check
-    // handler, Electron defaults all permissions to "ask", ensuring every request
-    // flows through our prompt UI above.
+    // Mirror persistent grants into Chromium's permission status so that
+    // `navigator.permissions.query()` reports `granted` for origins the user
+    // has already allowed. Without this, sites like Google Meet that gate
+    // their UI on the queried state keep showing "Permission needed" even
+    // after the user has granted access via our prompt.
+    //
+    // We deliberately return `true` *only* for permissions explicitly stored
+    // as `allowed_persistent` (or held as `allowed_session` for the tab).
+    // Everything else — undecided, denied, insecure — returns `false`, which
+    // maps to PermissionStatus::PROMPT/DENIED. The request handler above is
+    // still consulted on the actual API invocation (getUserMedia,
+    // getCurrentPosition, etc.) so first-time use still surfaces our prompt.
+    ses.setPermissionCheckHandler((webContents, permission, requestingOrigin, details) => {
+      if (PermissionManager.AUTO_GRANT_PERMISSIONS.has(permission)) return true;
+
+      const iframeOrigin = PermissionManager.extractOrigin(requestingOrigin);
+      const detailsAny = details as unknown as { isMainFrame?: boolean };
+      const isSubFrame = detailsAny.isMainFrame === false;
+      let topOrigin = iframeOrigin;
+      if (isSubFrame && webContents) {
+        try {
+          const topUrl = webContents.getURL();
+          if (topUrl) topOrigin = PermissionManager.extractOrigin(topUrl);
+        } catch {
+          /* fall through to iframe origin */
+        }
+      }
+      const origin = topOrigin;
+
+      // Sensitive permissions require both frames to be on secure origins —
+      // mirrors the request handler so a mixed-content embed can't inherit a
+      // stored grant via the synchronous status query.
+      if (PermissionManager.SENSITIVE_PERMISSIONS.has(permission)) {
+        if (
+          !PermissionManager.isSecureOrigin(topOrigin) ||
+          !PermissionManager.isSecureOrigin(iframeOrigin)
+        ) {
+          return false;
+        }
+      }
+
+      if (!isPrivate) {
+        const persistent = PermissionManager.getPersistentDecision(origin, permission);
+        if (persistent === 'allowed_persistent') return true;
+        if (persistent === 'denied_persistent') return false;
+      }
+
+      if (webContents) {
+        const tabInfo = PermissionManager.findTabCallback?.(webContents.id);
+        if (tabInfo) {
+          const sessionKey = PermissionManager.sessionKey(tabInfo.tabId, origin, permission);
+          const sessionDecision = PermissionManager.sessionPermissions.get(sessionKey);
+          if (sessionDecision === 'allowed_session') return true;
+        }
+      }
+
+      return false;
+    });
 
     // getDisplayMedia() — Chromium delegates screen/window selection to the host
     // app. Without this handler screen sharing silently fails in Meet/Zoom/Teams.
