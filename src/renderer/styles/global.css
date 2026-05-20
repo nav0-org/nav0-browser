@@ -205,6 +205,43 @@ img {
 }
 
 /* --------------------------------------------------------------------------
+   Native <select> — Nav0 design system applied by default so every dropdown
+   in the app gets the same chrome (4-px radius, pale-grey rest, white-on-
+   focus halo, custom chevron) regardless of class. Per-context overrides
+   should keep `appearance: none` and may adjust padding/font-size/min-width.
+   -------------------------------------------------------------------------- */
+select {
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--fg-1);
+  padding: 8px 32px 8px 12px;
+  min-width: 120px;
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  background-color: var(--bg-2);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition:
+    background-color var(--dur-fast),
+    box-shadow var(--dur-fast);
+}
+
+select:focus {
+  outline: none;
+  background-color: var(--bg-0);
+  box-shadow: var(--shadow-focus);
+}
+
+select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
    Accessibility Helpers
    -------------------------------------------------------------------------- */
 .sr-only {

@@ -189,6 +189,30 @@
   margin-right: var(--spacing-sm);
 }
 
+/* Subline collapses the former url + meta rows into a single row. Meta
+   appears first; each child keeps its original color/typography. */
+#overlay-command-k .result-subline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  min-width: 0;
+}
+
+#overlay-command-k .result-subline .result-meta {
+  margin-top: 0;
+  flex-shrink: 0;
+}
+
+#overlay-command-k .result-subline .result-meta span {
+  margin-right: 0;
+}
+
+#overlay-command-k .result-subline .result-url {
+  flex: 1;
+  min-width: 0;
+}
+
 #overlay-command-k .result-meta i {
   margin-right: 4px;
   width: 14px;

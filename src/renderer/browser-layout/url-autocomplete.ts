@@ -27,8 +27,8 @@ type BookmarkRow = {
 
 const DEBOUNCE_MS = 120;
 const MAX_PER_GROUP = 4;
-const DROPDOWN_MAX_HEIGHT = 360;
-const ITEM_HEIGHT = 44;
+const ITEM_HEIGHT = 58;
+const getDropdownMaxHeight = (): number => Math.round(window.innerHeight * 0.7);
 
 let urlInput: HTMLInputElement;
 let appWindowId = '';
@@ -56,8 +56,9 @@ const formatDate = (dateStr: string): string => {
 
 const estimateDropdownHeight = (results: Suggestion[]): number => {
   if (results.length === 0) return 0;
-  const padding = 16;
-  return Math.min(DROPDOWN_MAX_HEIGHT, padding + results.length * ITEM_HEIGHT);
+  // Account for the 1px top + 1px bottom border on .url-autocomplete-panel.
+  const chrome = 2;
+  return Math.min(getDropdownMaxHeight(), chrome + results.length * ITEM_HEIGHT);
 };
 
 const dedupeHistoryByUrl = (history: HistoryRecord[]): HistoryRecord[] => {
@@ -316,6 +317,15 @@ export function initUrlAutocomplete(opts: UrlAutocompleteOptions): {
   urlInput.addEventListener('blur', handleBlur);
   urlInput.addEventListener('input', handleInput);
   urlInput.addEventListener('keydown', handleKeydown);
+
+  // Escape closes the dropdown from anywhere in the main renderer, not just
+  // when the URL input still has focus. Idempotent — closeDropdown guards on isOpen.
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen) {
+      e.preventDefault();
+      closeDropdown();
+    }
+  });
 
   // Reposition the overlay if the window resizes while open
   window.addEventListener('resize', () => {

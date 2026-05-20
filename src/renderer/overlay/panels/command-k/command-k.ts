@@ -120,12 +120,14 @@ const createResultItemElement = (item: ResultItem, index: number): HTMLElement =
     urlHtml = `<div class="result-url">${escapeHtml(item.url)}</div>`;
   }
 
+  const sublineHtml =
+    metaHtml || urlHtml ? `<div class="result-subline">${metaHtml}${urlHtml}</div>` : '';
+
   el.innerHTML = `
     ${iconHtml}
     <div class="result-content">
       <div class="result-title">${escapeHtml(item.title)}</div>
-      ${urlHtml}
-      ${metaHtml}
+      ${sublineHtml}
     </div>
     <div class="keyboard-shortcut">
       ${index < 9 ? `<span class="key">${index + 1}</span>` : ''}

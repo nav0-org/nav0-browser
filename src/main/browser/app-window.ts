@@ -335,7 +335,7 @@ export class AppWindow {
   }
 
   private getYOffset(): number {
-    return 85 + (this.permissionStripVisible ? 48 : 0) + (this.isFindInPageVisible() ? 48 : 0);
+    return 82 + (this.permissionStripVisible ? 48 : 0) + (this.isFindInPageVisible() ? 48 : 0);
   }
 
   private resizeActiveTab(): void {
