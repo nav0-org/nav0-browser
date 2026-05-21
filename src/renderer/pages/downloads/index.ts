@@ -41,6 +41,19 @@ const getDisplayType = (item: DownloadRecord): string => {
   return getDisplayTypeFromExtension(item.fileExtension);
 };
 
+// 24-hour HH:MM, matching the prototype's row time column.
+const formatRowTime = (date: Date | string): string => {
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+};
+
+const escapeHtml = (str: string): string => {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+};
+
 // ---------------------------------------------------------------------------
 // DOM references
 // ---------------------------------------------------------------------------
@@ -51,10 +64,10 @@ const searchInput = document.getElementById('search-input') as HTMLInputElement;
 const typeFiltersContainer = document.getElementById('type-filters') as HTMLElement;
 const storageBar = document.getElementById('storage-bar') as HTMLElement;
 const storageLegend = document.getElementById('storage-legend') as HTMLElement;
-const storageTotal = document.getElementById('storage-total') as HTMLElement;
+const storageMeta = document.getElementById('storage-meta') as HTMLElement;
+const statsLabel = document.getElementById('downloads-stats') as HTMLElement;
 const noDownloads = document.getElementById('no-downloads') as HTMLElement;
 const deleteAllBtn = document.getElementById('delete-all') as HTMLElement;
-const downloadsFooter = document.querySelector('.downloads-footer') as HTMLElement;
 
 // ---------------------------------------------------------------------------
 // Initialization
@@ -85,7 +98,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     allLoadedItems = [];
     selectedItemId = null;
     noDownloads.style.display = 'block';
-    downloadsFooter.style.display = 'none';
+    deleteAllBtn.style.display = 'none';
     updateStorageGauge();
     renderTypeFilters();
   });
@@ -209,23 +222,94 @@ const loadDownloadsPage = async (): Promise<void> => {
 
   if (currentOffset === 0 && downloadData.length === 0) {
     noDownloads.style.display = 'block';
-    downloadsFooter.style.display = 'none';
+    deleteAllBtn.style.display = 'none';
     isLoading = false;
     updateStorageGauge();
     renderTypeFilters();
     return;
   } else {
     noDownloads.style.display = 'none';
-    downloadsFooter.style.display = 'block';
+    // Empty string clears the inline style so the CSS rule (inline-flex) applies.
+    deleteAllBtn.style.display = '';
   }
 
   allLoadedItems = allLoadedItems.concat(downloadData);
   currentOffset += downloadData.length;
 
-  appendDownloadItems(downloadData);
+  // Re-render the full list each load so day-group headers stay accurate.
+  rerenderList();
   updateStorageGauge();
   renderTypeFilters();
   isLoading = false;
+};
+
+// Group all loaded items by day and render headers + rows in order.
+const rerenderList = (): void => {
+  downloadsListElement.innerHTML = '';
+  if (allLoadedItems.length === 0) return;
+  const groups = groupByDay(allLoadedItems);
+  for (const g of groups) {
+    downloadsListElement.appendChild(renderDayHeader(g));
+    appendDownloadItems(g.items);
+  }
+};
+
+interface DayGroup {
+  dateKey: string;
+  label: string;
+  items: DownloadRecord[];
+}
+
+const groupByDay = (items: DownloadRecord[]): DayGroup[] => {
+  const byDay = new Map<string, DownloadRecord[]>();
+  for (const item of items) {
+    const d = new Date(item.createdDate);
+    const key = d.toDateString();
+    if (!byDay.has(key)) byDay.set(key, []);
+    byDay.get(key)!.push(item);
+  }
+  const groups: DayGroup[] = [];
+  for (const [key, list] of byDay) {
+    list.sort((a, b) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime());
+    const d = new Date(list[0].createdDate);
+    groups.push({ dateKey: key, label: formatDayLabel(d), items: list });
+  }
+  // Reverse-chronological by most recent item in each group.
+  groups.sort((a, b) => {
+    const ad = new Date(a.items[0].createdDate).getTime();
+    const bd = new Date(b.items[0].createdDate).getTime();
+    return bd - ad;
+  });
+  return groups;
+};
+
+const formatDayLabel = (date: Date): string => {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const diff = Math.floor((today.getTime() - target.getTime()) / 86400000);
+  const absolute = date.toLocaleDateString([], {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  });
+  if (diff === 0) return `Today · ${absolute}`;
+  if (diff === 1) return `Yesterday · ${absolute}`;
+  if (diff < 7) return absolute;
+  return absolute;
+};
+
+const renderDayHeader = (group: DayGroup): HTMLElement => {
+  const header = document.createElement('div');
+  header.className = 'date-group-label';
+  const fileWord = group.items.length === 1 ? 'file' : 'files';
+  const totalBytes = group.items.reduce((a, b) => a + (b.fileSize || 0), 0);
+  const sizeStr = totalBytes > 0 ? ` · ${FormatUtils.formatFileSize(totalBytes)}` : '';
+  header.innerHTML = `
+    <span class="day-label">${group.label}</span>
+    <span class="day-sub">${group.items.length} ${fileWord}${sizeStr}</span>
+  `;
+  return header;
 };
 
 // ---------------------------------------------------------------------------
@@ -242,11 +326,16 @@ const renderTypeFilters = (): void => {
   const types = Object.keys(typeCounts).sort();
   typeFiltersContainer.innerHTML = '';
 
-  // "All" pill
+  // "All" pill — solid black when active, neutral otherwise.
   const allPill = document.createElement('button');
-  allPill.className = `type-pill${selectedTypeFilter === 'all' ? ' active' : ''}`;
+  allPill.className = 'type-pill';
   allPill.dataset.type = 'all';
-  allPill.textContent = `All (${allLoadedItems.length})`;
+  allPill.innerHTML = `All <span class="type-pill-count">${allLoadedItems.length}</span>`;
+  if (selectedTypeFilter === 'all') {
+    allPill.style.background = 'var(--fg-1)';
+    allPill.style.color = 'var(--bg-0)';
+    allPill.style.borderColor = 'var(--fg-1)';
+  }
   allPill.addEventListener('click', () => {
     selectedTypeFilter = 'all';
     applyTypeFilter();
@@ -256,9 +345,21 @@ const renderTypeFilters = (): void => {
 
   types.forEach((type) => {
     const pill = document.createElement('button');
-    pill.className = `type-pill${selectedTypeFilter === type ? ' active' : ''}`;
+    pill.className = 'type-pill';
     pill.dataset.type = type;
-    pill.textContent = `${capitalize(type)} (${typeCounts[type]})`;
+    const color = TYPE_COLORS[type] || TYPE_COLORS.other;
+    pill.innerHTML = `${type} <span class="type-pill-count">${typeCounts[type]}</span>`;
+    // Per-type tint: soft tinted bg + accented border + colored label;
+    // active state inverts to a solid fill.
+    if (selectedTypeFilter === type) {
+      pill.style.background = color;
+      pill.style.color = '#fff';
+      pill.style.borderColor = color;
+    } else {
+      pill.style.background = color + '0f';
+      pill.style.color = color;
+      pill.style.borderColor = color + '40';
+    }
     pill.addEventListener('click', () => {
       selectedTypeFilter = type;
       applyTypeFilter();
@@ -312,10 +413,29 @@ const updateStorageGauge = (): void => {
 
   const total = Object.values(byType).reduce((a, b) => a + b, 0);
   const sortedTypes = Object.entries(byType).sort((a, b) => b[1] - a[1]);
+  const pausedCount = allLoadedItems.filter(
+    (d) => d.status === 'paused' || activeDownloads.get(d.fileName)?.state === 'paused'
+  ).length;
+  const fileWord = allLoadedItems.length === 1 ? 'file' : 'files';
 
-  storageTotal.textContent = FormatUtils.formatFileSize(total) || '0 B';
+  // Panel header meta — "2.9 GB used · 5 files · 1 paused"
+  const totalStr = FormatUtils.formatFileSize(total) || '0 B';
+  const metaParts = [
+    `<span><strong>${totalStr}</strong>used</span>`,
+    `<span><strong>${allLoadedItems.length}</strong>${fileWord}</span>`,
+  ];
+  if (pausedCount > 0) {
+    metaParts.push(`<span><strong>${pausedCount}</strong>paused</span>`);
+  }
+  storageMeta.innerHTML = metaParts.join('');
 
-  // Bar segments
+  // Top-of-page stats line — small mono right rail.
+  statsLabel.textContent =
+    allLoadedItems.length === 0
+      ? 'nav0://downloads · empty · local'
+      : `nav0://downloads · ${allLoadedItems.length} ${fileWord} · ${totalStr} · local`;
+
+  // Bar segments — per-type colour via TYPE_COLORS.
   storageBar.innerHTML = '';
   sortedTypes.forEach(([type, size]) => {
     const segment = document.createElement('div');
@@ -325,14 +445,17 @@ const updateStorageGauge = (): void => {
     storageBar.appendChild(segment);
   });
 
-  // Legend
+  // Legend — colored swatch + label + mono size.
   storageLegend.innerHTML = '';
   sortedTypes.forEach(([type, size]) => {
     const item = document.createElement('div');
     item.className = 'storage-legend-item';
     item.innerHTML = `
       <div class="storage-legend-dot" style="background: ${TYPE_COLORS[type] || '#a1a1aa'}"></div>
-      <span class="storage-legend-text">${type} · ${FormatUtils.formatFileSize(size)}</span>
+      <span class="storage-legend-text">
+        <strong>${type}</strong>
+        <span class="size">${FormatUtils.formatFileSize(size)}</span>
+      </span>
     `;
     storageLegend.appendChild(item);
   });
@@ -343,7 +466,7 @@ const updateStorageGauge = (): void => {
 // ---------------------------------------------------------------------------
 
 const appendDownloadItems = (items: DownloadRecord[]): void => {
-  items.forEach((item, index) => {
+  items.forEach((item) => {
     const displayType = getDisplayType(item);
 
     const wrapper = document.createElement('div');
@@ -355,9 +478,6 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
     downloadItem.className = 'download-item';
     downloadItem.dataset.fileName = item.fileName;
     downloadItem.dataset.recordId = item.id;
-
-    // Stagger animation delay
-    downloadItem.style.transitionDelay = `${index * 0.03}s`;
 
     const activeInfo = activeDownloads.get(item.fileName);
     const isActive = !!activeInfo;
@@ -390,10 +510,16 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
       sizeText = FormatUtils.formatFileSize(item.fileSize);
     }
 
-    // Badges
-    let badgesHtml = '';
+    // Status pill — done / paused / progress
+    let statusHtml = '';
     if (isPaused) {
-      badgesHtml += '<span class="badge badge-paused">paused</span>';
+      statusHtml =
+        '<span class="download-status paused"><i data-lucide="pause" width="10" height="10"></i> paused</span>';
+    } else if (isActive) {
+      const pctLabel = activeInfo.totalBytes > 0 ? `${pct}%` : '…';
+      statusHtml = `<span class="download-status progress"><i data-lucide="arrow-down" width="10" height="10"></i> <span class="pct-num">${pctLabel}</span></span>`;
+    } else {
+      statusHtml = '<span class="download-status done">complete</span>';
     }
 
     // Action buttons
@@ -403,61 +529,71 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
       if (isPaused) {
         actionsHtml = `
           <button class="action-btn resume-btn" data-download-id="${downloadId}" title="Resume">
-            <i data-lucide="play" width="12" height="12"></i>
+            <i data-lucide="play" width="14" height="14"></i>
           </button>`;
       } else {
         actionsHtml = `
           <button class="action-btn pause-btn" data-download-id="${downloadId}" title="Pause">
-            <i data-lucide="pause" width="12" height="12"></i>
+            <i data-lucide="pause" width="14" height="14"></i>
           </button>`;
       }
       actionsHtml += `
-        <button class="action-btn remove-btn cancel-btn" data-download-id="${downloadId}" title="Cancel">
-          <i data-lucide="x" width="12" height="12"></i>
+        <button class="action-btn cancel-btn" data-download-id="${downloadId}" title="Cancel">
+          <i data-lucide="x" width="14" height="14"></i>
         </button>`;
     } else if (isPausedFromDb) {
       actionsHtml = `
         <button class="action-btn resume-db-btn" data-record-id="${item.id}" title="Resume">
-          <i data-lucide="play" width="12" height="12"></i>
+          <i data-lucide="play" width="14" height="14"></i>
         </button>
         <button class="action-btn remove-btn delete-button" title="Remove">
-          <i data-lucide="x" width="12" height="12"></i>
+          <i data-lucide="x" width="14" height="14"></i>
         </button>`;
     } else {
       actionsHtml = `
         <button class="action-btn remove-btn delete-button" title="Remove">
-          <i data-lucide="x" width="12" height="12"></i>
+          <i data-lucide="x" width="14" height="14"></i>
         </button>`;
     }
 
-    // Progress bar for active downloads
+    // Progress bar for active downloads — wrapped in .download-progress
+    // which spans grid cols 3-6 on row 2 via CSS.
     let progressHtml = '';
     if (isActive) {
       const hasTotal = activeInfo.totalBytes > 0;
       const barWidth = hasTotal ? `${pct}%` : '30%';
-      const barColor = isPaused ? '#d4d4d8' : color;
+      const barColor = isPaused ? 'var(--bg-3)' : color;
       const indeterminateClass = hasTotal ? '' : ' indeterminate';
       progressHtml = `
         <div class="download-progress${indeterminateClass}">
-          <div class="download-progress-fill" style="width: ${barWidth}; background: ${barColor}"></div>
+          <div class="download-progress-bar">
+            <div class="download-progress-fill" style="width: ${barWidth}; background: ${barColor}"></div>
+          </div>
         </div>`;
     }
 
+    // Meta line — source host (accent) · file path. Falls back gracefully.
+    const metaParts: string[] = [];
+    if (sourceHost) metaParts.push(`<span class="from">${escapeHtml(sourceHost)}</span>`);
+    if (item.fileLocation) {
+      if (sourceHost) metaParts.push('<span class="dot">·</span>');
+      metaParts.push(`<span class="path">${escapeHtml(item.fileLocation)}</span>`);
+    }
+
     downloadItem.innerHTML = `
-      <div class="download-time">${FormatUtils.getFriendlyDateString(item.createdDate)}</div>
-      <div class="download-type-icon" style="background: ${hexToRgba(color, 0.08)}">
-        <i data-lucide="${iconName}" style="color: ${color}" width="16" height="16"></i>
-      </div>
+      <span class="download-time">${formatRowTime(item.createdDate)}</span>
+      <span class="download-type-icon" style="background: ${color}14; border-color: ${color}40; color: ${color}">
+        <i data-lucide="${iconName}" width="16" height="16"></i>
+      </span>
       <div class="download-content">
-        <div class="download-filename-row">
-          <span class="download-filename" title="${item.fileName}">${item.fileName}</span>
-          ${badgesHtml}
-        </div>
-        <div class="download-path">${isPausedFromDb ? 'Paused' : item.fileLocation}</div>
-        ${progressHtml}
+        <span class="download-filename" title="${escapeHtml(item.fileName)}">${escapeHtml(item.fileName)}</span>
+        <div class="download-meta">${metaParts.join('')}</div>
       </div>
-      <div class="download-size">${sizeText}</div>
+      <span class="download-tag">${displayType}</span>
+      ${statusHtml}
+      <span class="download-size">${sizeText}</span>
       <div class="download-actions">${actionsHtml}</div>
+      ${progressHtml}
     `;
 
     // Row click → toggle detail panel (only for completed downloads)
@@ -508,7 +644,7 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
         allLoadedItems.splice(allLoadedItems.indexOf(item), 1);
         if (allLoadedItems.length === 0) {
           noDownloads.style.display = 'block';
-          downloadsFooter.style.display = 'none';
+          deleteAllBtn.style.display = 'none';
         }
         updateStorageGauge();
         renderTypeFilters();
@@ -635,8 +771,9 @@ const updateProgressBar = (fileName: string, receivedBytes: number, totalBytes: 
   if (!bar) {
     const newProgressEl = document.createElement('div');
     newProgressEl.className = 'download-progress';
-    newProgressEl.innerHTML = '<div class="download-progress-fill" style="width: 0%"></div>';
-    row.querySelector('.download-content')?.appendChild(newProgressEl);
+    newProgressEl.innerHTML =
+      '<div class="download-progress-bar"><div class="download-progress-fill" style="width: 0%"></div></div>';
+    row.appendChild(newProgressEl);
     bar = newProgressEl.querySelector('.download-progress-fill') as HTMLElement;
   }
 
@@ -645,9 +782,10 @@ const updateProgressBar = (fileName: string, receivedBytes: number, totalBytes: 
   const color = TYPE_COLORS[fileType] || '#a1a1aa';
   bar.style.background = color;
 
+  let pct = 0;
   if (totalBytes > 0) {
     // Determinate: show actual percentage
-    const pct = Math.round((receivedBytes / totalBytes) * 100);
+    pct = Math.round((receivedBytes / totalBytes) * 100);
     bar.style.width = `${pct}%`;
     if (progressEl) progressEl.classList.remove('indeterminate');
   } else {
@@ -655,6 +793,10 @@ const updateProgressBar = (fileName: string, receivedBytes: number, totalBytes: 
     bar.style.width = '30%';
     if (progressEl) progressEl.classList.add('indeterminate');
   }
+
+  // Update status pill (percentage)
+  const pctNum = row.querySelector('.download-status.progress .pct-num') as HTMLElement;
+  if (pctNum) pctNum.textContent = totalBytes > 0 ? `${pct}%` : '…';
 
   // Update file size display
   const sizeEl = row.querySelector('.download-size') as HTMLElement;
@@ -674,12 +816,18 @@ const removeProgressBar = (fileName: string): void => {
   if (!row) return;
   row.classList.remove('downloading', 'paused');
   row.querySelector('.download-progress')?.remove();
+  // Swap status pill from "progress" to "done"
+  const statusEl = row.querySelector('.download-status');
+  if (statusEl) {
+    statusEl.className = 'download-status done';
+    statusEl.textContent = 'complete';
+  }
   // Replace action buttons with just the delete button
   const actionsEl = row.querySelector('.download-actions');
   if (actionsEl) {
     actionsEl.innerHTML = `
       <button class="action-btn remove-btn delete-button" title="Remove">
-        <i data-lucide="x" width="12" height="12"></i>
+        <i data-lucide="x" width="14" height="14"></i>
       </button>`;
     createIcons({ icons });
   }
@@ -698,7 +846,7 @@ const setRowPaused = (fileName: string): void => {
     pauseBtn.classList.remove('pause-btn');
     pauseBtn.classList.add('resume-btn');
     pauseBtn.setAttribute('title', 'Resume');
-    pauseBtn.innerHTML = '<i data-lucide="play" width="12" height="12"></i>';
+    pauseBtn.innerHTML = '<i data-lucide="play" width="14" height="14"></i>';
     const downloadId = (pauseBtn as HTMLElement).dataset.downloadId;
     pauseBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -710,16 +858,15 @@ const setRowPaused = (fileName: string): void => {
   // Update progress bar color
   const progressFill = row.querySelector('.download-progress-fill') as HTMLElement;
   if (progressFill) {
-    progressFill.style.background = '#d4d4d8';
+    progressFill.style.background = 'var(--bg-3)';
   }
 
-  // Add paused badge if not present
-  const filenameRow = row.querySelector('.download-filename-row');
-  if (filenameRow && !filenameRow.querySelector('.badge-paused')) {
-    const badge = document.createElement('span');
-    badge.className = 'badge badge-paused';
-    badge.textContent = 'paused';
-    filenameRow.appendChild(badge);
+  // Swap status pill to paused
+  const statusEl = row.querySelector('.download-status') as HTMLElement;
+  if (statusEl) {
+    statusEl.className = 'download-status paused';
+    statusEl.innerHTML = '<i data-lucide="pause" width="10" height="10"></i> paused';
+    createIcons({ icons });
   }
 };
 
@@ -736,7 +883,7 @@ const setRowResumed = (fileName: string): void => {
     resumeBtn.classList.remove('resume-btn');
     resumeBtn.classList.add('pause-btn');
     resumeBtn.setAttribute('title', 'Pause');
-    resumeBtn.innerHTML = '<i data-lucide="pause" width="12" height="12"></i>';
+    resumeBtn.innerHTML = '<i data-lucide="pause" width="14" height="14"></i>';
     const downloadId = (resumeBtn as HTMLElement).dataset.downloadId;
     resumeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -753,8 +900,14 @@ const setRowResumed = (fileName: string): void => {
     progressFill.style.background = TYPE_COLORS[fileType] || '#a1a1aa';
   }
 
-  // Remove paused badge
-  row.querySelector('.badge-paused')?.remove();
+  // Swap status pill back to in-progress
+  const statusEl = row.querySelector('.download-status') as HTMLElement;
+  if (statusEl) {
+    statusEl.className = 'download-status progress';
+    statusEl.innerHTML =
+      '<i data-lucide="arrow-down" width="10" height="10"></i> <span class="pct-num">…</span>';
+    createIcons({ icons });
+  }
 };
 
 // ---------------------------------------------------------------------------
@@ -776,8 +929,6 @@ const removeLoadingIndicator = (): void => {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-const capitalize = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
 const extractHostname = (url: string): string => {
   try {

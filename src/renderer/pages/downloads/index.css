@@ -1,16 +1,24 @@
 @import url('../../styles/global.css');
 
-/* ==========================================================================
-   Downloads Page — Redesigned UI
-   ========================================================================== */
+/* ============================================================
+   Downloads — editorial dashboard layout.
+   Centered card with the orange storage-tray on top becomes an
+   editorial masthead, a properly framed storage panel, and a
+   real list grouped by date. Same masthead / toolbar / list
+   grammar the History and Bookmarks pages use.
+   ============================================================ */
+
+/* Local mono stack — for tabular times, sizes, and small caps labels. */
+.downloads-page {
+  --downloads-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+}
 
 .downloads-page {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: var(--bg-light);
   min-height: 100vh;
-  color: var(--text-color);
+  background: var(--bg-0);
+  color: var(--fg-2);
   opacity: 0;
-  transition: opacity var(--transition-medium) ease;
+  transition: opacity var(--transition-medium, 220ms) ease;
 }
 
 .downloads-page.loaded {
@@ -18,229 +26,313 @@
 }
 
 .downloads-wrapper {
-  max-width: 840px;
+  max-width: 1080px;
   margin: 0 auto;
-  padding: 48px 24px 60px;
+  padding: 48px 56px 80px;
 }
 
-/* --------------------------------------------------------------------------
-   Header
-   -------------------------------------------------------------------------- */
+/* ---- Editorial masthead --------------------------------- */
+.downloads-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-1);
+}
+
 .downloads-title {
-  font-size: 28px;
-  font-weight: 600;
-  text-align: center;
-  margin: 0 0 6px;
-  color: var(--primary-dark);
-  letter-spacing: -0.3px;
+  font-size: 48px;
+  font-weight: 200;
+  letter-spacing: -0.5px;
+  color: var(--fg-1);
+  margin: 0;
+  line-height: 1.2;
 }
 
-.downloads-subtitle {
-  font-size: var(--font-md);
-  color: var(--text-light);
-  text-align: center;
-  margin: 0 0 32px;
+.downloads-stats-label {
+  font-family: var(--downloads-mono);
+  font-size: 12px;
+  color: var(--fg-3);
+  margin: 0;
+  text-align: right;
 }
 
-/* --------------------------------------------------------------------------
-   Search
-   -------------------------------------------------------------------------- */
+/* ---- Toolbar (search + type filter + clear) ------------- */
+.downloads-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 28px 0 24px;
+  flex-wrap: wrap;
+}
+
 .search-container {
   position: relative;
-  max-width: 520px;
-  margin: 0 auto 28px;
-}
-
-.search-input {
-  width: 100%;
-  box-sizing: border-box;
-  font-size: var(--font-md);
-  padding: 10px 16px 10px 40px;
-  border: none;
-  border-radius: var(--r-md);
-  outline: none;
-  color: var(--text-color);
+  flex: 1;
+  min-width: 240px;
+  display: flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 12px 0 36px;
   background: var(--bg-2);
-  transition: background var(--transition-fast);
+  border: 1px solid var(--border-1);
+  border-radius: 3px;
+  color: var(--fg-3);
+  transition:
+    background var(--dur-fast),
+    border-color var(--dur-fast),
+    box-shadow var(--dur-fast);
 }
 
-.search-input:focus {
+.search-container:focus-within {
   background: var(--bg-0);
+  border-color: var(--fg-1);
   box-shadow: var(--shadow-focus);
 }
 
 .search-icon {
   position: absolute;
-  left: 14px;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--text-secondary);
+  color: var(--fg-3);
+  pointer-events: none;
 }
 
-/* --------------------------------------------------------------------------
-   Type Filter Pills
-   -------------------------------------------------------------------------- */
+.search-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--fg-1);
+  padding: 0;
+}
+
+.search-input::placeholder {
+  color: var(--fg-4);
+}
+
+/* Type filter — pills with per-type color tint (dynamic via inline style).
+   Active state inverts to a solid fill. */
 .type-filters {
   display: flex;
+  align-items: center;
   gap: 6px;
-  justify-content: center;
-  margin-bottom: 28px;
   flex-wrap: wrap;
 }
 
 .type-pill {
-  font-size: var(--font-sm);
-  font-weight: 400;
-  color: var(--text-secondary);
-  background: var(--bg-color);
-  border: none;
-  padding: 5px 14px;
-  border-radius: var(--r-pill);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  background: var(--bg-0);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-pill, 6px);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg-2);
   cursor: pointer;
-  transition: all var(--transition-fast) ease;
+  text-transform: capitalize;
+  transition:
+    background var(--dur-fast),
+    border-color var(--dur-fast),
+    color var(--dur-fast),
+    filter var(--dur-fast);
 }
 
 .type-pill:hover {
-  background: var(--border-color);
+  filter: brightness(0.97);
 }
 
-.type-pill.active {
+.type-pill-count {
+  font-family: var(--downloads-mono);
+  font-size: 10.5px;
+  color: currentColor;
+  opacity: 0.55;
+}
+
+/* Danger ghost Clear button — matches History & Bookmarks */
+.btn-clear-all {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border-1);
+  background: var(--bg-0);
+  border-radius: 3px;
+  color: var(--danger);
+  font-family: inherit;
+  font-size: 12px;
   font-weight: 500;
-  color: var(--bg-light);
-  background: var(--primary-color);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition:
+    background var(--dur-fast),
+    border-color var(--dur-fast);
 }
 
-/* Type-specific active colors */
-.type-pill.active[data-type='document'] {
-  background: var(--accent);
-}
-.type-pill.active[data-type='spreadsheet'] {
-  background: var(--accent);
-}
-.type-pill.active[data-type='presentation'] {
-  background: var(--accent);
-}
-.type-pill.active[data-type='image'] {
-  background: #06b6d4;
-}
-.type-pill.active[data-type='video'] {
-  background: #06b6d4;
-}
-.type-pill.active[data-type='installer'] {
-  background: #f59e0b;
-}
-.type-pill.active[data-type='archive'] {
-  background: #8b5cf6;
-}
-.type-pill.active[data-type='audio'] {
-  background: #ec4899;
-}
-.type-pill.active[data-type='code'] {
-  background: var(--success);
-}
-.type-pill.active[data-type='other'] {
-  background: #a1a1aa;
+.btn-clear-all:hover {
+  background: var(--danger-soft, #fdecea);
+  border-color: var(--danger);
 }
 
-/* --------------------------------------------------------------------------
-   Storage Gauge
-   -------------------------------------------------------------------------- */
-.storage-gauge {
-  margin-bottom: 28px;
-  padding: 14px 20px;
-  background: var(--bg-color);
-  border-radius: var(--r-lg);
-  border: 1px solid var(--border-color);
+/* ---- Storage panel (bordered card) --------------------- */
+.panel {
+  background: var(--bg-0);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-md);
+  padding: 20px 22px;
 }
 
-.storage-header {
+.storage-panel {
+  margin-bottom: 24px;
+}
+
+.panel-head {
   display: flex;
-  justify-content: space-between;
   align-items: baseline;
-  margin-bottom: 10px;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
 }
 
-.storage-label {
-  font-size: var(--font-sm);
-  color: var(--text-secondary);
-}
-
-.storage-total {
-  font-size: 13px;
-  color: var(--text-color);
+.panel-title {
+  font-size: 14px;
   font-weight: 600;
+  color: var(--fg-1);
+  letter-spacing: -0.1px;
+  white-space: nowrap;
 }
 
+.panel-meta {
+  font-family: var(--downloads-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--fg-3);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.panel-meta strong {
+  color: var(--fg-1);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0;
+  text-transform: none;
+  margin-right: 4px;
+  font-variant-numeric: tabular-nums;
+  font-family: inherit;
+}
+
+/* Hairline segmented progress bar (per-type tint via inline style) */
 .storage-bar {
-  height: 6px;
-  border-radius: var(--r-sm);
-  background: var(--border-color);
-  overflow: hidden;
   display: flex;
+  height: 8px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: var(--bg-2);
+  border: 1px solid var(--border-1);
 }
 
 .storage-bar-segment {
   height: 100%;
-  transition: width 0.6s ease;
 }
 
 .storage-legend {
   display: flex;
-  gap: 16px;
-  margin-top: 10px;
+  gap: 18px;
   flex-wrap: wrap;
+  margin-top: 14px;
 }
 
 .storage-legend-item {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--fg-3);
 }
 
 .storage-legend-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: var(--r-full);
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
   flex-shrink: 0;
 }
 
 .storage-legend-text {
-  font-size: var(--font-xs);
-  color: var(--text-light);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
 }
 
-/* --------------------------------------------------------------------------
-   Downloads List
-   -------------------------------------------------------------------------- */
-.downloads-container {
-  border-top: 1px solid var(--border-color);
+.storage-legend-text strong {
+  color: var(--fg-1);
+  font-weight: 500;
+  text-transform: capitalize;
 }
 
-.downloads-list {
-  /* No inner scroll — uses page scroll */
+.storage-legend-text .size {
+  font-family: var(--downloads-mono);
+  color: var(--fg-2);
+  font-variant-numeric: tabular-nums;
 }
 
-.no-downloads {
-  text-align: center;
-  padding: 60px 0;
-  color: var(--text-secondary);
-  font-size: var(--font-md);
-  display: none;
-}
-
-/* --------------------------------------------------------------------------
-   Download Row
-   -------------------------------------------------------------------------- */
-.download-item {
+/* ---- Day separator -------------------------------------- */
+.date-group-label {
   display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 28px 0 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-1);
+}
+
+.date-group-label .day-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg-1);
+  letter-spacing: -0.1px;
+  text-transform: capitalize;
+}
+
+.date-group-label .day-sub {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--fg-3);
+  font-family: var(--downloads-mono);
+}
+
+/* ---- Downloads list / rows ------------------------------ */
+.downloads-list {
+  /* The TS injects day-label dividers + .download-item-wrapper blocks. */
+}
+
+/* 7-column grid mirroring the prototype:
+   time | 32px icon tile | filename + meta | tag | status | size | hover actions */
+.download-item {
+  display: grid;
+  grid-template-columns: 90px 32px 1fr auto auto auto auto;
   align-items: center;
   gap: 14px;
-  padding: 13px 4px;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--border-1);
+  transition: background var(--dur-fast);
   cursor: pointer;
-  background: transparent;
-  border-bottom: 1px solid var(--border-color);
-  transition: background var(--transition-fast) ease;
-  position: relative;
 }
 
 .download-item:hover {
@@ -248,247 +340,301 @@
 }
 
 .download-item.selected {
-  background: var(--bg-2);
+  background: var(--bg-1);
 }
 
-/* Stagger animation */
-.download-item {
-  opacity: 0;
-  transform: translateY(4px);
-  transition:
-    opacity 0.25s ease,
-    transform 0.25s ease,
-    background var(--transition-fast) ease;
-}
-
-.downloads-page.loaded .download-item {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Time column */
 .download-time {
-  width: 138px;
-  flex-shrink: 0;
-  font-size: 13px;
-  color: var(--text-light);
+  font-family: var(--downloads-mono);
+  font-size: 12px;
+  color: var(--fg-3);
+  font-variant-numeric: tabular-nums;
 }
 
-/* File type icon */
+/* 32-px tinted icon tile — per-type background + border via inline style */
 .download-type-icon {
-  width: 30px;
-  height: 30px;
-  border-radius: var(--r-md);
-  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--bg-2);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-sm);
+  color: var(--fg-2);
 }
 
 .download-type-icon svg {
   width: 16px;
   height: 16px;
+  display: block;
 }
 
-/* File info */
 .download-content {
-  flex: 1;
   min-width: 0;
 }
 
-.download-filename-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .download-filename {
-  font-size: var(--font-md);
-  color: var(--text-color);
-  font-weight: 400;
+  font-size: 14px;
+  color: var(--fg-1);
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: block;
 }
 
-.download-path {
-  font-size: var(--font-sm);
-  color: var(--text-secondary);
+.download-meta {
+  font-family: var(--downloads-mono);
+  font-size: 11px;
+  color: var(--fg-3);
   margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-/* Badges */
-.badge {
-  font-size: 10px;
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-weight: 600;
+.download-meta .from {
+  color: var(--accent);
+}
+
+.download-meta .dot {
+  color: var(--fg-4);
+}
+
+.download-meta .path {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+/* Type tag — small pill, neutral by default */
+.download-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--fg-2);
+  background: var(--bg-2);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-xs);
+  letter-spacing: 0;
+  white-space: nowrap;
   flex-shrink: 0;
+  text-transform: capitalize;
+}
+
+/* Status pill — colored per state */
+.download-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 8px;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: var(--r-xs);
+  letter-spacing: 0;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.download-status.done {
+  color: var(--success);
+  background: var(--success-soft, #ecfdf5);
+  border: 1px solid rgba(22, 163, 74, 0.2);
+}
+
+.download-status.paused {
+  color: var(--danger);
+  background: var(--danger-soft, #fdecea);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.download-status.progress {
+  color: var(--accent);
+  background: rgba(37, 99, 235, 0.06);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+}
+
+.download-status.progress .pct-num {
+  font-variant-numeric: tabular-nums;
+}
+
+.download-size {
+  font-family: var(--downloads-mono);
+  font-size: 12px;
+  color: var(--fg-2);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  min-width: 64px;
   white-space: nowrap;
 }
 
-.badge-paused {
-  background: var(--danger-soft);
-  color: var(--danger);
-}
-
-/* Size column */
-.download-size {
-  flex-shrink: 0;
-  text-align: right;
-  min-width: 120px;
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-/* Row actions */
+/* Hover-revealed action buttons */
 .download-actions {
-  display: flex;
-  gap: 4px;
-  flex-shrink: 0;
-  width: 48px;
-  justify-content: flex-end;
-  align-items: center;
-}
-
-.action-btn {
-  width: 22px;
-  height: 22px;
-  border-radius: 4px;
-  border: 1px solid var(--border-color);
-  background: var(--bg-light);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  color: var(--text-secondary);
-  transition:
-    color var(--transition-fast),
-    border-color var(--transition-fast);
-}
-
-.action-btn:hover {
-  color: var(--text-color);
-  border-color: var(--border-color-dark);
-}
-
-.action-btn svg {
-  width: 12px;
-  height: 12px;
-}
-
-/* Hide remove button until hover */
-.action-btn.remove-btn {
+  display: inline-flex;
+  gap: 2px;
   opacity: 0;
-  transition: opacity var(--transition-fast);
+  transition: opacity var(--dur-fast);
 }
 
-.download-item:hover .action-btn.remove-btn {
+.download-item:hover .download-actions {
   opacity: 1;
 }
 
-/* Progress bar for active downloads */
-.download-progress {
-  margin-top: 6px;
-  height: 3px;
+/* Always-visible actions on active/paused rows so the user can act
+   without hovering. */
+.download-item.downloading .download-actions,
+.download-item.paused .download-actions {
+  opacity: 1;
+}
+
+.action-btn {
+  width: 26px;
+  height: 26px;
   border-radius: var(--r-xs);
-  background: var(--border-color);
+  border: 0;
+  background: transparent;
+  color: var(--fg-3);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition:
+    background var(--dur-fast),
+    color var(--dur-fast);
+}
+
+.action-btn:hover {
+  background: var(--bg-2);
+  color: var(--fg-1);
+}
+
+.action-btn.remove-btn:hover,
+.action-btn.cancel-btn:hover {
+  background: var(--danger-soft, #fdecea);
+  color: var(--danger);
+}
+
+.action-btn.resume-btn,
+.action-btn.resume-db-btn {
+  color: var(--success);
+}
+
+.action-btn.resume-btn:hover,
+.action-btn.resume-db-btn:hover {
+  background: var(--success-soft, #ecfdf5);
+}
+
+.action-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ---- In-progress row with progress bar underneath ------ */
+.download-item.downloading {
+  row-gap: 6px;
+  padding-bottom: 14px;
+}
+
+.download-progress {
+  grid-column: 3 / 6;
+  grid-row: 2 / 3;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 2px;
+}
+
+.download-progress-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--bg-2);
+  border-radius: 2px;
   overflow: hidden;
-  max-width: 260px;
+  position: relative;
+  border: 1px solid var(--border-1);
 }
 
 .download-progress-fill {
   height: 100%;
-  transition: width 0.3s ease;
-  width: 0%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width var(--dur-med, 220ms) var(--ease-out, ease);
 }
 
-/* Indeterminate progress: sliding bar when total size is unknown */
 .download-progress.indeterminate .download-progress-fill {
-  animation: indeterminate 1.5s ease-in-out infinite;
+  width: 30%;
+  animation: download-progress-slide 1.4s var(--ease-in-out, ease-in-out) infinite;
 }
 
-@keyframes indeterminate {
+@keyframes download-progress-slide {
   0% {
     transform: translateX(-100%);
   }
   100% {
-    transform: translateX(900%);
+    transform: translateX(400%);
   }
 }
 
-/* Active download row styling */
-.download-item.downloading {
-  opacity: 0.85;
+.download-progress-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--downloads-mono);
+  font-size: 11px;
+  color: var(--fg-3);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  flex-shrink: 0;
 }
 
-.download-item.paused .download-progress-fill {
-  background: var(--border-2);
+.download-progress-stats strong {
+  color: var(--fg-1);
+  font-weight: 500;
 }
 
-.download-item.paused .download-path {
-  color: var(--primary-color);
-  font-style: italic;
-}
-
-/* --------------------------------------------------------------------------
-   Detail Panel
-   -------------------------------------------------------------------------- */
+/* ---- Detail panel (preserved from the legacy implementation) -- */
 .detail-panel {
-  padding: 18px 20px;
-  background: var(--bg-color);
-  border-bottom: 1px solid var(--border-color);
-  animation: panelIn 0.15s ease;
-}
-
-@keyframes panelIn {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--border-1);
+  padding: 16px 4px 18px;
 }
 
 .detail-inner {
-  display: flex;
-  gap: 32px;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 20px;
+  align-items: start;
 }
 
-/* Preview area */
 .detail-preview {
-  width: 100px;
-  height: 80px;
-  border-radius: var(--radius-lg);
-  flex-shrink: 0;
+  width: 96px;
+  height: 96px;
+  border-radius: var(--r-md);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.detail-preview svg {
-  width: 32px;
-  height: 32px;
-}
-
-/* Metadata grid */
 .detail-metadata {
-  flex: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px 32px;
+  gap: 12px 24px;
 }
 
 .detail-field {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .detail-field.full-width {
@@ -496,101 +642,85 @@
 }
 
 .detail-field-label {
-  font-size: var(--font-sm);
-  color: var(--text-secondary);
-  min-width: 75px;
-  flex-shrink: 0;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--fg-3);
+  font-family: var(--downloads-mono);
 }
 
 .detail-field-value {
-  font-size: var(--font-sm);
-  color: var(--text-color);
-  word-break: break-all;
+  font-size: 13px;
+  color: var(--fg-1);
+  word-break: break-word;
 }
 
-/* Detail panel actions */
 .detail-actions {
+  grid-column: 1 / -1;
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex-shrink: 0;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.detail-btn-primary,
+.detail-btn-secondary,
+.detail-btn-ghost {
+  height: 32px;
+  padding: 0 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 3px;
+  cursor: pointer;
+  border: 1px solid var(--border-1);
+  background: var(--bg-0);
+  color: var(--fg-1);
+  transition:
+    background var(--dur-fast),
+    border-color var(--dur-fast);
 }
 
 .detail-btn-primary {
-  font-size: var(--font-sm);
-  color: var(--bg-light);
-  background: var(--primary-color);
-  border: none;
-  padding: 7px 20px;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  font-weight: 500;
-  white-space: nowrap;
+  background: var(--fg-1);
+  color: var(--bg-0);
+  border-color: var(--fg-1);
 }
 
 .detail-btn-primary:hover {
-  opacity: 0.9;
-}
-
-.detail-btn-secondary {
-  font-size: var(--font-sm);
-  color: var(--text-color);
-  background: var(--bg-light);
-  border: 1px solid var(--border-color);
-  padding: 7px 20px;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  white-space: nowrap;
+  background: var(--fg-2);
+  border-color: var(--fg-2);
 }
 
 .detail-btn-secondary:hover {
-  background: var(--bg-color);
+  background: var(--bg-2);
 }
 
 .detail-btn-ghost {
-  font-size: var(--font-sm);
-  color: var(--text-secondary);
   background: transparent;
-  border: none;
-  padding: 7px 20px;
-  cursor: pointer;
-  white-space: nowrap;
+  border-color: transparent;
+  color: var(--fg-3);
 }
 
 .detail-btn-ghost:hover {
-  color: var(--text-color);
+  color: var(--fg-1);
 }
 
-/* --------------------------------------------------------------------------
-   Clear All Footer
-   -------------------------------------------------------------------------- */
-.downloads-footer {
+/* ---- Empty + loading + footer ---------------------------- */
+.no-downloads {
   text-align: center;
-  margin-top: 28px;
+  padding: 60px 0;
+  color: var(--fg-3);
+  font-size: 12px;
   display: none;
 }
 
-.btn-clear-all {
-  font-size: 13px;
-  color: var(--text-color);
-  background: var(--bg-light);
-  border: 1px solid var(--border-color);
-  padding: 8px 28px;
-  border-radius: var(--radius-lg);
-  cursor: pointer;
-  transition: background var(--transition-fast);
-}
-
-.btn-clear-all:hover {
-  background: var(--bg-color);
-}
-
-/* --------------------------------------------------------------------------
-   Loading Indicator
-   -------------------------------------------------------------------------- */
 .loading-indicator {
   text-align: center;
-  padding: var(--spacing-sm);
-  color: var(--text-secondary);
-  font-size: var(--font-sm);
+  padding: 12px 0;
+  color: var(--fg-3);
+  font-size: 12px;
+}
+
+.downloads-footer {
+  margin-top: 28px;
 }
