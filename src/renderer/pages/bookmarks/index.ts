@@ -36,6 +36,25 @@ function getDomain(url: string): string {
   }
 }
 
+function getPath(url: string): string {
+  try {
+    const u = new URL(url);
+    const path = u.pathname + u.search;
+    return path === '/' ? '' : path;
+  } catch {
+    return '';
+  }
+}
+
+function formatSavedDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '';
+  const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+  if (d.getFullYear() !== new Date().getFullYear()) opts.year = 'numeric';
+  return d.toLocaleDateString([], opts);
+}
+
 // --- Freshness / age helpers ---
 
 function daysSince(dateStr: string | null): number {
@@ -89,6 +108,8 @@ let activeTab: 'queue' | 'reference' = 'queue';
 let currentSearchTerm = '';
 const selectedCategories: Set<string> = new Set();
 let availableCategories: string[] = [];
+const categoryCounts: Map<string, number> = new Map();
+let activeTabTotal = 0;
 let currentOffset = 0;
 let isLoading = false;
 let hasMore = true;
@@ -113,6 +134,10 @@ const staleReviewList = document.getElementById('stale-review-list') as HTMLElem
 const staleDoneBtn = document.getElementById('stale-done-btn') as HTMLButtonElement;
 const bookmarksFooter = document.getElementById('bookmarks-footer') as HTMLElement;
 const deleteAllBtn = document.getElementById('delete-all') as HTMLButtonElement;
+const statsLabel = document.getElementById('bookmarks-stats') as HTMLElement;
+const folderName = document.getElementById('folder-name') as HTMLElement;
+const folderIcon = document.getElementById('folder-icon') as HTMLElement;
+const folderSub = document.getElementById('folder-sub') as HTMLElement;
 
 // --- Init ---
 
@@ -168,12 +193,24 @@ async function updateCounts(): Promise<void> {
   queueCountEl.textContent = String(queueItems.length);
   referenceCountEl.textContent = String(refItems.length);
 
-  // Derive available categories from the full unfiltered result set for the active tab
+  // Top-of-page stats line — total saved + per-folder counts.
+  const totalSaved = queueItems.length + refItems.length;
+  statsLabel.textContent = `nav0://bookmarks · ${totalSaved} saved · ${queueItems.length} queued · ${refItems.length} reference`;
+
+  // Derive available categories + per-category counts from the active tab's
+  // full unfiltered result set, so chip ordering and counts react to tab/search.
   const sourceItems = activeTab === 'queue' ? queueItems : refItems;
-  const cats = new Set<string>();
-  sourceItems.forEach((b: BookmarkWithStats) => cats.add(getCategoryForUrl(b.url)));
-  availableCategories = [...cats].sort();
+  activeTabTotal = sourceItems.length;
+  categoryCounts.clear();
+  sourceItems.forEach((b: BookmarkWithStats) => {
+    const c = getCategoryForUrl(b.url);
+    categoryCounts.set(c, (categoryCounts.get(c) || 0) + 1);
+  });
+  availableCategories = [...categoryCounts.keys()].sort();
   renderCategoryPills();
+
+  // Folder section header subtitle ("N saved").
+  folderSub.textContent = `${activeTabTotal} saved`;
 
   // Show stale alert for reference tab
   if (activeTab === 'reference') {
@@ -193,6 +230,10 @@ function switchTab(tab: 'queue' | 'reference'): void {
   activeTab = tab;
   tabQueueBtn.classList.toggle('active', tab === 'queue');
   tabReferenceBtn.classList.toggle('active', tab === 'reference');
+  // Mirror the seg button label/icon into the folder section header below the chip row.
+  folderName.textContent = tab === 'queue' ? 'Reading queue' : 'Reference';
+  folderIcon.setAttribute('data-lucide', tab === 'queue' ? 'book-open' : 'bookmark');
+  createIcons({ icons });
   selectedCategories.clear();
   hideStaleReview();
   resetAndReload();
@@ -241,28 +282,53 @@ function updateVisibility(): void {
     noBookmarks.textContent = currentSearchTerm
       ? `No bookmarks matching "${currentSearchTerm}".`
       : 'No bookmarks saved yet.';
-    bookmarksFooter.style.display = 'none';
+    deleteAllBtn.style.display = 'none';
   } else {
     noBookmarks.style.display = 'none';
-    bookmarksFooter.style.display = 'block';
+    // Empty string clears the inline style so the CSS rule (inline-flex) applies.
+    deleteAllBtn.style.display = '';
   }
+  // Footer is no longer used as a wrapper for Clear; kept as an empty spacer.
+  if (bookmarksFooter) bookmarksFooter.style.display = 'block';
 }
 
 function renderCategoryPills(): void {
   categoryFilters.innerHTML = '';
+
+  // "All" chip — solid black when no individual category is selected.
+  const allPill = document.createElement('button');
+  const allActive = selectedCategories.size === 0;
+  allPill.className = 'cat-pill';
+  allPill.innerHTML = `All <span class="cat-pill-count">${activeTabTotal}</span>`;
+  if (allActive) {
+    allPill.style.background = 'var(--fg-1)';
+    allPill.style.color = 'var(--bg-0)';
+    allPill.style.borderColor = 'var(--fg-1)';
+  }
+  allPill.addEventListener('click', () => {
+    selectedCategories.clear();
+    renderCategoryPills();
+    resetAndReload();
+  });
+  categoryFilters.appendChild(allPill);
+
   for (const cat of availableCategories) {
     const pill = document.createElement('button');
     const catColor = getCategoryColor(cat);
     const isActive = selectedCategories.has(cat);
-    pill.className = 'cat-pill' + (isActive ? ' active' : '');
-    pill.textContent = cat;
-    // Always show category color — active: white on color, inactive: color on tinted bg
+    const count = categoryCounts.get(cat) ?? 0;
+    pill.className = 'cat-pill';
+    pill.innerHTML = `${cat} <span class="cat-pill-count">${count}</span>`;
+    // Per-category tint: soft tinted bg + accented border + colored label.
+    // Active state inverts to a solid fill, matching the prototype.
     if (isActive) {
       pill.style.background = catColor;
       pill.style.color = '#fff';
+      pill.style.borderColor = catColor;
     } else {
-      pill.style.background = catColor + '15';
+      pill.style.background = catColor + '0f';
       pill.style.color = catColor;
+      pill.style.borderColor = catColor + '40';
     }
     pill.addEventListener('click', () => {
       if (selectedCategories.has(cat)) {
@@ -280,64 +346,69 @@ function renderCategoryPills(): void {
 // --- Render bookmark rows ---
 
 function renderBookmarkItems(items: BookmarkWithStats[]): void {
-  items.forEach((item, i) => {
-    const row = document.createElement('div');
+  items.forEach((item) => {
+    const row = document.createElement('li');
     row.className = 'bookmark-item';
-    row.style.transitionDelay = `${i * 0.03}s`;
 
     const opacity = freshnessOpacity(item);
     const domain = getDomain(item.url);
+    const path = getPath(item.url);
     const category = getCategoryForUrl(item.url);
     const catColor = getCategoryColor(category);
+    const savedDate = formatSavedDate(item.createdDate as unknown as string);
 
-    // Favicon
+    // Favicon (rendered inside a 24px tile via CSS)
     const faviconHtml = item.faviconUrl
-      ? `<img src="${item.faviconUrl}" alt="" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>'">`
-      : `<i data-lucide="globe" width="16" height="16"></i>`;
+      ? `<img src="${item.faviconUrl}" alt="" onerror="this.parentElement.innerHTML='<i data-lucide=\\'globe\\' width=\\'14\\' height=\\'14\\'></i>'">`
+      : `<i data-lucide="globe" width="14" height="14"></i>`;
 
-    // Title row badges
-    let badgesHtml = '';
+    // Meta line: host (accent) + path + queue age / visits (reference)
+    const metaParts: string[] = [`<span class="host">${escapeHtml(domain)}</span>`];
+    if (path) {
+      metaParts.push('<span class="dot">·</span>');
+      metaParts.push(`<span>${escapeHtml(path)}</span>`);
+    }
     if (item.type === 'queue') {
       const age = queueAgeText(item.createdDate as unknown as string);
-      badgesHtml += `<span class="badge badge-queue-age" style="background: ${age.color}20; color: ${age.color}">${age.text}</span>`;
+      metaParts.push('<span class="dot">·</span>');
+      metaParts.push(`<span style="color: ${age.color}">${age.text}</span>`);
     }
+    if (item.type === 'reference') {
+      metaParts.push('<span class="dot">·</span>');
+      metaParts.push(
+        `<span class="bookmark-visits" style="color: ${heatColor(item.visits)}">${item.visits} visits</span>`
+      );
+    }
+
+    // Badges cell — dormant (reference only) + category
+    let badgesHtml = '';
     if (item.type === 'reference') {
       const daysAgo = daysSince(item.lastVisited);
       if (daysAgo >= 90) {
         const months = Math.floor(daysAgo / 30);
-        badgesHtml += `<span class="badge badge-stale">${months}mo dormant</span>`;
+        badgesHtml += `<span class="badge-stale">${months}mo dormant</span>`;
       }
     }
-    badgesHtml += `<span class="badge badge-category" style="background: ${catColor}18; color: ${catColor}">${category}</span>`;
+    badgesHtml += `<span class="badge-category" style="background: ${catColor}0f; color: ${catColor}; border-color: ${catColor}40">${category}</span>`;
 
-    // Visit count (reference only)
-    const visitsHtml =
-      item.type === 'reference'
-        ? `<span class="bookmark-visits" style="color: ${heatColor(item.visits)}">${item.visits} visits</span>`
-        : '';
-
-    // Move tooltip
+    // Move action tooltip + icon depend on which folder the item lives in.
     const moveTitle = item.type === 'queue' ? 'Move to Reference' : 'Move to Queue';
-    const moveIcon = item.type === 'queue' ? 'archive' : 'book-open';
+    const moveIcon = item.type === 'queue' ? 'bookmark' : 'book-open';
 
     row.innerHTML = `
-      <div class="bk-favicon" style="opacity: ${opacity}">
-        ${faviconHtml}
-      </div>
+      <span class="bookmark-date">${savedDate}</span>
+      <span class="bk-favicon" style="opacity: ${opacity}">${faviconHtml}</span>
       <div class="bookmark-content" style="opacity: ${opacity}">
-        <div class="bookmark-title-row">
-          <span class="bookmark-title">${escapeHtml(item.title)}</span>
-          ${badgesHtml}
-        </div>
-        <div class="bookmark-meta">${domain}</div>
+        <div class="bookmark-title">${escapeHtml(item.title)}</div>
+        <div class="bookmark-meta">${metaParts.join('')}</div>
       </div>
-      ${visitsHtml}
+      <div class="bookmark-badges">${badgesHtml}</div>
       <div class="bookmark-actions">
         <button class="action-btn move-btn" title="${moveTitle}" data-action="move">
-          <i data-lucide="${moveIcon}" width="12" height="12"></i>
+          <i data-lucide="${moveIcon}" width="14" height="14"></i>
         </button>
         <button class="action-btn remove-btn" title="Remove" data-action="remove">
-          <i data-lucide="x" width="12" height="12"></i>
+          <i data-lucide="x" width="14" height="14"></i>
         </button>
       </div>
     `;
