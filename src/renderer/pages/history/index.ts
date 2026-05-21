@@ -10,7 +10,32 @@ createIcons({ icons });
 
 // --- Constants ---
 const PAGE_SIZE = 100;
-const HEATMAP_LEVELS = ['#f0f0f0', '#d4d4d4', '#a3a3a3', '#525252', '#171717'];
+// Grayscale ramp from the Nav0 design system — used for both the heatmap
+// cells and the legend swatches.
+const HEATMAP_LEVELS = ['#f5f5f5', '#e5e5e5', '#bdbdbd', '#6b7280', '#0a0a0a'];
+
+// Per-category lucide icon for the "By category" panel rows.
+const CATEGORY_ICONS: Record<string, string> = {
+  dev: 'code',
+  news: 'newspaper',
+  media: 'play-circle',
+  social: 'users',
+  productivity: 'layout-grid',
+  tools: 'wrench',
+  finance: 'dollar-sign',
+  shopping: 'shopping-bag',
+  reference: 'book-open',
+  search: 'search',
+  design: 'palette',
+  health: 'heart-pulse',
+  gaming: 'gamepad-2',
+  travel: 'plane',
+  education: 'graduation-cap',
+  entertainment: 'sparkles',
+  jobs: 'briefcase',
+  lifestyle: 'coffee',
+  other: 'globe',
+};
 
 function getCategoryForDomain(domain: string): string {
   if (WEBSITE_CATEGORY_MAP[domain]) return WEBSITE_CATEGORY_MAP[domain];
@@ -144,7 +169,8 @@ function renderAll(): void {
 
   const hasEntries = allEntries.length > 0;
   noHistory.style.display = hasEntries ? 'none' : 'block';
-  deleteAllBtn.style.display = hasEntries ? 'inline-block' : 'none';
+  // Empty string clears the inline style so the CSS rule (inline-flex) applies.
+  deleteAllBtn.style.display = hasEntries ? '' : 'none';
   if (historyFooter) historyFooter.style.display = hasEntries ? 'block' : 'none';
 }
 
@@ -194,7 +220,23 @@ function renderHistoryList(): void {
   for (const dg of dateGroups) {
     const dateLabel = document.createElement('div');
     dateLabel.className = 'date-group-label';
-    dateLabel.textContent = dg.label;
+    const dayDate = new Date(dg.entries[0].createdDate);
+    const daysAgo = Math.floor((Date.now() - dayDate.getTime()) / 86400000);
+    // For today / yesterday / this-week, prepend the relative label to the
+    // absolute date so it reads "Today · Wednesday, May 20".
+    const absoluteDate = dayDate.toLocaleDateString([], {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+    });
+    const dayLabelText = daysAgo < 7 ? `${dg.label} · ${absoluteDate}` : absoluteDate;
+    const dayVisits = dg.entries.length;
+    const dayActive = dg.entries.reduce((a, e) => a + (e.activeDuration || 0), 0);
+    const dayActiveStr = dayActive > 0 ? ` · ${FormatUtils.formatDuration(dayActive)}` : '';
+    dateLabel.innerHTML = `
+      <span class="day-label">${dayLabelText}</span>
+      <span class="day-sub">${dayVisits} visit${dayVisits === 1 ? '' : 's'}${dayActiveStr}</span>
+    `;
     historyList.appendChild(dateLabel);
 
     for (const entry of dg.entries) {
@@ -227,16 +269,14 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
 
   row.innerHTML = `
     <span class="entry-time">${time}</span>
-    <div class="entry-favicon"><img src="${faviconUrl}" width="16" height="16" onerror="this.parentElement.innerHTML='<i data-lucide=\\'globe\\' width=\\'16\\' height=\\'16\\'></i>'"></div>
+    <div class="entry-favicon"><img src="${faviconUrl}" width="14" height="14" onerror="this.parentElement.innerHTML='<i data-lucide=\\'globe\\' width=\\'14\\' height=\\'14\\'></i>'"></div>
     <div class="entry-content">
-      <div class="entry-title-row">
-        <span class="entry-title" title="${escapeHtml(entry.title)}">${escapeHtml(entry.title)}</span>
-        <span class="entry-category-badge" style="background:${catColor}18;color:${catColor}">${category}</span>
-      </div>
+      <span class="entry-title" title="${escapeHtml(entry.title)}">${escapeHtml(entry.title)}</span>
       <span class="entry-domain">${escapeHtml(entry.topLevelDomain)}</span>
     </div>
+    <span class="entry-category-badge" style="background:${catColor}18;color:${catColor}">${category}</span>
     ${durationHtml}
-    <button class="entry-delete-btn"><i data-lucide="x" width="12" height="12"></i></button>
+    <button class="entry-delete-btn" title="Remove"><i data-lucide="x" width="14" height="14"></i></button>
   `;
 
   row.querySelector('.entry-title')?.addEventListener('click', () => {
@@ -365,7 +405,9 @@ function renderHeatmap(
       const isToday = day.date.toDateString() === now.toDateString();
       const x = dayLabelW + wi * (cellSize + cellGap);
       const y = topPad + day.dow * (cellSize + cellGap);
-      svgContent += `<rect class="heatmap-cell" x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" rx="2" fill="${HEATMAP_LEVELS[level]}" ${isToday ? `stroke="var(--primary-color)" stroke-width="1.5"` : ''} data-label="${day.label}" data-count="${day.count}" data-active="${day.active}" />`;
+      // Per Nav0 design system: today's cell is just the standard fill — no ring.
+      void isToday;
+      svgContent += `<rect class="heatmap-cell" x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" rx="2" fill="${HEATMAP_LEVELS[level]}" data-label="${day.label}" data-count="${day.count}" data-active="${day.active}" />`;
     }
   }
 
@@ -462,14 +504,16 @@ function renderDomainChart(): void {
       const valLabel = useTime ? FormatUtils.formatDuration(d.active) : `${d.visits}`;
       return `
     <div class="domain-row">
+      <span class="domain-favicon"><img src="${d.faviconUrl}" width="16" height="16" onerror="this.parentElement.innerHTML='<i data-lucide=\\'globe\\' width=\\'14\\' height=\\'14\\'></i>'" /></span>
       <span class="domain-name">${escapeHtml(d.domain)}</span>
+      <span class="domain-duration">${valLabel}</span>
       <div class="domain-bar-track">
         <div class="domain-bar-fill" style="width:${(val / maxVal) * 100}%"></div>
       </div>
-      <span class="domain-duration">${valLabel}</span>
     </div>`;
     })
     .join('');
+  createIcons({ icons });
 }
 
 // --- Category Chart (line bars) ---
@@ -504,17 +548,20 @@ function renderCategoryChart(): void {
   categoryContainer.innerHTML = cats
     .map(([cat, val]) => {
       const color = WEBSITE_CATEGORY_COLORS[cat] || WEBSITE_CATEGORY_COLORS.other;
+      const iconName = CATEGORY_ICONS[cat] || CATEGORY_ICONS.other;
       const valLabel = useDuration ? FormatUtils.formatDuration(val) : `${val}`;
       return `
     <div class="category-row">
+      <span class="category-icon" style="color:${color}"><i data-lucide="${iconName}" width="14" height="14"></i></span>
       <span class="category-name">${cat}</span>
+      <span class="category-duration">${valLabel}</span>
       <div class="category-bar-track">
         <div class="category-bar-fill" style="width:${(val / maxVal) * 100}%;background:${color}"></div>
       </div>
-      <span class="category-duration">${valLabel}</span>
     </div>`;
     })
     .join('');
+  createIcons({ icons });
 }
 
 // --- Helpers ---
