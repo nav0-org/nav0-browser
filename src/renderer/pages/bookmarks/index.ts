@@ -134,7 +134,6 @@ const staleReviewList = document.getElementById('stale-review-list') as HTMLElem
 const staleDoneBtn = document.getElementById('stale-done-btn') as HTMLButtonElement;
 const bookmarksFooter = document.getElementById('bookmarks-footer') as HTMLElement;
 const deleteAllBtn = document.getElementById('delete-all') as HTMLButtonElement;
-const statsLabel = document.getElementById('bookmarks-stats') as HTMLElement;
 const folderName = document.getElementById('folder-name') as HTMLElement;
 const folderIcon = document.getElementById('folder-icon') as HTMLElement;
 const folderSub = document.getElementById('folder-sub') as HTMLElement;
@@ -192,10 +191,6 @@ async function updateCounts(): Promise<void> {
   );
   queueCountEl.textContent = String(queueItems.length);
   referenceCountEl.textContent = String(refItems.length);
-
-  // Top-of-page stats line — total saved + per-folder counts.
-  const totalSaved = queueItems.length + refItems.length;
-  statsLabel.textContent = `nav0://bookmarks · ${totalSaved} saved · ${queueItems.length} queued · ${refItems.length} reference`;
 
   // Derive available categories + per-category counts from the active tab's
   // full unfiltered result set, so chip ordering and counts react to tab/search.

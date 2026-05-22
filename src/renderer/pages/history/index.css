@@ -1,20 +1,13 @@
 @import url('../../styles/global.css');
 
-/* Local mono stack — Nav0's global.css doesn't define one; the history
-   page uses mono for tabular times, durations, and small caps labels. */
-.history-page {
-  --history-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
-}
-
 /* ============================================================
    History — editorial dashboard layout.
    Page is the white canvas (browser chrome wraps it). Header
-   becomes a left-aligned masthead; stats become a small mono
-   line. Toolbar gathers search + time-range + clear into one
-   row. Heatmap, top sites, and categories live in bordered
-   panels. History list keeps its day grouping but each row
-   is a real table-like layout: time | favicon | title+meta |
-   tag | duration chips | hover actions.
+   is a left-aligned masthead. Toolbar gathers search +
+   time-range + clear into one row. Heatmap, top sites, and
+   categories live in bordered panels. History list keeps its
+   day grouping but each row is a real table-like layout:
+   time | favicon | title+meta | tag | duration | actions.
    ============================================================ */
 
 .history-page {
@@ -47,14 +40,6 @@
   color: var(--fg-1);
   margin: 0;
   line-height: 1.2;
-}
-
-.history-stats-label {
-  font-family: var(--history-mono);
-  font-size: 12px;
-  color: var(--fg-3);
-  margin: 0;
-  text-align: right;
 }
 
 /* ---- Toolbar (search + segmented + clear) --------------- */
@@ -202,7 +187,6 @@
   color: var(--fg-3);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  font-family: var(--history-mono);
 }
 
 /* ---- Heatmap -------------------------------------------- */
@@ -226,27 +210,6 @@
   letter-spacing: -0.1px;
 }
 
-.heatmap-stats {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 16px;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--fg-3);
-  font-family: var(--history-mono);
-}
-
-.heatmap-stats .stat-value {
-  color: var(--fg-1);
-  font-weight: 600;
-  font-size: 14px;
-  letter-spacing: 0;
-  text-transform: none;
-  margin-right: 4px;
-  font-variant-numeric: tabular-nums;
-}
-
 .heatmap-scroll-area {
   position: relative;
   overflow-x: auto;
@@ -265,7 +228,6 @@
   justify-content: flex-end;
   gap: 6px;
   margin-top: 8px;
-  font-family: var(--history-mono);
   font-size: 10px;
   color: var(--fg-4);
 }
@@ -372,7 +334,6 @@
 
 .domain-duration,
 .category-duration {
-  font-family: var(--history-mono);
   font-size: 12px;
   color: var(--fg-2);
   font-variant-numeric: tabular-nums;
@@ -409,11 +370,10 @@
   margin-top: 4px;
 }
 
-/* Date group label — "Today · Wednesday, May 20"  + small mono sub */
+/* Date group label — "Today · Wednesday, May 20" */
 .date-group-label {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
   gap: 16px;
   margin: 28px 0 8px;
   padding-bottom: 8px;
@@ -428,18 +388,12 @@
   text-transform: capitalize;
 }
 
-.date-group-label .day-sub {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--fg-3);
-  font-family: var(--history-mono);
-}
-
-/* History row — table-like with hover-revealed actions */
+/* History row — table-like with hover-revealed actions.
+   Six columns so the delete button never wraps when a duration
+   pill is present: time | favicon | content | badge | duration | delete. */
 .history-entry {
   display: grid;
-  grid-template-columns: 60px 24px 1fr auto auto;
+  grid-template-columns: 60px 32px 1fr auto auto auto;
   align-items: center;
   gap: 14px;
   padding: 12px 4px;
@@ -453,15 +407,14 @@
 }
 
 .entry-time {
-  font-family: var(--history-mono);
   font-size: 12px;
   color: var(--fg-3);
   font-variant-numeric: tabular-nums;
 }
 
 .entry-favicon {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -472,8 +425,8 @@
 
 .entry-favicon img,
 .entry-favicon svg {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   border-radius: 2px;
   display: block;
 }
@@ -512,11 +465,12 @@
   text-overflow: ellipsis;
 }
 
-/* Category tag — pill on the right of the title/meta */
+/* Category tag — pill on the right of the title/meta, icon + label */
 .entry-category-badge {
   display: inline-flex;
   align-items: center;
-  height: 20px;
+  gap: 5px;
+  height: 22px;
   padding: 0 8px;
   font-size: 11px;
   font-weight: 500;
@@ -527,12 +481,25 @@
   flex-shrink: 0;
   white-space: nowrap;
   letter-spacing: 0;
+  text-transform: capitalize;
 }
 
-/* Duration chips — replace the joined two-cell pill */
+.entry-category-badge svg {
+  width: 12px;
+  height: 12px;
+  display: block;
+  flex-shrink: 0;
+}
+
+/* Duration pill — single bordered pill with a vertical partition.
+   Active (left) sits on the page background; total (right) is muted. */
 .entry-duration {
   display: inline-flex;
-  gap: 4px;
+  align-items: stretch;
+  height: 22px;
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-xs);
+  overflow: hidden;
   flex-shrink: 0;
 }
 
@@ -540,21 +507,20 @@
 .entry-total-dur {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  height: 22px;
   padding: 0 8px;
-  font-family: var(--history-mono);
   font-size: 11px;
-  background: var(--bg-1);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-xs);
   font-variant-numeric: tabular-nums;
-  color: var(--fg-3);
 }
 
 .entry-active-dur {
   color: var(--fg-1);
   background: var(--bg-0);
+  border-right: 1px solid var(--border-1);
+}
+
+.entry-total-dur {
+  color: var(--fg-3);
+  background: var(--bg-1);
 }
 
 /* Hover-reveal delete button */

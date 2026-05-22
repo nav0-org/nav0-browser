@@ -34,16 +34,36 @@
   height: 32px;
   padding: 0 10px;
   border-radius: var(--r-xs);
+  border: 1px solid transparent;
   color: var(--fg-1);
   cursor: pointer;
-  transition: background-color var(--transition-fast);
+  position: relative;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
   user-select: none;
 }
 
+/* Hover/active matches the Settings sidebar active tab: white background,
+   hairline border, and a 2-px red anchor bar on the left. */
 #overlay-options-menu .dropdown-item:hover,
 #overlay-options-menu .has-submenu:hover > .dropdown-item,
 #overlay-options-menu .has-submenu.submenu-active > .dropdown-item {
-  background-color: var(--bg-2);
+  background-color: var(--bg-0);
+  border-color: var(--border-1);
+}
+
+#overlay-options-menu .dropdown-item:hover::before,
+#overlay-options-menu .has-submenu:hover > .dropdown-item::before,
+#overlay-options-menu .has-submenu.submenu-active > .dropdown-item::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: -1px;
+  bottom: -1px;
+  width: 2px;
+  background: var(--nav0-red-600);
+  border-radius: 1px;
 }
 
 #overlay-options-menu .dropdown-item > i {
@@ -165,13 +185,30 @@
   height: 32px;
   padding: 0 10px;
   border-radius: var(--r-xs);
+  border: 1px solid transparent;
   cursor: pointer;
-  transition: background-color var(--transition-fast);
+  position: relative;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .closed-tab-item:hover,
 .closed-window-item:hover {
-  background-color: var(--bg-2);
+  background-color: var(--bg-0);
+  border-color: var(--border-1);
+}
+
+.closed-tab-item:hover::before,
+.closed-window-item:hover::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: -1px;
+  bottom: -1px;
+  width: 2px;
+  background: var(--nav0-red-600);
+  border-radius: 1px;
 }
 
 .closed-tab-favicon {

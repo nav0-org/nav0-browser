@@ -457,6 +457,11 @@ export abstract class DownloadManager {
   }
 
   public static async removeAllRecords(appWindowId: string): Promise<boolean> {
+    // Cancel any in-flight downloads first so the renderer's progress ring
+    // clears via the existing DOWNLOAD_COMPLETED broadcast.
+    for (const downloadId of Array.from(this.downloadItems.keys())) {
+      this.cancelDownload(downloadId);
+    }
     const db = DatabaseManager.getDatabase(AppWindowManager.getWindowById(appWindowId).isPrivate);
     const stmt = db.prepare('DELETE FROM download;');
     await stmt.run();

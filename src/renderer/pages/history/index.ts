@@ -59,7 +59,6 @@ const searchInput = document.getElementById('search-input') as HTMLInputElement;
 const deleteAllBtn = document.getElementById('delete-all') as HTMLElement;
 const historyFooter = document.getElementById('history-footer') as HTMLElement;
 const noHistory = document.getElementById('no-history') as HTMLElement;
-const statsLabel = document.getElementById('history-stats') as HTMLElement;
 const heatmapContainer = document.getElementById('heatmap-container') as HTMLElement;
 const domainChartContainer = document.getElementById('domain-chart-container') as HTMLElement;
 const categoryContainer = document.getElementById('category-container') as HTMLElement;
@@ -165,19 +164,12 @@ function renderAll(): void {
   renderHistoryList();
   renderDomainChart();
   renderCategoryChart();
-  updateStats();
 
   const hasEntries = allEntries.length > 0;
   noHistory.style.display = hasEntries ? 'none' : 'block';
   // Empty string clears the inline style so the CSS rule (inline-flex) applies.
   deleteAllBtn.style.display = hasEntries ? '' : 'none';
   if (historyFooter) historyFooter.style.display = hasEntries ? 'block' : 'none';
-}
-
-function updateStats(): void {
-  const totalDomains = new Set(allEntries.map((e) => e.topLevelDomain)).size;
-  const totalActive = allEntries.reduce((a, e) => a + (e.activeDuration || 0), 0);
-  statsLabel.textContent = `${allEntries.length.toLocaleString()} pages \u00b7 ${totalDomains} sites \u00b7 ${FormatUtils.formatDuration(totalActive)} active`;
 }
 
 // --- Day grouping (flat, no sessions) ---
@@ -230,13 +222,7 @@ function renderHistoryList(): void {
       day: 'numeric',
     });
     const dayLabelText = daysAgo < 7 ? `${dg.label} · ${absoluteDate}` : absoluteDate;
-    const dayVisits = dg.entries.length;
-    const dayActive = dg.entries.reduce((a, e) => a + (e.activeDuration || 0), 0);
-    const dayActiveStr = dayActive > 0 ? ` · ${FormatUtils.formatDuration(dayActive)}` : '';
-    dateLabel.innerHTML = `
-      <span class="day-label">${dayLabelText}</span>
-      <span class="day-sub">${dayVisits} visit${dayVisits === 1 ? '' : 's'}${dayActiveStr}</span>
-    `;
+    dateLabel.innerHTML = `<span class="day-label">${dayLabelText}</span>`;
     historyList.appendChild(dateLabel);
 
     for (const entry of dg.entries) {
@@ -256,25 +242,27 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
     minute: '2-digit',
   });
   const faviconUrl = entry.faviconUrl || `https://${entry.topLevelDomain}/favicon.ico`;
-  const hasDuration = (entry.activeDuration || 0) > 0 || (entry.totalDuration || 0) > 0;
   const category = getCategoryForDomain(entry.topLevelDomain);
   const catColor = WEBSITE_CATEGORY_COLORS[category] || WEBSITE_CATEGORY_COLORS.other;
+  const catIcon = CATEGORY_ICONS[category] || CATEGORY_ICONS.other;
 
-  const durationHtml = hasDuration
-    ? `<div class="entry-duration">
-        <span class="entry-active-dur" title="active time">${FormatUtils.formatDuration(entry.activeDuration || 0)}</span>
-        <span class="entry-total-dur" title="total time">${FormatUtils.formatDuration(entry.totalDuration || 0)}</span>
-      </div>`
-    : '';
+  const activeStr =
+    (entry.activeDuration || 0) > 0 ? FormatUtils.formatDuration(entry.activeDuration || 0) : '0s';
+  const totalStr =
+    (entry.totalDuration || 0) > 0 ? FormatUtils.formatDuration(entry.totalDuration || 0) : '0s';
+  const durationHtml = `<div class="entry-duration" title="active · total">
+        <span class="entry-active-dur">${activeStr}</span>
+        <span class="entry-total-dur">${totalStr}</span>
+      </div>`;
 
   row.innerHTML = `
     <span class="entry-time">${time}</span>
-    <div class="entry-favicon"><img src="${faviconUrl}" width="14" height="14" onerror="this.parentElement.innerHTML='<i data-lucide=\\'globe\\' width=\\'14\\' height=\\'14\\'></i>'"></div>
+    <div class="entry-favicon"><img src="${faviconUrl}" width="18" height="18" onerror="this.parentElement.innerHTML='<i data-lucide=\\'globe\\' width=\\'18\\' height=\\'18\\'></i>'"></div>
     <div class="entry-content">
       <span class="entry-title" title="${escapeHtml(entry.title)}">${escapeHtml(entry.title)}</span>
       <span class="entry-domain">${escapeHtml(entry.topLevelDomain)}</span>
     </div>
-    <span class="entry-category-badge" style="background:${catColor}18;color:${catColor}">${category}</span>
+    <span class="entry-category-badge" style="background:${catColor}18;color:${catColor}"><i data-lucide="${catIcon}" width="12" height="12"></i>${category}</span>
     ${durationHtml}
     <button class="entry-delete-btn" title="Remove"><i data-lucide="x" width="14" height="14"></i></button>
   `;
@@ -290,7 +278,6 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
     row.remove();
     renderDomainChart();
     renderCategoryChart();
-    updateStats();
     if (allEntries.length === 0) {
       noHistory.style.display = 'block';
       deleteAllBtn.style.display = 'none';
@@ -319,9 +306,7 @@ function renderHeatmap(
   const weeks: DayCell[][] = [];
   let currentWeek: DayCell[] = [];
   let maxCount = 0;
-  let totalActive = 0;
   let totalPages = 0;
-  let activeDays = 0;
 
   interface MonthLabel {
     month: string;
@@ -335,9 +320,7 @@ function renderHeatmap(
     const dateStr = cursor.toISOString().split('T')[0];
     const data = dayMap.get(dateStr) || { count: 0, active: 0 };
     if (data.count > maxCount) maxCount = data.count;
-    totalActive += data.active;
     totalPages += data.count;
-    if (data.count > 0) activeDays++;
 
     const m = cursor.getMonth();
     if (m !== lastMonth) {
@@ -393,9 +376,9 @@ function renderHeatmap(
     lastLabelX = x;
   }
 
-  // Day labels — show all 7 days
+  // Day labels — right-aligned next to the cell grid.
   for (let i = 0; i < dayLabels.length; i++) {
-    svgContent += `<text x="0" y="${topPad + i * (cellSize + cellGap) + cellSize - 1}" font-size="8" fill="var(--text-secondary)">${dayLabels[i]}</text>`;
+    svgContent += `<text x="${dayLabelW - 6}" y="${topPad + i * (cellSize + cellGap) + cellSize - 1}" font-size="8" text-anchor="end" fill="var(--text-secondary)">${dayLabels[i]}</text>`;
   }
 
   // Cells
@@ -417,10 +400,6 @@ function renderHeatmap(
   heatmapContainer.innerHTML = `
     <div class="heatmap-header">
       <span class="heatmap-summary">${totalPages.toLocaleString()} pages visited in the last year</span>
-      <div class="heatmap-stats">
-        <span><span class="stat-value">${activeDays}</span> active days</span>
-        <span><span class="stat-value">${FormatUtils.formatDuration(totalActive)}</span> active time</span>
-      </div>
     </div>
     <div class="heatmap-scroll-area">
       <svg viewBox="0 0 ${svgW} ${svgH}" preserveAspectRatio="xMinYMid meet">${svgContent}</svg>

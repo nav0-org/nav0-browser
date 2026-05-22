@@ -400,7 +400,16 @@ export class BrowserTabManager {
   private handleBookmark(): void {
     const activeTab = this.getTabById(this.activeTabId);
     if (activeTab) {
-      if (activeTab.isBookmark && activeTab.bookmarkType === 'queue') {
+      // Internal pages (Nav0://new-tab, history, bookmarks, etc.) can't be
+      // bookmarked, so hide all three states.
+      const isInternal = (activeTab.url || '')
+        .toLowerCase()
+        .startsWith(InAppUrls.PREFIX.toLowerCase());
+      if (isInternal) {
+        this.bookmarkButton.style.display = 'none';
+        this.unbookmarkButton.style.display = 'none';
+        this.readinglistButton.style.display = 'none';
+      } else if (activeTab.isBookmark && activeTab.bookmarkType === 'queue') {
         // State 3: Reading list — show reading list button
         this.bookmarkButton.style.display = 'none';
         this.unbookmarkButton.style.display = 'none';

@@ -8,29 +8,47 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  background-color: var(--bg-1);
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 40px 20px;
   color: var(--fg-1);
 }
 
-.greeting {
+.new-tab-page {
+  min-height: 100vh;
+  color: var(--fg-2);
+}
+
+.new-tab-wrapper {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 48px 56px 80px;
+}
+
+/* ---- Editorial masthead --------------------------------- */
+.new-tab-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-2);
+}
+
+.new-tab-title {
   font-size: 48px;
   font-weight: 200;
-  margin-top: 40px;
-  margin-bottom: 40px;
   letter-spacing: -0.5px;
+  color: var(--fg-1);
+  margin: 0;
+  line-height: 1.2;
 }
 
 .bento-container {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
-  max-width: 800px;
   width: 100%;
+  margin-top: 28px;
 }
 
 .bento-item {

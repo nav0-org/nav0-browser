@@ -24,9 +24,10 @@
   --n0-text: var(--fg-1);
   --n0-text-2: var(--fg-3);
   --n0-text-3: var(--fg-4);
-  --n0-accent: var(--accent);
-  --n0-accent-dark: var(--accent-hover);
-  --n0-accent-light: rgba(37, 99, 235, 0.08);
+  /* Accent matches the tab-selector red used throughout the redesigned chrome. */
+  --n0-accent: var(--nav0-red-600);
+  --n0-accent-dark: var(--nav0-red-700);
+  --n0-accent-light: rgba(220, 38, 38, 0.08);
   --n0-accent-ring: rgba(0, 0, 0, 0.1);
   --n0-red: var(--danger);
   --n0-red-light: var(--danger-soft, #fdecea);
@@ -85,7 +86,6 @@
 }
 
 .sidebar-brand-tag {
-  font-family: var(--n0-mono);
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -224,7 +224,6 @@
 /* Footer — kept for the build status but tiny */
 .sidebar-footer {
   padding: 14px 8px 0;
-  font-family: var(--n0-mono);
   font-size: 11px;
   color: var(--n0-text-3);
   display: flex;
@@ -232,10 +231,6 @@
   align-items: center;
   border-top: 1px solid var(--border-1);
   margin-top: 14px;
-}
-
-.sidebar-version {
-  font-family: var(--n0-mono);
 }
 
 .sidebar-status {
@@ -444,7 +439,6 @@
 
 .sub-label {
   padding: 12px 16px 6px;
-  font-family: var(--n0-mono);
   font-size: 11px;
   color: var(--n0-text-2);
   font-weight: 600;
@@ -452,9 +446,8 @@
   letter-spacing: 0.5px;
 }
 
-/* Download path display — monospace because it's a path */
+/* Download path display */
 .setting-path-value {
-  font-family: var(--n0-mono);
   font-size: 12px;
   color: var(--n0-text);
   word-break: break-all;
@@ -864,9 +857,8 @@
   border-bottom: 0;
 }
 
-/* ====== USER AGENT — mono terminal block ================ */
+/* ====== USER AGENT — terminal block ===================== */
 .ua-preview-strip {
-  font-family: var(--n0-mono);
   font-size: 11.5px;
   color: var(--n0-text-2);
   background: var(--bg-1);
@@ -892,7 +884,6 @@
 }
 
 .ua-preview-value {
-  font-family: var(--n0-mono);
   font-size: 11.5px;
   color: var(--n0-text);
   margin: 0;
@@ -996,7 +987,6 @@
 }
 
 .shortcuts-table thead th {
-  font-family: var(--n0-mono);
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -1183,7 +1173,6 @@ kbd,
 }
 
 .permission-entry-label {
-  font-family: var(--n0-mono);
   font-size: 11px;
   color: var(--n0-text-2);
   text-transform: uppercase;

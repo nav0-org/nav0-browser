@@ -65,7 +65,6 @@ const typeFiltersContainer = document.getElementById('type-filters') as HTMLElem
 const storageBar = document.getElementById('storage-bar') as HTMLElement;
 const storageLegend = document.getElementById('storage-legend') as HTMLElement;
 const storageMeta = document.getElementById('storage-meta') as HTMLElement;
-const statsLabel = document.getElementById('downloads-stats') as HTMLElement;
 const noDownloads = document.getElementById('no-downloads') as HTMLElement;
 const deleteAllBtn = document.getElementById('delete-all') as HTMLElement;
 
@@ -429,12 +428,6 @@ const updateStorageGauge = (): void => {
   }
   storageMeta.innerHTML = metaParts.join('');
 
-  // Top-of-page stats line — small mono right rail.
-  statsLabel.textContent =
-    allLoadedItems.length === 0
-      ? 'nav0://downloads · empty · local'
-      : `nav0://downloads · ${allLoadedItems.length} ${fileWord} · ${totalStr} · local`;
-
   // Bar segments — per-type colour via TYPE_COLORS.
   storageBar.innerHTML = '';
   sortedTypes.forEach(([type, size]) => {
@@ -445,7 +438,7 @@ const updateStorageGauge = (): void => {
     storageBar.appendChild(segment);
   });
 
-  // Legend — colored swatch + label + mono size.
+  // Legend — colored swatch + label + size.
   storageLegend.innerHTML = '';
   sortedTypes.forEach(([type, size]) => {
     const item = document.createElement('div');
