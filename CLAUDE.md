@@ -253,6 +253,21 @@ There are 15 separate webpack entry points for different renderer windows/overla
 - Keep renderer code separate from main process code — communicate via IPC only
 - No inline styles — use CSS files in `src/renderer/styles/`
 
+## Design System
+
+**Before making any change to HTML, CSS, or DOM-building TypeScript under `src/renderer/**`, read [`DESIGN.md`](DESIGN.md).** It is the authoritative reference for design tokens, layout patterns, component classes, iconography (Lucide), motion, and the editorial dashboard skeleton used across built-in pages.
+
+Hard rules (full details in `DESIGN.md`):
+
+- **Tokens, not literals.** Always use CSS variables from `src/renderer/styles/global.css` — never hardcode colours, off-scale spacing (stick to `--spacing-xs/sm/md/lg/xl/xxl`), or off-scale radii (Nav0 caps at `--r-lg` = 6px; only `--r-full` for circles).
+- **Paper-flat, not glass.** Shadows come only from `--shadow-sm/md/lg` and the two `--shadow-focus*` halos. No coloured glows, no gradients on surfaces, no backdrop-blur "glass" outside the established command-palette pattern.
+- **Icons via Lucide only.** `<i data-lucide="<name>">` + `createIcons({ icons })`. No raw `<svg>` markup, no new icon libraries.
+- **Reuse `global.css` components.** `.btn`, `.btn-primary/secondary/ghost/link`, `.form-control`, `.card`, `.alert-*`, `.badge-*`, `.keycap`, flex/spacing/typography utilities — all pre-defined. Only fork into a page-local class when the design genuinely diverges.
+- **`--private-bg` is reserved** for the private-window chrome signal — never reuse for general danger/destructive affordances; use `--danger` instead.
+- **Honour `prefers-reduced-motion`** for any new animation.
+
+If a UI change introduces a new token, utility, or component, add it to `global.css` **and** document it in `DESIGN.md` in the same change. Drift between the two means the docs are wrong — fix them.
+
 ## Writing Blog Posts
 
 Blog posts live in `docs/blog/`. The sidebar and index are auto-generated from frontmatter.
