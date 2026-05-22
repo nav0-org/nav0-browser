@@ -641,6 +641,13 @@ export function init() {
         callback(data)
       );
     },
+    onTabNotificationChanged: (
+      callback: (data: { id: string; hasNotification: boolean }) => void
+    ) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.TAB_NOTIFICATION_CHANGED, (_event, data) =>
+        callback(data)
+      );
+    },
     onFullScreenChanged: (callback: (data: { isFullScreen: boolean }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.FULLSCREEN_CHANGED, (_event, data) =>
         callback(data)

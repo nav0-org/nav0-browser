@@ -379,6 +379,13 @@ export class BrowserTabManager {
       }
     });
 
+    // Tab notification indicator changed
+    window.BrowserAPI.onTabNotificationChanged(
+      (data: { id: string; hasNotification: boolean }) => {
+        this.getTabById(data.id)?.setNotificationIndicator(data.hasNotification);
+      }
+    );
+
     // Reader mode state changed
     window.BrowserAPI.onReaderModeStateChanged((data: { id: string; isActive: boolean }) => {
       const tab = this.getTabById(data.id);

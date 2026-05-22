@@ -23,6 +23,7 @@ export class Tab {
   public isReaderModeEligible = false;
   public isReaderModeActive = false;
   public isPinned = false;
+  public hasNotification = false;
   public sslStatus: 'secure' | 'insecure' | 'internal' = 'internal';
   public sslDetails: {
     issuer: string;
@@ -113,6 +114,13 @@ export class Tab {
     this.canGoForward = canGoForward;
     if (this.url.startsWith(InAppUrls.PREFIX)) {
       this.updateTabFavicon(ImageBase64Strings.FAVICON);
+    }
+  }
+
+  setNotificationIndicator(hasNotification: boolean): void {
+    this.hasNotification = hasNotification;
+    if (this.tabElement) {
+      this.tabElement.classList.toggle('has-notification', hasNotification);
     }
   }
 

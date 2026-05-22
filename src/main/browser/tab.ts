@@ -99,6 +99,7 @@ export class Tab {
       ) => void)
     | null = null;
   private isSuspended = false;
+  private hasUnreadNotification = false;
   private lastActivatedAt: Date = new Date();
   private pageStartTime: number | null = null;
   private activeTimeAccumulator = 0;
@@ -1041,6 +1042,35 @@ export class Tab {
 
   getId(): string {
     return this.id;
+  }
+
+  // Called when a Web Notification fires from this tab's webContents.
+  // Suppress the dot when the user is already looking at the tab — i.e.
+  // it's the active tab in a focused window.
+  markNotificationReceived(): void {
+    if (this._destroyed) return;
+    const window = this.parentAppWindow;
+    const bw = window?.getBrowserWindowInstance();
+    const isUserViewing =
+      window?.getActiveTab()?.getId() === this.id && bw?.isFocused() === true;
+    if (isUserViewing) return;
+    if (this.hasUnreadNotification) return;
+    this.hasUnreadNotification = true;
+    bw?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_NOTIFICATION_CHANGED, {
+      id: this.id,
+      hasNotification: true,
+    });
+  }
+
+  clearNotificationIndicator(): void {
+    if (!this.hasUnreadNotification) return;
+    this.hasUnreadNotification = false;
+    this.parentAppWindow
+      ?.getBrowserWindowInstance()
+      ?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_NOTIFICATION_CHANGED, {
+        id: this.id,
+        hasNotification: false,
+      });
   }
 
   getUrl(): string {

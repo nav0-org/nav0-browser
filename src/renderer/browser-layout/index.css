@@ -190,6 +190,27 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
   }
 }
 
+.tab-notification-dot {
+  display: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--primary-color, #2563eb);
+  box-shadow: 0 0 0 2px var(--bg-light, #fff);
+  position: absolute;
+  top: 4px;
+  left: 16px;
+  pointer-events: none;
+}
+
+.tab.has-notification .tab-notification-dot {
+  display: block;
+}
+
+.tab.pinned .tab-notification-dot {
+  left: 22px;
+}
+
 .tab-title {
   white-space: nowrap;
   overflow: hidden;

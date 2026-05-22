@@ -92,6 +92,15 @@ export abstract class AppWindowManager {
           }
           window.activateTab(tabId);
         }
+      },
+      (webContentsId: number) => {
+        for (const window of AppWindowManager.windows.values()) {
+          const tab = window.findTabByWebContentsId(webContentsId);
+          if (tab) {
+            tab.markNotificationReceived();
+            return;
+          }
+        }
       }
     );
     const stored = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as

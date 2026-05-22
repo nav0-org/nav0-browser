@@ -14,6 +14,8 @@ type FindTabCallback = (webContentsId: number) => {
 
 type FocusTabCallback = (appWindowId: string, tabId: string) => void;
 
+type NotifyShownCallback = (webContentsId: number) => void;
+
 interface ActiveNotification {
   notification: ElectronNotification;
   webContentsId: number;
@@ -26,14 +28,20 @@ export class NotificationManager {
   private static tagMap = new Map<string, string>(); // "origin::tag" → notification id
   private static findTabCallback: FindTabCallback | null = null;
   private static focusTabCallback: FocusTabCallback | null = null;
+  private static notifyShownCallback: NotifyShownCallback | null = null;
 
   static init(): void {
     NotificationManager.initIPCListeners();
   }
 
-  static setCallbacks(findTab: FindTabCallback, focusTab: FocusTabCallback): void {
+  static setCallbacks(
+    findTab: FindTabCallback,
+    focusTab: FocusTabCallback,
+    notifyShown?: NotifyShownCallback
+  ): void {
     NotificationManager.findTabCallback = findTab;
     NotificationManager.focusTabCallback = focusTab;
+    NotificationManager.notifyShownCallback = notifyShown ?? null;
   }
 
   private static getOriginFromWebContents(wc: Electron.WebContents): string {
@@ -169,6 +177,7 @@ export class NotificationManager {
 
           notification.on('show', () => {
             NotificationManager.sendEvent(webContentsId, notifId, 'show');
+            NotificationManager.notifyShownCallback?.(webContentsId);
           });
 
           notification.on('click', () => {

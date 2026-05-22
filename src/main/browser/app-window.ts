@@ -139,6 +139,12 @@ export class AppWindow {
       DownloadManager.pauseAllDownloads();
     });
 
+    // Clear the unread notification dot on the active tab when the window
+    // regains focus — by then the user has seen it.
+    this.browserWindowInstance.on('focus', () => {
+      this.getActiveTab()?.clearNotificationIndicator();
+    });
+
     this.browserWindowInstance.on('closed', () => {
       // Resolve any outstanding dialogs / auth prompts so awaiting callers don't hang
       for (const [, resolve] of this.pendingDialogs) resolve({ confirmed: false });
@@ -491,6 +497,7 @@ export class AppWindow {
       }
       tab.updateLastActivatedAt();
       tab.resumeActiveTime();
+      tab.clearNotificationIndicator();
 
       // Restore per-tab strip state for the new tab BEFORE calculating offset
       const findState = this.findInPageState.get(id);

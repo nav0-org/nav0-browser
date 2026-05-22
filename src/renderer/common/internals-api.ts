@@ -262,6 +262,9 @@ declare global {
       onTabLoadingChanged: (callback: (data: { id: string; isLoading: boolean }) => void) => void;
       onTabPinned: (callback: (data: { id: string }) => void) => void;
       onTabUnpinned: (callback: (data: { id: string }) => void) => void;
+      onTabNotificationChanged: (
+        callback: (data: { id: string; hasNotification: boolean }) => void
+      ) => void;
       onFullScreenChanged: (callback: (data: { isFullScreen: boolean }) => void) => void;
       onFocusUrlBar: (callback: () => void) => void;
       // Permission system
