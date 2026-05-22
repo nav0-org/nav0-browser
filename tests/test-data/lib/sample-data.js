@@ -1,0 +1,582 @@
+'use strict';
+
+/**
+ * Realistic sample data shared by the test-data scripts.
+ *
+ * Sites are real and reachable so the seeded state looks plausible when
+ * surfaced in the browser UI (favicons resolve, suggestions match).
+ */
+
+const BOOKMARKS = [
+  // Dev — most likely to be in the reference list
+  { title: 'GitHub', url: 'https://github.com/', category: 'dev', type: 'reference' },
+  {
+    title: 'Stack Overflow',
+    url: 'https://stackoverflow.com/',
+    category: 'dev',
+    type: 'reference',
+  },
+  {
+    title: 'MDN Web Docs',
+    url: 'https://developer.mozilla.org/',
+    category: 'dev',
+    type: 'reference',
+  },
+  { title: 'npm', url: 'https://www.npmjs.com/', category: 'dev', type: 'reference' },
+  { title: 'Can I use…', url: 'https://caniuse.com/', category: 'dev', type: 'reference' },
+  { title: 'DevDocs', url: 'https://devdocs.io/', category: 'dev', type: 'reference' },
+  { title: 'GitLab', url: 'https://gitlab.com/', category: 'dev', type: 'reference' },
+  {
+    title: 'Electron Docs',
+    url: 'https://www.electronjs.org/docs/latest',
+    category: 'dev',
+    type: 'reference',
+  },
+  {
+    title: 'TypeScript Handbook',
+    url: 'https://www.typescriptlang.org/docs/',
+    category: 'dev',
+    type: 'reference',
+  },
+  { title: 'Node.js Docs', url: 'https://nodejs.org/docs/', category: 'dev', type: 'reference' },
+  { title: 'Regex101', url: 'https://regex101.com/', category: 'tools', type: 'reference' },
+  { title: 'JSON Crack', url: 'https://jsoncrack.com/', category: 'tools', type: 'reference' },
+  // News
+  {
+    title: 'Hacker News',
+    url: 'https://news.ycombinator.com/',
+    category: 'news',
+    type: 'reference',
+  },
+  { title: 'Lobste.rs', url: 'https://lobste.rs/', category: 'news', type: 'reference' },
+  { title: 'Ars Technica', url: 'https://arstechnica.com/', category: 'news', type: 'reference' },
+  { title: 'The Verge', url: 'https://www.theverge.com/', category: 'news', type: 'reference' },
+  { title: 'BBC News', url: 'https://www.bbc.com/news', category: 'news', type: 'reference' },
+  {
+    title: 'The Guardian',
+    url: 'https://www.theguardian.com/',
+    category: 'news',
+    type: 'reference',
+  },
+  {
+    title: 'NYT',
+    url: 'https://www.nytimes.com/',
+    category: 'news',
+    type: 'reference',
+  },
+  // Social / community
+  { title: 'Reddit', url: 'https://www.reddit.com/', category: 'social', type: 'reference' },
+  {
+    title: 'r/programming',
+    url: 'https://www.reddit.com/r/programming/',
+    category: 'social',
+    type: 'queue',
+  },
+  { title: 'Mastodon', url: 'https://mastodon.social/', category: 'social', type: 'reference' },
+  { title: 'Bluesky', url: 'https://bsky.app/', category: 'social', type: 'reference' },
+  { title: 'LinkedIn', url: 'https://www.linkedin.com/', category: 'social', type: 'reference' },
+  // Productivity
+  { title: 'Notion', url: 'https://www.notion.so/', category: 'productivity', type: 'reference' },
+  { title: 'Linear', url: 'https://linear.app/', category: 'productivity', type: 'reference' },
+  { title: 'Figma', url: 'https://www.figma.com/', category: 'design', type: 'reference' },
+  { title: 'Slack', url: 'https://slack.com/', category: 'productivity', type: 'reference' },
+  { title: 'Trello', url: 'https://trello.com/', category: 'productivity', type: 'reference' },
+  {
+    title: 'Google Calendar',
+    url: 'https://calendar.google.com/',
+    category: 'productivity',
+    type: 'reference',
+  },
+  {
+    title: 'Google Docs',
+    url: 'https://docs.google.com/',
+    category: 'productivity',
+    type: 'reference',
+  },
+  // Reference
+  {
+    title: 'Wikipedia',
+    url: 'https://en.wikipedia.org/wiki/Main_Page',
+    category: 'reference',
+    type: 'reference',
+  },
+  {
+    title: 'Internet Archive',
+    url: 'https://archive.org/',
+    category: 'reference',
+    type: 'reference',
+  },
+  // Privacy / security
+  { title: 'EFF', url: 'https://www.eff.org/', category: 'reference', type: 'reference' },
+  { title: 'Mozilla', url: 'https://www.mozilla.org/', category: 'reference', type: 'reference' },
+  {
+    title: 'Tor Project',
+    url: 'https://www.torproject.org/',
+    category: 'reference',
+    type: 'reference',
+  },
+  // Read-later queue items
+  {
+    title: 'Designing Data-Intensive Applications — chapter notes',
+    url: 'https://martin.kleppmann.com/2017/03/27/designing-data-intensive-applications.html',
+    category: 'dev',
+    type: 'queue',
+  },
+  {
+    title: 'How CPython compiles f-strings',
+    url: 'https://peps.python.org/pep-0701/',
+    category: 'dev',
+    type: 'queue',
+  },
+  {
+    title: 'Local-first software: You own your data',
+    url: 'https://www.inkandswitch.com/local-first/',
+    category: 'dev',
+    type: 'queue',
+  },
+  {
+    title: 'A philosophy of software design — talk',
+    url: 'https://www.youtube.com/watch?v=bmSAYlu0NcY',
+    category: 'media',
+    type: 'queue',
+  },
+  {
+    title: 'SQLite the only database you will ever need',
+    url: 'https://www.epicweb.dev/why-you-should-probably-be-using-sqlite',
+    category: 'dev',
+    type: 'queue',
+  },
+  {
+    title: 'Awesome Electron',
+    url: 'https://github.com/sindresorhus/awesome-electron',
+    category: 'dev',
+    type: 'queue',
+  },
+  {
+    title: 'Why I still self-host my email',
+    url: 'https://cfenollosa.com/blog/after-self-hosting-my-email-for-twenty-three-years-i-have-thrown-in-the-towel-the-oligopoly-has-won.html',
+    category: 'news',
+    type: 'queue',
+  },
+  // Reading queue
+  {
+    title: 'The Twelve-Factor App',
+    url: 'https://12factor.net/',
+    category: 'dev',
+    type: 'queue',
+  },
+  {
+    title: 'Refactoring Guru — Design Patterns',
+    url: 'https://refactoring.guru/design-patterns',
+    category: 'dev',
+    type: 'queue',
+  },
+];
+
+// Used for history "search-style" entries to make the data feel real.
+const SEARCH_QUERIES = [
+  'electron webcontentsview tab',
+  'better-sqlite3 transaction batch insert',
+  'typescript narrow union by discriminant',
+  'css grid auto-fit minmax',
+  'cors preflight cache',
+  'sqlite wal checkpoint',
+  'service worker fetch cache strategy',
+  'rust ownership move vs borrow',
+  'react useeffect dependency array eslint',
+  'docker compose env_file precedence',
+  'aws s3 presigned url expiry',
+  'postgres rls policy example',
+  'macos launchd vs launchagents',
+  'youtube embed nocookie',
+  'eslint rule no-unused-vars typescript',
+  'git rebase onto root',
+  'unicode normalization nfc nfd',
+  'ipfs vs http archive',
+  'why is curl so fast',
+  'tailwind dark mode class strategy',
+];
+
+const HISTORY_DOMAINS = [
+  // Each entry is a base URL plus a few realistic paths.
+  {
+    title: 'GitHub',
+    base: 'https://github.com',
+    paths: [
+      '/',
+      '/explore',
+      '/trending',
+      '/nav0-org/nav0-browser',
+      '/nav0-org/nav0-browser/pulls',
+      '/nav0-org/nav0-browser/actions',
+      '/electron/electron',
+      '/electron/electron/issues',
+      '/microsoft/TypeScript',
+      '/sindresorhus/awesome',
+    ],
+  },
+  {
+    title: 'Stack Overflow',
+    base: 'https://stackoverflow.com',
+    paths: [
+      '/',
+      '/questions',
+      '/questions/tagged/electron',
+      '/questions/tagged/typescript',
+      '/questions/tagged/better-sqlite3',
+      '/questions/tagged/node.js',
+    ],
+  },
+  {
+    title: 'MDN Web Docs',
+    base: 'https://developer.mozilla.org',
+    paths: [
+      '/en-US/',
+      '/en-US/docs/Web/JavaScript',
+      '/en-US/docs/Web/API/fetch',
+      '/en-US/docs/Web/CSS/grid',
+      '/en-US/docs/Web/HTTP/Headers',
+      '/en-US/docs/Web/API/IndexedDB_API',
+    ],
+  },
+  {
+    title: 'Hacker News',
+    base: 'https://news.ycombinator.com',
+    paths: ['/', '/news', '/newest', '/show', '/ask'],
+  },
+  {
+    title: 'Reddit',
+    base: 'https://www.reddit.com',
+    paths: [
+      '/',
+      '/r/programming/',
+      '/r/electronjs/',
+      '/r/typescript/',
+      '/r/privacy/',
+      '/r/sysadmin/',
+    ],
+  },
+  {
+    title: 'Wikipedia',
+    base: 'https://en.wikipedia.org',
+    paths: [
+      '/wiki/Main_Page',
+      '/wiki/Electron_(software_framework)',
+      '/wiki/SQLite',
+      '/wiki/TypeScript',
+      '/wiki/Web_browser',
+      '/wiki/HTTP/2',
+      '/wiki/Tor_(anonymity_network)',
+    ],
+  },
+  {
+    title: 'YouTube',
+    base: 'https://www.youtube.com',
+    paths: ['/', '/feed/subscriptions', '/results?search_query=electron+ipc', '/feed/trending'],
+  },
+  {
+    title: 'DuckDuckGo',
+    base: 'https://duckduckgo.com',
+    paths: SEARCH_QUERIES.map((q) => '/?q=' + encodeURIComponent(q)),
+  },
+  {
+    title: 'npm',
+    base: 'https://www.npmjs.com',
+    paths: [
+      '/',
+      '/package/better-sqlite3',
+      '/package/electron',
+      '/package/typescript',
+      '/package/uuid',
+      '/package/lucide',
+    ],
+  },
+  {
+    title: 'BBC News',
+    base: 'https://www.bbc.com',
+    paths: ['/news', '/news/technology', '/news/world', '/news/business'],
+  },
+  {
+    title: 'The Verge',
+    base: 'https://www.theverge.com',
+    paths: ['/', '/tech', '/reviews', '/24/12/1/example-article'],
+  },
+  {
+    title: 'Notion',
+    base: 'https://www.notion.so',
+    paths: ['/', '/product', '/help'],
+  },
+  {
+    title: 'Linear',
+    base: 'https://linear.app',
+    paths: ['/', '/method', '/changelog'],
+  },
+  {
+    title: 'Figma',
+    base: 'https://www.figma.com',
+    paths: ['/', '/files', '/community'],
+  },
+  {
+    title: 'Google',
+    base: 'https://www.google.com',
+    paths: SEARCH_QUERIES.slice(0, 10).map((q) => '/search?q=' + encodeURIComponent(q)),
+  },
+  {
+    title: 'lobste.rs',
+    base: 'https://lobste.rs',
+    paths: ['/', '/recent', '/active', '/comments'],
+  },
+];
+
+const DOWNLOAD_TEMPLATES = [
+  {
+    fileName: 'designing-data-intensive-applications-notes.pdf',
+    url: 'https://example.com/papers/designing-data-intensive-applications-notes.pdf',
+    fileType: 'document',
+    fileExtension: 'pdf',
+    fileSize: 4_812_344,
+  },
+  {
+    fileName: 'invoice-2026-04.pdf',
+    url: 'https://billing.example.com/invoices/2026-04.pdf',
+    fileType: 'document',
+    fileExtension: 'pdf',
+    fileSize: 128_400,
+  },
+  {
+    fileName: 'meeting-notes-q1-review.docx',
+    url: 'https://files.example.com/notes/q1-review.docx',
+    fileType: 'document',
+    fileExtension: 'docx',
+    fileSize: 56_320,
+  },
+  {
+    fileName: 'product-roadmap.pdf',
+    url: 'https://example.com/roadmap.pdf',
+    fileType: 'document',
+    fileExtension: 'pdf',
+    fileSize: 1_204_733,
+  },
+  {
+    fileName: 'lighthouse-report-nav0.html',
+    url: 'https://example.com/reports/lighthouse-report-nav0.html',
+    fileType: 'document',
+    fileExtension: 'html',
+    fileSize: 312_456,
+  },
+  {
+    fileName: 'screenshot-dashboard.png',
+    url: 'https://example.com/screens/dashboard.png',
+    fileType: 'image',
+    fileExtension: 'png',
+    fileSize: 842_120,
+  },
+  {
+    fileName: 'wallpaper-4k-mountains.jpg',
+    url: 'https://images.example.com/wallpapers/4k-mountains.jpg',
+    fileType: 'image',
+    fileExtension: 'jpg',
+    fileSize: 5_120_000,
+  },
+  {
+    fileName: 'logo-redesign-v3.svg',
+    url: 'https://design.example.com/logo-redesign-v3.svg',
+    fileType: 'image',
+    fileExtension: 'svg',
+    fileSize: 12_338,
+  },
+  {
+    fileName: 'demo-video-final.mp4',
+    url: 'https://media.example.com/demo-video-final.mp4',
+    fileType: 'video',
+    fileExtension: 'mp4',
+    fileSize: 184_320_000,
+  },
+  {
+    fileName: 'product-walkthrough.mov',
+    url: 'https://media.example.com/product-walkthrough.mov',
+    fileType: 'video',
+    fileExtension: 'mov',
+    fileSize: 612_320_000,
+  },
+  {
+    fileName: 'podcast-episode-42.mp3',
+    url: 'https://podcast.example.com/episodes/42.mp3',
+    fileType: 'audio',
+    fileExtension: 'mp3',
+    fileSize: 28_344_000,
+  },
+  {
+    fileName: 'node-v22.13.0-linux-x64.tar.xz',
+    url: 'https://nodejs.org/dist/v22.13.0/node-v22.13.0-linux-x64.tar.xz',
+    fileType: 'archive',
+    fileExtension: 'xz',
+    fileSize: 25_734_000,
+  },
+  {
+    fileName: 'sqlite-amalgamation-3450200.zip',
+    url: 'https://www.sqlite.org/2024/sqlite-amalgamation-3450200.zip',
+    fileType: 'archive',
+    fileExtension: 'zip',
+    fileSize: 3_341_220,
+  },
+  {
+    fileName: 'electron-v35.2.1-linux-x64.zip',
+    url: 'https://github.com/electron/electron/releases/download/v35.2.1/electron-v35.2.1-linux-x64.zip',
+    fileType: 'archive',
+    fileExtension: 'zip',
+    fileSize: 102_345_678,
+  },
+  {
+    fileName: 'data-export.csv',
+    url: 'https://example.com/data-export.csv',
+    fileType: 'document',
+    fileExtension: 'csv',
+    fileSize: 4_812_009,
+  },
+  {
+    fileName: 'backup-2026-03-01.sql.gz',
+    url: 'https://backups.example.com/backup-2026-03-01.sql.gz',
+    fileType: 'archive',
+    fileExtension: 'gz',
+    fileSize: 73_811_000,
+  },
+  {
+    fileName: 'Nav0-0.2.9-arm64.dmg',
+    url: 'https://nav0.org/downloads/Nav0-0.2.9-arm64.dmg',
+    fileType: 'executable',
+    fileExtension: 'dmg',
+    fileSize: 142_320_000,
+  },
+  {
+    fileName: 'firefox-123.0.tar.bz2',
+    url: 'https://archive.mozilla.org/pub/firefox/releases/123.0/firefox-123.0.tar.bz2',
+    fileType: 'archive',
+    fileExtension: 'bz2',
+    fileSize: 78_902_000,
+  },
+  {
+    fileName: 'tailscale_1.62.1_amd64.deb',
+    url: 'https://pkgs.tailscale.com/stable/ubuntu/jammy/main/binary-amd64/tailscale_1.62.1_amd64.deb',
+    fileType: 'executable',
+    fileExtension: 'deb',
+    fileSize: 27_330_000,
+  },
+  {
+    fileName: 'paper-distributed-systems.pdf',
+    url: 'https://example.com/papers/distributed-systems.pdf',
+    fileType: 'document',
+    fileExtension: 'pdf',
+    fileSize: 1_842_001,
+  },
+  {
+    fileName: 'expense-report-march.xlsx',
+    url: 'https://files.example.com/expense-report-march.xlsx',
+    fileType: 'document',
+    fileExtension: 'xlsx',
+    fileSize: 73_400,
+  },
+  {
+    fileName: 'team-photo.heic',
+    url: 'https://images.example.com/team-photo.heic',
+    fileType: 'image',
+    fileExtension: 'heic',
+    fileSize: 2_034_120,
+  },
+  {
+    fileName: 'reading-list-export.json',
+    url: 'https://example.com/exports/reading-list.json',
+    fileType: 'document',
+    fileExtension: 'json',
+    fileSize: 24_002,
+  },
+  {
+    fileName: 'recording-2026-02-14.webm',
+    url: 'https://media.example.com/recording-2026-02-14.webm',
+    fileType: 'video',
+    fileExtension: 'webm',
+    fileSize: 92_004_000,
+  },
+  {
+    fileName: 'rfc9110.txt',
+    url: 'https://www.rfc-editor.org/rfc/rfc9110.txt',
+    fileType: 'document',
+    fileExtension: 'txt',
+    fileSize: 521_000,
+  },
+];
+
+/**
+ * Pre-baked window/tab layouts for "open my usual session" — three windows
+ * covering work / reading / personal, ~24-28 tabs total.
+ */
+const SESSION_LAYOUTS = {
+  workReadingPersonal: [
+    {
+      label: 'Work',
+      tabs: [
+        {
+          title: 'nav0-browser — Pull requests',
+          url: 'https://github.com/nav0-org/nav0-browser/pulls',
+        },
+        { title: 'nav0-browser — Issues', url: 'https://github.com/nav0-org/nav0-browser/issues' },
+        {
+          title: 'nav0-browser — Actions',
+          url: 'https://github.com/nav0-org/nav0-browser/actions',
+        },
+        { title: 'Linear — Inbox', url: 'https://linear.app/' },
+        { title: 'Notion — Engineering wiki', url: 'https://www.notion.so/' },
+        { title: 'Slack', url: 'https://app.slack.com/client/' },
+        { title: 'Google Calendar', url: 'https://calendar.google.com/' },
+        { title: 'Figma', url: 'https://www.figma.com/files' },
+        {
+          title: 'Electron — WebContentsView',
+          url: 'https://www.electronjs.org/docs/latest/api/web-contents-view',
+        },
+        {
+          title: 'better-sqlite3 — API',
+          url: 'https://github.com/WiseLibs/better-sqlite3/blob/master/docs/api.md',
+        },
+      ],
+    },
+    {
+      label: 'Reading',
+      tabs: [
+        { title: 'Hacker News', url: 'https://news.ycombinator.com/' },
+        { title: 'Lobste.rs', url: 'https://lobste.rs/' },
+        { title: 'r/programming', url: 'https://www.reddit.com/r/programming/' },
+        { title: 'Ars Technica', url: 'https://arstechnica.com/' },
+        { title: 'The Verge — Tech', url: 'https://www.theverge.com/tech' },
+        { title: 'Local-first software', url: 'https://www.inkandswitch.com/local-first/' },
+        {
+          title: 'Designing Data-Intensive Applications — notes',
+          url: 'https://martin.kleppmann.com/2017/03/27/designing-data-intensive-applications.html',
+        },
+        { title: 'Twelve-Factor App', url: 'https://12factor.net/' },
+        { title: 'CSS Grid — MDN', url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/grid' },
+      ],
+    },
+    {
+      label: 'Personal',
+      tabs: [
+        { title: 'BBC News', url: 'https://www.bbc.com/news' },
+        { title: 'Wikipedia — Web browser', url: 'https://en.wikipedia.org/wiki/Web_browser' },
+        { title: 'YouTube', url: 'https://www.youtube.com/' },
+        { title: 'r/electronjs', url: 'https://www.reddit.com/r/electronjs/' },
+        { title: 'Mastodon', url: 'https://mastodon.social/' },
+        { title: 'Bluesky', url: 'https://bsky.app/' },
+        { title: 'DuckDuckGo', url: 'https://duckduckgo.com/' },
+        { title: 'Internet Archive', url: 'https://archive.org/' },
+        { title: 'Nav0 — releases', url: 'https://nav0.org/releases/' },
+      ],
+    },
+  ],
+};
+
+module.exports = {
+  BOOKMARKS,
+  SEARCH_QUERIES,
+  HISTORY_DOMAINS,
+  DOWNLOAD_TEMPLATES,
+  SESSION_LAYOUTS,
+};

@@ -17,6 +17,8 @@
     "format:check": "prettier --check .",
     "test:perf": "node tests/performance/browser-perf-test.js",
     "test:data": "node tests/performance/data-consumption-test.js",
+    "seed:data": "node tests/test-data/seed-database.js",
+    "seed:session": "node tests/test-data/seed-session.js",
     "postinstall": "electron-rebuild -f -w better-sqlite3",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
     "prepare": "husky"
