@@ -67,35 +67,6 @@
   overflow-y: auto;
 }
 
-/* Brand — small lockup at the top of the rail (the prototype starts
-   with search; Nav0 keeps the brand for identity). */
-.sidebar-brand {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 8px 14px;
-  border-bottom: none;
-}
-
-.sidebar-brand-name {
-  font-family: var(--n0-sans);
-  font-size: 22px;
-  font-weight: 200;
-  letter-spacing: -0.5px;
-  color: var(--n0-text);
-}
-
-.sidebar-brand-tag {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--n0-text-2);
-  padding: 0;
-  border: 0;
-  background: transparent;
-  border-radius: 0;
-}
-
 /* Search */
 .sidebar-search {
   position: relative;
@@ -290,15 +261,6 @@
   color: var(--n0-text);
   margin: 0;
   line-height: 1.2;
-}
-
-.page-subtitle {
-  font-family: var(--n0-sans);
-  font-size: 16px;
-  color: var(--n0-text-2);
-  margin: 6px 0 0;
-  max-width: 540px;
-  line-height: 1.5;
 }
 
 /* Legacy alias for some sections */
