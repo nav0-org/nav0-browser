@@ -250,7 +250,7 @@
   flex-wrap: wrap;
   margin-bottom: 22px;
   padding-bottom: 18px;
-  border-bottom: 1px solid var(--border-1);
+  border-bottom: 1px solid var(--nav0-red-600);
 }
 
 .page-title {
