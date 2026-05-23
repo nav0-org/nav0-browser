@@ -18,12 +18,23 @@
 
         <div class="bento-container">
           <div class="search-item">
-            <input
-              type="text"
-              id="search-bar"
-              class="search-bar"
-              placeholder="Enter a search term or a URL"
-            />
+            <div class="search-shell">
+              <i data-lucide="search" class="search-shell-icon" width="18" height="18"></i>
+              <input
+                type="text"
+                id="search-bar"
+                class="search-bar"
+                placeholder="Search tabs, bookmarks, history, downloads or the web…"
+                autocomplete="off"
+                spellcheck="false"
+              />
+            </div>
+            <div class="search-results" id="search-results" hidden>
+              <div class="search-results-list" id="search-results-list"></div>
+              <div class="search-results-empty" id="search-results-empty" hidden>
+                Type to search your tabs, bookmarks, history, and downloads
+              </div>
+            </div>
           </div>
         </div>
 

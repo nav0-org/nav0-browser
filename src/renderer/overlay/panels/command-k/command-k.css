@@ -219,15 +219,6 @@
   height: 14px;
 }
 
-#overlay-command-k .keyboard-shortcut {
-  display: flex;
-  align-items: center;
-  color: var(--fg-4);
-  font-size: var(--font-xs);
-  min-width: 30px;
-  justify-content: flex-end;
-}
-
 /* No results state */
 #overlay-command-k .no-results {
   padding: 24px;
