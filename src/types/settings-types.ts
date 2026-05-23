@@ -400,7 +400,10 @@ export const DEFAULT_BROWSER_SETTINGS: BrowserSettings = {
   // Privacy - Ad Blocker (on by default)
   adBlockerEnabled: true,
   adBlockerFilterLists: [...DEFAULT_FILTER_LISTS],
-  adBlockerAllowedSites: [],
+  // Sites pre-exempted from ad blocking because their bot-detection (DataDome,
+  // PerimeterX, Akamai) flags the early script's prototype patches on
+  // document.createElement / HTMLMediaElement.play and blocks the page.
+  adBlockerAllowedSites: ['klook.com', 'tripadvisor.com'],
 
   // Network - Proxy (direct by default)
   proxyMode: 'direct',
