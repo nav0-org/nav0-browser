@@ -77,11 +77,7 @@ export function init() {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.HARD_RELOAD, appWindowId, tabId);
     },
     stopLoadingTab: async (appWindowId: string, tabId: string) => {
-      return ipcRenderer.invoke(
-        RendererToMainEventsForBrowserIPC.STOP_LOADING,
-        appWindowId,
-        tabId
-      );
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.STOP_LOADING, appWindowId, tabId);
     },
     addBookmark: async (
       appWindowId: string,
@@ -235,6 +231,13 @@ export function init() {
         searchTerm,
         limit,
         offset
+      );
+    },
+    fetchTopSites: async (appWindowId: string, limit?: number) => {
+      return ipcRenderer.invoke(
+        RendererToMainEventsForBrowserIPC.FETCH_TOP_SITES,
+        appWindowId,
+        limit
       );
     },
     fetchBrowsingHistoryStats: async (appWindowId: string) => {

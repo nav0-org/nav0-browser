@@ -119,30 +119,10 @@ function getTimeBasedGreeting(): string {
   return bucket.phrases[Math.floor(Math.random() * bucket.phrases.length)];
 }
 
-const BACKGROUND_GRADIENTS: string[] = [
-  'linear-gradient(135deg, #e7e4e2 0%, #e7e5e6 50%, #e5e5e7 100%)',
-  'linear-gradient(135deg, #e8e6e2 0%, #e7e5e6 50%, #e6e4e7 100%)',
-  'linear-gradient(135deg, #e4e6e8 0%, #e7e5e8 100%)',
-  'linear-gradient(135deg, #e6e7e3 0%, #e4e7e8 100%)',
-  'linear-gradient(135deg, #e8e7e1 0%, #e7e5e6 100%)',
-  'linear-gradient(135deg, #e4e7e9 0%, #e6e5e8 100%)',
-  'linear-gradient(135deg, #e7e5e6 0%, #e8e6e2 100%)',
-  'linear-gradient(135deg, #e7e5e8 0%, #e5e5e7 50%, #e4e7e8 100%)',
-  'linear-gradient(135deg, #e8e6e4 0%, #e5e6e9 100%)',
-  'linear-gradient(135deg, #e8e7e1 0%, #e7e5e8 100%)',
-];
-
-function pickRandomBackground(): string {
-  return BACKGROUND_GRADIENTS[Math.floor(Math.random() * BACKGROUND_GRADIENTS.length)];
-}
-
 const greetingEl = document.getElementById('greeting');
 if (greetingEl) {
   greetingEl.textContent = getTimeBasedGreeting();
 }
-
-document.body.style.backgroundImage = pickRandomBackground();
-document.body.style.backgroundAttachment = 'fixed';
 
 // Handle search input
 const searchBar = document.getElementById('search-bar') as HTMLInputElement;
@@ -160,3 +140,135 @@ if (searchBar) {
     searchBar.focus();
   });
 }
+
+// ---------------------------------------------------------------------------
+// Bookmarks + Frequently visited tile rows
+// ---------------------------------------------------------------------------
+
+const TILE_LIMIT = 8;
+
+function escapeAttr(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function escapeText(value: string): string {
+  const div = document.createElement('div');
+  div.textContent = value;
+  return div.innerHTML;
+}
+
+function deriveDomain(rawUrl: string): string {
+  try {
+    return new URL(rawUrl).hostname.replace(/^www\./, '');
+  } catch {
+    return rawUrl;
+  }
+}
+
+function deriveTitle(rawTitle: string, url: string): string {
+  if (rawTitle && rawTitle.trim()) return rawTitle.trim();
+  return deriveDomain(url);
+}
+
+function buildFaviconFallback(url: string): string {
+  try {
+    const u = new URL(url);
+    return `${u.protocol}//${u.host}/favicon.ico`;
+  } catch {
+    return '';
+  }
+}
+
+function renderTile(item: {
+  url: string;
+  title: string;
+  faviconUrl?: string;
+  visits?: number;
+}): string {
+  const domain = deriveDomain(item.url);
+  const title = deriveTitle(item.title, item.url);
+  const favicon = item.faviconUrl || buildFaviconFallback(item.url);
+  const safeUrl = escapeAttr(item.url);
+  const safeFavicon = escapeAttr(favicon);
+  return `
+    <a class="tile" href="${safeUrl}" data-url="${safeUrl}" title="${escapeAttr(title)}">
+      <span class="tile-icon">
+        ${
+          safeFavicon
+            ? `<img src="${safeFavicon}" alt="" onerror="this.parentElement.innerHTML='<i data-lucide=\\'globe\\' width=\\'18\\' height=\\'18\\'></i>'">`
+            : `<i data-lucide="globe" width="18" height="18"></i>`
+        }
+      </span>
+      <span class="tile-text">
+        <span class="tile-title">${escapeText(title)}</span>
+        <span class="tile-domain">${escapeText(domain)}</span>
+      </span>
+    </a>
+  `;
+}
+
+function attachTileNavigation(row: HTMLElement): void {
+  row.querySelectorAll<HTMLAnchorElement>('.tile').forEach((tile) => {
+    tile.addEventListener('click', (e) => {
+      e.preventDefault();
+      const url = tile.dataset.url;
+      if (url) {
+        window.BrowserAPI.navigate(window.BrowserAPI.appWindowId, window.BrowserAPI.tabId, url);
+      }
+    });
+  });
+}
+
+async function loadTileRows(): Promise<void> {
+  const appWindowId = window.BrowserAPI.appWindowId;
+
+  // Bookmarks — combined queue + reference, sorted by visits desc.
+  const bookmarksSection = document.getElementById('bookmarks-section') as HTMLElement | null;
+  const bookmarksRow = document.getElementById('bookmarks-row') as HTMLElement | null;
+  if (bookmarksSection && bookmarksRow) {
+    try {
+      const [queue, reference] = await Promise.all([
+        window.BrowserAPI.fetchBookmarksWithStats(appWindowId, 'queue', '', 100, 0),
+        window.BrowserAPI.fetchBookmarksWithStats(appWindowId, 'reference', '', 100, 0),
+      ]);
+      const merged = [...(queue || []), ...(reference || [])] as Array<{
+        url: string;
+        title: string;
+        faviconUrl?: string;
+        visits: number;
+      }>;
+      const top = merged.sort((a, b) => (b.visits || 0) - (a.visits || 0)).slice(0, TILE_LIMIT);
+      if (top.length > 0) {
+        bookmarksRow.innerHTML = top.map(renderTile).join('');
+        attachTileNavigation(bookmarksRow);
+        bookmarksSection.hidden = false;
+      }
+    } catch {
+      /* leave row hidden on failure */
+    }
+  }
+
+  // Frequently visited — top URLs by visit count from browsing history.
+  const topSitesSection = document.getElementById('top-sites-section') as HTMLElement | null;
+  const topSitesRow = document.getElementById('top-sites-row') as HTMLElement | null;
+  if (topSitesSection && topSitesRow) {
+    try {
+      const sites = await window.BrowserAPI.fetchTopSites(appWindowId, TILE_LIMIT);
+      if (sites && sites.length > 0) {
+        topSitesRow.innerHTML = sites.map(renderTile).join('');
+        attachTileNavigation(topSitesRow);
+        topSitesSection.hidden = false;
+      }
+    } catch {
+      /* leave row hidden on failure */
+    }
+  }
+
+  createIcons({ icons });
+}
+
+loadTileRows();

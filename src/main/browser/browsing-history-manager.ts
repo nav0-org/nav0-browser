@@ -28,6 +28,13 @@ export abstract class BrowsingHistoryManager {
     );
 
     ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.FETCH_TOP_SITES,
+      async (event, appWindowId: string, limit?: number) => {
+        return await BrowsingHistoryManager.fetchTopSites(appWindowId, limit);
+      }
+    );
+
+    ipcMain.handle(
       RendererToMainEventsForBrowserIPC.REMOVE_BROWSING_HISTORY,
       async (event, appWindowId: string, recordId: string) => {
         return await BrowsingHistoryManager.removeRecord(appWindowId, recordId);
@@ -148,6 +155,35 @@ export abstract class BrowsingHistoryManager {
       'UPDATE browsingHistory SET totalDuration = ?, activeDuration = ?, outTimestamp = ? WHERE id = ?;'
     );
     stmt.run(totalDuration, activeDuration, outTimestamp, recordId);
+  }
+
+  /**
+   * Aggregates browsing history by URL and returns the most-visited sites,
+   * with the latest title/favicon and the visit count. Skips internal pages.
+   */
+  public static async fetchTopSites(
+    appWindowId: string,
+    limit?: number
+  ): Promise<Array<{ url: string; title: string; faviconUrl: string; visits: number }>> {
+    const db = BrowsingHistoryManager.getDb(appWindowId);
+    if (!db) return [];
+    const stmt = db.prepare(`
+      SELECT url,
+        COUNT(*) as visits,
+        (SELECT title FROM browsingHistory WHERE url = h.url ORDER BY createdDate DESC LIMIT 1) as title,
+        (SELECT faviconUrl FROM browsingHistory WHERE url = h.url AND faviconUrl IS NOT NULL ORDER BY createdDate DESC LIMIT 1) as faviconUrl
+      FROM browsingHistory h
+      WHERE url NOT LIKE 'Nav0://%' AND url NOT LIKE 'nav0://%'
+      GROUP BY url
+      ORDER BY visits DESC, MAX(createdDate) DESC
+      LIMIT ?;
+    `);
+    return stmt.all(limit || 8) as Array<{
+      url: string;
+      title: string;
+      faviconUrl: string;
+      visits: number;
+    }>;
   }
 
   public static async fetchHistoryStats(
