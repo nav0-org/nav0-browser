@@ -253,6 +253,24 @@ There are 15 separate webpack entry points for different renderer windows/overla
 - Keep renderer code separate from main process code — communicate via IPC only
 - No inline styles — use CSS files in `src/renderer/styles/`
 
+## Design System
+
+**Before making any change to HTML, CSS, or DOM-building TypeScript under `src/renderer/**`, read [`DESIGN.md`](DESIGN.md).\*\* It is the authoritative reference for design tokens, layout patterns, component classes, iconography (Lucide), motion, and the editorial dashboard skeleton used across built-in pages.
+
+Hard rules (full details in `DESIGN.md`):
+
+- **Tokens, not literals.** Always use CSS variables from `src/renderer/styles/global.css` — never hardcode colours, off-scale spacing (stick to `--spacing-xs/sm/md/lg/xl/xxl`), or off-scale radii (Nav0 caps at `--r-lg` = 6px; only `--r-full` for circles).
+- **Chrome surfaces are warm off-white, content stays paper-white.** Tab strip, nav bar, and overlay panels use `--chrome-1` / `--chrome-2` / `--tab-inactive`; active tab and content cards stay on `--bg-0`.
+- **Row highlights are `--bg-3` plus a 2-px `--nav0-red-600` anchor bar on the left.** This applies to options-menu items, Command-K results, URL autocomplete, new-tab inline search, and the masthead divider on every built-in page.
+- **Paper-flat, not glass.** Shadows come only from `--shadow-sm/md/lg`, `--new-tab-card-shadow`, and the two `--shadow-focus*` halos. No coloured glows, no gradients on surfaces, no backdrop-blur "glass" outside the established command-palette pattern.
+- **Mono is for code only** (`<code>`, `<kbd>`, hashes, paths, error codes, reader-mode `<pre>`). UI chrome — versions, dates, durations, labels — uses the system sans stack.
+- **Icons via Lucide only.** `<i data-lucide="<name>">` + `createIcons({ icons })`. No raw `<svg>` markup, no new icon libraries.
+- **Reuse `global.css` components.** `.btn`, `.btn-primary/secondary/ghost/link`, `.form-control`, `.card`, `.alert-*`, `.badge-*`, `.keycap`, flex/spacing/typography utilities — all pre-defined. Only fork into a page-local class when the design genuinely diverges.
+- **`--private-bg` is reserved** for the private-window chrome signal — never reuse for general danger/destructive affordances; use `--danger` instead.
+- **Honour `prefers-reduced-motion`** for any new animation.
+
+If a UI change introduces a new token, utility, or component, add it to `global.css` **and** document it in `DESIGN.md` in the same change. Drift between the two means the docs are wrong — fix them.
+
 ## Writing Blog Posts
 
 Blog posts live in `docs/blog/`. The sidebar and index are auto-generated from frontmatter.
