@@ -204,14 +204,15 @@
   flex-wrap: wrap;
 }
 
-/* Category chip — soft pill with per-category tint via inline style.
-   Active state inverts to a solid fill. */
+/* Category chip — matches the Downloads .type-pill grammar: soft pill
+   with per-category tint via inline style, icon + capitalized label,
+   active state inverts to a solid fill. */
 .cat-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 26px;
-  padding: 0 10px;
+  height: 28px;
+  padding: 0 12px;
   background: var(--bg-0);
   border: 1px solid var(--border-1);
   border-radius: var(--r-pill, 6px);
@@ -220,6 +221,7 @@
   font-weight: 500;
   color: var(--fg-2);
   cursor: pointer;
+  text-transform: capitalize;
   transition:
     background var(--dur-fast),
     border-color var(--dur-fast),
@@ -231,10 +233,10 @@
   filter: brightness(0.97);
 }
 
-.cat-pill-count {
-  font-size: 10.5px;
-  color: currentColor;
-  opacity: 0.55;
+.cat-pill svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
 }
 
 /* ---- Stale gauge & review panel ------------------------- */
@@ -504,11 +506,12 @@
   flex-shrink: 0;
 }
 
-/* Category tag — pill with per-category tint via inline style */
+/* Category tag — pill with per-category tint via inline style. Icon +
+   capitalized label, matches the toolbar .cat-pill grammar. */
 .badge-category {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   height: 22px;
   padding: 0 9px;
   font-family: inherit;
@@ -519,8 +522,15 @@
   border-radius: var(--r-pill, 6px);
   color: var(--fg-2);
   letter-spacing: 0;
+  text-transform: capitalize;
   flex-shrink: 0;
   white-space: nowrap;
+}
+
+.badge-category svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
 }
 
 /* "Dormant" badge — same shape as category tag, danger tint */

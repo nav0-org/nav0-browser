@@ -51,7 +51,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 28px 0 24px;
+  margin: 28px 0 14px;
   flex-wrap: wrap;
 }
 
@@ -106,6 +106,27 @@
 
 /* Type filter — pills with per-type color tint (dynamic via inline style).
    Active state inverts to a solid fill. */
+/* Dedicated row for category pills — mirrors the Bookmarks .cat-row so the
+   Clear-All button can stay next to the search bar in the toolbar above. */
+.downloads-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 24px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border-1);
+}
+
+.downloads-filter-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--fg-3);
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
 .type-filters {
   display: flex;
   align-items: center;
@@ -139,10 +160,10 @@
   filter: brightness(0.97);
 }
 
-.type-pill-count {
-  font-size: 10.5px;
-  color: currentColor;
-  opacity: 0.55;
+.type-pill svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
 }
 
 /* Danger ghost Clear button — matches History & Bookmarks */

@@ -16,7 +16,7 @@
           <h1 class="downloads-title">Downloads</h1>
         </div>
 
-        <!-- Toolbar: search + type filter pills + danger Clear -->
+        <!-- Toolbar: search + danger Clear -->
         <div class="downloads-toolbar">
           <div class="search-container">
             <i data-lucide="search" class="search-icon" width="16" height="16"></i>
@@ -27,10 +27,15 @@
               placeholder="Search downloads…"
             />
           </div>
-          <div id="type-filters" class="type-filters"></div>
           <button id="delete-all" class="btn-clear-all" style="display: none">
-            <i data-lucide="trash-2" width="14" height="14"></i> Clear
+            <i data-lucide="trash-2" width="14" height="14"></i> Clear All Downloads
           </button>
+        </div>
+
+        <!-- Type filter pills — dedicated row so Clear stays next to the search bar -->
+        <div class="downloads-filter-row">
+          <span class="downloads-filter-label">Categories</span>
+          <div id="type-filters" class="type-filters"></div>
         </div>
 
         <!-- Storage panel (bordered card) -->

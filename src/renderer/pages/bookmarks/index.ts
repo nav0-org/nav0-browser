@@ -28,6 +28,34 @@ function getCategoryColor(category: string): string {
   return WEBSITE_CATEGORY_COLORS[category] || WEBSITE_CATEGORY_COLORS.other;
 }
 
+// Lucide icon name per category — same mapping used by the History page
+// "By category" panel, surfaced here on the toolbar filter pills.
+const CATEGORY_ICONS: Record<string, string> = {
+  dev: 'code',
+  news: 'newspaper',
+  media: 'play-circle',
+  social: 'users',
+  productivity: 'layout-grid',
+  tools: 'wrench',
+  finance: 'dollar-sign',
+  shopping: 'shopping-bag',
+  reference: 'book-open',
+  search: 'search',
+  design: 'palette',
+  health: 'heart-pulse',
+  gaming: 'gamepad-2',
+  travel: 'plane',
+  education: 'graduation-cap',
+  entertainment: 'sparkles',
+  jobs: 'briefcase',
+  lifestyle: 'coffee',
+  other: 'globe',
+};
+
+function getCategoryIcon(category: string): string {
+  return CATEGORY_ICONS[category] || CATEGORY_ICONS.other;
+}
+
 function getDomain(url: string): string {
   try {
     return new URL(url).hostname.replace(/^www\./, '');
@@ -62,22 +90,6 @@ function daysSince(dateStr: string | null): number {
   return Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
 }
 
-function freshnessOpacity(item: BookmarkWithStats): number {
-  if (item.type === 'queue') {
-    const days = daysSince(item.createdDate as unknown as string);
-    if (days < 7) return 1;
-    if (days < 30) return 0.85;
-    if (days < 90) return 0.6;
-    return 0.4;
-  }
-  const days = daysSince(item.lastVisited);
-  if (days < 7) return 1;
-  if (days < 30) return 0.85;
-  if (days < 90) return 0.6;
-  if (days < 180) return 0.45;
-  return 0.3;
-}
-
 function heatColor(visits: number): string {
   if (visits >= 200) return '#4338ca';
   if (visits >= 100) return '#6366f1';
@@ -106,7 +118,9 @@ function escapeHtml(str: string): string {
 const PAGE_SIZE = 50;
 let activeTab: 'queue' | 'reference' = 'queue';
 let currentSearchTerm = '';
-const selectedCategories: Set<string> = new Set();
+// Active category filter. 'all' means show every category — only one
+// category can be selected at a time, matching the Downloads pill behaviour.
+let selectedCategory: string = 'all';
 let availableCategories: string[] = [];
 const categoryCounts: Map<string, number> = new Map();
 let activeTabTotal = 0;
@@ -127,7 +141,6 @@ const tabQueueBtn = document.getElementById('tab-queue') as HTMLButtonElement;
 const tabReferenceBtn = document.getElementById('tab-reference') as HTMLButtonElement;
 const categoryFilters = document.getElementById('category-filters') as HTMLElement;
 const staleBar = document.getElementById('stale-bar') as HTMLElement;
-const staleText = document.getElementById('stale-text') as HTMLElement;
 const staleReviewBtn = document.getElementById('stale-review-btn') as HTMLButtonElement;
 const staleReview = document.getElementById('stale-review') as HTMLElement;
 const staleReviewList = document.getElementById('stale-review-list') as HTMLElement;
@@ -210,18 +223,8 @@ async function updateCounts(): Promise<void> {
   // Folder section header subtitle ("N saved").
   folderSub.textContent = `${activeTabTotal} saved`;
 
-  // Show stale alert for reference tab
-  if (activeTab === 'reference') {
-    const staleItems = refItems.filter((b: BookmarkWithStats) => daysSince(b.lastVisited) > 180);
-    if (staleItems.length > 0) {
-      staleText.textContent = `${staleItems.length} bookmark${staleItems.length > 1 ? 's' : ''} not visited in 6+ months`;
-      staleBar.style.display = 'block';
-    } else {
-      staleBar.style.display = 'none';
-    }
-  } else {
-    staleBar.style.display = 'none';
-  }
+  // Stale-bookmark alert removed — bar stays hidden permanently.
+  staleBar.style.display = 'none';
 }
 
 function switchTab(tab: 'queue' | 'reference'): void {
@@ -232,7 +235,7 @@ function switchTab(tab: 'queue' | 'reference'): void {
   folderName.textContent = tab === 'queue' ? 'Reading queue' : 'Reference';
   folderIcon.setAttribute('data-lucide', tab === 'queue' ? 'book-open' : 'bookmark');
   createIcons({ icons });
-  selectedCategories.clear();
+  selectedCategory = 'all';
   hideStaleReview();
   resetAndReload();
   updateCounts();
@@ -262,8 +265,8 @@ async function loadBookmarks(): Promise<void> {
   if (items.length < PAGE_SIZE) hasMore = false;
 
   let filtered = items;
-  if (selectedCategories.size > 0) {
-    filtered = items.filter((b) => selectedCategories.has(getCategoryForUrl(b.url)));
+  if (selectedCategory !== 'all') {
+    filtered = items.filter((b) => getCategoryForUrl(b.url) === selectedCategory);
   }
 
   allLoadedItems = allLoadedItems.concat(filtered);
@@ -295,16 +298,15 @@ function renderCategoryPills(): void {
 
   // "All" chip — solid black when no individual category is selected.
   const allPill = document.createElement('button');
-  const allActive = selectedCategories.size === 0;
   allPill.className = 'cat-pill';
-  allPill.innerHTML = `All <span class="cat-pill-count">${activeTabTotal}</span>`;
-  if (allActive) {
+  allPill.innerHTML = `<i data-lucide="layers" width="13" height="13"></i> All`;
+  if (selectedCategory === 'all') {
     allPill.style.background = 'var(--fg-1)';
     allPill.style.color = 'var(--bg-0)';
     allPill.style.borderColor = 'var(--fg-1)';
   }
   allPill.addEventListener('click', () => {
-    selectedCategories.clear();
+    selectedCategory = 'all';
     renderCategoryPills();
     resetAndReload();
   });
@@ -313,10 +315,10 @@ function renderCategoryPills(): void {
   for (const cat of availableCategories) {
     const pill = document.createElement('button');
     const catColor = getCategoryColor(cat);
-    const isActive = selectedCategories.has(cat);
-    const count = categoryCounts.get(cat) ?? 0;
+    const isActive = selectedCategory === cat;
+    const iconName = getCategoryIcon(cat);
     pill.className = 'cat-pill';
-    pill.innerHTML = `${cat} <span class="cat-pill-count">${count}</span>`;
+    pill.innerHTML = `<i data-lucide="${iconName}" width="13" height="13"></i> ${cat}`;
     // Per-category tint: soft tinted bg + accented border + colored label.
     // Active state inverts to a solid fill, matching the prototype.
     if (isActive) {
@@ -329,16 +331,17 @@ function renderCategoryPills(): void {
       pill.style.borderColor = catColor + '40';
     }
     pill.addEventListener('click', () => {
-      if (selectedCategories.has(cat)) {
-        selectedCategories.delete(cat);
-      } else {
-        selectedCategories.add(cat);
-      }
+      // Single-select: clicking replaces the active filter (clicking the
+      // currently active pill clears it back to "All").
+      selectedCategory = isActive ? 'all' : cat;
       renderCategoryPills();
       resetAndReload();
     });
     categoryFilters.appendChild(pill);
   }
+
+  // Hydrate the lucide placeholders that were just inserted.
+  createIcons({ icons });
 }
 
 // --- Render bookmark rows ---
@@ -348,7 +351,6 @@ function renderBookmarkItems(items: BookmarkWithStats[]): void {
     const row = document.createElement('li');
     row.className = 'bookmark-item';
 
-    const opacity = freshnessOpacity(item);
     const domain = getDomain(item.url);
     const path = getPath(item.url);
     const category = getCategoryForUrl(item.url);
@@ -378,16 +380,10 @@ function renderBookmarkItems(items: BookmarkWithStats[]): void {
       );
     }
 
-    // Badges cell — dormant (reference only) + category
-    let badgesHtml = '';
-    if (item.type === 'reference') {
-      const daysAgo = daysSince(item.lastVisited);
-      if (daysAgo >= 90) {
-        const months = Math.floor(daysAgo / 30);
-        badgesHtml += `<span class="badge-stale">${months}mo dormant</span>`;
-      }
-    }
-    badgesHtml += `<span class="badge-category" style="background: ${catColor}0f; color: ${catColor}; border-color: ${catColor}40">${category}</span>`;
+    // Badges cell — category only (dormant badge removed). Matches the
+    // toolbar filter pill: icon + capitalized label with per-category tint.
+    const categoryIcon = getCategoryIcon(category);
+    const badgesHtml = `<span class="badge-category" style="background: ${catColor}0f; color: ${catColor}; border-color: ${catColor}40"><i data-lucide="${categoryIcon}" width="12" height="12"></i> ${category}</span>`;
 
     // Move action tooltip + icon depend on which folder the item lives in.
     const moveTitle = item.type === 'queue' ? 'Move to Reference' : 'Move to Queue';
@@ -395,8 +391,8 @@ function renderBookmarkItems(items: BookmarkWithStats[]): void {
 
     row.innerHTML = `
       <span class="bookmark-date">${savedDate}</span>
-      <span class="bk-favicon" style="opacity: ${opacity}">${faviconHtml}</span>
-      <div class="bookmark-content" style="opacity: ${opacity}">
+      <span class="bk-favicon">${faviconHtml}</span>
+      <div class="bookmark-content">
         <div class="bookmark-title">${escapeHtml(item.title)}</div>
         <div class="bookmark-meta">${metaParts.join('')}</div>
       </div>

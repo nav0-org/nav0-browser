@@ -17,6 +17,23 @@ createIcons({ icons });
 // ---------------------------------------------------------------------------
 
 const PAGE_SIZE = 50;
+
+// Lucide icon name per display type — used in the toolbar type-filter pills
+// (replaces the count badge so the pills read at a glance without numbers).
+const TYPE_ICONS: Record<string, string> = {
+  document: 'file-text',
+  spreadsheet: 'file-spreadsheet',
+  presentation: 'presentation',
+  ebook: 'book-open',
+  image: 'image',
+  video: 'video',
+  installer: 'package',
+  archive: 'file-archive',
+  audio: 'music',
+  code: 'code',
+  font: 'type',
+  other: 'file',
+};
 let currentOffset = 0;
 let isLoading = false;
 let hasMore = true;
@@ -329,7 +346,7 @@ const renderTypeFilters = (): void => {
   const allPill = document.createElement('button');
   allPill.className = 'type-pill';
   allPill.dataset.type = 'all';
-  allPill.innerHTML = `All <span class="type-pill-count">${allLoadedItems.length}</span>`;
+  allPill.innerHTML = `<i data-lucide="layers" width="13" height="13"></i> All`;
   if (selectedTypeFilter === 'all') {
     allPill.style.background = 'var(--fg-1)';
     allPill.style.color = 'var(--bg-0)';
@@ -347,7 +364,8 @@ const renderTypeFilters = (): void => {
     pill.className = 'type-pill';
     pill.dataset.type = type;
     const color = TYPE_COLORS[type] || TYPE_COLORS.other;
-    pill.innerHTML = `${type} <span class="type-pill-count">${typeCounts[type]}</span>`;
+    const iconName = TYPE_ICONS[type] || TYPE_ICONS.other;
+    pill.innerHTML = `<i data-lucide="${iconName}" width="13" height="13"></i> ${type}`;
     // Per-type tint: soft tinted bg + accented border + colored label;
     // active state inverts to a solid fill.
     if (selectedTypeFilter === type) {
@@ -366,6 +384,9 @@ const renderTypeFilters = (): void => {
     });
     typeFiltersContainer.appendChild(pill);
   });
+
+  // Hydrate the lucide placeholders that were just inserted.
+  createIcons({ icons });
 };
 
 const applyTypeFilter = (): void => {
@@ -391,6 +412,30 @@ const applyTypeFilter = (): void => {
       el.style.display = 'none';
     }
   });
+
+  // Hide day-group headers that no longer have any visible rows under
+  // them — otherwise filtering by category leaves orphaned date labels.
+  const children = Array.from(downloadsListElement.children) as HTMLElement[];
+  let currentHeader: HTMLElement | null = null;
+  let currentHeaderHasVisible = false;
+  const finalizeHeader = () => {
+    if (currentHeader) {
+      currentHeader.style.display = currentHeaderHasVisible ? '' : 'none';
+    }
+  };
+  for (const child of children) {
+    if (child.classList.contains('date-group-label')) {
+      finalizeHeader();
+      currentHeader = child;
+      currentHeaderHasVisible = false;
+    } else if (
+      child.classList.contains('download-item-wrapper') &&
+      child.style.display !== 'none'
+    ) {
+      currentHeaderHasVisible = true;
+    }
+  }
+  finalizeHeader();
 
   // Check if any visible
   const anyVisible = downloadsListElement.querySelector(
@@ -503,7 +548,9 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
       sizeText = FormatUtils.formatFileSize(item.fileSize);
     }
 
-    // Status pill — done / paused / progress
+    // Status pill — paused / progress. Completed downloads don't get a
+    // pill: the row presence itself implies completion, and the redundant
+    // "complete" label adds visual noise.
     let statusHtml = '';
     if (isPaused) {
       statusHtml =
@@ -511,8 +558,6 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
     } else if (isActive) {
       const pctLabel = activeInfo.totalBytes > 0 ? `${pct}%` : '…';
       statusHtml = `<span class="download-status progress"><i data-lucide="arrow-down" width="10" height="10"></i> <span class="pct-num">${pctLabel}</span></span>`;
-    } else {
-      statusHtml = '<span class="download-status done">complete</span>';
     }
 
     // Action buttons
@@ -809,12 +854,8 @@ const removeProgressBar = (fileName: string): void => {
   if (!row) return;
   row.classList.remove('downloading', 'paused');
   row.querySelector('.download-progress')?.remove();
-  // Swap status pill from "progress" to "done"
-  const statusEl = row.querySelector('.download-status');
-  if (statusEl) {
-    statusEl.className = 'download-status done';
-    statusEl.textContent = 'complete';
-  }
+  // Completed downloads don't carry a status pill — drop it entirely.
+  row.querySelector('.download-status')?.remove();
   // Replace action buttons with just the delete button
   const actionsEl = row.querySelector('.download-actions');
   if (actionsEl) {

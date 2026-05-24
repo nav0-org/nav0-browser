@@ -193,6 +193,10 @@
 .panel-heat {
   padding: 22px 24px 18px;
   margin-bottom: 20px;
+  /* Establish a positioning context so the absolutely-positioned
+     .heatmap-tooltip (whose coords are calculated relative to this
+     container) anchors correctly to the hovered cell. */
+  position: relative;
 }
 
 .heatmap-header {
