@@ -578,6 +578,7 @@ export class AppWindow {
 
   async showOptionsMenuOverlay(): Promise<void> {
     this.hideCommandKOverlay();
+    this.hideUrlAutocompleteOverlay();
     await this.overlayInitPromise;
     if (this.unifiedOverlayManager.isVisible('options-menu')) return;
     await this.unifiedOverlayManager.whenReady();
@@ -595,6 +596,7 @@ export class AppWindow {
   async showCommandKOverlay(): Promise<void> {
     this.hideOptionsMenuOverlay();
     this.hideCommandOOverlay();
+    this.hideUrlAutocompleteOverlay();
     await this.overlayInitPromise;
     if (this.unifiedOverlayManager.isVisible('command-k')) {
       this.hideCommandKOverlay();
@@ -615,6 +617,7 @@ export class AppWindow {
   async showCommandOOverlay(): Promise<void> {
     this.hideOptionsMenuOverlay();
     this.hideCommandKOverlay();
+    this.hideUrlAutocompleteOverlay();
     await this.overlayInitPromise;
     if (this.unifiedOverlayManager.isVisible('command-o')) {
       this.hideCommandOOverlay();
@@ -733,6 +736,7 @@ export class AppWindow {
     if (!this.browserWindowInstance) return;
     this.hideOptionsMenuOverlay();
     this.hideCommandKOverlay();
+    this.hideUrlAutocompleteOverlay();
     await this.overlayInitPromise;
     if (this.unifiedOverlayManager.isVisible('issue-report')) return;
     await this.unifiedOverlayManager.whenReady();
@@ -760,6 +764,7 @@ export class AppWindow {
       this.pendingDialogs.set(requestId, resolve);
     });
 
+    this.hideUrlAutocompleteOverlay();
     await this.overlayInitPromise;
     if (!this.unifiedOverlayManager) {
       this.pendingDialogs.delete(requestId);
@@ -801,6 +806,7 @@ export class AppWindow {
     const request: BasicAuthRequest = { requestId, ...data };
     this.pendingBasicAuth.set(requestId, callback);
 
+    this.hideUrlAutocompleteOverlay();
     await this.overlayInitPromise;
     if (!this.unifiedOverlayManager) {
       this.pendingBasicAuth.delete(requestId);
@@ -905,6 +911,9 @@ export class AppWindow {
     this.hideOptionsMenuOverlay();
     this.hideCommandKOverlay();
     this.hideCommandOOverlay();
+    // URL autocomplete restricts the shared overlay view to the URL bar
+    // strip; leaving it open while SSL opens would clip the SSL panel.
+    this.hideUrlAutocompleteOverlay();
 
     await this.overlayInitPromise;
 
