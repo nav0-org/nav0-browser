@@ -1,7 +1,7 @@
 /* Command-O overlay panel styles */
 
 #overlay-command-o {
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.45);
   line-height: 1.4;
   font-size: 13px;
   display: flex;
@@ -14,7 +14,7 @@
 .cmdo-overlay-container {
   width: 720px;
   max-width: 90vw;
-  background-color: var(--bg-0);
+  background-color: var(--chrome-2);
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
@@ -142,7 +142,8 @@
   gap: 6px;
 }
 
-/* ---- Tab card ---- */
+/* ---- Tab card ---- Cards stay paper-white on the warm chrome-2 shell
+   so they read as the foreground layer. */
 .tab-card {
   display: flex;
   align-items: center;
@@ -150,7 +151,7 @@
   padding: 8px 10px;
   border-radius: var(--r-md);
   border: 1px solid var(--border-1);
-  background: var(--bg-2);
+  background: var(--bg-0);
   cursor: pointer;
   overflow: hidden;
   position: relative;
@@ -159,16 +160,16 @@
 
 .tab-card:hover {
   border-color: var(--border-2);
-  background: var(--bg-3);
+  background: var(--bg-0);
 }
 
 .tab-card.active {
   border-color: var(--fg-3);
-  background: var(--bg-3);
+  background: var(--bg-0);
 }
 
 .tab-card.selected {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--nav0-red-600);
   outline-offset: -1px;
 }
 
@@ -217,7 +218,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--nav0-red-600);
   flex-shrink: 0;
 }
 
@@ -237,7 +238,7 @@
 .window-group.drop-target {
   background: var(--bg-3);
   border-radius: var(--r-md);
-  outline: 2px dashed var(--accent);
+  outline: 2px dashed var(--nav0-red-600);
   outline-offset: 2px;
 }
 

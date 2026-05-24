@@ -152,7 +152,7 @@
 }
 
 .sidebar-link:hover {
-  background: var(--bg-2);
+  background: var(--bg-3);
   color: var(--n0-text);
   text-decoration: none;
 }
@@ -490,7 +490,7 @@
 }
 
 .radio-option:hover {
-  background: var(--bg-1);
+  background: var(--bg-3);
 }
 
 .radio-option:has(input[type='radio']:checked) {
@@ -974,7 +974,7 @@
 }
 
 .shortcuts-table tbody tr:hover {
-  background: var(--bg-1);
+  background: var(--bg-3);
 }
 
 .shortcuts-footer {

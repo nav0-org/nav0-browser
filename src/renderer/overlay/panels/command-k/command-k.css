@@ -1,7 +1,7 @@
 /* Command-K overlay panel styles */
 
 #overlay-command-k {
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.45);
   line-height: 1.4;
   font-size: 13px;
   display: flex;
@@ -14,7 +14,7 @@
 #overlay-command-k .command-container {
   width: 850px;
   max-width: 90vw;
-  background-color: var(--bg-0);
+  background-color: var(--chrome-2);
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
@@ -109,12 +109,23 @@
   align-items: center;
   padding: 10px var(--spacing-md);
   cursor: pointer;
+  position: relative;
 }
 
 #overlay-command-k .result-item:hover,
 #overlay-command-k .result-item.active {
   background-color: var(--bg-3);
-  border-left-color: var(--accent);
+}
+
+#overlay-command-k .result-item:hover::before,
+#overlay-command-k .result-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--nav0-red-600);
 }
 
 #overlay-command-k .result-icon {

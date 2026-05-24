@@ -191,6 +191,9 @@ async function updateCounts(): Promise<void> {
   );
   queueCountEl.textContent = String(queueItems.length);
   referenceCountEl.textContent = String(refItems.length);
+  // Clear All wipes both tabs in one go, so its visibility tracks the
+  // combined total — not just the active tab's items.
+  deleteAllBtn.style.display = queueItems.length + refItems.length > 0 ? '' : 'none';
 
   // Derive available categories + per-category counts from the active tab's
   // full unfiltered result set, so chip ordering and counts react to tab/search.
@@ -277,12 +280,12 @@ function updateVisibility(): void {
     noBookmarks.textContent = currentSearchTerm
       ? `No bookmarks matching "${currentSearchTerm}".`
       : 'No bookmarks saved yet.';
-    deleteAllBtn.style.display = 'none';
   } else {
     noBookmarks.style.display = 'none';
-    // Empty string clears the inline style so the CSS rule (inline-flex) applies.
-    deleteAllBtn.style.display = '';
   }
+  // Clear All button visibility is driven by updateCounts (totals across
+  // both tabs) — Clear wipes both, so its presence shouldn't depend on the
+  // active tab being non-empty.
   // Footer is no longer used as a wrapper for Clear; kept as an empty spacer.
   if (bookmarksFooter) bookmarksFooter.style.display = 'block';
 }

@@ -17,7 +17,7 @@
 
 #overlay-url-autocomplete .url-autocomplete-panel {
   flex: 1;
-  background-color: var(--bg-0);
+  background-color: var(--chrome-2);
   border: 1px solid var(--border-1);
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-md);
@@ -39,12 +39,23 @@
   padding: 10px var(--spacing-md);
   min-height: 58px;
   cursor: pointer;
+  position: relative;
 }
 
 #overlay-url-autocomplete .url-ac-item:hover,
 #overlay-url-autocomplete .url-ac-item.active {
   background-color: var(--bg-3);
-  border-left-color: var(--accent);
+}
+
+#overlay-url-autocomplete .url-ac-item:hover::before,
+#overlay-url-autocomplete .url-ac-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--nav0-red-600);
 }
 
 #overlay-url-autocomplete .url-ac-icon {

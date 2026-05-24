@@ -319,11 +319,11 @@
 }
 
 .download-item:hover {
-  background: var(--bg-1);
+  background: var(--bg-3);
 }
 
 .download-item.selected {
-  background: var(--bg-1);
+  background: var(--bg-3);
 }
 
 .download-time {

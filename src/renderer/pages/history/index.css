@@ -403,7 +403,7 @@
 }
 
 .history-entry:hover {
-  background: var(--bg-1);
+  background: var(--bg-3);
 }
 
 .entry-time {

@@ -14,7 +14,7 @@
   width: 300px;
   max-width: calc(100% - 24px);
   pointer-events: auto;
-  background-color: var(--bg-0);
+  background-color: var(--chrome-2);
   border: 1px solid var(--border-1);
   border-radius: var(--r-md);
   box-shadow: var(--shadow-md);

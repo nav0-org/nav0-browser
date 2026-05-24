@@ -2,7 +2,7 @@
 
 /* Tokens scoped to the chrome (rest are in global.css). */
 :root {
-  --tab-strip-bg: #e2e2e2;
+  --tab-strip-bg: var(--tab-inactive);
   --tab-divider: rgba(0, 0, 0, 0.08);
 }
 
@@ -155,7 +155,7 @@ body.is-private .tab-scroll-btn:hover {
 }
 
 .tab:hover {
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: var(--bg-3);
   color: var(--fg-2);
 }
 
@@ -278,7 +278,7 @@ body.is-private .tab.active {
 }
 
 .tab-close:hover {
-  background-color: rgba(0, 0, 0, 0.08);
+  background-color: var(--bg-3);
   color: var(--fg-1);
 }
 
@@ -330,7 +330,7 @@ body.is-private .new-tab-btn:hover {
   align-items: center;
   gap: 4px;
   padding: 5px;
-  background-color: var(--bg-0);
+  background-color: var(--chrome-1);
   border-bottom: 1px solid var(--border-1);
 }
 
@@ -347,6 +347,10 @@ body.is-private .new-tab-btn:hover {
   margin-right: 4px;
 }
 
+/* URL input sits as a paper-white card on the warm chrome-1 nav bar
+   so it reads as the primary input surface, not a pill blending into
+   the chrome. A hairline border gives it edge definition without
+   requiring focus to materialise. */
 .address-bar {
   flex: 1;
   display: flex;
@@ -354,15 +358,18 @@ body.is-private .new-tab-btn:hover {
   gap: 2px;
   height: 32px;
   padding: 0 4px;
-  background-color: var(--bg-2);
+  background-color: var(--bg-0);
+  border: 1px solid var(--border-1);
   border-radius: 4px;
   transition:
     background-color var(--dur-fast),
+    border-color var(--dur-fast),
     box-shadow var(--dur-fast);
 }
 
 .address-bar:focus-within {
   background-color: var(--bg-0);
+  border-color: var(--fg-3);
   box-shadow: var(--shadow-focus);
 }
 

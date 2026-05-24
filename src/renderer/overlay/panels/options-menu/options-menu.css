@@ -11,10 +11,10 @@
   top: 80px;
   right: 0;
   width: 320px;
-  padding: 6px;
+  padding: 6px 0;
   margin-top: var(--spacing-xs);
   margin-right: 10px;
-  background-color: var(--bg-0);
+  background-color: var(--chrome-2);
   border: 1px solid var(--border-1);
   border-radius: var(--r-md);
   box-shadow: var(--shadow-lg);
@@ -32,9 +32,10 @@
   align-items: center;
   gap: 10px;
   height: 32px;
-  padding: 0 10px;
-  border-radius: var(--r-xs);
-  border: 1px solid transparent;
+  padding: 0 12px;
+  border-radius: 0;
+  border-top: 1px solid transparent;
+  border-bottom: 1px solid transparent;
   color: var(--fg-1);
   cursor: pointer;
   position: relative;
@@ -44,13 +45,15 @@
   user-select: none;
 }
 
-/* Hover/active matches the Settings sidebar active tab: white background,
-   hairline border, and a 2-px red anchor bar on the left. */
+/* Hover/active uses the same row highlight as the URL autocomplete +
+   Command-K results — bg-3 spans the full menu width, with hairline
+   top/bottom rules and a 2-px red anchor bar flush at the left edge. */
 #overlay-options-menu .dropdown-item:hover,
 #overlay-options-menu .has-submenu:hover > .dropdown-item,
 #overlay-options-menu .has-submenu.submenu-active > .dropdown-item {
-  background-color: var(--bg-0);
-  border-color: var(--border-1);
+  background-color: var(--bg-3);
+  border-top-color: var(--border-1);
+  border-bottom-color: var(--border-1);
 }
 
 #overlay-options-menu .dropdown-item:hover::before,
@@ -58,12 +61,11 @@
 #overlay-options-menu .has-submenu.submenu-active > .dropdown-item::before {
   content: '';
   position: absolute;
-  left: -1px;
+  left: 0;
   top: -1px;
   bottom: -1px;
   width: 2px;
   background: var(--nav0-red-600);
-  border-radius: 1px;
 }
 
 #overlay-options-menu .dropdown-item > i {
@@ -84,7 +86,7 @@
 
 #overlay-options-menu .divider {
   height: 1px;
-  margin: 4px 2px;
+  margin: 4px 0;
   background-color: var(--border-1);
 }
 
@@ -112,8 +114,8 @@
   top: 0;
   right: calc(100% + 4px);
   width: 240px;
-  padding: 6px;
-  background-color: var(--bg-0);
+  padding: 6px 0;
+  background-color: var(--chrome-2);
   border: 1px solid var(--border-1);
   border-radius: var(--r-md);
   box-shadow: var(--shadow-lg);
@@ -183,9 +185,10 @@
   align-items: center;
   gap: 8px;
   height: 32px;
-  padding: 0 10px;
-  border-radius: var(--r-xs);
-  border: 1px solid transparent;
+  padding: 0 12px;
+  border-radius: 0;
+  border-top: 1px solid transparent;
+  border-bottom: 1px solid transparent;
   cursor: pointer;
   position: relative;
   transition:
@@ -195,20 +198,20 @@
 
 .closed-tab-item:hover,
 .closed-window-item:hover {
-  background-color: var(--bg-0);
-  border-color: var(--border-1);
+  background-color: var(--bg-3);
+  border-top-color: var(--border-1);
+  border-bottom-color: var(--border-1);
 }
 
 .closed-tab-item:hover::before,
 .closed-window-item:hover::before {
   content: '';
   position: absolute;
-  left: -1px;
+  left: 0;
   top: -1px;
   bottom: -1px;
   width: 2px;
   background: var(--nav0-red-600);
-  border-radius: 1px;
 }
 
 .closed-tab-favicon {

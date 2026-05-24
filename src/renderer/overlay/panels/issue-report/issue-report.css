@@ -35,7 +35,7 @@
   width: 480px;
   max-width: 90%;
   max-height: 80vh;
-  background-color: var(--bg-0);
+  background-color: var(--chrome-2);
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-md);
   border: 1px solid var(--border-1);

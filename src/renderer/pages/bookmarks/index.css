@@ -432,7 +432,7 @@
 }
 
 .bookmark-item:hover {
-  background: var(--bg-1);
+  background: var(--bg-3);
 }
 
 /* Saved-date column ("May 18", "Apr 28") */

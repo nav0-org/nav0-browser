@@ -164,12 +164,24 @@ body {
   gap: 12px;
   padding: 10px 16px;
   cursor: pointer;
+  position: relative;
   transition: background-color 0.08s ease;
 }
 
 .search-result-item:hover,
 .search-result-item.active {
-  background-color: var(--bg-1);
+  background-color: var(--bg-3);
+}
+
+.search-result-item:hover::before,
+.search-result-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--nav0-red-600);
 }
 
 .search-result-item.search-engine-item {

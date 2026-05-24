@@ -27,18 +27,26 @@
   --nav0-slate-900: #0f172a;
 
   /* Nav0 bg/fg scale — paired with the legacy aliases below. */
-  --bg-0: #ffffff; /* canvas / cards */
+  --bg-0: #ffffff; /* canvas / cards / active tab — kept paper-white */
   --bg-1: #fafafa; /* page background */
   --bg-2: #f5f5f5; /* subtle surface, input fields */
   --bg-3: #ebebeb; /* hover */
   --bg-inverse: #0a0a0a;
+
+  /* Chrome surfaces — warm off-whites that sit a notch under --bg-0 so
+     the active tab / page content reads as the foreground layer.
+     Nav0's compass-red accent reads warm; pulling 2-3% toward red/yellow
+     makes the whole system feel coherent. */
+  --chrome-1: #f7f6f4; /* nav bar, tab strip backplate, page bento panels */
+  --chrome-2: #fbfaf8; /* menus, popovers, command-K/O, overlay panels */
+  --tab-inactive: #e7e5e1; /* warm shift of the prior #e2e2e2 */
   --fg-1: #0a0a0a;
   --fg-2: #333333;
   --fg-3: #6b7280;
   --fg-4: #9ca3af;
   --fg-on-dark: #ffffff;
-  --border-1: #e5e5e5; /* hairline */
-  --border-2: #d4d4d4; /* heavier separator */
+  --border-1: #dcd9d4; /* hairline — warm gray to match chrome */
+  --border-2: #c8c5bf; /* heavier separator — warm shift of prior #d4d4d4 */
   --accent: var(--nav0-blue-600);
   --accent-hover: var(--nav0-blue-700);
   --danger: var(--nav0-red-600);
