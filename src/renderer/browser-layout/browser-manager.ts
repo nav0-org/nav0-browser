@@ -400,11 +400,10 @@ export class BrowserTabManager {
   private handleBookmark(): void {
     const activeTab = this.getTabById(this.activeTabId);
     if (activeTab) {
-      // Internal pages (Nav0://new-tab, history, bookmarks, etc.) can't be
-      // bookmarked, so hide all three states.
-      const isInternal = (activeTab.url || '')
-        .toLowerCase()
-        .startsWith(InAppUrls.PREFIX.toLowerCase());
+      // Internal pages (Nav0://new-tab, history, bookmarks, etc.) and blank
+      // tabs (empty URL) can't be bookmarked, so hide all three states.
+      const url = (activeTab.url || '').trim();
+      const isInternal = !url || url.toLowerCase().startsWith(InAppUrls.PREFIX.toLowerCase());
       if (isInternal) {
         this.bookmarkButton.style.display = 'none';
         this.unbookmarkButton.style.display = 'none';

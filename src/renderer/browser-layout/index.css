@@ -387,12 +387,16 @@ body.is-private .new-tab-btn:hover {
   color: var(--fg-1);
 }
 
+/* Search state is display-only — not a button affordance, so no
+   pointer cursor and no hover background/colour shift. */
 .ssl-indicator.ssl-search {
   color: var(--fg-3);
+  cursor: default;
 }
 
 .ssl-indicator.ssl-search:hover {
-  color: var(--fg-1);
+  background-color: transparent;
+  color: var(--fg-3);
 }
 
 .ssl-indicator.ssl-secure {
