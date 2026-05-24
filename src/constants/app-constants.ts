@@ -183,6 +183,7 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly CLEAR_ALL_PERMISSIONS = 'browser:clear-all-permissions';
   public static readonly UPDATE_PERMISSION_DECISION = 'browser:update-permission-decision';
   public static readonly PERMISSION_PROMPT_READY = 'browser:permission-prompt-ready';
+  public static readonly PERMISSION_QUERY_STATUS = 'browser:permission-query-status';
   public static readonly OVERLAY_RENDERER_READY = 'overlay:renderer-ready';
   // Display-capture source picker
   public static readonly DISPLAY_CAPTURE_PICKER_GET_SOURCES =

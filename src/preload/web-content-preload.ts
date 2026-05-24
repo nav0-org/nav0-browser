@@ -30,6 +30,16 @@ contextBridge.exposeInMainWorld('__Nav0Share', {
   }): Promise<{ success: boolean; error?: string }> => ipcRenderer.invoke('web-share', data),
 });
 
+// Bridge for the navigator.permissions.query() polyfill — returns our stored
+// decision for the current origin. We polyfill instead of using Electron's
+// setPermissionCheckHandler because the check handler can't express
+// "prompt"/undecided, and returning false there breaks the request handler
+// (getUserMedia silently fails). See permission-manager.ts for context.
+contextBridge.exposeInMainWorld('__Nav0Permissions', {
+  queryStatus: (name: string): Promise<'granted' | 'prompt' | 'denied'> =>
+    ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.PERMISSION_QUERY_STATUS, name),
+});
+
 // ─── Notification API Bridge ───────────────────────────────────────
 // Bridges web content Notification API to Electron's native notifications
 // via the main process NotificationManager.
@@ -307,6 +317,72 @@ const DIALOG_POLYFILL_CODE = `
 })();
 `;
 
+// Wraps navigator.permissions.query() so sites see the decision the user
+// already gave us. Without this, Electron always reports "prompt" for media
+// (since we deliberately omit setPermissionCheckHandler), causing Google
+// Meet et al. to display "Permission needed" even after the user grants
+// access. The polyfill only intercepts names we track; everything else
+// passes through to the native implementation.
+const PERMISSIONS_POLYFILL_CODE = `
+(function() {
+  if (window.__Nav0PermissionsPatched) return;
+  window.__Nav0PermissionsPatched = true;
+  if (!window.__Nav0Permissions || !navigator.permissions || !navigator.permissions.query) return;
+
+  var TRACKED = {
+    'microphone': true, 'camera': true, 'speaker-selection': true,
+    'geolocation': true, 'notifications': true, 'midi': true,
+    'storage-access': true, 'display-capture': true, 'idle-detection': true,
+    'screen-wake-lock': true, 'window-management': true, 'local-fonts': true,
+    'clipboard-read': true,
+  };
+
+  function makeStatus(name, state) {
+    var listeners = [];
+    var status = {
+      name: name,
+      state: state,
+      status: state,
+      onchange: null,
+      addEventListener: function(type, l) { if (type === 'change' && typeof l === 'function') listeners.push(l); },
+      removeEventListener: function(type, l) {
+        if (type !== 'change') return;
+        listeners = listeners.filter(function(x) { return x !== l; });
+      },
+      dispatchEvent: function() { return true; },
+    };
+    try {
+      Object.setPrototypeOf(status, (window.PermissionStatus && window.PermissionStatus.prototype) || EventTarget.prototype);
+    } catch (e) {}
+    return status;
+  }
+
+  var nativeQuery = navigator.permissions.query.bind(navigator.permissions);
+
+  navigator.permissions.query = function(descriptor) {
+    try {
+      var name = descriptor && descriptor.name;
+      if (!name || !TRACKED[name]) {
+        return nativeQuery(descriptor);
+      }
+      return window.__Nav0Permissions.queryStatus(name).then(function(state) {
+        if (state !== 'granted' && state !== 'denied' && state !== 'prompt') state = 'prompt';
+        return makeStatus(name, state);
+      }).catch(function() {
+        // Fall back to native on IPC failure so we never break the page.
+        try { return nativeQuery(descriptor); } catch (e) {
+          return makeStatus(name, 'prompt');
+        }
+      });
+    } catch (e) {
+      try { return nativeQuery(descriptor); } catch (e2) {
+        return Promise.reject(e);
+      }
+    }
+  };
+})();
+`;
+
 const SHARE_POLYFILL_CODE = `
 (function() {
   if (window.__Nav0SharePatched) return;
@@ -384,7 +460,11 @@ function injectPolyfill(): void {
     }
 
     const code =
-      POLYFILL_CODE + SHARE_POLYFILL_CODE + NOTIFICATION_POLYFILL_CODE + DIALOG_POLYFILL_CODE;
+      POLYFILL_CODE +
+      SHARE_POLYFILL_CODE +
+      NOTIFICATION_POLYFILL_CODE +
+      DIALOG_POLYFILL_CODE +
+      PERMISSIONS_POLYFILL_CODE;
 
     // Use a blob URL instead of inline script to avoid CSP violations.
     // Blob URLs are allowed by most CSPs that include 'blob:' in script-src.
@@ -485,3 +565,22 @@ function injectGoogleChromeRuntimeStub(): void {
 }
 
 injectGoogleChromeRuntimeStub();
+
+// Permissions polyfill is bundled into the blob-URL injection above for most
+// sites, but Google ships a strict response-header CSP that may block that
+// path — and Meet/Hangouts/etc. are the very sites that gate their UI on
+// `navigator.permissions.query()`. Re-inject via webFrame.executeJavaScript
+// (which bypasses CSP) so the polyfill lands on Google properties too. The
+// IIFE guard inside the code makes the second injection a no-op when the
+// blob path already succeeded.
+function injectPermissionsPolyfillUnconditionally(): void {
+  try {
+    webFrame.executeJavaScript(PERMISSIONS_POLYFILL_CODE).catch(() => {
+      /* ignore */
+    });
+  } catch {
+    /* preload should never throw into the page */
+  }
+}
+
+injectPermissionsPolyfillUnconditionally();

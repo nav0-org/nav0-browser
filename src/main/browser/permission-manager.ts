@@ -1,6 +1,7 @@
 import {
   session,
   WebContents,
+  webContents as webContentsAccessor,
   ipcMain,
   net,
   clipboard,
@@ -214,64 +215,18 @@ export class PermissionManager {
       }
     );
 
-    // Mirror persistent grants into Chromium's permission status so that
-    // `navigator.permissions.query()` reports `granted` for origins the user
-    // has already allowed. Without this, sites like Google Meet that gate
-    // their UI on the queried state keep showing "Permission needed" even
-    // after the user has granted access via our prompt.
-    //
-    // We deliberately return `true` *only* for permissions explicitly stored
-    // as `allowed_persistent` (or held as `allowed_session` for the tab).
-    // Everything else — undecided, denied, insecure — returns `false`, which
-    // maps to PermissionStatus::PROMPT/DENIED. The request handler above is
-    // still consulted on the actual API invocation (getUserMedia,
-    // getCurrentPosition, etc.) so first-time use still surfaces our prompt.
-    ses.setPermissionCheckHandler((webContents, permission, requestingOrigin, details) => {
-      if (PermissionManager.AUTO_GRANT_PERMISSIONS.has(permission)) return true;
-
-      const iframeOrigin = PermissionManager.extractOrigin(requestingOrigin);
-      const detailsAny = details as unknown as { isMainFrame?: boolean };
-      const isSubFrame = detailsAny.isMainFrame === false;
-      let topOrigin = iframeOrigin;
-      if (isSubFrame && webContents) {
-        try {
-          const topUrl = webContents.getURL();
-          if (topUrl) topOrigin = PermissionManager.extractOrigin(topUrl);
-        } catch {
-          /* fall through to iframe origin */
-        }
-      }
-      const origin = topOrigin;
-
-      // Sensitive permissions require both frames to be on secure origins —
-      // mirrors the request handler so a mixed-content embed can't inherit a
-      // stored grant via the synchronous status query.
-      if (PermissionManager.SENSITIVE_PERMISSIONS.has(permission)) {
-        if (
-          !PermissionManager.isSecureOrigin(topOrigin) ||
-          !PermissionManager.isSecureOrigin(iframeOrigin)
-        ) {
-          return false;
-        }
-      }
-
-      if (!isPrivate) {
-        const persistent = PermissionManager.getPersistentDecision(origin, permission);
-        if (persistent === 'allowed_persistent') return true;
-        if (persistent === 'denied_persistent') return false;
-      }
-
-      if (webContents) {
-        const tabInfo = PermissionManager.findTabCallback?.(webContents.id);
-        if (tabInfo) {
-          const sessionKey = PermissionManager.sessionKey(tabInfo.tabId, origin, permission);
-          const sessionDecision = PermissionManager.sessionPermissions.get(sessionKey);
-          if (sessionDecision === 'allowed_session') return true;
-        }
-      }
-
-      return false;
-    });
+    // Note: setPermissionCheckHandler is intentionally not used. Electron's boolean
+    // return can't express "undecided — please prompt". Returning false maps to
+    // PermissionStatus::DENIED in Chromium, which prevents setPermissionRequestHandler
+    // from being called for some permissions (notably geolocation and media —
+    // getUserMedia silently fails without ever invoking the prompt). Without a
+    // check handler, Electron defaults all permissions to "ask", ensuring every
+    // request flows through our prompt UI above. The trade-off is that
+    // `navigator.permissions.query()` reports "prompt" even for origins the user
+    // has already granted, which makes sites like Google Meet show "Permission
+    // needed" warnings. We patch that gap by polyfilling
+    // `navigator.permissions.query()` in the web-content preload so it reads our
+    // stored decisions directly — see web-content-preload.ts.
 
     // getDisplayMedia() — Chromium delegates screen/window selection to the host
     // app. Without this handler screen sharing silently fails in Meet/Zoom/Teams.
@@ -856,6 +811,70 @@ export class PermissionManager {
     return { type: permission, label: permission, icon: 'shield-alert' };
   }
 
+  // Maps a Permissions API name (used by `navigator.permissions.query`) to
+  // the internal Electron permission string we store grants under. Returns
+  // null for names we don't track — the polyfill falls back to native for
+  // those.
+  private static permissionsApiNameToInternal(name: string): string | null {
+    switch (name) {
+      case 'microphone':
+      case 'camera':
+      case 'speaker-selection':
+        return 'media';
+      case 'geolocation':
+      case 'notifications':
+      case 'midi':
+      case 'storage-access':
+      case 'display-capture':
+      case 'idle-detection':
+      case 'screen-wake-lock':
+      case 'window-management':
+      case 'local-fonts':
+      case 'clipboard-read':
+        return name;
+      default:
+        return null;
+    }
+  }
+
+  /**
+   * Returns the Permissions API state ('granted' | 'prompt' | 'denied') for the
+   * given webContents and Permissions API permission name. Used by the
+   * `navigator.permissions.query()` polyfill so sites see our stored decisions
+   * without us having to install setPermissionCheckHandler (which would break
+   * first-time prompts — see comment in setupSession).
+   */
+  static getPermissionsApiStatus(webContentsId: number, name: string): 'granted' | 'prompt' | 'denied' {
+    const internal = PermissionManager.permissionsApiNameToInternal(name);
+    if (!internal) return 'prompt';
+
+    const tabInfo = PermissionManager.findTabCallback?.(webContentsId);
+    if (!tabInfo) return 'prompt';
+
+    const { tabId, isPrivate } = tabInfo;
+
+    // Resolve the origin from the webContents top-frame URL rather than
+    // trusting a string the renderer might forward — keeps cross-origin
+    // iframes from impersonating their parent.
+    const wc = webContentsAccessor.fromId(webContentsId);
+    if (!wc) return 'prompt';
+    const origin = PermissionManager.extractOrigin(wc.getURL());
+    if (origin === 'unknown') return 'prompt';
+
+    if (!isPrivate) {
+      const persistent = PermissionManager.getPersistentDecision(origin, internal);
+      if (persistent === 'allowed_persistent') return 'granted';
+      if (persistent === 'denied_persistent') return 'denied';
+    }
+
+    const sessionKey = PermissionManager.sessionKey(tabId, origin, internal);
+    const sessionDecision = PermissionManager.sessionPermissions.get(sessionKey);
+    if (sessionDecision === 'allowed_session') return 'granted';
+    if (sessionDecision === 'denied_session') return 'denied';
+
+    return 'prompt';
+  }
+
   // ─── IPC Listeners ───────────────────────────────────────────────
 
   private static initIPCListeners(): void {
@@ -906,6 +925,13 @@ export class PermissionManager {
           permissionId,
           decision as PersistentDecision
         );
+      }
+    );
+
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.PERMISSION_QUERY_STATUS,
+      (event: Electron.IpcMainInvokeEvent, name: string) => {
+        return PermissionManager.getPermissionsApiStatus(event.sender.id, name);
       }
     );
 
