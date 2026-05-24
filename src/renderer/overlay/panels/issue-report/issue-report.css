@@ -35,12 +35,10 @@
   width: 480px;
   max-width: 90%;
   max-height: 80vh;
-  background-color: var(--bg-light);
-  border-radius: var(--radius-xl);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.18),
-    0 2px 8px rgba(0, 0, 0, 0.08);
-  border: 1px solid var(--border-color);
+  background-color: var(--chrome-2);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-1);
   overflow: hidden;
   z-index: 1;
   animation: issueSlideIn 0.2s ease-out;
@@ -71,10 +69,10 @@
   align-items: center;
   gap: 8px;
   padding: 16px 20px 12px 20px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-1);
   font-size: var(--font-lg);
   font-weight: 600;
-  color: var(--text-color);
+  color: var(--fg-2);
 }
 
 /* Body */
@@ -93,12 +91,12 @@
   margin-bottom: 4px;
   font-weight: 500;
   font-size: var(--font-sm);
-  color: var(--text-color);
+  color: var(--fg-2);
 }
 
 .issue-report-body .form-label-optional {
   font-weight: 400;
-  color: var(--text-secondary);
+  color: var(--fg-3);
   font-size: var(--font-xs);
 }
 
@@ -107,17 +105,18 @@
   width: 100%;
   padding: 8px 12px;
   font-size: var(--font-md);
-  color: var(--text-color);
-  background-color: var(--bg-color);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  color: var(--fg-2);
+  background-color: var(--bg-2);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-md);
   transition: border-color var(--transition-fast);
   box-sizing: border-box;
 }
 
 .issue-report-body .form-control:focus {
   outline: none;
-  border-color: var(--primary-color);
+  background-color: var(--bg-0);
+  box-shadow: var(--shadow-focus);
 }
 
 .issue-report-body textarea.form-control {
@@ -127,8 +126,15 @@
 }
 
 .issue-report-body select.form-control {
+  /* Keep the global Nav0 <select> treatment — only need to add the right
+     padding to fit the chevron, since .form-control's padding is for text inputs. */
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  appearance: none;
+  -webkit-appearance: none;
   cursor: pointer;
-  appearance: auto;
 }
 
 /* Attachments */
@@ -144,18 +150,18 @@
   justify-content: center;
   gap: 8px;
   padding: 12px;
-  border: 2px dashed var(--border-color);
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
+  border: 2px dashed var(--border-1);
+  border-radius: var(--r-md);
+  color: var(--fg-3);
   font-size: var(--font-sm);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .attachment-drop-zone:hover {
-  border-color: var(--primary-color);
-  color: var(--text-color);
-  background-color: var(--bg-color);
+  border-color: var(--accent);
+  color: var(--fg-2);
+  background-color: var(--bg-2);
 }
 
 .attachment-previews {
@@ -168,9 +174,9 @@
   position: relative;
   width: 64px;
   height: 64px;
-  border-radius: var(--radius-md);
+  border-radius: var(--r-md);
   overflow: hidden;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-1);
 }
 
 .attachment-preview img {
@@ -185,8 +191,8 @@
   right: 2px;
   width: 18px;
   height: 18px;
-  border-radius: var(--radius-circle);
-  background-color: var(--error-color);
+  border-radius: var(--r-full);
+  background-color: var(--danger);
   color: white;
   border: none;
   cursor: pointer;
@@ -199,7 +205,7 @@
 }
 
 .attachment-remove:hover {
-  background-color: #c0392b;
+  filter: brightness(0.9);
 }
 
 /* System info preview */
@@ -209,10 +215,10 @@
 
 .sysinfo-preview {
   font-size: var(--font-xs);
-  color: var(--text-secondary);
-  background-color: var(--bg-color);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  color: var(--fg-3);
+  background-color: var(--bg-2);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-md);
   padding: 8px 12px;
   line-height: 1.5;
   white-space: pre-line;
@@ -226,29 +232,29 @@
 }
 
 .issue-report-status.success {
-  color: var(--success-color);
-  background-color: var(--success-light);
+  color: var(--success);
+  background-color: var(--success-soft);
 }
 
 .issue-report-status.error {
-  color: var(--error-color);
-  background-color: var(--error-light);
+  color: var(--danger);
+  background-color: var(--danger-soft);
 }
 
 .issue-copy-url-btn {
   margin-left: 4px;
   padding: 2px 8px;
   font-size: var(--font-xs);
-  border: 1px solid var(--success-color);
-  border-radius: 4px;
+  border: 1px solid var(--success);
+  border-radius: var(--r-md);
   background: transparent;
-  color: var(--success-color);
+  color: var(--success);
   cursor: pointer;
   vertical-align: middle;
 }
 
 .issue-copy-url-btn:hover {
-  background: var(--success-color);
+  background: var(--success);
   color: #fff;
 }
 
@@ -258,14 +264,14 @@
   justify-content: flex-end;
   gap: 8px;
   padding: 12px 20px 16px 20px;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-1);
 }
 
 .issue-report-actions .btn {
   padding: 8px 20px;
   font-size: var(--font-sm);
   font-weight: 500;
-  border-radius: var(--radius-md);
+  border-radius: var(--r-md);
   cursor: pointer;
   transition: all var(--transition-fast);
   border: 1px solid transparent;

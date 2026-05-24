@@ -1,16 +1,21 @@
 @import url('../../styles/global.css');
 
-/* ==========================================================================
-   Bookmarks Page — Matches Downloads page design scheme
-   ========================================================================== */
+/* ============================================================
+   Bookmarks — editorial dashboard layout.
+   Centered card with stranded pills becomes a left-aligned
+   masthead with a stats line. Folder tabs become a segmented
+   control with counts. Cross-folder category chips sit
+   in a dashed-divider row underneath. Bookmark items become
+   real rows: saved-date | favicon tile | title + host (host
+   in --accent) | category tag | hover-revealed actions.
+   ============================================================ */
 
 .bookmarks-page {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: var(--bg-light);
   min-height: 100vh;
-  color: var(--text-color);
+  background: var(--bg-0);
+  color: var(--fg-2);
   opacity: 0;
-  transition: opacity var(--transition-medium) ease;
+  transition: opacity var(--transition-medium, 220ms) ease;
 }
 
 .bookmarks-page.loaded {
@@ -18,449 +23,595 @@
 }
 
 .bookmarks-wrapper {
-  max-width: 840px;
+  max-width: 1080px;
   margin: 0 auto;
-  padding: 48px 24px 60px;
+  padding: 48px 56px 80px;
 }
 
-/* --------------------------------------------------------------------------
-   Header
-   -------------------------------------------------------------------------- */
+/* ---- Editorial masthead --------------------------------- */
+.bookmarks-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--nav0-red-600);
+}
+
 .bookmarks-title {
-  font-size: 28px;
-  font-weight: 600;
-  text-align: center;
-  margin: 0 0 6px;
-  color: var(--primary-dark);
-  letter-spacing: -0.3px;
+  font-size: 48px;
+  font-weight: 200;
+  letter-spacing: -0.5px;
+  color: var(--fg-1);
+  margin: 0;
+  line-height: 1.2;
 }
 
-.bookmarks-subtitle {
-  font-size: var(--font-md);
-  color: var(--text-light);
-  text-align: center;
-  margin: 0 0 32px;
+/* ---- Toolbar (search + folder seg + clear) -------------- */
+.bookmarks-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 28px 0 14px;
 }
 
-/* --------------------------------------------------------------------------
-   Search
-   -------------------------------------------------------------------------- */
 .search-container {
   position: relative;
-  max-width: 520px;
-  margin: 0 auto 28px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 12px 0 36px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-1);
+  border-radius: 3px;
+  color: var(--fg-3);
+  transition:
+    background var(--dur-fast),
+    border-color var(--dur-fast),
+    box-shadow var(--dur-fast);
 }
 
-.search-input {
-  width: 100%;
-  box-sizing: border-box;
-  font-size: var(--font-md);
-  padding: 10px 16px 10px 40px;
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  outline: none;
-  color: var(--text-color);
-  background: var(--bg-light);
-  transition: border-color var(--transition-fast);
-}
-
-.search-input:focus {
-  border-color: var(--primary-color);
+.search-container:focus-within {
+  background: var(--bg-0);
+  border-color: var(--fg-1);
+  box-shadow: var(--shadow-focus);
 }
 
 .search-icon {
   position: absolute;
-  left: 14px;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--text-secondary);
+  color: var(--fg-3);
+  pointer-events: none;
 }
 
-/* --------------------------------------------------------------------------
-   Tab Filter Pills (Queue / Reference)
-   -------------------------------------------------------------------------- */
-.tab-filters {
-  display: flex;
-  gap: 6px;
-  justify-content: center;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
+.search-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--fg-1);
+  padding: 0;
 }
 
-.tab-pill {
-  font-size: var(--font-sm);
-  font-weight: 400;
-  color: var(--text-secondary);
-  background: var(--bg-color);
-  border: none;
-  padding: 5px 14px;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: all var(--transition-fast) ease;
+.search-input::placeholder {
+  color: var(--fg-4);
 }
 
-.tab-pill:hover {
-  background: var(--border-color);
+/* Folder segmented control — replaces tab pills */
+.folder-seg {
+  display: inline-flex;
+  background: var(--bg-2);
+  border: 1px solid var(--border-1);
+  border-radius: 3px;
+  padding: 2px;
+  gap: 0;
 }
 
-.tab-pill.active {
+.folder-seg-btn {
+  border: 0;
+  background: transparent;
+  height: 28px;
+  padding: 0 12px;
+  font-family: inherit;
+  font-size: 12px;
   font-weight: 500;
-  color: var(--bg-light);
-  background: var(--primary-color);
+  color: var(--fg-3);
+  border-radius: 2px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition:
+    background var(--dur-fast),
+    color var(--dur-fast);
 }
 
-/* --------------------------------------------------------------------------
-   Category Filter Pills
-   -------------------------------------------------------------------------- */
+.folder-seg-btn:hover {
+  color: var(--fg-1);
+}
+
+.folder-seg-btn.active {
+  background: var(--fg-1);
+  color: var(--bg-0);
+}
+
+.folder-seg-count {
+  font-size: 10.5px;
+  color: var(--fg-4);
+  margin-left: 2px;
+}
+
+.folder-seg-btn.active .folder-seg-count {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Danger ghost Clear button */
+.btn-clear-all {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border-1);
+  background: var(--bg-0);
+  border-radius: 3px;
+  color: var(--danger);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition:
+    background var(--dur-fast),
+    border-color var(--dur-fast);
+}
+
+.btn-clear-all:hover {
+  background: var(--danger-soft, #fdecea);
+  border-color: var(--danger);
+}
+
+/* ---- Category chip row (cross-folder filters) ----------- */
+.cat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 28px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border-1);
+}
+
+.cat-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--fg-3);
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
 .category-filters {
   display: flex;
-  gap: 6px;
-  justify-content: center;
-  margin-bottom: 28px;
+  align-items: center;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
+/* Category chip — matches the Downloads .type-pill grammar: soft pill
+   with per-category tint via inline style, icon + capitalized label,
+   active state inverts to a solid fill. */
 .cat-pill {
-  font-size: var(--font-sm);
-  font-weight: 400;
-  color: var(--text-secondary);
-  background: var(--bg-color);
-  border: none;
-  padding: 5px 14px;
-  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  background: var(--bg-0);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-pill, 6px);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg-2);
   cursor: pointer;
-  transition: all var(--transition-fast) ease;
+  text-transform: capitalize;
+  transition:
+    background var(--dur-fast),
+    border-color var(--dur-fast),
+    color var(--dur-fast),
+    filter var(--dur-fast);
 }
 
 .cat-pill:hover {
-  background: var(--border-color);
+  filter: brightness(0.97);
 }
 
-.cat-pill.active {
-  font-weight: 500;
-  color: var(--bg-light);
+.cat-pill svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
 }
 
-/* --------------------------------------------------------------------------
-   Stale Bookmarks Gauge
-   -------------------------------------------------------------------------- */
+/* ---- Stale gauge & review panel ------------------------- */
 .stale-gauge {
-  margin-bottom: 28px;
-  padding: 14px 20px;
-  background: var(--bg-color);
-  border-radius: 10px;
-  border: 1px solid var(--border-color);
+  margin-bottom: 18px;
+  padding: 12px 18px;
+  background: var(--bg-0);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-md);
 }
 
 .stale-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
 }
 
 .stale-label {
-  font-size: var(--font-sm);
-  color: var(--text-secondary);
+  font-size: 12px;
+  color: var(--fg-3);
 }
 
 .stale-review-btn {
-  font-size: var(--font-sm);
-  color: var(--text-color);
-  background: var(--bg-light);
-  border: 1px solid var(--border-color);
-  padding: 5px 14px;
-  border-radius: 20px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg-1);
+  background: var(--bg-0);
+  border: 1px solid var(--border-1);
+  padding: 5px 12px;
+  border-radius: 3px;
   cursor: pointer;
-  transition: background var(--transition-fast);
+  transition:
+    background var(--dur-fast),
+    border-color var(--dur-fast);
 }
 
 .stale-review-btn:hover {
-  background: var(--bg-color);
+  background: var(--bg-2);
+  border-color: var(--border-2);
 }
 
-/* --------------------------------------------------------------------------
-   Stale Review Panel
-   -------------------------------------------------------------------------- */
 .stale-review-panel {
-  margin-bottom: 28px;
+  margin-bottom: 18px;
+  padding: 16px 18px;
+  background: var(--bg-0);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-md);
 }
 
 .stale-review-header {
-  font-size: var(--font-sm);
-  color: var(--text-color);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg-1);
   margin-bottom: 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
 }
 
 .stale-review-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
   align-items: center;
   gap: 14px;
-  padding: 10px 4px;
-  border-bottom: 1px solid var(--border-color);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-1);
+}
+
+.stale-review-item:last-child {
+  border-bottom: 0;
 }
 
 .stale-review-item .bk-favicon {
-  width: 30px;
-  height: 30px;
-  border-radius: 7px;
-  background: var(--bg-color);
+  width: 24px;
+  height: 24px;
+  border-radius: var(--r-sm);
+  background: var(--bg-2);
+  border: 1px solid var(--border-1);
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.stale-review-item .bk-favicon img {
-  width: 16px;
-  height: 16px;
+.stale-review-item .bk-favicon img,
+.stale-review-item .bk-favicon svg {
+  width: 14px;
+  height: 14px;
+  display: block;
 }
 
 .stale-review-content {
-  flex: 1;
   min-width: 0;
 }
 
 .stale-review-title {
-  font-size: var(--font-md);
-  color: var(--text-color);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--fg-1);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .stale-review-meta {
-  font-size: var(--font-sm);
-  color: var(--text-secondary);
-  margin-top: 2px;
+  font-size: 12px;
+  color: var(--fg-3);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .stale-review-actions {
-  display: flex;
-  gap: 4px;
-  flex-shrink: 0;
+  display: inline-flex;
+  gap: 2px;
 }
 
-/* --------------------------------------------------------------------------
-   Bookmarks List
-   -------------------------------------------------------------------------- */
-.bookmarks-container {
-  border-top: 1px solid var(--border-color);
-}
-
-.bookmarks-list {
-  /* No inner scroll — uses page scroll like downloads */
-}
-
-.no-bookmarks {
-  text-align: center;
-  padding: 60px 0;
-  color: var(--text-secondary);
-  font-size: var(--font-md);
-  display: none;
-}
-
-/* --------------------------------------------------------------------------
-   Bookmark Row
-   -------------------------------------------------------------------------- */
-.bookmark-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 13px 4px;
-  cursor: pointer;
+.stale-review-actions .action-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-xs);
+  border: 0;
   background: transparent;
-  border-bottom: 1px solid var(--border-color);
-  transition: background var(--transition-fast) ease;
-  position: relative;
-}
-
-.bookmark-item:hover {
-  background: #fcfcfc;
-}
-
-/* Stagger animation */
-.bookmark-item {
-  opacity: 0;
-  transform: translateY(4px);
-  transition:
-    opacity 0.25s ease,
-    transform 0.25s ease,
-    background var(--transition-fast) ease;
-}
-
-.bookmarks-page.loaded .bookmark-item {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Favicon icon box — matches download-type-icon */
-.bk-favicon {
-  width: 30px;
-  height: 30px;
-  border-radius: 7px;
-  flex-shrink: 0;
-  display: flex;
+  color: var(--fg-3);
+  cursor: pointer;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-color);
+  padding: 0;
 }
 
-.bk-favicon img {
-  width: 16px;
-  height: 16px;
-  border-radius: 2px;
+.stale-review-actions .action-btn:hover {
+  background: var(--bg-2);
+  color: var(--fg-1);
 }
 
-.bk-favicon svg {
-  width: 16px;
-  height: 16px;
-}
-
-/* Content area */
-.bookmark-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.bookmark-title-row {
+/* ---- Folder section header ------------------------------ */
+.bookmarks-folder {
   display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 8px 0 8px;
+  padding-bottom: 8px;
+}
+
+.folder-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg-1);
+  letter-spacing: -0.1px;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
 }
 
+.folder-label .folder-icon {
+  color: var(--fg-3);
+  display: inline-flex;
+  align-items: center;
+}
+
+.folder-sub {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--fg-3);
+}
+
+/* ---- Bookmarks list (rows) ------------------------------ */
+.bookmarks-container {
+  margin-top: 0;
+}
+
+.bookmarks-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--border-1);
+}
+
+.bookmark-item {
+  display: grid;
+  grid-template-columns: 90px 24px 1fr auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--border-1);
+  transition: background var(--dur-fast);
+  cursor: pointer;
+}
+
+.bookmark-item:hover {
+  background: var(--bg-3);
+}
+
+/* Saved-date column ("May 18", "Apr 28") */
+.bookmark-date {
+  font-size: 12px;
+  color: var(--fg-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 24x24 favicon tile — same as history rows */
+.bk-favicon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-2);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-sm);
+}
+
+.bk-favicon img,
+.bk-favicon svg {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  display: block;
+}
+
+.bookmark-content {
+  min-width: 0;
+}
+
 .bookmark-title {
-  font-size: var(--font-md);
-  color: var(--text-color);
-  font-weight: 400;
+  font-size: 14px;
+  color: var(--fg-1);
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .bookmark-meta {
-  font-size: var(--font-sm);
-  color: var(--text-secondary);
-  margin-top: 2px;
-  display: flex;
-  align-items: center;
+  font-size: 12px;
+  color: var(--fg-3);
+  display: inline-flex;
   gap: 8px;
-  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
-/* Badges — same as downloads */
-.badge {
-  font-size: 10px;
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-weight: 600;
+.bookmark-meta .host {
+  color: var(--accent);
+}
+
+.bookmark-meta .dot {
+  color: var(--fg-4);
+}
+
+/* Badges cell — wraps the dormant badge and the category tag side-by-side */
+.bookmark-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Category tag — pill with per-category tint via inline style. Icon +
+   capitalized label, matches the toolbar .cat-pill grammar. */
+.badge-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 9px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--bg-0);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-pill, 6px);
+  color: var(--fg-2);
+  letter-spacing: 0;
+  text-transform: capitalize;
   flex-shrink: 0;
   white-space: nowrap;
 }
 
-.badge-stale {
-  background: var(--error-light);
-  color: var(--error-color);
-}
-
-.badge-queue-age {
-  font-weight: 500;
-}
-
-.badge-category {
-  font-weight: 500;
-}
-
-/* Visit count column — matches download-size */
-.bookmark-visits {
-  flex-shrink: 0;
-  text-align: right;
-  min-width: 80px;
-  font-size: 13px;
-  color: var(--text-secondary);
-  font-weight: 600;
-}
-
-/* Row actions — matches download-actions */
-.bookmark-actions {
-  display: flex;
-  gap: 4px;
-  flex-shrink: 0;
-  justify-content: flex-end;
-  align-items: center;
-}
-
-.action-btn {
-  width: 22px;
-  height: 22px;
-  border-radius: 4px;
-  border: 1px solid var(--border-color);
-  background: var(--bg-light);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  color: var(--text-secondary);
-  transition:
-    color var(--transition-fast),
-    border-color var(--transition-fast);
-}
-
-.action-btn:hover {
-  color: var(--text-color);
-  border-color: var(--border-color-dark);
-}
-
-.action-btn svg {
+.badge-category svg {
   width: 12px;
   height: 12px;
+  flex-shrink: 0;
 }
 
-/* Hide actions until hover */
-.action-btn.move-btn,
-.action-btn.remove-btn {
+/* "Dormant" badge — same shape as category tag, danger tint */
+.badge-stale {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 9px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--danger-soft, #fdecea);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  color: var(--danger);
+  border-radius: var(--r-pill, 6px);
+  letter-spacing: 0;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Visit count chip — secondary pill */
+.bookmark-visits {
+  font-size: 11px;
+  color: var(--fg-3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Hover-revealed action buttons (move / remove) */
+.bookmark-actions {
+  display: inline-flex;
+  gap: 2px;
   opacity: 0;
-  transition: opacity var(--transition-fast);
+  transition: opacity var(--dur-fast);
 }
 
-.bookmark-item:hover .action-btn.move-btn,
-.bookmark-item:hover .action-btn.remove-btn {
+.bookmark-item:hover .bookmark-actions {
   opacity: 1;
 }
 
-/* --------------------------------------------------------------------------
-   Clear All Footer
-   -------------------------------------------------------------------------- */
-.bookmarks-footer {
+.action-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-xs);
+  border: 0;
+  background: transparent;
+  color: var(--fg-3);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition:
+    background var(--dur-fast),
+    color var(--dur-fast);
+}
+
+.action-btn:hover {
+  background: var(--bg-2);
+  color: var(--fg-1);
+}
+
+.action-btn.remove-btn:hover {
+  background: var(--danger-soft, #fdecea);
+  color: var(--danger);
+}
+
+.action-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ---- Empty + footer ------------------------------------ */
+.no-bookmarks {
   text-align: center;
-  margin-top: 28px;
+  padding: 60px 0;
+  color: var(--fg-3);
+  font-size: 12px;
   display: none;
 }
 
-.btn-clear-all {
-  font-size: 13px;
-  color: var(--text-color);
-  background: var(--bg-light);
-  border: 1px solid var(--border-color);
-  padding: 8px 28px;
-  border-radius: var(--radius-lg);
-  cursor: pointer;
-  transition: background var(--transition-fast);
-}
-
-.btn-clear-all:hover {
-  background: var(--bg-color);
-}
-
-/* --------------------------------------------------------------------------
-   Loading Indicator
-   -------------------------------------------------------------------------- */
-.loading-indicator {
-  text-align: center;
-  padding: var(--spacing-sm);
-  color: var(--text-secondary);
-  font-size: var(--font-sm);
+.bookmarks-footer {
+  margin-top: 28px;
 }

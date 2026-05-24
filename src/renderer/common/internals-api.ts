@@ -83,6 +83,10 @@ declare global {
       fetchBrowsingHistoryStats: (
         appWindowId: string
       ) => Promise<Array<{ date: string; count: number; activeDuration: number }>>;
+      fetchTopSites: (
+        appWindowId: string,
+        limit?: number
+      ) => Promise<Array<{ url: string; title: string; faviconUrl: string; visits: number }>>;
       handleFileSelection: (
         appWindowId: string,
         tabId: string,

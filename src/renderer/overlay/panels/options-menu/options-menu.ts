@@ -58,7 +58,6 @@ const OPTIONS_MENU_HTML = `
       <div class="dropdown-item has-submenu" id="om-history-submenu-container">
         <i data-lucide="clock" width="16" height="16"></i>
         <span class="dropdown-item-text">History</span>
-        <span id="om-history-shortcut" class="keyboard-shortcut"></span>
         <i data-lucide="chevron-right" class="submenu-indicator" width="14" height="14"></i>
 
         <!-- History Submenu -->
@@ -67,6 +66,7 @@ const OPTIONS_MENU_HTML = `
           <div class="dropdown-item" id="om-history-option">
             <i data-lucide="clock" width="16" height="16"></i>
             <span class="dropdown-item-text">Show All History</span>
+            <span id="om-history-shortcut" class="keyboard-shortcut"></span>
           </div>
 
           <div class="divider"></div>

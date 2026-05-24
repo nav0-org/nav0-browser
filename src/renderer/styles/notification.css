@@ -12,8 +12,8 @@
 /* Base Notification Styles */
 .notification {
   padding: 16px 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   background-color: #fafafa;
   color: #333;
   font-weight: 500;
@@ -44,15 +44,15 @@
 }
 
 .notification.info {
-  border-left-color: #3b82f6;
+  border-left-color: #2563eb;
 }
 
 .notification.warning {
-  border-left-color: #f59e0b;
+  border-left-color: #d97706;
 }
 
 .notification.error {
-  border-left-color: #ef4444;
+  border-left-color: #dc2626;
 }
 
 /* Notification Icon */

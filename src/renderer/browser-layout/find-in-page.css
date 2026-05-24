@@ -4,8 +4,8 @@
 
 .find-in-page-bar {
   flex-shrink: 0;
-  background-color: var(--bg-light);
-  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-0);
+  border-bottom: 1px solid var(--border-1);
 }
 
 .find-in-page-bar .find-bar-wrapper {
@@ -17,7 +17,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  background-color: var(--bg-light);
+  background-color: var(--bg-0);
   animation: findBarSlideDown 0.15s ease-out;
   flex: 1;
 }
@@ -49,7 +49,7 @@
 }
 
 .find-in-page-bar .search-icon {
-  color: var(--text-light);
+  color: var(--fg-4);
   flex-shrink: 0;
 }
 
@@ -57,7 +57,7 @@
   border: none;
   outline: none;
   font-size: 13px;
-  color: var(--text-color);
+  color: var(--fg-2);
   background: transparent;
   flex: 1;
   min-width: 120px;
@@ -66,16 +66,16 @@
 }
 
 .find-in-page-bar .find-input::placeholder {
-  color: var(--text-light);
+  color: var(--fg-4);
 }
 
 .find-in-page-bar .find-input.no-match {
-  color: #e74c3c;
+  color: var(--danger);
 }
 
 .find-in-page-bar .match-counter {
   font-size: 11px;
-  color: var(--text-secondary);
+  color: var(--fg-3);
   white-space: nowrap;
   flex-shrink: 0;
   min-width: 48px;
@@ -83,7 +83,7 @@
 }
 
 .find-in-page-bar .match-counter.no-match {
-  color: #e74c3c;
+  color: var(--danger);
 }
 
 /* Actions */
@@ -97,7 +97,7 @@
 .find-in-page-bar .find-separator {
   width: 1px;
   height: 18px;
-  background-color: var(--border-color);
+  background-color: var(--border-1);
   margin: 0 3px;
 }
 
@@ -109,9 +109,9 @@
   width: 28px;
   height: 28px;
   border: 1px solid transparent;
-  border-radius: 4px;
+  border-radius: var(--r-md);
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--fg-3);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -120,8 +120,8 @@
 }
 
 .find-in-page-bar .find-toggle-btn:hover {
-  background-color: var(--bg-hover);
-  color: var(--text-color);
+  background-color: var(--bg-3);
+  color: var(--fg-2);
 }
 
 .find-in-page-bar .find-toggle-btn.active {
@@ -131,7 +131,7 @@
 }
 
 .find-in-page-bar .find-toggle-btn:focus-visible {
-  outline: 2px solid var(--text-color);
+  outline: 2px solid var(--fg-2);
   outline-offset: 1px;
 }
 
@@ -151,17 +151,17 @@
   width: 28px;
   height: 28px;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--r-md);
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--fg-3);
   cursor: pointer;
   transition: all 0.15s;
   padding: 0;
 }
 
 .find-in-page-bar .find-nav-btn:hover {
-  background-color: var(--bg-hover);
-  color: var(--text-color);
+  background-color: var(--bg-3);
+  color: var(--fg-2);
 }
 
 .find-in-page-bar .find-nav-btn:disabled {
@@ -171,15 +171,15 @@
 
 .find-in-page-bar .find-nav-btn:disabled:hover {
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--fg-3);
 }
 
 .find-in-page-bar .find-nav-btn:focus-visible {
-  outline: 2px solid var(--text-color);
+  outline: 2px solid var(--fg-2);
   outline-offset: 1px;
 }
 
 .find-in-page-bar .find-close-btn:hover {
-  background-color: #fee;
-  color: #c00;
+  background-color: var(--danger-soft);
+  color: var(--danger);
 }

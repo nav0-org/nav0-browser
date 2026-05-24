@@ -53,28 +53,28 @@ Main Process (src/main/)          Renderer Process (src/renderer/)
 
 Every feature is encapsulated in a manager class:
 
-| Manager                  | Location             | Purpose                                           |
-| ------------------------ | -------------------- | ------------------------------------------------- |
-| `AppWindowManager`       | `src/main/browser/`  | Window lifecycle, multi-window support            |
-| `AppWindow`              | `src/main/browser/`  | Single window with tabs and overlays              |
-| `Tab`                    | `src/main/browser/`  | Individual tab (WebContentsView)                  |
-| `AppMenuManager`         | `src/main/browser/`  | Native application menu (File/Edit/View/…)        |
-| `SessionManager`         | `src/main/browser/`  | Persists/restores open windows + tabs on relaunch |
-| `UnifiedOverlayManager`  | `src/main/browser/`  | Hosts all overlay panels in one WebContentsView   |
-| `NotificationManager`    | `src/main/browser/`  | Web Notification API with per-origin gating       |
-| `DatabaseManager`        | `src/main/database/` | SQLite connection management (normal + private)   |
-| `SchemaManager`          | `src/main/database/` | Database schema versioning                        |
-| `DataStoreManager`       | `src/main/database/` | electron-store key-value wrapper                  |
-| `DownloadManager`        | `src/main/browser/`  | Download tracking and control                     |
-| `BookmarkManager`        | `src/main/browser/`  | Bookmark CRUD operations                          |
-| `BrowsingHistoryManager` | `src/main/browser/`  | Browsing history CRUD                             |
-| `PermissionManager`      | `src/main/browser/`  | Site permission policies + prompts                |
-| `SettingsEnforcer`       | `src/main/settings/` | Applies user preferences to sessions              |
-| `ReaderModeManager`      | `src/main/browser/`  | Reader mode extraction (@mozilla/readability)     |
-| `SSLManager`             | `src/main/browser/`  | Certificate validation + interstitial page        |
-| `FindInPageManager`      | `src/main/browser/`  | In-page text search                               |
-| `SearchEngine`           | `src/main/web/`      | Selects the active search engine + suggestions    |
-| `CLIInstaller`           | `src/main/cli/`      | Installs `nav0` shim into PATH (macOS/Windows)    |
+| Manager                  | Location                          | Purpose                                           |
+| ------------------------ | --------------------------------- | ------------------------------------------------- |
+| `AppWindowManager`       | `src/main/browser/`               | Window lifecycle, multi-window support            |
+| `AppWindow`              | `src/main/browser/`               | Single window with tabs and overlays              |
+| `Tab`                    | `src/main/browser/`               | Individual tab (WebContentsView)                  |
+| `AppMenuManager`         | `src/main/browser/`               | Native application menu (File/Edit/View/…)        |
+| `SessionManager`         | `src/main/browser/`               | Persists/restores open windows + tabs on relaunch |
+| `UnifiedOverlayManager`  | `src/main/browser/`               | Hosts all overlay panels in one WebContentsView   |
+| `NotificationManager`    | `src/main/browser/`               | Web Notification API with per-origin gating       |
+| `DatabaseManager`        | `src/main/database/`              | SQLite connection management (normal + private)   |
+| `SchemaManager`          | `src/main/database/`              | Database schema versioning                        |
+| `DataStoreManager`       | `src/main/database/`              | electron-store key-value wrapper                  |
+| `DownloadManager`        | `src/main/browser/`               | Download tracking and control                     |
+| `BookmarkManager`        | `src/main/browser/`               | Bookmark CRUD operations                          |
+| `BrowsingHistoryManager` | `src/main/browser/`               | Browsing history CRUD                             |
+| `PermissionManager`      | `src/main/browser/`               | Site permission policies + prompts                |
+| `SettingsEnforcer`       | `src/main/settings/`              | Applies user preferences to sessions              |
+| `ReaderModeManager`      | `src/main/browser/`               | Reader mode extraction (@mozilla/readability)     |
+| `SSLManager`             | `src/main/browser/`               | Certificate validation + interstitial page        |
+| `FindInPageManager`      | `src/main/browser/`               | In-page text search                               |
+| `SearchEngine`           | `src/main/web/`                   | Selects the active search engine + suggestions    |
+| `CLIInstaller`           | `src/main/cli/`                   | Installs `nav0` shim into PATH (macOS/Windows)    |
 | UA switcher              | `src/main/browser/ua-switcher.ts` | Strips "Electron/…" from UA + aligns Client Hints |
 
 ### Unified overlay system
@@ -390,6 +390,24 @@ When contributing to Nav0, always keep these principles in mind:
 - No inline styles — use CSS files in `src/renderer/` (each module owns its CSS)
 - Prefer extending the unified overlay over creating new renderer entry points
 - Let Prettier format your files; don't fight the lint hook
+
+## Design System
+
+**Before making any change to HTML, CSS, or DOM-building TypeScript under `src/renderer/**`, read [`DESIGN.md`](DESIGN.md).\*\* It is the authoritative reference for design tokens, layout patterns, component classes, iconography (Lucide), motion, and the editorial dashboard skeleton used across built-in pages.
+
+Hard rules (full details in `DESIGN.md`):
+
+- **Tokens, not literals.** Always use CSS variables from `src/renderer/styles/global.css` — never hardcode colours, off-scale spacing (stick to `--spacing-xs/sm/md/lg/xl/xxl`), or off-scale radii (Nav0 caps at `--r-lg` = 6px; only `--r-full` for circles).
+- **Chrome surfaces are warm off-white, content stays paper-white.** Tab strip, nav bar, and overlay panels use `--chrome-1` / `--chrome-2` / `--tab-inactive`; active tab and content cards stay on `--bg-0`.
+- **Row highlights are `--bg-3` plus a 2-px `--nav0-red-600` anchor bar on the left.** This applies to options-menu items, Command-K results, URL autocomplete, new-tab inline search, and the masthead divider on every built-in page.
+- **Paper-flat, not glass.** Shadows come only from `--shadow-sm/md/lg`, `--new-tab-card-shadow`, and the two `--shadow-focus*` halos. No coloured glows, no gradients on surfaces, no backdrop-blur "glass" outside the established command-palette pattern.
+- **Mono is for code only** (`<code>`, `<kbd>`, hashes, paths, error codes, reader-mode `<pre>`). UI chrome — versions, dates, durations, labels — uses the system sans stack.
+- **Icons via Lucide only.** `<i data-lucide="<name>">` + `createIcons({ icons })`. No raw `<svg>` markup, no new icon libraries.
+- **Reuse `global.css` components.** `.btn`, `.btn-primary/secondary/ghost/link`, `.form-control`, `.card`, `.alert-*`, `.badge-*`, `.keycap`, flex/spacing/typography utilities — all pre-defined. Only fork into a page-local class when the design genuinely diverges.
+- **`--private-bg` is reserved** for the private-window chrome signal — never reuse for general danger/destructive affordances; use `--danger` instead.
+- **Honour `prefers-reduced-motion`** for any new animation.
+
+If a UI change introduces a new token, utility, or component, add it to `global.css` **and** document it in `DESIGN.md` in the same change. Drift between the two means the docs are wrong — fix them.
 
 ## Default Browser Settings
 

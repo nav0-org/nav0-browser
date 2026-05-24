@@ -17,49 +17,78 @@
 
 #overlay-url-autocomplete .url-autocomplete-panel {
   flex: 1;
-  background-color: var(--bg-light);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  background-color: var(--chrome-2);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-lg);
   box-shadow: var(--shadow-md);
   overflow-y: auto;
   max-height: 100%;
 }
 
 #overlay-url-autocomplete .url-autocomplete-results {
-  padding: var(--spacing-xs) 0;
+  padding: 0;
 }
 
+/* Row layout mirrors command-K's .result-item exactly so the two surfaces
+   render the same shape. min-height locks the rendered row to the value
+   used by the dropdown-height estimator (ITEM_HEIGHT), so no gap appears
+   after the last row. */
 #overlay-url-autocomplete .url-ac-item {
   display: flex;
   align-items: center;
-  padding: 6px var(--spacing-md);
+  padding: 10px var(--spacing-md);
+  min-height: 58px;
   cursor: pointer;
+  position: relative;
 }
 
 #overlay-url-autocomplete .url-ac-item:hover,
 #overlay-url-autocomplete .url-ac-item.active {
-  background-color: var(--bg-color);
+  background-color: var(--bg-3);
 }
 
-#overlay-url-autocomplete .url-ac-icon,
-#overlay-url-autocomplete .url-ac-favicon {
-  width: 24px;
-  height: 24px;
+#overlay-url-autocomplete .url-ac-item:hover::before,
+#overlay-url-autocomplete .url-ac-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--nav0-red-600);
+}
+
+#overlay-url-autocomplete .url-ac-icon {
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 10px;
-  border-radius: var(--radius-sm);
-  background-color: var(--bg-hover);
-  color: var(--text-secondary);
+  margin-right: 12px;
+  border-radius: var(--r-md);
+  background-color: var(--bg-2);
+  color: var(--fg-3);
   flex-shrink: 0;
+}
+
+#overlay-url-autocomplete .url-ac-favicon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  border-radius: var(--r-md);
+  background-color: var(--bg-2);
+  color: var(--fg-3);
+  flex-shrink: 0;
+  font-size: var(--font-lg);
   font-weight: bold;
-  font-size: 12px;
 }
 
 #overlay-url-autocomplete .url-ac-favicon img {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   border-radius: 2px;
 }
 
@@ -70,32 +99,54 @@
 
 #overlay-url-autocomplete .url-ac-title {
   font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: var(--text-color);
-}
-
-#overlay-url-autocomplete .url-ac-subtitle {
-  font-size: var(--font-xs);
-  color: var(--text-secondary);
+  margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-#overlay-url-autocomplete .url-ac-trailing {
-  margin-left: var(--spacing-sm);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
+#overlay-url-autocomplete .url-ac-url {
+  font-size: var(--font-sm);
+  color: var(--accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 #overlay-url-autocomplete .url-ac-meta {
+  display: flex;
+  align-items: center;
   font-size: var(--font-xs);
-  color: var(--text-light);
+  color: var(--fg-4);
+  margin-top: 2px;
 }
 
-#overlay-url-autocomplete .url-ac-bookmark-flag {
-  color: var(--primary-color, #3b82f6);
+#overlay-url-autocomplete .url-ac-meta span {
+  display: flex;
+  align-items: center;
+  margin-right: var(--spacing-sm);
+}
+
+/* Subline collapses the former url + meta rows into a single row. Meta
+   appears first; each child keeps its original color/typography. */
+#overlay-url-autocomplete .url-ac-subline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  min-width: 0;
+}
+
+#overlay-url-autocomplete .url-ac-subline .url-ac-meta {
+  margin-top: 0;
+  flex-shrink: 0;
+}
+
+#overlay-url-autocomplete .url-ac-subline .url-ac-meta span {
+  margin-right: 0;
+}
+
+#overlay-url-autocomplete .url-ac-subline .url-ac-url {
+  flex: 1;
+  min-width: 0;
 }

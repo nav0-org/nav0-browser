@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https: http:;"
+      content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:;"
     />
     <title>Settings</title>
   </head>
@@ -12,11 +12,6 @@
     <div class="settings-layout">
       <!-- Sidebar -->
       <nav class="settings-sidebar">
-        <div class="sidebar-brand">
-          <span class="sidebar-brand-name">Nav0</span>
-          <span class="sidebar-brand-tag">Settings</span>
-        </div>
-
         <div class="sidebar-search">
           <i data-lucide="search" class="sidebar-search-icon"></i>
           <input
@@ -82,7 +77,6 @@
           >
             <header class="page-header">
               <h1 class="page-title">General</h1>
-              <p class="page-subtitle">Basic browser behavior and file handling.</p>
             </header>
 
             <!-- Downloads Location -->
@@ -119,7 +113,6 @@
           >
             <header class="page-header">
               <h1 class="page-title">On Startup</h1>
-              <p class="page-subtitle">What opens when Nav0 launches.</p>
             </header>
 
             <div class="setting-group">
@@ -192,7 +185,6 @@
           >
             <header class="page-header">
               <h1 class="page-title">Search</h1>
-              <p class="page-subtitle">What happens when you type in the URL bar.</p>
             </header>
 
             <!-- Default Search Engine -->
@@ -282,9 +274,6 @@
           >
             <header class="page-header">
               <h1 class="page-title">Privacy &amp; Security</h1>
-              <p class="page-subtitle">
-                What the browser blocks by default, and what sites can do.
-              </p>
             </header>
 
             <!-- Third-Party Cookie Policy -->
@@ -668,7 +657,6 @@
           >
             <header class="page-header">
               <h1 class="page-title">Site Permissions</h1>
-              <p class="page-subtitle">Permissions you've granted or denied to websites.</p>
             </header>
 
             <div class="permissions-search">
@@ -709,7 +697,6 @@
           >
             <header class="page-header">
               <h1 class="page-title">Network</h1>
-              <p class="page-subtitle">How the browser identifies itself and how it connects.</p>
             </header>
 
             <!-- User Agent -->
@@ -908,22 +895,7 @@
           >
             <header class="page-header">
               <h1 class="page-title">Keyboard Shortcuts</h1>
-              <p class="page-subtitle">
-                Click any shortcut to rebind. Backspace clears, Escape cancels.
-              </p>
             </header>
-
-            <!-- Category Filter -->
-            <div class="shortcuts-filter">
-              <button class="filter-btn active" data-filter="all">All</button>
-              <button class="filter-btn" data-filter="Tabs">Tabs</button>
-              <button class="filter-btn" data-filter="Window">Window</button>
-              <button class="filter-btn" data-filter="Navigation">Navigation</button>
-              <button class="filter-btn" data-filter="Utilities">Utilities</button>
-              <button class="filter-btn" data-filter="Bookmarks">Bookmarks</button>
-              <button class="filter-btn" data-filter="Developer">Developer</button>
-              <button class="filter-btn" data-filter="View">View</button>
-            </div>
 
             <!-- Search -->
             <div class="shortcuts-search">
@@ -936,6 +908,14 @@
               />
             </div>
 
+            <!-- Category Filter — same pill grammar as Downloads / Bookmarks -->
+            <div class="shortcuts-filter-row">
+              <span class="shortcuts-filter-label">Categories</span>
+              <div class="shortcuts-filter" id="shortcut-filters">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+
             <!-- Shortcuts Table -->
             <div class="shortcuts-table-container">
               <table class="shortcuts-table" id="shortcuts-table">
@@ -943,21 +923,13 @@
                   <tr>
                     <th>Action</th>
                     <th>Category</th>
-                    <th>Default</th>
-                    <th>Current Shortcut</th>
-                    <th>Reset</th>
+                    <th>Shortcut</th>
                   </tr>
                 </thead>
                 <tbody id="shortcuts-tbody">
                   <!-- Populated by JS -->
                 </tbody>
               </table>
-            </div>
-
-            <div class="shortcuts-footer">
-              <button class="btn btn-sm btn-secondary" id="reset-all-shortcuts-btn">
-                <i data-lucide="rotate-ccw" width="13" height="13"></i> Reset All to Defaults
-              </button>
             </div>
           </section>
 
@@ -969,7 +941,6 @@
           >
             <header class="page-header">
               <h1 class="page-title">Developer</h1>
-              <p class="page-subtitle">Tools for inspecting pages and debugging.</p>
             </header>
 
             <!-- Developer Tools Toggle -->

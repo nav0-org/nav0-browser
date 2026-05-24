@@ -37,33 +37,31 @@ const buildItem = (item: Suggestion, index: number): HTMLElement => {
 
   let iconHtml = '';
   if (item.type === 'search') {
-    iconHtml = `<div class="url-ac-icon"><i data-lucide="search" width="14" height="14"></i></div>`;
+    iconHtml = `<div class="url-ac-icon"><i data-lucide="search" width="16" height="16"></i></div>`;
   } else if (item.faviconUrl) {
     iconHtml = `<div class="url-ac-favicon"><img src="${escapeHtml(item.faviconUrl)}" onerror="this.parentElement.textContent='${getFaviconLetter(item.url)}'"></div>`;
   } else if (item.type === 'tab') {
-    iconHtml = `<div class="url-ac-icon"><i data-lucide="app-window" width="14" height="14"></i></div>`;
+    iconHtml = `<div class="url-ac-icon"><i data-lucide="app-window" width="16" height="16"></i></div>`;
   } else {
     iconHtml = `<div class="url-ac-favicon">${getFaviconLetter(item.url)}</div>`;
   }
 
-  const subtitle = item.type === 'search' ? item.meta || '' : item.url;
-
-  let trailingHtml = '';
-  if (item.isBookmark) {
-    trailingHtml =
-      '<div class="url-ac-trailing url-ac-bookmark-flag" title="Bookmarked">' +
-      '<i data-lucide="bookmark" width="14" height="14"></i></div>';
-  } else if (item.meta && item.type !== 'search') {
-    trailingHtml = `<div class="url-ac-trailing url-ac-meta">${escapeHtml(item.meta)}</div>`;
-  }
+  const metaHtml = item.meta
+    ? `<div class="url-ac-meta"><span>${escapeHtml(item.meta)}</span></div>`
+    : '';
+  const urlHtml =
+    item.type !== 'search' && item.url
+      ? `<div class="url-ac-url">${escapeHtml(item.url)}</div>`
+      : '';
+  const sublineHtml =
+    metaHtml || urlHtml ? `<div class="url-ac-subline">${metaHtml}${urlHtml}</div>` : '';
 
   el.innerHTML = `
     ${iconHtml}
     <div class="url-ac-content">
       <div class="url-ac-title">${escapeHtml(item.title)}</div>
-      ${subtitle ? `<div class="url-ac-subtitle">${escapeHtml(subtitle)}</div>` : ''}
+      ${sublineHtml}
     </div>
-    ${trailingHtml}
   `;
 
   el.addEventListener('mousedown', (e) => {
@@ -110,8 +108,19 @@ export function init(container: HTMLElement): void {
   `;
   resultsContainer = container.querySelector('#url-ac-results') as HTMLElement;
 
-  window.BrowserAPI.onUrlAutocompleteUpdate((data: { results?: Suggestion[]; activeIndex: number }) => {
-    applyData(data);
+  window.BrowserAPI.onUrlAutocompleteUpdate(
+    (data: { results?: Suggestion[]; activeIndex: number }) => {
+      applyData(data);
+    }
+  );
+
+  // Close the dropdown when the overlay view itself has keyboard focus
+  // (the main-renderer keydown handler can't see events here).
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      window.BrowserAPI.hideUrlAutocompleteOverlay(window.BrowserAPI.appWindowId);
+    }
   });
 }
 

@@ -1,148 +1,339 @@
 <!doctype html>
 <html>
   <head>
+    <meta charset="utf-8" />
+    <title>{{TITLE}}</title>
     <style>
+      /* Mirror of global.css tokens — this document is injected wholesale via
+         executeJavaScript so it can't @import the renderer stylesheet. */
+      :root {
+        --bg-0: #ffffff;
+        --bg-1: #fafafa;
+        --bg-2: #f5f5f5;
+        --bg-3: #ebebeb;
+        --chrome-1: #f7f6f4;
+        --fg-1: #0a0a0a;
+        --fg-2: #333333;
+        --fg-3: #6b7280;
+        --fg-4: #9ca3af;
+        --border-1: #dcd9d4;
+        --border-2: #c8c5bf;
+        --nav0-red-600: #dc2626;
+        --accent: #2563eb;
+        --danger: #dc2626;
+        --danger-soft: #fdecea;
+        --success: #16a34a;
+        --r-xs: 2px;
+        --r-sm: 3px;
+        --r-md: 4px;
+        --dur-fast: 120ms;
+        --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+        --font-sans:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      }
+
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
       }
 
+      html,
       body {
-        font-family:
-          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        background: #fafafa;
-        color: #1c1c1e;
+        background: var(--bg-0);
+        color: var(--fg-2);
+        font-family: var(--font-sans);
         min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
         -webkit-font-smoothing: antialiased;
       }
 
-      .error-container {
-        text-align: center;
-        max-width: 480px;
-        padding: 40px 24px;
+      .error-wrapper {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 48px 56px 80px;
       }
 
-      .error-icon {
-        margin-bottom: 24px;
-      }
-
-      .error-icon svg {
-        width: 64px;
-        height: 64px;
-        color: #999;
+      /* Editorial masthead — red rule under the title */
+      .error-head {
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--nav0-red-600);
+        margin-bottom: 28px;
       }
 
       .error-title {
+        font-size: 48px;
+        font-weight: 200;
+        letter-spacing: -0.5px;
+        color: var(--fg-1);
+        margin: 0;
+        line-height: 1.2;
+      }
+
+      /* Body: main panel + optional side rail */
+      .error-body {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 20px;
+        align-items: start;
+      }
+
+      .error-body.no-side {
+        grid-template-columns: 1fr;
+      }
+
+      /* Main message panel */
+      .error-main {
+        background: var(--bg-0);
+        border: 1px solid var(--border-1);
+        border-radius: var(--r-md);
+        padding: 32px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .error-glyph {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--r-sm);
+        background: var(--bg-2);
+        border: 1px solid var(--border-1);
+        color: var(--fg-2);
+      }
+
+      .error-glyph svg {
+        width: 22px;
+        height: 22px;
+        display: block;
+      }
+
+      .error-eyebrow {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--fg-3);
+        font-weight: 500;
+      }
+
+      .error-heading {
         font-size: 22px;
         font-weight: 600;
-        margin-bottom: 8px;
         letter-spacing: -0.3px;
+        color: var(--fg-1);
+        margin: 0;
       }
 
-      .error-message {
-        font-size: 15px;
-        color: #666;
-        margin-bottom: 6px;
-        line-height: 1.5;
-      }
-
-      .error-suggestion {
+      .error-text {
         font-size: 14px;
-        color: #999;
-        margin-bottom: 28px;
-        line-height: 1.5;
+        line-height: 1.55;
+        color: var(--fg-2);
+        max-width: 600px;
+        margin: 0;
       }
 
-      .error-reload {
+      .error-text .host {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--fg-1);
+        background: var(--bg-2);
+        border: 1px solid var(--border-1);
+        border-radius: var(--r-xs);
+        padding: 1px 6px;
+      }
+
+      /* Mono error-code chip */
+      .error-code {
+        align-self: flex-start;
+        display: inline-flex;
+        align-items: center;
+        height: 24px;
+        padding: 0 10px;
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+        color: var(--fg-2);
+        background: var(--bg-2);
+        border: 1px solid var(--border-1);
+        border-radius: var(--r-xs);
+      }
+
+      /* Actions */
+      .error-actions {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 6px;
+      }
+
+      .btn {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 10px 24px;
+        padding: 0 14px;
+        height: 36px;
+        border-radius: var(--r-sm);
         font-size: 14px;
         font-weight: 500;
-        color: #fff;
-        background: #1c1c1e;
-        border: none;
-        border-radius: 8px;
         cursor: pointer;
-        transition: background 0.2s;
+        border: 1px solid transparent;
+        font-family: var(--font-sans);
+        transition:
+          background var(--dur-fast),
+          border-color var(--dur-fast),
+          color var(--dur-fast);
       }
 
-      .error-reload:hover {
-        background: #333;
+      .btn.primary {
+        background: var(--fg-1);
+        color: #fff;
+        border-color: var(--fg-1);
       }
 
-      .error-reload svg {
+      .btn.primary:hover {
+        background: #171717;
+      }
+
+      .btn.secondary {
+        background: var(--bg-0);
+        color: var(--fg-1);
+        border-color: var(--border-2);
+      }
+
+      .btn.secondary:hover {
+        background: var(--bg-2);
+      }
+
+      .btn svg {
         width: 14px;
         height: 14px;
       }
 
-      .error-code {
-        margin-top: 20px;
-        font-size: 11px;
-        color: #bbb;
-        font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+      /* Side rail — "Try this" checklist */
+      .error-side {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
       }
 
-      @media (prefers-color-scheme: dark) {
-        body {
-          background: #1a1a1a;
-          color: #e0e0e0;
-        }
+      .panel {
+        background: var(--bg-0);
+        border: 1px solid var(--border-1);
+        border-radius: var(--r-md);
+        overflow: hidden;
+      }
 
-        .error-icon svg {
-          color: #666;
-        }
+      .panel-head {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-1);
+        background: var(--chrome-1);
+      }
 
-        .error-message {
-          color: #a0a0a0;
-        }
+      .panel-head .panel-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--fg-1);
+        letter-spacing: -0.1px;
+      }
 
-        .error-suggestion {
-          color: #777;
-        }
+      .panel-head .panel-sub {
+        font-size: 12px;
+        color: var(--fg-3);
+        margin-top: 2px;
+      }
 
-        .error-reload {
-          background: #e0e0e0;
-          color: #1a1a1a;
-        }
+      .check-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
 
-        .error-reload:hover {
-          background: #fff;
-        }
+      .check-row {
+        display: grid;
+        grid-template-columns: 18px 1fr;
+        gap: 12px;
+        align-items: start;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-1);
+      }
 
-        .error-code {
-          color: #555;
-        }
+      .check-row:last-child {
+        border-bottom: 0;
+      }
+
+      .check-dot {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 1.5px solid var(--border-2);
+        margin-top: 2px;
+      }
+
+      .check-title {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--fg-1);
+      }
+
+      .check-help {
+        font-size: 12px;
+        color: var(--fg-3);
+        margin-top: 2px;
+        line-height: 1.4;
       }
     </style>
   </head>
   <body>
-    <div class="error-container">
-      <div class="error-icon">{{ICON}}</div>
-      <div class="error-title">{{TITLE}}</div>
-      <div class="error-message">{{MESSAGE}}</div>
-      <div class="error-suggestion">{{SUGGESTION}}</div>
-      <button class="error-reload" onclick="location.reload()">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <polyline points="23 4 23 10 17 10" />
-          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-        </svg>
-        Reload
-      </button>
-      <div class="error-code">{{ERROR_CODE}}</div>
+    <div class="error-page">
+      <div class="error-wrapper">
+        <div class="error-head">
+          <h1 class="error-title">{{TITLE}}</h1>
+        </div>
+
+        <div class="error-body {{BODY_CLASS}}">
+          <div class="error-main">
+            <span class="error-glyph">{{ICON}}</span>
+            <div class="error-eyebrow">{{EYEBROW}}</div>
+            <h2 class="error-heading">{{HEADING}}</h2>
+            <p class="error-text">{{MESSAGE}}</p>
+            <span class="error-code">{{ERROR_CODE}}</span>
+            <div class="error-actions">
+              <button class="btn primary" onclick="location.reload()">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="23 4 23 10 17 10" />
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                </svg>
+                Reload
+              </button>
+              <button class="btn secondary" onclick="history.back()">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+                Go back
+              </button>
+            </div>
+          </div>
+
+          {{SIDE_PANEL}}
+        </div>
+      </div>
     </div>
   </body>
 </html>

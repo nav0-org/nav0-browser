@@ -11,50 +11,51 @@
   <body>
     <div id="downloads-page" class="downloads-page">
       <div class="downloads-wrapper">
-        <!-- Header -->
-        <h1 class="downloads-title">Downloads</h1>
-        <p class="downloads-subtitle">View and manage your downloaded files</p>
-
-        <!-- Search -->
-        <div class="search-container">
-          <input
-            type="text"
-            id="search-input"
-            class="search-input"
-            placeholder="Search downloads..."
-          />
-          <i data-lucide="search" class="search-icon" width="16" height="16"></i>
+        <!-- Editorial masthead -->
+        <div class="downloads-head">
+          <h1 class="downloads-title">Downloads</h1>
         </div>
 
-        <!-- Type filter pills -->
-        <div id="type-filters" class="type-filters">
-          <!-- Populated dynamically -->
+        <!-- Toolbar: search + danger Clear -->
+        <div class="downloads-toolbar">
+          <div class="search-container">
+            <i data-lucide="search" class="search-icon" width="16" height="16"></i>
+            <input
+              type="text"
+              id="search-input"
+              class="search-input"
+              placeholder="Search downloads…"
+            />
+          </div>
+          <button id="delete-all" class="btn-clear-all" style="display: none">
+            <i data-lucide="trash-2" width="14" height="14"></i> Clear All Downloads
+          </button>
         </div>
 
-        <!-- Storage gauge -->
-        <!-- NOTE: Storage breakdown is computed from loaded download records only.
-         There is no backend API for total disk usage or per-type storage stats. -->
-        <div id="storage-gauge" class="storage-gauge">
-          <div class="storage-header">
-            <span class="storage-label">Storage</span>
-            <span id="storage-total" class="storage-total"></span>
+        <!-- Type filter pills — dedicated row so Clear stays next to the search bar -->
+        <div class="downloads-filter-row">
+          <span class="downloads-filter-label">Categories</span>
+          <div id="type-filters" class="type-filters"></div>
+        </div>
+
+        <!-- Storage panel (bordered card) -->
+        <div id="storage-gauge" class="panel storage-panel">
+          <div class="panel-head">
+            <div class="panel-title">Storage</div>
+            <div class="panel-meta" id="storage-meta"></div>
           </div>
           <div id="storage-bar" class="storage-bar"></div>
           <div id="storage-legend" class="storage-legend"></div>
         </div>
 
-        <!-- Downloads list -->
+        <!-- Downloads list (day-grouped, populated by TS) -->
         <div class="downloads-container">
-          <div id="downloads-list" class="downloads-list">
-            <!-- Download items will be dynamically inserted here -->
-          </div>
+          <div id="downloads-list" class="downloads-list"></div>
           <div id="no-downloads" class="no-downloads">No downloads match your search.</div>
         </div>
 
-        <!-- Clear All -->
-        <div class="downloads-footer">
-          <button id="delete-all" class="btn-clear-all">Clear All</button>
-        </div>
+        <!-- Footer placeholder (Clear moved to toolbar) -->
+        <div class="downloads-footer" id="downloads-footer"></div>
       </div>
     </div>
   </body>

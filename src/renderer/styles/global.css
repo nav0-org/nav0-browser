@@ -8,43 +8,97 @@
    CSS Variables for Theming
    -------------------------------------------------------------------------- */
 :root {
-  /* Color palette */
+  /* ----------------------------------------------------------------
+     Nav0 Design System tokens — brand ramps from the compass logo.
+     Sharp corners, hairline borders, paper-flat shadows.
+     ---------------------------------------------------------------- */
+  --nav0-red-500: #ef4444;
+  --nav0-red-600: #dc2626;
+  --nav0-red-700: #b91c1c;
+  --nav0-red-800: #991b1b;
+  --nav0-blue-500: #3b82f6;
+  --nav0-blue-600: #2563eb;
+  --nav0-blue-700: #1d4ed8;
+  --nav0-blue-800: #1e40af;
+  --nav0-slate-300: #cbd5e1;
+  --nav0-slate-400: #94a3b8;
+  --nav0-slate-500: #64748b;
+  --nav0-slate-700: #334155;
+  --nav0-slate-900: #0f172a;
+
+  /* Nav0 bg/fg scale — paired with the legacy aliases below. */
+  --bg-0: #ffffff; /* canvas / cards / active tab — kept paper-white */
+  --bg-1: #fafafa; /* page background */
+  --bg-2: #f5f5f5; /* subtle surface, input fields */
+  --bg-3: #ebebeb; /* hover */
+  --bg-inverse: #0a0a0a;
+
+  /* Chrome surfaces — warm off-whites that sit a notch under --bg-0 so
+     the active tab / page content reads as the foreground layer.
+     Nav0's compass-red accent reads warm; pulling 2-3% toward red/yellow
+     makes the whole system feel coherent. */
+  --chrome-1: #f7f6f4; /* nav bar, tab strip backplate, page bento panels */
+  --chrome-2: #fbfaf8; /* menus, popovers, command-K/O, overlay panels */
+  --tab-inactive: #e7e5e1; /* warm shift of the prior #e2e2e2 */
+  --fg-1: #0a0a0a;
+  --fg-2: #333333;
+  --fg-3: #6b7280;
+  --fg-4: #9ca3af;
+  --fg-on-dark: #ffffff;
+  --border-1: #dcd9d4; /* hairline — warm gray to match chrome */
+  --border-2: #c8c5bf; /* heavier separator — warm shift of prior #d4d4d4 */
+  --accent: var(--nav0-blue-600);
+  --accent-hover: var(--nav0-blue-700);
+  --danger: var(--nav0-red-600);
+  --danger-soft: #fdecea;
+  --success: #16a34a;
+  --success-soft: #ecfdf5;
+  --warning: #d97706;
+  --warning-soft: #fef3c7;
+  --private-bg: var(--nav0-red-700);
+  --private-fg: #ffffff;
+
+  /* Focus rings */
+  --shadow-focus: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  --shadow-focus-accent: 0 0 0 3px rgba(37, 99, 235, 0.18);
+
+  /* ----------------------------------------------------------------
+     Legacy aliases — kept so existing pages keep working, mapped onto
+     the Nav0 ramp. New code should prefer the Nav0 tokens above.
+     ---------------------------------------------------------------- */
   --primary-color: #000000;
-  --primary-light: #f5f5f5;
+  --primary-light: var(--bg-2);
   --primary-dark: #171717;
-  --text-color: #333;
-  --text-secondary: #777;
-  --text-light: #999;
+  --text-color: var(--fg-2);
+  --text-secondary: var(--fg-3);
+  --text-light: var(--fg-4);
+  --bg-color: var(--bg-2);
+  --bg-light: var(--bg-0);
+  --bg-hover: var(--bg-3);
+  --bg-active: var(--bg-2);
+  --border-color: var(--border-1);
+  --border-color-dark: var(--border-2);
+  --error-color: var(--danger);
+  --error-light: var(--danger-soft);
+  --warning-color: var(--warning);
+  --warning-light: var(--warning-soft);
+  --success-color: var(--success);
+  --success-light: var(--success-soft);
+  --info-color: var(--accent);
+  --info-light: #eff4ff;
 
-  /* Background colors */
-  --bg-color: #f5f5f5;
-  --bg-light: #fff;
-  --bg-hover: #d3d3d3;
-  --bg-active: #f5f5f5;
-
-  /* Border colors */
-  --border-color: #e0e0e0;
-  --border-color-dark: #ccc;
-
-  /* Feedback colors */
-  --error-color: #e74c3c;
-  --error-light: #fdecea;
-  --warning-color: #f39c12;
-  --warning-light: #fef5e7;
-  --success-color: #2ecc71;
-  --success-light: #eafaf1;
-  --info-color: #3498db;
-  --info-light: #ebf5fb;
-
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 2px 10px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.12);
+  /* Shadows — subtle, paper-flat. No coloured glows. */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
 
   /* Animation speeds */
-  --transition-fast: 0.15s;
-  --transition-medium: 0.3s;
-  --transition-slow: 0.5s;
+  --dur-fast: 120ms;
+  --dur-med: 220ms;
+  --dur-slow: 400ms;
+  --transition-fast: var(--dur-fast);
+  --transition-medium: var(--dur-med);
+  --transition-slow: var(--dur-slow);
 
   /* Spacing variables */
   --spacing-xs: 4px;
@@ -63,13 +117,25 @@
   --font-xxl: 24px;
   --font-xxxl: 32px;
 
-  /* Border radius */
-  --radius-sm: 3px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
-  --radius-pill: 500px;
-  --radius-circle: 50%;
+  /* ----------------------------------------------------------------
+     Border radii — tightened toward Nav0's utilitarian aesthetic.
+     Source app used 6/8/12/pill; Nav0 spec is 2/3/4/6 plus circle.
+     "URL-bar pill" is a softly rounded rectangle (6px), not 500px.
+     ---------------------------------------------------------------- */
+  --r-xs: 2px;
+  --r-sm: 3px;
+  --r-md: 4px;
+  --r-lg: 6px;
+  --r-pill: 6px;
+  --r-full: 50%;
+
+  /* Legacy aliases mapped onto the Nav0 radii. */
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+  --radius-xl: var(--r-lg);
+  --radius-pill: var(--r-pill);
+  --radius-circle: var(--r-full);
 
   /* Z-index layers */
   --z-dropdown: 100;
@@ -144,6 +210,43 @@ a:hover {
 img {
   max-width: 100%;
   height: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Native <select> — Nav0 design system applied by default so every dropdown
+   in the app gets the same chrome (4-px radius, pale-grey rest, white-on-
+   focus halo, custom chevron) regardless of class. Per-context overrides
+   should keep `appearance: none` and may adjust padding/font-size/min-width.
+   -------------------------------------------------------------------------- */
+select {
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--fg-1);
+  padding: 8px 32px 8px 12px;
+  min-width: 120px;
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  background-color: var(--bg-2);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition:
+    background-color var(--dur-fast),
+    box-shadow var(--dur-fast);
+}
+
+select:focus {
+  outline: none;
+  background-color: var(--bg-0);
+  box-shadow: var(--shadow-focus);
+}
+
+select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* --------------------------------------------------------------------------

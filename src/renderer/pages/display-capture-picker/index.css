@@ -41,9 +41,9 @@ body {
 }
 
 .picker-source {
-  background-color: var(--bg-light);
+  background-color: var(--bg-0);
   border: 2px solid transparent;
-  border-radius: var(--radius-md);
+  border-radius: var(--r-md);
   padding: var(--spacing-sm);
   cursor: pointer;
   user-select: none;
@@ -51,11 +51,11 @@ body {
 }
 
 .picker-source:hover {
-  border-color: var(--border-color-dark);
+  border-color: var(--border-2);
 }
 
 .picker-source.selected {
-  border-color: var(--primary-color);
+  border-color: var(--accent);
 }
 
 .picker-source-thumb {
@@ -64,13 +64,13 @@ body {
   aspect-ratio: 16 / 10;
   object-fit: contain;
   background-color: #000;
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-sm);
   display: block;
 }
 
 .picker-source-type {
   font-size: var(--font-xs);
-  color: var(--text-secondary);
+  color: var(--fg-3);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-top: var(--spacing-xs);
@@ -86,7 +86,7 @@ body {
 
 .picker-empty {
   text-align: center;
-  color: var(--text-secondary);
+  color: var(--fg-3);
   padding: var(--spacing-lg);
 }
 
@@ -95,26 +95,26 @@ body {
   justify-content: flex-end;
   gap: var(--spacing-sm);
   padding: var(--spacing-sm) var(--spacing-md) var(--spacing-md);
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-1);
 }
 
 .picker-btn {
   font-size: var(--font-sm);
   padding: var(--spacing-sm) var(--spacing-md);
-  border: 1px solid var(--border-color-dark);
-  background-color: var(--bg-light);
-  color: var(--text-color);
-  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-2);
+  background-color: var(--bg-0);
+  color: var(--fg-2);
+  border-radius: var(--r-sm);
   cursor: pointer;
 }
 
 .picker-btn:hover {
-  background-color: var(--bg-hover);
+  background-color: var(--bg-3);
 }
 
 .picker-btn-primary {
   background-color: var(--primary-color);
-  color: var(--bg-light);
+  color: var(--bg-0);
   border-color: var(--primary-color);
 }
 

@@ -9,16 +9,48 @@
     <title>New Tab</title>
   </head>
   <body>
-    <h1 class="greeting" id="greeting"></h1>
+    <div id="new-tab-page" class="new-tab-page">
+      <div class="new-tab-wrapper">
+        <!-- Editorial masthead -->
+        <div class="new-tab-head">
+          <h1 class="new-tab-title" id="greeting"></h1>
+        </div>
 
-    <div class="bento-container">
-      <div class="bento-item search-item">
-        <input
-          type="text"
-          id="search-bar"
-          class="search-bar"
-          placeholder="Enter a search term or a URL"
-        />
+        <div class="bento-container">
+          <div class="search-item">
+            <div class="search-shell">
+              <i data-lucide="search" class="search-shell-icon" width="18" height="18"></i>
+              <input
+                type="text"
+                id="search-bar"
+                class="search-bar"
+                placeholder="Search tabs, bookmarks, history, downloads or the web…"
+                autocomplete="off"
+                spellcheck="false"
+              />
+            </div>
+            <div class="search-results" id="search-results" hidden>
+              <div class="search-results-list" id="search-results-list"></div>
+              <div class="search-results-empty" id="search-results-empty" hidden>
+                Type to search your tabs, bookmarks, history, and downloads
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <section class="tile-section" id="bookmarks-section" hidden>
+          <div class="tile-section-head">
+            <h2 class="tile-section-title">Bookmarks</h2>
+          </div>
+          <div class="tile-row" id="bookmarks-row"></div>
+        </section>
+
+        <section class="tile-section" id="top-sites-section" hidden>
+          <div class="tile-section-head">
+            <h2 class="tile-section-title">Frequently visited</h2>
+          </div>
+          <div class="tile-row" id="top-sites-row"></div>
+        </section>
       </div>
     </div>
   </body>

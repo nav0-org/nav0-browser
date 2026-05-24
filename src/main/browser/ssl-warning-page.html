@@ -5,271 +5,402 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{TITLE}}</title>
     <style>
+      :root {
+        --bg-0: #0a0a0a;
+        --bg-panel: rgba(255, 255, 255, 0.02);
+        --bg-panel-strong: rgba(255, 255, 255, 0.05);
+        --fg-1: #ffffff;
+        --fg-2: #d4d4d4;
+        --fg-3: #a3a3a3;
+        --fg-4: #737373;
+        --border-1: rgba(255, 255, 255, 0.08);
+        --border-2: rgba(255, 255, 255, 0.18);
+        --nav0-red-500: #ef4444;
+        --nav0-red-600: #dc2626;
+        --r-xs: 2px;
+        --r-sm: 3px;
+        --r-md: 4px;
+        --dur-fast: 120ms;
+        --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+        --font-sans:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      }
+
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
       }
 
+      html,
       body {
-        font-family:
-          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        background-color: #0f0f0f;
-        color: #e0e0e0;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
+        background: var(--bg-0);
+        color: var(--fg-2);
+        font-family: var(--font-sans);
         min-height: 100vh;
-        padding: 60px 20px;
         -webkit-font-smoothing: antialiased;
       }
 
-      .warning-container {
-        max-width: 600px;
-        width: 100%;
+      .ssl-wrapper {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 48px 56px 80px;
       }
 
-      .warning-icon {
-        width: 64px;
-        height: 64px;
-        margin-bottom: 24px;
+      .ssl-head {
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--nav0-red-600);
+        margin-bottom: 28px;
       }
 
-      .warning-icon svg {
-        width: 64px;
-        height: 64px;
+      .ssl-title {
+        font-size: 48px;
+        font-weight: 200;
+        letter-spacing: -0.5px;
+        color: var(--fg-1);
+        margin: 0;
+        line-height: 1.2;
       }
 
-      h1 {
-        font-size: 24px;
-        font-weight: 700;
-        color: #f44336;
-        margin-bottom: 16px;
-        line-height: 1.3;
+      .ssl-main {
+        background: var(--bg-panel);
+        border: 1px solid var(--border-1);
+        border-radius: var(--r-md);
+        padding: 32px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
       }
 
-      .description {
-        font-size: 15px;
-        line-height: 1.7;
-        color: #b0b0b0;
-        margin-bottom: 32px;
-      }
-
-      .description strong {
-        color: #e0e0e0;
-      }
-
-      .description code {
-        background: #1a1a1a;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-size: 13px;
-        color: #ff8a80;
-      }
-
-      .back-button {
-        display: inline-flex;
+      .ssl-glyph {
+        width: 44px;
+        height: 44px;
+        display: flex;
         align-items: center;
-        gap: 8px;
-        padding: 12px 28px;
-        background-color: #2196f3;
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        font-size: 15px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background-color 0.2s;
-        margin-bottom: 40px;
+        justify-content: center;
+        border-radius: var(--r-sm);
+        background: rgba(220, 38, 38, 0.12);
+        border: 1px solid rgba(220, 38, 38, 0.35);
+        color: var(--nav0-red-500);
       }
 
-      .back-button:hover {
-        background-color: #1976d2;
-      }
-
-      .divider {
-        border: none;
-        border-top: 1px solid #222;
-        margin: 0 0 24px 0;
-      }
-
-      .advanced-toggle {
-        font-size: 13px;
-        color: #777;
-        cursor: pointer;
-        user-select: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        margin-bottom: 16px;
-      }
-
-      .advanced-toggle:hover {
-        color: #999;
-      }
-
-      .arrow {
-        display: inline-block;
-        transition: transform 0.2s;
-        font-size: 10px;
-      }
-
-      .arrow.open {
-        transform: rotate(90deg);
-      }
-
-      .advanced-content {
-        display: none;
-        animation: fadeIn 0.2s ease-in;
-      }
-
-      .advanced-content.visible {
+      .ssl-glyph svg {
+        width: 22px;
+        height: 22px;
         display: block;
       }
 
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(-4px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .risk-card {
-        background-color: #1a1212;
-        border: 1px solid #3d1f1f;
-        border-radius: 10px;
-        padding: 20px 24px;
-        margin-bottom: 20px;
-      }
-
-      .risk-card h3 {
-        font-size: 14px;
-        font-weight: 600;
-        color: #ff8a80;
-        margin-bottom: 12px;
+      .ssl-eyebrow {
+        font-size: 11px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        color: var(--nav0-red-500);
+        font-weight: 500;
       }
 
-      .risk-card ul {
-        list-style: none;
-        padding: 0;
+      .ssl-heading {
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: -0.3px;
+        color: var(--fg-1);
+        margin: 0;
       }
 
-      .risk-card li {
+      .ssl-text {
         font-size: 14px;
-        line-height: 1.6;
-        color: #b0a0a0;
-        padding: 4px 0 4px 20px;
-        position: relative;
+        line-height: 1.55;
+        color: var(--fg-2);
+        max-width: 620px;
+        margin: 0;
       }
 
-      .risk-card li::before {
-        content: '\2022';
-        color: #f44336;
-        position: absolute;
-        left: 4px;
+      .ssl-text .host {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--fg-1);
+        background: var(--bg-panel-strong);
+        border: 1px solid var(--border-2);
+        border-radius: var(--r-xs);
+        padding: 1px 6px;
       }
 
-      .proceed-button {
+      .ssl-code {
+        align-self: flex-start;
+        display: inline-flex;
+        align-items: center;
+        height: 24px;
+        padding: 0 10px;
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+        color: var(--nav0-red-500);
+        background: rgba(220, 38, 38, 0.08);
+        border: 1px solid rgba(220, 38, 38, 0.35);
+        border-radius: var(--r-xs);
+      }
+
+      .ssl-actions {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 6px;
+      }
+
+      .btn {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 8px 16px;
-        background: transparent;
-        color: #777;
-        border: 1px solid #333;
-        border-radius: 6px;
-        font-size: 13px;
+        padding: 0 14px;
+        height: 36px;
+        border-radius: var(--r-sm);
+        font-size: 14px;
+        font-weight: 500;
         cursor: pointer;
-        transition: all 0.2s;
+        border: 1px solid transparent;
+        font-family: var(--font-sans);
+        transition:
+          background var(--dur-fast),
+          border-color var(--dur-fast),
+          color var(--dur-fast);
       }
 
-      .proceed-button:hover {
-        color: #ff8a80;
-        border-color: #5c2a2a;
-        background-color: #1a1212;
+      .btn.primary {
+        background: #ffffff;
+        color: #0a0a0a;
+        border-color: #ffffff;
       }
 
-      .url-display {
+      .btn.primary:hover {
+        background: #e5e5e5;
+      }
+
+      .btn.secondary {
+        background: transparent;
+        color: #ffffff;
+        border-color: var(--border-2);
+      }
+
+      .btn.secondary:hover {
+        background: var(--bg-panel-strong);
+      }
+
+      .btn svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      /* Advanced toggle + risks panel */
+      .advanced {
+        margin-top: 24px;
+      }
+
+      .advanced-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--fg-3);
+        background: transparent;
+        border: 0;
+        padding: 6px 0;
+        cursor: pointer;
+      }
+
+      .advanced-toggle:hover {
+        color: var(--fg-1);
+      }
+
+      .advanced-toggle .chev {
+        display: inline-block;
+        transition: transform var(--dur-fast);
+        font-size: 10px;
+      }
+
+      .advanced-toggle.open .chev {
+        transform: rotate(90deg);
+      }
+
+      .advanced-body {
+        display: none;
+        margin-top: 14px;
+      }
+
+      .advanced-body.open {
+        display: block;
+      }
+
+      .panel {
+        background: var(--bg-panel);
+        border: 1px solid var(--border-1);
+        border-radius: var(--r-md);
+        overflow: hidden;
+      }
+
+      .panel-head {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-1);
+      }
+
+      .panel-head .panel-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--fg-1);
+        letter-spacing: -0.1px;
+      }
+
+      .panel-head .panel-sub {
         font-size: 12px;
-        color: #555;
-        margin-top: 16px;
+        color: var(--fg-3);
+        margin-top: 2px;
+      }
+
+      .risk-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .risk-list li {
+        display: grid;
+        grid-template-columns: 14px 1fr;
+        gap: 12px;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-1);
+        font-size: 13px;
+        line-height: 1.5;
+        color: var(--fg-2);
+      }
+
+      .risk-list li:last-child {
+        border-bottom: 0;
+      }
+
+      .risk-list li::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--nav0-red-500);
+        margin-top: 7px;
+      }
+
+      .panel-foot {
+        padding: 14px 16px;
+        border-top: 1px solid var(--border-1);
+        background: var(--bg-panel-strong);
+      }
+
+      /* Proceed button — bordered red treatment to signal danger; sits
+         inside the Advanced panel so it's intentionally lower priority
+         than the primary "Go back to safety" action above. */
+      .proceed-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0 14px;
+        height: 36px;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--nav0-red-500);
+        background: transparent;
+        border: 1px solid rgba(220, 38, 38, 0.45);
+        border-radius: var(--r-sm);
+        cursor: pointer;
+        font-family: var(--font-sans);
+        transition:
+          background var(--dur-fast),
+          border-color var(--dur-fast),
+          color var(--dur-fast);
+      }
+
+      .proceed-link:hover {
+        background: rgba(220, 38, 38, 0.12);
+        border-color: var(--nav0-red-500);
+        color: #ffffff;
+      }
+
+      .ssl-url {
+        margin-top: 10px;
+        font-size: 11.5px;
+        color: var(--fg-4);
         word-break: break-all;
-        font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
       }
     </style>
   </head>
   <body>
-    <div class="warning-container">
-      <div class="warning-icon">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#f44336"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          {{ICON_SVG}}
-        </svg>
+    <div class="ssl-wrapper">
+      <div class="ssl-head">
+        <h1 class="ssl-title">{{TITLE}}</h1>
       </div>
 
-      <h1>{{HEADING}}</h1>
-      <p class="description">{{DESCRIPTION}}</p>
+      <div class="ssl-main">
+        <span class="ssl-glyph">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            {{ICON_SVG}}
+          </svg>
+        </span>
+        <div class="ssl-eyebrow">{{EYEBROW}}</div>
+        <h2 class="ssl-heading">{{HEADING}}</h2>
+        <p class="ssl-text">{{MESSAGE}}</p>
+        <span class="ssl-code">{{ERROR_CODE}}</span>
 
-      <button class="back-button" id="goBackBtn">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <polyline points="15 18 9 12 15 6" />
-        </svg>
-        Go back to safety
-      </button>
-
-      <hr class="divider" />
-
-      <div class="advanced-toggle" onclick="toggleAdvanced()">
-        <span class="arrow" id="arrow">&#9654;</span>
-        Advanced
-      </div>
-
-      <div class="advanced-content" id="advancedContent">
-        <div class="risk-card">
-          <h3>Risks of proceeding</h3>
-          <ul>
-            {{RISK_DETAILS}}
-          </ul>
+        <div class="ssl-actions">
+          <button class="btn primary" id="goBackBtn">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+            Go back to safety
+          </button>
         </div>
+      </div>
 
-        <button class="proceed-button" id="proceedBtn" data-url="{{ENCODED_URL}}">
-          Proceed to {{HOSTNAME}} (unsafe)
+      <div class="advanced">
+        <button class="advanced-toggle" id="advancedToggle" type="button">
+          <span class="chev">▶</span> Advanced
         </button>
 
-        <div class="url-display">{{URL_DISPLAY}}</div>
+        <div class="advanced-body" id="advancedBody">
+          <div class="panel">
+            <div class="panel-head">
+              <div class="panel-title">Risks of proceeding</div>
+              <div class="panel-sub">Read these before overriding the warning.</div>
+            </div>
+            <ul class="risk-list">
+              {{RISK_DETAILS}}
+            </ul>
+            <div class="panel-foot">
+              <button class="proceed-link" id="proceedBtn" data-url="{{ENCODED_URL}}">
+                Proceed to {{HOSTNAME}} (unsafe) →
+              </button>
+              <div class="ssl-url">{{URL_DISPLAY}}</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
     <script>
-      function toggleAdvanced() {
-        var content = document.getElementById('advancedContent');
-        var arrow = document.getElementById('arrow');
-        content.classList.toggle('visible');
-        arrow.classList.toggle('open');
-      }
+      var toggle = document.getElementById('advancedToggle');
+      var body = document.getElementById('advancedBody');
+      toggle.addEventListener('click', function () {
+        toggle.classList.toggle('open');
+        body.classList.toggle('open');
+      });
 
       document.getElementById('goBackBtn').addEventListener('click', function () {
         document.title = '__ssl_go_back__';

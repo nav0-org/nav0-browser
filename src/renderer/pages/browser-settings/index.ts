@@ -15,8 +15,18 @@ import {
 // ---- Globals ----
 let settings: BrowserSettings = { ...DEFAULT_BROWSER_SETTINGS };
 let shortcuts: KeyboardShortcutAction[] = [...DEFAULT_KEYBOARD_SHORTCUTS];
-let recordingCell: HTMLElement | null = null;
 let activeFilter = 'all';
+
+// Lucide icon per shortcut category — surfaced on the toolbar filter pills.
+const SHORTCUT_CATEGORY_ICONS: Record<string, string> = {
+  Tabs: 'layout-grid',
+  Window: 'app-window',
+  Navigation: 'compass',
+  Utilities: 'wrench',
+  Bookmarks: 'bookmark',
+  Developer: 'code',
+  View: 'eye',
+};
 
 const isMac = (window as any).DataStoreAPI?.platform === 'darwin';
 const modKey = isMac ? 'Cmd' : 'Ctrl';
@@ -986,45 +996,59 @@ function effectiveDefault(s: KeyboardShortcutAction): string {
 }
 
 function initKeyboardShortcuts() {
-  // Build shortcuts list from defaults + overrides
+  // Read-only list of the defaults. Rebinding lives in the renderer-side
+  // settings model but isn't wired through the main-process accelerator
+  // registry yet, so we don't show a Current Shortcut / Reset column.
   shortcuts = DEFAULT_KEYBOARD_SHORTCUTS.map((s) => ({
     ...s,
-    currentShortcut: settings.keyboardShortcuts?.[s.id] || effectiveDefault(s),
+    currentShortcut: effectiveDefault(s),
   }));
 
+  renderShortcutFilters();
   renderShortcutsTable();
-
-  // Category filter
-  document.querySelectorAll('.filter-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn').forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      activeFilter = (btn as HTMLElement).dataset.filter;
-      renderShortcutsTable();
-    });
-  });
 
   // Search filter
   document.getElementById('shortcut-search')?.addEventListener('input', () => {
     renderShortcutsTable();
   });
+}
 
-  // Reset all
-  document.getElementById('reset-all-shortcuts-btn')?.addEventListener('click', () => {
-    if (confirm('Reset all keyboard shortcuts to defaults?')) {
-      settings.keyboardShortcuts = {};
-      saveSettings();
-      shortcuts = DEFAULT_KEYBOARD_SHORTCUTS.map((s) => ({
-        ...s,
-        currentShortcut: effectiveDefault(s),
-      }));
-      renderShortcutsTable();
-      showToast('All shortcuts reset to defaults');
+function renderShortcutFilters() {
+  const container = document.getElementById('shortcut-filters');
+  if (!container) return;
+  container.innerHTML = '';
+
+  // Distinct categories in the order they first appear in the defaults.
+  const categories: string[] = [];
+  for (const s of shortcuts) {
+    if (!categories.includes(s.category)) categories.push(s.category);
+  }
+
+  const buildPill = (label: string, value: string, iconName: string) => {
+    const pill = document.createElement('button');
+    pill.className = 'cat-pill';
+    pill.dataset.filter = value;
+    pill.innerHTML = `<i data-lucide="${iconName}" width="13" height="13"></i> ${label}`;
+    const isActive = activeFilter === value;
+    if (isActive) {
+      pill.style.background = 'var(--fg-1)';
+      pill.style.color = 'var(--bg-0)';
+      pill.style.borderColor = 'var(--fg-1)';
     }
-  });
+    pill.addEventListener('click', () => {
+      activeFilter = isActive ? 'all' : value;
+      renderShortcutFilters();
+      renderShortcutsTable();
+    });
+    container.appendChild(pill);
+  };
 
-  // Global key listener for recording
-  document.addEventListener('keydown', handleShortcutRecording);
+  buildPill('All', 'all', 'layers');
+  for (const cat of categories) {
+    buildPill(cat, cat, SHORTCUT_CATEGORY_ICONS[cat] || 'square');
+  }
+
+  createIcons({ icons });
 }
 
 function renderShortcutsTable() {
@@ -1053,136 +1077,11 @@ function renderShortcutsTable() {
       <td>${shortcut.label}</td>
       <td><span class="shortcut-category-badge">${shortcut.category}</span></td>
       <td>${formatShortcutDisplay(effectiveDefault(shortcut))}</td>
-      <td class="shortcut-key-cell" data-action-id="${shortcut.id}">
-        <span class="shortcut-key">${formatShortcutDisplay(shortcut.currentShortcut)}</span>
-      </td>
-      <td>
-        <button class="shortcut-reset-btn" data-action-id="${shortcut.id}" title="Reset to default"><i data-lucide="rotate-ccw" width="13" height="13"></i></button>
-      </td>
     `;
-
-    // Click to record
-    const keyCell = tr.querySelector('.shortcut-key-cell') as HTMLElement;
-    keyCell?.addEventListener('click', () => startRecording(keyCell, shortcut));
-
-    // Reset button
-    const resetBtn = tr.querySelector('.shortcut-reset-btn') as HTMLElement;
-    resetBtn?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      shortcut.currentShortcut = effectiveDefault(shortcut);
-      if (settings.keyboardShortcuts?.[shortcut.id]) {
-        delete settings.keyboardShortcuts[shortcut.id];
-      }
-      saveSettings();
-      renderShortcutsTable();
-    });
-
     tbody.appendChild(tr);
   });
 
   createIcons({ icons });
-}
-
-function startRecording(cell: HTMLElement, shortcut: KeyboardShortcutAction) {
-  // Cancel previous recording
-  if (recordingCell) {
-    recordingCell.classList.remove('recording');
-  }
-  recordingCell = cell;
-  cell.classList.add('recording');
-  cell.dataset.recordingFor = shortcut.id;
-}
-
-function handleShortcutRecording(e: KeyboardEvent) {
-  if (!recordingCell) return;
-
-  e.preventDefault();
-  e.stopPropagation();
-
-  // Allow clearing with Backspace/Delete
-  if (e.key === 'Backspace' || e.key === 'Delete') {
-    const actionId = recordingCell.dataset.recordingFor;
-    const shortcut = shortcuts.find((s) => s.id === actionId);
-    if (shortcut) {
-      shortcut.currentShortcut = '';
-      if (!settings.keyboardShortcuts) settings.keyboardShortcuts = {};
-      settings.keyboardShortcuts[actionId] = '';
-      saveSettings();
-    }
-    recordingCell.classList.remove('recording');
-    recordingCell = null;
-    renderShortcutsTable();
-    return;
-  }
-
-  // Escape cancels recording
-  if (e.key === 'Escape') {
-    recordingCell.classList.remove('recording');
-    recordingCell = null;
-    return;
-  }
-
-  // Ignore standalone modifier keys
-  if (['Control', 'Shift', 'Alt', 'Meta'].indexOf(e.key) >= 0) return;
-
-  // Build key combination
-  const parts: string[] = [];
-  if (e.ctrlKey || e.metaKey) parts.push('mod');
-  if (e.shiftKey) parts.push('Shift');
-  if (e.altKey) parts.push('Alt');
-
-  // Must have modifier (except for function keys)
-  const isFunctionKey = /^F\d+$/.test(e.key);
-  if (parts.length === 0 && !isFunctionKey && e.key !== 'Escape') {
-    showToast('Shortcuts must include a modifier key (Ctrl/Cmd)');
-    return;
-  }
-
-  // Get key name
-  let keyName = e.key;
-  if (keyName === ' ') keyName = 'Space';
-  if (keyName.length === 1) keyName = keyName.toUpperCase();
-  if (keyName === 'ArrowLeft') keyName = 'Left';
-  if (keyName === 'ArrowRight') keyName = 'Right';
-  if (keyName === 'ArrowUp') keyName = 'Up';
-  if (keyName === 'ArrowDown') keyName = 'Down';
-
-  parts.push(keyName);
-  const combo = parts.join('+');
-
-  // Check for conflicts
-  const actionId = recordingCell.dataset.recordingFor;
-  const conflicting = shortcuts.find((s) => s.id !== actionId && s.currentShortcut === combo);
-
-  if (conflicting) {
-    const swap = confirm(
-      `"${combo}" is already assigned to "${conflicting.label}". Swap bindings?`
-    );
-    if (swap) {
-      const currentShortcut = shortcuts.find((s) => s.id === actionId);
-      conflicting.currentShortcut = currentShortcut?.currentShortcut || '';
-      if (!settings.keyboardShortcuts) settings.keyboardShortcuts = {};
-      settings.keyboardShortcuts[conflicting.id] = conflicting.currentShortcut;
-    } else {
-      recordingCell.classList.remove('recording');
-      recordingCell = null;
-      return;
-    }
-  }
-
-  // Apply new binding
-  const shortcut = shortcuts.find((s) => s.id === actionId);
-  if (shortcut) {
-    shortcut.currentShortcut = combo;
-    if (!settings.keyboardShortcuts) settings.keyboardShortcuts = {};
-    settings.keyboardShortcuts[actionId] = combo;
-    saveSettings();
-  }
-
-  recordingCell.classList.remove('recording');
-  recordingCell = null;
-  renderShortcutsTable();
-  showToast(`Shortcut updated: ${combo}`);
 }
 
 function formatShortcutDisplay(combo: string): string {

@@ -120,15 +120,14 @@ const createResultItemElement = (item: ResultItem, index: number): HTMLElement =
     urlHtml = `<div class="result-url">${escapeHtml(item.url)}</div>`;
   }
 
+  const sublineHtml =
+    metaHtml || urlHtml ? `<div class="result-subline">${metaHtml}${urlHtml}</div>` : '';
+
   el.innerHTML = `
     ${iconHtml}
     <div class="result-content">
       <div class="result-title">${escapeHtml(item.title)}</div>
-      ${urlHtml}
-      ${metaHtml}
-    </div>
-    <div class="keyboard-shortcut">
-      ${index < 9 ? `<span class="key">${index + 1}</span>` : ''}
+      ${sublineHtml}
     </div>
   `;
 
@@ -393,19 +392,6 @@ const handleKeydown = (e: KeyboardEvent) => {
     case 'Escape':
       e.preventDefault();
       window.BrowserAPI.hideCommandKOverlay(window.BrowserAPI.appWindowId);
-      break;
-    default:
-      // For number keys 1-9, select the corresponding result (only when not typing in input)
-      if (e.key >= '1' && e.key <= '9' && !e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey) {
-        const target = e.target as HTMLElement;
-        if (target !== searchInput) {
-          const index = parseInt(e.key) - 1;
-          if (index < currentResults.length) {
-            e.preventDefault();
-            openResult(currentResults[index]);
-          }
-        }
-      }
       break;
   }
 };

@@ -1,7 +1,7 @@
 /* Command-K overlay panel styles */
 
 #overlay-command-k {
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.45);
   line-height: 1.4;
   font-size: 13px;
   display: flex;
@@ -14,8 +14,8 @@
 #overlay-command-k .command-container {
   width: 850px;
   max-width: 90vw;
-  background-color: var(--bg-light);
-  border-radius: var(--radius-xl);
+  background-color: var(--chrome-2);
+  border-radius: var(--r-lg);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
   display: flex;
@@ -26,13 +26,13 @@
 /* Search input area */
 #overlay-command-k .search-area {
   padding: var(--spacing-md);
-  border-bottom: 1px solid #eaeaea;
+  border-bottom: 1px solid var(--border-1);
   display: flex;
   align-items: center;
 }
 
 #overlay-command-k .search-icon {
-  color: var(--text-secondary);
+  color: var(--fg-3);
   margin-right: 12px;
   flex-shrink: 0;
 }
@@ -42,12 +42,12 @@
   border: none;
   outline: none;
   font-size: 16px;
-  color: var(--text-color);
+  color: var(--fg-2);
   background: transparent;
 }
 
 #overlay-command-k .search-input::placeholder {
-  color: var(--text-light);
+  color: var(--fg-4);
 }
 
 #overlay-command-k .keyboard-hint {
@@ -64,9 +64,9 @@
   height: 20px;
   padding: 0 var(--spacing-xs);
   font-size: var(--font-xs);
-  border-radius: var(--radius-sm);
-  background-color: var(--bg-light);
-  border: 1px solid var(--border-color);
+  border-radius: var(--r-sm);
+  background-color: var(--bg-0);
+  border: 1px solid var(--border-1);
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
   margin: 0 2px;
 }
@@ -83,23 +83,23 @@
 }
 
 #overlay-command-k .results-container::-webkit-scrollbar-track {
-  background: var(--bg-color);
+  background: var(--bg-1);
 }
 
 #overlay-command-k .results-container::-webkit-scrollbar-thumb {
-  background: #ddd;
-  border-radius: 4px;
+  background: var(--bg-3);
+  border-radius: var(--r-md);
 }
 
 #overlay-command-k .results-container::-webkit-scrollbar-thumb:hover {
-  background: var(--border-color-dark);
+  background: var(--border-2);
 }
 
 #overlay-command-k .section-title {
   padding: var(--spacing-sm) var(--spacing-md);
   font-size: var(--font-xs);
   text-transform: uppercase;
-  color: var(--text-secondary);
+  color: var(--fg-3);
   letter-spacing: 0.5px;
   font-weight: 500;
 }
@@ -109,12 +109,23 @@
   align-items: center;
   padding: 10px var(--spacing-md);
   cursor: pointer;
+  position: relative;
 }
 
 #overlay-command-k .result-item:hover,
 #overlay-command-k .result-item.active {
-  background-color: var(--bg-color);
-  border-left-color: var(--primary-color);
+  background-color: var(--bg-3);
+}
+
+#overlay-command-k .result-item:hover::before,
+#overlay-command-k .result-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--nav0-red-600);
 }
 
 #overlay-command-k .result-icon {
@@ -124,9 +135,9 @@
   align-items: center;
   justify-content: center;
   margin-right: 12px;
-  border-radius: var(--radius-md);
-  background-color: var(--bg-hover);
-  color: var(--text-secondary);
+  border-radius: var(--r-md);
+  background-color: var(--bg-2);
+  color: var(--fg-3);
   flex-shrink: 0;
 }
 
@@ -137,9 +148,9 @@
   align-items: center;
   justify-content: center;
   margin-right: 12px;
-  border-radius: var(--radius-md);
-  background-color: var(--bg-hover);
-  color: var(--text-secondary);
+  border-radius: var(--r-md);
+  background-color: var(--bg-2);
+  color: var(--fg-3);
   flex-shrink: 0;
   font-size: var(--font-lg);
   font-weight: bold;
@@ -160,7 +171,7 @@
 
 #overlay-command-k .result-url {
   font-size: var(--font-sm);
-  color: var(--primary-color);
+  color: var(--accent);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -169,7 +180,7 @@
 #overlay-command-k .result-date,
 #overlay-command-k .result-preview {
   font-size: var(--font-sm);
-  color: var(--text-secondary);
+  color: var(--fg-3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -179,7 +190,7 @@
   display: flex;
   align-items: center;
   font-size: var(--font-xs);
-  color: var(--text-light);
+  color: var(--fg-4);
   margin-top: 2px;
 }
 
@@ -189,38 +200,53 @@
   margin-right: var(--spacing-sm);
 }
 
+/* Subline collapses the former url + meta rows into a single row. Meta
+   appears first; each child keeps its original color/typography. */
+#overlay-command-k .result-subline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  min-width: 0;
+}
+
+#overlay-command-k .result-subline .result-meta {
+  margin-top: 0;
+  flex-shrink: 0;
+}
+
+#overlay-command-k .result-subline .result-meta span {
+  margin-right: 0;
+}
+
+#overlay-command-k .result-subline .result-url {
+  flex: 1;
+  min-width: 0;
+}
+
 #overlay-command-k .result-meta i {
   margin-right: 4px;
   width: 14px;
   height: 14px;
 }
 
-#overlay-command-k .keyboard-shortcut {
-  display: flex;
-  align-items: center;
-  color: var(--text-light);
-  font-size: var(--font-xs);
-  min-width: 30px;
-  justify-content: flex-end;
-}
-
 /* No results state */
 #overlay-command-k .no-results {
   padding: 24px;
   text-align: center;
-  color: var(--text-secondary);
+  color: var(--fg-3);
 }
 
 #overlay-command-k .no-results i {
   margin-bottom: 12px;
-  color: #ccc;
+  color: var(--fg-4);
 }
 
 /* Empty state */
 #overlay-command-k .empty-state {
   padding: 32px 24px;
   text-align: center;
-  color: var(--text-secondary);
+  color: var(--fg-3);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -228,12 +254,12 @@
 }
 
 #overlay-command-k .empty-state i {
-  color: #ccc;
+  color: var(--fg-4);
 }
 
 /* Search engine result item */
 #overlay-command-k .result-item.search-engine-item {
-  border-top: 1px solid #eaeaea;
+  border-top: 1px solid var(--border-1);
   margin-top: 4px;
   padding-top: 12px;
 }
@@ -250,15 +276,15 @@
   display: none;
   padding: 12px;
   text-align: center;
-  color: var(--text-secondary);
+  color: var(--fg-3);
 }
 
 #overlay-command-k .loading .loader {
   width: 20px;
   height: 20px;
-  border: 2px solid #eaeaea;
-  border-top: 2px solid var(--primary-color);
-  border-radius: var(--radius-circle);
+  border: 2px solid var(--border-1);
+  border-top: 2px solid var(--accent);
+  border-radius: var(--r-full);
   animation: spin 1s linear infinite;
   margin: 0 auto 8px;
 }
