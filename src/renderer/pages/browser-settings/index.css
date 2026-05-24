@@ -136,11 +136,11 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0 10px;
-  height: 34px;
+  padding: 0 12px;
+  height: 38px;
   border-radius: var(--r-sm);
   font-family: inherit;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--n0-text);
   text-decoration: none;
@@ -852,19 +852,42 @@
 }
 
 /* ====== KEYBOARD SHORTCUTS ============================== */
-.shortcuts-filter {
+/* Dedicated category-pill row — mirrors the Downloads / Bookmarks
+   grammar (dashed top border, uppercase Categories label, wrapping
+   pill row). The pills themselves use .cat-pill from the chrome
+   library; the rules here cover layout + capitalization + svg size. */
+.shortcuts-filter-row {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
-  margin-bottom: 16px;
+  flex-wrap: wrap;
+  margin: 14px 0 24px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border-1);
 }
 
-.filter-btn {
+.shortcuts-filter-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--n0-text-2);
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
+.shortcuts-filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.shortcuts-filter .cat-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 26px;
-  padding: 0 10px;
+  height: 28px;
+  padding: 0 12px;
   background: var(--bg-0);
   border: 1px solid var(--border-1);
   border-radius: var(--r-pill, 6px);
@@ -873,21 +896,22 @@
   font-weight: 500;
   color: var(--n0-text-2);
   cursor: pointer;
+  text-transform: capitalize;
   transition:
     background var(--dur-fast),
     color var(--dur-fast),
-    border-color var(--dur-fast);
+    border-color var(--dur-fast),
+    filter var(--dur-fast);
 }
 
-.filter-btn:hover {
-  background: var(--bg-2);
-  color: var(--n0-text);
+.shortcuts-filter .cat-pill:hover {
+  filter: brightness(0.97);
 }
 
-.filter-btn.active {
-  background: var(--n0-text);
-  color: var(--bg-0);
-  border-color: var(--n0-text);
+.shortcuts-filter .cat-pill svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
 }
 
 /* Search bar above shortcut table */
@@ -975,12 +999,6 @@
 
 .shortcuts-table tbody tr:hover {
   background: var(--bg-3);
-}
-
-.shortcuts-footer {
-  padding: 12px 0 0;
-  font-size: 12px;
-  color: var(--n0-text-2);
 }
 
 /* Keycap — single-key pill, used in shortcut table + descriptions */

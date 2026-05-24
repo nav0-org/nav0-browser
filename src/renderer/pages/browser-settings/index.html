@@ -897,18 +897,6 @@
               <h1 class="page-title">Keyboard Shortcuts</h1>
             </header>
 
-            <!-- Category Filter -->
-            <div class="shortcuts-filter">
-              <button class="filter-btn active" data-filter="all">All</button>
-              <button class="filter-btn" data-filter="Tabs">Tabs</button>
-              <button class="filter-btn" data-filter="Window">Window</button>
-              <button class="filter-btn" data-filter="Navigation">Navigation</button>
-              <button class="filter-btn" data-filter="Utilities">Utilities</button>
-              <button class="filter-btn" data-filter="Bookmarks">Bookmarks</button>
-              <button class="filter-btn" data-filter="Developer">Developer</button>
-              <button class="filter-btn" data-filter="View">View</button>
-            </div>
-
             <!-- Search -->
             <div class="shortcuts-search">
               <i data-lucide="search" class="shortcuts-search-icon"></i>
@@ -920,6 +908,14 @@
               />
             </div>
 
+            <!-- Category Filter — same pill grammar as Downloads / Bookmarks -->
+            <div class="shortcuts-filter-row">
+              <span class="shortcuts-filter-label">Categories</span>
+              <div class="shortcuts-filter" id="shortcut-filters">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+
             <!-- Shortcuts Table -->
             <div class="shortcuts-table-container">
               <table class="shortcuts-table" id="shortcuts-table">
@@ -927,21 +923,13 @@
                   <tr>
                     <th>Action</th>
                     <th>Category</th>
-                    <th>Default</th>
-                    <th>Current Shortcut</th>
-                    <th>Reset</th>
+                    <th>Shortcut</th>
                   </tr>
                 </thead>
                 <tbody id="shortcuts-tbody">
                   <!-- Populated by JS -->
                 </tbody>
               </table>
-            </div>
-
-            <div class="shortcuts-footer">
-              <button class="btn btn-sm btn-secondary" id="reset-all-shortcuts-btn">
-                <i data-lucide="rotate-ccw" width="13" height="13"></i> Reset All to Defaults
-              </button>
             </div>
           </section>
 
