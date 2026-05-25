@@ -213,9 +213,14 @@ export class BrowserTabManager {
       this.tabsContainer.scrollBy({ left: 200, behavior: 'smooth' });
     });
 
-    // Update scroll arrow visibility on scroll and resize
+    // Update scroll arrow visibility on scroll and resize. The resize callback
+    // is deferred to the next frame so toggling the arrows' visibility (which
+    // can itself change layout) doesn't re-enter the observer synchronously and
+    // trip the benign "ResizeObserver loop" warning.
     this.tabsContainer.addEventListener('scroll', () => this.updateTabScrollButtons());
-    new ResizeObserver(() => this.updateTabScrollButtons()).observe(this.tabsContainer);
+    new ResizeObserver(() => {
+      window.requestAnimationFrame(() => this.updateTabScrollButtons());
+    }).observe(this.tabsContainer);
   }
 
   private setupIpcListeners(): void {
