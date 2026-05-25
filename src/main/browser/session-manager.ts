@@ -39,6 +39,7 @@ export abstract class SessionManager {
         url: string;
         title: string;
         faviconUrl: string | null;
+        isPinned: boolean;
         isActive: boolean;
       }[] = [];
       for (const tab of tabs) {
@@ -48,6 +49,7 @@ export abstract class SessionManager {
           url,
           title: tab.getTitle(),
           faviconUrl: tab.getFaviconUrl(),
+          isPinned: tab.getIsPinned(),
           isActive: tab.getId() === activeTabId,
         });
       }
@@ -58,7 +60,12 @@ export abstract class SessionManager {
       if (activeTabIndex === -1) activeTabIndex = 0;
 
       sessionWindows.push({
-        tabs: filteredTabs.map((t) => ({ url: t.url, title: t.title, faviconUrl: t.faviconUrl })),
+        tabs: filteredTabs.map((t) => ({
+          url: t.url,
+          title: t.title,
+          faviconUrl: t.faviconUrl,
+          isPinned: t.isPinned,
+        })),
         activeTabIndex,
       });
     }
@@ -123,8 +130,17 @@ export abstract class SessionManager {
         }
       }
 
-      // Activate the correct tab
+      // Re-apply pinned state. Tabs were created in record order (default tab
+      // for record 0, then the rest), so getTabs() lines up index-for-index
+      // with windowRecord.tabs. The renderer pins and reorders on each event.
       const allTabs = newWindow.getTabs();
+      for (let i = 0; i < windowRecord.tabs.length && i < allTabs.length; i++) {
+        if (windowRecord.tabs[i].isPinned) {
+          newWindow.setTabPinned(allTabs[i].getId(), true);
+        }
+      }
+
+      // Activate the correct tab
       if (windowRecord.activeTabIndex < allTabs.length) {
         newWindow.activateTab(allTabs[windowRecord.activeTabIndex].getId());
       }

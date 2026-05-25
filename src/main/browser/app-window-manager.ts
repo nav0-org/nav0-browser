@@ -2,7 +2,6 @@ import {
   ClosedTabRecord,
   ClosedWindowRecord,
   RendererToMainEventsForBrowserIPC,
-  MainToRendererEventsForBrowserIPC,
   DataStoreConstants,
   PartitionNames,
 } from '../../constants/app-constants';
@@ -1227,15 +1226,7 @@ export abstract class AppWindowManager {
           {
             label: isPinned ? 'Unpin Tab' : 'Pin Tab',
             click: () => {
-              if (isPinned) {
-                window
-                  .getBrowserWindowInstance()
-                  ?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_UNPINNED, { id: tabId });
-              } else {
-                window
-                  .getBrowserWindowInstance()
-                  ?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_PINNED, { id: tabId });
-              }
+              window.setTabPinned(tabId, !isPinned);
             },
           },
           { type: 'separator' },

@@ -557,6 +557,18 @@ export class AppWindow {
     return this.tabs.get(id) || null;
   }
 
+  setTabPinned(id: string, pinned: boolean): void {
+    const tab = this.tabs.get(id);
+    if (!tab) return;
+    tab.setPinned(pinned);
+    this.browserWindowInstance?.webContents.send(
+      pinned
+        ? MainToRendererEventsForBrowserIPC.TAB_PINNED
+        : MainToRendererEventsForBrowserIPC.TAB_UNPINNED,
+      { id }
+    );
+  }
+
   getBrowserWindowInstance(): BrowserWindow | null {
     return this.browserWindowInstance;
   }
