@@ -557,7 +557,22 @@ export class Tab {
       }
     );
 
-    this.webContentsViewInstance.webContents.setWindowOpenHandler(({ url, disposition }) => {
+    this.attachWindowOpenHandling(this.webContentsViewInstance.webContents);
+  }
+
+  /**
+   * Wires window.open handling onto a webContents and, crucially, re-attaches
+   * itself to every popup window that webContents spawns. Child windows do NOT
+   * inherit their opener's window-open handler, so without this a window.open
+   * call made from inside a popup is dropped and silently does nothing — e.g.
+   * Google Meet's "Start now" button, which lives in the "Share your new
+   * meeting" popup and opens the meeting via window.open before closing that
+   * popup.
+   */
+  private attachWindowOpenHandling(webContents: Electron.WebContents): void {
+    const isMainTab = webContents === this.webContentsViewInstance?.webContents;
+
+    webContents.setWindowOpenHandler(({ url, disposition }) => {
       // Hand off external protocols to the OS (mailto:, tel:, etc.)
       if (EXTERNAL_PROTOCOL_RE.test(url)) {
         shell.openExternal(url).catch(() => {});
@@ -576,7 +591,7 @@ export class Tab {
       }
 
       // Check popup policy from settings
-      if (!this.isPopupAllowedBySettings(url)) {
+      if (!this.isPopupAllowedBySettings(url, webContents.getURL())) {
         console.warn(`Popup blocked by settings for: ${url}`);
         return { action: 'deny' };
       }
@@ -593,7 +608,10 @@ export class Tab {
         };
       } else if (disposition === 'foreground-tab' || disposition === 'background-tab') {
         this.popupTimestamps.push(now);
-        this.parentAppWindow.createTab(url, false);
+        // A popup that opens a tab is usually about to close itself (e.g. Meet's
+        // "Start now"), so surface the new tab; _blank links from the main tab
+        // stay in the background to avoid stealing focus.
+        this.parentAppWindow.createTab(url, !isMainTab);
       } else if (disposition === 'new-window') {
         // Allow popup windows (e.g. OAuth flows like "Continue with Google")
         // to open as real windows, preserving window.opener for callback communication
@@ -609,15 +627,22 @@ export class Tab {
       }
       return { action: 'deny' };
     });
+
+    // Child windows don't inherit this handler, so re-attach to any popup this
+    // webContents spawns (and, recursively, to popups of popups).
+    webContents.on('did-create-window', (childWindow: BrowserWindow) => {
+      if (childWindow.webContents && !childWindow.webContents.isDestroyed()) {
+        this.attachWindowOpenHandling(childWindow.webContents);
+      }
+    });
   }
 
-  private isPopupAllowedBySettings(popupUrl: string): boolean {
+  private isPopupAllowedBySettings(popupUrl: string, openerUrl: string): boolean {
     try {
       const stored = DataStoreManager.get(DataStoreConstants.BROWSER_SETTINGS) as BrowserSettings;
       const s = { ...DEFAULT_BROWSER_SETTINGS, ...stored };
 
       // Get hostnames for both the opener page and the popup destination
-      const openerUrl = this.webContentsViewInstance.webContents.getURL();
       let openerHostname = '';
       try {
         openerHostname = new URL(openerUrl).hostname;
