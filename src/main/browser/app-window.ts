@@ -557,6 +557,30 @@ export class AppWindow {
     return this.tabs.get(id) || null;
   }
 
+  setTabPinned(id: string, pinned: boolean): void {
+    const tab = this.tabs.get(id);
+    if (!tab) return;
+    tab.setPinned(pinned);
+    this.reorderPinnedTabs();
+    this.browserWindowInstance?.webContents.send(
+      pinned
+        ? MainToRendererEventsForBrowserIPC.TAB_PINNED
+        : MainToRendererEventsForBrowserIPC.TAB_UNPINNED,
+      { id }
+    );
+  }
+
+  // Keep the tab Map ordered with pinned tabs first, preserving each group's
+  // relative order — mirroring how the renderer's tab strip reorders on pin.
+  // This keeps getTabs() (and therefore the saved session order) matching what
+  // the user actually sees.
+  private reorderPinnedTabs(): void {
+    const entries = Array.from(this.tabs.entries());
+    const pinned = entries.filter(([, tab]) => tab.getIsPinned());
+    const unpinned = entries.filter(([, tab]) => !tab.getIsPinned());
+    this.tabs = new Map([...pinned, ...unpinned]);
+  }
+
   getBrowserWindowInstance(): BrowserWindow | null {
     return this.browserWindowInstance;
   }

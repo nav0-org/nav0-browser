@@ -99,6 +99,7 @@ export class Tab {
       ) => void)
     | null = null;
   private isSuspended = false;
+  private isPinned = false;
   private lastActivatedAt: Date = new Date();
   private pageStartTime: number | null = null;
   private activeTimeAccumulator = 0;
@@ -1126,6 +1127,14 @@ export class Tab {
 
   getIsSuspended(): boolean {
     return this.isSuspended;
+  }
+
+  getIsPinned(): boolean {
+    return this.isPinned;
+  }
+
+  setPinned(pinned: boolean): void {
+    this.isPinned = pinned;
   }
 
   getLastActivatedAt(): Date {

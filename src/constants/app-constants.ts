@@ -275,6 +275,7 @@ export interface SessionTabRecord {
   url: string;
   title: string;
   faviconUrl: string | null;
+  isPinned: boolean;
 }
 
 export interface SessionWindowRecord {
