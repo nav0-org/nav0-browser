@@ -560,16 +560,16 @@ function renderFilterLists() {
     item.className = 'list-item';
     item.innerHTML = `
       <div class="list-item-content">
-        <label class="toggle" style="margin-right: 8px;">
+        <div class="list-item-text" style="font-family: var(--n0-sans); font-weight: 500;">${list.name}</div>
+        <div class="list-item-description" style="font-family: var(--n0-sans);">${list.description}</div>
+      </div>
+      <div class="list-item-actions">
+        <label class="toggle">
           <input type="checkbox" ${list.enabled ? 'checked' : ''} data-idx="${idx}">
           <span class="toggle-slider"></span>
         </label>
-        <div>
-          <div class="list-item-text" style="font-family: var(--n0-sans); font-weight: 500;">${list.name}</div>
-          <div class="list-item-description" style="font-family: var(--n0-sans);">${list.description}</div>
-        </div>
+        ${!list.isBuiltIn ? `<button class="list-item-btn" data-idx="${idx}" title="Remove"><i data-lucide="x" width="14" height="14"></i></button>` : ''}
       </div>
-      ${!list.isBuiltIn ? `<div class="list-item-actions"><button class="list-item-btn" data-idx="${idx}" title="Remove"><i data-lucide="x" width="14" height="14"></i></button></div>` : ''}
     `;
 
     const checkbox = item.querySelector('input[type="checkbox"]') as HTMLInputElement;
