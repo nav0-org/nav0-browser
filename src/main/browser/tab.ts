@@ -694,18 +694,28 @@ export class Tab {
     if (s.downloadPath && !fs.existsSync(s.downloadPath)) {
       downloadDir = app.getPath('downloads');
     }
-    const downloadPath = path.join(downloadDir, item.getFilename());
-    const downloadId = item.getStartTime().toString() + '_' + item.getFilename();
+    const requestedFileName = item.getFilename();
+    const downloadId = item.getStartTime().toString() + '_' + requestedFileName;
 
     // Prevent duplicate handling when multiple tabs share the same session
     if (Tab.handledDownloads.has(downloadId)) return;
     Tab.handledDownloads.add(downloadId);
 
-    item.setSavePath(downloadPath);
-
     // Check if this is a cross-session resume (triggered by createInterruptedDownload)
     let dbRecordId = DownloadManager.checkResuming(downloadId);
     const isCrossSessionResume = !!dbRecordId;
+
+    // New downloads get a Chrome-style " (n)" suffix when a file of the same
+    // name already exists, so we never clobber it. Resumes must keep their
+    // original path so the partial file on disk is continued, not duplicated.
+    let downloadPath = path.join(downloadDir, requestedFileName);
+    let fileName = requestedFileName;
+    if (!isCrossSessionResume) {
+      downloadPath = Utils.getUniqueFilePath(downloadPath);
+      fileName = path.basename(downloadPath);
+    }
+
+    item.setSavePath(downloadPath);
 
     if (dbRecordId) {
       // Resuming from previous session – update existing record
@@ -715,9 +725,9 @@ export class Tab {
       const record = await DownloadManager.addRecord(
         this.parentAppWindow.id,
         item.getURL(),
-        item.getFilename(),
-        path.extname(item.getFilename()),
-        Utils.getFileType(path.extname(item.getFilename())),
+        fileName,
+        path.extname(fileName),
+        Utils.getFileType(path.extname(fileName)),
         item.getTotalBytes(),
         downloadPath
       );
@@ -735,19 +745,14 @@ export class Tab {
     );
 
     // Track in main process so renderer can query on page load
-    DownloadManager.trackDownloadStarted(
-      downloadId,
-      item.getFilename(),
-      item.getTotalBytes(),
-      dbRecordId
-    );
+    DownloadManager.trackDownloadStarted(downloadId, fileName, item.getTotalBytes(), dbRecordId);
     DownloadManager.storeDownloadItem(downloadId, item);
 
     // Notify renderer (browser chrome + all tabs) that a download has started
     const startedData = {
       downloadId,
       dbRecordId,
-      fileName: item.getFilename(),
+      fileName,
       totalBytes: item.getTotalBytes(),
     };
     this.parentAppWindow
@@ -823,7 +828,7 @@ export class Tab {
 
       const browserWindow = this.parentAppWindow.getBrowserWindowInstance();
       if (!browserWindow?.webContents) return;
-      const completedData = { downloadId, state, fileName: item.getFilename(), dbRecordId };
+      const completedData = { downloadId, state, fileName, dbRecordId };
       browserWindow.webContents.send(
         MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED,
         completedData

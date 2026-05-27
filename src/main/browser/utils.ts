@@ -1,4 +1,30 @@
+import * as fs from 'fs';
+import path from 'path';
+
 export abstract class Utils {
+  /**
+   * Returns a file path that won't overwrite an existing file. If the desired
+   * path is free it is returned unchanged; otherwise a Chrome-style numeric
+   * suffix is inserted before the extension ("report.pdf" → "report (1).pdf"
+   * → "report (2).pdf").
+   */
+  public static getUniqueFilePath(desiredPath: string): string {
+    if (!fs.existsSync(desiredPath)) return desiredPath;
+
+    const dir = path.dirname(desiredPath);
+    const ext = path.extname(desiredPath);
+    const base = path.basename(desiredPath, ext);
+
+    let counter = 1;
+    let candidate: string;
+    do {
+      candidate = path.join(dir, `${base} (${counter})${ext}`);
+      counter++;
+    } while (fs.existsSync(candidate));
+
+    return candidate;
+  }
+
   public static getFileType(
     fileExtension: string
   ): 'document' | 'image' | 'archive' | 'audio' | 'video' | 'file' | 'executable' | 'other' {
