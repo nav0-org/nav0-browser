@@ -352,8 +352,12 @@ export class Tab {
     //for soft navigation (debounced)
     this.webContentsViewInstance.webContents.on(
       WebContentsEvents.DID_NAVIGATE_IN_PAGE,
-      async (event, url: string) => {
+      async (event, url: string, isMainFrame: boolean) => {
         if (this._destroyed) return;
+        // did-navigate-in-page fires for every frame. Ignore subframes (e.g. the
+        // gapi hovercard iframe in Gmail changing its #fragment) so an iframe URL
+        // never lands in the address bar — only the main frame drives it.
+        if (!isMainFrame) return;
         this.debouncedHandleNavigationCompletion(url);
         // Re-apply dark mode for back/forward in-page navigations (bfcache restores)
       }
