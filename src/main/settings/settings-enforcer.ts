@@ -407,22 +407,26 @@ export abstract class SettingsEnforcer {
           }
         }
 
+        // Neither blocklist below may cancel a top-level navigation or a
+        // first-party request — both target third-party trackers/ads embedded
+        // in other sites, so applying them to a page the user opened directly
+        // (or its own assets) breaks the site with no privacy benefit. Some
+        // listed domains (e.g. webengage.com) also serve their own website.
+        // Registrable-domain match keeps a site's own subdomains first-party.
+        const requestDomain = SettingsEnforcer.getRegistrableDomain(hostname);
+        const topDomain = topHostname ? SettingsEnforcer.getRegistrableDomain(topHostname) : '';
+        const isFirstParty = topDomain !== '' && requestDomain === topDomain;
+        if (details.resourceType === 'mainFrame' || isFirstParty) {
+          callback({});
+          return;
+        }
+
         // Check if hostname matches any blocked domain
         for (const domain of SettingsEnforcer.adBlockDomains) {
           if (hostname === domain || hostname.endsWith('.' + domain)) {
             callback({ cancel: true });
             return;
           }
-        }
-
-        // Skip generic URL pattern matching for first-party (same-host)
-        // requests. The patterns are designed to catch third-party ad URLs
-        // and produce false positives on legitimate site assets whose paths
-        // happen to contain generic words like "popup", "banner", or "ads"
-        // (e.g. Bitrix CMS components served under /.../popup/script.js).
-        if (topHostname && topHostname === hostname) {
-          callback({});
-          return;
         }
 
         // Skip URL-pattern matching for sub-resources of streaming sites.
@@ -447,10 +451,6 @@ export abstract class SettingsEnforcer {
         const urlString = details.url;
         for (const pattern of AD_URL_PATTERNS) {
           if (pattern.test(urlString)) {
-            // Don't block navigations to avoid breaking page loads
-            if (details.resourceType === 'mainFrame') {
-              break;
-            }
             callback({ cancel: true });
             return;
           }
