@@ -407,11 +407,22 @@ export abstract class SettingsEnforcer {
           }
         }
 
-        // Check if hostname matches any blocked domain
-        for (const domain of SettingsEnforcer.adBlockDomains) {
-          if (hostname === domain || hostname.endsWith('.' + domain)) {
-            callback({ cancel: true });
-            return;
+        // Domain blocking targets third-party trackers/ads embedded in other
+        // sites — it must never cancel a top-level navigation or a first-party
+        // request. Some listed domains (e.g. webengage.com, a marketing SaaS)
+        // also serve their own website; blocking the mainFrame request makes
+        // the site unreachable, with no privacy benefit since the user
+        // deliberately went there. Third-party requests stay blocked.
+        const requestDomain = SettingsEnforcer.getRegistrableDomain(hostname);
+        const topDomain = topHostname ? SettingsEnforcer.getRegistrableDomain(topHostname) : '';
+        const isFirstParty = topDomain !== '' && requestDomain === topDomain;
+        if (details.resourceType !== 'mainFrame' && !isFirstParty) {
+          // Check if hostname matches any blocked domain
+          for (const domain of SettingsEnforcer.adBlockDomains) {
+            if (hostname === domain || hostname.endsWith('.' + domain)) {
+              callback({ cancel: true });
+              return;
+            }
           }
         }
 
