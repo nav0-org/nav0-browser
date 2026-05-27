@@ -772,6 +772,25 @@
   border-bottom: 0;
 }
 
+/* List-style sub-settings (allow / block / exception lists) stack their
+   label, description, list and add-form vertically instead of using the
+   default label|control grid, which would split them into a 2x2 layout. */
+#cookie-exceptions-container,
+#popup-allowed-container,
+#popup-blocked-container {
+  display: block;
+}
+
+#cookie-exceptions-container .list-item,
+#popup-allowed-container .list-item,
+#popup-blocked-container .list-item,
+#cookie-exceptions-container .add-item-form,
+#popup-allowed-container .add-item-form,
+#popup-blocked-container .add-item-form {
+  padding-left: 0;
+  padding-right: 0;
+}
+
 .sub-setting-panel {
   background: var(--bg-1);
   border-top: 1px solid var(--border-1);
@@ -1161,6 +1180,59 @@ kbd,
 
 .permission-entry-decision .form-select-sm {
   min-width: 120px;
+}
+
+/* Origin group: a card grouping all the permissions for one site */
+.permission-origin-group {
+  margin-bottom: 16px;
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-sm);
+  background: var(--bg-0);
+  overflow: hidden;
+}
+
+.permission-origin-group:last-child {
+  margin-bottom: 0;
+}
+
+.permission-origin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--border-1);
+}
+
+.permission-origin-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.permission-origin-favicon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  object-fit: contain;
+  color: var(--n0-text-2);
+}
+
+.permission-origin-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--n0-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.permission-origin-actions {
+  flex-shrink: 0;
 }
 
 /* ====== CHECKBOX OPTIONS (dialogs etc.) ================ */
