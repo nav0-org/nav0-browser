@@ -399,6 +399,13 @@
   box-shadow: none;
 }
 
+/* A description that follows a .sub-label inside an unpadded group body
+   needs the same 16px inset so it lines up with the label and list rows. */
+#adblocker-details > .setting-description {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
 .sub-label {
   padding: 12px 16px 6px;
   font-size: 11px;
@@ -756,6 +763,12 @@
   gap: 8px;
   align-items: center;
   padding: 12px 16px;
+}
+
+/* The custom search engine form has a third field (name), so it needs an
+   extra column or the URL input collapses and the button wraps to a new row. */
+#add-engine-form {
+  grid-template-columns: auto 1fr auto;
 }
 
 /* ====== SUB-SETTINGS (nested panels) ==================== */
