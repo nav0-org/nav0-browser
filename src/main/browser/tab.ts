@@ -321,6 +321,7 @@ export class Tab {
       WebContentsEvents.DID_NAVIGATE,
       async (event, url: string) => {
         if (this._destroyed) return;
+        if (this.closeIfGapiHelperFrame(url)) return;
         // Skip data: URLs (SSL warning interstitials) during forward/back navigation.
         // These are not real pages — go back to where the user came from.
         if (url.startsWith('data:') && !this.showingSSLWarning) {
@@ -353,6 +354,7 @@ export class Tab {
       WebContentsEvents.DID_NAVIGATE_IN_PAGE,
       async (event, url: string) => {
         if (this._destroyed) return;
+        if (this.closeIfGapiHelperFrame(url)) return;
         this.debouncedHandleNavigationCompletion(url);
         // Re-apply dark mode for back/forward in-page navigations (bfcache restores)
       }
@@ -903,6 +905,17 @@ export class Tab {
     } catch {
       return false;
     }
+  }
+
+  // A gapi helper frame can still reach a tab's top frame — e.g. a window.open
+  // bootstrap URL that only redirects into the widget after the tab is created,
+  // slipping past the window-open guard. Such a URL is never a real page, so
+  // discard the stray tab. Deferred so we don't close the webContents mid-event.
+  private closeIfGapiHelperFrame(url: string): boolean {
+    if (!Tab.isGapiHelperPopup(url)) return false;
+    console.warn(`Closing stray gapi helper tab: ${url}`);
+    setImmediate(() => this.parentAppWindow.closeTab(this.id, false));
+    return true;
   }
 
   private injectCustomErrorPage(error: NavigationError): void {
