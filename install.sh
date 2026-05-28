@@ -18,6 +18,54 @@ case "$ARCH" in
     ;;
 esac
 
+# Read the installed Nav0 version from the bundle's Info.plist, if present.
+get_installed_version() {
+  local path
+  for path in "/Applications/$APP_NAME.app" "$HOME/Desktop/$APP_NAME.app"; do
+    if [ -d "$path" ]; then
+      local v
+      v=$(defaults read "$path/Contents/Info" CFBundleShortVersionString 2>/dev/null || true)
+      if [ -n "$v" ]; then
+        echo "$v"
+        return 0
+      fi
+    fi
+  done
+  return 1
+}
+
+# Returns 0 if $1 >= $2 using semver-style ordering via sort -V.
+version_ge() {
+  [ "$1" = "$2" ] && return 0
+  [ "$(printf '%s\n%s\n' "$1" "$2" | sort -V | tail -n1)" = "$1" ]
+}
+
+# Get latest release tag
+echo "Fetching latest release..."
+TAG=$(curl -sfL "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name"' | head -1 | cut -d'"' -f4)
+
+if [ -z "$TAG" ]; then
+  echo "Error: Could not determine latest release"
+  exit 1
+fi
+
+VERSION="${TAG#v}"
+DMG_NAME="${APP_NAME}-${VERSION}-${ARCH_SUFFIX}.dmg"
+DOWNLOAD_URL="https://github.com/$REPO/releases/download/$TAG/$DMG_NAME"
+
+# Skip the install if the user already has this version (or newer).
+# Bail before the running-app prompt so we don't kill Nav0 just to no-op.
+if [ "${NAV0_FORCE_REINSTALL:-}" != "1" ]; then
+  if INSTALLED_VERSION=$(get_installed_version); then
+    if version_ge "$INSTALLED_VERSION" "$VERSION"; then
+      echo "Nav0 $INSTALLED_VERSION is already installed (latest: $VERSION)."
+      echo "Set NAV0_FORCE_REINSTALL=1 to reinstall anyway."
+      exit 0
+    fi
+    echo "Updating Nav0 from $INSTALLED_VERSION to $VERSION..."
+  fi
+fi
+
 # Check if Nav0 is currently running; offer to quit and continue.
 if pgrep -x "$APP_NAME" >/dev/null 2>&1 \
    || pgrep -f "/${APP_NAME}.app/Contents/MacOS/${APP_NAME}" >/dev/null 2>&1; then
@@ -72,19 +120,6 @@ if pgrep -x "$APP_NAME" >/dev/null 2>&1 \
   fi
   echo "Nav0 stopped."
 fi
-
-# Get latest release tag
-echo "Fetching latest release..."
-TAG=$(curl -sfL "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name"' | head -1 | cut -d'"' -f4)
-
-if [ -z "$TAG" ]; then
-  echo "Error: Could not determine latest release"
-  exit 1
-fi
-
-VERSION="${TAG#v}"
-DMG_NAME="${APP_NAME}-${VERSION}-${ARCH_SUFFIX}.dmg"
-DOWNLOAD_URL="https://github.com/$REPO/releases/download/$TAG/$DMG_NAME"
 
 TMPDIR_INSTALL=$(mktemp -d)
 trap 'rm -rf "$TMPDIR_INSTALL"' EXIT
