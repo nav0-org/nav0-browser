@@ -6,7 +6,6 @@ import {
   clipboard,
   desktopCapturer,
   BrowserWindow,
-  systemPreferences,
 } from 'electron';
 import { v4 as uuid } from 'uuid';
 import {
@@ -164,16 +163,12 @@ export class PermissionManager {
           PermissionManager.SENSITIVE_PERMISSIONS.has(permission) &&
           (!topIsSecure || !iframeIsSecure);
 
-        // Extract media types up-front — needed both for the prompt UI and
-        // for the macOS TCC check on stored-grant fast paths below.
-        const mediaTypes = PermissionManager.extractMediaTypes(permission, details);
-
         // Check stored persistent decisions (not in private mode)
         if (!isPrivate && !isInsecureBlocked) {
           const persistent = PermissionManager.getPersistentDecision(origin, permission);
           if (persistent === 'allowed_persistent') {
             PermissionManager.touchPersistentDecision(origin, permission);
-            PermissionManager.grantCallbacks([callback], permission, mediaTypes);
+            callback(true);
             return;
           }
           if (persistent === 'denied_persistent') {
@@ -186,7 +181,7 @@ export class PermissionManager {
         const sessionKey = PermissionManager.sessionKey(tabId, origin, permission);
         const sessionDecision = PermissionManager.sessionPermissions.get(sessionKey);
         if (sessionDecision === 'allowed_session') {
-          PermissionManager.grantCallbacks([callback], permission, mediaTypes);
+          callback(true);
           return;
         }
         if (sessionDecision === 'denied_session') {
@@ -198,6 +193,7 @@ export class PermissionManager {
         const isFloodBlocked = PermissionManager.isFlooding(origin);
 
         // Build permission info
+        const mediaTypes = PermissionManager.extractMediaTypes(permission, details);
         const permInfo = PermissionManager.getPermissionInfo(permission, details);
 
         // Create request
@@ -417,11 +413,7 @@ export class PermissionManager {
     // media request for the same origin should auto-resolve, not re-prompt).
     const decided = PermissionManager.evaluateStoredDecision(next);
     if (decided !== null) {
-      if (decided) {
-        PermissionManager.grantCallbacks(next.callbacks, next.permission, next.mediaTypes);
-      } else {
-        for (const cb of next.callbacks) cb(false);
-      }
+      for (const cb of next.callbacks) cb(decided);
       // Continue draining the queue without forcing a UI roundtrip.
       setTimeout(() => PermissionManager.processNextInQueue(tabId), 0);
       return;
@@ -464,19 +456,16 @@ export class PermissionManager {
     if (!request) return;
 
     PermissionManager.activePrompts.delete(request.tabId);
-    const { tabId, origin, permission, callbacks, mediaTypes, isPrivate } = request;
+    const { tabId, origin, permission, callbacks, isPrivate } = request;
     const sessionKey = PermissionManager.sessionKey(tabId, origin, permission);
-    const grantAll = (): void => {
-      PermissionManager.grantCallbacks(callbacks, permission, mediaTypes);
-    };
-    const denyAll = (): void => {
-      for (const cb of callbacks) cb(false);
+    const invokeAll = (granted: boolean): void => {
+      for (const cb of callbacks) cb(granted);
     };
 
     switch (decision) {
       case 'allow_once':
         PermissionManager.sessionPermissions.set(sessionKey, 'allowed_session');
-        grantAll();
+        invokeAll(true);
         break;
 
       case 'always_allow':
@@ -485,12 +474,12 @@ export class PermissionManager {
         } else {
           PermissionManager.storePersistentDecision(origin, permission, 'allowed_persistent');
         }
-        grantAll();
+        invokeAll(true);
         break;
 
       case 'deny_once':
         PermissionManager.sessionPermissions.set(sessionKey, 'denied_session');
-        denyAll();
+        invokeAll(false);
         break;
 
       case 'always_deny':
@@ -499,11 +488,11 @@ export class PermissionManager {
         } else {
           PermissionManager.storePersistentDecision(origin, permission, 'denied_persistent');
         }
-        denyAll();
+        invokeAll(false);
         break;
 
       default:
-        denyAll();
+        invokeAll(false);
         break;
     }
 
@@ -789,7 +778,7 @@ export class PermissionManager {
       const persistent = PermissionManager.getPersistentDecision(origin, permission);
       if (persistent === 'allowed_persistent') {
         PermissionManager.touchPersistentDecision(origin, permission);
-        PermissionManager.grantCallbacks([callback], permission, []);
+        callback(true);
         return;
       }
       if (persistent === 'denied_persistent') {
@@ -802,7 +791,7 @@ export class PermissionManager {
     const sessionKey = PermissionManager.sessionKey(tabId, origin, permission);
     const sessionDecision = PermissionManager.sessionPermissions.get(sessionKey);
     if (sessionDecision === 'allowed_session') {
-      PermissionManager.grantCallbacks([callback], permission, []);
+      callback(true);
       return;
     }
     if (sessionDecision === 'denied_session') {
@@ -836,77 +825,6 @@ export class PermissionManager {
   }
 
   // ─── Helpers ─────────────────────────────────────────────────────
-
-  // Granting `media` via setPermissionRequestHandler is necessary but not
-  // sufficient on macOS: TCC also has to grant the app itself access to the
-  // mic/camera, and that dialog doesn't fire automatically just because we
-  // returned true. Without this step, getUserMedia silently hangs on
-  // unsigned builds — Chromium waits on the OS, the OS never resolves,
-  // and pages like Zoom retry until they hit their internal timeout.
-  // askForMediaAccess() triggers the TCC dialog on first use; on subsequent
-  // calls it short-circuits to the cached decision.
-  private static async invokeMediaCallbacks(
-    callbacks: Array<(granted: boolean) => void>,
-    mediaTypes: string[]
-  ): Promise<void> {
-    const grant = (value: boolean): void => {
-      for (const cb of callbacks) cb(value);
-    };
-
-    if (process.platform !== 'darwin') {
-      grant(true);
-      return;
-    }
-
-    const types: Array<'microphone' | 'camera'> = [];
-    if (mediaTypes.includes('audio')) types.push('microphone');
-    if (mediaTypes.includes('video')) types.push('camera');
-    if (types.length === 0) {
-      grant(true);
-      return;
-    }
-
-    try {
-      for (const type of types) {
-        const status = systemPreferences.getMediaAccessStatus(type);
-        if (status === 'granted') continue;
-        if (status === 'denied' || status === 'restricted') {
-          console.warn(
-            `Nav0: macOS ${type} access is ${status}. Enable Nav0 in ` +
-              `System Settings > Privacy & Security > ${
-                type === 'microphone' ? 'Microphone' : 'Camera'
-              }.`
-          );
-          grant(false);
-          return;
-        }
-        const granted = await systemPreferences.askForMediaAccess(type);
-        if (!granted) {
-          grant(false);
-          return;
-        }
-      }
-      grant(true);
-    } catch (err) {
-      console.error('macOS media access check failed:', err);
-      grant(false);
-    }
-  }
-
-  // Single funnel for granting a permission to one or more queued callbacks.
-  // Routes `media` through the macOS TCC check; everything else grants
-  // synchronously like before.
-  private static grantCallbacks(
-    callbacks: Array<(granted: boolean) => void>,
-    permission: string,
-    mediaTypes: string[]
-  ): void {
-    if (permission === 'media') {
-      void PermissionManager.invokeMediaCallbacks(callbacks, mediaTypes);
-      return;
-    }
-    for (const cb of callbacks) cb(true);
-  }
 
   private static extractOrigin(url: string): string {
     try {
