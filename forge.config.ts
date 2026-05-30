@@ -20,6 +20,7 @@ const ICON_ICO = path.resolve(__dirname, 'src/renderer/assets/favicon.ico');
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
+    appBundleId: 'org.nav0.browser',
     executableName: process.platform === 'linux' ? 'nav0' : 'Nav0',
     icon: ICON_BASE,
     extraResource: [],
