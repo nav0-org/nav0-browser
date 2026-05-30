@@ -242,6 +242,22 @@
   outline-offset: 2px;
 }
 
+/* Within-window reorder: a red anchor bar marks the insertion edge, echoing
+   the row-anchor pattern used across Nav0. */
+.tab-card.drop-before {
+  box-shadow: inset 2px 0 0 0 var(--nav0-red-600);
+}
+
+.tab-card.drop-after {
+  box-shadow: inset -2px 0 0 0 var(--nav0-red-600);
+}
+
+/* Pin marker — signals tabs that are anchored to the left of their window. */
+.tab-pin-icon {
+  flex-shrink: 0;
+  color: var(--nav0-red-600);
+}
+
 /* ---- Empty state ---- */
 #overlay-command-o .empty-state {
   padding: 32px;

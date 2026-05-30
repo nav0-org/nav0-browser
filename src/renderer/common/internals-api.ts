@@ -126,6 +126,7 @@ declare global {
             url: string;
             faviconUrl: string | null;
             isActive: boolean;
+            isPinned: boolean;
           }>;
         }>
       >;
@@ -134,6 +135,7 @@ declare global {
         tabId: string,
         targetWindowId: string
       ) => Promise<{ success: boolean }>;
+      reorderTabs: (windowId: string, orderedIds: string[]) => Promise<{ success: boolean }>;
       getAboutInfo: () => Promise<{
         appVersion: string;
         isPackaged: boolean;
@@ -266,6 +268,7 @@ declare global {
       onTabLoadingChanged: (callback: (data: { id: string; isLoading: boolean }) => void) => void;
       onTabPinned: (callback: (data: { id: string }) => void) => void;
       onTabUnpinned: (callback: (data: { id: string }) => void) => void;
+      onTabsReordered: (callback: (data: { order: string[] }) => void) => void;
       onFullScreenChanged: (callback: (data: { isFullScreen: boolean }) => void) => void;
       onFocusUrlBar: (callback: () => void) => void;
       // Permission system

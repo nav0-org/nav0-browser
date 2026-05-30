@@ -146,6 +146,7 @@ export abstract class RendererToMainEventsForBrowserIPC {
     'browser:url-autocomplete-result-clicked';
   public static readonly FETCH_ALL_WINDOWS_TABS = 'browser:fetch-all-windows-tabs';
   public static readonly MOVE_TAB_TO_WINDOW = 'browser:move-tab-to-window';
+  public static readonly REORDER_TABS = 'browser:reorder-tabs';
   public static readonly CREATE_NEW_APP_WINDOW = 'browser:create-new-app-window';
   public static readonly CREATE_NEW_PRIVATE_APP_WINDOW = 'browser:create-new-private-app-window';
   public static readonly EXECUTE_JAVASCRIPT = 'browser:execute-javascript';
@@ -247,6 +248,7 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly TAB_LOADING_CHANGED = 'browser:tab-loading-changed';
   public static readonly TAB_PINNED = 'browser:tab-pinned';
   public static readonly TAB_UNPINNED = 'browser:tab-unpinned';
+  public static readonly TABS_REORDERED = 'browser:tabs-reordered';
   public static readonly FULLSCREEN_CHANGED = 'browser:fullscreen-changed';
   public static readonly FOCUS_URL_BAR = 'browser:focus-url-bar';
 }

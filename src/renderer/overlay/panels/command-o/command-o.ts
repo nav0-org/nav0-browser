@@ -7,6 +7,7 @@ type TabInfo = {
   url: string;
   faviconUrl: string | null;
   isActive: boolean;
+  isPinned: boolean;
 };
 
 type WindowGroup = {
@@ -33,7 +34,10 @@ let filteredGroups: WindowGroup[] = [];
 let flatTabs: { tab: TabInfo; windowId: string }[] = [];
 let selectedIndex = 0;
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-let dragData: { tabId: string; sourceWindowId: string } | null = null;
+let dragData: { tabId: string; sourceWindowId: string; isPinned: boolean } | null = null;
+// Reordering within a window is only unambiguous when the full tab list is on
+// screen, so it's disabled while a search filter is narrowing the results.
+let isFiltered = false;
 
 let containerEl: HTMLElement;
 let searchInput: HTMLInputElement;
@@ -101,6 +105,54 @@ const buildFlatTabs = () => {
   }
 };
 
+const clearDropIndicators = () => {
+  document
+    .querySelectorAll('.tab-card.drop-before, .tab-card.drop-after')
+    .forEach((el) => el.classList.remove('drop-before', 'drop-after'));
+};
+
+// Builds the new tab-id order for a window after dropping `draggedId` next to
+// `targetId`. Pinned tabs are always pulled to the front (stable), so they
+// stick to the left regardless of where the user dropped — mirroring the
+// main-process invariant.
+const computeReorderedIds = (
+  windowId: string,
+  draggedId: string,
+  targetId: string,
+  dropAfter: boolean
+): string[] => {
+  const group = allGroups.find((g) => g.windowId === windowId);
+  if (!group) return [];
+
+  const ids = group.tabs.map((t) => t.id).filter((id) => id !== draggedId);
+  let insertAt = ids.indexOf(targetId);
+  if (insertAt === -1) {
+    ids.push(draggedId);
+  } else {
+    if (dropAfter) insertAt += 1;
+    ids.splice(insertAt, 0, draggedId);
+  }
+
+  // Stable partition: pinned first, unpinned after.
+  const pinnedById = new Map(group.tabs.map((t) => [t.id, t.isPinned]));
+  const pinned = ids.filter((id) => pinnedById.get(id));
+  const unpinned = ids.filter((id) => !pinnedById.get(id));
+  return [...pinned, ...unpinned];
+};
+
+const reorderWithinWindow = async (
+  windowId: string,
+  draggedId: string,
+  targetId: string,
+  dropAfter: boolean
+) => {
+  const orderedIds = computeReorderedIds(windowId, draggedId, targetId, dropAfter);
+  if (orderedIds.length === 0) return;
+  await window.BrowserAPI.reorderTabs(windowId, orderedIds);
+  // Reflect the new order in the overlay while keeping it open.
+  await loadTabs();
+};
+
 const render = () => {
   tabsBody.innerHTML = '';
   const totalTabs = allGroups.reduce((sum, g) => sum + g.tabs.length, 0);
@@ -112,8 +164,16 @@ const render = () => {
   }
 
   const showHeaders = allGroups.length > 1;
-  const canDrag = !window.BrowserAPI.isPrivate && allGroups.length > 1;
+  // Cross-window moves require multiple non-private windows; within-window
+  // reordering just needs the unfiltered list. A card is draggable if either
+  // gesture is available.
+  const canMoveBetweenWindows = !window.BrowserAPI.isPrivate && allGroups.length > 1;
+  const canReorder = !isFiltered;
+  const canDrag = canMoveBetweenWindows || canReorder;
   footerDragHint.style.display = canDrag ? '' : 'none';
+  footerDragHint.textContent = canMoveBetweenWindows
+    ? 'drag to reorder or move between windows'
+    : 'drag to reorder tabs';
 
   let flatIdx = 0;
   for (let gi = 0; gi < filteredGroups.length; gi++) {
@@ -124,7 +184,7 @@ const render = () => {
     groupEl.className = 'window-group';
     groupEl.dataset.windowId = group.windowId;
 
-    if (canDrag) {
+    if (canMoveBetweenWindows) {
       groupEl.addEventListener('dragover', (e) => {
         e.preventDefault();
         if (dragData && dragData.sourceWindowId !== group.windowId) {
@@ -184,16 +244,22 @@ const render = () => {
       const titleText = tab.title || tab.url || 'New Tab';
       const truncatedTitle = escapeHtml(titleText);
 
+      const pinHtml = tab.isPinned
+        ? '<i data-lucide="pin" class="tab-pin-icon" width="12" height="12"></i>'
+        : '';
+
       card.innerHTML = `
         ${faviconHtml}
+        ${pinHtml}
         <span class="tab-title" title="${escapeHtml(titleText)}">${truncatedTitle}</span>
         ${tab.isActive ? '<span class="tab-active-dot"></span>' : ''}
       `;
+      if (tab.isPinned) card.classList.add('pinned');
 
       if (canDrag) {
         card.draggable = true;
         card.addEventListener('dragstart', (e) => {
-          dragData = { tabId: tab.id, sourceWindowId: group.windowId };
+          dragData = { tabId: tab.id, sourceWindowId: group.windowId, isPinned: tab.isPinned };
           card.classList.add('dragging');
           if (e.dataTransfer) {
             e.dataTransfer.effectAllowed = 'move';
@@ -202,10 +268,40 @@ const render = () => {
         card.addEventListener('dragend', () => {
           card.classList.remove('dragging');
           dragData = null;
+          clearDropIndicators();
           document
             .querySelectorAll('.drop-target')
             .forEach((el) => el.classList.remove('drop-target'));
         });
+
+        // Within-window reordering: show an insertion indicator and reorder on
+        // drop when dragging over a sibling card in the same window.
+        if (canReorder) {
+          card.addEventListener('dragover', (e) => {
+            if (!dragData) return;
+            if (dragData.sourceWindowId !== group.windowId) return;
+            if (dragData.tabId === tab.id) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const rect = card.getBoundingClientRect();
+            const dropAfter = e.clientX > rect.left + rect.width / 2;
+            clearDropIndicators();
+            card.classList.add(dropAfter ? 'drop-after' : 'drop-before');
+          });
+          card.addEventListener('drop', async (e) => {
+            if (!dragData) return;
+            if (dragData.sourceWindowId !== group.windowId) return;
+            if (dragData.tabId === tab.id) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const rect = card.getBoundingClientRect();
+            const dropAfter = e.clientX > rect.left + rect.width / 2;
+            const draggedId = dragData.tabId;
+            clearDropIndicators();
+            dragData = null;
+            await reorderWithinWindow(group.windowId, draggedId, tab.id, dropAfter);
+          });
+        }
       }
 
       card.addEventListener('click', () => {
@@ -220,6 +316,9 @@ const render = () => {
     tabsBody.appendChild(groupEl);
   }
 
+  // Render any Lucide icons added to the dynamic cards (e.g. pin markers).
+  createIcons({ icons });
+
   // Scroll selected into view
   const selectedCard = tabsBody.querySelector('.tab-card.selected') as HTMLElement;
   selectedCard?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -232,6 +331,7 @@ const switchToTab = (tab: TabInfo, windowId: string) => {
 
 const filterTabs = (query: string) => {
   const lowerQuery = query.toLowerCase().trim();
+  isFiltered = lowerQuery.length > 0;
   if (!lowerQuery) {
     filteredGroups = allGroups.map((g) => ({ ...g, tabs: [...g.tabs] }));
   } else {

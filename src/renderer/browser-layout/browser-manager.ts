@@ -384,6 +384,11 @@ export class BrowserTabManager {
       }
     });
 
+    // Tabs reordered (e.g. dragged in the Command-O tab switcher)
+    window.BrowserAPI.onTabsReordered((data: { order: string[] }) => {
+      this.applyTabOrder(data.order);
+    });
+
     // Reader mode state changed
     window.BrowserAPI.onReaderModeStateChanged((data: { id: string; isActive: boolean }) => {
       const tab = this.getTabById(data.id);
@@ -558,6 +563,36 @@ export class BrowserTabManager {
     this.tabs = [...pinnedTabs, ...unpinnedTabs];
 
     // Reorder DOM elements
+    for (const tab of this.tabs) {
+      const el = tab.getTabElement();
+      if (el) {
+        this.tabsContainer.appendChild(el);
+      }
+    }
+  }
+
+  // Reorders the visible tab strip to match an authoritative order from the
+  // main process. Unknown ids are skipped; any local tabs missing from the
+  // order are kept in their current relative position at the end.
+  private applyTabOrder(order: string[]): void {
+    const byId = new Map(this.tabs.map((t) => [t.id, t]));
+    const reordered: Tab[] = [];
+    for (const id of order) {
+      const tab = byId.get(id);
+      if (tab) {
+        reordered.push(tab);
+        byId.delete(id);
+      }
+    }
+    // Append any tabs that weren't part of the order, preserving their order.
+    for (const tab of this.tabs) {
+      if (byId.has(tab.id)) {
+        reordered.push(tab);
+      }
+    }
+    this.tabs = reordered;
+
+    // Reorder DOM elements to match.
     for (const tab of this.tabs) {
       const el = tab.getTabElement();
       if (el) {
