@@ -44,12 +44,18 @@ const config: ForgeConfig = {
       options: {
         icon: ICON_PNG,
         bin: 'nav0',
+        // Place Nav0 under "Internet" (not "Accessories"). Without this the
+        // installer defaults the .desktop Categories to Utility, which Linux
+        // Mint / GNOME map to Accessories.
+        categories: ['Network', 'WebBrowser'],
       },
     }),
     new MakerRpm({
       options: {
         icon: ICON_PNG,
         bin: 'nav0',
+        // Same as deb: surface Nav0 in the Internet menu group.
+        categories: ['Network', 'WebBrowser'],
       },
     }),
     {
