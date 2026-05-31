@@ -78,15 +78,16 @@ export class AppWindow {
     const isWindows = process.platform === 'win32';
     const isLinux = process.platform === 'linux';
 
-    // On Linux, true fullscreen makes the window manager hide its own panels
-    // (top/bottom system bars). We want the window to fill the screen while
-    // keeping those bars visible, so we open maximized instead of fullscreen.
-    this._desiredFullScreen = !isLinux;
+    // On Linux and Windows, true fullscreen makes the window manager hide its
+    // own panels (top/bottom system bars, taskbar). We want the window to fill
+    // the screen while keeping those bars visible, so we open maximized instead
+    // of fullscreen there. macOS keeps native fullscreen.
+    this._desiredFullScreen = isMac;
 
     this.browserWindowInstance = new BrowserWindow({
       width: 1200,
       height: 800,
-      fullscreen: !isLinux,
+      fullscreen: isMac,
       show: false,
       title: AppConstants.APP_NAME,
       icon:
@@ -120,9 +121,9 @@ export class AppWindow {
       },
     });
 
-    // Fill the screen on Linux without going into true fullscreen, so the
-    // system top/bottom bars stay visible.
-    if (isLinux) {
+    // Fill the screen on Linux/Windows without going into true fullscreen, so
+    // the system top/bottom bars (and taskbar) stay visible.
+    if (isLinux || isWindows) {
       this.browserWindowInstance.maximize();
     }
 
