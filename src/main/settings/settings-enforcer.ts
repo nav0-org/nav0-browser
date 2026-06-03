@@ -215,6 +215,20 @@ export abstract class SettingsEnforcer {
           return;
         }
 
+        // A top-level navigation is always first-party to itself: the document
+        // being loaded *is* the site, so its own Set-Cookie is never a
+        // third-party cookie — regardless of which site referred us here. This
+        // matters for sign-in redirect chains that hop across origins (e.g. a
+        // Google/SSO step lands back on github.com with an accounts.google.com
+        // referrer). Without this exemption we'd strip the destination's own
+        // session cookie, and the follow-up page (e.g. GitHub's
+        // /sessions/two-factor/app) 404s because the pending session is gone.
+        // Only sub-resources / sub-frames can legitimately be third-party.
+        if (details.resourceType === 'mainFrame') {
+          callback({ responseHeaders: details.responseHeaders });
+          return;
+        }
+
         // Determine if this is a third-party request
         const requestUrl = new URL(details.url);
         const frameUrl = details.frame?.url || details.referrer || '';
