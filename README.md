@@ -4,6 +4,8 @@
 
 Nav0 is a minimal, privacy-focused web browser built on Electron. No data collection. No bloat. No AI gimmicks. Just clean, safe browsing.
 
+![Nav0 Browser](https://nav0.org/homepage-screenshot.png)
+
 ## Features
 
 - **Lightweight** — Minimal resource usage for fast browsing
