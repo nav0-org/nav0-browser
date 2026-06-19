@@ -47,10 +47,17 @@ body.is-private .tab-bar {
   border-bottom-color: #4a1414;
 }
 
+/* The tabs container fills the strip via flex:1, so its empty area must stay
+   part of the window drag handle — otherwise there's nothing left to grab and
+   the frameless window can't be repositioned. Its interactive children
+   (tabs/buttons) opt back out below. */
+.tab-bar .tabs-container {
+  -webkit-app-region: drag;
+}
+
 /* All interactive elements inside tab bar must be non-draggable */
 .tab-bar button,
 .tab-bar .tab,
-.tab-bar .tabs-container,
 .tab-bar .private-window-identifier {
   -webkit-app-region: no-drag;
 }
