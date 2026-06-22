@@ -584,25 +584,35 @@ export class Tab {
         return { action: 'deny' };
       }
 
-      const now = Date.now();
-      this.popupTimestamps = this.popupTimestamps.filter((t) => now - t < Tab.POPUP_WINDOW_MS);
+      // A 'background-tab' disposition can only come from a modifier / middle
+      // click (Ctrl/Cmd/middle) on a link — a page can't request one through
+      // window.open — so it's an unambiguous, deliberate user action and skips
+      // the flood guard and popup policy. (Context-menu "Open link in new tab",
+      // Command-K, the app menu, etc. never reach this handler at all; they call
+      // createTab directly and were already exempt.)
+      if (disposition !== 'background-tab') {
+        // Everything else here is page-driven — a scripted window.open, or a
+        // _blank left-click we can't tell apart from one — so it stays subject
+        // to flood protection and the popup policy.
+        const now = Date.now();
+        this.popupTimestamps = this.popupTimestamps.filter((t) => now - t < Tab.POPUP_WINDOW_MS);
 
-      // Flood protection: always enforced regardless of policy
-      if (this.popupTimestamps.length >= Tab.MAX_POPUPS) {
-        console.warn(
-          `Popup blocked: tab exceeded ${Tab.MAX_POPUPS} popups in ${Tab.POPUP_WINDOW_MS / 1000}s`
-        );
-        return { action: 'deny' };
-      }
+        if (this.popupTimestamps.length >= Tab.MAX_POPUPS) {
+          console.warn(
+            `Popup blocked: tab exceeded ${Tab.MAX_POPUPS} automatic popups in ${Tab.POPUP_WINDOW_MS / 1000}s`
+          );
+          return { action: 'deny' };
+        }
 
-      // Check popup policy from settings
-      if (!this.isPopupAllowedBySettings(url, webContents.getURL())) {
-        console.warn(`Popup blocked by settings for: ${url}`);
-        return { action: 'deny' };
+        if (!this.isPopupAllowedBySettings(url, webContents.getURL())) {
+          console.warn(`Popup blocked by settings for: ${url}`);
+          return { action: 'deny' };
+        }
+
+        this.popupTimestamps.push(now);
       }
 
       if (url === 'about:blank') {
-        this.popupTimestamps.push(now);
         return {
           action: 'allow',
           overrideBrowserWindowOptions: {
@@ -612,7 +622,6 @@ export class Tab {
           },
         };
       } else if (disposition === 'foreground-tab' || disposition === 'background-tab') {
-        this.popupTimestamps.push(now);
         // A popup that opens a tab is usually about to close itself (e.g. Meet's
         // "Start now"), so surface the new tab; _blank links from the main tab
         // stay in the background to avoid stealing focus.
@@ -620,7 +629,6 @@ export class Tab {
       } else if (disposition === 'new-window') {
         // Allow popup windows (e.g. OAuth flows like "Continue with Google")
         // to open as real windows, preserving window.opener for callback communication
-        this.popupTimestamps.push(now);
         return {
           action: 'allow',
           overrideBrowserWindowOptions: {
