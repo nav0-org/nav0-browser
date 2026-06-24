@@ -391,9 +391,9 @@ export class AppWindow {
     }
   }
 
-  async createTab(url: string, activateNewTab = true): Promise<Tab> {
+  async createTab(url: string, activateNewTab = true, openerTabId?: string): Promise<Tab> {
     const tab = new Tab(this, url, this.partitionSetting);
-    this.tabs.set(tab.getId(), tab);
+    const index = this.insertTab(tab, openerTabId);
 
     this.browserWindowInstance?.webContents.send(
       MainToRendererEventsForBrowserIPC.NEW_TAB_CREATED,
@@ -401,6 +401,7 @@ export class AppWindow {
         id: tab.id,
         title: tab.getTitle(),
         url: tab.getUrl(),
+        index,
       }
     );
 
@@ -410,6 +411,32 @@ export class AppWindow {
     }
 
     return tab;
+  }
+
+  // Inserts a freshly created tab into the ordered tab Map and returns its final
+  // index. When openerTabId is given — i.e. the tab was spawned from an existing
+  // page (a _blank link, window.open, or the "open link in new tab" context
+  // menu) — the new tab is placed directly after its opener, like Chrome,
+  // instead of at the end of the strip. Without an opener (Ctrl+T, the app menu,
+  // the command palette, session restore, …) it appends as before. New tabs are
+  // always unpinned, so the insertion point is clamped to the unpinned region to
+  // keep pinned tabs grouped at the front.
+  private insertTab(tab: Tab, openerTabId?: string): number {
+    const entries = Array.from(this.tabs.entries());
+    const openerIndex = openerTabId ? entries.findIndex(([id]) => id === openerTabId) : -1;
+
+    if (openerIndex === -1) {
+      this.tabs.set(tab.getId(), tab);
+      return entries.length;
+    }
+
+    const firstUnpinnedIndex = entries.findIndex(([, t]) => !t.getIsPinned());
+    const unpinnedStart = firstUnpinnedIndex === -1 ? entries.length : firstUnpinnedIndex;
+    const insertIndex = Math.max(openerIndex + 1, unpinnedStart);
+
+    entries.splice(insertIndex, 0, [tab.getId(), tab]);
+    this.tabs = new Map(entries);
+    return insertIndex;
   }
 
   createSuspendedTab(url: string, title: string): Tab {

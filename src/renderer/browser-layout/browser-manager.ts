@@ -224,14 +224,33 @@ export class BrowserTabManager {
   }
 
   private setupIpcListeners(): void {
-    window.BrowserAPI.onNewTabCreated((tab: { id: string; url: string; title: string }) => {
-      if (!this.getTabById(tab.id)) {
-        this.tabs.push(new Tab(tab.id, tab.url, tab.title));
-        this.getTabById(tab.id)?.createTabElement(this.appWindowId);
-        this.tabsContainer.appendChild(this.getTabById(tab.id)?.getTabElement());
+    window.BrowserAPI.onNewTabCreated(
+      (tab: { id: string; url: string; title: string; index?: number }) => {
+        if (this.getTabById(tab.id)) return;
+
+        const newTab = new Tab(tab.id, tab.url, tab.title);
+        newTab.createTabElement(this.appWindowId);
+        const newElement = newTab.getTabElement();
+
+        // Tabs spawned from a page arrive with the index they should occupy
+        // (right after their opener); everything else appends at the end.
+        const insertAt =
+          typeof tab.index === 'number' && tab.index >= 0 && tab.index < this.tabs.length
+            ? tab.index
+            : this.tabs.length;
+        const referenceTab = this.tabs[insertAt];
+        this.tabs.splice(insertAt, 0, newTab);
+
+        const referenceElement = referenceTab?.getTabElement();
+        if (newElement && referenceElement) {
+          this.tabsContainer.insertBefore(newElement, referenceElement);
+        } else if (newElement) {
+          this.tabsContainer.appendChild(newElement);
+        }
+
         this.updateTabScrollButtons();
       }
-    });
+    );
 
     // Tab activated
     window.BrowserAPI.onTabActivated((data: { id: string; url: string }) => {

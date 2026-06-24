@@ -200,7 +200,7 @@ declare global {
       downloadCurrentPdf: (appWindowId: string, tabId: string) => Promise<any>;
       // Event listeners
       onNewTabCreated: (
-        callback: (tab: { id: string; url: string; title: string }) => void
+        callback: (tab: { id: string; url: string; title: string; index?: number }) => void
       ) => void;
       onTabActivated: (callback: (tab: { id: string; url: string }) => void) => void;
       onTabClosed: (callback: (data: { id: string }) => void) => void;

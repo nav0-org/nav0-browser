@@ -632,8 +632,9 @@ export class Tab {
       } else if (disposition === 'foreground-tab' || disposition === 'background-tab') {
         // A popup that opens a tab is usually about to close itself (e.g. Meet's
         // "Start now"), so surface the new tab; _blank links from the main tab
-        // stay in the background to avoid stealing focus.
-        this.parentAppWindow.createTab(url, !isMainTab);
+        // stay in the background to avoid stealing focus. Either way the tab is
+        // spawned from this page, so open it next to its opener.
+        this.parentAppWindow.createTab(url, !isMainTab, this.getId());
       } else if (disposition === 'new-window') {
         // Allow popup windows (e.g. OAuth flows like "Continue with Google")
         // to open as real windows, preserving window.opener for callback communication
@@ -1543,7 +1544,7 @@ export class Tab {
           {
             label: 'Open link in new tab',
             click: () => {
-              parentAppWindow.createTab(linkURL, false);
+              parentAppWindow.createTab(linkURL, false, this.getId());
             },
           },
           {
@@ -1597,7 +1598,7 @@ export class Tab {
         {
           label: `Search ${engineName} for "${truncatedText}"`,
           click: () => {
-            this.parentAppWindow.createTab(selectionText, true);
+            this.parentAppWindow.createTab(selectionText, true, this.getId());
           },
         }
       );
