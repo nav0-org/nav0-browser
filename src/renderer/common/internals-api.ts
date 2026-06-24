@@ -142,6 +142,7 @@ declare global {
         nodeVersion: string;
         v8Version: string;
         platform: string;
+        isChromeOS: boolean;
         arch: string;
         osVersion: string;
         appPath: string;

@@ -3,6 +3,30 @@ import path from 'path';
 
 export abstract class Utils {
   /**
+   * Detects whether we're running inside ChromeOS's Linux container (Crostini).
+   *
+   * ChromeOS has no dedicated Electron platform — `process.platform` reports
+   * `'linux'` because the app runs in a Debian VM. So every Linux code path
+   * applies unchanged; this helper is purely for labeling / UX (e.g. the About
+   * panel and issue reports) and must never gate behaviour away from the Linux
+   * branch.
+   *
+   * `/dev/.cros_milestone` is written by the ChromeOS guest tools, and
+   * `SOMMELIER_VERSION` is exported by Sommelier, the Wayland/X proxy that
+   * bridges container windows to the ChromeOS compositor. Either is a reliable
+   * Crostini marker.
+   */
+  public static isChromeOS(): boolean {
+    if (process.platform !== 'linux') return false;
+    try {
+      if (process.env.SOMMELIER_VERSION) return true;
+      return fs.existsSync('/dev/.cros_milestone');
+    } catch {
+      return false;
+    }
+  }
+
+  /**
    * Returns a file path that won't overwrite an existing file. If the desired
    * path is free it is returned unchanged; otherwise a Chrome-style numeric
    * suffix is inserted before the extension ("report.pdf" → "report (1).pdf"

@@ -16,6 +16,7 @@ import { SearchEngine } from '../web/search-engine';
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from '../../types/settings-types';
 import { PermissionManager, PermissionRequest } from './permission-manager';
 import { NotificationManager } from './notification-manager';
+import { Utils } from './utils';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
@@ -1023,6 +1024,7 @@ export abstract class AppWindowManager {
         nodeVersion: process.versions.node,
         v8Version: process.versions.v8,
         platform: process.platform,
+        isChromeOS: Utils.isChromeOS(),
         arch: process.arch,
         osVersion: process.getSystemVersion(),
         appPath: app.getAppPath(),

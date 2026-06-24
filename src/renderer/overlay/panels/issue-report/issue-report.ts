@@ -83,7 +83,7 @@ const ISSUE_REPORT_HTML = `
 `;
 
 async function getSystemInfo(): Promise<string> {
-  const platform = window.BrowserAPI?.platform || navigator.platform;
+  let platform = window.BrowserAPI?.platform || navigator.platform;
   let appVersion = 'unknown';
   let buildMode = 'unknown';
   let electronVersion = 'unknown';
@@ -94,6 +94,9 @@ async function getSystemInfo(): Promise<string> {
     buildMode = info.isPackaged ? 'Installed' : 'Development';
     electronVersion = info.electronVersion || 'unknown';
     chromeVersion = info.chromiumVersion || 'unknown';
+    // ChromeOS reports platform 'linux' (Crostini container) — flag it so bug
+    // reports distinguish a Chromebook from a regular Linux desktop.
+    if (info.isChromeOS) platform = `${platform} (ChromeOS / Crostini)`;
   } catch {
     const userAgent = navigator.userAgent;
     const electronMatch = userAgent.match(/Electron\/([\d.]+)/);

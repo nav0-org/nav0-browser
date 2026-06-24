@@ -48,6 +48,21 @@ const config: ForgeConfig = {
         // installer defaults the .desktop Categories to Utility, which Linux
         // Mint / GNOME map to Accessories.
         categories: ['Network', 'WebBrowser'],
+        // Explicitly declare the shared libraries Chromium needs at runtime.
+        // electron-installer-debian already lists the common GUI deps, but the
+        // minimal Debian image inside ChromeOS's Linux container (Crostini)
+        // ships almost nothing, so a bare install opens to a blank window.
+        // These are merged + de-duped with the maker's defaults; declaring them
+        // makes `apt install ./nav0.deb` pull the whole set. Keep in sync with
+        // the apt list in .github/workflows/build-electron.yml.
+        depends: [
+          'libnss3',
+          'libatk-bridge2.0-0',
+          'libdrm2',
+          'libgtk-3-0',
+          'libgbm1',
+          'libasound2',
+        ],
       },
     }),
     new MakerRpm({
@@ -56,6 +71,10 @@ const config: ForgeConfig = {
         bin: 'nav0',
         // Same as deb: surface Nav0 in the Internet menu group.
         categories: ['Network', 'WebBrowser'],
+        // Fedora/RHEL equivalents of the deb runtime deps above. ChromeOS's
+        // container is Debian-based (uses the .deb), so this is parity for
+        // desktop RPM distros rather than a ChromeOS requirement.
+        requires: ['nss', 'at-spi2-atk', 'libdrm', 'gtk3', 'mesa-libgbm', 'alsa-lib'],
       },
     }),
     {

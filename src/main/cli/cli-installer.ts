@@ -2,6 +2,7 @@ import { app, dialog } from 'electron';
 import { exec } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import { Utils } from '../browser/utils';
 
 const MAC_SYMLINK_PATH = '/usr/local/bin/nav0';
 
@@ -179,7 +180,9 @@ export async function showInstallCLIDialog(parentWindow?: Electron.BrowserWindow
       message: 'Command line tool',
       detail:
         process.platform === 'linux'
-          ? 'On Linux, the nav0 command is installed automatically with the deb / rpm package.'
+          ? Utils.isChromeOS()
+            ? 'On ChromeOS, Nav0 runs in the Linux container and the nav0 command is installed automatically with the deb package. Run it from the Linux terminal.'
+            : 'On Linux, the nav0 command is installed automatically with the deb / rpm package.'
           : `Installing the nav0 command from inside the app isn't supported on ${process.platform}.`,
       buttons: ['OK'],
     });

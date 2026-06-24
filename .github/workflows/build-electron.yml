@@ -37,11 +37,17 @@ jobs:
             arch: arm64
             artifact_name: macOS-arm64
 
-          # Linux build
+          # Linux build (x64 desktops + ChromeOS/Crostini on Intel Chromebooks)
           - os: ubuntu-latest
             platform: linux
             arch: x64
             artifact_name: Linux-x64
+
+          # Linux build (ARM64 desktops + ChromeOS/Crostini on ARM Chromebooks)
+          - os: ubuntu-24.04-arm
+            platform: linux
+            arch: arm64
+            artifact_name: Linux-arm64
 
           # Windows build
           - os: windows-latest
@@ -265,6 +271,20 @@ jobs:
             ### Linux
 
             Download `.deb` (Debian/Ubuntu) or `.rpm` (Fedora/RHEL) from the assets below.
+            Both x64 and ARM64 builds are provided.
+
+            ### ChromeOS (via Linux / Crostini)
+
+            Enable **Settings → Advanced → Developers → Linux development
+            environment**, then install the `.deb` inside the Linux container:
+
+            ```
+            sudo apt install ./nav0_<version>_<arch>.deb
+            ```
+
+            Pick `amd64` on Intel Chromebooks and `arm64` on ARM Chromebooks.
+            Nav0 then appears in the launcher. Note: ChromeOS does not let a
+            Linux-container app become the system default browser.
 
             ### Build from Source
 
@@ -393,4 +413,5 @@ jobs:
             macOS-x64
             macOS-arm64
             Linux-x64
+            Linux-arm64
             Windows-x64

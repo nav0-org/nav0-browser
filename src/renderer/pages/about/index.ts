@@ -83,7 +83,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     setText('kv-v8', info.v8Version);
 
     // ---- System ----
-    setText('kv-platform', PLATFORM_NAMES[info.platform] || info.platform);
+    // ChromeOS runs the app inside a Linux container, so info.platform is
+    // 'linux'; surface the more specific name when we detected Crostini.
+    const platformLabel = info.isChromeOS
+      ? 'ChromeOS (Linux)'
+      : PLATFORM_NAMES[info.platform] || info.platform;
+    setText('kv-platform', platformLabel);
     setText('kv-architecture', ARCH_NAMES[info.arch] || info.arch);
     setText('kv-os', info.osVersion || '--');
 
