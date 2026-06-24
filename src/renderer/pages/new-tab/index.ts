@@ -282,11 +282,11 @@ function renderSearchResults(results: SearchResultItem[], query: string): void {
     items.forEach((item) => fragment.appendChild(buildResultRow(item, results.indexOf(item))));
   };
 
+  searchItems.forEach((item) => fragment.appendChild(buildResultRow(item, results.indexOf(item))));
   addSection('Open Tabs', tabs);
   addSection('Bookmarks', bookmarks);
   addSection('Browsing History', history);
   addSection('Downloads', downloads);
-  searchItems.forEach((item) => fragment.appendChild(buildResultRow(item, results.indexOf(item))));
 
   searchResultsList.appendChild(fragment);
   createIcons({ icons });
@@ -368,7 +368,7 @@ async function performSearch(query: string): Promise<void> {
       }
     );
 
-    results.push({
+    results.unshift({
       type: 'search',
       title: trimmed,
       url: '',
