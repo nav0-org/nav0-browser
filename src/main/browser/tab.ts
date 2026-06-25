@@ -26,6 +26,7 @@ import {
   AD_BLOCK_SCRIPT,
 } from '../ad-blocker/ad-block-lists';
 import { SSLManager } from './ssl-manager';
+import { ZoomManager } from './zoom-manager';
 import { buildErrorPageScript, NavigationError } from './error-page/error-page';
 const domainPattern = /^[^\s]+\.[^\s]+$/;
 // Protocols that should be handed off to the OS default handler.
@@ -323,6 +324,17 @@ export class Tab {
         event.preventDefault();
         shell.openExternal(url).catch(() => {});
       }
+    });
+
+    // Chrome-style zoom shortcuts (Cmd/Ctrl +/-/0) when the page has focus.
+    this.webContentsViewInstance.webContents.on('before-input-event', (event, input) => {
+      if (this._destroyed) return;
+      const action = ZoomManager.matchShortcut(input);
+      if (!action) return;
+      event.preventDefault();
+      if (action === 'in') this.zoomIn();
+      else if (action === 'out') this.zoomOut();
+      else this.resetZoom();
     });
 
     //for hard navigation (debounced)
@@ -1331,6 +1343,32 @@ export class Tab {
     } catch {
       // Window may be closed
     }
+  }
+
+  // --- Page zoom (per-tab, Chrome-style) ---
+
+  zoomIn(): number {
+    const wc = this.webContentsViewInstance?.webContents;
+    if (!wc) return 1;
+    return ZoomManager.zoomIn(wc);
+  }
+
+  zoomOut(): number {
+    const wc = this.webContentsViewInstance?.webContents;
+    if (!wc) return 1;
+    return ZoomManager.zoomOut(wc);
+  }
+
+  resetZoom(): number {
+    const wc = this.webContentsViewInstance?.webContents;
+    if (!wc) return 1;
+    return ZoomManager.reset(wc);
+  }
+
+  getZoomFactor(): number {
+    const wc = this.webContentsViewInstance?.webContents;
+    if (!wc) return 1;
+    return ZoomManager.getFactor(wc);
   }
 
   downloadCurrentPdf(): void {

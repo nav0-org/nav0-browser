@@ -405,6 +405,18 @@ export function init() {
     toggleDevTools: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.TOGGLE_DEV_TOOLS, appWindowId);
     },
+    zoomIn: async (appWindowId: string): Promise<number> => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.ZOOM_IN, appWindowId);
+    },
+    zoomOut: async (appWindowId: string): Promise<number> => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.ZOOM_OUT, appWindowId);
+    },
+    resetZoom: async (appWindowId: string): Promise<number> => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.ZOOM_RESET, appWindowId);
+    },
+    getZoomFactor: async (appWindowId: string): Promise<number> => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GET_ZOOM_FACTOR, appWindowId);
+    },
     showTabContextMenu: (appWindowId: string, tabId: string, isPinned: boolean) => {
       ipcRenderer.send(
         RendererToMainEventsForBrowserIPC.SHOW_TAB_CONTEXT_MENU,

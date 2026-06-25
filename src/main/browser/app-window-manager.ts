@@ -1207,6 +1207,47 @@ export abstract class AppWindowManager {
       }
     );
 
+    // --- Page zoom (Chrome-style, per active tab) ---
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.ZOOM_IN,
+      async (event, appWindowId: string) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        return window?.zoomInActiveTab() ?? 1;
+      }
+    );
+
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.ZOOM_OUT,
+      async (event, appWindowId: string) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        return window?.zoomOutActiveTab() ?? 1;
+      }
+    );
+
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.ZOOM_RESET,
+      async (event, appWindowId: string) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        return window?.resetZoomActiveTab() ?? 1;
+      }
+    );
+
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.GET_ZOOM_FACTOR,
+      async (event, appWindowId: string) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        return window?.getActiveTabZoomFactor() ?? 1;
+      }
+    );
+
     ipcMain.on(
       RendererToMainEventsForBrowserIPC.SHOW_TAB_CONTEXT_MENU,
       async (event, appWindowId: string, tabId: string, isPinned: boolean) => {

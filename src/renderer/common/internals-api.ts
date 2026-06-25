@@ -168,6 +168,10 @@ declare global {
       stopFindInPage: (appWindowId: string) => Promise<any>;
       printPage: (appWindowId: string) => Promise<any>;
       toggleDevTools: (appWindowId: string) => Promise<any>;
+      zoomIn: (appWindowId: string) => Promise<number>;
+      zoomOut: (appWindowId: string) => Promise<number>;
+      resetZoom: (appWindowId: string) => Promise<number>;
+      getZoomFactor: (appWindowId: string) => Promise<number>;
       showTabContextMenu: (appWindowId: string, tabId: string, isPinned: boolean) => void;
       showAboutPanel: () => Promise<any>;
       getSearchUrl: (searchTerm: string) => Promise<string>;
