@@ -222,7 +222,7 @@ const fetchSuggestions = async (query: string) => {
       });
 
     if (trimmed) {
-      results.push({
+      results.unshift({
         type: 'search',
         title: trimmed,
         url: '',
