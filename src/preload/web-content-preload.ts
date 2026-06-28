@@ -3,8 +3,11 @@
  *
  * Runs before page scripts with contextIsolation: true.  Since we cannot
  * directly modify `navigator.geolocation` from the isolated preload world,
- * we use a MutationObserver to inject a <script> tag into the main-world
- * DOM the moment <html> appears — before any <head> scripts execute.
+ * we run the polyfill in the page's main world via webFrame.executeJavaScript
+ * the moment <html> appears — before any <head> scripts execute. (We used to
+ * append a <script> element, but assigning to script.src is a Trusted Types
+ * sink that pages like Google Meet block via `require-trusted-types-for
+ * 'script'`, which broke Meet's own audio worklet.)
  *
  * The injected polyfill wraps navigator.geolocation so that when the native
  * provider fails with POSITION_UNAVAILABLE or TIMEOUT (e.g. Linux without
@@ -370,40 +373,27 @@ const SHARE_POLYFILL_CODE = `
 })();
 `;
 
+let polyfillInjected = false;
+
 function injectPolyfill(): void {
-  try {
-    // Skip injection on pages with strict CSP that blocks inline scripts.
-    // Check for a meta CSP tag; server-sent CSP headers can't be read from
-    // the preload, but the try/catch below handles that case silently.
-    const cspMeta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
-    if (cspMeta) {
-      const content = cspMeta.getAttribute('content') || '';
-      if (content.includes('script-src') && !content.includes("'unsafe-inline'")) {
-        return; // CSP would block inline script injection
-      }
-    }
+  if (polyfillInjected) return;
+  polyfillInjected = true;
 
-    const code =
-      POLYFILL_CODE + SHARE_POLYFILL_CODE + NOTIFICATION_POLYFILL_CODE + DIALOG_POLYFILL_CODE;
+  const code =
+    POLYFILL_CODE + SHARE_POLYFILL_CODE + NOTIFICATION_POLYFILL_CODE + DIALOG_POLYFILL_CODE;
 
-    // Use a blob URL instead of inline script to avoid CSP violations.
-    // Blob URLs are allowed by most CSPs that include 'blob:' in script-src.
-    const blob = new Blob([code], { type: 'application/javascript' });
-    const blobUrl = URL.createObjectURL(blob);
-    const script = document.createElement('script');
-    script.src = blobUrl;
-    script.onload = () => {
-      URL.revokeObjectURL(blobUrl);
-      script.remove();
-    };
-    script.onerror = () => {
-      URL.revokeObjectURL(blobUrl);
-      script.remove();
-    };
-    (document.head || document.documentElement).appendChild(script);
-  } catch {
-    // Ignore injection errors
-  }
+  // Run the polyfills in the page's main world via executeJavaScript rather
+  // than appending a <script> element. Assigning a URL to `script.src` is a
+  // Trusted Types sink: pages that send `require-trusted-types-for 'script'`
+  // (Google Meet and other Google properties) block the assignment, which
+  // tripped Meet's own AudioWorklet/script loading and broke its mic + speaker.
+  // executeJavaScript runs in the main world and is exempt from page CSP /
+  // Trusted Types — the same mechanism used for the chrome.runtime stub below.
+  // It also no longer needs the DOM, and reaches strict-CSP pages the old
+  // blob-<script> path was forced to skip.
+  webFrame.executeJavaScript(code).catch(() => {
+    /* page may navigate away before injection runs */
+  });
 }
 
 // Observe the document for the first element addition (the <html> tag from
