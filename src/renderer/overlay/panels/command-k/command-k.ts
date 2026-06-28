@@ -194,16 +194,16 @@ const renderResults = (results: ResultItem[], query: string) => {
     });
   };
 
-  addSection('Open Tabs', tabs);
-  addSection('Bookmarks', bookmarks);
-  addSection('Browsing History', history);
-  addSection('Downloads', downloads);
-
-  // Search engine item at the end
+  // Search engine item first
   searchItems.forEach((item) => {
     const idx = results.indexOf(item);
     fragment.appendChild(createResultItemElement(item, idx));
   });
+
+  addSection('Open Tabs', tabs);
+  addSection('Bookmarks', bookmarks);
+  addSection('Browsing History', history);
+  addSection('Downloads', downloads);
 
   resultsContainer.insertBefore(fragment, emptyState);
 
@@ -310,8 +310,8 @@ const performSearch = async (query: string) => {
       });
     });
 
-    // Always add a "Search the web" option at the end
-    results.push({
+    // Always add a "Search the web" option first
+    results.unshift({
       type: 'search',
       title: query,
       url: '',

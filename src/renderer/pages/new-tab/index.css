@@ -185,9 +185,9 @@ body {
 }
 
 .search-result-item.search-engine-item {
-  border-top: 1px solid var(--border-1);
-  margin-top: 4px;
-  padding-top: 12px;
+  border-bottom: 1px solid var(--border-1);
+  margin-bottom: 4px;
+  padding-bottom: 12px;
 }
 
 .search-result-icon,
