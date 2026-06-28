@@ -352,6 +352,13 @@ export function init() {
         targetWindowId
       );
     },
+    reorderTabs: async (windowId: string, orderedIds: string[]) => {
+      return ipcRenderer.invoke(
+        RendererToMainEventsForBrowserIPC.REORDER_TABS,
+        windowId,
+        orderedIds
+      );
+    },
     showFindInPage: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_FIND_IN_PAGE, appWindowId);
     },
@@ -655,6 +662,11 @@ export function init() {
     },
     onTabUnpinned: (callback: (data: { id: string }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.TAB_UNPINNED, (_event, data) =>
+        callback(data)
+      );
+    },
+    onTabsReordered: (callback: (data: { order: string[] }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.TABS_REORDERED, (_event, data) =>
         callback(data)
       );
     },

@@ -623,6 +623,32 @@ export class AppWindow {
     );
   }
 
+  // Reorders the tabs to match the requested id order (e.g. from a drag in the
+  // Command-O tab switcher). Unknown ids are ignored and any tabs missing from
+  // the requested order are appended in their existing order. The pinned-first
+  // invariant is always enforced afterwards, so pinned tabs stick to the left
+  // no matter where the user dropped them. The final order is broadcast to the
+  // tab-strip renderer so the visible strip stays in sync.
+  reorderTabs(orderedIds: string[]): void {
+    const newTabs = new Map<string, Tab>();
+    for (const id of orderedIds) {
+      const tab = this.tabs.get(id);
+      if (tab && !newTabs.has(id)) {
+        newTabs.set(id, tab);
+      }
+    }
+    for (const [id, tab] of this.tabs) {
+      if (!newTabs.has(id)) {
+        newTabs.set(id, tab);
+      }
+    }
+    this.tabs = newTabs;
+    this.reorderPinnedTabs();
+    this.browserWindowInstance?.webContents.send(MainToRendererEventsForBrowserIPC.TABS_REORDERED, {
+      order: this.getTabs().map((tab) => tab.getId()),
+    });
+  }
+
   // Keep the tab Map ordered with pinned tabs first, preserving each group's
   // relative order — mirroring how the renderer's tab strip reorders on pin.
   // This keeps getTabs() (and therefore the saved session order) matching what

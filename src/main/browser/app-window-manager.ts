@@ -713,6 +713,7 @@ export abstract class AppWindowManager {
             url: string;
             faviconUrl: string | null;
             isActive: boolean;
+            isPinned: boolean;
           }>;
         }> = [];
         let windowIndex = 0;
@@ -725,6 +726,7 @@ export abstract class AppWindowManager {
             url: tab.getUrl(),
             faviconUrl: tab.getFaviconUrl(),
             isActive: tab.getId() === activeTabId,
+            isPinned: tab.getIsPinned(),
           }));
           const label = window.isPrivate
             ? `Private Window ${windowIndex + 1}`
@@ -760,6 +762,16 @@ export abstract class AppWindowManager {
         }
         await targetWindow.createTab(url, true);
         AppWindowManager.activateWindow(targetWindow.id);
+        return { success: true };
+      }
+    );
+
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.REORDER_TABS,
+      async (event, windowId: string, orderedIds: string[]) => {
+        const window = AppWindowManager.getWindowById(windowId);
+        if (!window) return { success: false };
+        window.reorderTabs(orderedIds);
         return { success: true };
       }
     );
