@@ -156,6 +156,72 @@
   color: var(--fg-2);
 }
 
+/* Zoom control row — label on the left, stepper cluster on the right.
+   The row itself isn't clickable (the buttons are), so it keeps the default
+   cursor and doesn't show the red anchor bar on hover. */
+#overlay-options-menu .zoom-row {
+  cursor: default;
+}
+
+#overlay-options-menu .zoom-row:hover {
+  background-color: transparent;
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+}
+
+#overlay-options-menu .zoom-row:hover::before {
+  display: none;
+}
+
+#overlay-options-menu .zoom-row:hover > i {
+  color: var(--fg-3);
+}
+
+.zoom-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-left: auto;
+}
+
+#overlay-options-menu .zoom-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  color: var(--fg-2);
+  background-color: var(--bg-0);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+#overlay-options-menu .zoom-btn:hover {
+  color: var(--fg-1);
+  background-color: var(--bg-3);
+  border-color: var(--border-2);
+}
+
+#overlay-options-menu .zoom-btn > i {
+  width: 14px;
+  height: 14px;
+}
+
+.zoom-level {
+  min-width: 44px;
+  text-align: center;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-2);
+  user-select: none;
+}
+
 /* History submenu — wider, scrollable */
 .history-submenu {
   width: 300px;

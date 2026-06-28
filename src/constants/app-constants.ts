@@ -200,6 +200,12 @@ export abstract class RendererToMainEventsForBrowserIPC {
   // Developer Tools
   public static readonly TOGGLE_DEV_TOOLS = 'browser:toggle-dev-tools';
 
+  // Page zoom
+  public static readonly ZOOM_IN = 'browser:zoom-in';
+  public static readonly ZOOM_OUT = 'browser:zoom-out';
+  public static readonly ZOOM_RESET = 'browser:zoom-reset';
+  public static readonly GET_ZOOM_FACTOR = 'browser:get-zoom-factor';
+
   // Issue report
   public static readonly SHOW_ISSUE_REPORT = 'browser:show-issue-report';
   public static readonly HIDE_ISSUE_REPORT = 'browser:hide-issue-report';

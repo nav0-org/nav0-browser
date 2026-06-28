@@ -15,6 +15,7 @@ import { PermissionManager } from './permission-manager';
 import { NotificationManager } from './notification-manager';
 import { FindInPageManager } from './find-in-page-manager';
 import { UnifiedOverlayManager, OverlayType } from './unified-overlay-manager';
+import { ZoomManager } from './zoom-manager';
 import type { Database as DB } from 'better-sqlite3';
 import type {
   BasicAuthCreds,
@@ -144,6 +145,18 @@ export class AppWindow {
 
     this.browserWindowInstance.webContents.setWindowOpenHandler(({ url }) => {
       return { action: 'deny' };
+    });
+
+    // Chrome-style zoom shortcuts (Cmd/Ctrl +/-/0) also fire when focus is on
+    // the browser chrome (e.g. the URL bar) rather than the page — apply them
+    // to the active tab so zooming works regardless of where focus sits.
+    this.browserWindowInstance.webContents.on('before-input-event', (event, input) => {
+      const action = ZoomManager.matchShortcut(input);
+      if (!action) return;
+      event.preventDefault();
+      if (action === 'in') this.zoomInActiveTab();
+      else if (action === 'out') this.zoomOutActiveTab();
+      else this.resetZoomActiveTab();
     });
 
     // Pause all active downloads before the window is destroyed
@@ -636,6 +649,24 @@ export class AppWindow {
     if (this.getActiveTab()) {
       this.getActiveTab().getWebContentsViewInstance()?.setBounds(bounds);
     }
+  }
+
+  // --- Page zoom (delegates to the active tab) ---
+
+  zoomInActiveTab(): number {
+    return this.getActiveTab()?.zoomIn() ?? 1;
+  }
+
+  zoomOutActiveTab(): number {
+    return this.getActiveTab()?.zoomOut() ?? 1;
+  }
+
+  resetZoomActiveTab(): number {
+    return this.getActiveTab()?.resetZoom() ?? 1;
+  }
+
+  getActiveTabZoomFactor(): number {
+    return this.getActiveTab()?.getZoomFactor() ?? 1;
   }
 
   // --- Overlay methods (delegate to UnifiedOverlayManager) ---

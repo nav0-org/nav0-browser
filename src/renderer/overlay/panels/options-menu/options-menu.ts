@@ -47,6 +47,23 @@ const OPTIONS_MENU_HTML = `
         <span id="om-find-in-page-shortcut" class="keyboard-shortcut"></span>
       </div>
 
+      <div class="dropdown-item zoom-row" id="om-zoom-row">
+        <i data-lucide="search" width="16" height="16"></i>
+        <span class="dropdown-item-text">Zoom</span>
+        <div class="zoom-controls">
+          <button class="zoom-btn" id="om-zoom-out" type="button" aria-label="Zoom out">
+            <i data-lucide="minus" width="14" height="14"></i>
+          </button>
+          <span class="zoom-level" id="om-zoom-level">100%</span>
+          <button class="zoom-btn" id="om-zoom-in" type="button" aria-label="Zoom in">
+            <i data-lucide="plus" width="14" height="14"></i>
+          </button>
+          <button class="zoom-btn" id="om-zoom-reset" type="button" aria-label="Reset zoom">
+            <i data-lucide="rotate-ccw" width="14" height="14"></i>
+          </button>
+        </div>
+      </div>
+
       <div class="divider"></div>
 
       <div class="dropdown-item" id="om-downloads-option">
@@ -176,6 +193,11 @@ function initializeDomElements(): void {
   if (historyContainer) {
     historyContainer.addEventListener('mouseenter', () => populateHistorySubmenu());
   }
+}
+
+function renderZoomLevel(factor: number): void {
+  const el = containerEl?.querySelector('#om-zoom-level') as HTMLElement | null;
+  if (el) el.textContent = `${Math.round(factor * 100)}%`;
 }
 
 async function populateHistorySubmenu(): Promise<void> {
@@ -322,6 +344,22 @@ function setupEventListeners(): void {
     await window.BrowserAPI.showFindInPage(appWindowId);
   });
 
+  // Zoom controls — keep the menu open while stepping zoom, like Chrome.
+  const zoomRow = optionsElement?.querySelector('#om-zoom-row');
+  zoomRow?.addEventListener('click', (e) => e.stopPropagation());
+  optionsElement?.querySelector('#om-zoom-out')?.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    renderZoomLevel(await window.BrowserAPI.zoomOut(appWindowId));
+  });
+  optionsElement?.querySelector('#om-zoom-in')?.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    renderZoomLevel(await window.BrowserAPI.zoomIn(appWindowId));
+  });
+  optionsElement?.querySelector('#om-zoom-reset')?.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    renderZoomLevel(await window.BrowserAPI.resetZoom(appWindowId));
+  });
+
   optionsElement?.querySelector('#om-downloads-option')?.addEventListener('click', async () => {
     await window.BrowserAPI.createTab(appWindowId, InAppUrls.DOWNLOADS, true);
   });
@@ -388,6 +426,13 @@ export function init(container: HTMLElement): void {
 }
 
 export function show(_data?: any): void {
+  // Reflect the active tab's current zoom level in the zoom control.
+  window.BrowserAPI.getZoomFactor(appWindowId)
+    .then((factor) => renderZoomLevel(factor))
+    .catch(() => {
+      /* ignore */
+    });
+
   // Hide the Developer Tools option when devtools is disabled in settings.
   window.DataStoreAPI.get('browser-settings')
     .then((stored: unknown) => {

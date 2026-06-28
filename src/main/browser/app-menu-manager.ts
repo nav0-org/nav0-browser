@@ -318,9 +318,34 @@ export abstract class AppMenuManager {
             },
           },
           { type: 'separator' as const },
-          { role: 'resetZoom' as const },
-          { role: 'zoomIn' as const, accelerator: 'CmdOrCtrl+Shift+=' },
-          { role: 'zoomOut' as const, accelerator: 'CmdOrCtrl+Shift+-' },
+          {
+            label: 'Zoom In',
+            accelerator: 'CmdOrCtrl+Plus',
+            // The +/-/0 keys are handled by a before-input-event listener on the
+            // active tab (see Tab/AppWindow) so Chrome's unshifted Cmd/Ctrl+=
+            // works too. Keep the accelerator for display only to avoid the
+            // menu double-firing the action alongside that listener.
+            registerAccelerator: false,
+            click: () => {
+              AppWindowManager.getActiveWindow()?.zoomInActiveTab();
+            },
+          },
+          {
+            label: 'Zoom Out',
+            accelerator: 'CmdOrCtrl+-',
+            registerAccelerator: false,
+            click: () => {
+              AppWindowManager.getActiveWindow()?.zoomOutActiveTab();
+            },
+          },
+          {
+            label: 'Actual Size',
+            accelerator: 'CmdOrCtrl+0',
+            registerAccelerator: false,
+            click: () => {
+              AppWindowManager.getActiveWindow()?.resetZoomActiveTab();
+            },
+          },
           { type: 'separator' as const },
           {
             label: 'Toggle Full Screen',
