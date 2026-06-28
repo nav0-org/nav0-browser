@@ -44,7 +44,10 @@ jobs:
             artifact_name: Linux-x64
 
           # Windows build
-          - os: windows-latest
+          # Pinned to windows-2022 (VS 2022). The windows-latest image rolled over to
+          # Visual Studio 2026 (v18), which the node-gyp bundled under better-sqlite3
+          # cannot detect, breaking the native-module rebuild.
+          - os: windows-2022
             platform: win
             arch: x64
             artifact_name: Windows-x64
