@@ -141,6 +141,17 @@ export abstract class SettingsEnforcer {
         // the Chromium/Electron embedded-browser detection. Override only for
         // accounts.google.com so the rest of the session keeps the user's
         // chosen preset.
+        //
+        // CRITICAL: never apply this to a main-frame navigation. Electron seeds
+        // a document's navigator.userAgent from the User-Agent header sent on
+        // its top-level navigation request, so a main-frame Firefox override
+        // becomes that document's navigator.userAgent. Google Meet routes its
+        // join flow's top-level navigation through accounts.google.com, which
+        // leaked a Firefox navigator.userAgent onto the meet.google.com
+        // document while navigator.userAgentData stayed Chromium — an
+        // inconsistent profile that broke Meet's mic/speaker detection and
+        // dropped the call (DisconnectedError). Scoping the swap to
+        // sub-resource/sub-frame requests keeps it off the top-level document.
         let isGoogleSignIn = false;
         try {
           const host = new URL(details.url).hostname;
@@ -152,7 +163,7 @@ export abstract class SettingsEnforcer {
           /* ignore */
         }
 
-        if (isGoogleSignIn && !hasCustomUserAgent) {
+        if (isGoogleSignIn && !hasCustomUserAgent && details.resourceType !== 'mainFrame') {
           headers['User-Agent'] = SettingsEnforcer.getFirefoxUA();
           // Firefox doesn't send Client Hints — strip every sec-ch-ua* header
           // that applyClientHints just set.
