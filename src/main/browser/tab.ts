@@ -233,14 +233,14 @@ export class Tab {
         partition: this.partitionSetting,
       },
     });
-    // WebRTC leak protection + no macOS "Local Network" prompt: restrict ICE
-    // candidate gathering to the public-facing interface so local/private IPs are
-    // never exposed to pages. This removes the need for Chromium's mDNS-based
-    // local-IP masking (disabled via WebRtcHideLocalIpsWithMdns in index.ts),
-    // which is what triggers the macOS Local Network permission dialog.
-    this.webContentsViewInstance.webContents.setWebRTCIPHandlingPolicy(
-      'default_public_interface_only'
-    );
+    // WebRTC leak protection without breaking connectivity: keep the full
+    // 'default' ICE policy so calls can connect, and rely on Chromium's mDNS
+    // masking (WebRtcHideLocalIpsWithMdns, enabled in index.ts) to replace real
+    // local IPs with ".local" hostnames on the wire. The stricter
+    // 'default_public_interface_only' policy we used before withheld host
+    // candidates and broke demanding WebRTC services (Google Meet failed to
+    // connect with DisconnectedError).
+    this.webContentsViewInstance.webContents.setWebRTCIPHandlingPolicy('default');
     // User agent is set at the session level by SettingsEnforcer.applyUserAgent()
     // this.webContentsViewInstance.webContents.openDevTools({mode : 'detach'});
     this.registerPdfHandler();

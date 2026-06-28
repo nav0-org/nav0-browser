@@ -49,23 +49,19 @@ if (!app.isPackaged) {
   app.setPath('userData', path.join(app.getPath('appData'), 'Nav0 (Dev)'));
 }
 
-// Disable Chromium features that reach out to the local network and trigger the
-// macOS "Local Network" permission dialog. Cast / DIAL / GlobalMediaControls use
-// mDNS/Bonjour to discover Chromecasts and smart TVs. WebRtcHideLocalIpsWithMdns
-// registers an mDNS ".local" hostname to mask local IPs during WebRTC ICE
-// gathering — the mDNS broadcast it sends is what surfaces the prompt whenever a
-// page uses WebRTC. None of this is needed for a privacy-focused browser. We drop
-// the WebRTC mDNS masking here and instead stop local IPs from ever being gathered
-// per tab via setWebRTCIPHandlingPolicy('default_public_interface_only') (see
-// Tab.initWebContentsView), which closes the local-IP leak without any mDNS traffic.
+// Disable Chromium features that reach out to the local network for device
+// discovery (Chromecast / DIAL / GlobalMediaControls casting), which Nav0 does
+// not support. We deliberately KEEP WebRtcHideLocalIpsWithMdns enabled: it masks
+// real local IPs behind an mDNS ".local" hostname during WebRTC ICE gathering,
+// preserving IP privacy while still letting host candidates participate in the
+// connection. Dropping it and clamping ICE to the public interface (the old
+// approach) starved candidate gathering and broke demanding WebRTC services like
+// Google Meet (calls failed to connect with DisconnectedError). The trade-off is
+// that mDNS re-introduces the macOS "Local Network" permission prompt the first
+// time a page uses WebRTC — an acceptable cost for working video calls.
 app.commandLine.appendSwitch(
   'disable-features',
-  [
-    'MediaRouter',
-    'DialMediaRouteProvider',
-    'GlobalMediaControls',
-    'WebRtcHideLocalIpsWithMdns',
-  ].join(',')
+  ['MediaRouter', 'DialMediaRouteProvider', 'GlobalMediaControls'].join(',')
 );
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling
