@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import { execFileSync } from 'child_process';
 import type { ForgeConfig } from '@electron-forge/shared-types';
 import { MakerSquirrel } from '@electron-forge/maker-squirrel';
 import { MakerZIP } from '@electron-forge/maker-zip';
@@ -17,9 +18,14 @@ const ICON_PNG = `${ICON_BASE}.png`;
 const ICON_ICNS = `${ICON_BASE}.icns`;
 const ICON_ICO = path.resolve(__dirname, 'src/renderer/assets/favicon.ico');
 
+// Stable macOS bundle + code-signing identity. TCC keys camera/microphone
+// grants on this, so it must not change once a signed build ships.
+const APP_BUNDLE_ID = 'org.nav0.browser';
+
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
+    appBundleId: APP_BUNDLE_ID,
     executableName: process.platform === 'linux' ? 'nav0' : 'Nav0',
     icon: ICON_BASE,
     extraResource: [],
@@ -79,6 +85,40 @@ const config: ForgeConfig = {
       if (pkg.main === '.webpack/main') {
         pkg.main = '.webpack/main/index.js';
         fs.writeFileSync(packageJsonPath, JSON.stringify(pkg, null, 2));
+      }
+    },
+    postPackage: async (_config, packageResult) => {
+      // macOS camera/microphone fix.
+      //
+      // electron-packager leaves the prebuilt Electron binary's ad-hoc
+      // signature in place, whose code-signing identity is the generic
+      // `com.github.Electron`. macOS TCC attributes camera/mic grants to the
+      // *code signature* identity — not CFBundleIdentifier — so that generic,
+      // shared identity is never registered as Nav0's own principal: the app
+      // never appears under System Settings → Privacy & Security, and
+      // getUserMedia hands back live-but-frameless tracks (black camera,
+      // silent mic). Re-signing ad-hoc with our own stable identifier gives
+      // macOS a distinct principal to grant, after which frames actually flow.
+      //
+      // Caveats of ad-hoc (no Apple Team ID): the code hash changes every
+      // build, so TCC grants don't survive app updates (users re-grant), and
+      // Gatekeeper still warns on first download. A real Developer ID
+      // signature is the durable fix; when one is configured we skip this so
+      // we don't clobber it.
+      if (packageResult.platform !== 'darwin') return;
+      if (process.env.APPLE_IDENTITY || process.env.CSC_LINK || process.env.CSC_NAME) {
+        return; // Developer ID signing is configured — leave that signature intact.
+      }
+      for (const outputPath of packageResult.outputPaths) {
+        const appPath = path.join(outputPath, 'Nav0.app');
+        if (!fs.existsSync(appPath)) continue;
+        execFileSync(
+          'codesign',
+          ['--force', '--deep', '--sign', '-', '--identifier', APP_BUNDLE_ID, appPath],
+          { stdio: 'inherit' }
+        );
+        // eslint-disable-next-line no-console
+        console.log(`[postPackage] ad-hoc re-signed ${appPath} as ${APP_BUNDLE_ID}`);
       }
     },
   },
