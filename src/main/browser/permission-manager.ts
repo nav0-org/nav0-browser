@@ -5,6 +5,7 @@ import {
   net,
   clipboard,
   desktopCapturer,
+  systemPreferences,
   BrowserWindow,
 } from 'electron';
 import { v4 as uuid } from 'uuid';
@@ -168,7 +169,12 @@ export class PermissionManager {
           const persistent = PermissionManager.getPersistentDecision(origin, permission);
           if (persistent === 'allowed_persistent') {
             PermissionManager.touchPersistentDecision(origin, permission);
-            callback(true);
+            PermissionManager.resolveGrant(
+              true,
+              permission,
+              PermissionManager.extractMediaTypes(permission, details),
+              [callback]
+            );
             return;
           }
           if (persistent === 'denied_persistent') {
@@ -181,7 +187,12 @@ export class PermissionManager {
         const sessionKey = PermissionManager.sessionKey(tabId, origin, permission);
         const sessionDecision = PermissionManager.sessionPermissions.get(sessionKey);
         if (sessionDecision === 'allowed_session') {
-          callback(true);
+          PermissionManager.resolveGrant(
+            true,
+            permission,
+            PermissionManager.extractMediaTypes(permission, details),
+            [callback]
+          );
           return;
         }
         if (sessionDecision === 'denied_session') {
@@ -245,6 +256,60 @@ export class PermissionManager {
         (callback as (s?: Electron.Streams) => void)(undefined);
       }
     });
+  }
+
+  // ─── macOS OS-Level Media Access (TCC) ───────────────────────────
+  //
+  // Granting the web-level `media` permission (our in-app prompt) is NOT enough
+  // on macOS: the OS still has to grant camera/microphone access via TCC. In a
+  // signed packaged build Electron does not reliably raise the native TCC dialog
+  // for getUserMedia coming from a WebContentsView, so we drive it ourselves.
+  // No-op on Windows/Linux (no TCC) and pre-10.14 macOS (APIs throw → ignored).
+  private static async ensureOSMediaAccess(mediaTypes: string[]): Promise<boolean> {
+    if (process.platform !== 'darwin') return true;
+    // Only act on explicitly requested device types so an audio-only request
+    // never triggers a spurious camera prompt (and vice-versa).
+    if (mediaTypes.length === 0) return true;
+
+    let allGranted = true;
+    for (const t of mediaTypes) {
+      const device: 'camera' | 'microphone' = t === 'video' ? 'camera' : 'microphone';
+      try {
+        const status = systemPreferences.getMediaAccessStatus(device);
+        if (status === 'granted') continue;
+        if (status === 'denied' || status === 'restricted') {
+          allGranted = false;
+          continue;
+        }
+        // 'not-determined' / 'unknown' → raise the native macOS TCC prompt.
+        const granted = await systemPreferences.askForMediaAccess(device);
+        if (!granted) allGranted = false;
+      } catch {
+        // askForMediaAccess/getMediaAccessStatus only exist on macOS 10.14+.
+        // If they throw, don't block the web-level grant — let Chromium try.
+      }
+    }
+    return allGranted;
+  }
+
+  // Resolve one or more permission callbacks with a granted/denied decision.
+  // For a media GRANT on macOS this first ensures OS-level (TCC) access, so the
+  // page only ends up "allowed" if the OS will actually deliver frames/audio.
+  // Everything else (denials, non-media permissions, other platforms) forwards
+  // the decision synchronously, preserving the existing behaviour exactly.
+  private static resolveGrant(
+    granted: boolean,
+    permission: string,
+    mediaTypes: string[],
+    callbacks: Array<(granted: boolean) => void>
+  ): void {
+    if (granted && permission === 'media' && process.platform === 'darwin') {
+      PermissionManager.ensureOSMediaAccess(mediaTypes).then((osOk) => {
+        for (const cb of callbacks) cb(osOk);
+      });
+      return;
+    }
+    for (const cb of callbacks) cb(granted);
   }
 
   // ─── Display-Media Source Picker ─────────────────────────────────
@@ -413,7 +478,7 @@ export class PermissionManager {
     // media request for the same origin should auto-resolve, not re-prompt).
     const decided = PermissionManager.evaluateStoredDecision(next);
     if (decided !== null) {
-      for (const cb of next.callbacks) cb(decided);
+      PermissionManager.resolveGrant(decided, next.permission, next.mediaTypes, next.callbacks);
       // Continue draining the queue without forcing a UI roundtrip.
       setTimeout(() => PermissionManager.processNextInQueue(tabId), 0);
       return;
@@ -459,7 +524,7 @@ export class PermissionManager {
     const { tabId, origin, permission, callbacks, isPrivate } = request;
     const sessionKey = PermissionManager.sessionKey(tabId, origin, permission);
     const invokeAll = (granted: boolean): void => {
-      for (const cb of callbacks) cb(granted);
+      PermissionManager.resolveGrant(granted, permission, request.mediaTypes, callbacks);
     };
 
     switch (decision) {

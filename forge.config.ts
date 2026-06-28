@@ -16,6 +16,29 @@ const ICON_BASE = path.resolve(__dirname, 'src/renderer/assets/logo');
 const ICON_PNG = `${ICON_BASE}.png`;
 const ICON_ICNS = `${ICON_BASE}.icns`;
 const ICON_ICO = path.resolve(__dirname, 'src/renderer/assets/favicon.ico');
+const MAC_ENTITLEMENTS = path.resolve(__dirname, 'build/entitlements.mac.plist');
+
+// macOS code signing. Camera/microphone (and screen capture) only work in a
+// packaged build if the .app carries a VALID code signature plus the
+// hardened-runtime camera/audio-input entitlements — macOS TCC binds the user's
+// consent to a stable code-signing identity, and an unsigned/invalid bundle is
+// silently denied (and on Apple Silicon may not launch at all). In dev this is a
+// non-issue because we run Electron's own pre-signed binary.
+//
+// Identity is env-driven so the same config works two ways:
+//   • APPLE_SIGNING_IDENTITY set  → Developer ID signing (robust, distributable;
+//     notarized too when the APPLE_ID/APPLE_TEAM_ID secrets are present).
+//   • not set                     → ad-hoc signing ("-"), which still produces a
+//     valid, internally-consistent signature so camera/mic work on the build
+//     machine. Ad-hoc apps are not notarized, so distributed copies still need
+//     the quarantine flag stripped (install.sh already does `xattr -cr`), and on
+//     the newest macOS ad-hoc capture can be unreliable — ship a Developer ID +
+//     notarized build for end users.
+const APPLE_SIGNING_IDENTITY = process.env.APPLE_SIGNING_IDENTITY;
+const canNotarize =
+  !!process.env.APPLE_ID &&
+  !!process.env.APPLE_APP_SPECIFIC_PASSWORD &&
+  !!process.env.APPLE_TEAM_ID;
 
 const config: ForgeConfig = {
   packagerConfig: {
@@ -30,6 +53,32 @@ const config: ForgeConfig = {
       NSMicrophoneUsageDescription:
         'Nav0 needs microphone access when a website you visit requests it.',
     },
+    // Sign the macOS bundle (and every Electron Helper) with the camera/mic
+    // entitlements. The same entitlements file is applied to every file via
+    // optionsForFile so the device entitlements land on the Helper
+    // (Renderer/GPU) processes that actually open the camera/mic — applying them
+    // only to the top-level app is the classic "works unsigned, breaks signed"
+    // trap. osxSign is ignored on non-darwin packaging targets.
+    osxSign: {
+      identity: APPLE_SIGNING_IDENTITY || '-',
+      // Skip the keychain identity lookup for ad-hoc ("-") builds.
+      identityValidation: !!APPLE_SIGNING_IDENTITY,
+      optionsForFile: () => ({
+        entitlements: MAC_ENTITLEMENTS,
+        hardenedRuntime: true,
+      }),
+    },
+    // Notarize only when real Apple credentials are available (skipped for
+    // ad-hoc/local builds, which can't be notarized).
+    ...(canNotarize
+      ? {
+          osxNotarize: {
+            appleId: process.env.APPLE_ID as string,
+            appleIdPassword: process.env.APPLE_APP_SPECIFIC_PASSWORD as string,
+            teamId: process.env.APPLE_TEAM_ID as string,
+          },
+        }
+      : {}),
   },
   rebuildConfig: {
     force: true,
