@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!--
+    Hardened-runtime entitlements for the packaged macOS build.
+
+    The camera/microphone keys are what let macOS TCC attribute a capture
+    request to Nav0 once the bundle is code-signed. The usage strings in
+    forge.config.ts (NSCameraUsageDescription / NSMicrophoneUsageDescription)
+    only populate the prompt text — they do NOT grant access on their own.
+
+    allow-jit / allow-unsigned-executable-memory are required by V8, and
+    disable-library-validation lets the (ad-hoc) signed app load Electron's
+    own helper frameworks and native modules (e.g. better-sqlite3), which
+    carry Apple's Team ID. Without it, an ad-hoc + hardened-runtime build
+    crashes on launch with a library-validation error.
+  -->
+  <key>com.apple.security.cs.allow-jit</key>
+  <true/>
+  <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+  <true/>
+  <key>com.apple.security.cs.disable-library-validation</key>
+  <true/>
+  <key>com.apple.security.device.camera</key>
+  <true/>
+  <key>com.apple.security.device.audio-input</key>
+  <true/>
+</dict>
+</plist>

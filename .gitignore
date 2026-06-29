@@ -4,7 +4,9 @@ node_modules/
 # Build output
 dist/
 out/
-build/
+build/*
+# …but keep the tracked macOS signing entitlements (not build output)
+!build/entitlements.mac.plist
 
 # VitePress
 docs/.vitepress/dist/
