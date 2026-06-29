@@ -136,10 +136,10 @@ body.is-private .tab-scroll-btn:hover {
 .tab {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   height: 100%;
-  padding: 0 8px;
-  min-width: 120px;
+  padding: 0 8px 0 6px;
+  min-width: 98px;
   flex: 1 1 160px;
   max-width: 220px;
   font-size: var(--font-sm);
@@ -169,7 +169,7 @@ body.is-private .tab-scroll-btn:hover {
 .tab.active {
   color: var(--fg-1);
   background-color: var(--bg-0);
-  padding-left: 12px;
+  padding-left: 10px;
   border-left: 0;
   border-right: 0;
 }
@@ -264,24 +264,21 @@ body.is-private .tab.active {
   border-radius: 4px;
   background: none;
   border: none;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   margin-left: auto;
   color: var(--fg-3);
   cursor: pointer;
   padding: 0;
-  opacity: 0;
   flex-shrink: 0;
   transition:
-    opacity var(--dur-fast),
     background-color var(--dur-fast),
     color var(--dur-fast);
 }
 
-.tab:hover .tab-close,
-.tab.active .tab-close {
-  opacity: 1;
+.tab:hover .tab-close {
+  display: flex;
 }
 
 .tab-close:hover {
