@@ -136,7 +136,7 @@ body.is-private .tab-scroll-btn:hover {
 .tab {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   height: 100%;
   padding: 0 8px;
   min-width: 120px;
