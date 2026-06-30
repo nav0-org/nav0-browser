@@ -51,9 +51,14 @@ export const HOVER_STATUS_BAR_SCRIPT = `
     if (host && label && root.contains(host)) return true;
     host = document.createElement('div');
     host.id = HOST_ID;
+    // z-index is one below INT_MAX on purpose: the ad-blocker's cosmetic filter
+    // hides any element whose inline style contains the exact "z-index:2147483647"
+    // (the value ad overlays use), which would otherwise display:none our bar on
+    // every page where ad-blocking runs. 2147483646 is still effectively top-most
+    // but sidesteps that rule. Keep it out of the literal 2147483647.
     host.setAttribute(
       'style',
-      'all:initial;position:fixed;left:0;bottom:0;z-index:2147483647;pointer-events:none;'
+      'all:initial;position:fixed;left:0;bottom:0;z-index:2147483646;pointer-events:none;'
     );
     var style = document.createElement('style');
     style.textContent = CSS;
