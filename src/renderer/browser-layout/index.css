@@ -102,12 +102,12 @@ body.is-private .private-window-identifier {
   display: none;
   align-items: center;
   justify-content: center;
-  width: 28px;
+  width: 32px;
   height: 100%;
   align-self: stretch;
   background: transparent;
   border: 0;
-  color: var(--fg-3);
+  color: var(--fg-2);
   cursor: pointer;
   padding: 0;
   transition:
@@ -116,8 +116,8 @@ body.is-private .private-window-identifier {
 }
 
 .tab-scroll-btn:hover {
-  background: rgba(255, 255, 255, 0.5);
-  color: var(--fg-1);
+  background: var(--bg-3);
+  color: var(--nav0-red-600);
 }
 
 .tab-scroll-btn.visible {
@@ -125,12 +125,12 @@ body.is-private .private-window-identifier {
 }
 
 body.is-private .tab-scroll-btn {
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 body.is-private .tab-scroll-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
 }
 
 .tab {
