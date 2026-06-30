@@ -1,19 +1,25 @@
 /**
  * In-page hover status bar (Chrome-style).
  *
- * When the user hovers a link, Chromium's `update-target-url` event fires in
- * the main process; the Tab forwards the resolved URL to this page over IPC.
- * We render it in a small pill anchored to the bottom-left of the viewport and
- * hide it again when the URL clears (the event fires with an empty string when
- * the pointer leaves the link).
+ * When the user hovers (or keyboard-focuses) a link, its URL is shown in a
+ * small pill anchored to the bottom-left of the viewport, and hidden again when
+ * the pointer/focus leaves the link.
+ *
+ * The hovered URL comes from two complementary sources, whichever fires:
+ *   1. DOM events watched directly here in the preload (`mouseover`/`focusin`),
+ *      resolving the nearest `<a href>` / `<area href>`. This is self-contained
+ *      and needs nothing from the main process.
+ *   2. Chromium's `update-target-url`, forwarded by the Tab over IPC. This is
+ *      the canonical browser signal and also covers cases the DOM scan misses.
+ * `render()` de-dupes, so the two sources never conflict.
  *
  * The bar lives in a closed shadow root attached to <html> so page styles can't
  * touch it and it can't touch theirs, and the host is `pointer-events: none`
- * so it never intercepts clicks on the content underneath it.
+ * so it never intercepts clicks on the content underneath it. The shadow root
+ * also makes it immune to page CSP (unlike injected <script> tags).
  *
  * Shared by every preload that backs a tab's page (web content + built-in
- * pages). Chrome / overlay webContents never receive the event — only Tab
- * webContents forward it — so installing it there is an idle no-op.
+ * pages).
  */
 
 import { ipcRenderer } from 'electron';
@@ -60,6 +66,7 @@ const STATUS_BAR_CSS = `
 
 let hostEl: HTMLElement | null = null;
 let labelEl: HTMLElement | null = null;
+let currentUrl = '';
 
 function truncateUrl(url: string): string {
   if (url.length <= MAX_URL_LENGTH) return url;
@@ -95,6 +102,8 @@ function ensureElements(): boolean {
 }
 
 function render(url: string): void {
+  if (url === currentUrl) return;
+  currentUrl = url;
   if (!url) {
     if (labelEl) labelEl.classList.remove('visible');
     return;
@@ -104,7 +113,54 @@ function render(url: string): void {
   labelEl.classList.add('visible');
 }
 
+// Resolve the link URL for an element the pointer/focus is on, walking up to the
+// nearest anchor. `.href` on <a>/<area> is already an absolute, resolved URL.
+function linkUrlFor(target: EventTarget | null): string {
+  if (!(target instanceof Element)) return '';
+  const anchor = target.closest('a[href], area[href]') as
+    | HTMLAnchorElement
+    | HTMLAreaElement
+    | null;
+  if (!anchor) return '';
+  const href = anchor.href;
+  if (!href || href.toLowerCase().startsWith('javascript:')) return '';
+  return href;
+}
+
 export function installHoverStatusBar(): void {
+  try {
+    // --- DOM-driven detection (self-contained, CSP-immune) ---
+    // Capture phase so we observe the event even if the page stops propagation.
+    document.addEventListener(
+      'mouseover',
+      (e) => {
+        render(linkUrlFor(e.target));
+      },
+      true
+    );
+    document.addEventListener(
+      'mouseout',
+      (e: MouseEvent) => {
+        // Pointer left the document/window entirely.
+        if (!e.relatedTarget) render('');
+      },
+      true
+    );
+    window.addEventListener('blur', () => render(''));
+    document.addEventListener(
+      'focusin',
+      (e) => {
+        const url = linkUrlFor(e.target);
+        if (url) render(url);
+      },
+      true
+    );
+    document.addEventListener('focusout', () => render(''), true);
+  } catch {
+    // A preload must never throw into the page.
+  }
+
+  // --- Canonical browser signal, forwarded by the Tab (empty string ⇒ hide) ---
   ipcRenderer.on(MainToRendererEventsForBrowserIPC.TARGET_URL_UPDATED, (_event, url: unknown) => {
     try {
       render(typeof url === 'string' ? url : '');
