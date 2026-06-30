@@ -1,28 +1,26 @@
 /**
- * In-page hover status bar (Chrome-style).
+ * Chrome-style hover URL status bar — injected into a tab's page from the MAIN
+ * process via `webContents.executeJavaScript` (see Tab.injectHoverStatusBar).
  *
- * When the user hovers (or keyboard-focuses) a link, its URL is shown in a
- * small pill anchored to the bottom-left of the viewport, and hidden again when
- * the pointer/focus leaves the link. Long URLs are truncated with an ellipsis.
+ * This is the same mechanism reader mode and the custom error page use to render
+ * visible DOM into a page. Injecting the equivalent script from a preload does
+ * NOT work here: with `sandbox: true`, a preload's `webFrame.executeJavaScript`
+ * does not reach the page's main world (verified against Electron 41), so the
+ * element was never created — which is why earlier preload-based attempts were
+ * invisible.
  *
- * Implementation: we inject a small, self-contained script into the page's
- * MAIN world via `webFrame.executeJavaScript`. This is the same mechanism the
- * Google `chrome.runtime` stub uses in web-content-preload.ts — it runs in the
- * page's own world (where DOM nodes reliably render, unlike the isolated
- * preload world) and bypasses page CSP entirely. The bar lives in a closed
- * shadow root attached to <html> with `pointer-events: none`, so page styles
- * can't touch it and it never intercepts clicks on the content beneath it.
+ * The script runs once per document (guarded by a window flag), watches
+ * `mouseover`/`focusin`, resolves the nearest `<a href>`/`<area href>`, and
+ * shows the URL in a pill anchored to the bottom-left of the viewport. The pill
+ * lives in a closed shadow root with `pointer-events: none`, so page styles
+ * (and the ad-blocker's cosmetic CSS) can't touch it and it never intercepts
+ * clicks on the content beneath it. Long URLs are truncated at 120 chars.
  *
- * Shared by every preload that backs a tab's page (web content + built-in
- * pages).
+ * Colours mirror the design tokens (--chrome-2 surface, --border-1 hairline,
+ * --fg-2 text, --r-md corner, --shadow-sm) since a page-injected element can't
+ * reference global.css. `prefers-reduced-motion` is honoured.
  */
-
-import { webFrame } from 'electron';
-
-// The bootstrap runs in the page's main world. Keep it ES5-ish and fully
-// self-contained — it can reference nothing from this module. `…` is the
-// truncation ellipsis; 120 is the max URL length before truncating.
-const STATUS_BAR_BOOTSTRAP = `
+export const HOVER_STATUS_BAR_SCRIPT = `
 (function () {
   if (window.__nav0HoverBarInstalled) return;
   window.__nav0HoverBarInstalled = true;
@@ -98,14 +96,3 @@ const STATUS_BAR_BOOTSTRAP = `
   document.addEventListener('focusout', function () { render(''); }, true);
 })();
 `;
-
-export function installHoverStatusBar(): void {
-  try {
-    // webFrame.executeJavaScript runs in the page's main world and bypasses CSP.
-    webFrame.executeJavaScript(STATUS_BAR_BOOTSTRAP).catch(() => {
-      /* page may block; ignore */
-    });
-  } catch {
-    // A preload must never throw into the page.
-  }
-}
