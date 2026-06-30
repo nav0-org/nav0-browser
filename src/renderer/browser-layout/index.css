@@ -138,9 +138,8 @@ body.is-private .tab-scroll-btn:hover {
   align-items: center;
   gap: 6px;
   height: 100%;
-  padding: 0 8px 0 6px;
-  min-width: 98px;
-  flex: 1 1 160px;
+  padding: 0 6px;
+  flex: 0 0 auto;
   max-width: 220px;
   font-size: var(--font-sm);
   font-weight: 500;
@@ -254,31 +253,41 @@ body.is-private .tab.active {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 0;
 }
 
 .tab-close {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
   width: 16px;
   height: 16px;
   border-radius: 4px;
   background: none;
   border: none;
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: auto;
   color: var(--fg-3);
   cursor: pointer;
   padding: 0;
-  flex-shrink: 0;
+  opacity: 0;
   transition:
+    opacity var(--dur-fast),
     background-color var(--dur-fast),
     color var(--dur-fast);
 }
 
 .tab:hover .tab-close {
-  display: flex;
+  opacity: 1;
+}
+
+/* Fade the tail of the title under the overlaid close button on hover */
+.tab:hover .tab-title {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 20px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 20px), transparent);
 }
 
 .tab-close:hover {
