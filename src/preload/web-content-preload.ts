@@ -14,6 +14,7 @@
 
 import { contextBridge, ipcRenderer, webFrame } from 'electron';
 import { RendererToMainEventsForBrowserIPC } from '../constants/app-constants';
+import { installHoverStatusBar } from './hover-status-bar';
 
 // Expose a function the main-world polyfill can call to get IP geolocation
 // from the main process (uses Electron net.fetch, immune to page CSP).
@@ -485,3 +486,6 @@ function injectGoogleChromeRuntimeStub(): void {
 }
 
 injectGoogleChromeRuntimeStub();
+
+// Chrome-style hover status bar (bottom-left link preview).
+installHoverStatusBar();

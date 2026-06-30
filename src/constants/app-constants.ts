@@ -228,6 +228,9 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly TAB_TITLE_UPDATED = 'browser:tab-title-updated';
   public static readonly TAB_FAVICON_UPDATED = 'browser:tab-favicon-updated';
   public static readonly TAB_URL_UPDATED = 'browser:tab-url-updated';
+  // Hovered-link URL forwarded to a tab's own page so the in-page status bar
+  // (bottom-left, Chrome-style) can show/hide it. Empty string ⇒ hide.
+  public static readonly TARGET_URL_UPDATED = 'browser:target-url-updated';
   public static readonly NAVIGATION_FAILED = 'browser:navigation-failed';
   public static readonly DOWNLOAD_STARTED = 'browser:download-started';
   public static readonly DOWNLOAD_PROGRESS = 'browser:download-progress';

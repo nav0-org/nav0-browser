@@ -4,6 +4,7 @@ import {
   RendererToMainEventsForBrowserIPC,
   RendererToMainEventsForDataStoreIPC,
 } from '../constants/app-constants';
+import { installHoverStatusBar } from './hover-status-bar';
 
 export function init() {
   const appWindowId = process.argv.find((arg) => arg.startsWith('--app-window-id='))?.split('=')[1];
@@ -766,6 +767,11 @@ export function init() {
       );
     },
   });
+
+  // Chrome-style hover status bar (bottom-left link preview) for built-in
+  // pages loaded as tabs. Only Tab webContents forward the event, so this is a
+  // no-op for the chrome/overlay webContents that also use this preload.
+  installHoverStatusBar();
 }
 
 init();
