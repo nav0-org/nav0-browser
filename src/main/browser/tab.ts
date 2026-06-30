@@ -523,19 +523,6 @@ export class Tab {
       }
     );
 
-    // Chrome-style status bar: forward the hovered-link URL to the page so its
-    // in-page status bar can show it (bottom-left) and hide it when it clears.
-    this.webContentsViewInstance.webContents.on(
-      WebContentsEvents.UPDATE_TARGET_URL,
-      (event, url: string) => {
-        if (this._destroyed) return;
-        this.webContentsViewInstance?.webContents.send(
-          MainToRendererEventsForBrowserIPC.TARGET_URL_UPDATED,
-          url
-        );
-      }
-    );
-
     this.webContentsViewInstance.webContents.on('context-menu', (event, params) => {
       if (this._destroyed) return;
       this.handleContextMenuEvent(this.parentAppWindow, event, params);
