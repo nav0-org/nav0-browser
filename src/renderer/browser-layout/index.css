@@ -345,6 +345,15 @@ body.is-private .new-tab-btn:hover {
   border-radius: 4px;
 }
 
+/* Brand-red icon tint on hover, matching the tab-strip "+" and scroll
+   buttons. The hover background already comes from .btn-ghost (--bg-hover,
+   which resolves to --bg-3). Excludes the SSL indicator so it keeps its
+   secure/insecure state colours, and disabled buttons (e.g. back/forward). */
+.nav-bar .btn-icon.rounded-circle:hover:not(:disabled, .ssl-indicator),
+.address-bar .btn-icon.rounded-circle:hover:not(:disabled, .ssl-indicator) {
+  color: var(--nav0-red-600);
+}
+
 .nav-controls {
   display: flex;
   gap: 2px;
