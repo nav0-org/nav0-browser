@@ -327,9 +327,14 @@ export class Tab {
       }
     });
 
-    // Chrome-style zoom shortcuts (Cmd/Ctrl +/-/0) when the page has focus.
+    // Alt+<digit> tab switching + Chrome-style zoom shortcuts (Cmd/Ctrl +/-/0)
+    // when the page has focus.
     this.webContentsViewInstance.webContents.on('before-input-event', (event, input) => {
       if (this._destroyed) return;
+      if (this.parentAppWindow.getTabSwitchManager().handleInput(input)) {
+        event.preventDefault();
+        return;
+      }
       const action = ZoomManager.matchShortcut(input);
       if (!action) return;
       event.preventDefault();

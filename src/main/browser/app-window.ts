@@ -16,6 +16,7 @@ import { NotificationManager } from './notification-manager';
 import { FindInPageManager } from './find-in-page-manager';
 import { UnifiedOverlayManager, OverlayType } from './unified-overlay-manager';
 import { ZoomManager } from './zoom-manager';
+import { TabSwitchManager } from './tab-switch-manager';
 import type { Database as DB } from 'better-sqlite3';
 import type {
   BasicAuthCreds,
@@ -48,6 +49,9 @@ export class AppWindow {
   private urlAutocompleteBounds: { x: number; y: number; width: number; height: number } | null =
     null;
   private findInPageManager: FindInPageManager | null = null;
+  private tabSwitchManager: TabSwitchManager = new TabSwitchManager((index) =>
+    this.activateTabByIndex(index)
+  );
   private findInPageState: Map<string, { searchText: string }> = new Map(); // per-tab find state
   private permissionPrompts: Map<string, PermissionPromptData> = new Map(); // per-tab permission data
   private pendingDialogs: Map<string, (response: DialogResponse) => void> = new Map();
@@ -151,6 +155,12 @@ export class AppWindow {
     // the browser chrome (e.g. the URL bar) rather than the page — apply them
     // to the active tab so zooming works regardless of where focus sits.
     this.browserWindowInstance.webContents.on('before-input-event', (event, input) => {
+      // Alt+<digits> tab switching also needs to work while the chrome (URL bar,
+      // new-tab page, …) holds focus, so feed events here too.
+      if (this.tabSwitchManager.handleInput(input)) {
+        event.preventDefault();
+        return;
+      }
       const action = ZoomManager.matchShortcut(input);
       if (!action) return;
       event.preventDefault();
@@ -166,6 +176,7 @@ export class AppWindow {
     });
 
     this.browserWindowInstance.on('closed', () => {
+      this.tabSwitchManager.dispose();
       // Resolve any outstanding dialogs / auth prompts so awaiting callers don't hang
       for (const [, resolve] of this.pendingDialogs) resolve({ confirmed: false });
       this.pendingDialogs.clear();
@@ -583,6 +594,22 @@ export class AppWindow {
       title: this.getActiveTab().getTitle(),
       url: this.getActiveTab().getUrl(),
     });
+  }
+
+  // Activate the nth tab (1-based) in the visible strip order. Out-of-range
+  // indices are ignored so an Alt+<n> for a tab that doesn't exist is a no-op.
+  activateTabByIndex(oneBasedIndex: number): void {
+    const tabs = this.getTabs();
+    if (oneBasedIndex < 1 || oneBasedIndex > tabs.length) return;
+    const target = tabs[oneBasedIndex - 1];
+    if (!target || target.getId() === this.activeTabId) return;
+    this.activateTab(target.getId(), true);
+  }
+
+  // Exposed so a tab's own before-input-event handler can feed Alt+<digit>
+  // presses into the shared, per-window accumulator when the page holds focus.
+  getTabSwitchManager(): TabSwitchManager {
+    return this.tabSwitchManager;
   }
 
   getActiveTab(): Tab | null {
