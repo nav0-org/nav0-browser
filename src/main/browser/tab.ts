@@ -28,6 +28,7 @@ import {
 import { SSLManager } from './ssl-manager';
 import { ZoomManager } from './zoom-manager';
 import { buildErrorPageScript, NavigationError } from './error-page/error-page';
+import { HOVER_STATUS_BAR_SCRIPT } from './hover-status-bar-script';
 const domainPattern = /^[^\s]+\.[^\s]+$/;
 // Protocols that should be handed off to the OS default handler.
 // Covers communication (mailto, tel, sms), calendar (webcal), and
@@ -391,6 +392,7 @@ export class Tab {
         return;
       }
       this.injectAdBlockDOMScript();
+      this.injectHoverStatusBar();
     });
 
     this.willDownloadHandler = async (
@@ -954,6 +956,18 @@ export class Tab {
   private injectCustomErrorPage(error: NavigationError): void {
     const script = buildErrorPageScript(error);
     this.webContentsViewInstance.webContents.executeJavaScript(script).catch(() => {});
+  }
+
+  /**
+   * Injects the Chrome-style hover URL status bar into the page's main world.
+   * Done from the main process (like reader mode / error pages) because a
+   * sandboxed preload's webFrame.executeJavaScript can't reach the main world.
+   * The injected script is idempotent (guards on a window flag).
+   */
+  private injectHoverStatusBar(): void {
+    this.webContentsViewInstance?.webContents
+      .executeJavaScript(HOVER_STATUS_BAR_SCRIPT)
+      .catch(() => {});
   }
 
   private debouncedHandleNavigationCompletion(url: string): void {
