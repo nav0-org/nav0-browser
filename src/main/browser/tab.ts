@@ -3,6 +3,7 @@ import {
   InAppUrls,
   DataStoreConstants,
   MainToRendererEventsForBrowserIPC,
+  RendererToMainEventsForBrowserIPC,
   WebContentsEvents,
   STREAMING_SITES,
 } from '../../constants/app-constants';
@@ -342,6 +343,23 @@ export class Tab {
       else if (action === 'out') this.zoomOut();
       else this.resetZoom();
     });
+
+    // Two-finger trackpad pinch zoom. Chromium delivers a pinch gesture to the
+    // page as a Ctrl-modified wheel event (fingers apart scroll "up", together
+    // "down") on every desktop platform — the same signal web apps use for
+    // pinch-to-zoom. The web-content preload watches for these Ctrl+wheel events
+    // and forwards a step here via PINCH_ZOOM; we route it through the same
+    // Chrome-style ladder as the keyboard shortcuts so both stay in sync.
+    // (macOS routes the native magnify gesture only to the DOM, not to the
+    // main-process `zoom-changed` event, so this must be driven from the page.)
+    this.webContentsViewInstance.webContents.ipc.on(
+      RendererToMainEventsForBrowserIPC.PINCH_ZOOM,
+      (_event, direction: 'in' | 'out') => {
+        if (this._destroyed) return;
+        if (direction === 'in') this.zoomIn();
+        else this.zoomOut();
+      }
+    );
 
     //for hard navigation (debounced)
     this.webContentsViewInstance.webContents.on(
