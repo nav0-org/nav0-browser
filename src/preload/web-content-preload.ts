@@ -83,6 +83,57 @@ contextBridge.exposeInMainWorld('__Nav0Dialog', {
   },
 });
 
+// ─── Two-finger pinch-to-zoom ───────────────────────────────────────
+// Chromium delivers a trackpad pinch to the page as a Ctrl-modified wheel
+// event (fingers apart → deltaY < 0, together → deltaY > 0); the same signal
+// also covers a physical Ctrl+mouse-wheel. On macOS the native magnify gesture
+// reaches only the DOM — never the main-process zoom controller — so we detect
+// it here and forward discrete zoom steps to the tab's main process, which
+// steps the shared Chrome-style zoom ladder.
+//
+// deltaY is accumulated and a step is emitted each time it crosses a threshold,
+// so one large mouse-wheel notch and a stream of tiny trackpad deltas both
+// advance the zoom one rung at a time. A minimum interval between steps caps
+// how fast a brisk pinch can travel the ladder (the per-event delta magnitude
+// varies a lot by device), while the accumulator keeps building between capped
+// events so gentle pinches still register. The accumulator resets between
+// gestures after a short idle gap. We stay out of the way when the page already
+// handled the Ctrl+wheel itself (defaultPrevented), so sites with their own
+// pinch-zoom (maps, design canvases) keep working.
+(function setupPinchZoom(): void {
+  const STEP_THRESHOLD = 12; // accumulated |deltaY| that advances one zoom rung
+  const GESTURE_RESET_MS = 200; // idle gap that starts a fresh gesture
+  const MIN_STEP_INTERVAL_MS = 50; // floor between steps (caps a fast pinch)
+  let accumulated = 0;
+  let lastEventTime = 0;
+  let lastStepTime = 0;
+
+  window.addEventListener(
+    'wheel',
+    (e: WheelEvent) => {
+      if (!e.ctrlKey) return; // ordinary scroll — leave it alone
+      if (e.defaultPrevented) return; // the page is doing its own zoom
+      // Suppress Chromium's native page/viewport zoom; we drive zoom ourselves.
+      e.preventDefault();
+
+      const now = Date.now();
+      if (now - lastEventTime > GESTURE_RESET_MS) accumulated = 0;
+      lastEventTime = now;
+
+      accumulated += e.deltaY;
+      if (Math.abs(accumulated) < STEP_THRESHOLD) return;
+      if (now - lastStepTime < MIN_STEP_INTERVAL_MS) return; // keep accumulating
+      lastStepTime = now;
+
+      // deltaY < 0 (fingers apart / wheel up) zooms in; > 0 zooms out.
+      const direction = accumulated < 0 ? 'in' : 'out';
+      accumulated = 0;
+      ipcRenderer.send(RendererToMainEventsForBrowserIPC.PINCH_ZOOM, direction);
+    },
+    { passive: false }
+  );
+})();
+
 const POLYFILL_CODE = `
 (function() {
   if (window.__Nav0GeolocationPatched) return;

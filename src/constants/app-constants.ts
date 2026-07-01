@@ -206,6 +206,9 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly ZOOM_OUT = 'browser:zoom-out';
   public static readonly ZOOM_RESET = 'browser:zoom-reset';
   public static readonly GET_ZOOM_FACTOR = 'browser:get-zoom-factor';
+  // Two-finger trackpad pinch, forwarded from the web-content preload as a
+  // discrete 'in'/'out' step (the native gesture reaches only the page's DOM).
+  public static readonly PINCH_ZOOM = 'browser:pinch-zoom';
 
   // Issue report
   public static readonly SHOW_ISSUE_REPORT = 'browser:show-issue-report';
