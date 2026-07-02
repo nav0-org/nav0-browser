@@ -24,6 +24,11 @@ export class BrowserTabManager {
   private readerModeButton: HTMLButtonElement;
   private pdfDownloadButton: HTMLButtonElement;
   private sslIndicator: HTMLButtonElement;
+  private windowMinimizeButton: HTMLButtonElement | null;
+  private windowMaximizeButton: HTMLButtonElement | null;
+  private windowCloseButton: HTMLButtonElement | null;
+  private windowMaximizeIcon: HTMLElement | null;
+  private windowRestoreIcon: HTMLElement | null;
 
   // State
   private tabs: Tab[] = [];
@@ -95,6 +100,17 @@ export class BrowserTabManager {
     this.readerModeButton = document.getElementById('reader-mode-button') as HTMLButtonElement;
     this.pdfDownloadButton = document.getElementById('pdf-download-button') as HTMLButtonElement;
     this.sslIndicator = document.getElementById('ssl-indicator') as HTMLButtonElement;
+    this.windowMinimizeButton = document.getElementById(
+      'window-minimize-button'
+    ) as HTMLButtonElement | null;
+    this.windowMaximizeButton = document.getElementById(
+      'window-maximize-button'
+    ) as HTMLButtonElement | null;
+    this.windowCloseButton = document.getElementById(
+      'window-close-button'
+    ) as HTMLButtonElement | null;
+    this.windowMaximizeIcon = document.getElementById('window-maximize-icon');
+    this.windowRestoreIcon = document.getElementById('window-restore-icon');
 
     this.setupSSLIndicator();
     this.setupShortcutTooltips();
@@ -109,10 +125,40 @@ export class BrowserTabManager {
     this.urlInput.title = `Search or enter address (${mod}L)`;
   }
 
+  // Swap the Linux maximize control between "maximize" and "restore" glyphs to
+  // reflect the current window state.
+  private updateMaximizeButtonIcon(isMaximized: boolean): void {
+    if (this.windowMaximizeIcon) {
+      this.windowMaximizeIcon.style.display = isMaximized ? 'none' : '';
+    }
+    if (this.windowRestoreIcon) {
+      this.windowRestoreIcon.style.display = isMaximized ? '' : 'none';
+    }
+    if (this.windowMaximizeButton) {
+      this.windowMaximizeButton.title = isMaximized ? 'Restore' : 'Maximize';
+      this.windowMaximizeButton.setAttribute('aria-label', isMaximized ? 'Restore' : 'Maximize');
+    }
+  }
+
   private setupEventListeners(): void {
     // New tab button
     this.newTabButton.addEventListener('click', async () => {
       window.BrowserAPI.createTab(this.appWindowId, InAppUrls.NEW_TAB, true);
+    });
+
+    // Linux window controls (min / maximize / close). These buttons only exist
+    // in the DOM path exercised on Linux; the handlers no-op elsewhere.
+    this.windowMinimizeButton?.addEventListener('click', () => {
+      window.BrowserAPI.minimizeAppWindow(this.appWindowId);
+    });
+    this.windowMaximizeButton?.addEventListener('click', () => {
+      window.BrowserAPI.toggleMaximizeAppWindow(this.appWindowId);
+    });
+    this.windowCloseButton?.addEventListener('click', () => {
+      window.BrowserAPI.closeAppWindow(this.appWindowId);
+    });
+    window.BrowserAPI.onMaximizeStateChanged?.((data: { isMaximized: boolean }) => {
+      this.updateMaximizeButtonIcon(data.isMaximized);
     });
 
     // Back button

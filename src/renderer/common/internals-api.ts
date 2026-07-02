@@ -99,6 +99,8 @@ declare global {
         bounds: { x: number; y: number; width: number; height: number }
       ) => Promise<any>;
       closeAppWindow: (appWindowId: string) => Promise<any>;
+      minimizeAppWindow: (appWindowId: string) => void;
+      toggleMaximizeAppWindow: (appWindowId: string) => void;
       createNewAppWindow: () => Promise<any>;
       createNewPrivateAppWindow: () => Promise<any>;
 
@@ -274,6 +276,7 @@ declare global {
       onTabUnpinned: (callback: (data: { id: string }) => void) => void;
       onTabsReordered: (callback: (data: { order: string[] }) => void) => void;
       onFullScreenChanged: (callback: (data: { isFullScreen: boolean }) => void) => void;
+      onMaximizeStateChanged: (callback: (data: { isMaximized: boolean }) => void) => void;
       onFocusUrlBar: (callback: () => void) => void;
       // Permission system
       respondToPermissionPrompt: (appWindowId: string, requestId: string, decision: string) => void;

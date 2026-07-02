@@ -132,6 +132,8 @@ export abstract class RendererToMainEventsForBrowserIPC {
 
   public static readonly UPDATE_BROWSER_VIEW_BOUNDS = 'browser:update-browser-view-bounds';
   public static readonly CLOSE_WINDOW = 'browser:close-window';
+  public static readonly MINIMIZE_WINDOW = 'browser:minimize-window';
+  public static readonly TOGGLE_MAXIMIZE_WINDOW = 'browser:toggle-maximize-window';
   public static readonly SHOW_OPTIONS_MENU = 'browser:show-options-menu';
   public static readonly HIDE_OPTIONS_MENU = 'browser:hide-options-menu';
   public static readonly SHOW_COMMAND_K_OVERLAY = 'browser:show-command-k-overlay';
@@ -259,6 +261,7 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly TAB_UNPINNED = 'browser:tab-unpinned';
   public static readonly TABS_REORDERED = 'browser:tabs-reordered';
   public static readonly FULLSCREEN_CHANGED = 'browser:fullscreen-changed';
+  public static readonly MAXIMIZE_STATE_CHANGED = 'browser:maximize-state-changed';
   public static readonly FOCUS_URL_BAR = 'browser:focus-url-bar';
 }
 

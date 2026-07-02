@@ -33,6 +33,42 @@
           <button class="new-tab-btn" id="new-tab-button" title="New tab">
             <i data-lucide="plus" width="18" height="18"></i>
           </button>
+          <!-- Window controls — Linux only. On macOS the native traffic lights
+               show and on Windows titleBarOverlay draws these, but a frameless
+               Linux window has no native min/max/close, so we render our own. -->
+          <div class="window-controls" id="window-controls">
+            <button
+              class="window-control-btn"
+              id="window-minimize-button"
+              title="Minimize"
+              aria-label="Minimize"
+            >
+              <i data-lucide="minus" width="16" height="16"></i>
+            </button>
+            <button
+              class="window-control-btn"
+              id="window-maximize-button"
+              title="Maximize"
+              aria-label="Maximize"
+            >
+              <i id="window-maximize-icon" data-lucide="square" width="14" height="14"></i>
+              <i
+                id="window-restore-icon"
+                data-lucide="copy"
+                width="14"
+                height="14"
+                style="display: none"
+              ></i>
+            </button>
+            <button
+              class="window-control-btn window-control-close"
+              id="window-close-button"
+              title="Close"
+              aria-label="Close"
+            >
+              <i data-lucide="x" width="16" height="16"></i>
+            </button>
+          </div>
         </div>
       </div>
       <!-- Navigation Bar -->
