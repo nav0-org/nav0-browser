@@ -7,6 +7,8 @@ out/
 build/*
 # …but keep the tracked macOS signing entitlements (not build output)
 !build/entitlements.mac.plist
+# …and the Linux packaging maintainer scripts (deb/rpm post-install/-remove)
+!build/linux/
 
 # VitePress
 docs/.vitepress/dist/

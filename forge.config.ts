@@ -18,6 +18,13 @@ const ICON_ICNS = `${ICON_BASE}.icns`;
 const ICON_ICO = path.resolve(__dirname, 'src/renderer/assets/favicon.ico');
 const MAC_ENTITLEMENTS = path.resolve(__dirname, 'build/entitlements.mac.plist');
 
+// Linux maintainer scripts (deb postinst/postrm, rpm post/postun). They refresh
+// the desktop + icon caches on install/upgrade/remove so the "Internet" menu
+// category from the .desktop file actually takes effect — even when upgrading
+// over an older Nav0 that Cinnamon had cached under "Accessories".
+const LINUX_AFTER_INSTALL = path.resolve(__dirname, 'build/linux/after-install.sh');
+const LINUX_AFTER_REMOVE = path.resolve(__dirname, 'build/linux/after-remove.sh');
+
 // macOS code signing. Camera/microphone (and screen capture) only work in a
 // packaged build if the .app carries a VALID code signature plus the
 // hardened-runtime camera/audio-input entitlements — macOS TCC binds the user's
@@ -97,6 +104,14 @@ const config: ForgeConfig = {
         // installer defaults the .desktop Categories to Utility, which Linux
         // Mint / GNOME map to Accessories.
         categories: ['Network', 'WebBrowser'],
+        // Refresh the desktop/icon caches on install & removal so the category
+        // above takes effect immediately, including when upgrading over a build
+        // that was previously filed under Accessories (Cinnamon caches the old
+        // placement otherwise). Passed straight through to electron-installer-debian.
+        scripts: {
+          postinst: LINUX_AFTER_INSTALL,
+          postrm: LINUX_AFTER_REMOVE,
+        },
       },
     }),
     new MakerRpm({
@@ -105,6 +120,13 @@ const config: ForgeConfig = {
         bin: 'nav0',
         // Same as deb: surface Nav0 in the Internet menu group.
         categories: ['Network', 'WebBrowser'],
+        // rpm scriptlets (post/postun) mirroring the deb postinst/postrm above.
+        // Not in @electron-forge/maker-rpm's typings, but forwarded verbatim to
+        // electron-installer-redhat, which supports `scripts`.
+        scripts: {
+          post: LINUX_AFTER_INSTALL,
+          postun: LINUX_AFTER_REMOVE,
+        },
       },
     }),
     {
