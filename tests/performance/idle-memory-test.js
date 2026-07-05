@@ -1,22 +1,33 @@
 #!/usr/bin/env node
 /*
- * Idle memory measurement for Nav0 (Linux).
+ * Idle memory measurement for Nav0 (Linux + macOS).
  *
- * Launches the PACKAGED app headless (xvfb) with a fresh throwaway profile,
- * lets it settle, then samples memory over a window and reports:
- *   - Accurate total  : summed PSS across the Nav0 process tree
- *                       (/proc/<pid>/smaps_rollup — shared pages counted once)
- *   - Naive total     : summed RSS (what browser-perf-test.js does today) so
- *                       you can see how much RSS overcounts an idle multiprocess app
- *   - Per-process type: from app.getAppMetrics() via the /memory control endpoint
+ * Launches the PACKAGED app with a fresh throwaway profile, lets it settle,
+ * then samples memory over a window and reports:
+ *   - Accurate total  : summed accurate footprint across all Nav0 processes.
+ *                       Linux -> PSS (/proc/<pid>/smaps_rollup, shared pages
+ *                       counted once); macOS -> "Physical footprint" (vmmap,
+ *                       the number Activity Monitor's Memory column shows).
+ *   - Working-set total: summed workingSetSize from app.getAppMetrics(). This is
+ *                       RSS-like (counts shared pages in every process) and is
+ *                       what browser-perf-test.js sums today — shown so you can
+ *                       see how much it overcounts an idle multiprocess app.
+ *   - Per-process type: from app.getAppMetrics() via the /memory control endpoint.
+ *
+ * The process list comes from getAppMetrics() (cross-platform); the accurate
+ * per-process number is layered on via the OS tool.
  *
  * Env knobs: SETTLE_MS, SAMPLE_WINDOW_MS, RUNS, PORT
  */
-const { spawn } = require('child_process');
+const { spawn, execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const http = require('http');
+
+const IS_MAC = process.platform === 'darwin';
+const IS_LINUX = process.platform === 'linux';
+const ACCURATE_LABEL = IS_MAC ? 'phys_footprint' : 'PSS';
 
 const PORT = Number(process.env.PORT || 39472);
 const SETTLE_MS = Number(process.env.SETTLE_MS || 30000);
@@ -29,65 +40,71 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 function findBinary() {
   const outDir = path.join(__dirname, '..', '..', 'out');
   if (!fs.existsSync(outDir)) return null;
-  // forge.config.ts sets the Linux executableName to lowercase 'nav0'.
-  const skip = new Set(['chrome-sandbox', 'chrome_crashpad_handler']);
   for (const d of fs.readdirSync(outDir)) {
-    if (!d.includes('linux')) continue;
     const dir = path.join(outDir, d);
-    const files = fs.readdirSync(dir);
-    if (files.includes('nav0')) return path.join(dir, 'nav0');
-    for (const f of files) {
-      if (skip.has(f) || f.includes('.')) continue;
-      const full = path.join(dir, f);
-      try {
-        const st = fs.statSync(full);
-        if (st.isFile() && st.mode & 0o111) return full;
-      } catch {
-        /* ignore */
+    if (IS_LINUX && d.includes('linux')) {
+      // forge.config.ts sets the Linux executableName to lowercase 'nav0'.
+      const files = fs.readdirSync(dir);
+      if (files.includes('nav0')) return path.join(dir, 'nav0');
+      const skip = new Set(['chrome-sandbox', 'chrome_crashpad_handler']);
+      for (const f of files) {
+        if (skip.has(f) || f.includes('.')) continue;
+        try {
+          const st = fs.statSync(path.join(dir, f));
+          if (st.isFile() && st.mode & 0o111) return path.join(dir, f);
+        } catch {
+          /* ignore */
+        }
       }
+    }
+    if (IS_MAC && d.includes('darwin')) {
+      // out/Nav0-darwin-<arch>/Nav0.app/Contents/MacOS/Nav0
+      const appName = fs.readdirSync(dir).find((f) => f.endsWith('.app'));
+      if (!appName) continue;
+      const macosDir = path.join(dir, appName, 'Contents', 'MacOS');
+      if (!fs.existsSync(macosDir)) continue;
+      const exe = fs.readdirSync(macosDir)[0];
+      if (exe) return path.join(macosDir, exe);
     }
   }
   return null;
 }
 
-function getProcessTree(rootPid) {
-  const pids = fs
-    .readdirSync('/proc')
-    .filter((n) => /^\d+$/.test(n))
-    .map(Number);
-  const children = new Map();
-  for (const pid of pids) {
-    try {
-      const stat = fs.readFileSync(`/proc/${pid}/stat`, 'utf-8');
-      // comm (field 2) can contain spaces/parens — split after the last ')'
-      const rest = stat.slice(stat.lastIndexOf(')') + 2).split(' ');
-      const ppid = Number(rest[1]); // [0]=state, [1]=ppid
-      if (!children.has(ppid)) children.set(ppid, []);
-      children.get(ppid).push(pid);
-    } catch {
-      /* process gone */
-    }
+function launch(binary, userDataDir) {
+  const common = [`--user-data-dir=${userDataDir}`];
+  const env = { ...process.env, REMOTE_DEBUGGING_PORT: String(PORT) };
+  // Linux: headless via xvfb, no-sandbox for CI runners. macOS: launch directly
+  // on the real display with the normal sandbox so the number reflects reality.
+  if (IS_LINUX) {
+    return spawn('xvfb-run', ['-a', binary, ...common, '--no-sandbox', '--disable-dev-shm-usage'], {
+      env,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
   }
-  const tree = [];
-  const stack = [rootPid];
-  while (stack.length) {
-    const p = stack.pop();
-    tree.push(p);
-    for (const c of children.get(p) || []) stack.push(c);
-  }
-  return tree;
+  return spawn(binary, common, { env, stdio: ['ignore', 'pipe', 'pipe'] });
 }
 
-function readField(pid, file, re) {
+// Accurate per-process footprint in KB, or 0 if the OS tool can't read it.
+function accurateKB(pid) {
   try {
-    const m = fs.readFileSync(`/proc/${pid}/${file}`, 'utf-8').match(re);
-    return m ? parseInt(m[1], 10) : 0;
+    if (IS_LINUX) {
+      const m = fs.readFileSync(`/proc/${pid}/smaps_rollup`, 'utf-8').match(/^Pss:\s+(\d+)\s+kB/m);
+      return m ? parseInt(m[1], 10) : 0;
+    }
+    // macOS: "Physical footprint:" from vmmap --summary (not the (peak) line).
+    const out = execSync(`/usr/bin/vmmap --summary ${pid}`, {
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+      maxBuffer: 16 * 1024 * 1024,
+    });
+    const m = out.match(/Physical footprint:\s+([\d.]+)\s*([KMG])/);
+    if (!m) return 0;
+    const v = parseFloat(m[1]);
+    return Math.round(m[2] === 'G' ? v * 1024 * 1024 : m[2] === 'M' ? v * 1024 : v);
   } catch {
     return 0;
   }
 }
-const readPssKB = (pid) => readField(pid, 'smaps_rollup', /^Pss:\s+(\d+)\s+kB/m);
-const readRssKB = (pid) => readField(pid, 'status', /VmRSS:\s+(\d+)\s+kB/);
 
 function httpGet(pathname) {
   return new Promise((resolve, reject) => {
@@ -130,35 +147,26 @@ function median(arr) {
 }
 
 async function sampleOnce() {
-  const mem = await httpGet('/memory'); // getAppMetrics breakdown
-  const typeByPid = new Map(mem.metrics.map((m) => [m.pid, m.type]));
-  const browser = mem.metrics.find((m) => m.type === 'Browser');
-  if (!browser) throw new Error('no Browser process in getAppMetrics');
-  const tree = getProcessTree(browser.pid);
-
-  let totalPss = 0;
-  let totalRss = 0;
+  const mem = await httpGet('/memory'); // getAppMetrics breakdown = the process list
+  const rows = mem.metrics;
+  if (!rows.some((r) => r.type === 'Browser')) throw new Error('no Browser process yet');
+  let ws = 0;
+  let acc = 0;
+  let accOk = true;
   const byType = {};
-  for (const pid of tree) {
-    const pss = readPssKB(pid);
-    totalPss += pss;
-    totalRss += readRssKB(pid);
-    const t = typeByPid.get(pid) || 'Other/Zygote';
-    byType[t] = (byType[t] || 0) + pss;
+  for (const r of rows) {
+    ws += r.workingSetKB;
+    const a = accurateKB(r.pid);
+    if (a > 0) acc += a;
+    else accOk = false;
+    byType[r.type] = (byType[r.type] || 0) + (a > 0 ? a : r.workingSetKB);
   }
-  return { totalPss, totalRss, byType, procCount: tree.length };
+  return { ws, acc, accOk, byType, procCount: rows.length };
 }
 
 async function measureOnce(binary, runIdx) {
   const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'nav0-idle-'));
-  const child = spawn(
-    'xvfb-run',
-    ['-a', binary, `--user-data-dir=${userDataDir}`, '--no-sandbox', '--disable-dev-shm-usage'],
-    {
-      env: { ...process.env, REMOTE_DEBUGGING_PORT: String(PORT) },
-      stdio: ['ignore', 'pipe', 'pipe'],
-    }
-  );
+  const child = launch(binary, userDataDir);
   let stderr = '';
   child.stderr.on('data', (d) => (stderr += d.toString()));
 
@@ -175,17 +183,22 @@ async function measureOnce(binary, runIdx) {
       samples.push(await sampleOnce());
       await sleep(SAMPLE_EVERY_MS);
     }
-    // Pick the sample nearest the median total PSS as the representative breakdown
-    const med = median(samples.map((s) => s.totalPss));
-    const rep = samples.reduce((a, b) =>
-      Math.abs(a.totalPss - med) <= Math.abs(b.totalPss - med) ? a : b
-    );
-    const troughPss = Math.min(...samples.map((s) => s.totalPss));
     process.stdout.write(' done\n');
+
+    const accAvailable = samples.every((s) => s.accOk);
+    const accSeries = samples.map((s) => (accAvailable ? s.acc : s.ws));
+    const med = median(accSeries);
+    const rep = samples.reduce((a, b) =>
+      Math.abs((accAvailable ? a.acc : a.ws) - med) <=
+      Math.abs((accAvailable ? b.acc : b.ws) - med)
+        ? a
+        : b
+    );
     return {
-      medPssMB: +(med / 1024).toFixed(1),
-      troughPssMB: +(troughPss / 1024).toFixed(1),
-      medRssMB: +(median(samples.map((s) => s.totalRss)) / 1024).toFixed(1),
+      accAvailable,
+      headlineMB: +(med / 1024).toFixed(1),
+      troughMB: +(Math.min(...accSeries) / 1024).toFixed(1),
+      wsMB: +(median(samples.map((s) => s.ws)) / 1024).toFixed(1),
       procCount: rep.procCount,
       byTypeMB: Object.fromEntries(
         Object.entries(rep.byType).map(([k, v]) => [k, +(v / 1024).toFixed(1)])
@@ -208,15 +221,22 @@ async function measureOnce(binary, runIdx) {
 }
 
 (async () => {
-  const binary = findBinary();
-  if (!binary) {
-    console.error('No packaged Linux binary under out/. Run `npm run package` first.');
+  if (!IS_LINUX && !IS_MAC) {
+    console.error(`Unsupported platform: ${process.platform} (Linux or macOS only).`);
     process.exit(1);
   }
+  const binary = findBinary();
+  if (!binary) {
+    console.error(
+      `No packaged ${IS_MAC ? 'macOS (.app)' : 'Linux'} binary under out/. Run \`npm run package\` first.`
+    );
+    process.exit(1);
+  }
+  console.log(`Platform: ${process.platform}  Accurate metric: ${ACCURATE_LABEL}`);
   console.log(`Binary: ${binary}`);
-  console.log(
-    `Config: RUNS=${RUNS} SETTLE=${SETTLE_MS / 1000}s WINDOW=${SAMPLE_WINDOW_MS / 1000}s\n`
-  );
+  console.log(`Config: RUNS=${RUNS} SETTLE=${SETTLE_MS / 1000}s WINDOW=${SAMPLE_WINDOW_MS / 1000}s`);
+  if (IS_MAC) console.log('(a Nav0 window will briefly open on your display during each run)\n');
+  else console.log('');
 
   const results = [];
   for (let i = 0; i < RUNS; i++) {
@@ -231,20 +251,21 @@ async function measureOnce(binary, runIdx) {
     process.exit(1);
   }
 
-  console.log('\n===== IDLE MEMORY (single window, one new-tab, headless) =====');
+  const accAvailable = results.every((r) => r.accAvailable);
+  const label = accAvailable ? ACCURATE_LABEL : 'working-set (accurate tool unavailable)';
+  console.log('\n===== IDLE MEMORY (single window, one new-tab) =====');
   results.forEach((r, i) =>
     console.log(
-      `run ${i + 1}: PSS med=${r.medPssMB}MB trough=${r.troughPssMB}MB | RSS med=${r.medRssMB}MB | procs=${r.procCount}`
+      `run ${i + 1}: ${label} med=${r.headlineMB}MB trough=${r.troughMB}MB | working-set=${r.wsMB}MB | procs=${r.procCount}`
     )
   );
-  const medPss = median(results.map((r) => r.medPssMB));
-  const medRss = median(results.map((r) => r.medRssMB));
-  console.log(
-    `\nMEDIAN accurate idle (PSS): ${medPss} MB   [naive RSS sum: ${medRss} MB, +${(((medRss - medPss) / medPss) * 100).toFixed(0)}% overcount]`
-  );
-  console.log('\nPer-process-type PSS (representative run):');
+  const medHead = median(results.map((r) => r.headlineMB));
+  const medWs = median(results.map((r) => r.wsMB));
+  const over = accAvailable ? ` [working-set sum: ${medWs} MB, +${(((medWs - medHead) / medHead) * 100).toFixed(0)}%]` : '';
+  console.log(`\nMEDIAN idle (${label}): ${medHead} MB${over}`);
+  console.log(`\nPer-process-type ${accAvailable ? ACCURATE_LABEL : 'working-set'} (representative run):`);
   const rep = results[results.length - 1];
   Object.entries(rep.byTypeMB)
     .sort((a, b) => b[1] - a[1])
-    .forEach(([t, mb]) => console.log(`  ${t.padEnd(16)} ${mb} MB`));
+    .forEach(([t, mb]) => console.log(`  ${String(t).padEnd(16)} ${mb} MB`));
 })();
