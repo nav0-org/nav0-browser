@@ -122,6 +122,11 @@ export class AppWindow {
         sandbox: true,
         webSecurity: true,
         allowRunningInsecureContent: false,
+        // Trusted first-party chrome UI: drop the spellchecker (avoids the
+        // in-memory hunspell dictionary and Chromium's dictionary download) and
+        // WebGL (unused by the chrome — its only canvas is 2D). Footprint + privacy.
+        spellcheck: false,
+        webgl: false,
         partition: this.partitionSetting,
       },
     });
