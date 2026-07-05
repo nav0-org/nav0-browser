@@ -542,6 +542,9 @@ export class AppWindow {
       prevTab.pauseActiveTime();
       const prevView = prevTab.getWebContentsViewInstance();
       if (prevView) {
+        // Mark the outgoing tab hidden so Chromium throttles its timers/rAF
+        // instead of leaving it running full-speed while detached from the window.
+        prevView.setVisible(false);
         this.browserWindowInstance.contentView.removeChildView(prevView);
       }
     }
@@ -583,6 +586,9 @@ export class AppWindow {
         width: parentBounds.width,
         height: parentBounds.height - yOffset,
       });
+      // Bring the incoming tab out of the hidden/throttled state before it is
+      // shown (it was marked hidden on creation or when last deactivated).
+      tab.getWebContentsViewInstance()?.setVisible(true);
       this.browserWindowInstance.contentView.addChildView(tab.getWebContentsViewInstance());
       // Only focus tab if find bar is not visible (find bar needs input focus)
       if (!this.isFindInPageVisible()) {
