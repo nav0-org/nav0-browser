@@ -40,13 +40,9 @@ npm run make
 
 ## Documentation
 
-Full documentation available at the [Nav0 docs site](https://nav0-org.github.io/nav0-browser/).
+Full documentation is available at the [Nav0 docs site](https://nav0.org/guide/getting-started).
 
-To run documentation locally:
-
-```bash
-npm run docs:dev
-```
+The documentation is maintained in a separate repository — [nav0-org/website](https://github.com/nav0-org/website). To run the docs locally, clone that repo and follow its README.
 
 ## Philosophy
 
@@ -71,7 +67,7 @@ By design, Nav0 does not include:
 
 ## Contributing
 
-Contributions are welcome! Please read our [Contributing Guide](https://nav0-org.github.io/nav0-browser/guide/contributing) before submitting PRs.
+Contributions are welcome! Please read our [Contributing Guide](https://nav0.org/guide/contributing) before submitting PRs.
 
 ## License
 
