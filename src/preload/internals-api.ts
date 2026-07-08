@@ -270,15 +270,6 @@ export function init() {
     closeAppWindow: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.CLOSE_WINDOW, appWindowId);
     },
-    minimizeAppWindow: (appWindowId: string) => {
-      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.MINIMIZE_WINDOW, appWindowId);
-    },
-    toggleMaximizeAppWindow: (appWindowId: string) => {
-      return ipcRenderer.send(
-        RendererToMainEventsForBrowserIPC.TOGGLE_MAXIMIZE_WINDOW,
-        appWindowId
-      );
-    },
     showOptionsMenu: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_OPTIONS_MENU, appWindowId);
     },
@@ -681,11 +672,6 @@ export function init() {
     },
     onFullScreenChanged: (callback: (data: { isFullScreen: boolean }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.FULLSCREEN_CHANGED, (_event, data) =>
-        callback(data)
-      );
-    },
-    onMaximizeStateChanged: (callback: (data: { isMaximized: boolean }) => void) => {
-      ipcRenderer.on(MainToRendererEventsForBrowserIPC.MAXIMIZE_STATE_CHANGED, (_event, data) =>
         callback(data)
       );
     },

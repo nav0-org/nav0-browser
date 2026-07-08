@@ -328,63 +328,6 @@ body.is-private .new-tab-btn:hover {
   color: #ffffff;
 }
 
-/* === Window controls (Linux only) =======================
-   macOS shows native traffic lights and Windows draws its
-   own controls via titleBarOverlay; a frameless Linux window
-   has neither, so we render min/maximize/close here. Hidden
-   on every other platform. */
-.window-controls {
-  display: none;
-  align-items: stretch;
-  align-self: stretch;
-  -webkit-app-region: no-drag;
-}
-
-body.platform-linux .window-controls {
-  display: flex;
-}
-
-.window-control-btn {
-  width: 46px;
-  height: 100%;
-  align-self: stretch;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: 0;
-  color: var(--fg-2);
-  cursor: pointer;
-  padding: 0;
-  transition:
-    background var(--dur-fast),
-    color var(--dur-fast);
-}
-
-.window-control-btn:hover {
-  background: var(--bg-3);
-  color: var(--fg-1);
-}
-
-.window-control-close:hover {
-  background: var(--danger-soft);
-  color: var(--danger);
-}
-
-body.is-private .window-control-btn {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-body.is-private .window-control-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
-}
-
-body.is-private .window-control-close:hover {
-  background: var(--danger);
-  color: #ffffff;
-}
-
 /* === Nav bar — utility row, original height ============ */
 .nav-bar {
   display: flex;

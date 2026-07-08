@@ -210,22 +210,6 @@ export class AppWindow {
       );
     });
 
-    // Keep the renderer's custom Linux window controls (maximize/restore icon)
-    // in sync with the actual window state.
-    this.browserWindowInstance.on('maximize', () => {
-      this.browserWindowInstance?.webContents.send(
-        MainToRendererEventsForBrowserIPC.MAXIMIZE_STATE_CHANGED,
-        { isMaximized: true }
-      );
-    });
-
-    this.browserWindowInstance.on('unmaximize', () => {
-      this.browserWindowInstance?.webContents.send(
-        MainToRendererEventsForBrowserIPC.MAXIMIZE_STATE_CHANGED,
-        { isMaximized: false }
-      );
-    });
-
     this.browserWindowInstance.webContents.on('did-finish-load', async () => {
       const firstTab = await this.createTab(InAppUrls.NEW_TAB);
       this.activateTab(firstTab.getId());
@@ -237,12 +221,6 @@ export class AppWindow {
           title: firstTab.getTitle(),
           url: firstTab.getUrl(),
         }
-      );
-      // Report the initial maximize state so the Linux window controls render
-      // the correct maximize/restore icon (the window opens maximized there).
-      this.browserWindowInstance.webContents.send(
-        MainToRendererEventsForBrowserIPC.MAXIMIZE_STATE_CHANGED,
-        { isMaximized: this.browserWindowInstance.isMaximized() }
       );
       this.resolveReady();
       this.browserWindowInstance?.show();
@@ -334,20 +312,6 @@ export class AppWindow {
       return this.browserWindowInstance.getBounds();
     }
     return null;
-  }
-
-  public minimizeWindow(): void {
-    this.browserWindowInstance?.minimize();
-  }
-
-  public toggleMaximizeWindow(): void {
-    const win = this.browserWindowInstance;
-    if (!win) return;
-    if (win.isMaximized()) {
-      win.unmaximize();
-    } else {
-      win.maximize();
-    }
   }
 
   // --- Unified overlay view management ---
