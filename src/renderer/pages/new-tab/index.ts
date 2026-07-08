@@ -247,7 +247,11 @@ function renderSearchResults(results: SearchResultItem[], query: string): void {
   if (!searchResults || !searchResultsList || !searchResultsEmpty) return;
 
   searchCurrentResults = results;
-  searchActiveIndex = results.length > 0 ? 0 : -1;
+  // Leave no suggestion highlighted by default so pressing Enter navigates to
+  // whatever the user typed. This lets the main-process heuristic treat input
+  // like "xyz.com" as a URL instead of forcing a search. Users can
+  // ArrowDown/ArrowUp (or Tab) to pick a suggestion.
+  searchActiveIndex = -1;
   searchResultsList.innerHTML = '';
 
   if (!query.trim()) {
