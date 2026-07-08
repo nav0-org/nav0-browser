@@ -1,13 +1,16 @@
 #!/usr/bin/env node
 /*
- * Idle memory measurement for Nav0 (Linux + macOS).
+ * Idle memory measurement for Nav0 (Linux + macOS + Windows).
  *
  * Launches the PACKAGED app with a fresh throwaway profile, lets it settle,
  * then samples memory over a window and reports:
  *   - Accurate total  : summed accurate footprint across all Nav0 processes.
- *                       Linux -> PSS (/proc/<pid>/smaps_rollup, shared pages
- *                       counted once); macOS -> "Physical footprint" (vmmap,
- *                       the number Activity Monitor's Memory column shows).
+ *                       Linux   -> PSS (/proc/<pid>/smaps_rollup, shared pages
+ *                                  counted once);
+ *                       macOS   -> "Physical footprint" (vmmap — the number
+ *                                  Activity Monitor's Memory column shows);
+ *                       Windows -> Private Working Set (WMI perf counter — the
+ *                                  number Task Manager's Memory column shows).
  *   - Working-set total: summed workingSetSize from app.getAppMetrics(). This is
  *                       RSS-like (counts shared pages in every process) and is
  *                       what browser-perf-test.js sums today — shown so you can
@@ -27,7 +30,8 @@ const http = require('http');
 
 const IS_MAC = process.platform === 'darwin';
 const IS_LINUX = process.platform === 'linux';
-const ACCURATE_LABEL = IS_MAC ? 'phys_footprint' : 'PSS';
+const IS_WIN = process.platform === 'win32';
+const ACCURATE_LABEL = IS_MAC ? 'phys_footprint' : IS_WIN ? 'private working set' : 'PSS';
 
 const PORT = Number(process.env.PORT || 39472);
 const SETTLE_MS = Number(process.env.SETTLE_MS || 30000);
@@ -70,6 +74,15 @@ function findBinary() {
       const exe = fs.readdirSync(macosDir)[0];
       if (exe) return path.join(macosDir, exe);
     }
+    if (IS_WIN && d.includes('win32')) {
+      // out/Nav0-win32-x64/Nav0.exe (executableName is 'Nav0' on non-linux).
+      const files = fs.readdirSync(dir);
+      if (files.includes('Nav0.exe')) return path.join(dir, 'Nav0.exe');
+      const exe = files.find(
+        (f) => f.toLowerCase().endsWith('.exe') && !/crashpad|sandbox/i.test(f)
+      );
+      if (exe) return path.join(dir, exe);
+    }
   }
   return null;
 }
@@ -80,8 +93,8 @@ function launch(binary, userDataDir) {
   // scanning URLs at `--user-data-dir=` / `--no-sandbox` / `--disable-*`.
   if (TAB_URL) common.unshift('--url', TAB_URL);
   const env = { ...process.env, REMOTE_DEBUGGING_PORT: String(PORT) };
-  // Linux: headless via xvfb, no-sandbox for CI runners. macOS: launch directly
-  // on the real display with the normal sandbox so the number reflects reality.
+  // Linux: headless via xvfb, no-sandbox for CI runners. macOS/Windows: launch
+  // directly on the real display with the normal sandbox so the number is real.
   if (IS_LINUX) {
     return spawn('xvfb-run', ['-a', binary, ...common, '--no-sandbox', '--disable-dev-shm-usage'], {
       env,
@@ -91,12 +104,42 @@ function launch(binary, userDataDir) {
   return spawn(binary, common, { env, stdio: ['ignore', 'pipe', 'pipe'] });
 }
 
+// Windows: one WMI query returns every process's Private Working Set (bytes)
+// keyed by PID — the value Task Manager's "Memory" column shows. Fetched once
+// per sample and looked up per-pid, so we don't spawn PowerShell N times.
+function getWinPrivateWSMap() {
+  try {
+    const ps =
+      'Get-CimInstance Win32_PerfRawData_PerfProc_Process | ' +
+      'Where-Object { $_.IDProcess -ne 0 } | ' +
+      'Select-Object IDProcess,WorkingSetPrivate | ConvertTo-Json -Compress';
+    const out = execSync(`powershell -NoProfile -NonInteractive -Command "${ps}"`, {
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+      maxBuffer: 32 * 1024 * 1024,
+    });
+    const data = JSON.parse(out);
+    const rows = Array.isArray(data) ? data : [data];
+    const map = new Map();
+    for (const r of rows) {
+      map.set(Number(r.IDProcess), Math.round(Number(r.WorkingSetPrivate) / 1024));
+    }
+    return map;
+  } catch {
+    return new Map();
+  }
+}
+
 // Accurate per-process footprint in KB, or 0 if the OS tool can't read it.
-function accurateKB(pid) {
+// On Windows the value comes from winMap (pid -> private working set KB).
+function accurateKB(pid, winMap) {
   try {
     if (IS_LINUX) {
       const m = fs.readFileSync(`/proc/${pid}/smaps_rollup`, 'utf-8').match(/^Pss:\s+(\d+)\s+kB/m);
       return m ? parseInt(m[1], 10) : 0;
+    }
+    if (IS_WIN) {
+      return winMap && winMap.has(pid) ? winMap.get(pid) : 0;
     }
     // macOS: "Physical footprint:" from vmmap --summary (not the (peak) line).
     const out = execSync(`/usr/bin/vmmap --summary ${pid}`, {
@@ -157,13 +200,14 @@ async function sampleOnce() {
   const mem = await httpGet('/memory'); // getAppMetrics breakdown = the process list
   const rows = mem.metrics;
   if (!rows.some((r) => r.type === 'Browser')) throw new Error('no Browser process yet');
+  const winMap = IS_WIN ? getWinPrivateWSMap() : null;
   let ws = 0;
   let acc = 0;
   let accOk = true;
   const byType = {};
   for (const r of rows) {
     ws += r.workingSetKB;
-    const a = accurateKB(r.pid);
+    const a = accurateKB(r.pid, winMap);
     if (a > 0) acc += a;
     else accOk = false;
     byType[r.type] = (byType[r.type] || 0) + (a > 0 ? a : r.workingSetKB);
@@ -211,15 +255,25 @@ async function measureOnce(binary, runIdx) {
       ),
     };
   } finally {
-    child.kill('SIGTERM');
-    await sleep(1500);
-    try {
-      child.kill('SIGKILL');
-    } catch {
-      /* already dead */
+    // Windows: kill the whole tree (Electron helpers won't get a POSIX signal).
+    if (IS_WIN) {
+      try {
+        execSync(`taskkill /pid ${child.pid} /t /f`, { stdio: 'ignore' });
+      } catch {
+        /* already dead */
+      }
+    } else {
+      child.kill('SIGTERM');
+      await sleep(1500);
+      try {
+        child.kill('SIGKILL');
+      } catch {
+        /* already dead */
+      }
     }
     try {
-      fs.rmSync(userDataDir, { recursive: true, force: true });
+      // maxRetries covers Windows briefly holding file handles after exit.
+      fs.rmSync(userDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
     } catch {
       /* best effort */
     }
@@ -227,15 +281,14 @@ async function measureOnce(binary, runIdx) {
 }
 
 (async () => {
-  if (!IS_LINUX && !IS_MAC) {
-    console.error(`Unsupported platform: ${process.platform} (Linux or macOS only).`);
+  if (!IS_LINUX && !IS_MAC && !IS_WIN) {
+    console.error(`Unsupported platform: ${process.platform} (Linux, macOS, or Windows only).`);
     process.exit(1);
   }
   const binary = findBinary();
   if (!binary) {
-    console.error(
-      `No packaged ${IS_MAC ? 'macOS (.app)' : 'Linux'} binary under out/. Run \`npm run package\` first.`
-    );
+    const kind = IS_MAC ? 'macOS (.app)' : IS_WIN ? 'Windows (.exe)' : 'Linux';
+    console.error(`No packaged ${kind} binary under out/. Run \`npm run package\` first.`);
     process.exit(1);
   }
   console.log(`Platform: ${process.platform}  Accurate metric: ${ACCURATE_LABEL}`);
@@ -244,7 +297,8 @@ async function measureOnce(binary, runIdx) {
   console.log(
     `Config: RUNS=${RUNS} SETTLE=${SETTLE_MS / 1000}s WINDOW=${SAMPLE_WINDOW_MS / 1000}s`
   );
-  if (IS_MAC) console.log('(a Nav0 window will briefly open on your display during each run)\n');
+  if (IS_MAC || IS_WIN)
+    console.log('(a Nav0 window will briefly open on your display during each run)\n');
   else console.log('');
 
   const results = [];
