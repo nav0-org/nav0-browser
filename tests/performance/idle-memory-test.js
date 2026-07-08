@@ -17,7 +17,7 @@
  * The process list comes from getAppMetrics() (cross-platform); the accurate
  * per-process number is layered on via the OS tool.
  *
- * Env knobs: SETTLE_MS, SAMPLE_WINDOW_MS, RUNS, PORT
+ * Env knobs: SETTLE_MS, SAMPLE_WINDOW_MS, RUNS, PORT, TAB_URL
  */
 const { spawn, execSync } = require('child_process');
 const fs = require('fs');
@@ -34,6 +34,10 @@ const SETTLE_MS = Number(process.env.SETTLE_MS || 30000);
 const SAMPLE_WINDOW_MS = Number(process.env.SAMPLE_WINDOW_MS || 30000);
 const SAMPLE_EVERY_MS = 5000;
 const RUNS = Number(process.env.RUNS || 3);
+// Optional: open a single tab on this URL instead of the default new-tab page.
+// Uses Nav0's own `--url` CLI flag, which opens exactly one window with one tab
+// and skips default startup — so the measurement reflects that one real page.
+const TAB_URL = process.env.TAB_URL || '';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -72,6 +76,9 @@ function findBinary() {
 
 function launch(binary, userDataDir) {
   const common = [`--user-data-dir=${userDataDir}`];
+  // `--url <u>` must come before the Chromium flags; the CLI parser stops
+  // scanning URLs at `--user-data-dir=` / `--no-sandbox` / `--disable-*`.
+  if (TAB_URL) common.unshift('--url', TAB_URL);
   const env = { ...process.env, REMOTE_DEBUGGING_PORT: String(PORT) };
   // Linux: headless via xvfb, no-sandbox for CI runners. macOS: launch directly
   // on the real display with the normal sandbox so the number reflects reality.
@@ -189,8 +196,7 @@ async function measureOnce(binary, runIdx) {
     const accSeries = samples.map((s) => (accAvailable ? s.acc : s.ws));
     const med = median(accSeries);
     const rep = samples.reduce((a, b) =>
-      Math.abs((accAvailable ? a.acc : a.ws) - med) <=
-      Math.abs((accAvailable ? b.acc : b.ws) - med)
+      Math.abs((accAvailable ? a.acc : a.ws) - med) <= Math.abs((accAvailable ? b.acc : b.ws) - med)
         ? a
         : b
     );
@@ -234,7 +240,10 @@ async function measureOnce(binary, runIdx) {
   }
   console.log(`Platform: ${process.platform}  Accurate metric: ${ACCURATE_LABEL}`);
   console.log(`Binary: ${binary}`);
-  console.log(`Config: RUNS=${RUNS} SETTLE=${SETTLE_MS / 1000}s WINDOW=${SAMPLE_WINDOW_MS / 1000}s`);
+  console.log(`Tab: ${TAB_URL || 'default new-tab page'}`);
+  console.log(
+    `Config: RUNS=${RUNS} SETTLE=${SETTLE_MS / 1000}s WINDOW=${SAMPLE_WINDOW_MS / 1000}s`
+  );
   if (IS_MAC) console.log('(a Nav0 window will briefly open on your display during each run)\n');
   else console.log('');
 
@@ -253,7 +262,7 @@ async function measureOnce(binary, runIdx) {
 
   const accAvailable = results.every((r) => r.accAvailable);
   const label = accAvailable ? ACCURATE_LABEL : 'working-set (accurate tool unavailable)';
-  console.log('\n===== IDLE MEMORY (single window, one new-tab) =====');
+  console.log(`\n===== IDLE MEMORY (single window, ${TAB_URL || 'one new-tab'}) =====`);
   results.forEach((r, i) =>
     console.log(
       `run ${i + 1}: ${label} med=${r.headlineMB}MB trough=${r.troughMB}MB | working-set=${r.wsMB}MB | procs=${r.procCount}`
@@ -261,9 +270,13 @@ async function measureOnce(binary, runIdx) {
   );
   const medHead = median(results.map((r) => r.headlineMB));
   const medWs = median(results.map((r) => r.wsMB));
-  const over = accAvailable ? ` [working-set sum: ${medWs} MB, +${(((medWs - medHead) / medHead) * 100).toFixed(0)}%]` : '';
+  const over = accAvailable
+    ? ` [working-set sum: ${medWs} MB, +${(((medWs - medHead) / medHead) * 100).toFixed(0)}%]`
+    : '';
   console.log(`\nMEDIAN idle (${label}): ${medHead} MB${over}`);
-  console.log(`\nPer-process-type ${accAvailable ? ACCURATE_LABEL : 'working-set'} (representative run):`);
+  console.log(
+    `\nPer-process-type ${accAvailable ? ACCURATE_LABEL : 'working-set'} (representative run):`
+  );
   const rep = results[results.length - 1];
   Object.entries(rep.byTypeMB)
     .sort((a, b) => b[1] - a[1])
