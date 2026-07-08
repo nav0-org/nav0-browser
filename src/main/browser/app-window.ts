@@ -83,16 +83,20 @@ export class AppWindow {
     const isWindows = process.platform === 'win32';
     const isLinux = process.platform === 'linux';
 
-    // On Linux and Windows, true fullscreen makes the window manager hide its
-    // own panels (top/bottom system bars, taskbar). We want the window to fill
-    // the screen while keeping those bars visible, so we open maximized instead
-    // of fullscreen there. macOS keeps native fullscreen.
-    this._desiredFullScreen = isMac;
+    // macOS and Linux open in true fullscreen. On Linux the window is frameless
+    // (titleBarStyle 'hidden'), and some window managers (e.g. Cinnamon on Linux
+    // Mint) won't reliably maximize a frameless window before it's shown — it
+    // ends up as a small floating window with no decorations to grab. Real
+    // fullscreen is honoured consistently and gives us the intended full-screen
+    // app. Press F11 to leave fullscreen. Windows keeps its native controls via
+    // titleBarOverlay, so it opens maximized (bars/taskbar stay visible).
+    const openFullScreen = isMac || isLinux;
+    this._desiredFullScreen = openFullScreen;
 
     this.browserWindowInstance = new BrowserWindow({
       width: 1200,
       height: 800,
-      fullscreen: isMac,
+      fullscreen: openFullScreen,
       show: false,
       title: AppConstants.APP_NAME,
       icon:
@@ -126,9 +130,9 @@ export class AppWindow {
       },
     });
 
-    // Fill the screen on Linux/Windows without going into true fullscreen, so
-    // the system top/bottom bars (and taskbar) stay visible.
-    if (isLinux || isWindows) {
+    // Windows fills the screen via maximize (not true fullscreen) so its native
+    // titleBarOverlay controls and the taskbar stay visible.
+    if (isWindows) {
       this.browserWindowInstance.maximize();
     }
 
