@@ -39,11 +39,6 @@ export class UnifiedOverlayManager {
         sandbox: true,
         webSecurity: true,
         allowRunningInsecureContent: false,
-        // Trusted first-party overlay UI: drop the spellchecker (avoids the
-        // in-memory hunspell dictionary and Chromium's dictionary download) and
-        // WebGL (unused — the only canvas here is 2D). Footprint + privacy.
-        spellcheck: false,
-        webgl: false,
         partition: partitionSetting,
         additionalArguments: [`--app-window-id=${appWindowId}`, `--is-private=${isPrivate}`],
         transparent: true,
@@ -123,7 +118,10 @@ export class UnifiedOverlayManager {
   }
 
   // URL autocomplete: push live updates while the panel is visible
-  updateUrlAutocomplete(data: { results: UrlAutocompleteSuggestion[]; activeIndex: number }): void {
+  updateUrlAutocomplete(data: {
+    results: UrlAutocompleteSuggestion[];
+    activeIndex: number;
+  }): void {
     if (!this.visibleOverlays.has('url-autocomplete')) return;
     this.urlAutocompleteHandler.update(this.webContentsViewInstance.webContents, data);
   }
