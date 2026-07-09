@@ -41,6 +41,16 @@ body.platform-darwin:not(.is-fullscreen) .tab-bar {
   padding-left: 78px;
 }
 
+/* Keep the strip clear of the native window-controls overlay on Windows and
+   Linux — Chromium draws minimize/maximize/close over the strip's top corner.
+   The titlebar-area env() vars only resolve while the overlay is active; the
+   fallbacks collapse both paddings to zero otherwise (e.g. in fullscreen). */
+body.platform-win32 .tab-bar,
+body.platform-linux .tab-bar {
+  padding-left: env(titlebar-area-x, 0px);
+  padding-right: calc(100vw - env(titlebar-area-x, 0px) - env(titlebar-area-width, 100vw));
+}
+
 /* Private mode — dark strip with red accent */
 body.is-private .tab-bar {
   background-color: #2a0a0a;

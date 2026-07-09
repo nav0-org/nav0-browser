@@ -83,10 +83,10 @@ export class AppWindow {
     const isWindows = process.platform === 'win32';
     const isLinux = process.platform === 'linux';
 
-    // On Linux and Windows, true fullscreen makes the window manager hide its
-    // own panels (top/bottom system bars, taskbar). We want the window to fill
-    // the screen while keeping those bars visible, so we open maximized instead
-    // of fullscreen there. macOS keeps native fullscreen.
+    // macOS opens in its native fullscreen Space. Linux and Windows fill the
+    // screen as a *maximized* window instead — true fullscreen there makes the
+    // window manager hide its own panels (top/bottom bars, taskbar), which we
+    // want to keep visible.
     this._desiredFullScreen = isMac;
 
     this.browserWindowInstance = new BrowserWindow({
@@ -100,11 +100,17 @@ export class AppWindow {
           ? path.join(app.getAppPath(), 'src/renderer/assets/logo.png')
           : undefined,
       titleBarStyle: isMac ? 'hiddenInset' : 'hidden',
-      ...(isWindows
+      // Chromium-drawn minimize/maximize/close buttons for the frameless
+      // window. Electron supports this Window Controls Overlay on Linux since
+      // v30.2 (electron/electron#41769) — without it, a 'hidden' title bar on
+      // Linux shows no window controls at all. Colours match the tab strip
+      // (--tab-inactive, or the dark private strip) so the overlay reads as
+      // part of it.
+      ...(isWindows || isLinux
         ? {
             titleBarOverlay: {
-              color: '#ffffff',
-              symbolColor: '#333333',
+              color: this.isPrivate ? '#2a0a0a' : '#e7e5e1',
+              symbolColor: this.isPrivate ? '#ffffff' : '#333333',
               height: 38,
             },
           }
@@ -127,7 +133,9 @@ export class AppWindow {
     });
 
     // Fill the screen on Linux/Windows without going into true fullscreen, so
-    // the system top/bottom bars (and taskbar) stay visible.
+    // the system top/bottom bars (and taskbar) stay visible. Some X11 window
+    // managers ignore maximization hints while the window is still unmapped
+    // (electron/electron#1418, #45815), so this is re-asserted after show().
     if (isLinux || isWindows) {
       this.browserWindowInstance.maximize();
     }
@@ -185,15 +193,22 @@ export class AppWindow {
       this.browserWindowInstance = null;
     });
 
-    // When leaving fullscreen, set proper windowed bounds and resize all views.
+    // When leaving fullscreen on macOS, set proper windowed bounds and resize
+    // all views — the window started in a fullscreen Space, so it has no
+    // meaningful windowed bounds to return to. On Linux/Windows the window
+    // manager restores the pre-fullscreen state itself (typically maximized);
+    // forcing bounds here would shrink a maximized window to 1200×800 every
+    // time fullscreen ends (F11 or leaving HTML5 video fullscreen).
     this.browserWindowInstance.on('leave-full-screen', () => {
       this._desiredFullScreen = false;
-      const { width: screenW, height: screenH } = screen.getPrimaryDisplay().workAreaSize;
-      const w = Math.min(1200, screenW);
-      const h = Math.min(800, screenH);
-      const x = Math.round((screenW - w) / 2);
-      const y = Math.round((screenH - h) / 2);
-      this.browserWindowInstance?.setBounds({ x, y, width: w, height: h });
+      if (isMac) {
+        const { width: screenW, height: screenH } = screen.getPrimaryDisplay().workAreaSize;
+        const w = Math.min(1200, screenW);
+        const h = Math.min(800, screenH);
+        const x = Math.round((screenW - w) / 2);
+        const y = Math.round((screenH - h) / 2);
+        this.browserWindowInstance?.setBounds({ x, y, width: w, height: h });
+      }
       this.handleResizing();
       this.browserWindowInstance?.webContents.send(
         MainToRendererEventsForBrowserIPC.FULLSCREEN_CHANGED,
@@ -224,6 +239,12 @@ export class AppWindow {
       );
       this.resolveReady();
       this.browserWindowInstance?.show();
+      // Re-assert maximization now that the window is mapped. X11 window
+      // managers (e.g. Muffin on Linux Mint) may ignore the maximize() issued
+      // while the window was still hidden, which left a small floating window.
+      if (isLinux) {
+        this.browserWindowInstance?.maximize();
+      }
     });
 
     // this.browserWindowInstance.webContents.openDevTools({mode : 'detach'});
