@@ -13,6 +13,34 @@
       <div id="browser-control-panel" class="controls">
         <!-- Tab Bar -->
         <div class="tab-bar">
+          <!-- macOS traffic lights — drawn only while the window is in a
+               fullscreen Space, where the native close/minimize/zoom buttons
+               are hidden. Outside fullscreen the native ones show instead. -->
+          <div class="traffic-lights" id="traffic-lights" role="group" aria-label="Window controls">
+            <button
+              class="traffic-light traffic-light-close"
+              id="traffic-light-close"
+              title="Close Window"
+              aria-label="Close window"
+            >
+              <i data-lucide="x" width="8" height="8" stroke-width="3.5"></i>
+            </button>
+            <button
+              class="traffic-light traffic-light-minimize"
+              id="traffic-light-minimize"
+              title="Minimize — unavailable in Full Screen"
+              aria-label="Minimize (unavailable in Full Screen)"
+              disabled
+            ></button>
+            <button
+              class="traffic-light traffic-light-zoom"
+              id="traffic-light-zoom"
+              title="Exit Full Screen"
+              aria-label="Exit Full Screen"
+            >
+              <i data-lucide="minimize-2" width="8" height="8" stroke-width="3.5"></i>
+            </button>
+          </div>
           <div
             class="private-window-identifier"
             title="This is a private window."

@@ -58,6 +58,17 @@
   --private-bg: var(--nav0-red-700);
   --private-fg: #ffffff;
 
+  /* macOS traffic lights — fixed Apple system colours, used only by the
+     custom close/minimize/zoom cluster the chrome draws in fullscreen
+     (where the native buttons are hidden). Never reuse elsewhere. */
+  --mac-close: #ff5f57;
+  --mac-close-border: #e0443e;
+  --mac-zoom: #28c840;
+  --mac-zoom-border: #1aab29;
+  --mac-control-disabled: #dcdcdc;
+  --mac-control-disabled-border: #c8c8c8;
+  --mac-control-glyph: rgba(0, 0, 0, 0.55);
+
   /* Focus rings */
   --shadow-focus: 0 0 0 2px rgba(0, 0, 0, 0.1);
   --shadow-focus-accent: 0 0 0 3px rgba(37, 99, 235, 0.18);

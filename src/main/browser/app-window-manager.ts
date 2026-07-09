@@ -555,6 +555,16 @@ export abstract class AppWindowManager {
     );
 
     ipcMain.on(
+      RendererToMainEventsForBrowserIPC.TOGGLE_FULLSCREEN_WINDOW,
+      async (event, appWindowId: string) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        window?.toggleFullScreen();
+      }
+    );
+
+    ipcMain.on(
       RendererToMainEventsForBrowserIPC.SHOW_OPTIONS_MENU,
       async (event, appWindowId: string) => {
         let window: AppWindow | null = null;
