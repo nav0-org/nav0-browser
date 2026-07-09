@@ -106,6 +106,8 @@ When in doubt: **default to less.** Smaller radius, lighter shadow, more white s
 
 > Use `--nav0-red-600` directly for visual brand surfaces (anchor bars, active indicators). Use `--danger` for destructive _semantics_ (delete buttons, error pills) — even though it resolves to the same hex, the intent is different and lets us recolour each independently later.
 
+**macOS traffic lights** (`--mac-close`, `--mac-close-border`, `--mac-zoom`, `--mac-zoom-border`, `--mac-control-disabled`, `--mac-control-disabled-border`, `--mac-control-glyph`) are fixed Apple system colours used exclusively by the custom close/minimize/zoom cluster the tab strip draws on macOS in fullscreen (where the native buttons are hidden). Like `--private-bg`, these are reserved — never reuse them for general status colours.
+
 ### 3.4 Shadows & focus
 
 ```

@@ -270,6 +270,12 @@ export function init() {
     closeAppWindow: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.CLOSE_WINDOW, appWindowId);
     },
+    toggleFullScreenAppWindow: (appWindowId: string) => {
+      return ipcRenderer.send(
+        RendererToMainEventsForBrowserIPC.TOGGLE_FULLSCREEN_WINDOW,
+        appWindowId
+      );
+    },
     showOptionsMenu: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_OPTIONS_MENU, appWindowId);
     },

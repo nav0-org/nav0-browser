@@ -24,6 +24,8 @@ export class BrowserTabManager {
   private readerModeButton: HTMLButtonElement;
   private pdfDownloadButton: HTMLButtonElement;
   private sslIndicator: HTMLButtonElement;
+  private trafficLightCloseButton: HTMLButtonElement | null;
+  private trafficLightZoomButton: HTMLButtonElement | null;
 
   // State
   private tabs: Tab[] = [];
@@ -95,6 +97,12 @@ export class BrowserTabManager {
     this.readerModeButton = document.getElementById('reader-mode-button') as HTMLButtonElement;
     this.pdfDownloadButton = document.getElementById('pdf-download-button') as HTMLButtonElement;
     this.sslIndicator = document.getElementById('ssl-indicator') as HTMLButtonElement;
+    this.trafficLightCloseButton = document.getElementById(
+      'traffic-light-close'
+    ) as HTMLButtonElement | null;
+    this.trafficLightZoomButton = document.getElementById(
+      'traffic-light-zoom'
+    ) as HTMLButtonElement | null;
 
     this.setupSSLIndicator();
     this.setupShortcutTooltips();
@@ -113,6 +121,16 @@ export class BrowserTabManager {
     // New tab button
     this.newTabButton.addEventListener('click', async () => {
       window.BrowserAPI.createTab(this.appWindowId, InAppUrls.NEW_TAB, true);
+    });
+
+    // macOS traffic lights (only visible in fullscreen — see index.css). The
+    // gray minimize disc stays disabled, matching the native fullscreen
+    // behaviour, so only close and zoom (exit fullscreen) are wired up.
+    this.trafficLightCloseButton?.addEventListener('click', () => {
+      window.BrowserAPI.closeAppWindow(this.appWindowId);
+    });
+    this.trafficLightZoomButton?.addEventListener('click', () => {
+      window.BrowserAPI.toggleFullScreenAppWindow(this.appWindowId);
     });
 
     // Back button

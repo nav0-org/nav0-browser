@@ -132,6 +132,7 @@ export abstract class RendererToMainEventsForBrowserIPC {
 
   public static readonly UPDATE_BROWSER_VIEW_BOUNDS = 'browser:update-browser-view-bounds';
   public static readonly CLOSE_WINDOW = 'browser:close-window';
+  public static readonly TOGGLE_FULLSCREEN_WINDOW = 'browser:toggle-fullscreen-window';
   public static readonly SHOW_OPTIONS_MENU = 'browser:show-options-menu';
   public static readonly HIDE_OPTIONS_MENU = 'browser:hide-options-menu';
   public static readonly SHOW_COMMAND_K_OVERLAY = 'browser:show-command-k-overlay';

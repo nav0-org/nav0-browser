@@ -57,6 +57,69 @@ body.is-private .tab-bar {
   border-bottom-color: #4a1414;
 }
 
+/* === macOS traffic lights (fullscreen only) ==============
+   The window opens in a fullscreen Space on macOS, where the
+   native close/minimize/zoom buttons are hidden unless the
+   menu bar is revealed. Draw our own cluster at the strip's
+   leading edge instead: red closes the window, gray minimize
+   is disabled (macOS can't minimize a fullscreen window —
+   the native button grays out the same way), green exits
+   fullscreen. Outside fullscreen the native lights show and
+   this cluster hides; Windows/Linux use titleBarOverlay. */
+.traffic-lights {
+  display: none;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 0 var(--spacing-md) 0 12px;
+  -webkit-app-region: no-drag;
+}
+
+body.platform-darwin.is-fullscreen .traffic-lights {
+  display: flex;
+}
+
+.traffic-light {
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border-radius: var(--r-full);
+  border: 1px solid var(--mac-control-disabled-border);
+  background: var(--mac-control-disabled);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* macOS traffic lights use the default cursor, not a pointer */
+  cursor: default;
+  color: var(--mac-control-glyph);
+}
+
+.traffic-light-close {
+  background: var(--mac-close);
+  border-color: var(--mac-close-border);
+}
+
+.traffic-light-zoom {
+  background: var(--mac-zoom);
+  border-color: var(--mac-zoom-border);
+}
+
+/* Glyphs surface when the cluster is hovered, like the native
+   lights. The disabled minimize stays a blank gray disc. */
+.traffic-light svg {
+  opacity: 0;
+  transition: opacity var(--dur-fast);
+}
+
+.traffic-lights:hover .traffic-light:not(:disabled) svg {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .traffic-light svg {
+    transition: none;
+  }
+}
+
 /* The tabs container fills the strip via flex:1, so its empty area must stay
    part of the window drag handle — otherwise there's nothing left to grab and
    the frameless window can't be repositioned. Its interactive children

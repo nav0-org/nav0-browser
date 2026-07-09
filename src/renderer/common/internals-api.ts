@@ -99,6 +99,7 @@ declare global {
         bounds: { x: number; y: number; width: number; height: number }
       ) => Promise<any>;
       closeAppWindow: (appWindowId: string) => Promise<any>;
+      toggleFullScreenAppWindow: (appWindowId: string) => void;
       createNewAppWindow: () => Promise<any>;
       createNewPrivateAppWindow: () => Promise<any>;
 
