@@ -12,7 +12,11 @@ import {
   DEFAULT_BROWSER_SETTINGS,
   USER_AGENT_PRESETS,
 } from '../../types/settings-types';
-import { AD_BLOCK_DOMAINS, AD_URL_PATTERNS } from '../ad-blocker/ad-block-lists';
+import {
+  AD_BLOCK_DOMAINS,
+  AD_URL_PATTERNS,
+  CAPTCHA_URL_MARKERS,
+} from '../ad-blocker/ad-block-lists';
 import { applyClientHints, alignUAWithRealChromeVersion } from '../browser/ua-switcher';
 import { STREAMING_SITES } from '../../constants/app-constants';
 
@@ -399,6 +403,15 @@ export abstract class SettingsEnforcer {
       try {
         const url = new URL(details.url);
         const hostname = url.hostname;
+
+        // Never block interactive captcha / bot-challenge providers. Their
+        // scripts, widget iframes and challenge subframes are third-party by
+        // nature, so blocking them here would break logins and form
+        // submissions with no privacy benefit.
+        if (CAPTCHA_URL_MARKERS.some((marker) => details.url.includes(marker))) {
+          callback({});
+          return;
+        }
 
         // Check allowed sites (per-site disable)
         const topFrameUrl = details.frame?.url || details.referrer || '';

@@ -9,6 +9,35 @@ import { STREAMING_SITES } from '../../constants/app-constants';
 // into template-literal scripts that run in the renderer context.
 const STREAMING_SITES_JS = JSON.stringify(STREAMING_SITES as unknown as string[]);
 
+// URL/iframe-src markers for interactive captcha & bot-challenge providers.
+// These must NEVER be network-blocked, cosmetically hidden, or have their
+// full-screen challenge modals removed — doing so silently breaks logins and
+// form submissions. Notably, hCaptcha and reCAPTCHA render their challenge
+// popup in a body-level <div> carrying the maximum 32-bit z-index
+// (2147483647), which collides head-on with the generic "high z-index overlay
+// == ad wrapper" heuristics further down this file.
+export const CAPTCHA_URL_MARKERS: string[] = [
+  'hcaptcha.com',
+  'recaptcha',
+  'challenges.cloudflare.com',
+  'arkoselabs.com',
+  'funcaptcha.com',
+  'geetest.com',
+];
+
+// A CSS `:not(:has(...))` chain that spares any element hosting a captcha
+// challenge iframe from a cosmetic rule (e.g. the max-z-index overlay rule).
+const CAPTCHA_OVERLAY_EXEMPTION = CAPTCHA_URL_MARKERS.map(
+  (marker) => `:not(:has(iframe[src*="${marker}"]))`
+).join('');
+
+// A plain selector that matches a captcha challenge iframe directly, for use
+// inside injected DOM-cleanup scripts.
+const CAPTCHA_IFRAME_SELECTOR = CAPTCHA_URL_MARKERS.map(
+  (marker) => `iframe[src*="${marker}"]`
+).join(',');
+const CAPTCHA_IFRAME_SELECTOR_JS = JSON.stringify(CAPTCHA_IFRAME_SELECTOR);
+
 // Well-known ad and tracking domains
 export const AD_BLOCK_DOMAINS: string[] = [
   // Google Ads & Analytics
@@ -646,9 +675,11 @@ div[class*="ima-"],
 [id*="clmb"],
 [class*="clmb"],
 
-/* Generic high z-index overlays (ad wrappers) */
-[style*="z-index: 2147483647"],
-[style*="z-index:2147483647"] {
+/* Generic high z-index overlays (ad wrappers). Captcha challenge modals
+   legitimately use the max 32-bit z-index, so exempt any element hosting a
+   captcha iframe — otherwise hCaptcha/reCAPTCHA challenges get hidden. */
+[style*="z-index: 2147483647"]${CAPTCHA_OVERLAY_EXEMPTION},
+[style*="z-index:2147483647"]${CAPTCHA_OVERLAY_EXEMPTION} {
   display: none !important;
   height: 0 !important;
   min-height: 0 !important;
@@ -1123,9 +1154,30 @@ export const AD_BLOCK_SCRIPT = `
     return false;
   }
 
+  // Guard: never touch captcha widgets or their full-screen challenge modals.
+  // Their overlay containers use the max z-index and would otherwise be caught
+  // by the high-z-index / overlay heuristics, silently breaking logins.
+  var captchaIframeSelector = ${CAPTCHA_IFRAME_SELECTOR_JS};
+  function isCaptchaElement(el) {
+    try {
+      if (el.matches && el.matches(captchaIframeSelector)) return true;
+      if (el.querySelector && el.querySelector(captchaIframeSelector)) return true;
+      var node = el;
+      for (var i = 0; i < 6 && node && node.nodeType === 1; i++) {
+        var id = (node.id || '').toLowerCase();
+        var cls = (node.className && typeof node.className === 'string') ? node.className.toLowerCase() : '';
+        if (id.indexOf('captcha') > -1 || cls.indexOf('captcha') > -1 ||
+            id.indexOf('turnstile') > -1 || cls.indexOf('turnstile') > -1) return true;
+        node = node.parentElement;
+      }
+    } catch(e) {}
+    return false;
+  }
+
   function hideElement(el) {
     if (el && el.style && !el.getAttribute('data-Nav0-blocked')) {
       if (isLikelyMainContent(el)) return;
+      if (isCaptchaElement(el)) return;
       el.style.setProperty('display', 'none', 'important');
       el.style.setProperty('height', '0', 'important');
       el.style.setProperty('min-height', '0', 'important');
