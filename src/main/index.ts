@@ -6,6 +6,7 @@ import { DataStoreManager } from './database/data-store-manager';
 import { DownloadManager } from './browser/download-manager';
 import { SessionManager } from './browser/session-manager';
 import { SettingsEnforcer } from './settings/settings-enforcer';
+import { WidevineManager } from './browser/widevine-manager';
 import { configureUserAgentFallback } from './browser/ua-switcher';
 import { startTestControlServer } from './test-control-server';
 import { CLIArgs, hasCLIOverride, parseCLIArgs } from './cli/cli-args';
@@ -105,8 +106,18 @@ if (!gotSingleInstanceLock) {
 
   // Initialize main window when app is ready
   appReady = app.whenReady().then(async () => {
+    // Kick off the Widevine CDM install (ECS fork) in parallel with our own
+    // startup work. On first launch this may fetch the CDM over the network, so
+    // overlapping it with the DB/settings init keeps cold-start snappy. We
+    // barrier on it below, before the first window loads any content, so
+    // DRM-protected media plays on the very first navigation.
+    const widevineReady = WidevineManager.whenReady();
+
     await DataStoreManager.init();
     await SettingsEnforcer.init();
+
+    await widevineReady;
+
     const cliOverride = hasCLIOverride(initialCLIArgs);
     await AppWindowManager.init({ skipDefaultStartup: cliOverride });
     if (cliOverride) {

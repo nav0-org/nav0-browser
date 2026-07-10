@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import { execFileSync } from 'child_process';
 import type { ForgeConfig } from '@electron-forge/shared-types';
 import { MakerSquirrel } from '@electron-forge/maker-squirrel';
 import { MakerZIP } from '@electron-forge/maker-zip';
@@ -40,12 +41,53 @@ const canNotarize =
   !!process.env.APPLE_APP_SPECIFIC_PASSWORD &&
   !!process.env.APPLE_TEAM_ID;
 
+// Widevine VMP (Verified Media Path) signing — castLabs "Electron for Content
+// Security" (ECS). A Widevine *production* license server only trusts an ECS app
+// whose Electron framework/executable carries a valid VMP signature, issued by
+// castLabs' EVS service via the `castlabs-evs` Python package. Signing is gated
+// on the EVS credentials so local/dev/unsigned builds still succeed — those keep
+// the fork's built-in *development* signature, which works against Widevine UAT /
+// dev license servers but not production ones (Netflix, etc.).
+//
+// Ordering vs. code-signing is platform-specific: on macOS the VMP signature
+// must be applied BEFORE code-signing (so osxSign seals it in), so we sign in
+// packageAfterPrune (which runs before osxSign). On Windows it must be applied
+// AFTER code-signing, so we sign in postPackage (after packaging completes).
+// Linux has no VMP signing (Widevine on Linux uses the built-in signature).
+// See https://github.com/castlabs/electron-releases/wiki/EVS
+const EVS_CONFIGURED = !!process.env.EVS_ACCOUNT_NAME && !!process.env.EVS_PASSWD;
+
+function vmpSign(packageDir: string): void {
+  // `castlabs_evs.vmp sign-pkg` expects the directory that CONTAINS the .app/.exe,
+  // not the bundle/executable itself. It re-signs the Electron framework in place.
+  const python = process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
+  console.log(`[vmp] VMP-signing package at ${packageDir}`);
+  execFileSync(python, ['-m', 'castlabs_evs.vmp', 'sign-pkg', packageDir], {
+    stdio: 'inherit',
+    // EVS_NO_ASK keeps the CLI non-interactive; it reads EVS_ACCOUNT_NAME /
+    // EVS_PASSWD from the environment to authenticate.
+    env: { ...process.env, EVS_NO_ASK: '1' },
+  });
+}
+
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
     executableName: process.platform === 'linux' ? 'nav0' : 'Nav0',
     icon: ICON_BASE,
     extraResource: [],
+    // Download the Widevine-enabled ECS binaries from castLabs' GitHub releases
+    // instead of the upstream electron.org mirror. @electron/get derives the
+    // "v<version>/electron-v<version>-<platform>-<arch>.zip" path from the
+    // installed electron version (41.9.2+wvcus), so only the mirror base needs
+    // overriding. Required for packaging every arch — including cross-compiled
+    // ones (e.g. the macOS x64 build produced on an arm64 runner), which pull a
+    // fresh binary rather than reusing the host's node_modules/electron.
+    download: {
+      mirrorOptions: {
+        mirror: 'https://github.com/castlabs/electron-releases/releases/download/',
+      },
+    },
     extendInfo: {
       NSAudioCaptureUsageDescription:
         'Nav0 needs audio capture access to share system audio during screen sharing.',
@@ -116,7 +158,7 @@ const config: ForgeConfig = {
     },
   ],
   hooks: {
-    packageAfterPrune: async (_config, buildPath) => {
+    packageAfterPrune: async (_config, buildPath, _electronVersion, platform) => {
       // Electron 35+ uses ESM resolution for the main entry point.
       // ESM does not support directory imports like ".webpack/main" —
       // it requires the full file path ".webpack/main/index.js".
@@ -128,6 +170,39 @@ const config: ForgeConfig = {
       if (pkg.main === '.webpack/main') {
         pkg.main = '.webpack/main/index.js';
         fs.writeFileSync(packageJsonPath, JSON.stringify(pkg, null, 2));
+      }
+
+      // macOS: apply the Widevine VMP signature BEFORE osxSign runs (osxSign
+      // happens later in the packaging step, so packageAfterPrune is the last
+      // safe point). buildPath is "<dir>/<App>.app/Contents/Resources/app"; the
+      // directory that contains the .app is four levels up, which is what
+      // sign-pkg expects.
+      if (platform === 'darwin') {
+        if (EVS_CONFIGURED) {
+          vmpSign(path.resolve(buildPath, '../../../..'));
+        } else {
+          console.log(
+            '[vmp] EVS_ACCOUNT_NAME/EVS_PASSWD not set — skipping macOS VMP signing ' +
+              '(dev build; production Widevine playback will be unavailable).'
+          );
+        }
+      }
+    },
+    postPackage: async (_config, packageResult) => {
+      // Windows: apply the Widevine VMP signature AFTER packaging (and any
+      // code-signing) completes. Each outputPath is the directory that directly
+      // contains Nav0.exe, which is what sign-pkg expects.
+      if (packageResult.platform === 'win32') {
+        if (EVS_CONFIGURED) {
+          for (const outputPath of packageResult.outputPaths) {
+            vmpSign(outputPath);
+          }
+        } else {
+          console.log(
+            '[vmp] EVS_ACCOUNT_NAME/EVS_PASSWD not set — skipping Windows VMP signing ' +
+              '(dev build; production Widevine playback will be unavailable).'
+          );
+        }
       }
     },
   },

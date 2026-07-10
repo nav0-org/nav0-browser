@@ -98,6 +98,16 @@ jobs:
         with:
           python-version: '3.11'
 
+      # The `electron` devDependency is now the castLabs "Electron for Content
+      # Security" fork, pulled straight from GitHub. npm pins it in the lockfile
+      # as a git+ssh URL; rewrite GitHub SSH to HTTPS so `npm ci` can clone the
+      # public fork with the runner's token instead of needing an SSH key.
+      - name: Fetch GitHub git dependencies over HTTPS
+        shell: bash
+        run: |
+          git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+
       # Install dependencies
       - name: Install dependencies
         run: npm ci --ignore-scripts
@@ -165,11 +175,21 @@ jobs:
           npm rebuild better-sqlite3 --build-from-source
         env:
           npm_config_target_arch: ${{ matrix.arch }}
-          npm_config_target: 35.2.1
+          npm_config_target: 41.9.2
           npm_config_runtime: electron
           npm_config_disturl: https://electronjs.org/headers
           npm_config_cache: ${{ runner.os == 'Windows' && 'C:\temp\.npm' || '/tmp/.npm' }}
           npm_config_build_from_source: true
+
+      # castLabs EVS client for Widevine VMP (Verified Media Path) signing.
+      # Only macOS/Windows packages get VMP-signed; Linux uses the fork's
+      # built-in signature. forge.config.ts skips signing gracefully when the
+      # EVS_ACCOUNT_NAME/EVS_PASSWD secrets aren't set, so this install is a
+      # cheap no-op for forks without EVS credentials.
+      - name: Install castLabs EVS (Widevine VMP signing)
+        if: matrix.platform == 'mac' || matrix.platform == 'win'
+        shell: bash
+        run: python -m pip install --upgrade castlabs-evs
 
       # Build using electron-forge
       - name: Make Electron app
@@ -177,6 +197,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NAV0_ISSUE_API_KEY: ${{ secrets.NAV0_ISSUE_API_KEY }}
+          # Widevine VMP signing credentials (EVS). Signing runs only when both
+          # are present; otherwise forge.config.ts logs a skip and continues.
+          EVS_ACCOUNT_NAME: ${{ secrets.EVS_ACCOUNT_NAME }}
+          EVS_PASSWD: ${{ secrets.EVS_PASSWD }}
+          EVS_NO_ASK: '1'
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

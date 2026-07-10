@@ -71,6 +71,7 @@ Every feature is encapsulated in a manager class:
 | `PermissionManager`      | `src/main/browser/`               | Site permission policies + prompts                |
 | `SettingsEnforcer`       | `src/main/settings/`              | Applies user preferences to sessions              |
 | `ReaderModeManager`      | `src/main/browser/`               | Reader mode extraction (@mozilla/readability)     |
+| `WidevineManager`        | `src/main/browser/`               | Widevine CDM readiness (ECS `components` API)     |
 | `SSLManager`             | `src/main/browser/`               | Certificate validation + interstitial page        |
 | `FindInPageManager`      | `src/main/browser/`               | In-page text search                               |
 | `SearchEngine`           | `src/main/web/`                   | Selects the active search engine + suggestions    |
@@ -166,6 +167,7 @@ src/
 │   │   ├── browsing-history-manager.ts
 │   │   ├── permission-manager.ts
 │   │   ├── reader-mode-manager.ts
+│   │   ├── widevine-manager.ts     # Widevine CDM readiness (castLabs ECS `components` API)
 │   │   ├── find-in-page-manager.ts
 │   │   ├── ssl-manager.ts
 │   │   ├── ssl-warning-page.{ts,html}
@@ -243,23 +245,23 @@ Documentation (VitePress site, blog posts, release notes) lives in the separate 
 
 ## Tech Stack
 
-| Component       | Technology                               | Version |
-| --------------- | ---------------------------------------- | ------- |
-| Runtime         | Electron                                 | 41.0.0  |
-| Language        | TypeScript                               | 5.8.3   |
-| Bundler         | Webpack (via @electron-forge)            | —       |
-| Build Tool      | Electron Forge                           | 7.10.x  |
-| Database        | better-sqlite3                           | 12.9.0  |
-| Key-Value Store | electron-store                           | 8.2.0   |
-| Reader Mode     | @mozilla/readability                     | 0.6.0   |
-| PDF parsing     | pdf-parse                                | 1.1.1   |
-| Markdown        | marked                                   | 15.0.11 |
-| UUIDs           | uuid                                     | 11.1.0  |
-| Promises        | bluebird                                 | 3.7.2   |
-| Icons           | Lucide                                   | 0.503.0 |
-| Testing         | Puppeteer Core                           | 24.42.x |
-| Lint / Format   | ESLint + Stylelint + HTMLHint + Prettier | —       |
-| Git hooks       | Husky + lint-staged                      | —       |
+| Component       | Technology                                | Version      |
+| --------------- | ----------------------------------------- | ------------ |
+| Runtime         | Electron (castLabs ECS, Widevine-enabled) | 41.9.2+wvcus |
+| Language        | TypeScript                                | 5.8.3        |
+| Bundler         | Webpack (via @electron-forge)             | —            |
+| Build Tool      | Electron Forge                            | 7.10.x       |
+| Database        | better-sqlite3                            | 12.9.0       |
+| Key-Value Store | electron-store                            | 8.2.0        |
+| Reader Mode     | @mozilla/readability                      | 0.6.0        |
+| PDF parsing     | pdf-parse                                 | 1.1.1        |
+| Markdown        | marked                                    | 15.0.11      |
+| UUIDs           | uuid                                      | 11.1.0       |
+| Promises        | bluebird                                  | 3.7.2        |
+| Icons           | Lucide                                    | 0.503.0      |
+| Testing         | Puppeteer Core                            | 24.42.x      |
+| Lint / Format   | ESLint + Stylelint + HTMLHint + Prettier  | —            |
+| Git hooks       | Husky + lint-staged                       | —            |
 
 ## Build & Configuration
 
@@ -341,6 +343,14 @@ When contributing to Nav0, always keep these principles in mind:
 - Telemetry or analytics of any kind
 
 ## Important Gotchas
+
+### Widevine / DRM (castLabs ECS)
+
+- The `electron` devDependency is **not** upstream Electron — it's castLabs' [Electron for Content Security (ECS)](https://github.com/castlabs/electron-releases) fork (`git+https://github.com/castlabs/electron-releases.git#v41.9.2+wvcus`). ECS bundles Google's Widevine CDM so DRM-protected media (Netflix, Spotify, Amazon Prime, …) can play. Stay on a `+wvcus` tag whose base version matches the Electron major you're targeting.
+- `WidevineManager.whenReady()` (`src/main/browser/widevine-manager.ts`) wraps ECS's `components.whenReady()` and **must** be awaited after `app.whenReady()` and before the first window loads content — `src/main/index.ts` does this (overlapped with DB/settings init). It's a graceful no-op on stock Electron so the app still boots for contributors who build against upstream.
+- **Binary download**: `forge.config.ts` sets `packagerConfig.download.mirrorOptions.mirror` to castLabs' GitHub releases so `@electron/get` fetches the Widevine binary (for every arch, incl. cross-compiled ones) instead of the upstream one. Don't drop this or you'll ship a non-Widevine build.
+- **VMP signing**: a production Widevine license server only trusts a VMP-signed app. `forge.config.ts` shells out to `castlabs-evs` (`vmpSign`) — on **macOS before** code-signing (`packageAfterPrune`), on **Windows after** (`postPackage`), never on Linux. It's gated on the `EVS_ACCOUNT_NAME`/`EVS_PASSWD` env (CI secrets), so credential-less/dev builds still succeed with the fork's built-in dev signature (works against Widevine UAT, not production).
+- CI (`build-electron.yml`) rewrites GitHub SSH→HTTPS before `npm ci` (npm pins the fork as a `git+ssh` URL in the lockfile), installs `castlabs-evs` on macOS/Windows, and passes the EVS secrets to `npm run make`.
 
 ### Native Modules (better-sqlite3)
 

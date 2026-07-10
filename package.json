@@ -76,7 +76,7 @@
     "@vercel/webpack-asset-relocator-loader": "^1.7.3",
     "copy-webpack-plugin": "^13.0.0",
     "css-loader": "^6.11.0",
-    "electron": "41.0.0",
+    "electron": "git+https://github.com/castlabs/electron-releases.git#v41.9.2+wvcus",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.31.0",
