@@ -22,7 +22,13 @@ export abstract class DatabaseManager {
     DatabaseManager.db = new Database(DatabaseManager.dbPath, {});
     DatabaseManager.db.pragma('journal_mode = WAL');
     DatabaseManager.db.pragma('page_size = 8192');
-    DatabaseManager.db.pragma('cache_size = 20000');
+    // The page cache is the dominant SQLite memory cost. A *positive* cache_size
+    // is measured in pages, so the previous `20000` meant 20000 × 8 KiB page_size
+    // ≈ 156 MiB — a large, long-lived ceiling the main process grows into as the
+    // history DB fills, for a minimal browser whose queries are small and indexed.
+    // The negative form pins the cache to an absolute size in KiB (independent of
+    // page_size). 16 MiB is ~8× SQLite's 2 MiB default and ample for these lookups.
+    DatabaseManager.db.pragma('cache_size = -16000'); // ~16 MiB (was 20000 pages ≈ 156 MiB)
     DatabaseManager.db.pragma('synchronous = NORMAL');
 
     // Older builds stored the private db on disk at <userData>/private-database.db
@@ -30,10 +36,7 @@ export abstract class DatabaseManager {
     // file readable until the next launch. Delete any such leftover, then
     // create a fresh in-memory db so private browsing data is never written
     // to disk in the first place.
-    DatabaseManager.legacyPrivateDbPath = path.join(
-      app.getPath('userData'),
-      'private-database.db'
-    );
+    DatabaseManager.legacyPrivateDbPath = path.join(app.getPath('userData'), 'private-database.db');
     DatabaseManager.deleteLegacyPrivateDbFile();
     DatabaseManager.dbForPrivateBrowsing = new Database(':memory:');
 

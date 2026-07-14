@@ -243,6 +243,14 @@ export class Tab {
     this.webContentsViewInstance.webContents.setWebRTCIPHandlingPolicy(
       'default_public_interface_only'
     );
+    // A freshly created WebContentsView is "visible" to Chromium even while it is
+    // detached from the window, so a background tab would keep running
+    // requestAnimationFrame and unthrottled timers at full rate. Mark non-active
+    // tabs hidden up front so Chromium throttles them; AppWindow.activateTab()
+    // flips visibility back on when the tab is brought to the foreground.
+    if (this.parentAppWindow.getActiveTabId() !== this.id) {
+      this.webContentsViewInstance.setVisible(false);
+    }
     // User agent is set at the session level by SettingsEnforcer.applyUserAgent()
     // this.webContentsViewInstance.webContents.openDevTools({mode : 'detach'});
     this.registerPdfHandler();
