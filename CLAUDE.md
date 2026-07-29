@@ -316,7 +316,7 @@ When adding a new overlay, **do not** add a new entry — register it inside the
   - macOS 15 (x64) + macOS Latest (arm64) → DMG
   - Ubuntu Latest (x64) → DEB + RPM
   - Windows Latest (x64) → EXE
-  - Node 22, Python 3.11
+  - Node 24, Python 3.11
   - Trigger: `workflow_dispatch` with optional version override + `prerelease` toggle
 
 Documentation deployment lives in the **nav0-org/website** repo and is not built from this one.
