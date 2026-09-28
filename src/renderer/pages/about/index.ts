@@ -63,6 +63,115 @@ async function copyToClipboard(text: string, btn: HTMLElement): Promise<void> {
   setTimeout(() => btn.classList.remove('copied'), 900);
 }
 
+/**
+ * Wire the "Check for updates" control. Detection works on every platform (a
+ * single main-process GitHub query); in-place install is offered only where
+ * `canAutoInstall` is true (packaged Windows). Elsewhere we point the user at
+ * the release page for a manual download.
+ */
+function initUpdates(): void {
+  const statusEl = document.getElementById('update-status');
+  const detailEl = document.getElementById('update-detail');
+  const checkBtn = document.getElementById('btn-check-update') as HTMLButtonElement | null;
+  const actionBtn = document.getElementById('btn-update-action') as HTMLButtonElement | null;
+  if (!statusEl || !detailEl || !checkBtn || !actionBtn) return;
+
+  const appWindowId = window.BrowserAPI.appWindowId;
+
+  const setDetail = (text: string, kind?: 'available' | 'error'): void => {
+    detailEl.textContent = text;
+    detailEl.classList.remove('available', 'error');
+    if (kind) detailEl.classList.add(kind);
+    detailEl.hidden = !text;
+  };
+
+  const hideAction = (): void => {
+    actionBtn.hidden = true;
+    actionBtn.disabled = false;
+    actionBtn.onclick = null;
+  };
+
+  const showAction = (label: string, onClick: (() => void) | null): void => {
+    actionBtn.textContent = label;
+    actionBtn.hidden = false;
+    actionBtn.disabled = onClick === null;
+    actionBtn.onclick = onClick;
+  };
+
+  const runInstall = async (version?: string): Promise<void> => {
+    showAction('Downloading…', null);
+    checkBtn.disabled = true;
+    setDetail(version ? `Downloading v${version} in the background…` : 'Downloading the update…');
+    try {
+      const result = await window.BrowserAPI.downloadAndInstallUpdate();
+      if (result.downloaded) {
+        setDetail('Update downloaded. Restart Nav0 to finish updating.', 'available');
+        showAction('Restart now', () => window.BrowserAPI.quitAndInstallUpdate());
+      } else if (result.error) {
+        setDetail(result.error, 'error');
+        hideAction();
+      } else {
+        setDetail('No update was available to download.');
+        hideAction();
+      }
+    } catch {
+      setDetail('The update could not be downloaded.', 'error');
+      hideAction();
+    } finally {
+      checkBtn.disabled = false;
+    }
+  };
+
+  const check = async (): Promise<void> => {
+    checkBtn.disabled = true;
+    checkBtn.textContent = 'Checking…';
+    hideAction();
+    setDetail('');
+    statusEl.textContent = 'Checking for updates…';
+    try {
+      const result = await window.BrowserAPI.checkForUpdates();
+      if (result.status === 'up-to-date') {
+        statusEl.textContent = "You're on the latest version.";
+        setDetail(`Nav0 v${result.currentVersion} is up to date.`);
+      } else if (result.status === 'update-available') {
+        statusEl.textContent = `Update available: v${result.latestVersion}`;
+        if (result.canAutoInstall) {
+          setDetail(
+            `You're on v${result.currentVersion}. Download and install v${result.latestVersion}?`,
+            'available'
+          );
+          showAction('Download & install', () => {
+            void runInstall(result.latestVersion);
+          });
+        } else {
+          setDetail(
+            `You're on v${result.currentVersion}. Open the release page to download v${result.latestVersion}.`,
+            'available'
+          );
+          showAction('View release', () => {
+            const url =
+              result.releaseUrl || 'https://github.com/nav0-org/nav0-browser/releases/latest';
+            window.BrowserAPI.createTab(appWindowId, url, true);
+          });
+        }
+      } else {
+        statusEl.textContent = "Couldn't check for updates.";
+        setDetail(result.error || 'Please try again later.', 'error');
+      }
+    } catch {
+      statusEl.textContent = "Couldn't check for updates.";
+      setDetail('Please try again later.', 'error');
+    } finally {
+      checkBtn.disabled = false;
+      checkBtn.textContent = 'Check for updates';
+    }
+  };
+
+  checkBtn.addEventListener('click', () => {
+    void check();
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const appWindowId = window.BrowserAPI.appWindowId;
 
@@ -135,6 +244,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('link-license')?.addEventListener('click', () => {
     openTab('https://github.com/nav0-org/nav0-browser/blob/main/LICENSE.md');
   });
+
+  initUpdates();
 
   // Re-render lucide icons in case any were injected after the initial pass.
   createIcons({ icons });

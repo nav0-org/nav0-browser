@@ -16,6 +16,7 @@ import { SearchEngine } from '../web/search-engine';
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from '../../types/settings-types';
 import { PermissionManager, PermissionRequest } from './permission-manager';
 import { NotificationManager } from './notification-manager';
+import { UpdateManager } from './update-manager';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
@@ -1051,6 +1052,18 @@ export abstract class AppWindowManager {
         executableChecksum,
         asarChecksum,
       };
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.CHECK_FOR_UPDATES, async () => {
+      return UpdateManager.checkForUpdates();
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.DOWNLOAD_AND_INSTALL_UPDATE, async () => {
+      return UpdateManager.downloadAndInstall();
+    });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.QUIT_AND_INSTALL_UPDATE, async () => {
+      UpdateManager.quitAndInstall();
     });
 
     ipcMain.on(RendererToMainEventsForBrowserIPC.CREATE_NEW_APP_WINDOW, async (event) => {

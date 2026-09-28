@@ -151,6 +151,20 @@ declare global {
         executableChecksum: string;
         asarChecksum: string;
       }>;
+      checkForUpdates: () => Promise<{
+        status: 'up-to-date' | 'update-available' | 'error';
+        currentVersion: string;
+        latestVersion?: string;
+        releaseUrl?: string;
+        canAutoInstall: boolean;
+        error?: string;
+      }>;
+      downloadAndInstallUpdate: () => Promise<{
+        downloaded: boolean;
+        version?: string;
+        error?: string;
+      }>;
+      quitAndInstallUpdate: () => Promise<void>;
       showFindInPage: (appWindowId: string) => Promise<any>;
       hideFindInPage: (appWindowId: string) => Promise<any>;
       findInPage: (
