@@ -170,6 +170,22 @@ function initUpdates(): void {
   checkBtn.addEventListener('click', () => {
     void check();
   });
+
+  // Opened via a Help-menu "Check for Updates" entry (Nav0://about#check-updates):
+  // run the check immediately, then drop the fragment so a manual refresh does not
+  // re-check — the network call stays tied to an explicit user action.
+  if (window.location.hash.includes('check-updates')) {
+    try {
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+    } catch {
+      /* ignore */
+    }
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document
+      .getElementById('updates-group')
+      ?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+    void check();
+  }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {

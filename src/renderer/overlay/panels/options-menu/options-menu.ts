@@ -130,6 +130,10 @@ const OPTIONS_MENU_HTML = `
             <i data-lucide="info" width="16" height="16"></i>
             <span class="dropdown-item-text">About Nav0</span>
           </div>
+          <div class="dropdown-item" id="om-check-updates-option">
+            <i data-lucide="refresh-cw" width="16" height="16"></i>
+            <span class="dropdown-item-text">Check for Updates</span>
+          </div>
           <div class="dropdown-item" id="om-privacy-policy-option">
             <i data-lucide="shield-check" width="16" height="16"></i>
             <span class="dropdown-item-text">Privacy Policy</span>
@@ -383,6 +387,10 @@ function setupEventListeners(): void {
 
   optionsElement?.querySelector('#om-about-Nav0-option')?.addEventListener('click', async () => {
     await window.BrowserAPI.createTab(appWindowId, InAppUrls.ABOUT, true);
+  });
+
+  optionsElement?.querySelector('#om-check-updates-option')?.addEventListener('click', async () => {
+    await window.BrowserAPI.createTab(appWindowId, `${InAppUrls.ABOUT}#check-updates`, true);
   });
 
   optionsElement
