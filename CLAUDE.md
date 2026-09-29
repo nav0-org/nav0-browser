@@ -73,6 +73,7 @@ Every feature is encapsulated in a manager class:
 | `ReaderModeManager`      | `src/main/browser/`               | Reader mode extraction (@mozilla/readability)     |
 | `SSLManager`             | `src/main/browser/`               | Certificate validation + interstitial page        |
 | `FindInPageManager`      | `src/main/browser/`               | In-page text search                               |
+| `UpdateManager`          | `src/main/browser/`               | User-triggered update checks (GitHub + Squirrel)  |
 | `SearchEngine`           | `src/main/web/`                   | Selects the active search engine + suggestions    |
 | `CLIInstaller`           | `src/main/cli/`                   | Installs `nav0` shim into PATH (macOS/Windows)    |
 | UA switcher              | `src/main/browser/ua-switcher.ts` | Strips "Electron/…" from UA + aligns Client Hints |
@@ -167,6 +168,7 @@ src/
 │   │   ├── permission-manager.ts
 │   │   ├── reader-mode-manager.ts
 │   │   ├── find-in-page-manager.ts
+│   │   ├── update-manager.ts      # User-triggered OTA: GitHub check + Squirrel apply (Windows)
 │   │   ├── ssl-manager.ts
 │   │   ├── ssl-warning-page.{ts,html}
 │   │   ├── ua-switcher.ts         # Strips "Electron/…" from UA + aligns Client Hints

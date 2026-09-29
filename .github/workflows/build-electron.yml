@@ -188,6 +188,8 @@ jobs:
             out/make/**/*.deb
             out/make/**/*.rpm
             out/make/**/*.zip
+            out/make/**/*.nupkg
+            out/make/**/RELEASES
           retention-days: 5
 
   release:
@@ -283,6 +285,8 @@ jobs:
             ./artifacts/**/*.deb
             ./artifacts/**/*.rpm
             ./artifacts/**/*.zip
+            ./artifacts/**/*.nupkg
+            ./artifacts/**/RELEASES
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
