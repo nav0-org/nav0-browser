@@ -156,7 +156,12 @@ export class Tab {
       this.url = '';
       isInternalPage = true;
     } else if (this.url.startsWith(InAppUrls.ABOUT)) {
-      urlToLoad = ABOUT_WEBPACK_ENTRY;
+      // Carry any URL fragment (e.g. "#check-updates" from the Help menus) through
+      // to the About renderer, but keep the address bar showing a clean Nav0://about.
+      const hashIndex = this.url.indexOf('#');
+      const fragment = hashIndex >= 0 ? this.url.slice(hashIndex) : '';
+      this.url = InAppUrls.ABOUT;
+      urlToLoad = ABOUT_WEBPACK_ENTRY + fragment;
       preloadScriptToLoad = ABOUT_PRELOAD_WEBPACK_ENTRY;
       isInternalPage = true;
     } else if (EXTERNAL_PROTOCOL_RE.test(this.url)) {

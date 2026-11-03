@@ -136,6 +136,48 @@
   border-color: rgba(217, 119, 6, 0.25);
 }
 
+/* ---- Updates -------------------------------------------- */
+.update-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  padding: 12px 16px;
+  flex-wrap: wrap;
+}
+
+.update-info {
+  min-width: 0;
+}
+
+.update-status {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--fg-1);
+  letter-spacing: -0.05px;
+}
+
+.update-detail {
+  font-size: 12px;
+  color: var(--fg-3);
+  margin-top: 2px;
+}
+
+.update-detail.available {
+  color: var(--success);
+}
+
+.update-detail.error {
+  color: var(--danger);
+}
+
+.update-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+}
+
 /* ---- Hash rows ------------------------------------------ */
 .hash-row {
   display: flex;

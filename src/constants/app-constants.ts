@@ -162,6 +162,11 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly RESTORE_PREVIOUS_SESSION = 'browser:restore-previous-session';
   public static readonly SHOW_ABOUT_PANEL = 'browser:show-about-panel';
   public static readonly GET_ABOUT_INFO = 'browser:get-about-info';
+
+  // Software updates (user-triggered OTA — see UpdateManager)
+  public static readonly CHECK_FOR_UPDATES = 'browser:check-for-updates';
+  public static readonly DOWNLOAD_AND_INSTALL_UPDATE = 'browser:download-and-install-update';
+  public static readonly QUIT_AND_INSTALL_UPDATE = 'browser:quit-and-install-update';
   public static readonly TOGGLE_READER_MODE = 'browser:toggle-reader-mode';
   public static readonly DOWNLOAD_CURRENT_PDF = 'browser:download-current-pdf';
   public static readonly SHOW_FIND_IN_PAGE = 'browser:show-find-in-page';

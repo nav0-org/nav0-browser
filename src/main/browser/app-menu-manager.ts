@@ -393,6 +393,15 @@ export abstract class AppMenuManager {
               await AppWindowManager.getActiveWindow().createTab(InAppUrls.ABOUT, true);
             },
           },
+          {
+            label: 'Check for Updates',
+            click: async () => {
+              await AppWindowManager.getActiveWindow().createTab(
+                `${InAppUrls.ABOUT}#check-updates`,
+                true
+              );
+            },
+          },
           ...(process.platform === 'win32'
             ? [
                 {

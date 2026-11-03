@@ -453,6 +453,15 @@ export function init() {
     getAboutInfo: async () => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GET_ABOUT_INFO);
     },
+    checkForUpdates: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.CHECK_FOR_UPDATES);
+    },
+    downloadAndInstallUpdate: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.DOWNLOAD_AND_INSTALL_UPDATE);
+    },
+    quitAndInstallUpdate: async () => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.QUIT_AND_INSTALL_UPDATE);
+    },
     getSearchUrl: async (searchTerm: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GET_SEARCH_URL, searchTerm);
     },
