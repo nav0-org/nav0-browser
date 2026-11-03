@@ -1,4 +1,14 @@
-import { app, BrowserWindow, dialog, Menu, MenuItem, net, shell, WebContentsView } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  dialog,
+  Menu,
+  MenuItem,
+  net,
+  shell,
+  webFrameMain,
+  WebContentsView,
+} from 'electron';
 import {
   InAppUrls,
   DataStoreConstants,
@@ -30,6 +40,7 @@ import { SSLManager } from './ssl-manager';
 import { ZoomManager } from './zoom-manager';
 import { buildErrorPageScript, NavigationError } from './error-page/error-page';
 import { HOVER_STATUS_BAR_SCRIPT } from './hover-status-bar-script';
+import { buildFingerprintAlignmentScript } from './ua-switcher';
 const domainPattern = /^[^\s]+\.[^\s]+$/;
 // Protocols that should be handed off to the OS default handler.
 // Covers communication (mailto, tel, sms), calendar (webcal), and
@@ -389,6 +400,11 @@ export class Tab {
         }
         this.handleOriginChange(url);
         this.debouncedHandleNavigationCompletion(url);
+        // Align the JS-visible fingerprint (navigator.userAgentData / window.chrome)
+        // with the Chrome UA we present, before any page script runs. Runs
+        // unconditionally — unlike the ad-block hooks it is not gated by the
+        // ad-blocker toggle or streaming sites, since reCAPTCHA can appear anywhere.
+        this.injectFingerprintAlignment();
         // Inject early ad-block hooks (IMA mock, play() interception) as soon as navigation commits
         this.injectAdBlockEarlyScript(url);
       }
@@ -404,6 +420,25 @@ export class Tab {
         if (!isMainFrame) return;
         this.debouncedHandleNavigationCompletion(url);
         // Re-apply dark mode for back/forward in-page navigations (bfcache restores)
+      }
+    );
+
+    // Align the fingerprint inside sub-frames too (e.g. a reCAPTCHA widget
+    // embedded in a third-party iframe), which the main-frame DID_NAVIGATE hook
+    // above does not reach.
+    this.webContentsViewInstance.webContents.on(
+      'did-frame-navigate',
+      (
+        _event,
+        _url,
+        _httpResponseCode,
+        _httpStatusText,
+        isMainFrame,
+        frameProcessId,
+        frameRoutingId
+      ) => {
+        if (this._destroyed || isMainFrame) return;
+        this.injectFingerprintAlignment(frameProcessId, frameRoutingId);
       }
     );
 
@@ -941,6 +976,29 @@ export class Tab {
     } catch {
       return false;
     }
+  }
+
+  /**
+   * Aligns the JS-visible browser fingerprint (navigator.userAgentData brands +
+   * window.chrome) with the Chrome User-Agent/SEC-CH-UA we present, so client-side
+   * bot detectors like reCAPTCHA's botguard don't flag Electron as a spoofed
+   * browser and hang with "reCAPTCHA Timeout". See ua-switcher.ts for the why.
+   *
+   * With no arguments it targets the main frame; with a frame's process/routing
+   * id it targets that sub-frame (reCAPTCHA embedded in a third-party iframe).
+   * Runs in the page's main world at navigation commit, before page scripts.
+   */
+  private injectFingerprintAlignment(frameProcessId?: number, frameRoutingId?: number): void {
+    const wc = this.webContentsViewInstance?.webContents;
+    if (!wc) return;
+    const script = buildFingerprintAlignmentScript(wc.getUserAgent());
+    if (!script) return; // non-Chromium UA preset (Firefox/Safari): leave untouched
+    if (frameProcessId !== undefined && frameRoutingId !== undefined) {
+      const frame = webFrameMain.fromId(frameProcessId, frameRoutingId);
+      frame?.executeJavaScript(script, true).catch(() => {});
+      return;
+    }
+    wc.executeJavaScript(script, true).catch(() => {});
   }
 
   /**
