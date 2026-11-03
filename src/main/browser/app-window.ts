@@ -605,9 +605,13 @@ export class AppWindow {
         height: parentBounds.height - yOffset,
       });
       this.browserWindowInstance.contentView.addChildView(tab.getWebContentsViewInstance());
-      // Only focus tab if find bar is not visible (find bar needs input focus)
+      // Only focus tab if find bar is not visible. When the find bar was
+      // restored for this tab, focus the chrome WebContents instead so its
+      // findInput.focus() can actually land in the search field.
       if (!this.isFindInPageVisible()) {
         tab.getWebContentsViewInstance()?.webContents.focus();
+      } else {
+        this.browserWindowInstance.webContents.focus();
       }
     }
     this.browserWindowInstance?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_ACTIVATED, {
@@ -1038,6 +1042,11 @@ export class AppWindow {
     if (this.activeTabId) this.findInPageState.set(this.activeTabId, { searchText: '' });
     this.findInPageManager.show();
     this.resizeActiveTab();
+    // Move OS-level keyboard focus to the chrome WebContents so the renderer's
+    // findInput.focus() actually lands in the search field. Done after
+    // resizeActiveTab() because resizing the tab view can steal focus back to
+    // the page. Mirrors the pattern in focusUrlBar().
+    this.browserWindowInstance?.webContents.focus();
   }
 
   hideFindInPage(): void {
