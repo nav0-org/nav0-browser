@@ -1,3 +1,4 @@
+import { app } from 'electron';
 import { AppWindowManager } from './browser/app-window-manager';
 
 // Lightweight HTTP server for perf tests.
@@ -12,6 +13,21 @@ export function startTestControlServer(port: number): void {
       if (req.method === 'GET' && req.url === '/status') {
         const win = AppWindowManager.getActiveWindow();
         res.end(JSON.stringify({ ready: true, hasWindow: !!win }));
+        return;
+      }
+
+      // Per-process memory attribution (cross-platform). workingSetSize is
+      // RSS-like (includes shared pages), so use this for the per-process-type
+      // breakdown and pair it with OS-level PSS for the accurate total.
+      if (req.method === 'GET' && req.url === '/memory') {
+        const metrics = app.getAppMetrics().map((m) => ({
+          pid: m.pid,
+          type: m.type,
+          name: m.name || '',
+          workingSetKB: m.memory.workingSetSize,
+          peakKB: m.memory.peakWorkingSetSize,
+        }));
+        res.end(JSON.stringify({ metrics }));
         return;
       }
 
