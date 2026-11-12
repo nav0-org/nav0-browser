@@ -1,7 +1,7 @@
 import { app, ipcMain, session, dialog, BrowserWindow, webContents } from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
-import { parseCrx, extractZip } from './crx-utils';
+import { parseCrx, extractZip, injectManifestKey } from './crx-utils';
 import {
   RendererToMainEventsForBrowserIPC,
   MainToRendererEventsForBrowserIPC,
@@ -120,13 +120,6 @@ export abstract class ExtensionManager {
       return { success: false, error: 'Selected directory does not contain a manifest.json file.' };
     }
 
-    let manifest: any;
-    try {
-      manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
-    } catch {
-      return { success: false, error: 'Failed to parse manifest.json.' };
-    }
-
     // Check for duplicate
     for (const [, existing] of ExtensionManager.extensions) {
       if (existing.path === extensionPath) {
@@ -138,19 +131,12 @@ export abstract class ExtensionManager {
       const browsingSes = session.fromPartition('persist:browsertabs');
       const ext = await browsingSes.loadExtension(extensionPath, { allowFileAccess: true });
 
-      const iconDataUrl = ExtensionManager.readExtensionIcon(extensionPath, manifest);
-
       const record: ExtensionRecord = {
-        id: ext.id,
-        name: ExtensionManager.localizeManifestString(extensionPath, manifest, manifest.name) || ext.name || 'Unknown Extension',
-        version: manifest.version || '0.0.0',
-        description: ExtensionManager.localizeManifestString(extensionPath, manifest, manifest.description) || '',
+        ...ExtensionManager.recordFieldsFromExtension(ext),
         path: extensionPath,
         enabled: true,
         allowedInPrivate: false,
         installedAt: Date.now(),
-        iconDataUrl,
-        manifestVersion: manifest.manifest_version || 2,
         source: 'local',
       };
 
@@ -489,15 +475,29 @@ export abstract class ExtensionManager {
       throw new Error(`Download failed with HTTP ${response.status}.`);
     }
     const declaredLength = Number(response.headers.get('content-length') || 0);
-    if (declaredLength > MAX_CRX_BYTES) {
-      throw new Error('Extension package is too large.');
+    if (declaredLength > MAX_CRX_BYTES || !response.body) {
+      throw new Error(response.body ? 'Extension package is too large.' : 'Download returned an empty response.');
     }
 
-    const body = Buffer.from(await response.arrayBuffer());
-    if (body.length > MAX_CRX_BYTES) {
-      throw new Error('Extension package is too large.');
+    const reader = response.body.getReader();
+    const chunks: Buffer[] = [];
+    let total = 0;
+    try {
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        total += value.byteLength;
+        if (total > MAX_CRX_BYTES) {
+          await reader.cancel().catch(() => {});
+          throw new Error('Extension package is too large.');
+        }
+        chunks.push(Buffer.from(value));
+      }
+    } catch (err: any) {
+      if (err?.name === 'TimeoutError' || err?.name === 'AbortError') throw new Error('Download timed out.');
+      throw err;
     }
-    return body;
+    return Buffer.concat(chunks);
   }
 
   private static async installFromWebStore(input: string): Promise<{ success: boolean; error?: string; extension?: ExtensionRecord }> {
@@ -522,6 +522,7 @@ export abstract class ExtensionManager {
     const extensionDir = path.join(app.getPath('userData'), 'extensions', webStoreId);
     const browsingSes = session.fromPartition('persist:browsertabs');
     let loadedId: string | null = null;
+    let addedToMap = false;
 
     try {
       const crxBuffer = await ExtensionManager.downloadCrx(webStoreId);
@@ -531,17 +532,8 @@ export abstract class ExtensionManager {
       fs.mkdirSync(extensionDir, { recursive: true });
       extractZip(zip, extensionDir);
 
-      const manifestPath = path.join(extensionDir, 'manifest.json');
-      let manifest: any;
-      try {
-        manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
-      } catch {
-        throw new Error('Downloaded extension has a missing or invalid manifest.json.');
-      }
-
       // Without "key" Chromium derives the ID from the install path instead of the Web Store key.
-      manifest.key = publicKey.toString('base64');
-      fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+      injectManifestKey(path.join(extensionDir, 'manifest.json'), publicKey.toString('base64'));
 
       const ext = await browsingSes.loadExtension(extensionDir, { allowFileAccess: true });
       loadedId = ext.id;
@@ -550,27 +542,27 @@ export abstract class ExtensionManager {
       }
 
       const record: ExtensionRecord = {
-        id: ext.id,
-        name: ExtensionManager.localizeManifestString(extensionDir, manifest, manifest.name) || ext.name || 'Unknown Extension',
-        version: manifest.version || '0.0.0',
-        description: ExtensionManager.localizeManifestString(extensionDir, manifest, manifest.description) || '',
+        ...ExtensionManager.recordFieldsFromExtension(ext),
         path: extensionDir,
         enabled: true,
         allowedInPrivate: false,
         installedAt: Date.now(),
-        iconDataUrl: ExtensionManager.readExtensionIcon(extensionDir, manifest),
-        manifestVersion: manifest.manifest_version || 2,
         source: 'webstore',
         webStoreId,
       };
 
       ExtensionManager.extensions.set(record.id, record);
+      addedToMap = true;
       ExtensionManager.persistExtensions();
       ExtensionManager.broadcastToAllWindows(MainToRendererEventsForBrowserIPC.EXTENSION_INSTALLED, record);
       ExtensionManager.broadcastToAllWindows(MainToRendererEventsForBrowserIPC.EXTENSIONS_UPDATED, ExtensionManager.fetchExtensions());
 
       return { success: true, extension: record };
     } catch (err: any) {
+      if (addedToMap) {
+        ExtensionManager.extensions.delete(webStoreId);
+        try { ExtensionManager.persistExtensions(); } catch { /* ignore */ }
+      }
       if (loadedId) {
         try { browsingSes.removeExtension(loadedId); } catch { /* ignore */ }
       }
@@ -581,22 +573,30 @@ export abstract class ExtensionManager {
     }
   }
 
-  // Resolves "__MSG_key__" placeholders; Chrome matches message keys case-insensitively.
-  private static localizeManifestString(extensionDir: string, manifest: any, value: unknown): string {
-    if (typeof value !== 'string') return '';
-    const match = value.match(/^__MSG_(.+)__$/);
-    if (!match || !manifest.default_locale) return value;
+  // Electron's Extension already has __MSG_ placeholders resolved for the UI locale.
+  private static recordFieldsFromExtension(ext: Electron.Extension): Pick<ExtensionRecord, 'id' | 'name' | 'version' | 'description' | 'iconDataUrl' | 'manifestVersion'> {
+    const manifest = ext.manifest || {};
+    return {
+      id: ext.id,
+      name: ext.name || 'Unknown Extension',
+      version: ext.version || '0.0.0',
+      description: typeof manifest.description === 'string' ? manifest.description : '',
+      iconDataUrl: ExtensionManager.readExtensionIcon(ext.path, manifest),
+      manifestVersion: manifest.manifest_version || 2,
+    };
+  }
+
+  private static extensionsPageUrl: URL | null = null;
+
+  // Compares parsed URLs: on Windows the webpack entry is "file://C:\..." while getURL() returns "file:///C:/...".
+  private static isExtensionsPage(url: string): boolean {
     try {
-      const messagesPath = path.join(extensionDir, '_locales', manifest.default_locale, 'messages.json');
-      const messages = JSON.parse(fs.readFileSync(messagesPath, 'utf-8'));
-      const wanted = match[1].toLowerCase();
-      for (const key of Object.keys(messages)) {
-        if (key.toLowerCase() === wanted && typeof messages[key]?.message === 'string') {
-          return messages[key].message;
-        }
-      }
-    } catch { /* fall through */ }
-    return value;
+      const target = ExtensionManager.extensionsPageUrl || (ExtensionManager.extensionsPageUrl = new URL(EXTENSIONS_WEBPACK_ENTRY));
+      const candidate = new URL(url);
+      return candidate.protocol === target.protocol && candidate.host === target.host && candidate.pathname === target.pathname;
+    } catch {
+      return false;
+    }
   }
 
   private static persistExtensions(): void {
@@ -612,7 +612,7 @@ export abstract class ExtensionManager {
     }
     // Nav0://extensions runs inside a tab's WebContentsView, not a BrowserWindow.
     for (const wc of webContents.getAllWebContents()) {
-      if (!wc.isDestroyed() && wc.getURL().startsWith(EXTENSIONS_WEBPACK_ENTRY)) {
+      if (!wc.isDestroyed() && ExtensionManager.isExtensionsPage(wc.getURL())) {
         wc.send(channel, data);
       }
     }

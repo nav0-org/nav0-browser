@@ -123,6 +123,29 @@ export function parseCrx(crx: Buffer, expectedId: string): ParsedCrx {
   throw new Error('Extension package signature does not match the requested extension ID.');
 }
 
+// Adds "key" to manifest.json without reformatting it, since Chromium accepts
+// comments and a BOM that JSON.parse/stringify would reject or drop.
+export function injectManifestKey(manifestPath: string, key: string): void {
+  let text: string;
+  try {
+    text = fs.readFileSync(manifestPath, 'utf-8');
+  } catch {
+    throw new Error('Downloaded extension has no manifest.json.');
+  }
+  if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
+
+  let i = 0;
+  while (i < text.length) {
+    if (/\s/.test(text[i])) { i++; continue; }
+    if (text.startsWith('//', i)) { const nl = text.indexOf('\n', i); i = nl < 0 ? text.length : nl + 1; continue; }
+    if (text.startsWith('/*', i)) { const end = text.indexOf('*/', i + 2); i = end < 0 ? text.length : end + 2; continue; }
+    break;
+  }
+  if (text[i] !== '{') throw new Error('Downloaded extension has an invalid manifest.json.');
+
+  fs.writeFileSync(manifestPath, `${text.slice(0, i + 1)}"key":${JSON.stringify(key)},${text.slice(i + 1)}`);
+}
+
 // Extracts a ZIP archive by walking its central directory, so entries written with
 // data descriptors (general-purpose flag bit 3) get their real sizes.
 export function extractZip(zip: Buffer, destDir: string): void {
@@ -182,6 +205,7 @@ export function extractZip(zip: Buffer, destDir: string): void {
   }
 
   for (const entry of entries) {
+    if (entry.target === root) continue;
     if (entry.name.endsWith('/') || entry.name.endsWith('\\')) {
       fs.mkdirSync(entry.target, { recursive: true });
       continue;
