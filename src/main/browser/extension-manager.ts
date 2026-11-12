@@ -1,6 +1,8 @@
-import { ipcMain, session, dialog, BrowserWindow } from 'electron';
+import { app, ipcMain, session, dialog, BrowserWindow, net } from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
+import { createWriteStream } from 'fs';
+import { pipeline } from 'stream/promises';
 import {
   RendererToMainEventsForBrowserIPC,
   MainToRendererEventsForBrowserIPC,
@@ -104,6 +106,10 @@ export abstract class ExtensionManager {
     ipcMain.handle(RendererToMainEventsForBrowserIPC.GET_TOOLBAR_EXTENSIONS, async () => {
       return ExtensionManager.getToolbarExtensions();
     });
+
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.INSTALL_EXTENSION_FROM_WEBSTORE, async (event, extensionIdOrUrl: string) => {
+      return await ExtensionManager.installFromWebStore(extensionIdOrUrl);
+    });
   }
 
   private static async installExtension(appWindowId: string): Promise<{ success: boolean; error?: string; extension?: ExtensionRecord }> {
@@ -158,6 +164,7 @@ export abstract class ExtensionManager {
         installedAt: Date.now(),
         iconDataUrl,
         manifestVersion: manifest.manifest_version || 2,
+        source: 'local',
       };
 
       ExtensionManager.extensions.set(record.id, record);
@@ -188,6 +195,11 @@ export abstract class ExtensionManager {
         }
       }
     } catch { /* extension may not be loaded in session */ }
+
+    // Clean up extracted files for Web Store extensions
+    if (record.source === 'webstore') {
+      try { fs.rmSync(record.path, { recursive: true, force: true }); } catch { /* ignore */ }
+    }
 
     ExtensionManager.extensions.delete(extensionId);
     ExtensionManager.persistExtensions();
@@ -440,6 +452,272 @@ export abstract class ExtensionManager {
       try {
         await privateSes.loadExtension(record.path, { allowFileAccess: true });
       } catch { /* ignore */ }
+    }
+  }
+
+  // ---- Chrome Web Store Installation ----
+
+  private static parseWebStoreInput(input: string): string | null {
+    const trimmed = input.trim();
+
+    // Direct extension ID (32 lowercase letters)
+    if (/^[a-z]{32}$/.test(trimmed)) {
+      return trimmed;
+    }
+
+    // Chrome Web Store URL patterns
+    const urlPatterns = [
+      /chrome\.google\.com\/webstore\/detail\/[^/]*\/([a-z]{32})/,
+      /chromewebstore\.google\.com\/detail\/[^/]*\/([a-z]{32})/,
+      /chromewebstore\.google\.com\/detail\/([a-z]{32})/,
+    ];
+
+    for (const pattern of urlPatterns) {
+      const match = trimmed.match(pattern);
+      if (match) return match[1];
+    }
+
+    return null;
+  }
+
+  private static getExtensionsDir(): string {
+    const dir = path.join(app.getPath('userData'), 'extensions');
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    return dir;
+  }
+
+  private static async downloadCrx(extensionId: string): Promise<Buffer> {
+    const chromeVersion = process.versions.chrome || '120.0.0.0';
+    const url = `https://clients2.google.com/service/update2/crx?response=redirect&prodversion=${chromeVersion}&acceptformat=crx2,crx3&x=id%3D${extensionId}%26uc`;
+
+    return new Promise<Buffer>((resolve, reject) => {
+      const request = net.request(url);
+
+      request.on('response', (response) => {
+        if (response.statusCode === 301 || response.statusCode === 302) {
+          reject(new Error(`Extension not found or unavailable (HTTP ${response.statusCode}).`));
+          return;
+        }
+        if (response.statusCode !== 200) {
+          reject(new Error(`Download failed with HTTP ${response.statusCode}.`));
+          return;
+        }
+
+        const chunks: Buffer[] = [];
+        response.on('data', (chunk: Buffer) => {
+          chunks.push(chunk);
+        });
+        response.on('end', () => {
+          resolve(Buffer.concat(chunks));
+        });
+        response.on('error', (err) => {
+          reject(new Error(`Download stream error: ${err.message}`));
+        });
+      });
+
+      request.on('error', (err) => {
+        reject(new Error(`Network request failed: ${err.message}`));
+      });
+
+      request.end();
+    });
+  }
+
+  private static extractCrxToZip(crxBuffer: Buffer): Buffer {
+    // CRX magic number: "Cr24" = 0x43723234
+    if (crxBuffer.length < 12) {
+      throw new Error('File too small to be a CRX.');
+    }
+
+    const magic = crxBuffer.toString('ascii', 0, 4);
+    if (magic !== 'Cr24') {
+      throw new Error('Not a valid CRX file (bad magic number).');
+    }
+
+    const version = crxBuffer.readUInt32LE(4);
+
+    if (version === 3) {
+      // CRX3: 4 magic + 4 version + 4 header_length + header + ZIP
+      const headerLength = crxBuffer.readUInt32LE(8);
+      const zipStart = 12 + headerLength;
+      if (zipStart >= crxBuffer.length) {
+        throw new Error('CRX3 header extends past end of file.');
+      }
+      return crxBuffer.subarray(zipStart);
+    } else if (version === 2) {
+      // CRX2: 4 magic + 4 version + 4 pubkey_len + 4 sig_len + pubkey + sig + ZIP
+      const pubKeyLength = crxBuffer.readUInt32LE(8);
+      const sigLength = crxBuffer.readUInt32LE(12);
+      const zipStart = 16 + pubKeyLength + sigLength;
+      if (zipStart >= crxBuffer.length) {
+        throw new Error('CRX2 header extends past end of file.');
+      }
+      return crxBuffer.subarray(zipStart);
+    } else {
+      throw new Error(`Unsupported CRX version: ${version}.`);
+    }
+  }
+
+  private static async unzipBuffer(zipBuffer: Buffer, destDir: string): Promise<void> {
+    // Use Node.js built-in zlib with a simple ZIP parser
+    // ZIP files end with a central directory; we parse local file headers from the start
+    const { Readable } = await import('stream');
+    const { createInflateRaw } = await import('zlib');
+
+    let offset = 0;
+    while (offset < zipBuffer.length - 4) {
+      const sig = zipBuffer.readUInt32LE(offset);
+      if (sig !== 0x04034b50) break; // Not a local file header
+
+      const compressionMethod = zipBuffer.readUInt16LE(offset + 8);
+      const compressedSize = zipBuffer.readUInt32LE(offset + 18);
+      const uncompressedSize = zipBuffer.readUInt32LE(offset + 22);
+      const fileNameLength = zipBuffer.readUInt16LE(offset + 26);
+      const extraFieldLength = zipBuffer.readUInt16LE(offset + 28);
+
+      const fileName = zipBuffer.toString('utf-8', offset + 30, offset + 30 + fileNameLength);
+      const dataStart = offset + 30 + fileNameLength + extraFieldLength;
+
+      // Skip entries with path traversal
+      if (fileName.includes('..') || path.isAbsolute(fileName)) {
+        offset = dataStart + compressedSize;
+        continue;
+      }
+
+      const filePath = path.join(destDir, fileName);
+
+      if (fileName.endsWith('/')) {
+        fs.mkdirSync(filePath, { recursive: true });
+      } else {
+        fs.mkdirSync(path.dirname(filePath), { recursive: true });
+
+        if (compressionMethod === 0) {
+          // Stored (no compression)
+          const fileData = zipBuffer.subarray(dataStart, dataStart + compressedSize);
+          fs.writeFileSync(filePath, fileData);
+        } else if (compressionMethod === 8) {
+          // Deflate
+          const compressedData = zipBuffer.subarray(dataStart, dataStart + compressedSize);
+          const decompressed = await new Promise<Buffer>((resolve, reject) => {
+            const inflate = createInflateRaw();
+            const chunks: Buffer[] = [];
+            inflate.on('data', (chunk: Buffer) => chunks.push(chunk));
+            inflate.on('end', () => resolve(Buffer.concat(chunks)));
+            inflate.on('error', reject);
+            inflate.end(compressedData);
+          });
+          fs.writeFileSync(filePath, decompressed);
+        }
+      }
+
+      offset = dataStart + compressedSize;
+    }
+  }
+
+  private static async installFromWebStore(input: string): Promise<{ success: boolean; error?: string; extension?: ExtensionRecord }> {
+    const settings = ExtensionManager.getSettings();
+    if (!settings.extensionsEnabled) {
+      return { success: false, error: 'Extensions are disabled in settings.' };
+    }
+
+    const webStoreId = ExtensionManager.parseWebStoreInput(input);
+    if (!webStoreId) {
+      return { success: false, error: 'Invalid extension ID or Chrome Web Store URL. Enter a 32-character extension ID or a Web Store link.' };
+    }
+
+    // Check if already installed from Web Store with same ID
+    for (const [, existing] of ExtensionManager.extensions) {
+      if (existing.webStoreId === webStoreId) {
+        return { success: false, error: 'This extension is already installed.' };
+      }
+    }
+
+    try {
+      // 1. Download CRX
+      const crxBuffer = await ExtensionManager.downloadCrx(webStoreId);
+
+      // 2. Extract ZIP from CRX
+      const zipBuffer = ExtensionManager.extractCrxToZip(crxBuffer);
+
+      // 3. Unpack to extensions directory
+      const extensionsDir = ExtensionManager.getExtensionsDir();
+      const extensionDir = path.join(extensionsDir, webStoreId);
+
+      // Clean up any existing directory
+      if (fs.existsSync(extensionDir)) {
+        fs.rmSync(extensionDir, { recursive: true, force: true });
+      }
+      fs.mkdirSync(extensionDir, { recursive: true });
+
+      await ExtensionManager.unzipBuffer(zipBuffer, extensionDir);
+
+      // 4. Validate manifest.json exists
+      const manifestPath = path.join(extensionDir, 'manifest.json');
+      if (!fs.existsSync(manifestPath)) {
+        fs.rmSync(extensionDir, { recursive: true, force: true });
+        return { success: false, error: 'Downloaded extension does not contain a manifest.json.' };
+      }
+
+      let manifest: any;
+      try {
+        manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+      } catch {
+        fs.rmSync(extensionDir, { recursive: true, force: true });
+        return { success: false, error: 'Failed to parse manifest.json from downloaded extension.' };
+      }
+
+      // 5. Load extension
+      const browsingSes = session.fromPartition('persist:browsertabs');
+      const ext = await browsingSes.loadExtension(extensionDir, { allowFileAccess: true });
+
+      const iconDataUrl = ExtensionManager.readExtensionIcon(extensionDir, manifest);
+
+      // Chrome Web Store extensions often use __MSG_xxx__ for names
+      let extName = manifest.name || ext.name || 'Unknown Extension';
+      if (extName.startsWith('__MSG_') && manifest.default_locale) {
+        try {
+          const messagesPath = path.join(extensionDir, '_locales', manifest.default_locale, 'messages.json');
+          const messages = JSON.parse(fs.readFileSync(messagesPath, 'utf-8'));
+          const msgKey = extName.replace(/^__MSG_/, '').replace(/__$/, '');
+          extName = messages[msgKey]?.message || messages[msgKey.toLowerCase()]?.message || extName;
+        } catch { /* keep __MSG_ name */ }
+      }
+
+      let extDescription = manifest.description || '';
+      if (extDescription.startsWith('__MSG_') && manifest.default_locale) {
+        try {
+          const messagesPath = path.join(extensionDir, '_locales', manifest.default_locale, 'messages.json');
+          const messages = JSON.parse(fs.readFileSync(messagesPath, 'utf-8'));
+          const msgKey = extDescription.replace(/^__MSG_/, '').replace(/__$/, '');
+          extDescription = messages[msgKey]?.message || messages[msgKey.toLowerCase()]?.message || extDescription;
+        } catch { /* keep __MSG_ description */ }
+      }
+
+      const record: ExtensionRecord = {
+        id: ext.id,
+        name: extName,
+        version: manifest.version || '0.0.0',
+        description: extDescription,
+        path: extensionDir,
+        enabled: true,
+        allowedInPrivate: false,
+        installedAt: Date.now(),
+        iconDataUrl,
+        manifestVersion: manifest.manifest_version || 2,
+        source: 'webstore',
+        webStoreId,
+      };
+
+      ExtensionManager.extensions.set(record.id, record);
+      ExtensionManager.persistExtensions();
+      ExtensionManager.broadcastToAllWindows(MainToRendererEventsForBrowserIPC.EXTENSION_INSTALLED, record);
+      ExtensionManager.broadcastToAllWindows(MainToRendererEventsForBrowserIPC.EXTENSIONS_UPDATED, ExtensionManager.fetchExtensions());
+
+      return { success: true, extension: record };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Failed to install extension from Chrome Web Store.' };
     }
   }
 

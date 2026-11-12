@@ -18,6 +18,8 @@ interface ExtensionRecord {
   installedAt: number;
   iconDataUrl?: string;
   manifestVersion: number;
+  source?: 'local' | 'webstore';
+  webStoreId?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -54,6 +56,10 @@ function renderExtensions(): void {
       ? `<img src="${HtmlUtils.escapeHtml(ext.iconDataUrl)}" alt="">`
       : `<i data-lucide="puzzle" class="icon-placeholder" width="24" height="24"></i>`;
 
+    const sourceBadge = ext.source === 'webstore'
+      ? '<span class="extension-source-badge webstore">Chrome Web Store</span>'
+      : '<span class="extension-source-badge local">Local</span>';
+
     return `
       <div class="extension-card${ext.enabled ? '' : ' disabled'}" data-id="${HtmlUtils.escapeHtml(ext.id)}">
         <div class="extension-icon">${iconHtml}</div>
@@ -62,9 +68,10 @@ function renderExtensions(): void {
             ${HtmlUtils.escapeHtml(ext.name)}
             <span class="extension-version">v${HtmlUtils.escapeHtml(ext.version)}</span>
             <span class="extension-mv-badge">MV${ext.manifestVersion}</span>
+            ${sourceBadge}
           </div>
-          <p class="extension-description">${HtmlUtils.escapeHtml(ext.description || 'No description')}</p>
-          <p class="extension-path">${HtmlUtils.escapeHtml(ext.path)}</p>
+          <p class="extension-description">${HtmlUtils.escapeHtml(ext.description || 'No description')}</p>${ext.source !== 'webstore' ? `
+          <p class="extension-path">${HtmlUtils.escapeHtml(ext.path)}</p>` : ''}
           <div class="extension-controls">
             <label class="extension-toggle">
               <input type="checkbox" class="toggle-enabled" data-id="${HtmlUtils.escapeHtml(ext.id)}" ${ext.enabled ? 'checked' : ''}>
@@ -180,6 +187,44 @@ async function init(): Promise<void> {
       if (result && !result.success && result.error && result.error !== 'No directory selected.') {
         showToast(result.error);
       }
+    });
+  }
+
+  // Web Store install
+  const webStoreInput = document.getElementById('webstore-input') as HTMLInputElement;
+  const webStoreBtn = document.getElementById('webstore-install-btn') as HTMLButtonElement;
+
+  const doWebStoreInstall = async () => {
+    const value = webStoreInput?.value?.trim();
+    if (!value) {
+      showToast('Please enter an extension ID or Chrome Web Store URL.');
+      return;
+    }
+    webStoreBtn.disabled = true;
+    webStoreBtn.textContent = 'Installing...';
+    try {
+      const result = await BrowserAPI.installExtensionFromWebStore(value);
+      if (result && !result.success) {
+        showToast(result.error || 'Installation failed.');
+      } else {
+        webStoreInput.value = '';
+        showToast('Extension installed successfully!');
+      }
+    } catch {
+      showToast('Installation failed.');
+    } finally {
+      webStoreBtn.disabled = false;
+      webStoreBtn.innerHTML = '<i data-lucide="download" width="16" height="16"></i> Install';
+      createIcons({ icons });
+    }
+  };
+
+  if (webStoreBtn) {
+    webStoreBtn.addEventListener('click', doWebStoreInstall);
+  }
+  if (webStoreInput) {
+    webStoreInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') doWebStoreInstall();
     });
   }
 

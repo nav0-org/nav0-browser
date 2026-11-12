@@ -373,6 +373,9 @@ export function init(){
     getToolbarExtensions: async () => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GET_TOOLBAR_EXTENSIONS);
     },
+    installExtensionFromWebStore: async (extensionIdOrUrl: string) => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.INSTALL_EXTENSION_FROM_WEBSTORE, extensionIdOrUrl);
+    },
     onExtensionInstalled: (callback: (data: any) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.EXTENSION_INSTALLED, (_event, data) => callback(data));
     },

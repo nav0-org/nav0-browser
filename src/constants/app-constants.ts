@@ -198,6 +198,7 @@ export abstract class RendererToMainEventsForBrowserIPC {
   public static readonly TOGGLE_EXTENSION_PRIVATE = "browser:toggle-extension-private";
   public static readonly OPEN_EXTENSION_POPUP = "browser:open-extension-popup";
   public static readonly GET_TOOLBAR_EXTENSIONS = "browser:get-toolbar-extensions";
+  public static readonly INSTALL_EXTENSION_FROM_WEBSTORE = "browser:install-extension-from-webstore";
 }
 
 export abstract class MainToRendererEventsForBrowserIPC {
@@ -281,6 +282,8 @@ export interface ExtensionRecord {
   installedAt: number;
   iconDataUrl?: string;
   manifestVersion: number;
+  source?: 'local' | 'webstore';
+  webStoreId?: string;
 }
 
 export interface SessionState {

@@ -20,9 +20,22 @@
       <span>Extensions can read and modify web pages. Only install extensions you trust.</span>
     </div>
 
+    <!-- Install from Chrome Web Store -->
+    <div class="webstore-install">
+      <label class="webstore-label">Install from Chrome Web Store</label>
+      <div class="webstore-input-row">
+        <input type="text" id="webstore-input" class="webstore-input" placeholder="Paste extension ID or Chrome Web Store URL...">
+        <button id="webstore-install-btn" class="btn-webstore-install">
+          <i data-lucide="download" width="16" height="16"></i>
+          Install
+        </button>
+      </div>
+      <p class="webstore-hint">e.g. <code>cjpalhdlnbpafiamejdnhcphjbkeiagm</code> or a full Chrome Web Store link</p>
+    </div>
+
     <!-- Actions -->
     <div class="extensions-actions">
-      <button id="install-extension" class="btn-install">
+      <button id="install-extension" class="btn-install-local">
         <i data-lucide="folder-plus" width="16" height="16"></i>
         Load Unpacked Extension
       </button>
@@ -36,7 +49,7 @@
       <div id="no-extensions" class="no-extensions">
         <i data-lucide="puzzle" class="empty-icon" width="48" height="48"></i>
         <p class="empty-text">No extensions installed</p>
-        <p class="empty-subtext">Click "Load Unpacked Extension" to add one from a folder on your computer.</p>
+        <p class="empty-subtext">Install from the Chrome Web Store or load an unpacked extension from disk.</p>
       </div>
     </div>
 

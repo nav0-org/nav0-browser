@@ -87,8 +87,119 @@
   transition: background var(--transition-fast);
 }
 
-.btn-install:hover {
+.btn-install-local {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: transparent;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.btn-install-local:hover {
+  border-color: var(--primary-color);
+}
+
+/* --------------------------------------------------------------------------
+   Chrome Web Store Install
+   -------------------------------------------------------------------------- */
+.webstore-install {
+  max-width: 600px;
+  margin: 0 auto 20px;
+}
+
+.webstore-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-color);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.webstore-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.webstore-input {
+  flex: 1;
+  font-size: 13px;
+  padding: 9px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  outline: none;
+  color: var(--text-color);
+  background: var(--bg-light);
+  transition: border-color var(--transition-fast);
+}
+
+.webstore-input:focus {
+  border-color: var(--primary-color);
+}
+
+.btn-webstore-install {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition-fast), opacity var(--transition-fast);
+}
+
+.btn-webstore-install:hover {
   background: var(--primary-dark);
+}
+
+.btn-webstore-install:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.webstore-hint {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin: 6px 0 0;
+}
+
+.webstore-hint code {
+  font-size: 11px;
+  background: var(--bg-secondary);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+/* --------------------------------------------------------------------------
+   Source Badge
+   -------------------------------------------------------------------------- */
+.extension-source-badge {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+}
+
+.extension-source-badge.webstore {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.extension-source-badge.local {
+  background: rgba(156, 163, 175, 0.15);
+  color: var(--text-secondary);
 }
 
 /* --------------------------------------------------------------------------
