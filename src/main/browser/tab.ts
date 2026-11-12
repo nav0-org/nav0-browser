@@ -109,6 +109,10 @@ export class Tab {
   private lastActiveStart: number | null = null;
   private timeFlushInterval: ReturnType<typeof setInterval> | null = null;
   private static readonly TIME_FLUSH_INTERVAL_MS = 60_000;
+  // Some pages never emit did-stop-loading (hung requests, long-poll iframes, etc.),
+  // which leaves the tab spinner running forever. After this long we hide the spinner.
+  private loadingTimeoutTimer: ReturnType<typeof setTimeout> | null = null;
+  private static readonly LOADING_TIMEOUT_MS = 60_000;
 
   constructor(
     parentAppWindow: AppWindow,
@@ -435,21 +439,13 @@ export class Tab {
     this.webContentsViewInstance.webContents.session.on('will-download', this.willDownloadHandler);
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_START_LOADING, () => {
       if (this._destroyed) return;
-      this.parentAppWindow
-        .getBrowserWindowInstance()
-        ?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_LOADING_CHANGED, {
-          id: this.id,
-          isLoading: true,
-        });
+      this.sendLoadingState(true);
+      this.startLoadingTimeout();
     });
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DID_STOP_LOADING, () => {
       if (this._destroyed) return;
-      this.parentAppWindow
-        .getBrowserWindowInstance()
-        ?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_LOADING_CHANGED, {
-          id: this.id,
-          isLoading: false,
-        });
+      this.clearLoadingTimeout();
+      this.sendLoadingState(false);
     });
     this.webContentsViewInstance.webContents.on(
       WebContentsEvents.PAGE_TITLE_UPDATED,
@@ -1176,9 +1172,37 @@ export class Tab {
     return result.filePaths;
   }
 
+  private sendLoadingState(isLoading: boolean): void {
+    this.parentAppWindow
+      .getBrowserWindowInstance()
+      ?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_LOADING_CHANGED, {
+        id: this.id,
+        isLoading,
+      });
+  }
+
+  private startLoadingTimeout(): void {
+    this.clearLoadingTimeout();
+    this.loadingTimeoutTimer = setTimeout(() => {
+      this.loadingTimeoutTimer = null;
+      if (this._destroyed) return;
+      // Only hide the spinner; don't abort the load. Any in-flight requests keep
+      // going, and a later did-stop-loading just sends `false` again (harmless).
+      this.sendLoadingState(false);
+    }, Tab.LOADING_TIMEOUT_MS);
+  }
+
+  private clearLoadingTimeout(): void {
+    if (this.loadingTimeoutTimer) {
+      clearTimeout(this.loadingTimeoutTimer);
+      this.loadingTimeoutTimer = null;
+    }
+  }
+
   clearPendingTimers(): void {
     this._destroyed = true;
     this.stopTimeFlush();
+    this.clearLoadingTimeout();
     if (this.navigationDebounceTimer) {
       clearTimeout(this.navigationDebounceTimer);
       this.navigationDebounceTimer = null;
@@ -1288,6 +1312,7 @@ export class Tab {
     if (this.isSuspended || this._destroyed) return;
     this.finalizePageTime();
     // Clear timers but preserve tab identity (don't set _destroyed permanently)
+    this.clearLoadingTimeout();
     if (this.navigationDebounceTimer) {
       clearTimeout(this.navigationDebounceTimer);
       this.navigationDebounceTimer = null;
