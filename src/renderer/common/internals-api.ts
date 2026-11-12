@@ -127,6 +127,11 @@ declare global {
       // Issue report
       showIssueReport: (appWindowId: string) => Promise<any>;
       hideIssueReport: (appWindowId: string) => Promise<any>;
+
+      // Extensions
+      getToolbarExtensions: () => Promise<Array<{ id: string; name: string; iconDataUrl?: string; hasPopup: boolean }>>;
+      openExtensionPopup: (extensionId: string, bounds: { x: number; y: number }) => Promise<{ success: boolean; error?: string }>;
+      onExtensionsUpdated: (callback: (data: any[]) => void) => void;
     };
   }
 }

@@ -194,12 +194,16 @@ async function init(): Promise<void> {
   const webStoreInput = document.getElementById('webstore-input') as HTMLInputElement;
   const webStoreBtn = document.getElementById('webstore-install-btn') as HTMLButtonElement;
 
+  let installing = false;
   const doWebStoreInstall = async () => {
+    if (installing) return;
     const value = webStoreInput?.value?.trim();
     if (!value) {
       showToast('Please enter an extension ID or Chrome Web Store URL.');
       return;
     }
+    installing = true;
+    webStoreInput.disabled = true;
     webStoreBtn.disabled = true;
     webStoreBtn.textContent = 'Installing...';
     try {
@@ -213,6 +217,8 @@ async function init(): Promise<void> {
     } catch {
       showToast('Installation failed.');
     } finally {
+      installing = false;
+      webStoreInput.disabled = false;
       webStoreBtn.disabled = false;
       webStoreBtn.innerHTML = '<i data-lucide="download" width="16" height="16"></i> Install';
       createIcons({ icons });
