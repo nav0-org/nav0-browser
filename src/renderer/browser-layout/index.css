@@ -34,6 +34,16 @@
   border-bottom: 1px solid var(--border-1);
   flex-shrink: 0;
   -webkit-app-region: drag;
+  /* Chrome, not content: tab titles and the private badge must not be
+     text-selectable. The no-drag children (tabs, buttons) would otherwise
+     highlight on click-drag, double-click, or Cmd/Ctrl+A. */
+  user-select: none;
+}
+
+/* <img> is natively draggable, and -webkit-user-drag isn't inherited, so the
+   favicon (and any future image in the strip) has to opt out on its own. */
+.tab-bar img {
+  -webkit-user-drag: none;
 }
 
 /* Leave space for macOS traffic lights (close/minimize/maximize) — not in fullscreen */
