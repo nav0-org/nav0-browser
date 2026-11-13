@@ -1,415 +1,266 @@
 # DESIGN.md — Nav0 Browser Design System
 
-> Authoritative reference for visual & UI conventions. Read this **before**
+> Authoritative reference for visual and UI conventions. Read this **before**
 > touching anything under `src/renderer/**` (HTML, CSS, or DOM-building TS),
-> adding a new built-in page, or building a new overlay panel.
+> `src/main/browser/error-page/**` or `src/main/browser/ssl-warning-page.html`,
+> adding a built-in page, or building an overlay panel.
 >
 > The canonical source of truth for tokens is
 > [`src/renderer/styles/global.css`](src/renderer/styles/global.css). If this
-> document and `global.css` disagree, `global.css` wins — and this file is
-> stale and should be updated in the same change.
+> document and `global.css` disagree, `global.css` wins, and this file is stale
+> and must be fixed in the same change.
+
+> **This system replaces the earlier "paper and red" system.** The red anchor
+> bar, the warm off-white chrome, the editorial masthead (48 px weight 200 with
+> a red rule), the 2–6 px radius cap, black primary buttons, red toggles and
+> red private windows are all retired. Don't reintroduce them.
 
 ---
 
-## 1. TL;DR — the 10 rules that catch 90% of mistakes
+## 1. TL;DR — the rules that catch most mistakes
 
 1. **Always `@import url('../../styles/global.css');`** at the top of every page CSS.
-2. **Never hardcode a colour.** Use a token (`var(--bg-0)`, `var(--fg-2)`, `var(--nav0-red-600)`, …). No `#fff`, `#000`, `rgb(...)`, named colours. (The one allowed exception: the explicit `#ffffff` for active tab / focused input _because_ it visibly anchors against the warm chrome — but prefer `var(--bg-0)` when it resolves to the same value.)
-3. **Chrome is warm off-white, content is paper-white.** Tab strip / nav bar / overlay panels use `--chrome-1`, `--chrome-2`, `--tab-inactive`. Active tab, content cards, focused inputs stay `--bg-0`. Internal pages still use `--bg-0` as their canvas.
-4. **Row highlights are `--bg-3` + a 2-px `--nav0-red-600` anchor bar on the left.** Universal across the options menu, Command-K results, URL autocomplete, new-tab inline search, and built-in page list rows.
-5. **Radii are tight: 2 / 3 / 4 / 6 px, or full circle.** Use `--r-xs`, `--r-sm`, `--r-md`, `--r-lg`, `--r-full`. Do **not** introduce 8/12/16px or 500px "pills". The URL-bar "pill" is `--r-pill` = 6px, not a Stadium shape.
-6. **Hairline borders, paper-flat shadows.** `1px solid var(--border-1)` and `var(--shadow-sm/md/lg)` / `--new-tab-card-shadow`. No coloured glows, no `0 0 20px rgba(…)`.
-7. **Spacing comes from the scale.** `--spacing-xs/sm/md/lg/xl/xxl` (4/8/16/24/32/48). Avoid odd values like `13px`, `19px` — round to the scale.
-8. **Focus state = soft halo + paper-white fill.** Inputs at rest can already be white on the warm chrome (e.g. URL bar). On focus add `box-shadow: var(--shadow-focus)` (or `--shadow-focus-accent` for the accent ring).
-9. **No inline styles in HTML/TS.** Define a class in the page's CSS. (Reinforced by `CLAUDE.md` → Code Conventions.)
-10. **Icons come from Lucide,** `<i data-lucide="<name>" width="16" height="16"></i>`, then `createIcons({ icons })` in TS. Don't ship raw SVGs or icon fonts.
-11. **Mono is for _code_ only.** `<code>`, `<kbd>`, SHA-256 hashes, file paths, ERR\_\* codes, reader-mode `<pre>`. UI chrome — versions, dates, durations, table headers, badges — uses the system sans stack. There is no global mono token; scope a page-local `--<page>-mono` only on selectors that render actual code-like content.
-12. **Sharp, minimal, utilitarian.** If a design choice feels playful, decorative, or "cloudy", it's wrong. We are paper — not glass, not neon, not aqua.
+2. **Never hardcode a colour.** Use a token. No `#fff`, `#000`, `rgb(...)` or named colours outside `global.css`.
+3. **One page background.** Every built-in page is white (`--n-page`). Groups of settings, charts and summaries sit in grey panels (`--n-grouped`, radius `--n-r-panel`, no border, no shadow). Controls inside a grey panel are white.
+4. **The chrome is cool grey, and the active tab is connected.** Tab strip `--n-strip`; toolbar **and** active tab `--n-toolbar`, one surface with no line between them. A hairline (`--n-chrome-line`) runs under every other tab and under the toolbar.
+5. **Blue means interactive, selected or in progress.** Links, focus rings, switches, radios and checkboxes that are on, primary buttons, progress. **Red means danger and nothing else:** insecure connections, failures, and the confirm button of a destructive action. Red is never the brand, never selection, never a toggle.
+6. **One selection style everywhere:** `--n-accent-soft` background, `--n-text-1` text, `--n-accent` icon. Menus, ⌘K, ⌘O, URL autocomplete, the Settings sidebar and filter chips. No anchor bars, no outlines, no solid fills with white text.
+7. **Radii are half of macOS:** 2 / 3 / 4 / 5 / 6 / 7 / 8 px via `--n-r-*` (see §3.5). Switches, radios, dots and the download ring are round. No other values.
+8. **Seven type sizes, four weights.** 11 / 12 / 13 / 14 / 17 / 22 / 28 px; weights 400 / 500 / 600 / 700. Page titles are 28 px bold. No weight 200 or 300.
+9. **Focus rings are for the keyboard only.** Use `:focus-visible` with `--n-focus-ring`. Never show an outline on mouse click, and never a black outline.
+10. **No inline styles in HTML or TS.** Define a class in the page's CSS.
+11. **Icons are Lucide** (the version pinned in `package.json`) at the default 2 px stroke: 18 px in the toolbar, 16 px in fields, menus and buttons, 14 px inline.
+12. **Mono is for code only:** error codes, hashes, file paths, the user-agent string, and key combos inside prose.
+13. **Nothing animates forever.** Only the tab loader and download progress move. Respect `prefers-reduced-motion`.
+14. **Categories are named, not coloured.** An icon and a label on a neutral badge. Colour hues appear only in the storage bar, with a legend.
 
 ---
 
 ## 2. Design philosophy
 
-Nav0 is a **minimal, privacy-first browser**. Its visual language reflects that:
+- **Calm and native.** Nav0 should feel like a well-made Mac or Windows app: quiet chrome, clear hierarchy, platform conventions (⌘ ⇧ ⌥ glyphs on macOS, `Ctrl+Shift+` on Windows and Linux).
+- **Neutral first, one accent.** Surfaces and text are greys. If a colour appears, it is telling you something: blue for "you can act" or "it's chosen", red for danger.
+- **Content leads.** The chrome stays out of the way; built-in pages are white with grey panels so they read like pages, not like a second app.
+- **Hierarchy through size, weight and space**, not through colour, borders or large radii.
+- **Light mode only.** There is no dark theme. Don't add `prefers-color-scheme: dark` styles.
+- **Privacy mode is a calm, visible signal:** a lavender tint on the chrome plus a "Private" label. Colour is never the only cue.
 
-- **Editorial, not app-y.** Pages read like a dashboard / printed document — left-aligned masthead, brand-red 1-px rule under the title, generous gutter. Editorial pages drop subtitles, taglines, and stats lines; the title alone carries the section identity.
-- **Warm chrome, paper-white content.** The chrome (tab strip, nav bar, menus, overlays) sits on a warm off-white layer (`--chrome-1` / `--chrome-2`). The active tab, focused inputs, and built-in page canvases stay paper-white (`--bg-0`) — that contrast is what tells the eye what's the foreground.
-- **Utilitarian.** Sharp corners, hairline borders, paper-flat shadows. No gradients on surfaces, no coloured glows, no neumorphism.
-- **Calm, with a single brand red.** The Nav0 compass red (`--nav0-red-600`) is the brand accent: active tab anchor bar, masthead divider, row-highlight anchor bar on menus / search results / list rows, Settings sidebar active link, Settings toggle/radio fill, Command-O selected card outline. `--accent` (Nav0 blue 600) is reserved for links and a few cross-page status surfaces. Status colours (`--danger`, `--success`, `--warning`) only when the semantics demand it.
-- **Row highlights are uniform.** Hover / active rows everywhere use `--bg-3` background + a 2-px `--nav0-red-600` anchor bar flush at the left edge. No bespoke per-page colours.
-- **Hierarchy via type weight and white space,** not via colour or large radii.
-- **Privacy mode is a visible signal.** Private windows use `--private-bg` (Nav0 red 700) — never reuse this colour for non-private affordances.
-
-When in doubt: **default to less.** Smaller radius, lighter shadow, more white space.
+When in doubt: **default to less.** Fewer borders, fewer colours, more space.
 
 ---
 
 ## 3. Token reference (canonical: `global.css`)
 
-### 3.1 Colour ramps (brand)
+### 3.1 Brand ramps — logo only
 
-| Token              | Hex       | Use                                           |
-| ------------------ | --------- | --------------------------------------------- |
-| `--nav0-red-500`   | `#ef4444` | Brand red ramp — private mode, danger accents |
-| `--nav0-red-600`   | `#dc2626` | (alias of `--danger`)                         |
-| `--nav0-red-700`   | `#b91c1c` | `--private-bg`                                |
-| `--nav0-red-800`   | `#991b1b` | Pressed / very strong red                     |
-| `--nav0-blue-500`  | `#3b82f6` | Brand blue ramp                               |
-| `--nav0-blue-600`  | `#2563eb` | `--accent`                                    |
-| `--nav0-blue-700`  | `#1d4ed8` | `--accent-hover`                              |
-| `--nav0-blue-800`  | `#1e40af` | Pressed accent                                |
-| `--nav0-slate-300` | `#cbd5e1` | —                                             |
-| `--nav0-slate-400` | `#94a3b8` | —                                             |
-| `--nav0-slate-500` | `#64748b` | —                                             |
-| `--nav0-slate-700` | `#334155` | —                                             |
-| `--nav0-slate-900` | `#0f172a` | —                                             |
+The `--nav0-red-*`, `--nav0-blue-*` and `--nav0-slate-*` ramps stay in `global.css` for the compass logo only. **Never use them for UI.** UI colours come from the `--n-*` tokens below.
 
-> Reach for the slate ramp only when you need a neutral that isn't pure grey — most UI greys should come from `--bg-*` / `--fg-*` / `--border-*` below.
+### 3.2 Surfaces and lines
 
-### 3.2 Surface & ink
+| Token              | Value               | Use                                                                                    |
+| ------------------ | ------------------- | -------------------------------------------------------------------------------------- |
+| `--n-page`         | `#ffffff`           | Built-in page canvas (every page)                                                      |
+| `--n-grouped`      | `#f5f5f7`           | Grey panels on a page (settings groups, history charts, storage), the Settings sidebar |
+| `--n-card`         | `#ffffff`           | Fields and buttons inside grey panels; the address field                               |
+| `--n-strip`        | `#e6e6e9`           | Tab strip, behind inactive tabs                                                        |
+| `--n-toolbar`      | `#f6f6f7`           | Toolbar, the active tab and the find bar — one connected surface                       |
+| `--n-chrome-line`  | `#d1d1d6`           | Under the tab strip (except under the active tab) and under the toolbar                |
+| `--n-separator`    | `#e5e5ea`           | Row dividers on white, inset 16 px                                                     |
+| `--n-panel-line`   | `rgba(0,0,0,0.07)`  | Row dividers inside grey panels                                                        |
+| `--n-fill`         | `rgba(0,0,0,0.05)`  | Search fields on a page, secondary buttons, chips and badges at rest                   |
+| `--n-fill-2`       | `rgba(0,0,0,0.07)`  | Segmented-control track, keycaps, pressed toolbar button                               |
+| `--n-hover`        | `rgba(0,0,0,0.04)`  | Row hover                                                                              |
+| `--n-tab-hover`    | `rgba(0,0,0,0.045)` | Inactive tab hover                                                                     |
+| `--n-tab-divider`  | `rgba(0,0,0,0.14)`  | 16 px divider between inactive tabs                                                    |
+| `--n-control-edge` | `#8e8e93`           | Edge of an off switch, checkbox or radio (3.3:1 on white)                              |
+| `--n-track`        | `#e5e5ea`           | Off switch track                                                                       |
+| `--n-scrim`        | `rgba(0,0,0,0.12)`  | Behind ⌘K, ⌘O and dialogs                                                              |
+| `--n-well`         | `#f2f2f4`           | Icon and favicon wells on a white page (use `--n-card` for wells inside grey panels)   |
+| `--n-menu-line`    | `rgba(0,0,0,0.09)`  | Separators inside menus                                                                |
+| `--n-ring-track`   | `rgba(0,0,0,0.12)`  | Track of the tab loader and the download ring                                          |
+| `--n-menu-solid`   | `#f8f8fa`           | Menu background when the OS asks to reduce transparency                                |
 
-| Token            | Hex       | Use                                                |
-| ---------------- | --------- | -------------------------------------------------- |
-| `--bg-0`         | `#ffffff` | Canvas / cards / active tab / focused inputs       |
-| `--bg-1`         | `#fafafa` | Page background (very light grey, rarely used now) |
-| `--bg-2`         | `#f5f5f5` | Subtle surface — segmented controls, small chips   |
-| `--bg-3`         | `#ebebeb` | **Row hover / active highlight** (universal)       |
-| `--bg-inverse`   | `#0a0a0a` | Dark surfaces (tooltips, scrim contents)           |
-| `--chrome-1`     | `#f7f6f4` | Nav bar, page bento panels (warm off-white)        |
-| `--chrome-2`     | `#fbfaf8` | Menus, popovers, command-K/O, overlay panels       |
-| `--tab-inactive` | `#e7e5e1` | Inactive tab band on the tab strip                 |
-| `--fg-1`         | `#0a0a0a` | Primary text                                       |
-| `--fg-2`         | `#333333` | Body text                                          |
-| `--fg-3`         | `#6b7280` | Secondary text, stats, captions                    |
-| `--fg-4`         | `#9ca3af` | Placeholder, disabled, very low emphasis           |
-| `--fg-on-dark`   | `#ffffff` | Text on inverse surfaces                           |
-| `--border-1`     | `#dcd9d4` | Hairline divider (warm gray, matches chrome)       |
-| `--border-2`     | `#c8c5bf` | Heavier separator (rare)                           |
+### 3.3 Text
 
-> `--chrome-*` sit a notch under `--bg-0` so paper-white content reads as the foreground layer. The compass red (`--nav0-red-600`) is a warm hue; the chrome and hairlines were pulled 2–3% toward red/yellow so the whole system feels coherent. Don't tint chrome cool.
+| Token        | Value     | Contrast                         | Use                                                |
+| ------------ | --------- | -------------------------------- | -------------------------------------------------- |
+| `--n-text-1` | `#1d1d1f` | 16.8:1 on white, 13.5:1 on strip | Primary text, titles, active tab                   |
+| `--n-text-2` | `#424245` | 10.0:1 on white, 8.0:1 on strip  | Body, inactive tabs, icons                         |
+| `--n-text-3` | `#6e6e73` | 5.1:1 on white                   | Secondary text, meta, placeholders. Never on strip |
+| `--n-text-4` | `#aeaeb2` | —                                | Disabled only                                      |
 
-### 3.3 Semantic & status
+### 3.4 Accent, semantic, private, data
 
-| Token            | Maps to           | Use                                                                                                                                                                                                                       |
-| ---------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--nav0-red-600` | `#dc2626`         | **Brand accent.** Active tab bar, masthead dividers, row anchor bars, Settings sidebar active link, Settings toggles/radios, Command-O selected outline. Use this token directly (not `--accent`) for brand-red surfaces. |
-| `--accent`       | `--nav0-blue-600` | Link colour, default `<a>`, code-snippet syntax. **Not** the brand accent.                                                                                                                                                |
-| `--accent-hover` | `--nav0-blue-700` | Hover variant of links                                                                                                                                                                                                    |
-| `--danger`       | `--nav0-red-600`  | Destructive actions, error states (same colour as the brand red but reached via the semantic token)                                                                                                                       |
-| `--danger-soft`  | `#fdecea`         | Danger surface                                                                                                                                                                                                            |
-| `--success`      | `#16a34a`         | Success status                                                                                                                                                                                                            |
-| `--success-soft` | `#ecfdf5`         | Success surface                                                                                                                                                                                                           |
-| `--warning`      | `#d97706`         | Warning status                                                                                                                                                                                                            |
-| `--warning-soft` | `#fef3c7`         | Warning surface                                                                                                                                                                                                           |
-| `--private-bg`   | `--nav0-red-700`  | Private window chrome — **never reuse**                                                                                                                                                                                   |
-| `--private-fg`   | `#ffffff`         | Text on private chrome                                                                                                                                                                                                    |
+| Token                                       | Value                                                                                                               | Use                                                                            |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `--n-accent`                                | `#0066d6`                                                                                                           | Links, primary buttons, on-state controls, progress, the selected icon (5.4:1) |
+| `--n-accent-hover`                          | `#0058b9`                                                                                                           | Link and primary-button hover                                                  |
+| `--n-accent-soft`                           | `rgba(0,102,214,0.12)`                                                                                              | Selection background (rows, sidebar item, chips, toggled find options)         |
+| `--n-focus`                                 | `rgba(0,102,214,0.28)`                                                                                              | Focus halo colour                                                              |
+| `--n-danger`                                | `#d70015`                                                                                                           | Insecure, failure, destructive confirm (5.4:1)                                 |
+| `--n-danger-soft`                           | `rgba(215,0,21,0.08)`                                                                                               | Danger banner background                                                       |
+| `--n-warning`                               | `#a35200`                                                                                                           | Mixed content, paused (5.6:1)                                                  |
+| `--n-warning-soft`                          | `rgba(163,82,0,0.10)`                                                                                               | Warning badge background (e.g. a development build on About)                   |
+| `--n-success`                               | `#1d7a3a`                                                                                                           | Download complete, "Release" badge (5.4:1)                                     |
+| `--n-success-soft`                          | `rgba(29,122,58,0.10)`                                                                                              | Success badge background                                                       |
+| `--n-private-strip`                         | `#e4def4`                                                                                                           | Private window tab strip                                                       |
+| `--n-private-toolbar`                       | `#efebf8`                                                                                                           | Private window toolbar and active tab                                          |
+| `--n-private-line`                          | `#cdc4e6`                                                                                                           | Private window hairlines                                                       |
+| `--n-private-text`                          | `#3f3a52`                                                                                                           | Inactive tabs and icons in private windows (8.3:1)                             |
+| `--n-private-label-bg`                      | `#d3c8ef`                                                                                                           | "Private" label background                                                     |
+| `--n-private-label-text`                    | `#3b2d78`                                                                                                           | "Private" label text (7.3:1)                                                   |
+| `--n-data-0` … `--n-data-4`                 | `#e2e5e9` `#a4afbf` `#8693a6` `#6a788e` `#4f5f76`                                                                   | Activity map steps; bars use step 2 and always show their value                |
+| Storage hues (storage bar only, this order) | Images `#5b9a5f`, Video & audio `#8a6bbf`, Archives `#b98a35`, Apps `#547ebe`, Documents `#c0744d`, Other `#8e8e93` | Parts of a whole, always with a legend                                         |
 
-> Use `--nav0-red-600` directly for visual brand surfaces (anchor bars, active indicators). Use `--danger` for destructive _semantics_ (delete buttons, error pills) — even though it resolves to the same hex, the intent is different and lets us recolour each independently later.
-
-**macOS traffic lights** (`--mac-close`, `--mac-close-border`, `--mac-zoom`, `--mac-zoom-border`, `--mac-control-disabled`, `--mac-control-disabled-border`, `--mac-control-glyph`) are fixed Apple system colours used exclusively by the custom close/minimize/zoom cluster the tab strip draws on macOS in fullscreen (where the native buttons are hidden). Like `--private-bg`, these are reserved — never reuse them for general status colours.
-
-### 3.4 Shadows & focus
-
-```
---shadow-sm:    0 1px 2px  rgba(0, 0, 0, 0.06);   /* resting cards */
---shadow-md:    0 2px 8px  rgba(0, 0, 0, 0.06);   /* dialogs, popovers */
---shadow-lg:    0 8px 24px rgba(0, 0, 0, 0.10);   /* command palette, modals */
---shadow-focus:        0 0 0 2px rgba(0, 0, 0, 0.10);     /* neutral focus halo */
---shadow-focus-accent: 0 0 0 3px rgba(37, 99, 235, 0.18); /* accent focus halo */
-```
-
-Scoped to the new-tab page (declared on `.new-tab-page`):
-
-```
---new-tab-card-shadow:
-  0 16px 40px rgba(0, 0, 0, 0.12),
-  0 4px 12px  rgba(0, 0, 0, 0.06);
-```
-
-Shared by the new-tab search bar, suggestion tiles, and search-results popup so all three sit on the same elevation. Do not introduce other shadow values. No coloured drop shadows (`rgba(59, 130, 246, …)`, etc.) except `--shadow-focus-accent`.
+When the OS asks for more contrast (`prefers-contrast: more`), separators step up to `#8e8e93`, control edges to `#6e6e73`, and tertiary text becomes secondary.
 
 ### 3.5 Radii
 
 ```
---r-xs:   2px;    /* tags, micro-chips */
---r-sm:   3px;    /* keycaps, badges */
---r-md:   4px;    /* default — buttons, inputs, selects */
---r-lg:   6px;    /* cards, dialogs */
---r-pill: 6px;    /* URL-bar "pill" — softly rounded rect, NOT a stadium */
---r-full: 50%;    /* avatars, circular icons */
+--n-r-key:     2px;   /* keycaps, checkboxes */
+--n-r-icon:    3px;   /* icon buttons, the "Private" label */
+--n-r-control: 4px;   /* tabs (top corners), address field, buttons, inputs, selects, segmented, list and menu rows, icon wells */
+--n-r-badge:   5px;   /* badges */
+--n-r-panel:   6px;   /* grey panels, menus, cards, popovers */
+--n-r-chip:    7px;   /* filter chips */
+--n-r-dialog:  8px;   /* dialogs, ⌘K palette, ⌘O switcher */
+--n-r-full:  999px;   /* switches, radios, dots, rings */
 ```
-
-> Source app used 6/8/12/pill. Nav0 **deliberately** tightened these. Do not "soften" a Nav0 surface by bumping the radius.
 
 ### 3.6 Spacing
 
-```
---spacing-xs:  4px;
---spacing-sm:  8px;
---spacing-md: 16px;
---spacing-lg: 24px;
---spacing-xl: 32px;
---spacing-xxl: 48px;
-```
+Unchanged: `--spacing-xs/sm/md/lg/xl/xxl` = 4 / 8 / 16 / 24 / 32 / 48 px. A 4 px grid; component internals may also use 2, 6, 10, 12, 14 and 20.
 
-Use these (or `--r-*` / `--font-*`) instead of raw px wherever possible. Editorial layouts often combine `48px 56px 80px` for page padding — `56` and `80` are intentional outliers for that pattern only.
+### 3.7 Typography
 
-### 3.7 Typography scale
+Font stack (unchanged): `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif` — SF Pro on macOS, Segoe UI on Windows, Roboto on Linux. Don't bundle a font.
 
-```
---font-xs:   11px;   /* mono captions, small caps labels */
---font-sm:   12px;   /* secondary text, stats */
---font-md:   14px;   /* body (default) */
---font-lg:   16px;   /* emphasis, large inputs */
---font-xl:   18px;   /* h3-ish */
---font-xxl:  24px;   /* h2 */
---font-xxxl: 32px;   /* h1 */
-```
+Mono: `ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace`. Reader mode keeps its Georgia serif for article text.
 
-System sans stack (set globally on `*`):
+| Role        | Size / line height           | Weight           | Use                                                |
+| ----------- | ---------------------------- | ---------------- | -------------------------------------------------- |
+| Large title | 28 / 34                      | 700, −0.02em     | Page titles (History, Settings sections, About)    |
+| Title       | 22 / 28                      | 700              | Interstitial headings                              |
+| Headline    | 17 / 22                      | 600              | Dialog titles                                      |
+| Address     | 14 / 20                      | 400 (domain 600) | The address field                                  |
+| Body        | 13 / 18                      | 400 / 500        | Default UI text; 500 for row titles, tabs, buttons |
+| Callout     | 12 / 16                      | 400 / 600        | Secondary lines, meta, group labels (600)          |
+| Footnote    | 11 / 14                      | 400 / 600        | Badges, keycaps, tiny labels                       |
+| Mono        | 12 / 16 (11.5 in tight rows) | 400              | Codes, hashes, paths, UA string                    |
+
+Use tabular numerals (`font-variant-numeric: tabular-nums`) for times, sizes, counts and versions.
+
+### 3.8 Materials, shadows and focus
 
 ```
--apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif
+--n-menu-bg:      rgba(248, 248, 250, 0.88);
+--n-menu-blur:    blur(30px) saturate(1.8);          /* backdrop-filter for menus, popovers, ⌘K, ⌘O, dialogs */
+--n-menu-shadow:  0 0 0 0.5px rgba(0,0,0,0.14), 0 24px 60px rgba(0,0,0,0.20), 0 4px 12px rgba(0,0,0,0.08);
+--n-field-shadow: 0 0 0 0.5px rgba(0,0,0,0.18), 0 1px 1px rgba(0,0,0,0.04);   /* address field, white inputs */
+--n-raised-shadow: 0 0 0 0.5px rgba(0,0,0,0.18), 0 1px 1px rgba(0,0,0,0.05);  /* white buttons on grey panels */
+--n-focus-ring:   0 0 0 3px var(--n-focus);                                     /* buttons, rows, chips */
+--n-focus-ring-field: 0 0 0 1px var(--n-accent), 0 0 0 4px var(--n-focus);     /* text fields */
 ```
 
-**Mono is for code, not UI chrome.** Scope a page-local stack only on the selectors that actually render code-like content:
+Under `prefers-reduced-transparency: reduce`, menus drop the blur and use `--n-menu-solid`.
 
-```css
-.about-page {
-  --about-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
-}
-.about-page .hash {
-  /* SHA-256 checksum chip */
-  font-family: var(--about-mono);
-}
-```
+### 3.9 Motion
 
-Acceptable mono surfaces:
+`--dur-fast: 120ms`, `--dur-med: 220ms`. Hover and focus changes use `--dur-fast`; panel reveals ~180 ms. Only the tab loader and download progress animate continuously. Everything is gated on `@media (prefers-reduced-motion: reduce)`. No infinite pulses (the old insecure-icon pulse is removed).
 
-- Inline `<code>` / `<kbd>` snippets in setting descriptions
-- SHA-256 hashes, application paths, `ERR_*` codes
-- `<pre>` blocks inside reader mode
-- `<code>` / `<pre>` rendered on error / SSL warning pages
+### 3.10 Z-index
 
-**Not** mono: version numbers, dates, durations, table headers, badge text, tag labels, link URLs, stats counters. Earlier passes used mono everywhere for "tabular" feel — that has been intentionally stripped. Do not re-introduce it.
-
-Weights in use: `200` (display titles), `400` (body), `500` (labels, nav-link active), `600` (headings, badges), `700` (rare emphasis).
-
-### 3.8 Motion
-
-```
---dur-fast: 120ms;   /* hover, focus, micro-feedback */
---dur-med:  220ms;   /* page-load fade, panel reveal */
---dur-slow: 400ms;   /* large transitions (rare) */
-```
-
-`@media (prefers-reduced-motion: reduce)` must disable non-essential animations on any new overlay/dialog. See `alert.css` for the established pattern.
-
-### 3.9 Z-index layers
-
-```
---z-dropdown: 100;
---z-sticky:   200;
---z-modal:   1000;
---z-toast:   1100;
-```
-
-Pick from the scale. Do not invent `z-index: 9999`.
+Unchanged: `--z-dropdown 100`, `--z-sticky 200`, `--z-modal 1000`, `--z-toast 1100`.
 
 ---
 
 ## 4. Layout patterns
 
-### 4.1 Editorial dashboard (built-in pages — about, bookmarks, history, downloads, settings)
+### 4.1 Window chrome (`src/renderer/browser-layout/`)
 
-```
-┌────────────────────────────────────────────────────────────┐
-│  Title (48px / 200 weight / -0.5 letter-spacing)         │  ← masthead
-│  ═══════════════════════════════════════════════════════ │  ← 1-px nav0-red-600 rule
-│                                                            │
-│  [ toolbar: search · segmented control · clear ]           │
-│                                                            │
-│  Content rows / panels (hairline borders, --border-1)      │
-└────────────────────────────────────────────────────────────┘
-```
+**Tab strip** — 40 px, `--n-strip`, with an inset 1 px `--n-chrome-line` at the bottom.
 
-Skeleton:
+- Tabs start 6 px below the top of the strip (34 px tall), top corners `--n-r-control`, flex basis 220 px, minimum 72 px, then scroll buttons appear.
+- **Active tab:** `--n-toolbar` background, 1 px `--n-chrome-line` on top, left and right, **no bottom edge**, so it joins the toolbar. Title 12 px, 500, `--n-text-1`.
+- **Inactive tab:** transparent, title 12 px `--n-text-2`; hover `--n-tab-hover`; the close button (18 px, `--n-r-icon`) appears on hover only.
+- 16 px `--n-tab-divider` between inactive tabs, hidden next to the active or hovered tab.
+- Pinned tabs are 36 px wide, favicon only. While loading, a 14 px ring (2 px, track `--n-ring-track`, arc `--n-accent`) replaces the favicon.
+- New-tab "+" sits at the far right (36 px, 18 px icon). Traffic lights and Windows controls are centred on the tab row.
+- No coloured bar on the active tab.
 
-```css
-.<page > -page {
-  min-height: 100vh;
-  background: var(--bg-0);
-  color: var(--fg-2);
-}
+**Toolbar** — 44 px, `--n-toolbar`, 1 px `--n-chrome-line` at the bottom. Buttons are 32 × 32, `--n-r-icon`, 18 px icons in `--n-text-2`, hover `--n-fill`, pressed `--n-fill-2`. Order (unchanged): back, forward, reload, `>_` (⌘K), address field, downloads (with a 2 px `--n-accent` progress ring while downloading), ⋮.
 
-.<page > -wrapper {
-  max-width: 1080px; /* dashboard standard */
-  margin: 0 auto;
-  padding: 48px 56px 80px;
-}
+**Address field** — 32 px, `--n-card`, `--n-r-control`, `--n-field-shadow`; focused: `--n-focus-ring-field`. 14 px text.
 
-.<page > -head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 32px;
-  flex-wrap: wrap;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--nav0-red-600); /* brand rule under title */
-}
+- At rest, the URL is split for display: scheme, subdomain and path in `--n-text-3`; the registrable domain in `--n-text-1` weight 600. The scheme is lowercase (`nav0://`, never `Nav0://`).
+- Leading indicator (28 × 28): secure = `lock` in `--n-text-3` (neutral, never green); not secure (HTTP or bypassed certificate) = `triangle-alert` in `--n-danger`, static. A bypassed certificate also shows `https` struck through in red. Built-in pages and typing show `search`.
+- Trailing field buttons (reader, PDF, bookmark / reading queue): 28 × 28, 16 px icons in `--n-text-3`; when on, icon `--n-accent` on `--n-accent-soft`.
 
-.<page > -title {
-  font-size: 48px;
-  font-weight: 200;
-  letter-spacing: -0.5px;
-  color: var(--fg-1);
-  margin: 0;
-  line-height: 1.2;
-}
-```
+**Find in page** — a 44 px bar under the toolbar, `--n-toolbar`, bottom line `--n-chrome-line`. Field 400 px wide, 30 px, white, ring as above, match counter inside the field at the right (12 px `--n-text-3`, e.g. "3 of 12"). "No matches" and "Invalid regex" turn the text, counter and ring `--n-danger`. Option toggles **Aa**, **|ab|**, **.\*** are 28 px; on = `--n-accent` text on `--n-accent-soft`. Divider, previous/next (disabled `--n-text-4` when there's nothing to move to), and close at the far right.
 
-Conventions for built-in pages:
+**Private windows** — strip `--n-private-strip`, toolbar and active tab `--n-private-toolbar`, lines `--n-private-line`, text and icons `--n-private-text`, plus a "Private" label (`shield-check` + "Private", 12 px 600, `--n-private-label-bg` / `--n-private-label-text`, `--n-r-icon`) after the traffic lights. Never red.
 
-- **No subtitles, taglines, or stats lines.** Page identity is carried by the title alone. The earlier `--<page>-mono` stats-label slot has been removed everywhere.
-- **Toolbars** sit below the masthead with `margin: 28px 0 24px;` and use `--bg-2` segmented controls + a danger ghost "Clear All …" button at the right end.
-- **Settings** uses a sidebar layout instead of the centered wrapper — see `browser-settings/index.css`. The active sidebar link uses the same 2-px `--nav0-red-600` anchor bar pattern as row highlights.
-- **About** has no logo/mark, no right-rail stats, no privacy footer — just the title, four hairline-bordered groups (Software · System · Integrity · Links), and the SHA-256 hash chips.
+### 4.2 Built-in pages (`src/renderer/pages/<page>/`)
 
-Settings sidebar active link recipe (also used by the masthead anchor pattern):
+- Canvas `--n-page`. Content column 880 px (new tab, history, bookmarks, downloads) or 680 px (settings, about), centred, 36–40 px top padding, 56 px bottom.
+- Title: Large title (28 / 34, 700). **No masthead rule.**
+- Toolbar under the title: a filled search field (`--n-fill`, `--n-r-control`, 32 px), a segmented control (track `--n-fill-2`, white raised thumb), secondary buttons (`--n-fill`), in that order.
+- **Grey panels** (`--n-grouped`, `--n-r-panel`, 18–22 px padding) for charts, summaries and groups. No borders, no shadows.
+- Lists sit directly on white: rows 54 px, hover `--n-hover` with `--n-r-control`; 32 px icon wells (`--n-r-control`, `--n-well`); title 13 px 500; meta 12 px `--n-text-3` (URLs are grey, not link blue); trailing actions appear on hover. Day or group headers are 13 px 600 with the date in `--n-text-3` and a `--n-separator` underneath.
+- Filter chips: 28 px, `--n-r-chip`, `--n-fill` at rest, selection style when chosen, 14 px icons. Badges: 22 px, `--n-r-badge`, `--n-fill`, icon + label, `--n-text-2`.
 
-```css
-.sidebar-link.active {
-  background: var(--bg-0);
-  color: var(--fg-1);
-  border: 1px solid var(--border-1);
-  position: relative;
-}
-.sidebar-link.active::before {
-  content: '';
-  position: absolute;
-  left: -1px;
-  top: -1px;
-  bottom: -1px;
-  width: 2px;
-  background: var(--nav0-red-600);
-}
-```
+### 4.3 Settings (`src/renderer/pages/browser-settings/`)
 
-### 4.2 New-tab page
+- Sidebar 248 px, `--n-grouped`, right border `--n-separator`; search field white with `--n-field-shadow`; items 32 px, `--n-r-control`, 15 px icons; the current section uses the selection style.
+- Content: white page, 680 px column. Each group = a header **outside** the panel (13 px 600 title, 12 px `--n-text-3` description, 16 px left inset) + a grey panel.
+- Rows inside panels: 12 px × 16 px padding, label 13 px, description 12 px `--n-text-3`, control on the right. Dividers `--n-panel-line`, inset 16 px (44 px under radio rows).
+- Controls inside panels are white: inputs and selects (`--n-field-shadow`), buttons (`--n-raised-shadow`). Buttons that sit on the white page use the secondary fill.
+- "Recommended" is a neutral badge, not red. Permission names are sentence case (no `text-transform: uppercase`).
 
-`new-tab` follows the same editorial masthead pattern (greeting as the title, red rule below) but the body is a stack of floating cards:
+### 4.4 Overlays (`src/renderer/overlay/panels/<name>/`)
 
-```
-┌────────────────────────────────────────────────────────────┐
-│  Good afternoon                                          │  ← masthead (red rule)
-│                                                            │
-│  [🔍  Search tabs, bookmarks, history, downloads or web ]  │  ← search shell
-│                                                            │
-│  Bookmarks                                                 │  ← section title
-│  [tile] [tile] [tile] [tile] [tile] [tile] [tile] [tile]   │  ← 8-col tile row
-│                                                            │
-│  Frequently visited                                        │
-│  [tile] [tile] [tile] [tile] [tile] [tile] [tile] [tile]   │
-└────────────────────────────────────────────────────────────┘
-```
+- Material: `--n-menu-bg` + `backdrop-filter: var(--n-menu-blur)` + `--n-menu-shadow`. Radius `--n-r-panel` for menus and popovers, `--n-r-dialog` for ⌘K, ⌘O and dialogs. ⌘K, ⌘O and dialogs sit on `--n-scrim`.
+- Menu rows 30 px, `--n-r-control`, 6 px panel padding, 16 px icons in `--n-text-2`; hover or keyboard selection = selection style. Shortcuts right-aligned, 12 px `--n-text-3`, as glyphs on macOS (⌘T, ⇧⌘N, ⌥⌘I) and `Ctrl+T` elsewhere. Separators 1 px `--n-menu-line`, 8 px inset.
+- ⌘K: group labels 12 px 600 `--n-text-3`; secondary lines in `--n-text-3` (never link blue); keycap hints stay in the header, small and grey.
+- ⌘O: four columns, cards `--n-r-panel`, two-line titles, neutral window headers (no coloured rules); the active tab of each window is a small grey dot.
+- Inputs inside overlays are white with `--n-field-shadow`.
+- Slide-in ~180 ms, gated on `prefers-reduced-motion`. The URL autocomplete is closed before any modal overlay opens (unchanged).
 
-Conventions:
+### 4.5 Dialogs and interstitials
 
-- Page background is `--bg-0` (same as other built-in pages), **not** `--bg-1`. The gradient backgrounds we used earlier are gone.
-- The search bar, suggestion tiles, and search-results popup all carry the **shared `--new-tab-card-shadow`** so they read as one elevation layer.
-- Search shell uses an absolutely positioned `<i data-lucide="search">` magnifier on the left, with the input padded `16px 24px 16px 52px` so text starts past the icon.
-- When the user types, the results popup opens **flush** beneath the input (no margin) — full-width, same shadow. Tiles hide while a query is active and come back on `Escape` / click-outside / cleared input.
-- Result rows follow the universal row-highlight pattern: `--bg-3` background + 2-px `--nav0-red-600` anchor bar on the left.
-- Tiles: 36-px favicon well centered above a bold name and muted domain, white card with hairline border, hover only changes border colour (not background).
-
-### 4.3 Overlay panels (`src/renderer/overlay/panels/<name>/`)
-
-All overlay panels live in a single shared `WebContentsView` and are rendered through the unified overlay manager (`src/main/browser/unified-overlay-manager.ts`).
-
-- Root element has `position: fixed; inset: 0; z-index: var(--z-modal);`.
-- **Surface colour: `--chrome-2`** (warm off-white). This applies to the options menu, Command-K, Command-O, URL autocomplete, SSL info, alert, basic-auth, issue-report.
-- **Scrim** (Command-K / Command-O only): `rgba(0, 0, 0, 0.45)` + `backdrop-filter: blur(5px)`. The alert/auth/issue dialogs don't dim the page.
-- Dialog: `background: var(--chrome-2); border: 1px solid var(--border-1); border-radius: var(--r-lg); box-shadow: var(--shadow-md);` (or `--shadow-lg` for the command palette).
-- Slide-in animation ~ 180ms, **always gated** on `@media (prefers-reduced-motion: reduce)`.
-- **Inputs inside overlays stay paper-white** on focus (`background: var(--bg-0)` + `--shadow-focus`) so they pop on the warm panel.
-- When any modal overlay (`ssl-info`, `options-menu`, `command-k`, `command-o`, `issue-report`, `alert`, `basic-auth`) is opened, the URL autocomplete is closed first — the shared WebContentsView's bounds are otherwise restricted to the URL-bar dropdown region.
-
-### 4.4 Universal row-highlight pattern
-
-Used by the options menu, Command-K results, URL autocomplete, new-tab inline search, History/Bookmarks/Downloads entries, About link rows, Settings sidebar hover, etc.
-
-```css
-.row {
-  padding: 10px 16px; /* per-page may vary */
-  position: relative;
-  cursor: pointer;
-  transition: background-color var(--dur-fast);
-}
-.row:hover,
-.row.active {
-  background-color: var(--bg-3);
-}
-.row:hover::before,
-.row.active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--nav0-red-600);
-}
-```
-
-Conventions:
-
-- Rows span the full width of their container — no internal horizontal padding on the parent that would inset the highlight.
-- The anchor bar sits flush at `left: 0` (or `left: -1px` if the parent has a 1-px border that should be visually crossed). It does **not** have `border-radius` — sharp 2-px band.
-- For grouped menus, the highlight may also gain hairline `border-top` / `border-bottom` rules (see options-menu) so the band reads as a tactile press. Don't add a 4-sided border.
+- Dialogs: overlay material, `--n-r-dialog`, 20 px padding, title Headline (17 / 22, 600); actions right-aligned: Cancel (secondary) then the primary action. A destructive confirm uses the danger button — the only place red fills a surface.
+- Network error and certificate warning pages are **light** like every other page: an icon well, a small mono code line, a 22 px heading, plain-language text, a numbered "Try this" list (not radio circles), and one primary action. The certificate warning uses a red title and icon; "Proceed (unsafe)" is a red text link behind "Advanced".
 
 ---
 
 ## 5. Component patterns
 
-All of the following are pre-defined in `global.css` — **reuse them.** Only fork a class into page-local CSS when the design genuinely diverges (rare).
+All of these live in `global.css` — **reuse them.** Fork a class into page-local CSS only when the design genuinely diverges.
 
-### 5.1 Buttons
+### 5.1 Buttons (32 px on pages, 28–30 px in panels and dialogs; `--n-r-control`; 13 px 500)
 
-| Class               | Use                                               |
-| ------------------- | ------------------------------------------------- |
-| `.btn`              | Base — always include                             |
-| `.btn-primary`      | Primary action (`--primary-color` bg, white text) |
-| `.btn-secondary`    | Default action (`--bg-light` bg, border)          |
-| `.btn-ghost`        | Tertiary — transparent, hover greys the bg        |
-| `.btn-link`         | Looks like a link, underlines on hover            |
-| `.btn-sm` `.btn-lg` | Size modifiers                                    |
-| `.btn-icon`         | Square icon-only buttons                          |
-| `.btn-block`        | Full-width                                        |
+| Class            | Look                                                      | Use                                             |
+| ---------------- | --------------------------------------------------------- | ----------------------------------------------- |
+| `.btn-primary`   | `--n-accent` fill, white text                             | One per view                                    |
+| `.btn-secondary` | `--n-fill`, `--n-text-1`                                  | Default action on a white page; Cancel          |
+| `.btn-raised`    | White, `--n-raised-shadow`                                | Actions inside grey panels                      |
+| `.btn-ghost`     | Transparent, hover `--n-fill`                             | Reset and other tertiary actions                |
+| `.btn-danger`    | `--n-danger` fill, white text                             | Only the confirm button of a destructive action |
+| `.btn-icon`      | 32 × 32 (toolbar) or 28 × 28 (fields, bars), `--n-r-icon` | Icon-only; always `aria-label` + `title`        |
 
 ### 5.2 Form controls
 
-`.form-control` (input/textarea), `.form-group`, `.form-label`, `.form-text` (helper line).
-Native `<select>` is auto-styled globally — don't override unless you need to tweak padding / min-width.
+- Text inputs and selects: white, `--n-field-shadow`, `--n-r-control`, 28–32 px, 13 px; focus `--n-focus-ring-field`. Search fields on a page are filled (`--n-fill`) instead.
+- Switch: 38 × 22 (32 × 19 in dense lists); on = `--n-accent`; off = `--n-track` with an inset 1 px `--n-control-edge`. White knob.
+- Checkbox 16 px, `--n-r-key`; radio 16 px round. On = `--n-accent` with a white mark; off = white with `--n-control-edge`.
+- Segmented control: track `--n-fill-2`, 2 px padding, the chosen segment is a white raised thumb (no colour).
 
-### 5.3 Cards
+### 5.3 Panels, rows, badges, keycaps, progress
 
-`.card` / `.card-header` / `.card-body` / `.card-footer`.
-
-### 5.4 Alerts
-
-`.alert` + `.alert-primary | -error | -success | -warning | -info`. Always pair with semantic ARIA, not just colour, for status.
-
-### 5.5 Badges, keycaps, avatars, dividers, progress
-
-`.badge` (+ `-primary | -success | -error | -secondary`),
-`.keycap` (for ⌘ K and friends),
-`.avatar` / `.avatar-sm` / `.avatar-lg`,
-`.divider` / `.divider-vertical`,
-`.progress` / `.progress-bar`.
-
-### 5.6 Layout & utilities
-
-Flex/grid helpers (`.flex`, `.flex-col`, `.items-center`, `.justify-between`, `.gap-md`, …), spacing (`.mt-md`, `.p-lg`, …), typography (`.text-sm`, `.font-semibold`, `.truncate`, …), borders (`.border`, `.border-top`, `.rounded`, …), background utilities (`.bg-light`, `.bg-error-light`, …). Same names you'd expect from Bootstrap-ish utility CSS — see `global.css` §Utilities for the full list.
+- Panel: `--n-grouped`, `--n-r-panel`. No `.card` borders.
+- Keycaps: 20 px tall, min-width 20, `--n-r-key`, `--n-fill-2`, 11 px 500 `--n-text-2`, one keycap per key.
+- Progress bar: 4 px, track `--n-track`, fill `--n-accent`. Download ring: 2 px.
+- Tooltip: `--n-text-1` background, white 11 px text, `--n-r-control`.
 
 ---
 
@@ -424,9 +275,9 @@ import { createIcons, icons } from 'lucide';
 createIcons({ icons });
 ```
 
-- Default sizes: 14px (inline), 16px (buttons), 20–24px (page headers).
-- Icon colour comes from `currentColor` — set `color: var(--fg-3)` on the container, not on the SVG.
-- Do not paste raw SVG markup. Do not add a new icon library.
+- Sizes: 18 px toolbar, 16 px fields, menus and buttons, 14 px inline. Default 2 px stroke.
+- Colour comes from `currentColor` — set `color` on the container.
+- The error page and certificate warning keep their own inline SVGs (they're served from the main process); everything in the renderer uses Lucide.
 
 ---
 
@@ -438,65 +289,60 @@ createIcons({ icons });
 | `src/renderer/styles/notification.css`          | Cross-page notification styles                          |
 | `src/renderer/pages/<page>/index.css`           | Per-page CSS — must `@import` global.css                |
 | `src/renderer/overlay/panels/<name>/<name>.css` | Overlay panel CSS                                       |
-| `src/renderer/browser-layout/*.css`             | Chrome (tabs, nav bar, find-in-page, permission prompt) |
+| `src/renderer/browser-layout/*.css`             | Chrome (tabs, nav bar, find in page, permission prompt) |
 | `src/renderer/assets/`                          | Logo, favicon — no inline data URLs for branding        |
 
-**Never** add CSS under `src/main/`. Main process is headless.
-
-**Never** add a new webpack entry point silently — register it in `forge.config.ts` _and_ `webpack.renderer.config.ts` (see `CLAUDE.md` → Renderer Entry Points).
+**Never** add CSS under `src/main/` (the error and SSL pages are self-contained HTML templates and keep their own inline `<style>`). **Never** add a webpack entry point silently — register it in `forge.config.ts` _and_ `webpack.renderer.config.ts`.
 
 ---
 
-## 8. Anti-patterns — common mistakes to refuse
+## 8. Anti-patterns — refuse these
 
-| Anti-pattern                                                                  | Why it's wrong                                        | Do this instead                                                     |
-| ----------------------------------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------- |
-| `border-radius: 12px` / `border-radius: 999px`                                | Nav0 radii cap at 6px (full-circle only for avatars)  | `var(--r-md)` or `var(--r-lg)`                                      |
-| `box-shadow: 0 4px 20px rgba(59, 130, 246, .3)`                               | Coloured glow — not paper-flat                        | `var(--shadow-md)` (or `--new-tab-card-shadow` on the new-tab page) |
-| `color: #555` / `background: #f0f0f0`                                         | Hardcoded grey                                        | `var(--fg-3)` / `var(--bg-2)`                                       |
-| Overlay panel `background: var(--bg-0)`                                       | Pure white blends with the active tab / content layer | `var(--chrome-2)`                                                   |
-| Nav bar `background: var(--bg-0)`                                             | Same blending issue at the chrome level               | `var(--chrome-1)`                                                   |
-| `font-family: var(--*-mono)` on a version label, date, table header, or badge | Mono is for code only — UI chrome stays sans          | Drop the `font-family` line; sans is inherited                      |
-| Bespoke per-page hover colour (`var(--bg-1)`, custom rgba, etc.)              | Breaks the universal row-highlight pattern            | `var(--bg-3)` + 2-px `--nav0-red-600` anchor bar                    |
-| `style="margin-top: 13px"` in HTML                                            | Inline style + off-scale spacing                      | Class + `--spacing-md`                                              |
-| `padding: 7px 11px`                                                           | Off the spacing scale                                 | Round to 4/8/16/24                                                  |
-| New `<svg>` markup pasted in HTML                                             | Bypasses Lucide                                       | `<i data-lucide="…">` + `createIcons`                               |
-| Gradient backgrounds, random blur "glass" panels                              | Not minimal/utilitarian                               | Flat `--chrome-*` / `--bg-0` + hairline border                      |
-| Reusing `--private-bg` red for danger CTAs                                    | That red is reserved for the private-mode signal      | `--danger` (Nav0 red 600)                                           |
-| Settings toggles / radios in `--accent` blue                                  | Settings accent was repointed to brand red            | `--n0-accent` (already aliased to `--nav0-red-600`)                 |
-| `z-index: 9999`                                                               | Bypasses the layer system                             | `var(--z-modal)` / `var(--z-toast)`                                 |
-| Adding a new colour token without updating `global.css` and this doc          | Drift                                                 | Add it once, in `global.css`, then reference                        |
+| Anti-pattern                                                           | Why                              | Do this instead                                                       |
+| ---------------------------------------------------------------------- | -------------------------------- | --------------------------------------------------------------------- |
+| Red (`--nav0-red-*`, `--n-danger`) on a selection, toggle, rule or tab | Red means danger only            | Selection style; `--n-accent` for on-states                           |
+| 2 px coloured anchor bar on rows or tabs                               | Retired                          | Selection style                                                       |
+| Grey page background with white cards                                  | One page background              | White page, grey panels                                               |
+| Bordered white cards on a page                                         | Visual noise                     | Grey panel, no border                                                 |
+| Warm off-white chrome (`#f7f6f4`, `#e7e5e1`, …)                        | Retired                          | `--n-toolbar`, `--n-strip`                                            |
+| A line between the active tab and the toolbar                          | The active tab is connected      | No bottom edge on the active tab                                      |
+| `border-radius: 12px / 16px / 999px` on cards, buttons, chips          | Off the scale                    | `--n-r-*`                                                             |
+| Page titles at weight 200/300, or a rule under the title               | Retired masthead                 | Large title, 700                                                      |
+| Solid accent fill with white text for a selected row                   | Too heavy                        | `--n-accent-soft` + dark text                                         |
+| `outline: 2px solid #000` / focus ring on click                        | Harsh, and shows for mouse users | `:focus-visible` + `--n-focus-ring`                                   |
+| Link-blue URLs in lists and palettes                                   | Competes with titles             | `--n-text-3`                                                          |
+| Coloured category labels                                               | Colour carries no meaning        | Icon + label on a neutral badge                                       |
+| `animation: … infinite` in the chrome                                  | Distracting                      | Static state; only loaders animate                                    |
+| Black page inside light chrome (certificate warning)                   | Two themes in one window         | Light page, red heading and icon                                      |
+| `text-transform: uppercase` on labels                                  | Shouty, harder to read           | Sentence case, 12 px 600 if it must stand out                         |
+| `word-break: break-all` on prose or the UA string                      | Breaks words mid-way             | Normal wrapping (`overflow-wrap: anywhere` only for unbroken strings) |
+| Hardcoded hex, inline `style=""`, raw `<svg>`, `z-index: 9999`         | Drift                            | Tokens, classes, Lucide, the z-index scale                            |
 
 ---
 
 ## 9. Adding a new built-in page — checklist
 
-1. Folder: `src/renderer/pages/<name>/` with `index.html`, `index.css`, `index.ts`.
-2. CSS starts with `@import url('../../styles/global.css');`.
-3. Use the **editorial dashboard skeleton** (§4.1) unless the page has a genuinely different purpose.
-4. Register a new webpack entry point in both `forge.config.ts` and `webpack.renderer.config.ts` (see `CLAUDE.md`).
-5. Icons via Lucide; call `createIcons({ icons })` after DOM is ready.
-6. No analytics, telemetry, network calls, or third-party fonts/CSS. (Privacy-first — see `CLAUDE.md` → Design Principles.)
-7. Test in **both** normal and private windows. The page must still read correctly when surrounding chrome is `--private-bg`.
-8. Reduced motion: animations gated on `@media (prefers-reduced-motion: reduce)`.
+1. Folder `src/renderer/pages/<name>/` with `index.html`, `index.css`, `index.ts`; CSS starts with the `global.css` import.
+2. White page, 880 or 680 px column, Large title, toolbar row if needed, grey panels for groups, lists on white (§4.2).
+3. Register the webpack entry point in both `forge.config.ts` and `webpack.renderer.config.ts`.
+4. Lucide icons; `createIcons({ icons })` after the DOM is ready.
+5. No analytics, telemetry, network calls or third-party fonts/CSS.
+6. Check it in normal and private windows, with reduced motion, reduced transparency and increased contrast.
 
 ---
 
 ## 10. Pre-flight checklist before reporting a UI change "done"
 
-- [ ] CSS imports `global.css`.
-- [ ] No hardcoded colours; no off-scale spacing/font sizes; no off-scale radii.
-- [ ] Chrome / overlay surfaces use `--chrome-1` / `--chrome-2`; content stays `--bg-0`.
-- [ ] Row hovers use `var(--bg-3)` + 2-px `--nav0-red-600` anchor bar (`::before`).
-- [ ] Masthead divider on built-in pages is `1px solid var(--nav0-red-600)`.
-- [ ] No `font-family: var(--*-mono)` on non-code UI (versions, dates, labels, headers, badges).
-- [ ] Shadows from the `--shadow-*` set (or `--new-tab-card-shadow` on the new-tab page only).
-- [ ] Focus state is the soft halo (`--shadow-focus` or `--shadow-focus-accent`).
-- [ ] Icons are Lucide; no inline `<svg>`.
-- [ ] No inline `style=""` attributes in HTML / no DOM-level inline styles in TS.
-- [ ] `prefers-reduced-motion` honoured for any new animation.
-- [ ] Lints pass: `npm run lint` (and stylelint if you ran it).
-- [ ] If a new token, utility, or component was introduced: added to `global.css` **and** documented in this file.
-- [ ] App boots: `npm run start` and the affected page renders correctly in both normal and private windows.
+- [ ] CSS imports `global.css`; no hardcoded colours, radii, font sizes or off-scale spacing.
+- [ ] Red appears only for danger (insecure, failure, destructive confirm).
+- [ ] Selection uses `--n-accent-soft` + `--n-text-1` + `--n-accent` icon.
+- [ ] Built-in pages are white; groups are grey panels; controls inside panels are white.
+- [ ] Focus rings use `:focus-visible`; nothing outlines on mouse click.
+- [ ] Icons are Lucide at 18 / 16 / 14 px; no inline `<svg>` in the renderer.
+- [ ] No inline `style=""` in HTML; no DOM-level inline styles in TS.
+- [ ] Mono only on code-like content.
+- [ ] `prefers-reduced-motion` and `prefers-reduced-transparency` honoured.
+- [ ] `npm run lint` passes; the app boots with `npm run start`; checked in a normal and a private window.
+- [ ] Any new token or component is in `global.css` **and** documented here.
 
-If you cannot tick all the relevant boxes, say so explicitly in the reply — do **not** report the change as complete.
+If you can't tick every relevant box, say so explicitly — don't report the change as complete.
