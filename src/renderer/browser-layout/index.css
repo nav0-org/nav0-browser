@@ -40,6 +40,12 @@
   user-select: none;
 }
 
+/* <img> is natively draggable, and -webkit-user-drag isn't inherited, so the
+   favicon (and any future image in the strip) has to opt out on its own. */
+.tab-bar img {
+  -webkit-user-drag: none;
+}
+
 /* Leave space for macOS traffic lights (close/minimize/maximize) — not in fullscreen */
 body.platform-darwin:not(.is-fullscreen) .tab-bar {
   padding-left: 78px;
