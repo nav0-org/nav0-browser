@@ -1,25 +1,33 @@
+@import url('../styles/global.css');
+
 /* ==========================================================================
    Find in Page Bar Styles (embedded in browser-layout)
    ========================================================================== */
 
 .find-in-page-bar {
   flex-shrink: 0;
-  background-color: var(--bg-0);
-  border-bottom: 1px solid var(--border-1);
 }
 
 .find-in-page-bar .find-bar-wrapper {
   display: flex;
-  padding: 8px 12px;
 }
 
 .find-in-page-bar .find-bar {
+  height: 44px;
+  background-color: var(--n-toolbar);
+  border-bottom: 1px solid var(--n-chrome-line);
   display: flex;
   align-items: center;
   gap: 4px;
-  background-color: var(--bg-0);
-  animation: findBarSlideDown 0.15s ease-out;
+  padding: 0 8px 0 12px;
   flex: 1;
+  animation: findBarSlideDown var(--dur-fast) ease-out;
+}
+
+/* Lavender tint in a private window, matching the chrome. */
+body.is-private .find-in-page-bar .find-bar {
+  background-color: var(--n-private-toolbar);
+  border-bottom-color: var(--n-private-line);
 }
 
 @keyframes findBarSlideDown {
@@ -41,49 +49,64 @@
 
 /* Input Group */
 .find-in-page-bar .find-input-group {
+  width: 400px;
+  flex: none;
+  height: 30px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex: 1;
-  min-width: 0;
+  gap: 8px;
+  padding: 0 10px;
+  border-radius: var(--n-r-control);
+  background-color: var(--n-card);
+  box-shadow: var(--n-field-shadow);
+  transition: box-shadow var(--dur-fast);
+}
+
+.find-in-page-bar .find-input-group:focus-within {
+  box-shadow: var(--n-focus-ring-field);
 }
 
 .find-in-page-bar .search-icon {
-  color: var(--fg-4);
+  width: 14px;
+  height: 14px;
+  color: var(--n-text-3);
   flex-shrink: 0;
 }
 
 .find-in-page-bar .find-input {
-  border: none;
-  outline: none;
-  font-size: 13px;
-  color: var(--fg-2);
-  background: transparent;
   flex: 1;
-  min-width: 120px;
-  padding: 4px 0;
-  line-height: 1.4;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--n-text-1);
+  caret-color: var(--n-accent);
 }
 
 .find-in-page-bar .find-input::placeholder {
-  color: var(--fg-4);
-}
-
-.find-in-page-bar .find-input.no-match {
-  color: var(--danger);
+  color: var(--n-text-3);
 }
 
 .find-in-page-bar .match-counter {
-  font-size: 11px;
-  color: var(--fg-3);
+  flex: none;
+  font-size: 12px;
+  color: var(--n-text-3);
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  flex-shrink: 0;
-  min-width: 48px;
-  text-align: right;
+}
+
+/* Error / no-matches / invalid-regex state (toggled by find-in-page.ts) */
+.find-in-page-bar .find-input-group:has(.find-input.no-match) {
+  box-shadow: var(--n-focus-ring-field-danger);
+}
+
+.find-in-page-bar .find-input.no-match {
+  color: var(--n-danger);
 }
 
 .find-in-page-bar .match-counter.no-match {
-  color: var(--danger);
+  color: var(--n-danger);
 }
 
 /* Actions */
@@ -91,14 +114,15 @@
   display: flex;
   align-items: center;
   gap: 2px;
-  flex-shrink: 0;
+  flex: 1;
+  min-width: 0;
 }
 
 .find-in-page-bar .find-separator {
   width: 1px;
   height: 18px;
-  background-color: var(--border-1);
-  margin: 0 3px;
+  background-color: var(--n-chrome-line);
+  margin: 0 4px;
 }
 
 /* Toggle buttons (Match Case, Whole Word, Regex) */
@@ -106,80 +130,79 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
+  min-width: 28px;
   height: 28px;
-  border: 1px solid transparent;
-  border-radius: var(--r-md);
+  padding: 0 5px;
+  border: 0;
+  border-radius: var(--n-r-icon);
   background: transparent;
-  color: var(--fg-3);
+  color: var(--n-text-2);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s;
-  padding: 0;
+  transition:
+    background-color var(--dur-fast),
+    color var(--dur-fast);
 }
 
-.find-in-page-bar .find-toggle-btn:hover {
-  background-color: var(--bg-3);
-  color: var(--fg-2);
+.find-in-page-bar .find-toggle-btn:not(.active, [aria-pressed='true']):hover {
+  background-color: var(--n-fill);
 }
 
-.find-in-page-bar .find-toggle-btn.active {
-  background-color: #e8e0f0;
-  color: #6c47b8;
-  border-color: #c4b3e0;
-}
-
-.find-in-page-bar .find-toggle-btn:focus-visible {
-  outline: 2px solid var(--fg-2);
-  outline-offset: 1px;
+.find-in-page-bar .find-toggle-btn.active,
+.find-in-page-bar .find-toggle-btn[aria-pressed='true'] {
+  background-color: var(--n-accent-soft);
+  color: var(--n-accent);
 }
 
 .find-in-page-bar .whole-word-icon {
   font-size: 11px;
-  border-left: 2px solid currentColor;
-  border-right: 2px solid currentColor;
+  border-left: 1.5px solid currentColor;
+  border-right: 1.5px solid currentColor;
   padding: 0 2px;
   line-height: 1;
 }
 
-/* Navigation buttons */
+/* Navigation + close buttons */
 .find-in-page-bar .find-nav-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 28px;
   height: 28px;
-  border: none;
-  border-radius: var(--r-md);
+  border: 0;
+  border-radius: var(--n-r-icon);
   background: transparent;
-  color: var(--fg-3);
+  color: var(--n-text-2);
   cursor: pointer;
-  transition: all 0.15s;
-  padding: 0;
+  transition:
+    background-color var(--dur-fast),
+    color var(--dur-fast);
 }
 
 .find-in-page-bar .find-nav-btn:hover {
-  background-color: var(--bg-3);
-  color: var(--fg-2);
+  background-color: var(--n-fill);
 }
 
 .find-in-page-bar .find-nav-btn:disabled {
-  opacity: 0.35;
+  color: var(--n-text-4);
   cursor: not-allowed;
 }
 
 .find-in-page-bar .find-nav-btn:disabled:hover {
   background: transparent;
-  color: var(--fg-3);
+  color: var(--n-text-4);
 }
 
-.find-in-page-bar .find-nav-btn:focus-visible {
-  outline: 2px solid var(--fg-2);
-  outline-offset: 1px;
+/* Close button sits at the far right of the bar */
+.find-in-page-bar .find-close-btn {
+  margin-left: auto;
 }
 
-.find-in-page-bar .find-close-btn:hover {
-  background-color: var(--danger-soft);
-  color: var(--danger);
+@media (prefers-reduced-motion: reduce) {
+  .find-in-page-bar .find-input-group,
+  .find-in-page-bar .find-toggle-btn,
+  .find-in-page-bar .find-nav-btn {
+    transition: none;
+  }
 }

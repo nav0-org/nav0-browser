@@ -1,21 +1,23 @@
+@import url('global.css');
+
 .notification-container {
   position: fixed;
   top: 20px;
   right: 20px;
-  z-index: 1000;
+  z-index: var(--z-toast);
   display: flex;
   flex-direction: column;
   gap: 10px;
   max-width: 400px;
 }
 
-/* Base Notification Styles */
+/* Base Notification Styles — a white card with a 4-px semantic status edge. */
 .notification {
   padding: 16px 20px;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  background-color: #fafafa;
-  color: #333;
+  border-radius: var(--n-r-panel);
+  box-shadow: var(--shadow-md);
+  background-color: var(--n-card);
+  color: var(--n-text-1);
   font-weight: 500;
   position: relative;
   overflow: hidden;
@@ -24,7 +26,6 @@
   transition: all 0.3s ease-in-out;
   cursor: pointer;
   border-left: 4px solid;
-  /* font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; */
 }
 
 /* Animation States */
@@ -38,21 +39,21 @@
   opacity: 0;
 }
 
-/* Notification Types - Border Colors */
+/* Notification Types — semantic status edge (blue means info, not brand). */
 .notification.success {
-  border-left-color: #000000;
+  border-left-color: var(--n-success);
 }
 
 .notification.info {
-  border-left-color: #2563eb;
+  border-left-color: var(--n-accent);
 }
 
 .notification.warning {
-  border-left-color: #d97706;
+  border-left-color: var(--n-warning);
 }
 
 .notification.error {
-  border-left-color: #dc2626;
+  border-left-color: var(--n-danger);
 }
 
 /* Notification Icon */
@@ -67,6 +68,13 @@
   display: inline-block;
   vertical-align: top;
   line-height: 1.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notification {
+    transition: opacity 0.3s ease;
+    transform: none;
+  }
 }
 
 /* Responsive Design */

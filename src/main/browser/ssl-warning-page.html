@@ -6,20 +6,24 @@
     <title>{{TITLE}}</title>
     <style>
       :root {
-        --bg-0: #0a0a0a;
-        --bg-panel: rgba(255, 255, 255, 0.02);
-        --bg-panel-strong: rgba(255, 255, 255, 0.05);
-        --fg-1: #ffffff;
-        --fg-2: #d4d4d4;
-        --fg-3: #a3a3a3;
-        --fg-4: #737373;
-        --border-1: rgba(255, 255, 255, 0.08);
-        --border-2: rgba(255, 255, 255, 0.18);
-        --nav0-red-500: #ef4444;
-        --nav0-red-600: #dc2626;
-        --r-xs: 2px;
-        --r-sm: 3px;
-        --r-md: 4px;
+        --bg-0: #ffffff;
+        --bg-panel: #f5f5f7;
+        --bg-panel-strong: rgba(0, 0, 0, 0.05);
+        --fg-1: #1d1d1f;
+        --fg-2: #424245;
+        --fg-3: #6e6e73;
+        --fg-4: #6e6e73;
+        --border-1: #e5e5ea;
+        --border-2: #d1d1d6;
+        --icon-well: #f2f2f4;
+        --danger: #d70015;
+        --danger-soft: rgba(215, 0, 21, 0.08);
+        --accent: #0066d6;
+        --accent-hover: #0058b9;
+        --r-xs: 4px;
+        --r-sm: 4px;
+        --r-md: 6px;
+        --r-lg: 8px;
         --dur-fast: 120ms;
         --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
         --font-sans:
@@ -35,114 +39,101 @@
       html,
       body {
         background: var(--bg-0);
-        color: var(--fg-2);
+        color: var(--fg-1);
         font-family: var(--font-sans);
         min-height: 100vh;
         -webkit-font-smoothing: antialiased;
       }
 
       .ssl-wrapper {
-        max-width: 1080px;
+        max-width: 880px;
         margin: 0 auto;
-        padding: 48px 56px 80px;
+        padding: 72px 24px 80px;
       }
 
       .ssl-head {
-        padding-bottom: 24px;
-        border-bottom: 1px solid var(--nav0-red-600);
         margin-bottom: 28px;
       }
 
       .ssl-title {
-        font-size: 48px;
-        font-weight: 200;
-        letter-spacing: -0.5px;
-        color: var(--fg-1);
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--danger);
         margin: 0;
-        line-height: 1.2;
+        line-height: 34px;
       }
 
       .ssl-main {
-        background: var(--bg-panel);
-        border: 1px solid var(--border-1);
-        border-radius: var(--r-md);
-        padding: 32px;
         display: flex;
         flex-direction: column;
-        gap: 14px;
       }
 
       .ssl-glyph {
-        width: 44px;
-        height: 44px;
+        width: 52px;
+        height: 52px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: var(--r-sm);
-        background: rgba(220, 38, 38, 0.12);
-        border: 1px solid rgba(220, 38, 38, 0.35);
-        color: var(--nav0-red-500);
+        border-radius: var(--r-xs);
+        background: var(--danger-soft);
+        color: var(--danger);
       }
 
       .ssl-glyph svg {
-        width: 22px;
-        height: 22px;
+        width: 24px;
+        height: 24px;
         display: block;
       }
 
       .ssl-eyebrow {
+        margin-top: 18px;
+        font-family: var(--font-mono);
         font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: var(--nav0-red-500);
-        font-weight: 500;
+        letter-spacing: 0.04em;
+        color: var(--fg-3);
       }
 
       .ssl-heading {
+        margin: 6px 0 0;
         font-size: 22px;
-        font-weight: 600;
-        letter-spacing: -0.3px;
+        line-height: 28px;
+        font-weight: 700;
+        letter-spacing: -0.015em;
         color: var(--fg-1);
-        margin: 0;
       }
 
       .ssl-text {
-        font-size: 14px;
-        line-height: 1.55;
+        margin: 10px 0 0;
+        font-size: 13px;
+        line-height: 20px;
         color: var(--fg-2);
         max-width: 620px;
-        margin: 0;
       }
 
       .ssl-text .host {
-        font-size: 13px;
         font-weight: 600;
         color: var(--fg-1);
-        background: var(--bg-panel-strong);
-        border: 1px solid var(--border-2);
-        border-radius: var(--r-xs);
-        padding: 1px 6px;
       }
 
       .ssl-code {
         align-self: flex-start;
+        margin-top: 14px;
         display: inline-flex;
         align-items: center;
-        height: 24px;
-        padding: 0 10px;
+        padding: 3px 8px;
         font-family: var(--font-mono);
-        font-size: 11.5px;
-        color: var(--nav0-red-500);
-        background: rgba(220, 38, 38, 0.08);
-        border: 1px solid rgba(220, 38, 38, 0.35);
+        font-size: 12px;
+        color: var(--fg-2);
+        background: var(--bg-panel-strong);
         border-radius: var(--r-xs);
       }
 
       .ssl-actions {
         display: inline-flex;
         flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 6px;
+        gap: 10px;
+        margin-top: 22px;
       }
 
       .btn {
@@ -150,9 +141,9 @@
         align-items: center;
         gap: 6px;
         padding: 0 14px;
-        height: 36px;
-        border-radius: var(--r-sm);
-        font-size: 14px;
+        height: 32px;
+        border-radius: var(--r-xs);
+        font-size: 13px;
         font-weight: 500;
         cursor: pointer;
         border: 1px solid transparent;
@@ -164,23 +155,24 @@
       }
 
       .btn.primary {
-        background: #ffffff;
-        color: #0a0a0a;
-        border-color: #ffffff;
+        background: var(--accent);
+        color: #ffffff;
+        border-color: var(--accent);
       }
 
       .btn.primary:hover {
-        background: #e5e5e5;
+        background: var(--accent-hover);
+        border-color: var(--accent-hover);
       }
 
       .btn.secondary {
         background: transparent;
-        color: #ffffff;
+        color: var(--fg-1);
         border-color: var(--border-2);
       }
 
       .btn.secondary:hover {
-        background: var(--bg-panel-strong);
+        background: var(--bg-panel);
       }
 
       .btn svg {
@@ -190,7 +182,9 @@
 
       /* Advanced toggle + risks panel */
       .advanced {
-        margin-top: 24px;
+        margin-top: 30px;
+        padding-top: 18px;
+        border-top: 1px solid var(--border-1);
       }
 
       .advanced-toggle {
@@ -198,21 +192,19 @@
         align-items: center;
         gap: 6px;
         font-size: 13px;
-        color: var(--fg-3);
+        font-weight: 600;
+        color: var(--fg-1);
         background: transparent;
         border: 0;
-        padding: 6px 0;
+        padding: 0;
         cursor: pointer;
-      }
-
-      .advanced-toggle:hover {
-        color: var(--fg-1);
       }
 
       .advanced-toggle .chev {
         display: inline-block;
         transition: transform var(--dur-fast);
         font-size: 10px;
+        color: var(--fg-3);
       }
 
       .advanced-toggle.open .chev {
@@ -221,7 +213,7 @@
 
       .advanced-body {
         display: none;
-        margin-top: 14px;
+        margin: 14px 0 0 20px;
       }
 
       .advanced-body.open {
@@ -230,21 +222,18 @@
 
       .panel {
         background: var(--bg-panel);
-        border: 1px solid var(--border-1);
         border-radius: var(--r-md);
         overflow: hidden;
       }
 
       .panel-head {
-        padding: 12px 16px;
-        border-bottom: 1px solid var(--border-1);
+        padding: 14px 16px 10px;
       }
 
       .panel-head .panel-title {
-        font-size: 14px;
+        font-size: 12px;
         font-weight: 600;
-        color: var(--fg-1);
-        letter-spacing: -0.1px;
+        color: var(--fg-3);
       }
 
       .panel-head .panel-sub {
@@ -256,66 +245,47 @@
       .risk-list {
         list-style: none;
         margin: 0;
-        padding: 0;
+        padding: 0 16px;
       }
 
       .risk-list li {
         display: grid;
-        grid-template-columns: 14px 1fr;
-        gap: 12px;
-        padding: 12px 16px;
-        border-bottom: 1px solid var(--border-1);
+        grid-template-columns: 4px 1fr;
+        gap: 10px;
+        padding: 3px 0;
         font-size: 13px;
-        line-height: 1.5;
+        line-height: 19px;
         color: var(--fg-2);
-      }
-
-      .risk-list li:last-child {
-        border-bottom: 0;
       }
 
       .risk-list li::before {
         content: '';
-        width: 6px;
-        height: 6px;
+        width: 4px;
+        height: 4px;
         border-radius: 50%;
-        background: var(--nav0-red-500);
-        margin-top: 7px;
+        background: #8e8e93;
+        margin-top: 8px;
       }
 
       .panel-foot {
-        padding: 14px 16px;
-        border-top: 1px solid var(--border-1);
-        background: var(--bg-panel-strong);
+        padding: 10px 16px 16px;
       }
 
-      /* Proceed button — bordered red treatment to signal danger; sits
-         inside the Advanced panel so it's intentionally lower priority
-         than the primary "Go back to safety" action above. */
+      /* Proceed link — plain red text link inside the Advanced panel so it's
+         intentionally lower priority than the primary "Go back to safety"
+         action above. */
       .proceed-link {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 0 14px;
-        height: 36px;
-        font-size: 14px;
+        padding: 0;
+        font-size: 13px;
         font-weight: 500;
-        color: var(--nav0-red-500);
+        color: var(--danger);
         background: transparent;
-        border: 1px solid rgba(220, 38, 38, 0.45);
-        border-radius: var(--r-sm);
+        border: 0;
         cursor: pointer;
         font-family: var(--font-sans);
-        transition:
-          background var(--dur-fast),
-          border-color var(--dur-fast),
-          color var(--dur-fast);
-      }
-
-      .proceed-link:hover {
-        background: rgba(220, 38, 38, 0.12);
-        border-color: var(--nav0-red-500);
-        color: #ffffff;
       }
 
       .ssl-url {
@@ -323,6 +293,13 @@
         font-size: 11.5px;
         color: var(--fg-4);
         word-break: break-all;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .btn,
+        .advanced-toggle .chev {
+          transition: none;
+        }
       }
     </style>
   </head>

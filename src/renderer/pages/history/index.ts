@@ -1,7 +1,6 @@
 import { HtmlUtils } from '../../../renderer/common/html-utils';
 import { FormatUtils } from '../../../renderer/common/format-utils';
 import { BrowsingHistoryRecord } from '../../../types/browsing-history-record';
-import { WEBSITE_CATEGORY_COLORS } from '../../../constants/app-constants';
 import { WEBSITE_CATEGORY_MAP } from '../../../constants/data-constants';
 import './index.css';
 
@@ -10,9 +9,15 @@ createIcons({ icons });
 
 // --- Constants ---
 const PAGE_SIZE = 100;
-// Grayscale ramp from the Nav0 design system — used for both the heatmap
-// cells and the legend swatches.
-const HEATMAP_LEVELS = ['#f5f5f5', '#e5e5e5', '#bdbdbd', '#6b7280', '#0a0a0a'];
+// Slate data ramp (--n-data-0..4) from the Nav0 design system — used for
+// both the heatmap cells and the legend swatches.
+const HEATMAP_LEVELS = [
+  'var(--n-data-0)',
+  'var(--n-data-1)',
+  'var(--n-data-2)',
+  'var(--n-data-3)',
+  'var(--n-data-4)',
+];
 
 // Per-category lucide icon for the "By category" panel rows.
 const CATEGORY_ICONS: Record<string, string> = {
@@ -243,7 +248,6 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
   });
   const faviconUrl = entry.faviconUrl || `https://${entry.topLevelDomain}/favicon.ico`;
   const category = getCategoryForDomain(entry.topLevelDomain);
-  const catColor = WEBSITE_CATEGORY_COLORS[category] || WEBSITE_CATEGORY_COLORS.other;
   const catIcon = CATEGORY_ICONS[category] || CATEGORY_ICONS.other;
 
   const activeStr =
@@ -262,7 +266,7 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
       <span class="entry-title" title="${escapeHtml(entry.title)}">${escapeHtml(entry.title)}</span>
       <span class="entry-domain">${escapeHtml(entry.topLevelDomain)}</span>
     </div>
-    <span class="entry-category-badge" style="background:${catColor}18;color:${catColor}"><i data-lucide="${catIcon}" width="12" height="12"></i>${category}</span>
+    <span class="entry-category-badge"><i data-lucide="${catIcon}" width="12" height="12"></i>${category}</span>
     ${durationHtml}
     <button class="entry-delete-btn" title="Remove"><i data-lucide="x" width="14" height="14"></i></button>
   `;
@@ -372,13 +376,13 @@ function renderHeatmap(
   for (const m of monthLabels) {
     const x = dayLabelW + m.weekIndex * (cellSize + cellGap);
     if (x - lastLabelX < minLabelGap) continue;
-    svgContent += `<text x="${x}" y="12" font-size="9" fill="var(--text-secondary)">${m.month}</text>`;
+    svgContent += `<text x="${x}" y="12" font-size="9" fill="var(--n-text-3)">${m.month}</text>`;
     lastLabelX = x;
   }
 
   // Day labels — right-aligned next to the cell grid.
   for (let i = 0; i < dayLabels.length; i++) {
-    svgContent += `<text x="${dayLabelW - 6}" y="${topPad + i * (cellSize + cellGap) + cellSize - 1}" font-size="8" text-anchor="end" fill="var(--text-secondary)">${dayLabels[i]}</text>`;
+    svgContent += `<text x="${dayLabelW - 6}" y="${topPad + i * (cellSize + cellGap) + cellSize - 1}" font-size="8" text-anchor="end" fill="var(--n-text-3)">${dayLabels[i]}</text>`;
   }
 
   // Cells
@@ -390,7 +394,7 @@ function renderHeatmap(
       const y = topPad + day.dow * (cellSize + cellGap);
       // Per Nav0 design system: today's cell is just the standard fill — no ring.
       void isToday;
-      svgContent += `<rect class="heatmap-cell" x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" rx="2" fill="${HEATMAP_LEVELS[level]}" data-label="${day.label}" data-count="${day.count}" data-active="${day.active}" />`;
+      svgContent += `<rect class="heatmap-cell" x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" rx="2" style="fill:${HEATMAP_LEVELS[level]}" data-label="${day.label}" data-count="${day.count}" data-active="${day.active}" />`;
     }
   }
 
@@ -526,16 +530,15 @@ function renderCategoryChart(): void {
 
   categoryContainer.innerHTML = cats
     .map(([cat, val]) => {
-      const color = WEBSITE_CATEGORY_COLORS[cat] || WEBSITE_CATEGORY_COLORS.other;
       const iconName = CATEGORY_ICONS[cat] || CATEGORY_ICONS.other;
       const valLabel = useDuration ? FormatUtils.formatDuration(val) : `${val}`;
       return `
     <div class="category-row">
-      <span class="category-icon" style="color:${color}"><i data-lucide="${iconName}" width="14" height="14"></i></span>
+      <span class="category-icon"><i data-lucide="${iconName}" width="14" height="14"></i></span>
       <span class="category-name">${cat}</span>
       <span class="category-duration">${valLabel}</span>
       <div class="category-bar-track">
-        <div class="category-bar-fill" style="width:${(val / maxVal) * 100}%;background:${color}"></div>
+        <div class="category-bar-fill" style="width:${(val / maxVal) * 100}%"></div>
       </div>
     </div>`;
     })

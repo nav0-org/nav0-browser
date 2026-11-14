@@ -17,16 +17,6 @@ type WindowGroup = {
   tabs: TabInfo[];
 };
 
-const WINDOW_COLORS = [
-  '#3b82f6',
-  '#f59e0b',
-  '#22c55e',
-  '#ef4444',
-  '#a855f7',
-  '#ec4899',
-  '#14b8a6',
-  '#f97316',
-];
 const GRID_COLS = 4;
 
 let allGroups: WindowGroup[] = [];
@@ -212,14 +202,13 @@ const render = () => {
     }
 
     if (showHeaders) {
-      const color = WINDOW_COLORS[gi % WINDOW_COLORS.length];
       const header = document.createElement('div');
       header.className = 'window-header';
       header.innerHTML = `
-        <span class="window-dot" style="background:${color}"></span>
+        <span class="window-dot"></span>
         <span class="window-name">${escapeHtml(group.windowName)}</span>
         <span class="window-tab-count">&mdash; ${group.tabs.length} tab${group.tabs.length !== 1 ? 's' : ''}</span>
-        <span class="window-line" style="background:${color}"></span>
+        <span class="window-line"></span>
       `;
       groupEl.appendChild(header);
     }

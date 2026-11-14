@@ -1,11 +1,5 @@
 @import url('../styles/global.css');
 
-/* Tokens scoped to the chrome (rest are in global.css). */
-:root {
-  --tab-strip-bg: var(--tab-inactive);
-  --tab-divider: rgba(0, 0, 0, 0.08);
-}
-
 .browser-layout-container {
   display: flex;
   flex-direction: column;
@@ -22,16 +16,16 @@
 }
 
 /* === Tab strip ===========================================
-   Flush, segmented blocks on a single gray band. Active tab
-   drops out to white, anchored by a 2-px compass-red bar on
-   its left edge. Hairline dividers replace per-tab outlines. */
+   A 40 px cool-grey band. Tabs are 34 px, sitting 6 px below
+   the top; the active tab shares the toolbar surface and
+   connects to it, with no line between them. */
 .tab-bar {
   display: flex;
-  align-items: stretch;
-  height: 38px;
+  align-items: flex-end;
+  height: 40px;
   padding: 0;
-  background-color: var(--tab-strip-bg);
-  border-bottom: 1px solid var(--border-1);
+  background-color: var(--n-strip);
+  box-shadow: inset 0 -1px 0 var(--n-chrome-line);
   flex-shrink: 0;
   -webkit-app-region: drag;
   /* Chrome, not content: tab titles and the private badge must not be
@@ -61,10 +55,10 @@ body.platform-linux .tab-bar {
   padding-right: calc(100vw - env(titlebar-area-x, 0px) - env(titlebar-area-width, 100vw));
 }
 
-/* Private mode — dark strip with red accent */
+/* Private mode — a calm lavender tint, never red */
 body.is-private .tab-bar {
-  background-color: #2a0a0a;
-  border-bottom-color: #4a1414;
+  background-color: var(--n-private-strip);
+  box-shadow: inset 0 -1px 0 var(--n-private-line);
 }
 
 /* === macOS traffic lights (fullscreen only) ==============
@@ -78,6 +72,7 @@ body.is-private .tab-bar {
    this cluster hides; Windows/Linux use titleBarOverlay. */
 .traffic-lights {
   display: none;
+  align-self: center;
   align-items: center;
   gap: var(--spacing-sm);
   padding: 0 var(--spacing-md) 0 12px;
@@ -92,7 +87,7 @@ body.platform-darwin.is-fullscreen .traffic-lights {
   width: 12px;
   height: 12px;
   padding: 0;
-  border-radius: var(--r-full);
+  border-radius: var(--n-r-full);
   border: 1px solid var(--mac-control-disabled-border);
   background: var(--mac-control-disabled);
   display: inline-flex;
@@ -145,19 +140,20 @@ body.platform-darwin.is-fullscreen .traffic-lights {
   -webkit-app-region: no-drag;
 }
 
-/* Private badge — flush block at the strip's leading edge */
+/* Private badge — the lavender "Private" label after the window controls */
 .private-window-identifier {
   display: none;
+  align-self: center;
   align-items: center;
-  gap: 4px;
-  align-self: stretch;
-  padding: 0 10px;
-  margin: 3px;
-  border-radius: 3px;
-  background-color: var(--nav0-red-700);
-  color: #ffffff;
+  gap: 5px;
+  height: 24px;
+  padding: 0 9px 0 8px;
+  margin: 0 6px 0 2px;
+  border-radius: var(--n-r-icon);
+  background-color: var(--n-private-label-bg);
+  color: var(--n-private-label-text);
   font-size: var(--font-sm);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 body.is-private .private-window-identifier {
@@ -167,9 +163,10 @@ body.is-private .private-window-identifier {
 .tabs-container {
   display: flex;
   flex: 1;
-  align-items: stretch;
-  height: 100%;
-  padding: 0;
+  align-items: flex-end;
+  height: 34px;
+  align-self: flex-end;
+  padding: 0 4px 0 2px;
   overflow-x: auto;
   overflow-y: hidden;
   flex-wrap: nowrap;
@@ -185,12 +182,12 @@ body.is-private .private-window-identifier {
   display: none;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 100%;
-  align-self: stretch;
+  width: 28px;
+  height: 34px;
+  align-self: flex-end;
   background: transparent;
   border: 0;
-  color: var(--fg-2);
+  color: var(--n-text-2);
   cursor: pointer;
   padding: 0;
   transition:
@@ -199,8 +196,8 @@ body.is-private .private-window-identifier {
 }
 
 .tab-scroll-btn:hover {
-  background: var(--bg-3);
-  color: var(--nav0-red-600);
+  background: var(--n-fill);
+  color: var(--n-text-1);
 }
 
 .tab-scroll-btn.visible {
@@ -208,23 +205,24 @@ body.is-private .private-window-identifier {
 }
 
 body.is-private .tab-scroll-btn {
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--n-private-text);
 }
 
 body.is-private .tab-scroll-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
+  background: var(--n-fill);
+  color: var(--n-text-1);
 }
 
 .tab {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 100%;
-  padding: 0 6px;
+  height: 34px;
+  align-self: flex-end;
+  box-sizing: border-box;
+  padding: 0 6px 0 10px;
   min-width: 72px;
-  flex: 1 1 160px;
-  max-width: 220px;
+  flex: 0 1 220px;
   font-size: var(--font-sm);
   font-weight: 500;
   cursor: pointer;
@@ -232,69 +230,64 @@ body.is-private .tab-scroll-btn:hover {
     background-color var(--dur-fast),
     color var(--dur-fast);
   white-space: nowrap;
-  color: var(--fg-3);
+  color: var(--n-text-2);
   position: relative;
   background: transparent;
-  border: 0;
-  border-right: 1px solid var(--tab-divider);
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: var(--n-r-control) var(--n-r-control) 0 0;
   overflow: hidden;
 }
 
-.tab:first-child {
-  border-left: 1px solid var(--tab-divider);
+/* 16 px divider between inactive tabs, hidden next to the active or a
+   hovered tab and at the end of the strip. */
+.tab::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 16px;
+  background: var(--n-tab-divider);
+}
+
+.tab:last-child::after,
+.tab.active::after,
+.tab:hover::after,
+.tab:has(+ .tab.active)::after,
+.tab:has(+ .tab:hover)::after {
+  display: none;
 }
 
 .tab:hover {
-  background-color: var(--bg-3);
-  color: var(--fg-2);
+  background-color: var(--n-tab-hover);
 }
 
 .tab.active {
-  color: var(--fg-1);
-  background-color: var(--bg-0);
-  padding-left: 10px;
-  border-left: 0;
-  border-right: 0;
+  color: var(--n-text-1);
+  background-color: var(--n-toolbar);
+  border-color: var(--n-chrome-line);
+  border-bottom: 0;
 }
 
-.tab.active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background-color: var(--nav0-red-600);
-}
-
-/* Strip the preceding tab's right divider so nothing sits to the
-   left of the red anchor bar. */
-.tab:has(+ .tab.active) {
-  border-right: 0;
-}
-
-.tab.active + .tab {
-  border-left: 0;
-}
-
-/* Private-mode tab colors */
+/* Private-mode tab colours */
 body.is-private .tab {
-  color: rgba(255, 255, 255, 0.55);
-  border-right-color: rgba(255, 255, 255, 0.08);
+  color: var(--n-private-text);
 }
 
-body.is-private .tab:first-child {
-  border-left-color: rgba(255, 255, 255, 0.08);
+body.is-private .tab::after {
+  background: var(--n-private-line);
 }
 
 body.is-private .tab:hover {
-  background-color: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.85);
+  background-color: var(--n-tab-hover);
 }
 
 body.is-private .tab.active {
-  color: var(--fg-1);
-  background-color: #ffffff;
+  color: var(--n-text-1);
+  background-color: var(--n-private-toolbar);
+  border-color: var(--n-private-line);
 }
 
 .tab.pinned {
@@ -321,8 +314,8 @@ body.is-private .tab.active {
   height: 14px;
   width: 14px;
   flex-shrink: 0;
-  border: 2px solid var(--border-1);
-  border-top-color: var(--nav0-red-600);
+  border: 2px solid var(--n-ring-track);
+  border-top-color: var(--n-accent);
   border-radius: 50%;
   animation: tab-loader-spin 0.8s linear infinite;
 }
@@ -342,16 +335,16 @@ body.is-private .tab.active {
 }
 
 .tab-close {
-  width: 16px;
-  height: 16px;
-  border-radius: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--n-r-icon);
   background: none;
   border: none;
   display: none;
   align-items: center;
   justify-content: center;
   margin-left: auto;
-  color: var(--fg-3);
+  color: var(--n-text-3);
   cursor: pointer;
   padding: 0;
   flex-shrink: 0;
@@ -365,27 +358,26 @@ body.is-private .tab.active {
 }
 
 .tab-close:hover {
-  background-color: var(--bg-3);
-  color: var(--fg-1);
+  background-color: var(--n-fill);
+  color: var(--n-text-1);
 }
 
 body.is-private .tab .tab-close {
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--n-private-text);
 }
 
 body.is-private .tab.active .tab-close {
-  color: var(--fg-3);
+  color: var(--n-text-3);
 }
 
-/* "+" new-tab button — flush block, not a floating circle */
+/* "+" new-tab button — flush block at the far right of the strip */
 .new-tab-btn {
-  width: 42px;
-  height: 100%;
-  align-self: stretch;
+  width: 40px;
+  height: 34px;
+  align-self: flex-end;
   background: transparent;
   border: 0;
-  border-right: 1px solid var(--tab-divider);
-  color: var(--fg-2);
+  color: var(--n-text-2);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -397,44 +389,60 @@ body.is-private .tab.active .tab-close {
 }
 
 .new-tab-btn:hover {
-  background: var(--bg-3);
-  color: var(--nav0-red-600);
+  background: var(--n-fill);
+  color: var(--n-text-1);
 }
 
 body.is-private .new-tab-btn {
-  color: rgba(255, 255, 255, 0.8);
-  border-right-color: rgba(255, 255, 255, 0.08);
+  color: var(--n-private-text);
 }
 
 body.is-private .new-tab-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
+  background: var(--n-fill);
+  color: var(--n-text-1);
 }
 
-/* === Nav bar — utility row, original height ============ */
+/* === Toolbar — 44 px utility row ========================= */
 .nav-bar {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 5px;
-  background-color: var(--chrome-1);
-  border-bottom: 1px solid var(--border-1);
+  gap: 2px;
+  height: 44px;
+  padding: 0 8px;
+  background-color: var(--n-toolbar);
+  border-bottom: 1px solid var(--n-chrome-line);
 }
 
-/* Icon hover backgrounds — rounded square instead of circle.
-   Matches the tab shape radius (--r-md = 4px). */
+body.is-private .nav-bar {
+  background-color: var(--n-private-toolbar);
+  border-bottom-color: var(--n-private-line);
+}
+
+/* Toolbar icon buttons: rounded square, neutral icon, fill on hover. */
 .nav-bar .btn-icon.rounded-circle,
 .address-bar .btn-icon.rounded-circle {
-  border-radius: 4px;
+  border-radius: var(--n-r-icon);
 }
 
-/* Brand-red icon tint on hover, matching the tab-strip "+" and scroll
-   buttons. The hover background already comes from .btn-ghost (--bg-hover,
-   which resolves to --bg-3). Excludes the SSL indicator so it keeps its
-   secure/insecure state colours, and disabled buttons (e.g. back/forward). */
 .nav-bar .btn-icon.rounded-circle:hover:not(:disabled, .ssl-indicator),
 .address-bar .btn-icon.rounded-circle:hover:not(:disabled, .ssl-indicator) {
-  color: var(--nav0-red-600);
+  background-color: var(--n-fill);
+}
+
+.nav-bar .btn-icon.rounded-circle:active:not(:disabled, .ssl-indicator),
+.address-bar .btn-icon.rounded-circle:active:not(:disabled, .ssl-indicator) {
+  background-color: var(--n-fill-2);
+}
+
+.nav-bar .btn-icon:disabled {
+  color: var(--n-text-4);
+  cursor: default;
+}
+
+/* Outer toolbar buttons take the private text colour in a private window. */
+body.is-private .nav-controls .btn-icon,
+body.is-private .nav-bar > .btn-icon {
+  color: var(--n-private-text);
 }
 
 .nav-controls {
@@ -443,92 +451,100 @@ body.is-private .new-tab-btn:hover {
   margin-right: 4px;
 }
 
-/* URL input sits as a paper-white card on the warm chrome-1 nav bar
-   so it reads as the primary input surface, not a pill blending into
-   the chrome. A hairline border gives it edge definition without
-   requiring focus to materialise. */
+/* Button dimensions live here, not in inline styles (DESIGN.md §4.1):
+   32 px toolbar buttons, 28 px trailing field buttons, 30 × 28 for the
+   wider leading security indicator. */
+.nav-controls .btn-icon,
+.nav-bar > .btn-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.nav-bar > .btn-icon {
+  margin-left: var(--spacing-xs);
+}
+
+.address-bar .ssl-indicator {
+  width: 30px;
+  height: 28px;
+}
+
+.address-bar .btn-icon:not(.ssl-indicator) {
+  width: 28px;
+  height: 28px;
+}
+
+/* Address field — a white card with a hairline field shadow; a blue ring
+   on focus. The registrable domain stays readable in every state. */
 .address-bar {
   flex: 1;
   display: flex;
   align-items: center;
   gap: 2px;
   height: 32px;
-  padding: 0 4px;
-  background-color: var(--bg-0);
-  border: 1px solid var(--border-1);
-  border-radius: 4px;
-  transition:
-    background-color var(--dur-fast),
-    border-color var(--dur-fast),
-    box-shadow var(--dur-fast);
+  margin: 0 6px;
+  padding: 0 2px 0 1px;
+  background-color: var(--n-card);
+  border: 0;
+  border-radius: var(--n-r-control);
+  box-shadow: var(--n-field-shadow);
+  transition: box-shadow var(--dur-fast);
 }
 
 .address-bar:focus-within {
-  background-color: var(--bg-0);
-  border-color: var(--fg-3);
-  box-shadow: var(--shadow-focus);
+  box-shadow: var(--n-focus-ring-field);
 }
 
-/* SSL Indicator */
+/* SSL / security indicator (leading button in the address field) */
 .ssl-indicator {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  border-radius: 4px;
+  border-radius: var(--n-r-icon);
   background: none;
   border: none;
-  color: var(--fg-3);
+  color: var(--n-text-3);
   cursor: pointer;
   transition:
-    color 0.2s ease,
-    background-color 0.2s ease;
+    color var(--dur-fast),
+    background-color var(--dur-fast);
 }
 
 .ssl-indicator:hover {
-  background-color: var(--bg-3);
-  color: var(--fg-1);
+  background-color: var(--n-fill);
+  color: var(--n-text-2);
 }
 
 /* Search state is display-only — not a button affordance, so no
    pointer cursor and no hover background/colour shift. */
 .ssl-indicator.ssl-search {
-  color: var(--fg-3);
+  color: var(--n-text-3);
   cursor: default;
 }
 
 .ssl-indicator.ssl-search:hover {
   background-color: transparent;
-  color: var(--fg-3);
+  color: var(--n-text-3);
 }
 
+/* Secure = a neutral grey lock, never green. */
 .ssl-indicator.ssl-secure {
-  color: var(--success);
+  color: var(--n-text-3);
 }
 
 .ssl-indicator.ssl-secure:hover {
-  color: #15803d;
+  color: var(--n-text-2);
 }
 
+/* Not secure = a static red triangle, no pulse. */
 .ssl-indicator.ssl-insecure {
-  color: var(--danger);
-  background-color: rgba(220, 38, 38, 0.08);
-  animation: ssl-pulse 2s ease-in-out infinite;
+  color: var(--n-danger);
 }
 
 .ssl-indicator.ssl-insecure:hover {
-  color: var(--nav0-red-700);
-  background-color: rgba(220, 38, 38, 0.15);
-}
-
-@keyframes ssl-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.65;
-  }
+  color: var(--n-danger);
+  background-color: var(--n-danger-soft);
 }
 
 .url-input {
@@ -536,35 +552,43 @@ body.is-private .new-tab-btn:hover {
   border: none;
   background: transparent;
   outline: none;
-  color: var(--fg-1);
+  color: var(--n-text-1);
   font-family: inherit;
-  font-size: var(--font-md);
+  font-size: var(--font-lg);
   padding: 0 4px;
   min-width: 0;
+  caret-color: var(--n-accent);
 }
 
-/* Reader Mode Button */
+.url-input::placeholder {
+  color: var(--n-text-3);
+}
+
+/* Trailing field buttons (reader, PDF, bookmark, reading queue):
+   neutral by default, accent-on-soft when active. */
+.address-bar .btn-icon:not(.ssl-indicator) {
+  color: var(--n-text-3);
+}
+
 .reader-mode-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9ca3af;
+  color: var(--n-text-3);
   transition:
-    color 0.2s ease,
-    background-color 0.2s ease;
+    color var(--dur-fast),
+    background-color var(--dur-fast);
 }
 
 .reader-mode-btn:hover {
-  color: var(--text-color);
-  background-color: var(--bg-hover);
+  color: var(--n-text-2);
+  background-color: var(--n-fill);
 }
 
-.reader-mode-btn.active {
-  color: #6366f1;
-}
-
+.reader-mode-btn.active,
 .reader-mode-btn.active:hover {
-  color: #4f46e5;
+  color: var(--n-accent);
+  background-color: var(--n-accent-soft);
 }
 
 /* Ensure submenu fits within viewport */
@@ -582,7 +606,7 @@ body.is-private .new-tab-btn:hover {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  color: var(--text-light);
+  color: var(--n-text-4);
   font-size: var(--font-md);
   line-height: 1.5;
   text-align: center;
@@ -592,7 +616,7 @@ body.is-private .new-tab-btn:hover {
 .content-url {
   font-size: var(--font-sm);
   margin-top: var(--spacing-xs);
-  color: var(--text-light);
+  color: var(--n-text-4);
 }
 
 /* Download Progress Ring */
@@ -605,12 +629,11 @@ body.is-private .new-tab-btn:hover {
 }
 
 .download-progress-ring-bg {
-  stroke: var(--border-color);
-  opacity: 0.3;
+  stroke: var(--n-ring-track);
 }
 
 .download-progress-ring-fill {
-  stroke: var(--nav0-red-600);
+  stroke: var(--n-accent);
   stroke-linecap: round;
   stroke-dasharray: 87.96;
   stroke-dashoffset: 87.96;

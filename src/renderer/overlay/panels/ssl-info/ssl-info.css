@@ -1,4 +1,6 @@
-/* SSL Info overlay panel styles */
+@import url('../../../styles/global.css');
+
+/* SSL Info overlay panel styles — Popovers site-information spec (DESIGN.md §4.4) */
 
 #overlay-ssl-info {
   background: transparent;
@@ -11,16 +13,23 @@
   position: absolute;
   top: 93px;
   left: 12px;
-  width: 300px;
+  width: 340px;
   max-width: calc(100% - 24px);
   pointer-events: auto;
-  background-color: var(--chrome-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-md);
-  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px 14px;
+
+  /* MENU MATERIAL */
+  background: var(--n-menu-bg);
+  backdrop-filter: var(--n-menu-blur);
+  -webkit-backdrop-filter: var(--n-menu-blur);
+  box-shadow: var(--n-menu-shadow);
+  border-radius: var(--n-r-panel);
   font-size: 12px;
-  line-height: 1.5;
-  color: var(--fg-2);
+  line-height: 17px;
+  color: var(--n-text-2);
   overflow: hidden;
 }
 
@@ -28,39 +37,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 12px;
-  font-size: 13px;
   flex-shrink: 0;
-}
-
-.ssl-info-header.secure {
-  background-color: rgba(22, 163, 74, 0.08);
-  border-bottom: 2px solid var(--success);
-}
-
-.ssl-info-header.secure strong {
-  color: var(--success);
-}
-
-.ssl-info-header.secure .ssl-info-header-icon {
-  color: var(--success);
-}
-
-.ssl-info-header.insecure {
-  background-color: rgba(220, 38, 38, 0.08);
-  border-bottom: 2px solid var(--danger);
-}
-
-.ssl-info-header.insecure strong {
-  color: var(--danger);
-}
-
-.ssl-info-header.insecure .ssl-info-header-icon {
-  color: var(--danger);
 }
 
 .ssl-info-header strong {
   flex: 1;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--n-text-1);
 }
 
 .ssl-info-header-icon {
@@ -69,83 +53,101 @@
   align-items: center;
 }
 
+.ssl-info-header-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* SECURE — neutral, no green */
+.ssl-info-header.secure .ssl-info-header-icon {
+  color: var(--n-text-2);
+}
+
+/* NOT SECURE — danger triangle */
+.ssl-info-header.insecure .ssl-info-header-icon {
+  color: var(--n-danger);
+}
+
 .ssl-info-close {
+  width: 22px;
+  height: 22px;
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--fg-3);
-  padding: 2px;
-  border-radius: var(--r-md);
+  color: var(--n-text-3);
+  border-radius: var(--n-r-icon);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
+.ssl-info-close svg {
+  width: 14px;
+  height: 14px;
+}
+
 .ssl-info-close:hover {
-  background-color: var(--bg-3);
-  color: var(--fg-2);
+  background-color: var(--n-fill-2);
+  color: var(--n-text-1);
 }
 
 .ssl-info-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   overflow-y: auto;
 }
 
 .ssl-info-detail {
-  padding: 8px 12px;
-  color: var(--fg-3);
-  font-size: 11px;
+  color: var(--n-text-2);
+  font-size: 12px;
+  line-height: 17px;
 }
 
 .ssl-info-detail strong {
-  color: var(--fg-2);
+  color: var(--n-text-1);
+  font-weight: 600;
 }
 
+/* DANGER BANNER (not-secure state) */
 .ssl-info-warning-banner {
-  background-color: rgba(220, 38, 38, 0.06);
-  color: var(--danger);
-  font-size: 11px;
+  padding: 8px 10px;
+  border-radius: var(--n-r-control);
+  background-color: var(--n-danger-soft);
+  color: var(--n-danger);
+  font-size: 12px;
   font-weight: 600;
-  padding: 6px 12px;
-  border-bottom: 1px solid rgba(220, 38, 38, 0.12);
+  line-height: 17px;
 }
 
 .ssl-info-protocol {
-  padding: 6px 12px;
-  font-size: 11px;
-  color: var(--fg-3);
-  background-color: var(--bg-2);
-}
-
-.ssl-info-protocol div {
-  margin-bottom: 1px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--n-text-1);
 }
 
 .ssl-info-cert {
-  padding: 8px 12px;
-  font-size: 11px;
-  color: var(--fg-3);
-  border-top: 1px solid var(--border-1);
-}
-
-.ssl-info-cert div {
-  margin-bottom: 2px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--n-text-1);
+  border-top: 1px solid var(--n-separator);
+  padding-top: 10px;
 }
 
 .ssl-info-section-heading {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--fg-3);
+  color: var(--n-text-1);
   margin-bottom: 4px;
 }
 
 .ssl-info-risks {
-  padding: 8px 12px;
-  font-size: 11px;
-  color: var(--fg-3);
-  border-top: 1px solid var(--border-1);
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--n-text-2);
+  border-top: 1px solid var(--n-separator);
+  padding-top: 10px;
 }
 
 .ssl-info-risks ul {
@@ -153,16 +155,14 @@
   padding-left: 16px;
 }
 
-.ssl-info-risks li {
-  margin-bottom: 2px;
-}
-
+/* Detail-row label */
 .ssl-label {
-  color: var(--fg-2);
+  color: var(--n-text-3);
   font-weight: 500;
 }
 
+/* Not-secure protocol value */
 .ssl-text-danger {
-  color: var(--danger);
+  color: var(--n-danger);
   font-weight: 500;
 }

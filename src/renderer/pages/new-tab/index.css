@@ -9,69 +9,46 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   min-height: 100vh;
-  color: var(--fg-1);
-  background: var(--bg-0);
+  color: var(--n-text-1);
+  background: var(--n-page);
 }
 
 .new-tab-page {
   min-height: 100vh;
-  background: var(--bg-0);
-  color: var(--fg-2);
-
-  /* Shared floating-card shadow used by the search bar, suggestion tiles,
-     and the search-results popup so all three sit on the same elevation. */
-  --new-tab-card-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+  background: var(--n-page);
+  color: var(--n-text-2);
 }
 
 .new-tab-wrapper {
-  max-width: 1080px;
+  max-width: 880px;
   margin: 0 auto;
-  padding: 48px 56px 80px;
+  padding: 96px var(--spacing-xl) 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
 }
 
-/* ---- Editorial masthead --------------------------------- */
+/* ---- Masthead ------------------------------------------- */
 .new-tab-head {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 32px;
-  flex-wrap: wrap;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--nav0-red-600);
+  flex-direction: column;
+  gap: 20px;
 }
 
 .new-tab-title {
-  font-size: 48px;
-  font-weight: 200;
-  letter-spacing: -0.5px;
-  color: var(--fg-1);
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--n-text-1);
   margin: 0;
-  line-height: 1.2;
 }
 
 .bento-container {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
   width: 100%;
-  margin-top: 28px;
-}
-
-.bento-item {
-  background-color: var(--bg-0);
-  border-radius: var(--r-lg);
-  padding: 24px;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-1);
-  transition: box-shadow 0.2s ease;
-}
-
-.bento-item:hover {
-  box-shadow: var(--shadow-md);
 }
 
 .search-item {
-  grid-column: 1 / -1;
   position: relative;
 }
 
@@ -86,45 +63,46 @@ body {
 
 .search-shell-icon {
   position: absolute;
-  left: 20px;
+  left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--fg-3);
+  color: var(--n-text-3);
   pointer-events: none;
-  transition: color 0.12s ease;
+  transition: color var(--dur-fast) ease;
 }
 
 .search-shell:focus-within .search-shell-icon {
-  color: var(--fg-2);
+  color: var(--n-text-2);
 }
 
-/* Search input sits on the same elevation as the suggestion tiles and
-   the results popup — shared floating-card shadow, white surface. */
+/* Big filled search field spanning the column. */
 .search-bar {
   width: 100%;
-  padding: 16px 24px 16px 52px;
-  font-size: 18px;
+  height: 44px;
+  padding: 0 14px 0 42px;
+  font-size: 14px;
   border: none;
-  border-radius: var(--r-md);
-  background-color: var(--bg-0);
-  box-shadow: var(--new-tab-card-shadow);
+  border-radius: var(--n-r-panel);
+  background-color: var(--n-fill);
   outline: none;
-  transition: box-shadow 0.12s ease;
-  color: inherit;
+  transition: box-shadow var(--dur-fast) ease;
+  color: var(--n-text-1);
+}
+
+.search-bar::placeholder {
+  color: var(--n-text-3);
 }
 
 .search-bar:focus {
-  background-color: var(--bg-0);
-  box-shadow: var(--new-tab-card-shadow);
+  box-shadow: var(--n-focus-ring-field);
 }
 
 /* ---- Search results panel (Command-K styled, inline) ----- */
 .search-results {
-  margin-top: 0;
-  background: var(--bg-0);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-lg);
-  box-shadow: var(--new-tab-card-shadow);
+  margin-top: var(--spacing-sm);
+  background: var(--n-page);
+  border-radius: var(--n-r-panel);
+  box-shadow: var(--n-menu-shadow);
   max-height: 60vh;
   overflow: hidden;
   display: flex;
@@ -138,56 +116,46 @@ body {
 
 .search-results-list {
   overflow-y: auto;
-  padding: 6px 0;
+  padding: var(--spacing-xs) var(--spacing-sm);
   flex: 1;
 }
 
 .search-results-empty {
   padding: 18px 20px;
   text-align: center;
-  color: var(--fg-3);
+  color: var(--n-text-3);
   font-size: 13px;
 }
 
 .search-section-title {
-  padding: 8px 16px 4px;
+  padding: 8px 8px 4px;
   font-size: 11px;
-  text-transform: uppercase;
-  color: var(--fg-3);
-  letter-spacing: 0.5px;
-  font-weight: 500;
+  color: var(--n-text-3);
+  letter-spacing: 0.02em;
+  font-weight: 600;
 }
 
 .search-result-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 16px;
+  padding: 8px 10px;
   cursor: pointer;
   position: relative;
-  transition: background-color 0.08s ease;
+  border-radius: var(--n-r-control);
+  transition: background-color var(--dur-fast) ease;
 }
 
 .search-result-item:hover,
 .search-result-item.active {
-  background-color: var(--bg-3);
-}
-
-.search-result-item:hover::before,
-.search-result-item.active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--nav0-red-600);
+  background-color: var(--n-accent-soft);
 }
 
 .search-result-item.search-engine-item {
-  border-bottom: 1px solid var(--border-1);
-  margin-bottom: 4px;
+  border-bottom: 1px solid var(--n-separator);
+  margin-bottom: var(--spacing-xs);
   padding-bottom: 12px;
+  border-radius: var(--n-r-control) var(--n-r-control) 0 0;
 }
 
 .search-result-icon,
@@ -197,9 +165,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--r-md);
-  background: var(--bg-2);
-  color: var(--fg-3);
+  border-radius: var(--n-r-control);
+  background: var(--n-well);
+  color: var(--n-text-3);
   flex-shrink: 0;
   font-size: 14px;
   font-weight: 600;
@@ -208,7 +176,7 @@ body {
 .search-result-favicon img {
   width: 20px;
   height: 20px;
-  border-radius: 2px;
+  border-radius: var(--n-r-key);
   display: block;
 }
 
@@ -221,7 +189,7 @@ body {
   display: block;
   font-size: 13px;
   font-weight: 500;
-  color: var(--fg-1);
+  color: var(--n-text-1);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -237,7 +205,7 @@ body {
 
 .search-result-meta {
   font-size: 11px;
-  color: var(--fg-4);
+  color: var(--n-text-4);
   flex-shrink: 0;
 }
 
@@ -245,7 +213,7 @@ body {
   flex: 1;
   min-width: 0;
   font-size: 12px;
-  color: var(--accent);
+  color: var(--n-text-3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -268,8 +236,8 @@ body {
 .icon-container {
   width: 40px;
   height: 40px;
-  border-radius: var(--r-lg);
-  background-color: var(--bg-2);
+  border-radius: var(--n-r-panel);
+  background-color: var(--n-well);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -286,37 +254,33 @@ body {
 }
 
 .shortcut-description {
-  color: var(--fg-3);
+  color: var(--n-text-3);
   font-size: 12px;
   line-height: 1.3;
 }
 
-@media (max-width: 640px) {
-  .bento-container {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* ---- Tile rows (Bookmarks + Frequently visited) ---------- */
 .tile-section {
-  margin-top: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .tile-section-head {
-  margin-bottom: 14px;
+  margin: 0;
 }
 
 .tile-section-title {
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 18px;
   font-weight: 600;
-  color: var(--fg-1);
-  letter-spacing: -0.1px;
+  color: var(--n-text-1);
   margin: 0;
 }
 
 .tile-row {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
+  grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -325,50 +289,40 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  gap: 12px;
-  padding: 22px 12px 16px;
-  background: var(--bg-0);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-md);
-  box-shadow: var(--new-tab-card-shadow);
+  gap: 10px;
   text-decoration: none;
   color: inherit;
   cursor: pointer;
   min-width: 0;
-  transition:
-    background var(--dur-fast),
-    border-color var(--dur-fast),
-    box-shadow var(--dur-fast);
 }
 
-.tile:hover {
-  background: var(--bg-0);
-  border-color: var(--border-2);
-  box-shadow: var(--new-tab-card-shadow);
-}
-
+/* Favicon well — a per-site favicon stand-in, so the well keeps its
+   own colour and is NOT a neutral category chip. */
 .tile-icon {
-  width: 36px;
-  height: 36px;
+  width: 56px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-0);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-sm);
+  background: var(--n-well);
+  border-radius: var(--n-r-control);
   flex-shrink: 0;
   overflow: hidden;
 }
 
 .tile-icon img,
 .tile-icon svg {
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
   display: block;
+  border-radius: var(--n-r-control);
 }
 
 .tile-text {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
   text-align: center;
   width: 100%;
   max-width: 100%;
@@ -376,14 +330,15 @@ body {
 }
 
 .tile-title {
-  display: block;
+  display: -webkit-box;
   max-width: 100%;
-  font-size: 13px;
+  font-size: 12px;
+  line-height: 15px;
   font-weight: 500;
-  color: var(--fg-1);
-  white-space: nowrap;
+  color: var(--n-text-1);
   overflow: hidden;
-  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   margin: 0;
 }
 
@@ -391,11 +346,11 @@ body {
   display: block;
   max-width: 100%;
   font-size: 11px;
-  color: var(--fg-3);
+  color: var(--n-text-3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin: 4px 0 0;
+  margin: 0;
 }
 
 @media (max-width: 960px) {

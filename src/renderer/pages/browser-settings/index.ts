@@ -29,7 +29,6 @@ const SHORTCUT_CATEGORY_ICONS: Record<string, string> = {
 };
 
 const isMac = (window as any).DataStoreAPI?.platform === 'darwin';
-const modKey = isMac ? 'Cmd' : 'Ctrl';
 
 // ---- Init ----
 document.addEventListener('DOMContentLoaded', async () => {
@@ -560,8 +559,8 @@ function renderFilterLists() {
     item.className = 'list-item';
     item.innerHTML = `
       <div class="list-item-content">
-        <div class="list-item-text" style="font-family: var(--n0-sans); font-weight: 500;">${list.name}</div>
-        <div class="list-item-description" style="font-family: var(--n0-sans);">${list.description}</div>
+        <div class="list-item-text" style="font-weight: 500;">${list.name}</div>
+        <div class="list-item-description">${list.description}</div>
       </div>
       <div class="list-item-actions">
         <label class="toggle">
@@ -1031,9 +1030,7 @@ function renderShortcutFilters() {
     pill.innerHTML = `<i data-lucide="${iconName}" width="13" height="13"></i> ${label}`;
     const isActive = activeFilter === value;
     if (isActive) {
-      pill.style.background = 'var(--fg-1)';
-      pill.style.color = 'var(--bg-0)';
-      pill.style.borderColor = 'var(--fg-1)';
+      pill.classList.add('active');
     }
     pill.addEventListener('click', () => {
       activeFilter = isActive ? 'all' : value;
@@ -1084,38 +1081,55 @@ function renderShortcutsTable() {
   createIcons({ icons });
 }
 
+// Render a single shortcut key. On macOS modifiers collapse to their
+// glyphs (⌘ ⇧ ⌥ ⌃); on Windows/Linux they stay as text ('Ctrl', 'Shift', …).
+function formatShortcutKey(part: string): string {
+  if (part === 'mod') return isMac ? '⌘' : 'Ctrl';
+  if (!isMac) return part;
+  switch (part) {
+    case 'Cmd':
+      return '⌘';
+    case 'Shift':
+      return '⇧';
+    case 'Alt':
+    case 'Opt':
+    case 'Option':
+      return '⌥';
+    case 'Ctrl':
+      return '⌃';
+    default:
+      return part;
+  }
+}
+
 function formatShortcutDisplay(combo: string): string {
-  if (!combo) return '<span style="color: var(--n0-text-3); font-style: italic;">None</span>';
+  if (!combo) return '<span style="color: var(--n-text-4); font-style: italic;">None</span>';
   return combo
     .split('+')
-    .map((part) => {
-      let display = part;
-      if (part === 'mod') display = modKey;
-      return `<span class="keycap">${display}</span>`;
-    })
+    .map((part) => `<span class="keycap">${formatShortcutKey(part)}</span>`)
     .join('');
 }
 
 // ---- Permissions Settings ----
 const PERMISSION_INFO: Record<string, { label: string; icon: string }> = {
-  media: { label: 'Camera/Microphone', icon: 'camera' },
+  media: { label: 'Camera/microphone', icon: 'camera' },
   geolocation: { label: 'Location', icon: 'map-pin' },
   notifications: { label: 'Notifications', icon: 'bell' },
-  midi: { label: 'MIDI Devices', icon: 'music' },
-  midiSysex: { label: 'MIDI System Exclusive', icon: 'music' },
-  'display-capture': { label: 'Screen Sharing', icon: 'monitor' },
+  midi: { label: 'MIDI devices', icon: 'music' },
+  midiSysex: { label: 'MIDI system exclusive', icon: 'music' },
+  'display-capture': { label: 'Screen sharing', icon: 'monitor' },
   'clipboard-read': { label: 'Clipboard', icon: 'clipboard' },
-  'idle-detection': { label: 'Idle Detection', icon: 'moon' },
-  'storage-access': { label: 'Storage Access', icon: 'hard-drive' },
-  'window-management': { label: 'Window Management', icon: 'app-window' },
-  'local-fonts': { label: 'Local Fonts', icon: 'type' },
-  'screen-wake-lock': { label: 'Screen Wake Lock', icon: 'monitor' },
-  'speaker-selection': { label: 'Speaker Selection', icon: 'speaker' },
-  'keyboard-lock': { label: 'Keyboard Lock', icon: 'keyboard' },
-  usb: { label: 'USB Devices', icon: 'usb' },
-  serial: { label: 'Serial Ports', icon: 'usb' },
-  bluetooth: { label: 'Bluetooth Devices', icon: 'bluetooth' },
-  hid: { label: 'HID Devices', icon: 'keyboard' },
+  'idle-detection': { label: 'Idle detection', icon: 'moon' },
+  'storage-access': { label: 'Storage access', icon: 'hard-drive' },
+  'window-management': { label: 'Window management', icon: 'app-window' },
+  'local-fonts': { label: 'Local fonts', icon: 'type' },
+  'screen-wake-lock': { label: 'Screen wake lock', icon: 'monitor' },
+  'speaker-selection': { label: 'Speaker selection', icon: 'speaker' },
+  'keyboard-lock': { label: 'Keyboard lock', icon: 'keyboard' },
+  usb: { label: 'USB devices', icon: 'usb' },
+  serial: { label: 'Serial ports', icon: 'usb' },
+  bluetooth: { label: 'Bluetooth devices', icon: 'bluetooth' },
+  hid: { label: 'HID devices', icon: 'keyboard' },
 };
 
 function getPermLabel(permissionType: string): string {

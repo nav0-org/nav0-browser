@@ -1,18 +1,20 @@
 @import url('../../styles/global.css');
 
 /* ============================================================
-   About — editorial dashboard, matches the Bookmarks / Downloads /
-   Settings grammar. Lightweight title above four hairline groups
-   (Software · System · Integrity · Links). Hash chips sit in a
-   code-styled tile with a copy button; everything else uses the
-   page's default sans-serif. Links are 3-col rows: icon · title +
-   URL · arrow.
+   About — editorial dashboard, shared page spec (DESIGN.md §4.2).
+   White canvas, a single narrow 680px column. Lightweight 28px
+   title above four grouped sections (Software · System · Integrity
+   · Links). Each section has a header OUTSIDE the grey panel (a
+   small Lucide icon + a label), then a grey panel holding the rows.
+   Hash fields sit in white boxes with a copy button and a "Copied"
+   tooltip; hashes and the application path use mono. Links are
+   3-col rows: icon well · name + URL · external-link arrow.
    ============================================================ */
 
 .about-page {
   min-height: 100vh;
-  background: var(--bg-0);
-  color: var(--fg-2);
+  background: var(--n-page);
+  color: var(--n-text-2);
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 
@@ -22,230 +24,299 @@
 }
 
 .about-wrapper {
-  max-width: 1080px;
+  max-width: 680px;
   margin: 0 auto;
-  padding: 48px 56px 80px;
+  padding: 40px var(--spacing-md) 56px;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ---- Masthead ------------------------------------------- */
 .about-head {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 32px;
-  flex-wrap: wrap;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--nav0-red-600);
-  margin-bottom: 28px;
 }
 
 .about-title {
-  font-size: 48px;
-  font-weight: 200;
-  letter-spacing: -0.5px;
-  color: var(--fg-1);
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--n-text-1);
   margin: 0;
-  line-height: 1.2;
 }
 
-/* ---- Group panel (matches Settings groups) -------------- */
+/* ---- Group ---------------------------------------------- */
 .group {
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-md);
-  background: var(--bg-0);
-  overflow: hidden;
-  margin-bottom: 14px;
+  margin-bottom: 0;
 }
 
+/* Header sits OUTSIDE the grey panel: a small icon + a label. */
 .group-head {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border-1);
-  background: var(--bg-1);
+  gap: var(--spacing-sm);
+  margin: 28px 0 var(--spacing-sm);
+  padding-left: var(--spacing-md);
+  color: var(--n-text-2);
+}
+
+/* The first group tightens the gap below the title. */
+.group:first-of-type .group-head {
+  margin-top: 22px;
 }
 
 .group-icon {
-  width: 22px;
-  height: 22px;
+  width: 16px;
+  height: 16px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--fg-3);
+  color: var(--n-text-2);
+}
+
+.group-icon svg {
+  width: 16px;
+  height: 16px;
 }
 
 .group-title {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--fg-2);
+  font-size: 13px;
+  line-height: 18px;
   font-weight: 600;
+  color: var(--n-text-1);
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+/* ---- Grey panel ----------------------------------------- */
+.group > .kv-row,
+.group > .hash-row,
+.group > .link-row {
+  background: var(--n-grouped);
+}
+
+/* Round the shared panel's outer corners. */
+.group > .kv-row:first-of-type,
+.group > .hash-row:first-of-type,
+.group > .link-row:first-of-type {
+  border-top-left-radius: var(--n-r-panel);
+  border-top-right-radius: var(--n-r-panel);
+}
+
+.group > .kv-row:last-child,
+.group > .hash-row:last-child,
+.group > .link-row:last-child {
+  border-bottom-left-radius: var(--n-r-panel);
+  border-bottom-right-radius: var(--n-r-panel);
 }
 
 /* ---- Key / value rows ----------------------------------- */
 .kv-row {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 16px;
+  gap: var(--spacing-md);
   align-items: center;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--border-1);
+  padding: 11px var(--spacing-md);
+  position: relative;
 }
 
-.kv-row:last-child {
-  border-bottom: 0;
+/* Inset hairline divider between rows. */
+.kv-row + .kv-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--spacing-md);
+  right: 0;
+  height: 1px;
+  background: var(--n-panel-line);
 }
 
 .kv-row .k {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--fg-1);
-  letter-spacing: -0.05px;
+  font-size: 13px;
+  color: var(--n-text-2);
 }
 
 .kv-row .v {
-  font-size: 14px;
-  color: var(--fg-2);
+  font-size: 13px;
+  color: var(--n-text-1);
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 .kv-row .v .badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  height: 18px;
+  height: 20px;
   padding: 0 7px;
-  margin-left: 6px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  color: var(--success);
-  background: var(--success-soft);
-  border: 1px solid rgba(22, 163, 74, 0.25);
-  border-radius: var(--r-xs);
+  letter-spacing: normal;
+  text-transform: capitalize;
+  color: var(--n-success);
+  background: var(--n-success-soft);
+  border: 0;
+  border-radius: var(--n-r-badge);
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 .kv-row .v .badge.dev {
-  color: var(--warning);
-  background: var(--warning-soft);
-  border-color: rgba(217, 119, 6, 0.25);
+  color: var(--n-warning);
+  background: var(--n-warning-soft);
 }
 
 /* ---- Hash rows ------------------------------------------ */
 .hash-row {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border-1);
+  gap: var(--spacing-sm);
+  padding: 12px var(--spacing-md) 14px;
+  position: relative;
 }
 
-.hash-row:last-child {
-  border-bottom: 0;
+.hash-row + .hash-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--spacing-md);
+  right: 0;
+  height: 1px;
+  background: var(--n-panel-line);
 }
 
 .hash-row .k {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--fg-1);
-  letter-spacing: -0.05px;
+  font-size: 13px;
+  color: var(--n-text-1);
 }
 
 .hash-row .k .hash-algo {
-  color: var(--fg-3);
-  font-weight: 400;
+  color: var(--n-text-3);
   font-size: 12px;
-  margin-left: 4px;
+  margin-left: 6px;
 }
 
+/* White box holding the hash / path in mono. */
 .hash {
   font-family: var(--about-mono);
   font-size: 11.5px;
-  color: var(--fg-2);
-  background: var(--bg-1);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-xs);
-  padding: 8px 12px;
+  color: var(--n-text-1);
+  background: var(--n-card);
+  box-shadow: var(--n-raised-shadow);
+  border-radius: var(--n-r-control);
+  height: 32px;
+  padding: 0 4px 0 10px;
   word-break: break-all;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-sm);
 }
 
 .hash.muted {
-  background: var(--bg-2);
-  color: var(--fg-3);
+  color: var(--n-text-3);
   font-style: italic;
 }
 
 .hash .hash-value {
   flex: 1;
   min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+/* Copy button + its "Copied" tooltip. */
 .hash .copy-btn {
-  margin-left: auto;
+  position: relative;
   flex-shrink: 0;
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   border: 0;
   background: transparent;
-  color: var(--fg-3);
+  color: var(--n-text-2);
   cursor: pointer;
   padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--r-xs);
+  border-radius: var(--n-r-icon);
   transition:
     background var(--dur-fast),
     color var(--dur-fast);
 }
 
 .hash .copy-btn:hover {
-  background: var(--bg-3);
-  color: var(--fg-1);
+  background: var(--n-fill);
+  color: var(--n-text-1);
 }
 
 .hash .copy-btn.copied {
-  color: var(--success);
+  background: var(--n-fill);
+  color: var(--n-success);
+}
+
+.hash .copy-btn.copied::after {
+  content: 'Copied';
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 4px);
+  padding: 4px 8px;
+  border-radius: var(--n-r-control);
+  background: var(--n-text-1);
+  color: #fff;
+  font-size: 11px;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 /* ---- Link rows ------------------------------------------ */
 .link-row {
   display: grid;
-  grid-template-columns: 22px 1fr auto;
+  grid-template-columns: 28px 1fr auto;
   gap: 12px;
   align-items: center;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--border-1);
+  padding: 10px 14px 10px var(--spacing-md);
   cursor: pointer;
   transition: background var(--dur-fast);
   color: inherit;
   text-decoration: none;
+  position: relative;
 }
 
-.link-row:last-child {
-  border-bottom: 0;
+/* Divider inset past the icon well. */
+.link-row + .link-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 56px;
+  right: 0;
+  height: 1px;
+  background: var(--n-panel-line);
 }
 
 .link-row:hover {
-  background: var(--bg-3);
+  background: var(--n-hover);
+  border-radius: var(--n-r-control);
   text-decoration: none;
 }
 
+/* Hide the divider adjacent to a hovered row so the highlight reads clean. */
+.link-row:hover + .link-row::before,
+.link-row:hover::before {
+  background: transparent;
+}
+
 .link-row .link-icon {
-  width: 22px;
-  height: 22px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--fg-3);
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  background: var(--n-card);
+  border-radius: var(--n-r-control);
+  color: var(--n-text-2);
 }
 
 .link-row .link-main {
@@ -253,15 +324,14 @@
 }
 
 .link-row .link-title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  color: var(--fg-1);
-  letter-spacing: -0.05px;
+  color: var(--n-text-1);
 }
 
 .link-row .link-url {
   font-size: 12px;
-  color: var(--accent);
+  color: var(--n-text-3);
   margin-top: 1px;
   white-space: nowrap;
   overflow: hidden;
@@ -269,6 +339,6 @@
 }
 
 .link-row .link-arrow {
-  color: var(--fg-4);
+  color: var(--n-text-3);
   display: inline-flex;
 }

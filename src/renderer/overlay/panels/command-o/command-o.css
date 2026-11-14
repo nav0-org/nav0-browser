@@ -1,22 +1,25 @@
-/* Command-O overlay panel styles */
+/* Command-O overlay panel styles — TabSwitcher mock-up */
 
 #overlay-command-o {
-  background-color: rgba(0, 0, 0, 0.45);
+  background-color: var(--n-scrim);
   line-height: 1.4;
   font-size: 13px;
   display: flex;
   align-items: flex-start;
   justify-content: center;
   padding-top: 60px;
-  backdrop-filter: blur(5px);
 }
 
+/* MENU MATERIAL — tokens only, so the prefers-reduced-transparency fallback
+   in global.css swaps --n-menu-bg->--n-menu-solid and --n-menu-blur->none. */
 .cmdo-overlay-container {
   width: 720px;
   max-width: 90vw;
-  background-color: var(--chrome-2);
-  border-radius: var(--r-lg);
-  box-shadow: var(--shadow-lg);
+  background: var(--n-menu-bg);
+  backdrop-filter: var(--n-menu-blur);
+  -webkit-backdrop-filter: var(--n-menu-blur);
+  box-shadow: var(--n-menu-shadow);
+  border-radius: var(--n-r-dialog);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -27,27 +30,30 @@
 .search-bar {
   display: flex;
   align-items: center;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border-1);
+  height: 54px;
+  padding: 0 16px;
   gap: 10px;
 }
 
+/* ⌘O keycap — shared keycap spec */
 .shortcut-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-md);
-  padding: 4px 8px;
-  font-size: var(--font-xs);
-  color: var(--fg-3);
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  background-color: var(--n-fill-2);
+  border-radius: var(--n-r-key);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--n-text-2);
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 #overlay-command-o .search-icon {
-  color: var(--fg-3);
+  color: var(--n-text-3);
   flex-shrink: 0;
 }
 
@@ -56,17 +62,18 @@
   border: none;
   outline: none;
   font-size: 15px;
-  color: var(--fg-2);
+  color: var(--n-text-1);
+  caret-color: var(--n-accent);
   background: transparent;
 }
 
 #overlay-command-o .search-input::placeholder {
-  color: var(--fg-4);
+  color: var(--n-text-3);
 }
 
 .tab-count {
-  font-size: var(--font-sm);
-  color: var(--fg-3);
+  font-size: 12px;
+  color: var(--n-text-3);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -87,12 +94,12 @@
 }
 
 .tabs-body::-webkit-scrollbar-thumb {
-  background: var(--border-1);
-  border-radius: var(--r-sm);
+  background: var(--n-separator);
+  border-radius: var(--n-r-key);
 }
 
 .tabs-body::-webkit-scrollbar-thumb:hover {
-  background: var(--border-2);
+  background: var(--n-control-edge);
 }
 
 /* ---- Window group ---- */
@@ -104,6 +111,7 @@
   margin-bottom: 0;
 }
 
+/* NEUTRAL header — no coloured rule. */
 .window-header {
   display: flex;
   align-items: center;
@@ -112,113 +120,117 @@
 }
 
 .window-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: var(--n-r-full);
+  background: var(--n-control-edge);
   flex-shrink: 0;
 }
 
 .window-name {
-  font-size: var(--font-sm);
+  font-size: 13px;
   font-weight: 600;
-  color: var(--fg-2);
+  color: var(--n-text-1);
 }
 
 .window-tab-count {
-  font-size: var(--font-xs);
-  color: var(--fg-3);
+  font-size: 12px;
+  color: var(--n-text-3);
 }
 
 .window-line {
   flex: 1;
   height: 1px;
   margin-left: 8px;
+  background: var(--n-separator);
 }
 
 /* ---- Tab grid ---- */
 .tab-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
 }
 
-/* ---- Tab card ---- Cards stay paper-white on the warm chrome-2 shell
-   so they read as the foreground layer. */
+/* ---- Tab card ---- Raised cards float on the menu material. */
 .tab-card {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
-  border-radius: var(--r-md);
-  border: 1px solid var(--border-1);
-  background: var(--bg-0);
+  padding: 10px 10px 10px 12px;
+  border-radius: var(--n-r-control);
+  background: var(--n-card);
+  box-shadow: var(--n-raised-shadow);
   cursor: pointer;
   overflow: hidden;
   position: relative;
   min-width: 0;
 }
 
-.tab-card:hover {
-  border-color: var(--border-2);
-  background: var(--bg-0);
+/* Selection style — one style for hover and keyboard-selected/active cards.
+   Soft accent fill, no outline, no raised-white treatment. */
+.tab-card:hover,
+.tab-card.selected,
+.tab-card[aria-selected='true'] {
+  background: var(--n-accent-soft);
 }
 
-.tab-card.active {
-  border-color: var(--fg-3);
-  background: var(--bg-0);
-}
-
-.tab-card.selected {
-  outline: 2px solid var(--nav0-red-600);
-  outline-offset: -1px;
+.tab-card:hover .tab-title,
+.tab-card.selected .tab-title,
+.tab-card[aria-selected='true'] .tab-title {
+  color: var(--n-text-1);
 }
 
 .tab-favicon {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--r-sm);
+  border-radius: var(--n-r-control);
   overflow: hidden;
 }
 
 .tab-favicon img {
   width: 16px;
   height: 16px;
-  border-radius: var(--r-xs);
+  border-radius: var(--n-r-control);
 }
 
 .tab-favicon-letter {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-3);
-  border-radius: var(--r-sm);
+  background: var(--n-fill-2);
+  border-radius: var(--n-r-control);
   font-size: 10px;
   font-weight: 600;
-  color: var(--fg-3);
+  color: var(--n-text-3);
 }
 
+/* Two-line title — clamps at 2 lines, ~32px tall. */
 .tab-title {
   flex: 1;
-  font-size: var(--font-sm);
+  font-size: 12px;
+  line-height: 16px;
   font-weight: 500;
-  color: var(--fg-2);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: var(--n-text-1);
   min-width: 0;
+  max-height: 32px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .tab-active-dot {
   width: 6px;
   height: 6px;
-  border-radius: 50%;
-  background: var(--nav0-red-600);
+  border-radius: var(--n-r-full);
+  background: var(--n-control-edge);
   flex-shrink: 0;
 }
 
@@ -236,34 +248,33 @@
 }
 
 .window-group.drop-target {
-  background: var(--bg-3);
-  border-radius: var(--r-md);
-  outline: 2px dashed var(--nav0-red-600);
+  background: var(--n-accent-soft);
+  border-radius: var(--n-r-control);
+  outline: 2px dashed var(--n-accent);
   outline-offset: 2px;
 }
 
-/* Within-window reorder: a red anchor bar marks the insertion edge, echoing
-   the row-anchor pattern used across Nav0. */
+/* Within-window reorder: an accent bar marks the insertion edge. */
 .tab-card.drop-before {
-  box-shadow: inset 2px 0 0 0 var(--nav0-red-600);
+  box-shadow: inset 2px 0 0 0 var(--n-accent);
 }
 
 .tab-card.drop-after {
-  box-shadow: inset -2px 0 0 0 var(--nav0-red-600);
+  box-shadow: inset -2px 0 0 0 var(--n-accent);
 }
 
 /* Pin marker — signals tabs that are anchored to the left of their window. */
 .tab-pin-icon {
   flex-shrink: 0;
-  color: var(--nav0-red-600);
+  color: var(--n-text-3);
 }
 
 /* ---- Empty state ---- */
 #overlay-command-o .empty-state {
   padding: 32px;
   text-align: center;
-  color: var(--fg-3);
-  font-size: var(--font-sm);
+  color: var(--n-text-3);
+  font-size: 13px;
 }
 
 /* ---- Footer bar ---- */
@@ -272,7 +283,6 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 16px;
-  border-top: 1px solid var(--border-1);
   gap: 12px;
 }
 
@@ -282,30 +292,30 @@
   gap: 4px;
 }
 
+/* Keycaps — shared keycap spec. */
 #overlay-command-o .key {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 22px;
+  min-width: 20px;
   height: 20px;
   padding: 0 4px;
-  font-size: var(--font-xs);
-  border-radius: var(--r-sm);
-  background-color: var(--bg-2);
-  border: 1px solid var(--border-1);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
-  color: var(--fg-3);
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: var(--n-r-key);
+  background-color: var(--n-fill-2);
+  color: var(--n-text-2);
 }
 
 .key-label {
-  font-size: var(--font-xs);
-  color: var(--fg-4);
+  font-size: 12px;
+  color: var(--n-text-3);
   margin-right: 8px;
 }
 
 .footer-right {
-  font-size: var(--font-xs);
-  color: var(--fg-4);
+  font-size: 12px;
+  color: var(--n-text-3);
 }
 
 /* ---- Responsive ---- */
@@ -314,12 +324,18 @@
     padding-top: 40px;
   }
   .tab-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 500px) {
   .tab-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tabs-body {
+    scroll-behavior: auto;
   }
 }

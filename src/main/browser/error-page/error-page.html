@@ -4,34 +4,9 @@
     <meta charset="utf-8" />
     <title>{{TITLE}}</title>
     <style>
-      /* Mirror of global.css tokens — this document is injected wholesale via
-         executeJavaScript so it can't @import the renderer stylesheet. */
-      :root {
-        --bg-0: #ffffff;
-        --bg-1: #fafafa;
-        --bg-2: #f5f5f5;
-        --bg-3: #ebebeb;
-        --chrome-1: #f7f6f4;
-        --fg-1: #0a0a0a;
-        --fg-2: #333333;
-        --fg-3: #6b7280;
-        --fg-4: #9ca3af;
-        --border-1: #dcd9d4;
-        --border-2: #c8c5bf;
-        --nav0-red-600: #dc2626;
-        --accent: #2563eb;
-        --danger: #dc2626;
-        --danger-soft: #fdecea;
-        --success: #16a34a;
-        --r-xs: 2px;
-        --r-sm: 3px;
-        --r-md: 4px;
-        --dur-fast: 120ms;
-        --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
-        --font-sans:
-          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      }
-
+      /* Self-contained styles — this document is injected wholesale via
+         executeJavaScript so it can't @import the renderer stylesheet.
+         Literal values mirror the Nav0 redesign design tokens. */
       * {
         margin: 0;
         padding: 0;
@@ -40,131 +15,123 @@
 
       html,
       body {
-        background: var(--bg-0);
-        color: var(--fg-2);
-        font-family: var(--font-sans);
+        background: #ffffff;
+        color: #424245;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         min-height: 100vh;
         -webkit-font-smoothing: antialiased;
       }
 
       .error-wrapper {
-        max-width: 1080px;
+        max-width: 880px;
         margin: 0 auto;
-        padding: 48px 56px 80px;
+        padding: 72px 24px 80px;
       }
 
-      /* Editorial masthead — red rule under the title */
+      /* Masthead */
       .error-head {
-        padding-bottom: 24px;
-        border-bottom: 1px solid var(--nav0-red-600);
         margin-bottom: 28px;
       }
 
       .error-title {
-        font-size: 48px;
-        font-weight: 200;
-        letter-spacing: -0.5px;
-        color: var(--fg-1);
+        font-size: 28px;
+        line-height: 34px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: #1d1d1f;
         margin: 0;
-        line-height: 1.2;
       }
 
       /* Body: main panel + optional side rail */
       .error-body {
-        display: grid;
-        grid-template-columns: 1fr 340px;
-        gap: 20px;
-        align-items: start;
+        display: flex;
+        gap: 40px;
+        align-items: flex-start;
       }
 
       .error-body.no-side {
-        grid-template-columns: 1fr;
-      }
-
-      /* Main message panel */
-      .error-main {
-        background: var(--bg-0);
-        border: 1px solid var(--border-1);
-        border-radius: var(--r-md);
-        padding: 32px;
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-      }
-
-      .error-glyph {
-        width: 44px;
-        height: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: var(--r-sm);
-        background: var(--bg-2);
-        border: 1px solid var(--border-1);
-        color: var(--fg-2);
-      }
-
-      .error-glyph svg {
-        width: 22px;
-        height: 22px;
         display: block;
       }
 
+      /* Main message column */
+      .error-main {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Icon well */
+      .error-glyph {
+        width: 52px;
+        height: 52px;
+        flex: none;
+        display: grid;
+        place-items: center;
+        border-radius: 6px;
+        background: #f2f2f4;
+        color: #424245;
+      }
+
+      .error-glyph svg {
+        width: 24px;
+        height: 24px;
+        display: block;
+      }
+
+      /* Mono error-code line */
       .error-eyebrow {
+        margin-top: 18px;
+        font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
         font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: var(--fg-3);
-        font-weight: 500;
+        letter-spacing: 0.04em;
+        color: #6e6e73;
+        font-weight: 400;
       }
 
       .error-heading {
+        margin: 6px 0 0;
         font-size: 22px;
-        font-weight: 600;
-        letter-spacing: -0.3px;
-        color: var(--fg-1);
-        margin: 0;
+        line-height: 28px;
+        font-weight: 700;
+        letter-spacing: -0.015em;
+        color: #1d1d1f;
       }
 
       .error-text {
-        font-size: 14px;
-        line-height: 1.55;
-        color: var(--fg-2);
+        margin: 10px 0 0;
+        font-size: 13px;
+        line-height: 20px;
+        color: #424245;
         max-width: 600px;
-        margin: 0;
       }
 
       .error-text .host {
-        font-size: 13px;
         font-weight: 600;
-        color: var(--fg-1);
-        background: var(--bg-2);
-        border: 1px solid var(--border-1);
-        border-radius: var(--r-xs);
-        padding: 1px 6px;
+        color: #1d1d1f;
       }
 
-      /* Mono error-code chip */
+      /* Mono net-error-code chip */
       .error-code {
         align-self: flex-start;
+        margin-top: 14px;
         display: inline-flex;
         align-items: center;
-        height: 24px;
-        padding: 0 10px;
-        font-family: var(--font-mono);
-        font-size: 11.5px;
-        color: var(--fg-2);
-        background: var(--bg-2);
-        border: 1px solid var(--border-1);
-        border-radius: var(--r-xs);
+        padding: 3px 8px;
+        font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+        font-size: 12px;
+        color: #6e6e73;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 4px;
       }
 
       /* Actions */
       .error-actions {
-        display: inline-flex;
+        display: flex;
         flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 6px;
+        gap: 10px;
+        margin-top: 22px;
       }
 
       .btn {
@@ -172,45 +139,45 @@
         align-items: center;
         gap: 6px;
         padding: 0 14px;
-        height: 36px;
-        border-radius: var(--r-sm);
-        font-size: 14px;
+        height: 32px;
+        border-radius: 4px;
+        font-size: 13px;
         font-weight: 500;
         cursor: pointer;
-        border: 1px solid transparent;
-        font-family: var(--font-sans);
+        border: 0;
+        flex: none;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         transition:
-          background var(--dur-fast),
-          border-color var(--dur-fast),
-          color var(--dur-fast);
+          background 120ms,
+          color 120ms;
       }
 
       .btn.primary {
-        background: var(--fg-1);
-        color: #fff;
-        border-color: var(--fg-1);
+        background: #0066d6;
+        color: #ffffff;
       }
 
       .btn.primary:hover {
-        background: #171717;
+        background: #0058b9;
       }
 
       .btn.secondary {
-        background: var(--bg-0);
-        color: var(--fg-1);
-        border-color: var(--border-2);
+        background: rgba(0, 0, 0, 0.05);
+        color: #1d1d1f;
       }
 
       .btn.secondary:hover {
-        background: var(--bg-2);
+        background: rgba(0, 0, 0, 0.09);
       }
 
       .btn svg {
         width: 14px;
         height: 14px;
+        flex: none;
       }
 
-      /* Side rail — "Try this" checklist */
+      /* Side rail — "Try this" panel */
       .error-side {
         display: flex;
         flex-direction: column;
@@ -218,69 +185,89 @@
       }
 
       .panel {
-        background: var(--bg-0);
-        border: 1px solid var(--border-1);
-        border-radius: var(--r-md);
+        width: 320px;
+        flex: none;
+        border-radius: 6px;
+        background: #f5f5f7;
         overflow: hidden;
       }
 
       .panel-head {
-        padding: 12px 16px;
-        border-bottom: 1px solid var(--border-1);
-        background: var(--chrome-1);
+        padding: 16px 18px 0;
       }
 
       .panel-head .panel-title {
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 600;
-        color: var(--fg-1);
-        letter-spacing: -0.1px;
+        color: #1d1d1f;
       }
 
       .panel-head .panel-sub {
         font-size: 12px;
-        color: var(--fg-3);
+        color: #6e6e73;
         margin-top: 2px;
       }
 
       .check-list {
         list-style: none;
         margin: 0;
-        padding: 0;
+        padding: 10px 18px 6px;
+        counter-reset: check;
       }
 
       .check-row {
-        display: grid;
-        grid-template-columns: 18px 1fr;
+        display: flex;
         gap: 12px;
-        align-items: start;
-        padding: 12px 16px;
-        border-bottom: 1px solid var(--border-1);
+        align-items: flex-start;
+        padding: 12px 0;
+        border-top: 1px solid #e5e5ea;
+        counter-increment: check;
       }
 
-      .check-row:last-child {
-        border-bottom: 0;
+      .check-row:first-child {
+        border-top: 0;
       }
 
       .check-dot {
-        width: 16px;
-        height: 16px;
+        width: 20px;
+        height: 20px;
+        flex: none;
         border-radius: 50%;
-        border: 1.5px solid var(--border-2);
-        margin-top: 2px;
+        background: #ffffff;
+        box-shadow: inset 0 0 0 1px #8e8e93;
+        color: #424245;
+        font-size: 11px;
+        font-weight: 600;
+        display: grid;
+        place-items: center;
+      }
+
+      .check-dot::before {
+        content: counter(check);
+      }
+
+      .check-row > div {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
       }
 
       .check-title {
         font-size: 13px;
-        font-weight: 500;
-        color: var(--fg-1);
+        font-weight: 600;
+        color: #1d1d1f;
       }
 
       .check-help {
         font-size: 12px;
-        color: var(--fg-3);
-        margin-top: 2px;
+        color: #6e6e73;
         line-height: 1.4;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .btn {
+          transition: none;
+        }
       }
     </style>
   </head>

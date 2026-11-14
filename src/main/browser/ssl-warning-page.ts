@@ -4,12 +4,12 @@
  * - The user navigates to an HTTP (non-SSL) website
  * - The SSL certificate for a website is invalid or untrusted
  *
- * Editorial dashboard grammar in the dark "danger" theme: 48-px lightweight
- * title with a red rule, hairline-bordered main panel containing the
- * eyebrow code label, specific heading, body paragraph with the hostname
- * inlined as a mono chip, mono error-code chip, primary "Go back to
- * safety" action, and a collapsible Advanced section with a risks list
- * + low-key mono "Proceed (unsafe)" link.
+ * A light page (DESIGN.md §4.5): a 28-px bold red title, a soft-red icon
+ * well, a mono eyebrow code label, a specific heading, a body paragraph with
+ * the hostname bolded inline, a mono error-code chip, a primary blue "Go back
+ * to safety" action, and a collapsible Advanced section with a risks list in
+ * a grey panel + a red "Proceed (unsafe)" link. CSS is self-contained with
+ * literal values that mirror the global design tokens.
  */
 
 // Loaded as a raw string via webpack asset/source

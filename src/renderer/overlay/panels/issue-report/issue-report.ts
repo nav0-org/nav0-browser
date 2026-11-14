@@ -137,7 +137,7 @@ function showStatusWithLink(message: string, url: string): void {
     const link = document.createElement('a');
     link.href = '#';
     link.textContent = 'View on GitHub';
-    link.style.color = 'var(--success-color)';
+    link.style.color = 'var(--n-success)';
     link.style.textDecoration = 'underline';
     link.style.fontWeight = '500';
     link.style.cursor = 'pointer';
@@ -291,9 +291,7 @@ function resetForm(): void {
   const titleInput = containerEl.querySelector('#ir-issue-title') as HTMLInputElement;
   const descInput = containerEl.querySelector('#ir-issue-description') as HTMLTextAreaElement;
   const typeSelect = containerEl.querySelector('#ir-issue-type') as HTMLSelectElement;
-  const reportedByInput = containerEl.querySelector(
-    '#ir-issue-reported-by'
-  ) as HTMLInputElement;
+  const reportedByInput = containerEl.querySelector('#ir-issue-reported-by') as HTMLInputElement;
   const statusEl = containerEl.querySelector('#ir-issue-report-status') as HTMLElement;
 
   if (titleInput) titleInput.value = '';
@@ -314,9 +312,7 @@ async function submitIssue(): Promise<void> {
     '#ir-issue-description'
   ) as HTMLTextAreaElement;
   const typeSelect = containerEl.querySelector('#ir-issue-type') as HTMLSelectElement;
-  const reportedByInput = containerEl.querySelector(
-    '#ir-issue-reported-by'
-  ) as HTMLInputElement;
+  const reportedByInput = containerEl.querySelector('#ir-issue-reported-by') as HTMLInputElement;
   const submitBtn = containerEl.querySelector('#ir-issue-submit-btn') as HTMLButtonElement;
 
   const title = titleInput.value.trim();

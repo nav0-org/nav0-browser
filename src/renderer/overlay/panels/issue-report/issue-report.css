@@ -25,25 +25,30 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: var(--n-scrim);
   cursor: pointer;
 }
 
 /* Dialog card */
 .issue-report-dialog {
   position: relative;
-  width: 480px;
+  width: 540px;
   max-width: 90%;
   max-height: 80vh;
-  background-color: var(--chrome-2);
-  border-radius: var(--r-lg);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--border-1);
+  box-sizing: border-box;
+  padding: 20px;
+  background: var(--n-menu-bg);
+  backdrop-filter: var(--n-menu-blur);
+  -webkit-backdrop-filter: var(--n-menu-blur);
+  border-radius: var(--n-r-dialog);
+  box-shadow: var(--n-menu-shadow);
+  border: 0;
   overflow: hidden;
   z-index: 1;
   animation: issueSlideIn 0.2s ease-out;
   display: flex;
   flex-direction: column;
+  gap: 14px;
 }
 
 @keyframes issueSlideIn {
@@ -68,60 +73,71 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 16px 20px 12px 20px;
-  border-bottom: 1px solid var(--border-1);
-  font-size: var(--font-lg);
+  font-size: var(--font-xl);
+  line-height: 22px;
   font-weight: 600;
-  color: var(--fg-2);
+  letter-spacing: -0.01em;
+  color: var(--n-text-1);
+}
+
+.issue-report-header i,
+.issue-report-header svg {
+  flex: none;
+  color: var(--n-text-2);
 }
 
 /* Body */
 .issue-report-body {
-  padding: 16px 20px;
   overflow-y: auto;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .issue-report-body .form-group {
-  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 0;
 }
 
 .issue-report-body .form-label {
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 0;
   font-weight: 500;
   font-size: var(--font-sm);
-  color: var(--fg-2);
+  color: var(--n-text-2);
 }
 
 .issue-report-body .form-label-optional {
   font-weight: 400;
-  color: var(--fg-3);
-  font-size: var(--font-xs);
+  color: var(--n-text-3);
+  font-size: var(--font-sm);
 }
 
 .issue-report-body .form-control {
   display: block;
   width: 100%;
-  padding: 8px 12px;
+  padding: 8px 10px;
   font-size: var(--font-md);
-  color: var(--fg-2);
-  background-color: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-md);
-  transition: border-color var(--transition-fast);
+  color: var(--n-text-1);
+  background-color: var(--n-card);
+  border: 1px solid transparent;
+  border-radius: var(--n-r-control);
+  box-shadow: var(--n-field-shadow);
+  transition: box-shadow var(--transition-fast);
   box-sizing: border-box;
 }
 
 .issue-report-body .form-control:focus {
   outline: none;
-  background-color: var(--bg-0);
-  box-shadow: var(--shadow-focus);
+  box-shadow: var(--n-focus-ring-field);
 }
 
 .issue-report-body textarea.form-control {
   resize: vertical;
-  min-height: 100px;
+  min-height: 78px;
   font-family: inherit;
 }
 
@@ -150,18 +166,18 @@
   justify-content: center;
   gap: 8px;
   padding: 12px;
-  border: 2px dashed var(--border-1);
-  border-radius: var(--r-md);
-  color: var(--fg-3);
-  font-size: var(--font-sm);
+  border: 1px dashed var(--n-control-edge);
+  border-radius: var(--n-r-control);
+  color: var(--n-text-2);
+  font-size: var(--font-md);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .attachment-drop-zone:hover {
-  border-color: var(--accent);
-  color: var(--fg-2);
-  background-color: var(--bg-2);
+  border-color: var(--n-accent);
+  color: var(--n-text-1);
+  background-color: var(--n-fill);
 }
 
 .attachment-previews {
@@ -174,9 +190,9 @@
   position: relative;
   width: 64px;
   height: 64px;
-  border-radius: var(--r-md);
+  border-radius: var(--n-r-control);
   overflow: hidden;
-  border: 1px solid var(--border-1);
+  border: 1px solid var(--n-separator);
 }
 
 .attachment-preview img {
@@ -191,9 +207,9 @@
   right: 2px;
   width: 18px;
   height: 18px;
-  border-radius: var(--r-full);
-  background-color: var(--danger);
-  color: white;
+  border-radius: var(--n-r-full);
+  background-color: var(--n-danger);
+  color: #fff;
   border: none;
   cursor: pointer;
   display: flex;
@@ -210,51 +226,50 @@
 
 /* System info preview */
 .issue-report-sysinfo {
-  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .sysinfo-preview {
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
   font-size: var(--font-xs);
-  color: var(--fg-3);
-  background-color: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-md);
-  padding: 8px 12px;
-  line-height: 1.5;
+  color: var(--n-text-2);
+  background-color: var(--n-fill);
+  border-radius: var(--n-r-control);
+  padding: 8px 10px;
+  line-height: 16px;
   white-space: pre-line;
 }
 
 /* Status message */
 .issue-report-status {
-  padding: 8px 20px;
-  font-size: var(--font-sm);
+  font-size: var(--font-md);
   text-align: center;
 }
 
 .issue-report-status.success {
-  color: var(--success);
-  background-color: var(--success-soft);
+  color: var(--n-success);
 }
 
 .issue-report-status.error {
-  color: var(--danger);
-  background-color: var(--danger-soft);
+  color: var(--n-danger);
 }
 
 .issue-copy-url-btn {
   margin-left: 4px;
   padding: 2px 8px;
   font-size: var(--font-xs);
-  border: 1px solid var(--success);
-  border-radius: var(--r-md);
+  border: 1px solid var(--n-success);
+  border-radius: var(--n-r-control);
   background: transparent;
-  color: var(--success);
+  color: var(--n-success);
   cursor: pointer;
   vertical-align: middle;
 }
 
 .issue-copy-url-btn:hover {
-  background: var(--success);
+  background: var(--n-success);
   color: #fff;
 }
 
@@ -263,18 +278,21 @@
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  padding: 12px 20px 16px 20px;
-  border-top: 1px solid var(--border-1);
+  margin-top: 2px;
 }
 
 .issue-report-actions .btn {
-  padding: 8px 20px;
-  font-size: var(--font-sm);
+  height: 28px;
+  padding: 0 14px;
+  font-size: var(--font-md);
   font-weight: 500;
-  border-radius: var(--r-md);
+  border-radius: var(--n-r-control);
   cursor: pointer;
   transition: all var(--transition-fast);
   border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .issue-report-actions .btn:disabled {

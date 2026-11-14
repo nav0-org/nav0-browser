@@ -91,26 +91,26 @@ The `--nav0-red-*`, `--nav0-blue-*` and `--nav0-slate-*` ramps stay in `global.c
 
 ### 3.4 Accent, semantic, private, data
 
-| Token                                       | Value                                                                                                               | Use                                                                            |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `--n-accent`                                | `#0066d6`                                                                                                           | Links, primary buttons, on-state controls, progress, the selected icon (5.4:1) |
-| `--n-accent-hover`                          | `#0058b9`                                                                                                           | Link and primary-button hover                                                  |
-| `--n-accent-soft`                           | `rgba(0,102,214,0.12)`                                                                                              | Selection background (rows, sidebar item, chips, toggled find options)         |
-| `--n-focus`                                 | `rgba(0,102,214,0.28)`                                                                                              | Focus halo colour                                                              |
-| `--n-danger`                                | `#d70015`                                                                                                           | Insecure, failure, destructive confirm (5.4:1)                                 |
-| `--n-danger-soft`                           | `rgba(215,0,21,0.08)`                                                                                               | Danger banner background                                                       |
-| `--n-warning`                               | `#a35200`                                                                                                           | Mixed content, paused (5.6:1)                                                  |
-| `--n-warning-soft`                          | `rgba(163,82,0,0.10)`                                                                                               | Warning badge background (e.g. a development build on About)                   |
-| `--n-success`                               | `#1d7a3a`                                                                                                           | Download complete, "Release" badge (5.4:1)                                     |
-| `--n-success-soft`                          | `rgba(29,122,58,0.10)`                                                                                              | Success badge background                                                       |
-| `--n-private-strip`                         | `#e4def4`                                                                                                           | Private window tab strip                                                       |
-| `--n-private-toolbar`                       | `#efebf8`                                                                                                           | Private window toolbar and active tab                                          |
-| `--n-private-line`                          | `#cdc4e6`                                                                                                           | Private window hairlines                                                       |
-| `--n-private-text`                          | `#3f3a52`                                                                                                           | Inactive tabs and icons in private windows (8.3:1)                             |
-| `--n-private-label-bg`                      | `#d3c8ef`                                                                                                           | "Private" label background                                                     |
-| `--n-private-label-text`                    | `#3b2d78`                                                                                                           | "Private" label text (7.3:1)                                                   |
-| `--n-data-0` … `--n-data-4`                 | `#e2e5e9` `#a4afbf` `#8693a6` `#6a788e` `#4f5f76`                                                                   | Activity map steps; bars use step 2 and always show their value                |
-| Storage hues (storage bar only, this order) | Images `#5b9a5f`, Video & audio `#8a6bbf`, Archives `#b98a35`, Apps `#547ebe`, Documents `#c0744d`, Other `#8e8e93` | Parts of a whole, always with a legend                                         |
+| Token                                          | Value                                                                                                                                                                                           | Use                                                                            |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `--n-accent`                                   | `#0066d6`                                                                                                                                                                                       | Links, primary buttons, on-state controls, progress, the selected icon (5.4:1) |
+| `--n-accent-hover`                             | `#0058b9`                                                                                                                                                                                       | Link and primary-button hover                                                  |
+| `--n-accent-soft`                              | `rgba(0,102,214,0.12)`                                                                                                                                                                          | Selection background (rows, sidebar item, chips, toggled find options)         |
+| `--n-focus`                                    | `rgba(0,102,214,0.28)`                                                                                                                                                                          | Focus halo colour                                                              |
+| `--n-danger`                                   | `#d70015`                                                                                                                                                                                       | Insecure, failure, destructive confirm (5.4:1)                                 |
+| `--n-danger-soft`                              | `rgba(215,0,21,0.08)`                                                                                                                                                                           | Danger banner background                                                       |
+| `--n-warning`                                  | `#a35200`                                                                                                                                                                                       | Mixed content, paused (5.6:1)                                                  |
+| `--n-warning-soft`                             | `rgba(163,82,0,0.10)`                                                                                                                                                                           | Warning badge background (e.g. a development build on About)                   |
+| `--n-success`                                  | `#1d7a3a`                                                                                                                                                                                       | Download complete, "Release" badge (5.4:1)                                     |
+| `--n-success-soft`                             | `rgba(29,122,58,0.10)`                                                                                                                                                                          | Success badge background                                                       |
+| `--n-private-strip`                            | `#e4def4`                                                                                                                                                                                       | Private window tab strip                                                       |
+| `--n-private-toolbar`                          | `#efebf8`                                                                                                                                                                                       | Private window toolbar and active tab                                          |
+| `--n-private-line`                             | `#cdc4e6`                                                                                                                                                                                       | Private window hairlines                                                       |
+| `--n-private-text`                             | `#3f3a52`                                                                                                                                                                                       | Inactive tabs and icons in private windows (8.3:1)                             |
+| `--n-private-label-bg`                         | `#d3c8ef`                                                                                                                                                                                       | "Private" label background                                                     |
+| `--n-private-label-text`                       | `#3b2d78`                                                                                                                                                                                       | "Private" label text (7.3:1)                                                   |
+| `--n-data-0` … `--n-data-4`                    | `#e2e5e9` `#a4afbf` `#8693a6` `#6a788e` `#4f5f76`                                                                                                                                               | Activity map steps; bars use step 2 and always show their value                |
+| `--n-storage-*` (storage bar only, this order) | `--n-storage-images` `#5b9a5f`, `--n-storage-media` `#8a6bbf`, `--n-storage-archives` `#b98a35`, `--n-storage-apps` `#547ebe`, `--n-storage-documents` `#c0744d`, `--n-storage-other` `#8e8e93` | Parts of a whole, always with a legend                                         |
 
 When the OS asks for more contrast (`prefers-contrast: more`), separators step up to `#8e8e93`, control edges to `#6e6e73`, and tertiary text becomes secondary.
 
@@ -160,6 +160,8 @@ Use tabular numerals (`font-variant-numeric: tabular-nums`) for times, sizes, co
 --n-raised-shadow: 0 0 0 0.5px rgba(0,0,0,0.18), 0 1px 1px rgba(0,0,0,0.05);  /* white buttons on grey panels */
 --n-focus-ring:   0 0 0 3px var(--n-focus);                                     /* buttons, rows, chips */
 --n-focus-ring-field: 0 0 0 1px var(--n-accent), 0 0 0 4px var(--n-focus);     /* text fields */
+--n-focus-danger: rgba(215, 0, 21, 0.18);                                       /* danger focus halo */
+--n-focus-ring-field-danger: 0 0 0 1px var(--n-danger), 0 0 0 4px var(--n-focus-danger); /* invalid field (find: no matches / invalid regex) */
 ```
 
 Under `prefers-reduced-transparency: reduce`, menus drop the blur and use `--n-menu-solid`.
@@ -185,7 +187,7 @@ Unchanged: `--z-dropdown 100`, `--z-sticky 200`, `--z-modal 1000`, `--z-toast 11
 - **Inactive tab:** transparent, title 12 px `--n-text-2`; hover `--n-tab-hover`; the close button (18 px, `--n-r-icon`) appears on hover only.
 - 16 px `--n-tab-divider` between inactive tabs, hidden next to the active or hovered tab.
 - Pinned tabs are 36 px wide, favicon only. While loading, a 14 px ring (2 px, track `--n-ring-track`, arc `--n-accent`) replaces the favicon.
-- New-tab "+" sits at the far right (36 px, 18 px icon). Traffic lights and Windows controls are centred on the tab row.
+- New-tab "+" sits at the far right (40 × 34, 18 px icon). Traffic lights and Windows controls are centred on the tab row.
 - No coloured bar on the active tab.
 
 **Toolbar** — 44 px, `--n-toolbar`, 1 px `--n-chrome-line` at the bottom. Buttons are 32 × 32, `--n-r-icon`, 18 px icons in `--n-text-2`, hover `--n-fill`, pressed `--n-fill-2`. Order (unchanged): back, forward, reload, `>_` (⌘K), address field, downloads (with a 2 px `--n-accent` progress ring while downloading), ⋮.
@@ -193,7 +195,7 @@ Unchanged: `--z-dropdown 100`, `--z-sticky 200`, `--z-modal 1000`, `--z-toast 11
 **Address field** — 32 px, `--n-card`, `--n-r-control`, `--n-field-shadow`; focused: `--n-focus-ring-field`. 14 px text.
 
 - At rest, the URL is split for display: scheme, subdomain and path in `--n-text-3`; the registrable domain in `--n-text-1` weight 600. The scheme is lowercase (`nav0://`, never `Nav0://`).
-- Leading indicator (28 × 28): secure = `lock` in `--n-text-3` (neutral, never green); not secure (HTTP or bypassed certificate) = `triangle-alert` in `--n-danger`, static. A bypassed certificate also shows `https` struck through in red. Built-in pages and typing show `search`.
+- Leading indicator (30 × 28): secure = `lock` in `--n-text-3` (neutral, never green); not secure (HTTP or bypassed certificate) = `triangle-alert` in `--n-danger`, static. A bypassed certificate also shows `https` struck through in red. Built-in pages and typing show `search`.
 - Trailing field buttons (reader, PDF, bookmark / reading queue): 28 × 28, 16 px icons in `--n-text-3`; when on, icon `--n-accent` on `--n-accent-soft`.
 
 **Find in page** — a 44 px bar under the toolbar, `--n-toolbar`, bottom line `--n-chrome-line`. Field 400 px wide, 30 px, white, ring as above, match counter inside the field at the right (12 px `--n-text-3`, e.g. "3 of 12"). "No matches" and "Invalid regex" turn the text, counter and ring `--n-danger`. Option toggles **Aa**, **|ab|**, **.\*** are 28 px; on = `--n-accent` text on `--n-accent-soft`. Divider, previous/next (disabled `--n-text-4` when there's nothing to move to), and close at the far right.
@@ -202,7 +204,7 @@ Unchanged: `--z-dropdown 100`, `--z-sticky 200`, `--z-modal 1000`, `--z-toast 11
 
 ### 4.2 Built-in pages (`src/renderer/pages/<page>/`)
 
-- Canvas `--n-page`. Content column 880 px (new tab, history, bookmarks, downloads) or 680 px (settings, about), centred, 36–40 px top padding, 56 px bottom.
+- Canvas `--n-page`. Content column 880 px (new tab, history, bookmarks, downloads) or 680 px (settings, about), centred, 36–40 px top padding, 56 px bottom. The new-tab page is a hero exception: its content is centred lower (≈96 px top) and its search field is a taller filled field (44 px, `--n-r-panel`).
 - Title: Large title (28 / 34, 700). **No masthead rule.**
 - Toolbar under the title: a filled search field (`--n-fill`, `--n-r-control`, 32 px), a segmented control (track `--n-fill-2`, white raised thumb), secondary buttons (`--n-fill`), in that order.
 - **Grey panels** (`--n-grouped`, `--n-r-panel`, 18–22 px padding) for charts, summaries and groups. No borders, no shadows.

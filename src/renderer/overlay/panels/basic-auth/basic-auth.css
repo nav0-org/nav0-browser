@@ -21,22 +21,27 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: var(--n-scrim);
 }
 
 .basic-auth-dialog {
   position: relative;
   width: 420px;
   max-width: 90%;
-  background-color: var(--chrome-2);
-  border-radius: var(--r-lg);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--border-1);
+  box-sizing: border-box;
+  padding: 20px;
+  background: var(--n-menu-bg);
+  backdrop-filter: var(--n-menu-blur);
+  -webkit-backdrop-filter: var(--n-menu-blur);
+  border-radius: var(--n-r-dialog);
+  box-shadow: var(--n-menu-shadow);
+  border: 0;
   overflow: hidden;
   z-index: 1;
   animation: basicAuthSlideIn 0.18s ease-out;
   display: flex;
   flex-direction: column;
+  gap: 14px;
 }
 
 @keyframes basicAuthSlideIn {
@@ -60,112 +65,121 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 14px 18px 12px 18px;
-  border-bottom: 1px solid var(--border-1);
-  font-size: var(--font-lg);
+  font-size: var(--font-xl);
+  line-height: 22px;
   font-weight: 600;
-  color: var(--fg-2);
+  letter-spacing: -0.01em;
+  color: var(--n-text-1);
+}
+
+.basic-auth-header i,
+.basic-auth-header svg {
+  flex: none;
+  color: var(--n-text-2);
 }
 
 .basic-auth-body {
-  padding: 14px 18px 8px 18px;
+  display: block;
 }
 
 .basic-auth-subtitle {
-  font-size: var(--font-sm);
-  color: var(--text-color);
-  margin-bottom: 6px;
+  font-size: var(--font-md);
+  color: var(--n-text-1);
+  margin-bottom: 4px;
   line-height: 1.4;
   word-break: break-word;
 }
 
 .basic-auth-realm {
-  font-size: var(--font-xs);
-  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  color: var(--n-text-3);
   margin-bottom: 12px;
   word-break: break-word;
 }
 
 .basic-auth-warning {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
-  padding: 8px 10px;
-  margin: 6px 0 12px 0;
-  background-color: var(--danger-soft);
-  color: var(--danger);
-  border-radius: var(--r-md);
-  font-size: var(--font-xs);
+  margin: 10px 0 12px 0;
+  color: var(--n-danger);
+  font-size: var(--font-sm);
+  line-height: 17px;
+}
+
+.basic-auth-warning i,
+.basic-auth-warning svg {
+  flex: none;
+  margin-top: 1px;
 }
 
 .basic-auth-label {
   display: block;
-  margin: 10px 0 4px 0;
+  margin: 10px 0 5px 0;
   font-size: var(--font-sm);
   font-weight: 500;
-  color: var(--text-color);
+  color: var(--n-text-2);
 }
 
 .basic-auth-input {
   display: block;
   width: 100%;
-  padding: 8px 12px;
+  padding: 8px 10px;
   font-size: var(--font-md);
-  color: var(--fg-2);
-  background-color: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-md);
+  color: var(--n-text-1);
+  background-color: var(--n-card);
+  border: 1px solid transparent;
+  border-radius: var(--n-r-control);
+  box-shadow: var(--n-field-shadow);
   box-sizing: border-box;
   font-family: inherit;
 }
 
 .basic-auth-input:focus {
   outline: none;
-  background-color: var(--bg-0);
-  box-shadow: var(--shadow-focus);
+  box-shadow: var(--n-focus-ring-field);
 }
 
 .basic-auth-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  padding: 12px 18px 14px 18px;
-  border-top: 1px solid var(--border-1);
-  margin-top: 8px;
+  margin-top: 2px;
 }
 
 .basic-auth-btn {
-  padding: 7px 18px;
-  font-size: var(--font-sm);
+  height: 28px;
+  padding: 0 14px;
+  font-size: var(--font-md);
   font-weight: 500;
-  border-radius: var(--r-md);
+  border-radius: var(--n-r-control);
   cursor: pointer;
   transition: all var(--transition-fast);
   border: 1px solid transparent;
   font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
 }
 
 .basic-auth-btn-primary {
-  background-color: var(--primary-color);
+  background-color: var(--n-accent);
   color: #fff;
-  border-color: var(--primary-color);
+  border-color: var(--n-accent);
 }
 
 .basic-auth-btn-primary:hover {
-  filter: brightness(0.95);
+  background-color: var(--n-accent-hover);
+  border-color: var(--n-accent-hover);
 }
 
 .basic-auth-btn-secondary {
-  background-color: var(--bg-2);
-  color: var(--fg-2);
-  border-color: var(--border-1);
+  background-color: var(--n-fill);
+  color: var(--n-text-1);
+  border-color: transparent;
 }
 
 .basic-auth-btn-secondary:hover {
-  border-color: var(--fg-3);
-}
-
-.basic-auth-btn:focus-visible {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 2px;
+  background-color: var(--n-fill-2);
 }

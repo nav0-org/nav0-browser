@@ -1,19 +1,44 @@
 // File type display utilities — shared across renderer pages.
 
-/** Color palette for file display types. */
-export const TYPE_COLORS: Record<string, string> = {
-  document: '#6366f1', // Indigo
-  spreadsheet: '#22c55e', // Green
-  presentation: '#3b82f6', // Blue
-  ebook: '#f97316', // Orange
-  image: '#06b6d4', // Cyan
-  video: '#ef4444', // Red
-  installer: '#f59e0b', // Amber
-  archive: '#8b5cf6', // Purple
-  audio: '#ec4899', // Pink
-  code: '#10b981', // Emerald
-  font: '#64748b', // Slate
-  other: '#a1a1aa', // Gray
+/**
+ * The six storage hues (DESIGN.md §2 / global.css). These are the ONLY
+ * colours allowed on the Downloads page, and only on the storage bar + its
+ * legend. Everywhere else categories are neutral (an icon + a label).
+ *
+ * Each value is a CSS custom-property reference so the colour stays a token.
+ */
+export const STORAGE_BUCKET_COLORS: Record<string, string> = {
+  images: 'var(--n-storage-images)',
+  media: 'var(--n-storage-media)', // video & audio
+  archives: 'var(--n-storage-archives)',
+  apps: 'var(--n-storage-apps)', // installers / apps
+  documents: 'var(--n-storage-documents)',
+  other: 'var(--n-storage-other)',
+};
+
+/**
+ * Folds the fine-grained display types into the six storage buckets used by
+ * the storage bar + legend. This mapping is for the chart ONLY — row badges,
+ * file icons and progress fills stay neutral/accent.
+ */
+export const STORAGE_BUCKET_MAP: Record<string, string> = {
+  image: 'images',
+  video: 'media',
+  audio: 'media',
+  archive: 'archives',
+  installer: 'apps',
+  document: 'documents',
+  spreadsheet: 'documents',
+  presentation: 'documents',
+  ebook: 'documents',
+  code: 'other',
+  font: 'other',
+  other: 'other',
+};
+
+/** Fold a display type into its storage bucket (for the storage bar/legend). */
+export const getStorageBucket = (displayType: string): string => {
+  return STORAGE_BUCKET_MAP[displayType] || 'other';
 };
 
 /** Maps file extensions to a human-friendly display type. */
@@ -371,19 +396,6 @@ export const getDisplayTypeFromExtension = (fileExtension: string): string => {
     ? fileExtension.slice(1).toLowerCase()
     : fileExtension.toLowerCase();
   return EXTENSION_TYPE_MAP[ext] || 'other';
-};
-
-/** Get the type color for a display type. */
-export const getTypeColor = (displayType: string): string => {
-  return TYPE_COLORS[displayType] || TYPE_COLORS.other;
-};
-
-/** Convert hex color to rgba string. */
-export const hexToRgba = (hex: string, alpha: number): string => {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
 /** Maps file extensions to Lucide icon names. */

@@ -170,10 +170,37 @@ const OPTIONS_MENU_HTML = `
 
 function initializeDomElements(): void {
   optionsElement = containerEl.querySelector('#om-options-dropdown') as HTMLElement;
-  const modKey = window.BrowserAPI.platform === 'darwin' ? 'Cmd' : 'Ctrl';
+  const isMac = window.BrowserAPI.platform === 'darwin';
+  const modKey = isMac ? 'Cmd' : 'Ctrl';
+
+  // Menu-item shortcuts are muted text, not keycap boxes (DESIGN §4.4). On
+  // macOS they are glyphs ordered ⌃⌥⇧⌘ before the key with no plus signs
+  // (e.g. "⇧⌘N"); on Windows/Linux the "Ctrl+Shift+N" text form.
+  const MAC_GLYPHS: Record<string, string> = {
+    Ctrl: '⌃',
+    Alt: '⌥',
+    Opt: '⌥',
+    Option: '⌥',
+    Shift: '⇧',
+    Cmd: '⌘',
+  };
+  const MAC_MODIFIER_ORDER = ['⌃', '⌥', '⇧', '⌘'];
+
   const setShortcut = (id: string, keys: string[]) => {
     const el = containerEl.querySelector(`#${id}`) as HTMLElement;
-    if (el) el.innerHTML = keys.map((k) => `<span class="keycap">${k}</span>`).join('');
+    if (!el) return;
+    if (isMac) {
+      const glyphs: string[] = [];
+      const rest: string[] = [];
+      for (const k of keys) {
+        if (k in MAC_GLYPHS) glyphs.push(MAC_GLYPHS[k]);
+        else rest.push(k);
+      }
+      glyphs.sort((a, b) => MAC_MODIFIER_ORDER.indexOf(a) - MAC_MODIFIER_ORDER.indexOf(b));
+      el.textContent = glyphs.join('') + rest.join('');
+    } else {
+      el.textContent = keys.join('+');
+    }
   };
 
   setShortcut('om-new-tab-shortcut', [modKey, 'T']);
@@ -185,7 +212,7 @@ function initializeDomElements(): void {
   setShortcut('om-history-shortcut', [modKey, 'Shift', 'H']);
   setShortcut('om-bookmarks-shortcut', [modKey, 'Shift', 'B']);
   setShortcut('om-browser-settings-shortcut', [modKey, ',']);
-  const devtoolsMod = window.BrowserAPI.platform === 'darwin' ? 'Opt' : 'Shift';
+  const devtoolsMod = isMac ? 'Opt' : 'Shift';
   setShortcut('om-devtools-shortcut', [modKey, devtoolsMod, 'I']);
 
   // Populate history submenu when hovering

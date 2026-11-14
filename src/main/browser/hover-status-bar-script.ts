@@ -16,9 +16,10 @@
  * (and the ad-blocker's cosmetic CSS) can't touch it and it never intercepts
  * clicks on the content beneath it. Long URLs are truncated at 120 chars.
  *
- * Colours mirror the design tokens (--chrome-2 surface, --border-1 hairline,
- * --fg-2 text, --r-md corner, --shadow-sm) since a page-injected element can't
- * reference global.css. `prefers-reduced-motion` is honoured.
+ * Colours use the toolbar palette as literals (#f6f6f7 surface, #d1d1d6 hairline,
+ * #424245 text, 4px top-right corner) rather than CSS tokens, since a
+ * page-injected element can't reference global.css. `prefers-reduced-motion` is
+ * honoured.
  */
 export const HOVER_STATUS_BAR_SCRIPT = `
 (function () {
@@ -31,8 +32,8 @@ export const HOVER_STATUS_BAR_SCRIPT = `
     ":host{all:initial}" +
     ".bar{display:inline-block;box-sizing:border-box;max-width:60vw;" +
     "padding:3px 8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;" +
-    "font-size:12px;line-height:1.4;color:#333333;background:#fbfaf8;" +
-    "border-top:1px solid #dcd9d4;border-right:1px solid #dcd9d4;border-top-right-radius:4px;" +
+    "font-size:12px;line-height:1.4;color:#424245;background:#f6f6f7;" +
+    "border-top:1px solid #d1d1d6;border-right:1px solid #d1d1d6;border-top-right-radius:4px;" +
     "box-shadow:0 1px 2px rgba(0,0,0,.06);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" +
     "opacity:0;transform:translateY(2px);transition:opacity 90ms ease,transform 90ms ease}" +
     ".bar.visible{opacity:1;transform:translateY(0)}" +

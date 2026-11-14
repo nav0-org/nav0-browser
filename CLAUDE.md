@@ -393,19 +393,24 @@ When contributing to Nav0, always keep these principles in mind:
 
 ## Design System
 
-**Before making any change to HTML, CSS, or DOM-building TypeScript under `src/renderer/**`, read [`DESIGN.md`](DESIGN.md).\*\* It is the authoritative reference for design tokens, layout patterns, component classes, iconography (Lucide), motion, and the editorial dashboard skeleton used across built-in pages.
+**Read [`DESIGN.md`](DESIGN.md) before changing any HTML, CSS or DOM-building TypeScript** under `src/renderer/`, or the error and certificate-warning pages in `src/main/browser/`. It is the authoritative reference for tokens, layout patterns, components, iconography and motion.
 
 Hard rules (full details in `DESIGN.md`):
 
-- **Tokens, not literals.** Always use CSS variables from `src/renderer/styles/global.css` — never hardcode colours, off-scale spacing (stick to `--spacing-xs/sm/md/lg/xl/xxl`), or off-scale radii (Nav0 caps at `--r-lg` = 6px; only `--r-full` for circles).
-- **Chrome surfaces are warm off-white, content stays paper-white.** Tab strip, nav bar, and overlay panels use `--chrome-1` / `--chrome-2` / `--tab-inactive`; active tab and content cards stay on `--bg-0`.
-- **Row highlights are `--bg-3` plus a 2-px `--nav0-red-600` anchor bar on the left.** This applies to options-menu items, Command-K results, URL autocomplete, new-tab inline search, and the masthead divider on every built-in page.
-- **Paper-flat, not glass.** Shadows come only from `--shadow-sm/md/lg`, `--new-tab-card-shadow`, and the two `--shadow-focus*` halos. No coloured glows, no gradients on surfaces, no backdrop-blur "glass" outside the established command-palette pattern.
-- **Mono is for code only** (`<code>`, `<kbd>`, hashes, paths, error codes, reader-mode `<pre>`). UI chrome — versions, dates, durations, labels — uses the system sans stack.
-- **Icons via Lucide only.** `<i data-lucide="<name>">` + `createIcons({ icons })`. No raw `<svg>` markup, no new icon libraries.
-- **Reuse `global.css` components.** `.btn`, `.btn-primary/secondary/ghost/link`, `.form-control`, `.card`, `.alert-*`, `.badge-*`, `.keycap`, flex/spacing/typography utilities — all pre-defined. Only fork into a page-local class when the design genuinely diverges.
-- **`--private-bg` is reserved** for the private-window chrome signal — never reuse for general danger/destructive affordances; use `--danger` instead.
-- **Honour `prefers-reduced-motion`** for any new animation.
+- **Tokens, not literals.** Use the `--n-*` variables in `src/renderer/styles/global.css`. Never hardcode colours; keep spacing on `--spacing-xs/sm/md/lg/xl/xxl`; take radii only from `--n-r-*` (2–8 px). Only switches, radios, dots and rings are fully round.
+- **White pages, grey panels.** Every built-in page is `--n-page`. Groups, charts and summaries sit in `--n-grouped` panels with no border or shadow; controls inside a panel are white.
+- **Cool grey chrome, connected active tab.** The tab strip is `--n-strip`; the active tab and the toolbar share `--n-toolbar`, with no line between them.
+- **Blue means interactive or selected. Red means danger only:** insecure connections, failures and the confirm button of a destructive action. Never red for selection, toggles, rules, tabs or private windows; the `--nav0-red-*` ramp is for the logo.
+- **One selection style:** `--n-accent-soft` background, `--n-text-1` text, `--n-accent` icon, for menus, ⌘K, ⌘O, URL autocomplete, the Settings sidebar and filter chips. No anchor bars.
+- **Menus, popovers, palettes and dialogs use the frosted material** (`--n-menu-bg` + `backdrop-filter: var(--n-menu-blur)` + `--n-menu-shadow`), solid under `prefers-reduced-transparency`. Elsewhere, shadows come only from the shadow tokens: no coloured glows, no gradients on surfaces.
+- **Private windows use the `--n-private-*` tokens** (lavender) plus the "Private" label. Never red, never `--n-danger`.
+- **Type:** the system font stack; sizes 11 / 12 / 13 / 14 / 17 / 22 / 28 px; weights 400–700. Page titles are 28 px bold with no rule under them.
+- **Mono is for code only:** error codes, hashes, file paths, the user-agent string, and key combos inside prose. Versions, dates, labels and keycaps use the system sans stack.
+- **Focus rings on `:focus-visible` only** (`--n-focus-ring`; fields `--n-focus-ring-field`). Nothing outlines on mouse click.
+- **Icons via Lucide only:** `<i data-lucide="…">` + `createIcons({ icons })`, 18 px in the toolbar, 16 px in fields, menus and buttons, 14 px inline. No raw `<svg>` in the renderer.
+- **Reuse the components in `global.css`** (buttons, form controls, cards, badges, keycaps, utilities). Fork into a page-local class only when the design genuinely diverges.
+- **No inline styles** in HTML or TS; define a class in the module's CSS.
+- **Honour `prefers-reduced-motion`, `prefers-reduced-transparency` and `prefers-contrast`.** Only the tab loader and download progress animate continuously.
 
 If a UI change introduces a new token, utility, or component, add it to `global.css` **and** document it in `DESIGN.md` in the same change. Drift between the two means the docs are wrong — fix them.
 

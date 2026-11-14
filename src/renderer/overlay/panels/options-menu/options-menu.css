@@ -1,6 +1,8 @@
-/* Options Menu overlay panel — Nav0 redesign:
-   tightened 4-px container, 32-px rows, 2-px keycaps,
-   submenu cascades to the left with a 4-px gap. */
+/* Options Menu overlay panel — Nav0 redesign (DESIGN.md §4.4):
+   MENU MATERIAL popover, 30-px rows, selection-style hover/active,
+   macOS glyph shortcuts, submenu cascades to the left with a 4-px gap. */
+
+@import url('../../../styles/global.css');
 
 #overlay-options-menu {
   background-color: transparent !important;
@@ -11,15 +13,16 @@
   top: 80px;
   right: 0;
   width: 320px;
-  padding: 6px 0;
+  padding: 6px;
   margin-top: var(--spacing-xs);
   margin-right: 10px;
-  background-color: var(--chrome-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-md);
-  box-shadow: var(--shadow-lg);
+  background: var(--n-menu-bg);
+  backdrop-filter: var(--n-menu-blur);
+  -webkit-backdrop-filter: var(--n-menu-blur);
+  border-radius: var(--n-r-panel);
+  box-shadow: var(--n-menu-shadow);
   text-align: left;
-  z-index: 9999;
+  z-index: var(--z-dropdown);
   display: block;
 }
 
@@ -31,48 +34,31 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 32px;
-  padding: 0 12px;
-  border-radius: 0;
-  border-top: 1px solid transparent;
-  border-bottom: 1px solid transparent;
-  color: var(--fg-1);
+  height: 30px;
+  padding: 0 10px;
+  border-radius: var(--n-r-control);
+  color: var(--n-text-1);
+  font-size: 13px;
   cursor: pointer;
   position: relative;
-  transition:
-    background-color var(--transition-fast),
-    border-color var(--transition-fast);
+  transition: background-color var(--transition-fast);
   user-select: none;
 }
 
-/* Hover/active uses the same row highlight as the URL autocomplete +
-   Command-K results — bg-3 spans the full menu width, with hairline
-   top/bottom rules and a 2-px red anchor bar flush at the left edge. */
+/* Hover / has-submenu:hover / submenu-active — SELECTION STYLE:
+   accent-soft fill, text-1 label, accent-tinted leading icon. */
 #overlay-options-menu .dropdown-item:hover,
 #overlay-options-menu .has-submenu:hover > .dropdown-item,
 #overlay-options-menu .has-submenu.submenu-active > .dropdown-item {
-  background-color: var(--bg-3);
-  border-top-color: var(--border-1);
-  border-bottom-color: var(--border-1);
-}
-
-#overlay-options-menu .dropdown-item:hover::before,
-#overlay-options-menu .has-submenu:hover > .dropdown-item::before,
-#overlay-options-menu .has-submenu.submenu-active > .dropdown-item::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: -1px;
-  bottom: -1px;
-  width: 2px;
-  background: var(--nav0-red-600);
+  background-color: var(--n-accent-soft);
+  color: var(--n-text-1);
 }
 
 #overlay-options-menu .dropdown-item > i {
   flex-shrink: 0;
   width: 16px;
   height: 16px;
-  color: var(--fg-3);
+  color: var(--n-text-2);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -81,13 +67,13 @@
 #overlay-options-menu .dropdown-item:hover > i,
 #overlay-options-menu .has-submenu:hover > i,
 #overlay-options-menu .has-submenu.submenu-active > i {
-  color: var(--fg-1);
+  color: var(--n-accent);
 }
 
 #overlay-options-menu .divider {
   height: 1px;
-  margin: 4px 0;
-  background-color: var(--border-1);
+  margin: 5px 8px;
+  background-color: var(--n-menu-line);
 }
 
 .dropdown-item-text {
@@ -99,12 +85,18 @@
   text-overflow: ellipsis;
 }
 
+/* Trailing submenu chevron stays muted even on selection. */
 .submenu-indicator {
   flex-shrink: 0;
-  color: var(--fg-4);
+  color: var(--n-text-3);
 }
 
-/* Submenu — same chrome as main, cascades to the LEFT */
+#overlay-options-menu .has-submenu:hover > .submenu-indicator,
+#overlay-options-menu .has-submenu.submenu-active > .submenu-indicator {
+  color: var(--n-text-3);
+}
+
+/* Submenu — same MENU MATERIAL as main, cascades to the LEFT */
 .has-submenu {
   position: relative;
 }
@@ -114,11 +106,12 @@
   top: 0;
   right: calc(100% + 4px);
   width: 240px;
-  padding: 6px 0;
-  background-color: var(--chrome-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-md);
-  box-shadow: var(--shadow-lg);
+  padding: 6px;
+  background: var(--n-menu-bg);
+  backdrop-filter: var(--n-menu-blur);
+  -webkit-backdrop-filter: var(--n-menu-blur);
+  border-radius: var(--n-r-panel);
+  box-shadow: var(--n-menu-shadow);
   z-index: var(--z-dropdown);
   display: none;
 }
@@ -128,53 +121,31 @@
   display: block;
 }
 
-/* Keyboard shortcut cluster — sharp 2-px keycaps */
+/* Trailing keyboard-shortcut text — muted, lightly tracked. */
 #overlay-options-menu .keyboard-shortcut {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   gap: 3px;
   margin-left: auto;
-}
-
-#overlay-options-menu .keyboard-shortcut .keycap {
-  min-width: 18px;
-  height: 18px;
-  margin: 0;
-  padding: 0 6px;
-  font-size: 10.5px;
-  font-weight: 500;
-  line-height: 1;
-  color: var(--fg-3);
-  background-color: var(--bg-0);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-xs);
-  box-shadow: inset 0 -1px 0 var(--border-1);
-}
-
-#overlay-options-menu .dropdown-item:hover .keycap {
-  color: var(--fg-2);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--n-text-3);
 }
 
 /* Zoom control row — label on the left, stepper cluster on the right.
    The row itself isn't clickable (the buttons are), so it keeps the default
-   cursor and doesn't show the red anchor bar on hover. */
+   cursor and doesn't adopt the selection fill on hover. */
 #overlay-options-menu .zoom-row {
   cursor: default;
 }
 
 #overlay-options-menu .zoom-row:hover {
   background-color: transparent;
-  border-top-color: transparent;
-  border-bottom-color: transparent;
-}
-
-#overlay-options-menu .zoom-row:hover::before {
-  display: none;
 }
 
 #overlay-options-menu .zoom-row:hover > i {
-  color: var(--fg-3);
+  color: var(--n-text-2);
 }
 
 .zoom-controls {
@@ -191,21 +162,19 @@
   width: 24px;
   height: 24px;
   padding: 0;
-  color: var(--fg-2);
-  background-color: var(--bg-0);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-sm);
+  color: var(--n-text-2);
+  background-color: var(--n-fill-2);
+  border: none;
+  border-radius: var(--n-r-control);
   cursor: pointer;
   transition:
     background-color var(--transition-fast),
-    color var(--transition-fast),
-    border-color var(--transition-fast);
+    color var(--transition-fast);
 }
 
 #overlay-options-menu .zoom-btn:hover {
-  color: var(--fg-1);
-  background-color: var(--bg-3);
-  border-color: var(--border-2);
+  color: var(--n-text-1);
+  background-color: var(--n-accent-soft);
 }
 
 #overlay-options-menu .zoom-btn > i {
@@ -218,7 +187,7 @@
   text-align: center;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
-  color: var(--fg-2);
+  color: var(--n-text-2);
   user-select: none;
 }
 
@@ -229,12 +198,12 @@
   overflow-y: auto;
 }
 
+/* Submenu group label (e.g. "Recently Closed") */
 .submenu-section-label {
   padding: 4px 10px;
   font-size: 11px;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  color: var(--fg-4);
+  font-weight: 600;
+  color: var(--n-text-3);
   user-select: none;
 }
 
@@ -242,55 +211,39 @@
   padding: 4px 10px;
   font-size: 12px;
   font-style: italic;
-  color: var(--fg-4);
+  color: var(--n-text-3);
 }
 
 .closed-tab-item,
 .closed-window-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: 32px;
-  padding: 0 12px;
-  border-radius: 0;
-  border-top: 1px solid transparent;
-  border-bottom: 1px solid transparent;
+  gap: 10px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: var(--n-r-control);
   cursor: pointer;
   position: relative;
-  transition:
-    background-color var(--transition-fast),
-    border-color var(--transition-fast);
+  transition: background-color var(--transition-fast);
 }
 
 .closed-tab-item:hover,
 .closed-window-item:hover {
-  background-color: var(--bg-3);
-  border-top-color: var(--border-1);
-  border-bottom-color: var(--border-1);
-}
-
-.closed-tab-item:hover::before,
-.closed-window-item:hover::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: -1px;
-  bottom: -1px;
-  width: 2px;
-  background: var(--nav0-red-600);
+  background-color: var(--n-accent-soft);
 }
 
 .closed-tab-favicon {
   flex-shrink: 0;
   width: 16px;
   height: 16px;
-  border-radius: var(--r-xs);
+  border-radius: var(--n-r-key);
 }
 
 .closed-tab-title,
 .closed-window-title {
   flex: 1;
   font-size: 13px;
+  color: var(--n-text-1);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -299,5 +252,14 @@
 .closed-window-tab-count {
   flex-shrink: 0;
   font-size: 11px;
-  color: var(--fg-4);
+  color: var(--n-text-3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #overlay-options-menu .dropdown-item,
+  #overlay-options-menu .zoom-btn,
+  .closed-tab-item,
+  .closed-window-item {
+    transition: none;
+  }
 }

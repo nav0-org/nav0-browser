@@ -5,9 +5,9 @@ import { createIcons, icons } from 'lucide';
 import { FormatUtils } from '../../../renderer/common/format-utils';
 import { DownloadRecord } from '../../../types/download-record';
 import {
-  TYPE_COLORS,
+  STORAGE_BUCKET_COLORS,
+  getStorageBucket,
   getDisplayTypeFromExtension,
-  hexToRgba,
   getFileIcon,
 } from '../../../renderer/common/file-type-utils';
 createIcons({ icons });
@@ -342,15 +342,13 @@ const renderTypeFilters = (): void => {
   const types = Object.keys(typeCounts).sort();
   typeFiltersContainer.innerHTML = '';
 
-  // "All" pill — solid black when active, neutral otherwise.
+  // "All" chip — selection style when active, neutral fill otherwise.
   const allPill = document.createElement('button');
   allPill.className = 'type-pill';
   allPill.dataset.type = 'all';
-  allPill.innerHTML = `<i data-lucide="layers" width="13" height="13"></i> All`;
+  allPill.innerHTML = `<i data-lucide="layers" width="14" height="14"></i> All`;
   if (selectedTypeFilter === 'all') {
-    allPill.style.background = 'var(--fg-1)';
-    allPill.style.color = 'var(--bg-0)';
-    allPill.style.borderColor = 'var(--fg-1)';
+    allPill.classList.add('selected');
   }
   allPill.addEventListener('click', () => {
     selectedTypeFilter = 'all';
@@ -363,19 +361,12 @@ const renderTypeFilters = (): void => {
     const pill = document.createElement('button');
     pill.className = 'type-pill';
     pill.dataset.type = type;
-    const color = TYPE_COLORS[type] || TYPE_COLORS.other;
     const iconName = TYPE_ICONS[type] || TYPE_ICONS.other;
-    pill.innerHTML = `<i data-lucide="${iconName}" width="13" height="13"></i> ${type}`;
-    // Per-type tint: soft tinted bg + accented border + colored label;
-    // active state inverts to a solid fill.
+    pill.innerHTML = `<i data-lucide="${iconName}" width="14" height="14"></i> ${type}`;
+    // Neutral at rest; selection style (accent-soft + accent icon) when chosen.
+    // Categories are named, not coloured — no per-type hue here.
     if (selectedTypeFilter === type) {
-      pill.style.background = color;
-      pill.style.color = '#fff';
-      pill.style.borderColor = color;
-    } else {
-      pill.style.background = color + '0f';
-      pill.style.color = color;
-      pill.style.borderColor = color + '40';
+      pill.classList.add('selected');
     }
     pill.addEventListener('click', () => {
       selectedTypeFilter = type;
@@ -462,7 +453,12 @@ const updateStorageGauge = (): void => {
   ).length;
   const fileWord = allLoadedItems.length === 1 ? 'file' : 'files';
 
-  // Panel header meta — "2.9 GB used · 5 files · 1 paused"
+  // Each file type is coloured by its storage-bucket hue. The six hues are the
+  // only colour on this page, and only on the bar + legend (DESIGN.md §3.4).
+  const hue = (type: string): string =>
+    STORAGE_BUCKET_COLORS[getStorageBucket(type)] || STORAGE_BUCKET_COLORS.other;
+
+  // Panel header meta — "3.5 GB used · 22 files · 1 paused".
   const totalStr = FormatUtils.formatFileSize(total) || '0 B';
   const metaParts = [
     `<span><strong>${totalStr}</strong>used</span>`,
@@ -473,23 +469,23 @@ const updateStorageGauge = (): void => {
   }
   storageMeta.innerHTML = metaParts.join('');
 
-  // Bar segments — per-type colour via TYPE_COLORS.
+  // Bar segments — one per type, coloured by its storage-hue token.
   storageBar.innerHTML = '';
   sortedTypes.forEach(([type, size]) => {
     const segment = document.createElement('div');
     segment.className = 'storage-bar-segment';
     segment.style.width = total > 0 ? `${(size / total) * 100}%` : '0%';
-    segment.style.background = TYPE_COLORS[type] || '#a1a1aa';
+    segment.style.background = hue(type);
     storageBar.appendChild(segment);
   });
 
-  // Legend — colored swatch + label + size.
+  // Legend — hue swatch + type label + size.
   storageLegend.innerHTML = '';
   sortedTypes.forEach(([type, size]) => {
     const item = document.createElement('div');
     item.className = 'storage-legend-item';
     item.innerHTML = `
-      <div class="storage-legend-dot" style="background: ${TYPE_COLORS[type] || '#a1a1aa'}"></div>
+      <div class="storage-legend-dot" style="background: ${hue(type)}"></div>
       <span class="storage-legend-text">
         <strong>${type}</strong>
         <span class="size">${FormatUtils.formatFileSize(size)}</span>
@@ -527,7 +523,6 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
       if (isPaused) downloadItem.classList.add('paused');
     }
 
-    const color = TYPE_COLORS[displayType] || '#a1a1aa';
     const iconName = getFileIcon(item.fileExtension);
     const sourceHost = extractHostname(item.url);
 
@@ -600,7 +595,8 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
     if (isActive) {
       const hasTotal = activeInfo.totalBytes > 0;
       const barWidth = hasTotal ? `${pct}%` : '30%';
-      const barColor = isPaused ? 'var(--bg-3)' : color;
+      // Progress fill is accent; paused dims to warning. Never a per-type hue.
+      const barColor = isPaused ? 'var(--n-warning)' : 'var(--n-accent)';
       const indeterminateClass = hasTotal ? '' : ' indeterminate';
       progressHtml = `
         <div class="download-progress${indeterminateClass}">
@@ -620,7 +616,7 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
 
     downloadItem.innerHTML = `
       <span class="download-time">${formatRowTime(item.createdDate)}</span>
-      <span class="download-type-icon" style="background: ${color}14; border-color: ${color}40; color: ${color}">
+      <span class="download-type-icon">
         <i data-lucide="${iconName}" width="16" height="16"></i>
       </span>
       <div class="download-content">
@@ -725,7 +721,6 @@ const toggleDetailPanel = (
   wrapper.querySelector('.download-item')?.classList.add('selected');
 
   const displayType = getDisplayType(item);
-  const color = TYPE_COLORS[displayType] || '#a1a1aa';
   const iconName = getFileIcon(item.fileExtension);
 
   const panel = document.createElement('div');
@@ -734,8 +729,8 @@ const toggleDetailPanel = (
 
   panel.innerHTML = `
     <div class="detail-inner">
-      <div class="detail-preview" style="background: linear-gradient(135deg, ${hexToRgba(color, 0.07)}, ${hexToRgba(color, 0.16)}); border: 1px solid ${hexToRgba(color, 0.09)}">
-        <i data-lucide="${iconName}" style="color: ${color}" width="32" height="32"></i>
+      <div class="detail-preview">
+        <i data-lucide="${iconName}" width="32" height="32"></i>
       </div>
       <div class="detail-metadata">
         <div class="detail-field">
@@ -815,10 +810,8 @@ const updateProgressBar = (fileName: string, receivedBytes: number, totalBytes: 
     bar = newProgressEl.querySelector('.download-progress-fill') as HTMLElement;
   }
 
-  // Get the type color for this row
-  const fileType = row.closest('.download-item-wrapper')?.getAttribute('data-file-type') || 'other';
-  const color = TYPE_COLORS[fileType] || '#a1a1aa';
-  bar.style.background = color;
+  // Progress fill is always accent — never a per-type hue.
+  bar.style.background = 'var(--n-accent)';
 
   let pct = 0;
   if (totalBytes > 0) {
@@ -889,10 +882,10 @@ const setRowPaused = (fileName: string): void => {
     createIcons({ icons });
   }
 
-  // Update progress bar color
+  // Paused fill dims to warning.
   const progressFill = row.querySelector('.download-progress-fill') as HTMLElement;
   if (progressFill) {
-    progressFill.style.background = 'var(--bg-3)';
+    progressFill.style.background = 'var(--n-warning)';
   }
 
   // Swap status pill to paused
@@ -926,12 +919,10 @@ const setRowResumed = (fileName: string): void => {
     createIcons({ icons });
   }
 
-  // Restore progress bar color
+  // Restore the accent progress fill.
   const progressFill = row.querySelector('.download-progress-fill') as HTMLElement;
   if (progressFill) {
-    const fileType =
-      row.closest('.download-item-wrapper')?.getAttribute('data-file-type') || 'other';
-    progressFill.style.background = TYPE_COLORS[fileType] || '#a1a1aa';
+    progressFill.style.background = 'var(--n-accent)';
   }
 
   // Swap status pill back to in-progress

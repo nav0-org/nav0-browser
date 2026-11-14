@@ -9,8 +9,8 @@
    -------------------------------------------------------------------------- */
 :root {
   /* ----------------------------------------------------------------
-     Nav0 Design System tokens — brand ramps from the compass logo.
-     Sharp corners, hairline borders, paper-flat shadows.
+     Brand ramps — the compass logo only (DESIGN.md §3.1). Never use
+     these for UI; UI colour comes from the --n-* tokens below.
      ---------------------------------------------------------------- */
   --nav0-red-500: #ef4444;
   --nav0-red-600: #dc2626;
@@ -26,37 +26,81 @@
   --nav0-slate-700: #334155;
   --nav0-slate-900: #0f172a;
 
-  /* Nav0 bg/fg scale — paired with the legacy aliases below. */
-  --bg-0: #ffffff; /* canvas / cards / active tab — kept paper-white */
-  --bg-1: #fafafa; /* page background */
-  --bg-2: #f5f5f5; /* subtle surface, input fields */
-  --bg-3: #ebebeb; /* hover */
-  --bg-inverse: #0a0a0a;
+  /* ----------------------------------------------------------------
+     Nav0 design-system tokens (--n-*). Canonical source; DESIGN.md §3
+     mirrors these. Neutral surfaces, one blue accent, red for danger
+     only. The brand ramps above are logo-only.
+     ---------------------------------------------------------------- */
 
-  /* Chrome surfaces — warm off-whites that sit a notch under --bg-0 so
-     the active tab / page content reads as the foreground layer.
-     Nav0's compass-red accent reads warm; pulling 2-3% toward red/yellow
-     makes the whole system feel coherent. */
-  --chrome-1: #f7f6f4; /* nav bar, tab strip backplate, page bento panels */
-  --chrome-2: #fbfaf8; /* menus, popovers, command-K/O, overlay panels */
-  --tab-inactive: #e7e5e1; /* warm shift of the prior #e2e2e2 */
-  --fg-1: #0a0a0a;
-  --fg-2: #333333;
-  --fg-3: #6b7280;
-  --fg-4: #9ca3af;
-  --fg-on-dark: #ffffff;
-  --border-1: #dcd9d4; /* hairline — warm gray to match chrome */
-  --border-2: #c8c5bf; /* heavier separator — warm shift of prior #d4d4d4 */
-  --accent: var(--nav0-blue-600);
-  --accent-hover: var(--nav0-blue-700);
-  --danger: var(--nav0-red-600);
-  --danger-soft: #fdecea;
-  --success: #16a34a;
-  --success-soft: #ecfdf5;
-  --warning: #d97706;
-  --warning-soft: #fef3c7;
-  --private-bg: var(--nav0-red-700);
-  --private-fg: #ffffff;
+  /* Surfaces and lines (§3.2) */
+  --n-page: #ffffff;
+  --n-grouped: #f5f5f7;
+  --n-card: #ffffff;
+  --n-strip: #e6e6e9;
+  --n-toolbar: #f6f6f7;
+  --n-chrome-line: #d1d1d6;
+  --n-separator: #e5e5ea;
+  --n-panel-line: rgba(0, 0, 0, 0.07);
+  --n-fill: rgba(0, 0, 0, 0.05);
+  --n-fill-2: rgba(0, 0, 0, 0.07);
+  --n-hover: rgba(0, 0, 0, 0.04);
+  --n-tab-hover: rgba(0, 0, 0, 0.045);
+  --n-tab-divider: rgba(0, 0, 0, 0.14);
+  --n-control-edge: #8e8e93;
+  --n-track: #e5e5ea;
+  --n-scrim: rgba(0, 0, 0, 0.12);
+  --n-well: #f2f2f4;
+  --n-menu-line: rgba(0, 0, 0, 0.09);
+  --n-ring-track: rgba(0, 0, 0, 0.12);
+  --n-menu-solid: #f8f8fa;
+
+  /* Text (§3.3) */
+  --n-text-1: #1d1d1f;
+  --n-text-2: #424245;
+  --n-text-3: #6e6e73;
+  --n-text-4: #aeaeb2;
+
+  /* Accent, semantic, private, data (§3.4) */
+  --n-accent: #0066d6;
+  --n-accent-hover: #0058b9;
+  --n-accent-soft: rgba(0, 102, 214, 0.12);
+  --n-focus: rgba(0, 102, 214, 0.28);
+  --n-danger: #d70015;
+  --n-danger-soft: rgba(215, 0, 21, 0.08);
+  --n-warning: #a35200;
+  --n-warning-soft: rgba(163, 82, 0, 0.1);
+  --n-success: #1d7a3a;
+  --n-success-soft: rgba(29, 122, 58, 0.1);
+  --n-private-strip: #e4def4;
+  --n-private-toolbar: #efebf8;
+  --n-private-line: #cdc4e6;
+  --n-private-text: #3f3a52;
+  --n-private-label-bg: #d3c8ef;
+  --n-private-label-text: #3b2d78;
+  --n-data-0: #e2e5e9;
+  --n-data-1: #a4afbf;
+  --n-data-2: #8693a6;
+  --n-data-3: #6a788e;
+  --n-data-4: #4f5f76;
+  /* Storage-bar hues (§3.4) — parts of a whole, always shown with a legend */
+  --n-storage-images: #5b9a5f;
+  --n-storage-media: #8a6bbf;
+  --n-storage-archives: #b98a35;
+  --n-storage-apps: #547ebe;
+  --n-storage-documents: #c0744d;
+  --n-storage-other: #8e8e93;
+
+  /* Materials, shadows, focus (§3.8) */
+  --n-menu-bg: rgba(248, 248, 250, 0.88);
+  --n-menu-blur: blur(30px) saturate(1.8);
+  --n-menu-shadow:
+    0 0 0 0.5px rgba(0, 0, 0, 0.14), 0 24px 60px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.08);
+  --n-field-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.18), 0 1px 1px rgba(0, 0, 0, 0.04);
+  --n-raised-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.18), 0 1px 1px rgba(0, 0, 0, 0.05);
+  --n-focus-ring: 0 0 0 3px var(--n-focus);
+  --n-focus-ring-field: 0 0 0 1px var(--n-accent), 0 0 0 4px var(--n-focus);
+  --n-focus-danger: rgba(215, 0, 21, 0.18); /* danger halo for an invalid field */
+  --n-focus-ring-field-danger: 0 0 0 1px var(--n-danger), 0 0 0 4px var(--n-focus-danger);
 
   /* macOS traffic lights — fixed Apple system colours, used only by the
      custom close/minimize/zoom cluster the chrome draws in fullscreen
@@ -69,39 +113,9 @@
   --mac-control-disabled-border: #c8c8c8;
   --mac-control-glyph: rgba(0, 0, 0, 0.55);
 
-  /* Focus rings */
-  --shadow-focus: 0 0 0 2px rgba(0, 0, 0, 0.1);
-  --shadow-focus-accent: 0 0 0 3px rgba(37, 99, 235, 0.18);
-
-  /* ----------------------------------------------------------------
-     Legacy aliases — kept so existing pages keep working, mapped onto
-     the Nav0 ramp. New code should prefer the Nav0 tokens above.
-     ---------------------------------------------------------------- */
-  --primary-color: #000000;
-  --primary-light: var(--bg-2);
-  --primary-dark: #171717;
-  --text-color: var(--fg-2);
-  --text-secondary: var(--fg-3);
-  --text-light: var(--fg-4);
-  --bg-color: var(--bg-2);
-  --bg-light: var(--bg-0);
-  --bg-hover: var(--bg-3);
-  --bg-active: var(--bg-2);
-  --border-color: var(--border-1);
-  --border-color-dark: var(--border-2);
-  --error-color: var(--danger);
-  --error-light: var(--danger-soft);
-  --warning-color: var(--warning);
-  --warning-light: var(--warning-soft);
-  --success-color: var(--success);
-  --success-light: var(--success-soft);
-  --info-color: var(--accent);
-  --info-light: #eff4ff;
-
   /* Shadows — subtle, paper-flat. No coloured glows. */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
 
   /* Animation speeds */
   --dur-fast: 120ms;
@@ -122,37 +136,50 @@
   /* Font sizes */
   --font-xs: 11px;
   --font-sm: 12px;
-  --font-md: 14px;
-  --font-lg: 16px;
-  --font-xl: 18px;
-  --font-xxl: 24px;
-  --font-xxxl: 32px;
+  --font-md: 13px;
+  --font-lg: 14px;
+  --font-xl: 17px;
+  --font-xxl: 22px;
+  --font-xxxl: 28px;
 
   /* ----------------------------------------------------------------
-     Border radii — tightened toward Nav0's utilitarian aesthetic.
-     Source app used 6/8/12/pill; Nav0 spec is 2/3/4/6 plus circle.
-     "URL-bar pill" is a softly rounded rectangle (6px), not 500px.
+     Radii (§3.5) — half the macOS scale: 2 / 3 / 4 / 5 / 6 / 7 / 8 px,
+     plus fully round for switches, radios, dots and rings.
      ---------------------------------------------------------------- */
-  --r-xs: 2px;
-  --r-sm: 3px;
-  --r-md: 4px;
-  --r-lg: 6px;
-  --r-pill: 6px;
-  --r-full: 50%;
-
-  /* Legacy aliases mapped onto the Nav0 radii. */
-  --radius-sm: var(--r-sm);
-  --radius-md: var(--r-md);
-  --radius-lg: var(--r-lg);
-  --radius-xl: var(--r-lg);
-  --radius-pill: var(--r-pill);
-  --radius-circle: var(--r-full);
+  --n-r-key: 2px; /* keycaps, checkboxes */
+  --n-r-icon: 3px; /* icon buttons, the "Private" label */
+  --n-r-control: 4px; /* tabs, address field, buttons, inputs, rows, wells */
+  --n-r-badge: 5px; /* badges */
+  --n-r-panel: 6px; /* grey panels, menus, cards, popovers */
+  --n-r-chip: 7px; /* filter chips */
+  --n-r-dialog: 8px; /* dialogs, ⌘K palette, ⌘O switcher */
+  --n-r-full: 999px; /* switches, radios, dots, rings */
 
   /* Z-index layers */
   --z-dropdown: 100;
   --z-sticky: 200;
   --z-modal: 1000;
   --z-toast: 1100;
+}
+
+/* The frosted menu material turns solid when the OS asks to reduce
+   transparency (DESIGN.md §3.8). */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --n-menu-bg: var(--n-menu-solid);
+    --n-menu-blur: none;
+  }
+}
+
+/* Raise the contrast of lines, control edges and tertiary text when the OS
+   asks for more contrast (DESIGN.md §3.4). */
+@media (prefers-contrast: more) {
+  :root {
+    --n-separator: #8e8e93;
+    --n-chrome-line: #8e8e93;
+    --n-control-edge: #6e6e73;
+    --n-text-3: var(--n-text-2);
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -173,8 +200,8 @@ body {
 }
 
 body {
-  background-color: var(--bg-color);
-  color: var(--text-color);
+  background-color: var(--n-page);
+  color: var(--n-text-2);
   line-height: 1.5;
   font-size: var(--font-md);
   -webkit-font-smoothing: antialiased;
@@ -188,7 +215,7 @@ h3,
 h4,
 h5,
 h6 {
-  color: var(--text-color);
+  color: var(--n-text-2);
   font-weight: 600;
   line-height: 1.3;
 }
@@ -210,7 +237,7 @@ p {
 }
 
 a {
-  color: var(--primary-color);
+  color: var(--n-accent);
   text-decoration: none;
 }
 
@@ -232,12 +259,13 @@ img {
 select {
   font-family: inherit;
   font-size: 13px;
-  color: var(--fg-1);
+  color: var(--n-text-1);
   padding: 8px 32px 8px 12px;
   min-width: 120px;
   border: 1px solid transparent;
-  border-radius: var(--r-md);
-  background-color: var(--bg-2);
+  border-radius: var(--n-r-control);
+  background-color: var(--n-card);
+  box-shadow: var(--n-field-shadow);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
@@ -251,8 +279,7 @@ select {
 
 select:focus {
   outline: none;
-  background-color: var(--bg-0);
-  box-shadow: var(--shadow-focus);
+  box-shadow: var(--n-focus-ring-field);
 }
 
 select:disabled {
@@ -275,10 +302,11 @@ select:disabled {
   border-width: 0;
 }
 
-/* Focus visible styles for keyboard navigation */
+/* Focus visible styles for keyboard navigation — keyboard only, never on a
+   mouse click (DESIGN.md §3.8). A soft accent halo, not a hard outline. */
 :focus-visible {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: var(--n-focus-ring);
 }
 
 /* --------------------------------------------------------------------------
@@ -470,23 +498,23 @@ select:disabled {
 }
 
 .text-primary {
-  color: var(--primary-color);
+  color: var(--n-accent);
 }
 
 .text-secondary {
-  color: var(--text-secondary);
+  color: var(--n-text-3);
 }
 
 .text-light {
-  color: var(--text-light);
+  color: var(--n-text-4);
 }
 
 .text-error {
-  color: var(--error-color);
+  color: var(--n-danger);
 }
 
 .text-success {
-  color: var(--success-color);
+  color: var(--n-success);
 }
 
 .text-center {
@@ -515,7 +543,7 @@ select:disabled {
   align-items: center;
   justify-content: center;
   padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius-md);
+  border-radius: var(--n-r-control);
   font-size: var(--font-md);
   font-weight: 500;
   cursor: pointer;
@@ -533,7 +561,7 @@ select:disabled {
   margin-left: 2px;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-md);
+  border-radius: var(--n-r-control);
   font-size: var(--font-md);
   font-weight: 500;
   cursor: pointer;
@@ -565,40 +593,61 @@ select:disabled {
 }
 
 .btn-primary {
-  background-color: var(--primary-color);
+  background-color: var(--n-accent);
   color: white;
-  border-color: var(--primary-color);
+  border-color: var(--n-accent);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: var(--primary-dark);
-  border-color: var(--primary-dark);
+  background-color: var(--n-accent-hover);
+  border-color: var(--n-accent-hover);
 }
 
 .btn-secondary {
-  background-color: var(--bg-light);
-  color: var(--text-color);
-  border-color: var(--border-color);
+  background-color: var(--n-fill);
+  color: var(--n-text-1);
+  border-color: transparent;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background-color: var(--bg-hover);
-  border-color: var(--border-color-dark);
+  background-color: var(--n-fill-2);
+  border-color: transparent;
+}
+
+.btn-raised {
+  background-color: var(--n-card);
+  color: var(--n-text-1);
+  border-color: transparent;
+  box-shadow: var(--n-raised-shadow);
+}
+
+.btn-raised:hover:not(:disabled) {
+  filter: brightness(0.97);
+}
+
+.btn-danger {
+  background-color: var(--n-danger);
+  color: #fff;
+  border-color: var(--n-danger);
+}
+
+.btn-danger:hover:not(:disabled) {
+  filter: brightness(0.92);
 }
 
 .btn-ghost {
   background-color: transparent;
-  color: var(--text-color);
+  color: var(--n-text-2);
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background-color: var(--bg-hover);
+  background-color: var(--n-hover);
 }
 
 .btn-link {
   background: none;
   border: none;
-  color: var(--primary-color);
+  color: var(--n-accent);
   padding: var(--spacing-xs);
   font-weight: normal;
 }
@@ -620,17 +669,17 @@ select:disabled {
   padding: var(--spacing-sm) var(--spacing-md);
   font-size: var(--font-md);
   line-height: 1.5;
-  color: var(--text-color);
-  background-color: var(--bg-light);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  transition: border-color var(--transition-medium);
+  color: var(--n-text-2);
+  background-color: var(--n-card);
+  border: 1px solid transparent;
+  border-radius: var(--n-r-control);
+  box-shadow: var(--n-field-shadow);
+  transition: box-shadow var(--transition-medium);
 }
 
 .form-control:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--n-focus-ring-field);
 }
 
 .form-group {
@@ -648,23 +697,23 @@ select:disabled {
   display: block;
   margin-top: var(--spacing-xs);
   font-size: var(--font-sm);
-  color: var(--text-secondary);
+  color: var(--n-text-3);
 }
 
 /* --------------------------------------------------------------------------
    Cards and Containers
    -------------------------------------------------------------------------- */
 .card {
-  background-color: var(--bg-light);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
+  background-color: var(--n-page);
+  border-radius: var(--n-r-panel);
+  border: 1px solid var(--n-separator);
   overflow: hidden;
   box-shadow: var(--shadow-md);
 }
 
 .card-header {
   padding: var(--spacing-md);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--n-separator);
 }
 
 .card-body {
@@ -673,8 +722,8 @@ select:disabled {
 
 .card-footer {
   padding: var(--spacing-md);
-  border-top: 1px solid var(--border-color);
-  background-color: var(--bg-color);
+  border-top: 1px solid var(--n-separator);
+  background-color: var(--n-page);
 }
 
 /* --------------------------------------------------------------------------
@@ -690,7 +739,7 @@ select:disabled {
 }
 
 .nav-link {
-  color: var(--text-color);
+  color: var(--n-text-2);
   text-decoration: none;
   padding: var(--spacing-sm) 0;
   display: block;
@@ -698,12 +747,12 @@ select:disabled {
 }
 
 .nav-link:hover {
-  color: var(--primary-color);
+  color: var(--n-accent);
   text-decoration: none;
 }
 
 .nav-link.active {
-  color: var(--primary-color);
+  color: var(--n-accent);
   font-weight: 500;
 }
 
@@ -733,19 +782,19 @@ select:disabled {
 }
 
 .rounded-sm {
-  border-radius: var(--radius-sm);
+  border-radius: var(--n-r-icon);
 }
 
 .rounded {
-  border-radius: var(--radius-md);
+  border-radius: var(--n-r-control);
 }
 
 .rounded-lg {
-  border-radius: var(--radius-lg);
+  border-radius: var(--n-r-panel);
 }
 
 .rounded-circle {
-  border-radius: var(--radius-circle);
+  border-radius: var(--n-r-full);
 }
 
 .shadow-sm {
@@ -757,7 +806,7 @@ select:disabled {
 }
 
 .shadow-lg {
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--n-menu-shadow);
 }
 
 .w-100 {
@@ -785,7 +834,7 @@ select:disabled {
 }
 
 .border {
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--n-separator);
 }
 
 .border-0 {
@@ -793,60 +842,60 @@ select:disabled {
 }
 
 .border-top {
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--n-separator);
 }
 
 .border-bottom {
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--n-separator);
 }
 
 .border-primary {
-  border-color: var(--primary-color) !important;
+  border-color: var(--n-accent) !important;
 }
 
 /* Background utilities */
 .bg-primary {
-  background-color: var(--primary-color) !important;
+  background-color: var(--n-accent) !important;
 }
 
 .bg-primary-light {
-  background-color: var(--primary-light) !important;
+  background-color: var(--n-grouped) !important;
 }
 
 .bg-light {
-  background-color: var(--bg-light) !important;
+  background-color: var(--n-page) !important;
 }
 
 .bg-error {
-  background-color: var(--error-color) !important;
+  background-color: var(--n-danger) !important;
 }
 
 .bg-error-light {
-  background-color: var(--error-light) !important;
+  background-color: var(--n-danger-soft) !important;
 }
 
 .bg-success {
-  background-color: var(--success-color) !important;
+  background-color: var(--n-success) !important;
 }
 
 .bg-success-light {
-  background-color: var(--success-light) !important;
+  background-color: var(--n-success-soft) !important;
 }
 
 .bg-warning {
-  background-color: var(--warning-color) !important;
+  background-color: var(--n-warning) !important;
 }
 
 .bg-warning-light {
-  background-color: var(--warning-light) !important;
+  background-color: var(--n-warning-soft) !important;
 }
 
 .bg-info {
-  background-color: var(--info-color) !important;
+  background-color: var(--n-accent) !important;
 }
 
 .bg-info-light {
-  background-color: var(--info-light) !important;
+  background-color: var(--n-accent-soft) !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -964,26 +1013,26 @@ select:disabled {
   text-align: center;
   white-space: nowrap;
   vertical-align: baseline;
-  border-radius: var(--radius-pill);
+  border-radius: var(--n-r-badge);
 }
 
 .badge-primary {
-  background-color: var(--primary-color);
+  background-color: var(--n-accent);
   color: white;
 }
 
 .badge-secondary {
-  background-color: var(--text-secondary);
+  background-color: var(--n-text-3);
   color: white;
 }
 
 .badge-success {
-  background-color: var(--success-color);
+  background-color: var(--n-success);
   color: white;
 }
 
 .badge-error {
-  background-color: var(--error-color);
+  background-color: var(--n-danger);
   color: white;
 }
 
@@ -993,37 +1042,37 @@ select:disabled {
   padding: var(--spacing-md);
   margin-bottom: var(--spacing-md);
   border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  border-radius: var(--n-r-control);
 }
 
 .alert-primary {
-  background-color: var(--primary-light);
-  border-color: var(--primary-color);
-  color: var(--primary-dark);
+  background-color: var(--n-grouped);
+  border-color: var(--n-accent);
+  color: var(--n-accent-hover);
 }
 
 .alert-error {
-  background-color: var(--error-light);
-  border-color: var(--error-color);
-  color: var(--error-color);
+  background-color: var(--n-danger-soft);
+  border-color: var(--n-danger);
+  color: var(--n-danger);
 }
 
 .alert-success {
-  background-color: var(--success-light);
-  border-color: var(--success-color);
-  color: var(--success-color);
+  background-color: var(--n-success-soft);
+  border-color: var(--n-success);
+  color: var(--n-success);
 }
 
 .alert-warning {
-  background-color: var(--warning-light);
-  border-color: var(--warning-color);
-  color: var(--warning-color);
+  background-color: var(--n-warning-soft);
+  border-color: var(--n-warning);
+  color: var(--n-warning);
 }
 
 .alert-info {
-  background-color: var(--info-light);
-  border-color: var(--info-color);
-  color: var(--info-color);
+  background-color: var(--n-accent-soft);
+  border-color: var(--n-accent);
+  color: var(--n-accent);
 }
 
 /* Tooltips (simple CSS version) */
@@ -1038,7 +1087,7 @@ select:disabled {
   background-color: #333;
   color: #fff;
   text-align: center;
-  border-radius: var(--radius-sm);
+  border-radius: var(--n-r-icon);
   padding: var(--spacing-xs) var(--spacing-sm);
   position: absolute;
   z-index: var(--z-dropdown);
@@ -1061,9 +1110,9 @@ select:disabled {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--primary-light);
-  color: var(--primary-color);
-  border-radius: var(--radius-circle);
+  background-color: var(--n-grouped);
+  color: var(--n-accent);
+  border-radius: var(--n-r-full);
   width: 40px;
   height: 40px;
   font-weight: 600;
@@ -1091,9 +1140,9 @@ select:disabled {
   height: 20px;
   padding: 0 var(--spacing-xs);
   font-size: var(--font-xs);
-  border-radius: var(--radius-sm);
-  background-color: var(--bg-light);
-  border: 1px solid var(--border-color);
+  border-radius: var(--n-r-icon);
+  background-color: var(--n-page);
+  border: 1px solid var(--n-separator);
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
   margin: 0 2px;
 }
@@ -1101,27 +1150,27 @@ select:disabled {
 /* Simple divider */
 .divider {
   height: 1px;
-  background-color: var(--border-color);
+  background-color: var(--n-separator);
   margin: var(--spacing-md) 0;
 }
 
 .divider-vertical {
   width: 1px;
   height: 24px;
-  background-color: var(--border-color);
+  background-color: var(--n-separator);
   margin: 0 var(--spacing-sm);
 }
 
 /* Progress bar */
 .progress {
   height: 6px;
-  background-color: var(--bg-hover);
-  border-radius: var(--radius-sm);
+  background-color: var(--n-hover);
+  border-radius: var(--n-r-icon);
   overflow: hidden;
 }
 
 .progress-bar {
   height: 100%;
-  background-color: var(--primary-color);
-  border-radius: var(--radius-sm);
+  background-color: var(--n-accent);
+  border-radius: var(--n-r-icon);
 }

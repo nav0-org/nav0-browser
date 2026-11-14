@@ -1,84 +1,79 @@
 @import url('../../styles/global.css');
 
 /* ============================================================
-   History — editorial dashboard layout.
-   Page is the white canvas (browser chrome wraps it). Header
-   is a left-aligned masthead. Toolbar gathers search +
-   time-range + clear into one row. Heatmap, top sites, and
-   categories live in bordered panels. History list keeps its
-   day grouping but each row is a real table-like layout:
-   time | favicon | title+meta | tag | duration | actions.
+   History — editorial dashboard layout (DESIGN.md §4.2).
+   The page is the white canvas (browser chrome wraps it). A
+   left-aligned masthead title sits above a toolbar that gathers
+   search + time-range + clear into one row. The yearly activity
+   map, top sites, and categories live in flat grey panels. The
+   history list keeps its day grouping; each row is a table-like
+   layout: time | favicon well | title+url | category badge |
+   duration | delete action.
    ============================================================ */
 
 .history-page {
   min-height: 100vh;
-  background: var(--bg-0);
-  color: var(--fg-2);
+  background: var(--n-page);
+  color: var(--n-text-2);
 }
 
 .history-container {
-  max-width: 1080px;
+  max-width: 880px;
   margin: 0 auto;
-  padding: 48px 56px 80px;
+  padding: 36px 0 56px;
 }
 
-/* ---- Header ---------------------------------------------- */
+/* ---- Header masthead ------------------------------------- */
 .history-head {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 32px;
+  gap: var(--spacing-xl);
   flex-wrap: wrap;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--nav0-red-600);
 }
 
 .history-title {
-  font-size: 48px;
-  font-weight: 200;
-  letter-spacing: -0.5px;
-  color: var(--fg-1);
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--n-text-1);
   margin: 0;
-  line-height: 1.2;
 }
 
 /* ---- Toolbar (search + segmented + clear) --------------- */
 .history-toolbar {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 28px 0 24px;
+  gap: 12px;
+  margin: 20px 0 16px;
 }
 
+/* Filled search field */
 .search-container {
   position: relative;
   flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
-  height: 36px;
-  padding: 0 12px 0 36px;
-  background: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: 3px;
-  color: var(--fg-3);
-  transition:
-    background var(--dur-fast),
-    border-color var(--dur-fast),
-    box-shadow var(--dur-fast);
+  height: 32px;
+  padding: 0 10px 0 32px;
+  background: var(--n-fill);
+  border-radius: var(--n-r-control);
+  color: var(--n-text-3);
+  transition: box-shadow var(--dur-fast);
 }
 
 .search-container:focus-within {
-  background: var(--bg-0);
-  border-color: var(--fg-1);
-  box-shadow: var(--shadow-focus);
+  box-shadow: var(--n-focus-ring-field);
 }
 
 .search-icon {
   position: absolute;
-  left: 12px;
+  left: 10px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--fg-3);
+  color: var(--n-text-3);
   pointer-events: none;
 }
 
@@ -89,34 +84,38 @@
   outline: 0;
   background: transparent;
   font-family: inherit;
-  font-size: 14px;
-  color: var(--fg-1);
+  font-size: 13px;
+  color: var(--n-text-1);
   padding: 0;
 }
 
 .search-input::placeholder {
-  color: var(--fg-4);
+  color: var(--n-text-3);
 }
 
-/* Segmented "All / Week / Today" buttons */
+/* Segmented "All / Week / Today" control */
 .time-range-group {
   display: inline-flex;
-  background: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: 3px;
+  flex: none;
+  height: 32px;
   padding: 2px;
-  gap: 0;
+  box-sizing: border-box;
+  background: var(--n-fill-2);
+  border-radius: var(--n-r-control);
+  gap: 2px;
 }
 
 .time-range-btn {
+  display: inline-flex;
+  align-items: center;
   border: 0;
   background: transparent;
   height: 28px;
   padding: 0 12px;
   font-family: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--fg-3);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--n-text-2);
   border-radius: 2px;
   cursor: pointer;
   transition:
@@ -124,78 +123,68 @@
     color var(--dur-fast);
 }
 
-.time-range-btn:hover {
-  color: var(--fg-1);
-}
-
 .time-range-btn.active {
-  background: var(--fg-1);
-  color: var(--bg-0);
+  background: var(--n-page);
+  color: var(--n-text-1);
+  font-weight: 500;
+  box-shadow: var(--n-raised-shadow);
 }
 
-/* Clear-all (danger ghost button) */
+/* Clear-all (secondary button look) */
 .btn-clear-all {
-  height: 36px;
-  padding: 0 12px;
-  border: 1px solid var(--border-1);
-  background: var(--bg-0);
-  border-radius: 3px;
-  color: var(--danger);
+  height: 32px;
+  flex: none;
+  padding: 0 14px;
+  border: 0;
+  background: var(--n-fill);
+  border-radius: var(--n-r-control);
+  color: var(--n-text-1);
   font-family: inherit;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition:
-    background var(--dur-fast),
-    border-color var(--dur-fast);
+  transition: background var(--dur-fast);
 }
 
 .btn-clear-all:hover {
-  background: var(--danger-soft, #fdecea);
-  border-color: var(--danger);
+  background: var(--n-fill-2);
 }
 
-/* ---- Panel (shared bordered card) ----------------------- */
+/* ---- Panel (shared grey card) --------------------------- */
 .panel {
-  background: var(--bg-0);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-md);
-  padding: 20px 22px;
+  background: var(--n-grouped);
+  border-radius: var(--n-r-panel);
+  padding: 18px 22px 20px;
 }
 
 .panel-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 18px;
+  gap: var(--spacing-md);
+  margin-bottom: 14px;
 }
 
 .panel-title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: var(--fg-1);
-  letter-spacing: -0.1px;
+  color: var(--n-text-1);
   white-space: nowrap;
 }
 
 .panel-head .panel-meta {
   font-size: 11px;
-  color: var(--fg-3);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: var(--n-text-3);
 }
 
-/* ---- Heatmap -------------------------------------------- */
+/* ---- Activity map (heatmap) ----------------------------- */
 .panel-heat {
-  padding: 22px 24px 18px;
-  margin-bottom: 20px;
-  /* Establish a positioning context so the absolutely-positioned
-     .heatmap-tooltip (whose coords are calculated relative to this
-     container) anchors correctly to the hovered cell. */
+  margin-bottom: 16px;
+  /* Positioning context for the absolutely-placed tooltip whose
+     coordinates are measured relative to this container. */
   position: relative;
 }
 
@@ -203,15 +192,14 @@
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 16px;
-  margin-bottom: 18px;
+  gap: var(--spacing-md);
+  margin-bottom: 14px;
 }
 
 .heatmap-summary {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: var(--fg-1);
-  letter-spacing: -0.1px;
+  color: var(--n-text-1);
 }
 
 .heatmap-scroll-area {
@@ -230,19 +218,19 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 6px;
-  margin-top: 8px;
-  font-size: 10px;
-  color: var(--fg-4);
+  gap: 3px;
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--n-text-3);
 }
 
 .heatmap-legend-label {
-  color: var(--fg-4);
+  color: var(--n-text-3);
 }
 
 .heatmap-legend-cell {
-  width: 11px;
-  height: 11px;
+  width: 10px;
+  height: 10px;
   border-radius: 2px;
 }
 
@@ -250,11 +238,11 @@
 .heatmap-tooltip {
   position: absolute;
   transform: translate(-50%, -100%);
-  background: var(--fg-1);
-  color: var(--bg-0);
+  background: var(--n-text-1);
+  color: var(--n-page);
   padding: 5px 8px;
-  border-radius: var(--r-sm);
-  font-size: 10px;
+  border-radius: var(--n-r-control);
+  font-size: 11px;
   white-space: nowrap;
   pointer-events: none;
   z-index: 10;
@@ -266,88 +254,86 @@
 }
 
 .heatmap-tooltip-sub {
-  opacity: 0.75;
+  opacity: 0.8;
 }
 
 /* ---- Analytics grid (Top sites + Categories) ----------- */
 .analytics-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: var(--spacing-md);
   align-items: start;
-  margin-bottom: 32px;
+  margin-bottom: var(--spacing-md);
 }
 
 .analytics-card {
   min-width: 0;
 }
 
-/* Stat row — favicon | name | duration on row 1, bar on row 2 */
+/* Stat row — favicon/icon | name | value on row 1, bar on row 2 */
 .stat-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 9px;
 }
 
 .domain-row,
 .category-row {
   display: grid;
-  grid-template-columns: 18px 1fr auto;
+  grid-template-columns: 16px 1fr auto;
   align-items: center;
   gap: 10px;
 }
 
 .domain-favicon,
 .category-icon {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--fg-3);
+  color: var(--n-text-3);
 }
 
 .domain-favicon img {
   width: 16px;
   height: 16px;
-  border-radius: 2px;
+  border-radius: var(--n-r-control);
   display: block;
 }
 
 .domain-favicon svg,
 .category-icon svg {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   display: block;
 }
 
 .domain-name,
 .category-name {
-  font-size: 12px;
-  color: var(--fg-1);
-  font-weight: 500;
+  font-size: 13px;
+  color: var(--n-text-1);
+  font-weight: 400;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .domain-name .domain-suffix {
-  color: var(--fg-3);
-  font-weight: 400;
+  color: var(--n-text-3);
 }
 
 .domain-duration,
 .category-duration {
   font-size: 12px;
-  color: var(--fg-2);
+  color: var(--n-text-2);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
 .domain-duration .unit,
 .category-duration .unit {
-  font-size: 10.5px;
-  color: var(--fg-4);
+  color: var(--n-text-3);
   margin-left: 4px;
 }
 
@@ -355,16 +341,17 @@
 .category-bar-track {
   grid-column: 1 / -1;
   height: 4px;
-  background: var(--bg-2);
+  background: var(--n-separator);
   border-radius: 2px;
   overflow: hidden;
-  margin-top: -2px;
+  margin-left: 26px;
+  margin-top: 1px;
 }
 
 .domain-bar-fill,
 .category-bar-fill {
   height: 100%;
-  background: var(--fg-1);
+  background: var(--n-data-2);
   border-radius: 2px;
   transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -374,63 +361,63 @@
   margin-top: 4px;
 }
 
-/* Date group label — "Today · Wednesday, May 20" */
+/* Date group header — "Today · Friday, November 13" */
 .date-group-label {
   display: flex;
   align-items: baseline;
-  gap: 16px;
-  margin: 28px 0 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border-1);
+  gap: 6px;
+  margin: 20px 0 4px;
+  padding: 0 12px 8px;
+  border-bottom: 1px solid var(--n-separator);
 }
 
 .date-group-label .day-label {
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 18px;
   font-weight: 600;
-  color: var(--fg-1);
-  letter-spacing: -0.1px;
+  color: var(--n-text-1);
   text-transform: capitalize;
 }
 
-/* History row — table-like with hover-revealed actions.
+/* History row — table-like with a hover-revealed delete.
    Six columns so the delete button never wraps when a duration
    pill is present: time | favicon | content | badge | duration | delete. */
 .history-entry {
   display: grid;
-  grid-template-columns: 60px 32px 1fr auto auto auto;
+  grid-template-columns: 60px 28px 1fr auto auto auto;
   align-items: center;
-  gap: 14px;
-  padding: 12px 4px;
-  border-bottom: 1px solid var(--border-1);
+  gap: 12px;
+  height: 54px;
+  padding: 0 8px 0 12px;
+  border-radius: var(--n-r-control);
   transition: background var(--dur-fast);
   cursor: pointer;
 }
 
 .history-entry:hover {
-  background: var(--bg-3);
+  background: var(--n-hover);
 }
 
 .entry-time {
   font-size: 12px;
-  color: var(--fg-3);
+  color: var(--n-text-3);
   font-variant-numeric: tabular-nums;
 }
 
 .entry-favicon {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-sm);
+  background: var(--n-well);
+  border-radius: var(--n-r-control);
 }
 
 .entry-favicon img,
 .entry-favicon svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   border-radius: 2px;
   display: block;
 }
@@ -442,12 +429,12 @@
 .entry-title-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-sm);
 }
 
 .entry-title {
-  font-size: 14px;
-  color: var(--fg-1);
+  font-size: 13px;
+  color: var(--n-text-1);
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -462,29 +449,27 @@
 .entry-domain {
   display: block;
   font-size: 12px;
-  color: var(--accent);
-  margin-top: 1px;
+  color: var(--n-text-3);
+  margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Category tag — pill on the right of the title/meta, icon + label */
+/* Category badge — neutral pill, identical for every category */
 .entry-category-badge {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   height: 22px;
   padding: 0 8px;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--fg-2);
-  background: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-xs);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--n-text-2);
+  background: var(--n-fill);
+  border-radius: var(--n-r-badge);
   flex-shrink: 0;
   white-space: nowrap;
-  letter-spacing: 0;
   text-transform: capitalize;
 }
 
@@ -495,46 +480,45 @@
   flex-shrink: 0;
 }
 
-/* Duration pill — single bordered pill with a vertical partition.
-   Active (left) sits on the page background; total (right) is muted. */
+/* Duration pill — single filled pill with a vertical partition.
+   Active (left) uses primary text; total (right) is muted. */
 .entry-duration {
   display: inline-flex;
-  align-items: stretch;
+  align-items: center;
   height: 22px;
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-xs);
+  background: var(--n-fill);
+  border-radius: var(--n-r-badge);
   overflow: hidden;
   flex-shrink: 0;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
 .entry-active-dur,
 .entry-total-dur {
   display: inline-flex;
   align-items: center;
-  padding: 0 8px;
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
 }
 
 .entry-active-dur {
-  color: var(--fg-1);
-  background: var(--bg-0);
-  border-right: 1px solid var(--border-1);
+  color: var(--n-text-1);
+  padding: 0 7px 0 8px;
+  border-right: 1px solid var(--n-scrim);
 }
 
 .entry-total-dur {
-  color: var(--fg-3);
-  background: var(--bg-1);
+  color: var(--n-text-3);
+  padding: 0 8px 0 7px;
 }
 
 /* Hover-reveal delete button */
 .entry-delete-btn {
   width: 26px;
   height: 26px;
-  border-radius: var(--r-xs);
+  border-radius: var(--n-r-control);
   border: 0;
   background: transparent;
-  color: var(--fg-3);
+  color: var(--n-text-3);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -549,15 +533,15 @@
 }
 
 .entry-delete-btn:hover {
-  background: var(--bg-2);
-  color: var(--fg-1);
+  background: var(--n-fill);
+  color: var(--n-text-1);
 }
 
 /* ---- Empty + loading + footer --------------------------- */
 .no-history {
   text-align: center;
   padding: 48px 0;
-  color: var(--fg-3);
+  color: var(--n-text-3);
   font-size: 12px;
 }
 
@@ -573,10 +557,18 @@
 .loading-indicator {
   text-align: center;
   padding: 8px;
-  color: var(--fg-3);
+  color: var(--n-text-3);
   font-size: 12px;
 }
 
 .history-footer {
   margin-top: 28px;
+}
+
+/* Honour reduced-motion for the bar growth animation. */
+@media (prefers-reduced-motion: reduce) {
+  .domain-bar-fill,
+  .category-bar-fill {
+    transition: none;
+  }
 }
