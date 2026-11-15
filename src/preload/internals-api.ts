@@ -11,6 +11,9 @@ export function init() {
   const isPrivate =
     process.argv.find((arg) => arg.startsWith('--is-private='))?.split('=')[1] === 'true' || false;
   const platform = process.platform;
+  // Only the browser chrome gets this flag: its macOS title bar is mirrored.
+  const isTitleBarRtl =
+    process.argv.find((arg) => arg.startsWith('--titlebar-rtl='))?.split('=')[1] === 'true';
 
   contextBridge.exposeInMainWorld('DataStoreAPI', {
     appWindowId: appWindowId,
@@ -28,6 +31,7 @@ export function init() {
     appWindowId: appWindowId,
     isPrivate,
     platform,
+    isTitleBarRtl,
     tabId: tabId,
     createTab: async (appWindowId: string, url: string, activateNewTab: boolean) => {
       return ipcRenderer.send(
@@ -314,6 +318,16 @@ export function init() {
         appWindowId
       );
     },
+    dismissUrlAutocompleteOverlay: (
+      appWindowId: string,
+      press: { x: number; y: number; button: number }
+    ) => {
+      ipcRenderer.send(
+        RendererToMainEventsForBrowserIPC.DISMISS_URL_AUTOCOMPLETE_OVERLAY,
+        appWindowId,
+        press
+      );
+    },
     sendUrlAutocompleteResultClicked: (appWindowId: string, data: any) => {
       ipcRenderer.send(
         RendererToMainEventsForBrowserIPC.URL_AUTOCOMPLETE_RESULT_CLICKED,
@@ -557,7 +571,17 @@ export function init() {
         callback(data)
       );
     },
-    onNavigationFailed: (callback: (data: { id: string }) => void) => {
+    onNavigationFailed: (
+      callback: (data: {
+        id: string;
+        url: string;
+        isBookmark: boolean;
+        bookmarkId: string | null;
+        bookmarkType: 'reference' | 'queue' | null;
+        canGoBack: boolean;
+        canGoForward: boolean;
+      }) => void
+    ) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.NAVIGATION_FAILED, (_event, data) =>
         callback(data)
       );
@@ -678,6 +702,11 @@ export function init() {
     },
     onFullScreenChanged: (callback: (data: { isFullScreen: boolean }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.FULLSCREEN_CHANGED, (_event, data) =>
+        callback(data)
+      );
+    },
+    onOverlayVisibilityChanged: (callback: (data: { type: string; visible: boolean }) => void) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.OVERLAY_VISIBILITY_CHANGED, (_event, data) =>
         callback(data)
       );
     },

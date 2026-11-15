@@ -71,12 +71,11 @@ async function saveSettings() {
 }
 
 function showToast(message: string) {
-  const existing = document.querySelector('.settings-toast');
-  if (existing) existing.remove();
   const toast = document.createElement('div');
-  toast.className = 'settings-toast';
+  toast.className = 'toast';
   toast.textContent = message;
-  document.body.appendChild(toast);
+  // One toast at a time, inside the page's persistent status region.
+  document.getElementById('toast-region')?.replaceChildren(toast);
   setTimeout(() => toast.remove(), 2000);
 }
 
@@ -116,7 +115,7 @@ function initStartupSettings() {
     if (r.value === (settings.startupMode || 'continue')) r.checked = true;
   });
   if (pagesContainer) {
-    pagesContainer.style.display = settings.startupMode === 'specific-pages' ? '' : 'none';
+    pagesContainer.hidden = settings.startupMode !== 'specific-pages';
   }
 
   // Radio change handler
@@ -124,7 +123,7 @@ function initStartupSettings() {
     radio.addEventListener('change', () => {
       settings.startupMode = radio.value as BrowserSettings['startupMode'];
       if (pagesContainer) {
-        pagesContainer.style.display = radio.value === 'specific-pages' ? '' : 'none';
+        pagesContainer.hidden = radio.value !== 'specific-pages';
       }
       saveSettings();
       showToast('Startup setting updated');
@@ -167,7 +166,7 @@ function renderStartupPages() {
     item.className = 'list-item';
     item.innerHTML = `
       <div class="list-item-content">
-        <div class="list-item-text">${url}</div>
+        <div class="list-item-text">${escapeHtml(url)}</div>
       </div>
       <div class="list-item-actions">
         <button class="list-item-btn" data-idx="${idx}" title="Remove">
@@ -351,8 +350,8 @@ function renderCustomEngines() {
     item.innerHTML = `
       <div class="list-item-content">
         <div>
-          <div class="list-item-text">${engine.name}</div>
-          <div class="list-item-description">${engine.searchUrlTemplate}</div>
+          <div class="list-item-text">${escapeHtml(engine.name)}</div>
+          <div class="list-item-description">${escapeHtml(engine.searchUrlTemplate)}</div>
         </div>
       </div>
       <div class="list-item-actions">
@@ -397,14 +396,12 @@ function initCookieSettings() {
   clearOnCloseToggle.checked = settings.clearCookiesOnClose || false;
 
   // Show/hide exceptions
-  if (settings.cookiePolicy === 'block-with-exceptions') {
-    exceptionsContainer.style.display = '';
-  }
+  exceptionsContainer.hidden = settings.cookiePolicy !== 'block-with-exceptions';
 
   radios.forEach((radio) => {
     radio.addEventListener('change', () => {
       settings.cookiePolicy = radio.value as BrowserSettings['cookiePolicy'];
-      exceptionsContainer.style.display = radio.value === 'block-with-exceptions' ? '' : 'none';
+      exceptionsContainer.hidden = radio.value !== 'block-with-exceptions';
       saveSettings();
       showToast('Cookie policy updated');
     });
@@ -478,7 +475,7 @@ function renderCookieExceptions() {
     const item = document.createElement('div');
     item.className = 'list-item';
     item.innerHTML = `
-      <div class="list-item-content"><span class="list-item-text">${domain}</span></div>
+      <div class="list-item-content"><span class="list-item-text">${escapeHtml(domain)}</span></div>
       <div class="list-item-actions">
         <button class="list-item-btn" title="Remove"><i data-lucide="x" width="14" height="14"></i></button>
       </div>
@@ -500,11 +497,11 @@ function initAdBlockerSettings() {
   const details = document.getElementById('adblocker-details');
 
   toggle.checked = settings.adBlockerEnabled !== false;
-  details.style.display = toggle.checked ? '' : 'none';
+  details.hidden = !toggle.checked;
 
   toggle.addEventListener('change', () => {
     settings.adBlockerEnabled = toggle.checked;
-    details.style.display = toggle.checked ? '' : 'none';
+    details.hidden = !toggle.checked;
     saveSettings();
     showToast(toggle.checked ? 'Ad-blocker enabled' : 'Ad-blocker disabled');
   });
@@ -559,8 +556,8 @@ function renderFilterLists() {
     item.className = 'list-item';
     item.innerHTML = `
       <div class="list-item-content">
-        <div class="list-item-text">${list.name}</div>
-        <div class="list-item-description">${list.description}</div>
+        <div class="list-item-text">${escapeHtml(list.name)}</div>
+        <div class="list-item-description">${escapeHtml(list.description)}</div>
       </div>
       <div class="list-item-actions">
         <label class="toggle">
@@ -602,7 +599,7 @@ function renderAllowedSites() {
     const item = document.createElement('div');
     item.className = 'list-item';
     item.innerHTML = `
-      <div class="list-item-content"><span class="list-item-text">${site}</span></div>
+      <div class="list-item-content"><span class="list-item-text">${escapeHtml(site)}</span></div>
       <div class="list-item-actions">
         <button class="list-item-btn" title="Remove"><i data-lucide="x" width="14" height="14"></i></button>
       </div>
@@ -642,8 +639,8 @@ function initPopupSettings() {
   });
 
   function updatePopupContainerVisibility(policy: string) {
-    allowedContainer.style.display = policy === 'block' || policy === 'smart' ? '' : 'none';
-    blockedContainer.style.display = policy === 'allow' ? '' : 'none';
+    allowedContainer.hidden = policy !== 'block' && policy !== 'smart';
+    blockedContainer.hidden = policy !== 'allow';
   }
 
   renderPopupAllowedSites();
@@ -685,7 +682,7 @@ function renderPopupAllowedSites() {
     const item = document.createElement('div');
     item.className = 'list-item';
     item.innerHTML = `
-      <div class="list-item-content"><span class="list-item-text">${site}</span></div>
+      <div class="list-item-content"><span class="list-item-text">${escapeHtml(site)}</span></div>
       <div class="list-item-actions">
         <button class="list-item-btn" title="Remove"><i data-lucide="x" width="14" height="14"></i></button>
       </div>
@@ -710,7 +707,7 @@ function renderPopupBlockedSites() {
     const item = document.createElement('div');
     item.className = 'list-item';
     item.innerHTML = `
-      <div class="list-item-content"><span class="list-item-text">${site}</span></div>
+      <div class="list-item-content"><span class="list-item-text">${escapeHtml(site)}</span></div>
       <div class="list-item-actions">
         <button class="list-item-btn" title="Remove"><i data-lucide="x" width="14" height="14"></i></button>
       </div>
@@ -738,7 +735,7 @@ function initDataRetentionSettings() {
   ) as HTMLInputElement;
 
   autoDeleteToggle.checked = settings.autoDeleteEnabled || false;
-  retentionSettings.style.display = autoDeleteToggle.checked ? '' : 'none';
+  retentionSettings.hidden = !autoDeleteToggle.checked;
   clearHistoryCloseToggle.checked = settings.clearHistoryOnClose || false;
   clearCacheCloseToggle.checked = settings.clearCacheOnClose || false;
 
@@ -751,7 +748,7 @@ function initDataRetentionSettings() {
 
   autoDeleteToggle.addEventListener('change', () => {
     settings.autoDeleteEnabled = autoDeleteToggle.checked;
-    retentionSettings.style.display = autoDeleteToggle.checked ? '' : 'none';
+    retentionSettings.hidden = !autoDeleteToggle.checked;
     saveSettings();
   });
 
@@ -803,15 +800,15 @@ function initDataRetentionSettings() {
   const clearDataConfirm = document.getElementById('clear-data-confirm');
 
   clearDataBtn?.addEventListener('click', () => {
-    clearDataDialog.style.display = 'flex';
+    clearDataDialog.hidden = false;
   });
 
   clearDataCancel?.addEventListener('click', () => {
-    clearDataDialog.style.display = 'none';
+    clearDataDialog.hidden = true;
   });
 
   clearDataDialog?.addEventListener('click', (e) => {
-    if (e.target === clearDataDialog) clearDataDialog.style.display = 'none';
+    if (e.target === clearDataDialog) clearDataDialog.hidden = true;
   });
 
   clearDataConfirm?.addEventListener('click', async () => {
@@ -827,7 +824,7 @@ function initDataRetentionSettings() {
         .checked,
     };
     await (window as any).BrowserAPI.clearBrowsingData(options);
-    clearDataDialog.style.display = 'none';
+    clearDataDialog.hidden = true;
     showToast('Browsing data cleared');
     updateCookieCount();
   });
@@ -851,12 +848,12 @@ function initUserAgentSettings() {
     platform === 'darwin' ? 'chrome-mac' : platform === 'linux' ? 'chrome-linux' : 'chrome-windows';
   select.value = settings.userAgentPreset || defaultPreset;
   customInput.value = settings.userAgentCustomValue || '';
-  customContainer.style.display = select.value === 'custom' ? '' : 'none';
+  customContainer.hidden = select.value !== 'custom';
   updateUAPreview();
 
   select.addEventListener('change', () => {
     settings.userAgentPreset = select.value as BrowserSettings['userAgentPreset'];
-    customContainer.style.display = select.value === 'custom' ? '' : 'none';
+    customContainer.hidden = select.value !== 'custom';
     updateUAPreview();
     saveSettings();
     showToast('User agent updated');
@@ -985,8 +982,8 @@ function initNetworkSettings() {
 function updateProxyFormVisibility(mode: string) {
   const manualForm = document.getElementById('manual-proxy-form');
   const pacForm = document.getElementById('pac-proxy-form');
-  manualForm.style.display = mode === 'manual' ? '' : 'none';
-  pacForm.style.display = mode === 'pac' ? '' : 'none';
+  manualForm.hidden = mode !== 'manual';
+  pacForm.hidden = mode !== 'pac';
 }
 
 // ---- Keyboard Shortcuts ----
@@ -1142,12 +1139,17 @@ const PERMISSION_INFO: Record<string, { label: string; icon: string }> = {
   'display-capture': { label: 'Screen sharing', icon: 'monitor' },
   'clipboard-read': { label: 'Clipboard', icon: 'clipboard' },
   'idle-detection': { label: 'Idle detection', icon: 'moon' },
+  openExternal: { label: 'External applications', icon: 'app-window' },
+  pointerLock: { label: 'Pointer lock', icon: 'mouse-pointer' },
+  'persistent-storage': { label: 'Persistent storage', icon: 'database' },
   'storage-access': { label: 'Storage access', icon: 'hard-drive' },
+  'top-level-storage-access': { label: 'Top-level storage access', icon: 'hard-drive' },
+  fileSystem: { label: 'File system', icon: 'folder' },
   'window-management': { label: 'Window management', icon: 'app-window' },
   'local-fonts': { label: 'Local fonts', icon: 'type' },
   'screen-wake-lock': { label: 'Screen wake lock', icon: 'monitor' },
   'speaker-selection': { label: 'Speaker selection', icon: 'speaker' },
-  'keyboard-lock': { label: 'Keyboard lock', icon: 'keyboard' },
+  keyboardLock: { label: 'Keyboard lock', icon: 'keyboard' },
   usb: { label: 'USB devices', icon: 'usb' },
   serial: { label: 'Serial ports', icon: 'usb' },
   bluetooth: { label: 'Bluetooth devices', icon: 'bluetooth' },
@@ -1217,13 +1219,24 @@ async function loadAndRenderPermissions(searchTerm?: string) {
       renderPermissions([]);
       return;
     }
-    const permissions = await api.fetchPermissions(searchTerm || '');
+    // Fetch everything and filter here, so a search matches the label a row
+    // shows ("Pointer lock") as well as the stored type ("pointerLock").
+    const permissions = await api.fetchPermissions('');
+    const all: PermissionRecord[] = Array.isArray(permissions) ? permissions : [];
+    const term = (searchTerm || '').toLowerCase();
+    const matches = term
+      ? all.filter((p) =>
+          [p.origin, p.permissionType, getPermLabel(p.permissionType)].some((value) =>
+            (value || '').toLowerCase().includes(term)
+          )
+        )
+      : all;
     console.log('[permissions] fetched', {
-      count: permissions?.length ?? 0,
+      count: matches.length,
       searchTerm,
-      sample: permissions?.[0],
+      sample: matches[0],
     });
-    renderPermissions(Array.isArray(permissions) ? permissions : []);
+    renderPermissions(matches);
   } catch (err) {
     console.error('[permissions] fetch failed', err);
     renderPermissions([]);
@@ -1238,14 +1251,14 @@ function renderPermissions(permissions: PermissionRecord[]) {
   container.innerHTML = '';
 
   if (permissions.length === 0) {
-    emptyState.style.display = '';
-    footer.style.display = 'none';
+    emptyState.hidden = false;
+    footer.hidden = true;
     createIcons({ icons });
     return;
   }
 
-  emptyState.style.display = 'none';
-  footer.style.display = '';
+  emptyState.hidden = true;
+  footer.hidden = false;
 
   // Group by origin
   const grouped = new Map<string, PermissionRecord[]>();
@@ -1294,8 +1307,8 @@ function renderPermissions(permissions: PermissionRecord[]) {
       group.remove();
       showToast(`Permissions removed for ${origin}`);
       if (container.children.length === 0) {
-        emptyState.style.display = '';
-        footer.style.display = 'none';
+        emptyState.hidden = false;
+        footer.hidden = true;
         createIcons({ icons });
       }
     });
@@ -1337,8 +1350,8 @@ function renderPermissions(permissions: PermissionRecord[]) {
         if (group.querySelectorAll('.permission-entry').length === 0) {
           group.remove();
           if (container.children.length === 0) {
-            emptyState.style.display = '';
-            footer.style.display = 'none';
+            emptyState.hidden = false;
+            footer.hidden = true;
             createIcons({ icons });
           }
         }
@@ -1356,7 +1369,9 @@ function renderPermissions(permissions: PermissionRecord[]) {
 function escapeHtml(str: string): string {
   const div = document.createElement('div');
   div.textContent = str;
-  return div.innerHTML;
+  // innerHTML leaves quotes alone: escape them so the result is also safe
+  // inside a quoted attribute (title="…", src="…").
+  return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 createIcons({ icons });

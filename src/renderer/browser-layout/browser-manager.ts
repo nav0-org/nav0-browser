@@ -52,10 +52,13 @@ export class BrowserTabManager {
     if (platform) {
       document.body.classList.add(`platform-${platform}`);
     }
+    if (window.BrowserAPI.isTitleBarRtl) {
+      document.body.classList.add('titlebar-rtl');
+    }
 
-    // Track fullscreen state — on macOS traffic lights are hidden in fullscreen,
-    // so we remove the left padding. The app starts in fullscreen mode.
-    document.body.classList.add('is-fullscreen');
+    // Track fullscreen state — on macOS the native traffic lights are hidden in
+    // fullscreen, so the strip drops their 78 px column and draws its own.
+    // Windows always open windowed, so the class starts off.
     window.BrowserAPI.onFullScreenChanged?.((data: { isFullScreen: boolean }) => {
       document.body.classList.toggle('is-fullscreen', data.isFullScreen);
     });
@@ -220,7 +223,10 @@ export class BrowserTabManager {
     });
 
     // Keep the at-rest display in step with whatever the field holds, typed or set.
-    this.urlInput.addEventListener('input', () => this.renderUrlDisplay());
+    this.urlInput.addEventListener('input', () => {
+      this.renderUrlDisplay();
+      this.updateSSLIndicator();
+    });
     this.urlInput.addEventListener('blur', () => this.renderUrlDisplay());
 
     this.downloadsButton.addEventListener('click', () => {
@@ -362,6 +368,45 @@ export class BrowserTabManager {
 
     window.BrowserAPI.onTabFaviconUpdated((data: { id: string; faviconUrl: string }) => {
       this.getTabById(data.id)?.updateTabFavicon(data.faviconUrl);
+    });
+
+    // A failed load commits no URL update, so the failure stands in for one:
+    // the field keeps the URL that failed, with that URL's bookmark state. No
+    // connection was made, so there's no security state and the field leads
+    // with the search icon, not a lock.
+    window.BrowserAPI.onNavigationFailed((data) => {
+      const tab = this.getTabById(data.id);
+      if (!tab) return;
+      tab.handleUrlChange(
+        data.url,
+        data.isBookmark,
+        data.bookmarkId,
+        data.bookmarkType,
+        data.canGoBack,
+        data.canGoForward
+      );
+      tab.loadFailed = true;
+      tab.sslStatus = 'internal';
+      tab.sslDetails = null;
+      if (data.id === this.activeTabId) {
+        this.setUrlInputValue(data.url);
+        this.backButton.disabled = !data.canGoBack;
+        this.forwardButton.disabled = !data.canGoForward;
+        this.handleBookmark();
+        this.updatePdfDownloadButton();
+      }
+    });
+
+    // The ⋮ button and the security indicator stay pressed while the popover
+    // they opened is showing.
+    window.BrowserAPI.onOverlayVisibilityChanged((data: { type: string; visible: boolean }) => {
+      const opener =
+        data.type === 'options-menu'
+          ? this.optionsButton
+          : data.type === 'ssl-info'
+            ? this.sslIndicator
+            : null;
+      opener?.setAttribute('aria-expanded', String(data.visible));
     });
 
     // Tab loading state changed
@@ -580,6 +625,7 @@ export class BrowserTabManager {
   private setUrlInputValue(value: string): void {
     this.urlInput.value = value;
     this.renderUrlDisplay();
+    this.updateSSLIndicator();
   }
 
   // Draws the field's value for display only, with the registrable domain
@@ -732,9 +778,7 @@ export class BrowserTabManager {
     this.sslIndicator.addEventListener('click', () => {
       const activeTab = this.getTabById(this.activeTabId);
       if (!activeTab) return;
-      const url = activeTab.url;
-      const isNewTab = !url || url === '' || url.startsWith('Nav0://');
-      if (isNewTab) return;
+      if (this.showsSearchIndicator(activeTab)) return;
       window.BrowserAPI.showSSLInfo(this.appWindowId, {
         sslStatus: activeTab.sslStatus,
         sslDetails: activeTab.sslDetails,
@@ -743,18 +787,35 @@ export class BrowserTabManager {
     });
   }
 
+  // The URL is being edited while the field no longer holds the tab's URL.
+  private isEditingUrl(tab: Tab): boolean {
+    return this.urlInput.value !== tab.url;
+  }
+
+  // The field leads with the display-only search icon on built-in pages, after
+  // a failed load, and while the URL is being edited — DESIGN.md §4.1.
+  private showsSearchIndicator(tab: Tab): boolean {
+    const url = tab.url;
+    const isNewTab = !url || url === '' || url.startsWith('Nav0://');
+    return isNewTab || tab.loadFailed || this.isEditingUrl(tab);
+  }
+
   private updateSSLIndicator(): void {
     const activeTab = this.getTabById(this.activeTabId);
     if (!activeTab) return;
 
-    const url = activeTab.url;
-    const isNewTab = !url || url === '' || url.startsWith('Nav0://');
     const sslStatus = activeTab.sslStatus || 'internal';
+
+    // Editing also hides the trailing buttons, which act on the loaded page
+    // rather than on what's typed (index.css).
+    this.urlInput
+      .closest('.address-bar')
+      ?.classList.toggle('is-editing', this.isEditingUrl(activeTab));
 
     // Remove all state classes
     this.sslIndicator.classList.remove('ssl-search', 'ssl-secure', 'ssl-insecure');
 
-    if (isNewTab) {
+    if (this.showsSearchIndicator(activeTab)) {
       this.sslIndicator.innerHTML = BrowserTabManager.SSL_ICON_SEARCH;
       this.sslIndicator.classList.add('ssl-search');
       this.sslIndicator.title = 'Search';

@@ -29,6 +29,7 @@ export class UnifiedOverlayManager {
   private readyPromise: Promise<void>;
   private sslInfoHandler: SSLInfoHandler;
   private urlAutocompleteHandler: UrlAutocompleteHandler;
+  private onVisibilityChange: ((type: OverlayType, visible: boolean) => void) | null = null;
 
   constructor(appWindowId: string, isPrivate: boolean, partitionSetting: string) {
     this.webContentsViewInstance = new WebContentsView({
@@ -83,12 +84,19 @@ export class UnifiedOverlayManager {
     return this.webContentsViewInstance;
   }
 
+  // Called on every show and hide, so the window chrome can mirror an
+  // overlay's state (e.g. keep the button that opened it pressed).
+  setOnVisibilityChange(callback: (type: OverlayType, visible: boolean) => void): void {
+    this.onVisibilityChange = callback;
+  }
+
   showOverlay(type: OverlayType, data?: any): void {
     this.visibleOverlays.add(type);
     const handler = this.handlers.get(type);
     if (handler) {
       handler.onShow(this.webContentsViewInstance.webContents, data);
     }
+    this.onVisibilityChange?.(type, true);
   }
 
   hideOverlay(type: OverlayType): void {
@@ -98,6 +106,7 @@ export class UnifiedOverlayManager {
     if (handler) {
       handler.onHide(this.webContentsViewInstance.webContents);
     }
+    this.onVisibilityChange?.(type, false);
   }
 
   isVisible(type: OverlayType): boolean {
@@ -118,10 +127,7 @@ export class UnifiedOverlayManager {
   }
 
   // URL autocomplete: push live updates while the panel is visible
-  updateUrlAutocomplete(data: {
-    results: UrlAutocompleteSuggestion[];
-    activeIndex: number;
-  }): void {
+  updateUrlAutocomplete(data: { results: UrlAutocompleteSuggestion[]; activeIndex: number }): void {
     if (!this.visibleOverlays.has('url-autocomplete')) return;
     this.urlAutocompleteHandler.update(this.webContentsViewInstance.webContents, data);
   }

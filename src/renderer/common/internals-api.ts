@@ -15,6 +15,7 @@ declare global {
       appWindowId: string;
       isPrivate: boolean;
       platform: string;
+      isTitleBarRtl: boolean;
       tabId: string;
       createTab: (appWindowId: string, url: string, activateNewTab: boolean) => any;
       activateTab: (appWindowId: string, tabId: string, isUserInitiated: boolean) => any;
@@ -113,6 +114,12 @@ declare global {
       showUrlAutocompleteOverlay: (appWindowId: string, data: any) => void;
       updateUrlAutocompleteOverlay: (appWindowId: string, data: any) => void;
       hideUrlAutocompleteOverlay: (appWindowId: string) => void;
+      // A press in the dropdown's shadow margin (x, y in the overlay view):
+      // closes the dropdown and passes the press on to what lies beneath.
+      dismissUrlAutocompleteOverlay: (
+        appWindowId: string,
+        press: { x: number; y: number; button: number }
+      ) => void;
       sendUrlAutocompleteResultClicked: (appWindowId: string, data: any) => void;
       onUrlAutocompleteResultForwarded: (callback: (data: any) => void) => void;
       onUrlAutocompleteUpdate: (callback: (data: any) => void) => void;
@@ -224,7 +231,17 @@ declare global {
         }) => void
       ) => void;
       onTabFaviconUpdated: (callback: (data: { id: string; faviconUrl: string }) => void) => void;
-      onNavigationFailed: (callback: (data: { id: string }) => void) => void;
+      onNavigationFailed: (
+        callback: (data: {
+          id: string;
+          url: string;
+          isBookmark: boolean;
+          bookmarkId: string | null;
+          bookmarkType: 'reference' | 'queue' | null;
+          canGoBack: boolean;
+          canGoForward: boolean;
+        }) => void
+      ) => void;
       onDownloadStarted: (
         callback: (data: {
           downloadId: string;
@@ -275,6 +292,9 @@ declare global {
       onTabUnpinned: (callback: (data: { id: string }) => void) => void;
       onTabsReordered: (callback: (data: { order: string[] }) => void) => void;
       onFullScreenChanged: (callback: (data: { isFullScreen: boolean }) => void) => void;
+      onOverlayVisibilityChanged: (
+        callback: (data: { type: string; visible: boolean }) => void
+      ) => void;
       onFocusUrlBar: (callback: () => void) => void;
       // Permission system
       respondToPermissionPrompt: (appWindowId: string, requestId: string, decision: string) => void;

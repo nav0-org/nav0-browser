@@ -287,7 +287,7 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
 
   row.innerHTML = `
     <span class="entry-time">${time}</span>
-    <div class="entry-favicon"><img src="${faviconUrl}" width="18" height="18"></div>
+    <div class="entry-favicon"><img src="${escapeHtml(faviconUrl)}" width="18" height="18"></div>
     <div class="entry-content">
       <span class="entry-title" title="${escapeHtml(entry.title)}">${escapeHtml(entry.title)}</span>
       <span class="entry-domain">${escapeHtml(entry.topLevelDomain)}</span>
@@ -508,7 +508,7 @@ function renderDomainChart(): void {
       const valLabel = useTime ? FormatUtils.formatDuration(d.active) : `${d.visits}`;
       return `
     <div class="domain-row">
-      <span class="domain-favicon"><img src="${d.faviconUrl}" width="16" height="16" /></span>
+      <span class="domain-favicon"><img src="${escapeHtml(d.faviconUrl)}" width="16" height="16" /></span>
       <span class="domain-name">${escapeHtml(d.domain)}</span>
       <span class="domain-duration">${valLabel}</span>
       <div class="domain-bar-track">
@@ -572,5 +572,7 @@ function renderCategoryChart(): void {
 function escapeHtml(str: string): string {
   const div = document.createElement('div');
   div.textContent = str;
-  return div.innerHTML;
+  // innerHTML leaves quotes alone: escape them so the result is also safe
+  // inside a quoted attribute (title="…", src="…").
+  return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }

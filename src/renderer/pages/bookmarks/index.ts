@@ -96,7 +96,9 @@ function queueAgeText(createdDate: string): { text: string } {
 function escapeHtml(str: string): string {
   const div = document.createElement('div');
   div.textContent = str;
-  return div.innerHTML;
+  // innerHTML leaves quotes alone: escape them so the result is also safe
+  // inside a quoted attribute (title="…", src="…").
+  return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 // --- Favicons ---
@@ -480,7 +482,7 @@ async function showStaleReview(): Promise<void> {
       </div>
       <div class="stale-review-content">
         <div class="stale-review-title">${escapeHtml(item.title)}</div>
-        <div class="stale-review-meta">${domain} · ${item.visits} visits · last visited ${daysAgo === Infinity ? 'never' : daysAgo + ' days ago'}</div>
+        <div class="stale-review-meta">${escapeHtml(domain)} · ${item.visits} visits · last visited ${daysAgo === Infinity ? 'never' : daysAgo + ' days ago'}</div>
       </div>
       <div class="stale-review-actions">
         <button class="action-btn" title="Keep" data-action="keep">

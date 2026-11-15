@@ -9,10 +9,7 @@ import {
   BrowserWindow,
 } from 'electron';
 import { v4 as uuid } from 'uuid';
-import {
-  PartitionNames,
-  RendererToMainEventsForBrowserIPC,
-} from '../../constants/app-constants';
+import { PartitionNames, RendererToMainEventsForBrowserIPC } from '../../constants/app-constants';
 import type { Database as DatabaseType } from 'better-sqlite3';
 
 // Types
@@ -78,7 +75,7 @@ export class PermissionManager {
   static readonly AUTO_GRANT_PERMISSIONS = new Set([
     'fullscreen',
     'clipboard-sanitized-write',
-    'pointer-lock',
+    'pointerLock',
     'mediaKeySystem',
   ]);
 
@@ -910,10 +907,7 @@ export class PermissionManager {
     }
   }
 
-  static extractMediaTypes(
-    permission: string,
-    details: unknown
-  ): string[] {
+  static extractMediaTypes(permission: string, details: unknown): string[] {
     if (permission !== 'media') return [];
     const mediaDetails = details as Electron.MediaAccessPermissionRequest | undefined;
     const types = mediaDetails?.mediaTypes;
@@ -951,19 +945,22 @@ export class PermissionManager {
       notifications: { label: 'notifications', icon: 'bell' },
       midi: { label: 'MIDI devices', icon: 'music' },
       midiSysex: { label: 'MIDI system exclusive', icon: 'music' },
-      pointerLock: { label: 'pointer lock', icon: 'lock' },
+      pointerLock: { label: 'pointer lock', icon: 'mouse-pointer' },
       openExternal: { label: 'external application', icon: 'app-window' },
       'clipboard-read': { label: 'clipboard', icon: 'clipboard' },
       'idle-detection': { label: 'idle detection', icon: 'moon' },
       'display-capture': { label: 'screen sharing', icon: 'monitor' },
       mediaKeySystem: { label: 'protected content', icon: 'hard-drive' },
       'accessibility-events': { label: 'accessibility events', icon: 'eye' },
+      'persistent-storage': { label: 'persistent storage', icon: 'database' },
       'storage-access': { label: 'storage access', icon: 'hard-drive' },
+      'top-level-storage-access': { label: 'top-level storage access', icon: 'hard-drive' },
+      fileSystem: { label: 'file system', icon: 'folder' },
       'window-management': { label: 'window management', icon: 'app-window' },
       'local-fonts': { label: 'local fonts', icon: 'type' },
       'screen-wake-lock': { label: 'screen wake lock', icon: 'monitor' },
       'speaker-selection': { label: 'speaker selection', icon: 'speaker' },
-      'keyboard-lock': { label: 'keyboard lock', icon: 'keyboard' },
+      keyboardLock: { label: 'keyboard lock', icon: 'keyboard' },
       usb: { label: 'USB devices', icon: 'usb' },
       serial: { label: 'serial ports', icon: 'usb' },
       bluetooth: { label: 'Bluetooth devices', icon: 'bluetooth' },

@@ -169,7 +169,7 @@
   --n-r-icon: 3px; /* icon buttons, the "Private" label */
   --n-r-control: 4px; /* tabs, address field, buttons, inputs, rows, wells, ⌘O cards */
   --n-r-badge: 5px; /* badges */
-  --n-r-panel: 6px; /* grey panels (.card), menus, popovers, picker source cards */
+  --n-r-panel: 6px; /* grey panels (.card), menus, popovers, toasts, picker source cards */
   --n-r-chip: 7px; /* filter chips */
   --n-r-dialog: 8px; /* dialogs, ⌘K palette, ⌘O switcher */
   --n-r-full: 999px; /* switches, radios, dots, rings */
@@ -1278,6 +1278,44 @@ select.form-control {
   opacity: 1;
 }
 
+/* Toast (DESIGN.md §5.3): the page-wide form of the status bubble. A short
+   confirmation after an action ("Startup page added"), centred 24 px above
+   the bottom edge. Centred with auto margins rather than a transform, so the
+   reveal can move it; max-content keeps a long message on one line until it
+   meets the side gutters. */
+.toast {
+  position: fixed;
+  z-index: var(--z-toast);
+  right: 0;
+  bottom: var(--spacing-lg);
+  left: 0;
+  width: max-content;
+  max-width: calc(100% - 2 * var(--spacing-lg));
+  margin: 0 auto;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--n-r-panel);
+  background-color: var(--n-text-1);
+  color: var(--n-on-accent);
+  font-size: var(--font-md);
+  font-weight: 500;
+  line-height: 18px;
+  text-align: center;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+  animation: toast-reveal 180ms ease-out;
+}
+
+@keyframes toast-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Avatars */
 .avatar {
   display: inline-flex;
@@ -1378,7 +1416,8 @@ select.form-control {
   }
 
   .fade-in,
-  .fade-in-up {
+  .fade-in-up,
+  .toast {
     animation: none;
   }
 }

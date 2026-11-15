@@ -677,6 +677,16 @@ export abstract class AppWindowManager {
     );
 
     ipcMain.on(
+      RendererToMainEventsForBrowserIPC.DISMISS_URL_AUTOCOMPLETE_OVERLAY,
+      (event, appWindowId: string, press?: { x: number; y: number; button: number }) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (window) window.dismissUrlAutocompleteOverlay(press);
+      }
+    );
+
+    ipcMain.on(
       RendererToMainEventsForBrowserIPC.URL_AUTOCOMPLETE_RESULT_CLICKED,
       (event, appWindowId: string, data) => {
         const window = appWindowId

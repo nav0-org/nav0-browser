@@ -27,7 +27,9 @@ const SSL_INFO_HTML = `
 const escapeHtml = (str: string): string => {
   const div = document.createElement('div');
   div.textContent = str;
-  return div.innerHTML;
+  // innerHTML leaves quotes alone: escape them so the result is also safe
+  // inside a quoted attribute (title="…", src="…").
+  return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 };
 
 function renderSSLInfo(data: { sslStatus: string; sslDetails: any; url: string }): void {

@@ -45,7 +45,7 @@
           </li>
           <li>
             <a href="#permissions" class="sidebar-link" data-section="permissions"
-              ><i data-lucide="shield-check" width="15" height="15"></i> Permissions</a
+              ><i data-lucide="shield-check" width="15" height="15"></i> Site Permissions</a
             >
           </li>
           <li>
@@ -153,7 +153,7 @@
             </div>
 
             <!-- Startup Pages (shown when 'specific-pages' is selected) -->
-            <div id="startup-pages-container" class="setting-group" style="display: none">
+            <div id="startup-pages-container" class="setting-group" hidden>
               <div class="setting-group-header">
                 <div>
                   <h3 class="setting-group-title">Startup Pages</h3>
@@ -326,7 +326,7 @@
                 </div>
 
                 <!-- Cookie Exceptions -->
-                <div id="cookie-exceptions-container" class="sub-setting" style="display: none">
+                <div id="cookie-exceptions-container" class="sub-setting" hidden>
                   <label class="setting-label">Cookie Exceptions</label>
                   <p class="setting-description">
                     Sites in this list can set cookies even when embedded on other sites.
@@ -489,7 +489,7 @@
                   </label>
                 </div>
 
-                <!-- Allowed Sites (shown when policy is 'block') -->
+                <!-- Allowed Sites (shown when policy is 'block' or 'smart') -->
                 <div id="popup-allowed-container" class="sub-setting">
                   <label class="setting-label">Allowed Sites</label>
                   <p class="setting-description">Sites that are always allowed to open pop-ups.</p>
@@ -508,7 +508,7 @@
                 </div>
 
                 <!-- Blocked Sites (shown when policy is 'allow') -->
-                <div id="popup-blocked-container" class="sub-setting" style="display: none">
+                <div id="popup-blocked-container" class="sub-setting" hidden>
                   <label class="setting-label">Blocked Sites</label>
                   <p class="setting-description">Sites that are never allowed to open pop-ups.</p>
                   <div id="popup-blocked-list" class="items-list"></div>
@@ -564,7 +564,7 @@
                 </div>
 
                 <!-- Retention Periods -->
-                <div id="retention-settings" class="sub-setting" style="display: none">
+                <div id="retention-settings" class="sub-setting" hidden>
                   <div class="retention-grid">
                     <div class="retention-row">
                       <span>Browsing history</span>
@@ -673,7 +673,7 @@
             </div>
 
             <div id="permissions-list"></div>
-            <div id="permissions-empty" class="permissions-empty" style="display: none">
+            <div id="permissions-empty" class="permissions-empty" hidden>
               <i data-lucide="shield-check" class="permissions-empty-icon"></i>
               <p class="permissions-empty-title">No site permissions yet</p>
               <p class="permissions-empty-hint">
@@ -682,7 +682,7 @@
               </p>
             </div>
 
-            <div class="permissions-footer" id="permissions-footer" style="display: none">
+            <div class="permissions-footer" id="permissions-footer" hidden>
               <button class="btn btn-sm btn-secondary" id="clear-all-permissions-btn">
                 <i data-lucide="trash-2" width="14" height="14"></i> Clear All Permissions
               </button>
@@ -725,7 +725,7 @@
                     <option value="custom">Custom…</option>
                   </select>
                 </div>
-                <div id="custom-ua-container" class="sub-setting" style="display: none">
+                <div id="custom-ua-container" class="sub-setting" hidden>
                   <label class="setting-label">Custom User Agent String</label>
                   <input
                     type="text"
@@ -788,7 +788,7 @@
               </div>
 
               <!-- Manual Proxy Form -->
-              <div id="manual-proxy-form" class="sub-setting-panel" style="display: none">
+              <div id="manual-proxy-form" class="sub-setting-panel" hidden>
                 <div class="proxy-grid">
                   <div class="proxy-row">
                     <label>HTTP Proxy</label>
@@ -858,7 +858,7 @@
               </div>
 
               <!-- PAC URL Form -->
-              <div id="pac-proxy-form" class="sub-setting-panel" style="display: none">
+              <div id="pac-proxy-form" class="sub-setting-panel" hidden>
                 <div class="form-group">
                   <label>PAC File URL</label>
                   <input
@@ -973,7 +973,7 @@
     </div>
 
     <!-- Clear Browsing Data Dialog -->
-    <div id="clear-data-dialog" class="dialog-overlay" style="display: none">
+    <div id="clear-data-dialog" class="dialog-overlay" hidden>
       <div class="dialog-box">
         <h3 class="dialog-title">Clear Browsing Data</h3>
         <div class="dialog-body">
@@ -1019,5 +1019,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Holds the toast (showToast in index.ts). A live region has to be in
+         the page before its text changes for screen readers to announce it. -->
+    <div id="toast-region" role="status"></div>
   </body>
 </html>

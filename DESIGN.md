@@ -89,7 +89,7 @@ The `--nav0-red-*`, `--nav0-blue-*` and `--nav0-slate-*` ramps stay in `global.c
 | `--n-text-3` | `#6e6e73` | 5.1:1 on white                   | Secondary text, meta, placeholders. Never on strip |
 | `--n-text-4` | `#aeaeb2` | —                                | Disabled only                                      |
 
-`--n-on-accent` (`#ffffff`) is the text and icon colour on a filled `--n-accent` or `--n-danger` surface (primary and danger buttons, the checkbox mark, the radio dot; 5.4:1) and on dark `--n-text-1` fills: the status bubble ("Copied" on About) and the attachment remove button in Report an Issue (hover `--n-text-2`). Use it instead of a `#fff` literal.
+`--n-on-accent` (`#ffffff`) is the text and icon colour on a filled `--n-accent` or `--n-danger` surface (primary and danger buttons, the checkbox mark, the radio dot; 5.4:1) and on dark `--n-text-1` fills: the status bubble ("Copied" on About), the toast and the attachment remove button in Report an Issue (hover `--n-text-2`). Use it instead of a `#fff` literal.
 
 ### 3.4 Accent, semantic, private, data
 
@@ -123,7 +123,7 @@ When the OS asks for more contrast (`prefers-contrast: more`), every separator a
 --n-r-icon:    3px;   /* icon buttons, the "Private" label */
 --n-r-control: 4px;   /* tabs (top corners), address field, buttons, inputs, selects, segmented, list and menu rows, icon wells, ⌘O tab cards, tooltips */
 --n-r-badge:   5px;   /* badges */
---n-r-panel:   6px;   /* grey panels (.card), menus, popovers, the screen-share picker's source cards */
+--n-r-panel:   6px;   /* grey panels (.card), menus, popovers, toasts, the screen-share picker's source cards */
 --n-r-chip:    7px;   /* filter chips */
 --n-r-dialog:  8px;   /* dialogs, ⌘K palette, ⌘O switcher */
 --n-r-full:  999px;   /* switches, radios, dots, rings */
@@ -201,16 +201,16 @@ Unchanged: `--z-dropdown 100`, `--z-sticky 200`, `--z-modal 1000`, `--z-toast 11
 - **Inactive tab:** transparent, title 12 px `--n-text-2`; hover `--n-tab-hover`; the close button (18 px, `--n-r-icon`) appears on hover only.
 - 16 px `--n-tab-divider` between inactive tabs, hidden next to the active or hovered tab.
 - Pinned tabs are 36 px wide, favicon only. While loading, a 14 px ring (2 px, track `--n-ring-track`, arc `--n-accent`) replaces the favicon.
-- New-tab "+" sits at the far right (40 × 34, 18 px icon). Traffic lights and Windows controls are centred on the tab row.
+- New-tab "+" sits at the far right (40 × 34, 18 px icon). Traffic lights and Windows controls are centred on the tab row. On macOS the native lights sit in a 78 px column (centres 20 / 40 / 60 px in, 23 px down: `trafficLightPosition` in `app-window.ts`), at the right end instead when a right-to-left language mirrors the title bar; in fullscreen, where they hide, the strip draws the same cluster itself.
 - No coloured bar on the active tab.
 
-**Toolbar** — 44 px, `--n-toolbar`, 1 px `--n-chrome-line` at the bottom. Buttons are 32 × 32, `--n-r-icon`, 18 px icons in `--n-text-2`, hover `--n-fill`, pressed `--n-fill-2`. Order (unchanged): back, forward, reload, `>_` (⌘K), address field, downloads (with a 2 px `--n-accent` progress ring while downloading), ⋮.
+**Toolbar** — 44 px, `--n-toolbar`, 1 px `--n-chrome-line` at the bottom. Buttons are 32 × 32, `--n-r-icon`, 18 px icons in `--n-text-2`, hover `--n-fill`, pressed `--n-fill-2`. A button that opens a popover (⋮, and the security indicator) stays pressed while it's open. Order (unchanged): back, forward, reload, `>_` (⌘K), address field, downloads (with a 2 px `--n-accent` progress ring while downloading), ⋮.
 
 **Address field** — 32 px, `--n-card`, `--n-r-control`, `--n-field-shadow`; focused: `--n-focus-ring-field`. 14 px text.
 
 - At rest, the URL is split for display: scheme, subdomain and path in `--n-text-3`; the registrable domain in `--n-text-1` weight 600. The scheme is lowercase (`nav0://`, never `Nav0://`).
-- Leading indicator (30 × 28): secure = `lock` in `--n-text-3` (neutral, never green); not secure (HTTP or bypassed certificate) = `triangle-alert` in `--n-danger`, static. A bypassed certificate also shows `https` struck through in red. Built-in pages and typing show `search`.
-- Trailing field buttons (reader, PDF, bookmark / reading queue): 28 × 28, 16 px icons in `--n-text-3`; when on, icon `--n-accent` on `--n-accent-soft`.
+- Leading indicator (30 × 28): secure = `lock` in `--n-text-3` (neutral, never green); not secure (HTTP or bypassed certificate) = `triangle-alert` in `--n-danger`, static. A bypassed certificate also shows `https` struck through in red. Built-in pages, a failed load and typing (the field no longer holds the page's URL) show `search`, which is display-only.
+- Trailing field buttons (reader, PDF, bookmark / reading queue): 28 × 28, 16 px icons in `--n-text-3`; when on, icon `--n-accent` on `--n-accent-soft`. They hide while the URL is being edited.
 
 **Find in page** — a 44 px bar under the toolbar, `--n-toolbar`, bottom line `--n-chrome-line`. Field 400 px wide, 30 px, white, ring as above, match counter inside the field at the right (12 px `--n-text-3`, e.g. "3 of 12"). "No matches" and "Invalid regex" turn the text, counter and ring `--n-danger`. Option toggles **Aa**, **|ab|**, **.\*** are 28 px; on = `--n-accent` text on `--n-accent-soft`. Divider, previous/next (disabled `--n-text-4` when there's nothing to move to), and close at the far right.
 
@@ -241,6 +241,7 @@ Unchanged: `--z-dropdown 100`, `--z-sticky 200`, `--z-modal 1000`, `--z-toast 11
 - ⌘O: four columns of white cards (`--n-card`, `--n-r-control`, `--n-card-shadow`; the chosen card takes the selection style and drops the shadow), two-line titles, neutral window headers (no coloured rules); the active tab of each window is a small grey dot.
 - Text inputs inside dialogs are white with `--n-input-shadow` (30 px, a 12 px 500 `--n-text-2` label 5 px above); selects use `--n-select-shadow` and are 28 px (`select.form-control`).
 - Slide-in ~180 ms, gated on `prefers-reduced-motion`. The URL autocomplete is closed before any modal overlay opens (unchanged).
+- The URL autocomplete hangs 6 px under the toolbar, inset 2 px from each side of the address field. Its overlay view covers just the dropdown and its shadow's reach (6 px above, up to the toolbar's bottom line, 60 px either side, 84 px below), so the rest of the window stays clickable and the shadow shows whole except where the toolbar cuts it. A press in the shadow's margin is a click outside: the dropdown closes and the press goes on to whatever lies beneath, the page or the chrome.
 
 ### 4.5 Dialogs and interstitials
 
@@ -286,6 +287,7 @@ Pair `.btn-icon` with `.btn-ghost` for its hover fill; the container sets the sp
 - Keycaps (`.keycap`): 20 px tall, min-width 20, `0 5px`, `--n-r-key`, `--n-fill-2`, 11 px 500 `--n-text-2` in the system sans stack, one keycap per key, no border, shadow or margin. Put a row of caps in a flex container 4 px apart.
 - Progress bar (`.progress-track` holding a `.progress-fill`): 4 px, track `--n-track`, fill `--n-accent`, both `--n-r-key`. Download ring: 2 px.
 - Tooltip (`.tooltip` + `.tooltip-text`): a small popover in the menu material (`--n-menu-bg`, `--n-menu-blur`, `--n-menu-shadow`), `--n-r-control`, 24 px tall: one line of 12 px `--n-text-1` on a 14 px line inside `5px 9px` padding, 8 px above the element it describes. The tight line and the 5 / 9 px padding are deliberate exceptions to §3.6 and §3.7. A confirmation that appears after an action ("Copied" on About) is a dark status bubble instead: `--n-text-1` fill, `--n-on-accent` 11 px text, `4px 8px`, `--n-r-control`.
+- Toast (`.toast`, inside a persistent `role="status"` container that's in the page from load, so screen readers announce it): the page-wide form of the status bubble, for a short message after an action that isn't tied to one control ("Startup page added" in Settings, or why an entry was rejected). `--n-text-1` fill, 13 px 500 `--n-on-accent` text on an 18 px line, `8px 16px`, `--n-r-panel`, no shadow; centred 24 px above the bottom edge at `--z-toast`, as wide as its message up to the 24 px side gutters (a longer message wraps, breaking a long URL anywhere). It rises 8 px and fades in over 180 ms (none under reduced motion), and shows one at a time: a new toast replaces the old one.
 - The `hidden` attribute always wins: `global.css` sets `[hidden] { display: none !important }`, so a page's `display` rule can't reveal a hidden element. Show and hide with `el.hidden`.
 
 ---
@@ -330,6 +332,8 @@ createIcons({ icons });
 | `src/renderer/overlay/panels/<name>/<name>.css` | Overlay panel CSS                                       |
 | `src/renderer/browser-layout/*.css`             | Chrome (tabs, nav bar, find in page, permission prompt) |
 | `src/renderer/assets/`                          | Logo, favicon — no inline data URLs for branding        |
+
+One exception: `ImageBase64Strings.FAVICON` (`src/constants/app-constants.ts`) is the 32 × 32 image from `src/renderer/assets/favicon.ico` as a data URL, because the main process hands it to the chrome and the overlays over IPC for built-in pages. Re-export it whenever the favicon changes.
 
 **Never** add CSS under `src/main/` (the error and SSL pages are self-contained HTML templates and keep their own inline `<style>`). **Never** add a webpack entry point silently — register it in `forge.config.ts` _and_ `webpack.renderer.config.ts`.
 

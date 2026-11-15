@@ -1,6 +1,17 @@
-import { app, BrowserWindow, dialog, Menu, MenuItem, net, shell, WebContentsView } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  clipboard,
+  dialog,
+  Menu,
+  MenuItem,
+  net,
+  shell,
+  WebContentsView,
+} from 'electron';
 import {
   InAppUrls,
+  ImageBase64Strings,
   DataStoreConstants,
   MainToRendererEventsForBrowserIPC,
   RendererToMainEventsForBrowserIPC,
@@ -536,11 +547,7 @@ export class Tab {
         if (!isMainFrame || errorCode === -3) return;
         console.error('Failed to load URL:', this.url, errorCode, errorDescription);
         this.pendingError = { errorCode, errorDescription, validatedURL };
-        this.parentAppWindow
-          .getBrowserWindowInstance()
-          ?.webContents.send(MainToRendererEventsForBrowserIPC.NAVIGATION_FAILED, {
-            id: this.id,
-          });
+        this.sendNavigationFailed(validatedURL);
       }
     );
 
@@ -582,6 +589,10 @@ export class Tab {
         this.showingSSLWarning = true;
         this.sslCertificate = certificate;
         this.url = url;
+        // While the warning is up the field shows the connection as not secure
+        // (red triangle, struck-through https); updateSSLStatus() keeps an
+        // 'insecure' status.
+        this.sslStatus = 'insecure';
         this.sendTabUrlUpdate(url);
 
         SSLManager.showWarning(this.webContentsViewInstance.webContents, url, error).then(
@@ -590,7 +601,7 @@ export class Tab {
             if (decision === 'proceed') {
               this.sslStatus = 'insecure';
               this.navigate(url);
-            } else {
+            } else if (decision === 'go-back') {
               const wc = this.webContentsViewInstance.webContents;
               if (wc.navigationHistory.canGoBack()) {
                 wc.navigationHistory.goBack();
@@ -1019,6 +1030,26 @@ export class Tab {
     this.scheduleReaderModeCheck();
   }
 
+  // The error page commits no URL update, so the failure carries what the
+  // chrome needs to show the URL that failed: its bookmark state and history.
+  private async sendNavigationFailed(url: string): Promise<void> {
+    if (this._destroyed) return;
+    const bookmark = await BookmarkManager.isBookmark(this.parentAppWindow.id, url);
+    if (this._destroyed) return;
+    const history = this.webContentsViewInstance?.webContents.navigationHistory;
+    this.parentAppWindow
+      .getBrowserWindowInstance()
+      ?.webContents.send(MainToRendererEventsForBrowserIPC.NAVIGATION_FAILED, {
+        id: this.id,
+        url,
+        isBookmark: bookmark ? true : false,
+        bookmarkId: bookmark ? bookmark.id : null,
+        bookmarkType: bookmark ? bookmark.type : null,
+        canGoBack: history?.canGoBack() ?? false,
+        canGoForward: history?.canGoForward() ?? false,
+      });
+  }
+
   private async sendTabUrlUpdate(url: string): Promise<void> {
     if (this._destroyed) return;
     const foundBookmarkRecord = await BookmarkManager.isBookmark(this.parentAppWindow.id, url);
@@ -1153,6 +1184,11 @@ export class Tab {
   }
 
   getFaviconUrl(): string | null {
+    // Built-in pages (the New Tab page's URL is '') never report a favicon, and
+    // this.faviconUrl may still hold the last site's: they show the compass.
+    if (this.url === '' || this.url.startsWith(InAppUrls.PREFIX)) {
+      return ImageBase64Strings.FAVICON;
+    }
     return this.faviconUrl;
   }
 
@@ -1632,9 +1668,9 @@ export class Tab {
           {
             label: 'Copy link address',
             click: () => {
-              this.webContentsViewInstance.webContents.executeJavaScript(`
-              navigator.clipboard.writeText("${linkURL}");
-            `);
+              // From main, not via page script: the URL is page-controlled and
+              // must never be spliced into code that runs in the page.
+              clipboard.writeText(linkURL);
             },
           },
           { type: 'separator' as const }
@@ -1656,9 +1692,9 @@ export class Tab {
           {
             label: 'Copy link address',
             click: () => {
-              this.webContentsViewInstance.webContents.executeJavaScript(`
-            navigator.clipboard.writeText("${linkURL}");
-          `);
+              // From main, not via page script: the URL is page-controlled and
+              // must never be spliced into code that runs in the page.
+              clipboard.writeText(linkURL);
             },
           },
           { type: 'separator' }

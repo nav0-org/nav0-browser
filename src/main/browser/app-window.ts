@@ -1,4 +1,4 @@
-import { app, BrowserWindow, screen, session } from 'electron';
+import { app, BrowserWindow, session } from 'electron';
 import path from 'path';
 import { v4 as uuid } from 'uuid';
 import { Tab } from './tab';
@@ -15,6 +15,7 @@ import { PermissionManager } from './permission-manager';
 import { NotificationManager } from './notification-manager';
 import { FindInPageManager } from './find-in-page-manager';
 import { UnifiedOverlayManager, OverlayType } from './unified-overlay-manager';
+import { UrlAutocompleteHandler } from './overlay-handlers/url-autocomplete-handler';
 import { ZoomManager } from './zoom-manager';
 import { TabSwitchManager } from './tab-switch-manager';
 import type { Database as DB } from 'better-sqlite3';
@@ -59,7 +60,7 @@ export class AppWindow {
   private database: DB;
   private readyPromise: Promise<void>;
   private resolveReady: () => void;
-  private _desiredFullScreen = true;
+  private _desiredFullScreen = false;
 
   constructor(isPrivate = false, database: DB) {
     this.isPrivate = isPrivate;
@@ -83,16 +84,18 @@ export class AppWindow {
     const isWindows = process.platform === 'win32';
     const isLinux = process.platform === 'linux';
 
-    // macOS opens in its native fullscreen Space. Linux and Windows fill the
-    // screen as a *maximized* window instead — true fullscreen there makes the
-    // window manager hide its own panels (top/bottom bars, taskbar), which we
-    // want to keep visible.
-    this._desiredFullScreen = isMac;
+    // A right-to-left macOS UI language mirrors the title bar, which moves the
+    // native window buttons to the right end of the tab strip. AppKit follows
+    // the app's chosen localization, which app.getLocale() reports.
+    const isTitleBarRtl = isMac && ['ar', 'fa', 'he', 'ur'].includes(app.getLocale().split('-')[0]);
 
+    // Every platform opens in a normal window that fills the screen (zoomed on
+    // macOS, maximized on Linux and Windows), never in true fullscreen: that
+    // would hide the window manager's own panels (top/bottom bars, taskbar)
+    // and, on macOS, the menu bar and the native window buttons.
     this.browserWindowInstance = new BrowserWindow({
       width: 1200,
       height: 800,
-      fullscreen: isMac,
       show: false,
       title: AppConstants.APP_NAME,
       icon:
@@ -115,7 +118,10 @@ export class AppWindow {
             },
           }
         : {}),
-      trafficLightPosition: isMac ? { x: 12, y: 10 } : undefined,
+      // Centres the native buttons (14 × 16, 20 px apart) at x 20 / 40 / 60
+      // and y 23: the middle of the 34 px tab row in the 40 px strip, where
+      // the drawn fullscreen cluster sits too.
+      trafficLightPosition: isMac ? { x: 13, y: 15 } : undefined,
       webPreferences: {
         preload: BROWSER_LAYOUT_PRELOAD_WEBPACK_ENTRY,
         nodeIntegration: false,
@@ -124,6 +130,7 @@ export class AppWindow {
           `--app-window-id=${this.id}`,
           `--is-private=${this.isPrivate}`,
           `--platform=${process.platform}`,
+          `--titlebar-rtl=${isTitleBarRtl}`,
         ],
         sandbox: true,
         webSecurity: true,
@@ -147,6 +154,12 @@ export class AppWindow {
           this.isPrivate,
           this.partitionSetting
         );
+        this.unifiedOverlayManager.setOnVisibilityChange((type, visible) => {
+          this.browserWindowInstance?.webContents.send(
+            MainToRendererEventsForBrowserIPC.OVERLAY_VISIBILITY_CHANGED,
+            { type, visible }
+          );
+        });
         resolve();
       }, 500);
     });
@@ -193,22 +206,12 @@ export class AppWindow {
       this.browserWindowInstance = null;
     });
 
-    // When leaving fullscreen on macOS, set proper windowed bounds and resize
-    // all views — the window started in a fullscreen Space, so it has no
-    // meaningful windowed bounds to return to. On Linux/Windows the window
-    // manager restores the pre-fullscreen state itself (typically maximized);
-    // forcing bounds here would shrink a maximized window to 1200×800 every
-    // time fullscreen ends (F11 or leaving HTML5 video fullscreen).
+    // When fullscreen ends, resize all views. The window manager restores the
+    // pre-fullscreen bounds itself (every window starts windowed); forcing
+    // bounds here would shrink a maximized window every time fullscreen ends
+    // (⌃⌘F, F11 or leaving HTML5 video fullscreen).
     this.browserWindowInstance.on('leave-full-screen', () => {
       this._desiredFullScreen = false;
-      if (isMac) {
-        const { width: screenW, height: screenH } = screen.getPrimaryDisplay().workAreaSize;
-        const w = Math.min(1200, screenW);
-        const h = Math.min(800, screenH);
-        const x = Math.round((screenW - w) / 2);
-        const y = Math.round((screenH - h) / 2);
-        this.browserWindowInstance?.setBounds({ x, y, width: w, height: h });
-      }
       this.handleResizing();
       this.browserWindowInstance?.webContents.send(
         MainToRendererEventsForBrowserIPC.FULLSCREEN_CHANGED,
@@ -238,6 +241,13 @@ export class AppWindow {
         }
       );
       this.resolveReady();
+      // Zoom on macOS while the window is still hidden: maximize() shows a
+      // hidden window, so calling it any earlier would show the window before
+      // the chrome has loaded. Zooming (rather than sizing the window to the
+      // screen) leaves the 1200 × 800 frame for the zoom button to return to.
+      if (isMac) {
+        this.browserWindowInstance?.maximize();
+      }
       this.browserWindowInstance?.show();
       // Re-assert maximization now that the window is mapped. X11 window
       // managers (e.g. Muffin on Linux Mint) may ignore the maximize() issued
@@ -352,7 +362,8 @@ export class AppWindow {
     if (!this.browserWindowInstance) return { x: 0, y: 0, width: 0, height: 0 };
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
     // If url-autocomplete is the only visible overlay, restrict bounds to its region
-    // so the rest of the page (including the URL input) keeps receiving mouse events.
+    // (the dropdown plus room for its shadow, never above it) so the rest of the
+    // page (including the URL input) keeps receiving mouse events.
     if (
       this.unifiedOverlayManager &&
       this.unifiedOverlayManager.isVisible('url-autocomplete') &&
@@ -370,13 +381,7 @@ export class AppWindow {
         ] as const
       ).some((t) => this.unifiedOverlayManager!.isVisible(t));
       if (!otherVisible) {
-        const b = this.urlAutocompleteBounds;
-        return {
-          x: Math.max(0, Math.round(b.x)),
-          y: Math.max(0, Math.round(b.y)),
-          width: Math.max(0, Math.min(Math.round(b.width), parentBounds.width)),
-          height: Math.max(0, Math.min(Math.round(b.height), parentBounds.height)),
-        };
+        return UrlAutocompleteHandler.getViewBounds(this.urlAutocompleteBounds, parentBounds);
       }
     }
     return parentBounds;
@@ -545,6 +550,11 @@ export class AppWindow {
   }
 
   async activateTab(id: string, isUserInitiated = true): Promise<void> {
+    // A tab switch closes the ⋮ menu: the new tab's view would otherwise stack
+    // over the menu and hide it while it still counts as open (its overlay
+    // eating the next click, and ⋮ staying pressed). Covers menu items that
+    // open a tab and keyboard switches alike.
+    this.hideOptionsMenuOverlay();
     // Save current find-in-page state before switching
     if (this.isFindInPageVisible() && this.activeTabId) {
       this.findInPageState.set(this.activeTabId, {
@@ -844,6 +854,44 @@ export class AppWindow {
       this.urlAutocompleteBounds = null;
       this.removeOverlayViewIfEmpty();
     }
+  }
+
+  // A press in the transparent margin the overlay view keeps around the
+  // dropdown for its shadow (x, y in the view). It is a press on whatever lies
+  // under the margin — the page, or the chrome's strips: the dropdown closes,
+  // and the press is passed on there, so the margin never swallows a click.
+  // Focus moves to that target even when the chrome has already hidden the
+  // dropdown (the press can focus the overlay view first); otherwise it would
+  // stay in the removed view. The chrome's blur handler
+  // (browser-layout/url-autocomplete.ts) then resets its own dropdown state.
+  dismissUrlAutocompleteOverlay(press?: { x: number; y: number; button: number }): void {
+    // Read before hiding: the view's bounds turn the press into window space.
+    const viewBounds = this.unifiedOverlayManager?.getWebContentsViewInstance().getBounds();
+    this.hideUrlAutocompleteOverlay();
+    if (this.unifiedOverlayManager?.hasAnyVisible() || !this.browserWindowInstance) return;
+
+    const isPress = !!press && !!viewBounds && Number.isFinite(press.x) && Number.isFinite(press.y);
+    const x = isPress ? viewBounds.x + press.x : 0;
+    const y = isPress ? viewBounds.y + press.y : 0;
+    const tabView = this.getActiveTab()?.getWebContentsViewInstance();
+    const tabBounds = tabView?.getBounds();
+    const onPage =
+      !isPress ||
+      (!!tabBounds &&
+        x >= tabBounds.x &&
+        y >= tabBounds.y &&
+        x < tabBounds.x + tabBounds.width &&
+        y < tabBounds.y + tabBounds.height);
+    const target = onPage ? tabView?.webContents : this.browserWindowInstance.webContents;
+    if (!target) return;
+    target.focus();
+    if (!isPress) return;
+
+    const origin = onPage && tabBounds ? tabBounds : { x: 0, y: 0 };
+    const point = { x: Math.round(x - origin.x), y: Math.round(y - origin.y) };
+    const button = press.button === 2 ? 'right' : press.button === 1 ? 'middle' : 'left';
+    target.sendInputEvent({ type: 'mouseDown', ...point, button, clickCount: 1 });
+    target.sendInputEvent({ type: 'mouseUp', ...point, button, clickCount: 1 });
   }
 
   forwardUrlAutocompleteResultClicked(data: unknown): void {

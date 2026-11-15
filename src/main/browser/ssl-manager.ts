@@ -41,12 +41,16 @@ export class SSLManager {
    *
    * - 'proceed': user clicked "Proceed anyway" → bypass is recorded automatically
    * - 'go-back':  user clicked "Go back to safety"
+   * - 'left':     the tab navigated away some other way (toolbar Back, a typed
+   *               URL, a bookmark). The listeners go with it, so a later
+   *               page-initiated navigation to the same URL can't count as
+   *               "Proceed" and bypass the certificate.
    */
   static showWarning(
     wc: WebContents,
     url: string,
     errorCode: string
-  ): Promise<'proceed' | 'go-back'> {
+  ): Promise<'proceed' | 'go-back' | 'left'> {
     const html = SSLManager.generateWarningPage(url, errorCode);
     wc.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
 
@@ -71,13 +75,27 @@ export class SSLManager {
         }
       };
 
+      // The warning itself is a data: URL; any other main-frame document
+      // navigation means the tab has left it.
+      const leaveHandler = (
+        details: Electron.Event<Electron.WebContentsDidStartNavigationEventParams>
+      ) => {
+        if (!details.isMainFrame || details.isSameDocument || details.url.startsWith('data:')) {
+          return;
+        }
+        cleanup();
+        resolve('left');
+      };
+
       const cleanup = () => {
         wc.removeListener('will-navigate', willNavHandler);
         wc.removeListener('page-title-updated', titleHandler);
+        wc.removeListener('did-start-navigation', leaveHandler);
       };
 
       wc.on('will-navigate', willNavHandler);
       wc.on('page-title-updated', titleHandler);
+      wc.on('did-start-navigation', leaveHandler);
     });
   }
 }

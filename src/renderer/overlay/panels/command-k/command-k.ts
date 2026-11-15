@@ -77,7 +77,9 @@ const formatFileSize = (bytes: number): string => {
 const escapeHtml = (str: string): string => {
   const div = document.createElement('div');
   div.textContent = str;
-  return div.innerHTML;
+  // innerHTML leaves quotes alone: escape them so the result is also safe
+  // inside a quoted attribute (title="…", src="…").
+  return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 };
 
 // Smooth scrolling is motion: skip it when the OS asks to reduce motion.

@@ -40,9 +40,18 @@
   -webkit-user-drag: none;
 }
 
-/* Leave space for macOS traffic lights (close/minimize/maximize) — not in fullscreen */
+/* Leave space for macOS traffic lights (close/minimize/maximize) — not in fullscreen.
+   app-window.ts places the native buttons at 13–67 px, centred on the tab row. */
 body.platform-darwin:not(.is-fullscreen) .tab-bar {
   padding-left: 78px;
+}
+
+/* A right-to-left macOS language mirrors the title bar and puts the native
+   buttons at the right end, so the column moves there; the strip itself stays
+   left to right, its first tab 10 px in as on Windows and Linux. */
+body.platform-darwin.titlebar-rtl:not(.is-fullscreen) .tab-bar {
+  padding-right: 78px;
+  padding-left: var(--spacing-sm);
 }
 
 /* Keep the strip clear of the native window-controls overlay on Windows and
@@ -65,8 +74,8 @@ body.is-private .tab-bar {
 }
 
 /* === macOS traffic lights (fullscreen only) ==============
-   The window opens in a fullscreen Space on macOS, where the
-   native close/minimize/zoom buttons are hidden unless the
+   In a fullscreen Space on macOS the native
+   close/minimize/zoom buttons are hidden unless the
    menu bar is revealed. Draw our own cluster at the strip's
    leading edge instead: red closes the window, gray minimize
    is disabled (macOS can't minimize a fullscreen window —
@@ -449,6 +458,16 @@ body.is-private .nav-bar {
   background-color: var(--n-fill-2);
 }
 
+/* While its popover is open, the ⋮ button and the security indicator keep the
+   pressed fill (browser-manager.ts mirrors the overlay in aria-expanded). The
+   :hover forms out-rank the hover fills, which can linger under the overlay. */
+.nav-bar .btn-icon.rounded-circle[aria-expanded='true'],
+.nav-bar .btn-icon.rounded-circle[aria-expanded='true']:hover,
+.address-bar .ssl-indicator[aria-expanded='true'],
+.address-bar .ssl-indicator[aria-expanded='true']:hover {
+  background-color: var(--n-fill-2);
+}
+
 .nav-bar .btn-icon:disabled {
   color: var(--n-text-4);
   cursor: default;
@@ -658,6 +677,14 @@ body.is-private .nav-bar > .btn-icon:disabled {
    neutral by default, accent-on-soft when active. */
 .address-bar .btn-icon:not(.ssl-indicator) {
   color: var(--n-text-3);
+}
+
+/* While the URL is being edited (the field no longer holds the page's URL;
+   browser-manager.ts sets .is-editing) the trailing buttons step aside: they
+   act on the loaded page, not on what's typed. Focus alone doesn't hide them,
+   so Tab from the field still reaches them. */
+.address-bar.is-editing .btn-icon:not(.ssl-indicator) {
+  display: none;
 }
 
 .reader-mode-btn {

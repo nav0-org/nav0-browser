@@ -8,6 +8,10 @@ import { ImageBase64Strings, InAppUrls } from '../../constants/app-constants';
 const EMPTY_FAVICON =
   'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
+// Built-in pages (nav0://…, and the New Tab page, whose URL is '') show the
+// Nav0 compass: they never report a favicon of their own.
+const isBuiltInUrl = (url: string): boolean => url === '' || url.startsWith(InAppUrls.PREFIX);
+
 export class Tab {
   public id: string;
   public url: string;
@@ -23,6 +27,9 @@ export class Tab {
   public isReaderModeEligible = false;
   public isReaderModeActive = false;
   public isPinned = false;
+  // The last load failed (the error page is showing). Set after the failure's
+  // own handleUrlChange(); cleared by the next one.
+  public loadFailed = false;
   public sslStatus: 'secure' | 'insecure' | 'internal' = 'internal';
   public sslDetails: {
     issuer: string;
@@ -80,6 +87,9 @@ export class Tab {
     if (faviconElement) {
       faviconElement.src = EMPTY_FAVICON;
     }
+    if (isBuiltInUrl(this.url)) {
+      this.updateTabFavicon(ImageBase64Strings.FAVICON);
+    }
 
     setTimeout(() => {
       createIcons({ icons });
@@ -105,14 +115,21 @@ export class Tab {
     canGoBack: boolean,
     canGoForward: boolean
   ): void {
+    const wasBuiltIn = isBuiltInUrl(this.url);
     this.url = url;
+    this.loadFailed = false;
     this.isBookmark = isBookmark;
     this.bookmarkId = bookmarkId;
     this.bookmarkType = bookmarkType;
     this.canGoBack = canGoBack;
     this.canGoForward = canGoForward;
-    if (this.url.startsWith(InAppUrls.PREFIX)) {
+    if (isBuiltInUrl(this.url)) {
       this.updateTabFavicon(ImageBase64Strings.FAVICON);
+    } else if (wasBuiltIn) {
+      // Leaving a built-in page: drop the compass until the site reports its
+      // own favicon, so a site without one isn't shown (or bookmarked) with it.
+      this.faviconUrl = null;
+      this.setFaviconSource(EMPTY_FAVICON);
     }
   }
 
@@ -134,11 +151,17 @@ export class Tab {
   }
 
   updateTabFavicon(faviconUrl: string): void {
-    if (this.url.startsWith(InAppUrls.PREFIX)) {
+    // A site's favicon can arrive after the tab has moved on to a built-in
+    // page; the compass wins there.
+    if (isBuiltInUrl(this.url)) {
       this.faviconUrl = ImageBase64Strings.FAVICON;
     } else {
       this.faviconUrl = faviconUrl;
     }
+    this.setFaviconSource(this.faviconUrl);
+  }
+
+  private setFaviconSource(source: string): void {
     if (this.tabElement) {
       const faviconElement = this.tabElement.querySelector('.tab-favicon') as HTMLImageElement;
       if (faviconElement) {
@@ -146,7 +169,7 @@ export class Tab {
           faviconElement.onerror = null;
           faviconElement.src = EMPTY_FAVICON;
         };
-        faviconElement.src = faviconUrl;
+        faviconElement.src = source;
       }
     }
   }

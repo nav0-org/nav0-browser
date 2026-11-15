@@ -7,26 +7,28 @@
   overflow: hidden;
 }
 
+/* The overlay view is the dropdown's box plus room for its shadow: 6 px
+   above (up to the toolbar's bottom line), 60 px on either side and 84 px
+   below (SHADOW_ROOM_* in
+   main/browser/overlay-handlers/url-autocomplete-handler.ts). This padding
+   puts the panel back on the box; a press in it closes the dropdown and is
+   passed on to whatever lies underneath. */
 #overlay-url-autocomplete .url-autocomplete-shell {
   width: 100%;
   height: 100%;
   display: flex;
   align-items: flex-start;
   justify-content: stretch;
+  padding: 6px 60px 84px;
 }
 
-/* The overlay view is cut to the panel's bounds so it never covers the page,
-   which clips the material's outer ring and shadow; an inset hairline keeps
-   the dropdown's edge visible on light pages. */
 #overlay-url-autocomplete .url-autocomplete-panel {
   flex: 1;
   background: var(--n-menu-bg);
   backdrop-filter: var(--n-menu-blur);
   -webkit-backdrop-filter: var(--n-menu-blur);
   border-radius: var(--n-r-panel);
-  box-shadow:
-    inset 0 0 0 0.5px var(--n-menu-line),
-    var(--n-menu-shadow);
+  box-shadow: var(--n-menu-shadow);
   overflow-y: auto;
   max-height: 100%;
   padding: 6px;

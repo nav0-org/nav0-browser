@@ -1782,6 +1782,8 @@
 }
 
 /* ====== DIALOG OVERLAY (e.g., Clear data confirm) ======= */
+/* Starts with the hidden attribute; index.ts opens it with `hidden = false`,
+   so this rule's flex is what centres the box. */
 .dialog-overlay {
   position: fixed;
   inset: 0;

@@ -28,8 +28,9 @@ type BookmarkRow = {
 const DEBOUNCE_MS = 120;
 const MAX_PER_GROUP = 4;
 // Must match the panel's rows (url-autocomplete.css: 44 px rows inside 6 px of
-// panel padding), or the overlay view ends below the last row and its
-// transparent remainder swallows clicks meant for the page.
+// panel padding), or the overlay view reaches further below the last row than
+// the panel's shadow needs, and that transparent strip swallows clicks meant
+// for the page.
 const ITEM_HEIGHT = 44;
 const PANEL_PADDING = 6;
 // Where the dropdown sits relative to the address field: inset 2 px from each

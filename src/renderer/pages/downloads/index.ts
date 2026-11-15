@@ -67,7 +67,9 @@ const formatRowTime = (date: Date | string): string => {
 const escapeHtml = (str: string): string => {
   const div = document.createElement('div');
   div.textContent = str;
-  return div.innerHTML;
+  // innerHTML leaves quotes alone: escape them so the result is also safe
+  // inside a quoted attribute (title="…", src="…").
+  return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 };
 
 // ---------------------------------------------------------------------------
@@ -561,17 +563,17 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
       const downloadId = activeInfo.downloadId;
       if (isPaused) {
         actionsHtml = `
-          <button class="action-btn resume-btn" data-download-id="${downloadId}" title="Resume">
+          <button class="action-btn resume-btn" data-download-id="${escapeHtml(downloadId)}" title="Resume">
             <i data-lucide="play" width="14" height="14"></i>
           </button>`;
       } else {
         actionsHtml = `
-          <button class="action-btn pause-btn" data-download-id="${downloadId}" title="Pause">
+          <button class="action-btn pause-btn" data-download-id="${escapeHtml(downloadId)}" title="Pause">
             <i data-lucide="pause" width="14" height="14"></i>
           </button>`;
       }
       actionsHtml += `
-        <button class="action-btn cancel-btn" data-download-id="${downloadId}" title="Cancel">
+        <button class="action-btn cancel-btn" data-download-id="${escapeHtml(downloadId)}" title="Cancel">
           <i data-lucide="x" width="14" height="14"></i>
         </button>`;
     } else if (isPausedFromDb) {
@@ -734,7 +736,7 @@ const toggleDetailPanel = (
       <div class="detail-metadata">
         <div class="detail-field">
           <span class="detail-field-label">File</span>
-          <span class="detail-field-value">${item.fileName}</span>
+          <span class="detail-field-value">${escapeHtml(item.fileName)}</span>
         </div>
         <div class="detail-field">
           <span class="detail-field-label">Type</span>
@@ -746,7 +748,7 @@ const toggleDetailPanel = (
         </div>
         <div class="detail-field">
           <span class="detail-field-label">Source</span>
-          <span class="detail-field-value">${sourceHost || item.url}</span>
+          <span class="detail-field-value">${escapeHtml(sourceHost || item.url)}</span>
         </div>
         <div class="detail-field">
           <span class="detail-field-label">Downloaded</span>
@@ -754,7 +756,7 @@ const toggleDetailPanel = (
         </div>
         <div class="detail-field full-width">
           <span class="detail-field-label">Path</span>
-          <span class="detail-field-value">${item.fileLocation}</span>
+          <span class="detail-field-value">${escapeHtml(item.fileLocation)}</span>
         </div>
       </div>
       <div class="detail-actions">

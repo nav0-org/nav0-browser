@@ -20,7 +20,9 @@ let initialized = false;
 const escapeHtml = (str: string): string => {
   const div = document.createElement('div');
   div.textContent = str;
-  return div.innerHTML;
+  // innerHTML leaves quotes alone: escape them so the result is also safe
+  // inside a quoted attribute (title="…", src="…").
+  return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 };
 
 const getFaviconLetter = (url: string): string => {
@@ -131,6 +133,19 @@ export function init(container: HTMLElement): void {
     </div>
   `;
   resultsContainer = container.querySelector('#url-ac-results') as HTMLElement;
+
+  // The overlay view reaches past the panel to show its shadow (the shell's
+  // padding), over the page. A press there is a press outside the dropdown:
+  // the main process closes it and passes the press on to what lies beneath.
+  container.addEventListener('mousedown', (e) => {
+    if (e.target instanceof Element && e.target.closest('.url-autocomplete-panel')) return;
+    e.preventDefault();
+    window.BrowserAPI.dismissUrlAutocompleteOverlay(window.BrowserAPI.appWindowId, {
+      x: e.clientX,
+      y: e.clientY,
+      button: e.button,
+    });
+  });
 
   window.BrowserAPI.onUrlAutocompleteUpdate(
     (data: { results?: Suggestion[]; activeIndex: number }) => {

@@ -79,17 +79,19 @@ export function generateSSLWarningHTML(options: SSLWarningOptions): string {
 
   const encodedUrl = Buffer.from(url).toString('base64');
 
+  // Replacer functions, not strings: a URL may contain "$&" or "$`", which a
+  // replacement string would expand into pieces of the template.
   return template
-    .replace(/\{\{TITLE\}\}/g, escapeHtml(title))
-    .replace(/\{\{EYEBROW\}\}/g, escapeHtml(eyebrow))
-    .replace(/\{\{HEADING\}\}/g, escapeHtml(heading))
-    .replace(/\{\{MESSAGE\}\}/g, message)
-    .replace(/\{\{ERROR_CODE\}\}/g, escapeHtml(errorCodeLabel))
-    .replace(/\{\{ICON_SVG\}\}/g, iconSvg)
-    .replace(/\{\{RISK_DETAILS\}\}/g, riskDetails)
-    .replace(/\{\{ENCODED_URL\}\}/g, encodedUrl)
-    .replace(/\{\{HOSTNAME\}\}/g, escapeHtml(hostname))
-    .replace(/\{\{URL_DISPLAY\}\}/g, escapeHtml(url));
+    .replace(/\{\{TITLE\}\}/g, () => escapeHtml(title))
+    .replace(/\{\{EYEBROW\}\}/g, () => escapeHtml(eyebrow))
+    .replace(/\{\{HEADING\}\}/g, () => escapeHtml(heading))
+    .replace(/\{\{MESSAGE\}\}/g, () => message)
+    .replace(/\{\{ERROR_CODE\}\}/g, () => escapeHtml(errorCodeLabel))
+    .replace(/\{\{ICON_SVG\}\}/g, () => iconSvg)
+    .replace(/\{\{RISK_DETAILS\}\}/g, () => riskDetails)
+    .replace(/\{\{ENCODED_URL\}\}/g, () => encodedUrl)
+    .replace(/\{\{HOSTNAME\}\}/g, () => escapeHtml(hostname))
+    .replace(/\{\{URL_DISPLAY\}\}/g, () => escapeHtml(url));
 }
 
 function escapeHtml(str: string): string {
