@@ -1,29 +1,28 @@
 @import url('../../styles/global.css');
 
 /* ============================================================
-   History — editorial dashboard layout (DESIGN.md §4.2).
-   The page is the white canvas (browser chrome wraps it). A
-   left-aligned masthead title sits above a toolbar that gathers
-   search + time-range + clear into one row. The yearly activity
-   map, top sites, and categories live in flat grey panels. The
-   history list keeps its day grouping; each row is a table-like
-   layout: time | favicon well | title+url | category badge |
-   duration | delete action.
+   History (DESIGN.md §4.2): the activity map and charts sit in
+   grey panels above the list, which is grouped by day.
    ============================================================ */
 
 .history-page {
   min-height: 100vh;
   background: var(--n-page);
   color: var(--n-text-2);
+  /* The body's 1.5 would loosen every panel and row; titles, headers and
+     the activity-map labels set their own line heights. */
+  line-height: normal;
 }
 
+/* An 880 px content column (DESIGN.md §4.2): the side padding is added to
+   the max-width so it only shows as a gutter on narrow windows. */
 .history-container {
-  max-width: 880px;
+  max-width: calc(880px + 2 * var(--spacing-xl));
   margin: 0 auto;
-  padding: 36px 0 56px;
+  padding: 36px var(--spacing-xl) 56px;
 }
 
-/* ---- Header masthead ------------------------------------- */
+/* ---- Header ---------------------------------------------- */
 .history-head {
   display: flex;
   align-items: flex-end;
@@ -49,30 +48,33 @@
   margin: 20px 0 16px;
 }
 
-/* Filled search field */
+/* Filled search field (DESIGN.md §5.2). The wrapper draws the field ring;
+   the bare input must not add its own halo. */
 .search-container {
-  position: relative;
   flex: 1;
   min-width: 0;
   display: flex;
   align-items: center;
+  gap: 8px;
   height: 32px;
-  padding: 0 10px 0 32px;
+  padding: 0 10px;
   background: var(--n-fill);
   border-radius: var(--n-r-control);
   color: var(--n-text-3);
-  transition: box-shadow var(--dur-fast);
+  transition:
+    background var(--dur-fast),
+    box-shadow var(--dur-fast);
 }
 
 .search-container:focus-within {
+  background: var(--n-card);
   box-shadow: var(--n-focus-ring-field);
 }
 
 .search-icon {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
+  flex: none;
+  width: 15px;
+  height: 15px;
   color: var(--n-text-3);
   pointer-events: none;
 }
@@ -80,6 +82,7 @@
 .search-input {
   flex: 1;
   min-width: 0;
+  height: 100%;
   border: 0;
   outline: 0;
   background: transparent;
@@ -87,6 +90,10 @@
   font-size: 13px;
   color: var(--n-text-1);
   padding: 0;
+}
+
+.search-input:focus-visible {
+  box-shadow: none;
 }
 
 .search-input::placeholder {
@@ -116,7 +123,7 @@
   font-size: 13px;
   font-weight: 400;
   color: var(--n-text-2);
-  border-radius: 2px;
+  border-radius: var(--n-r-key);
   cursor: pointer;
   transition:
     background var(--dur-fast),
@@ -124,13 +131,19 @@
 }
 
 .time-range-btn.active {
-  background: var(--n-page);
+  background: var(--n-card);
   color: var(--n-text-1);
   font-weight: 500;
-  box-shadow: var(--n-raised-shadow);
+  box-shadow: var(--n-thumb-shadow);
 }
 
-/* Clear-all (secondary button look) */
+/* The thumb's shadow outranks the global :focus-visible ring, so put the
+   keyboard ring back over it on the selected segment. */
+.time-range-btn.active:focus-visible {
+  box-shadow: var(--n-focus-ring), var(--n-thumb-shadow);
+}
+
+/* Clear All History (secondary button look) */
 .btn-clear-all {
   height: 32px;
   flex: none;
@@ -153,6 +166,12 @@
   background: var(--n-fill-2);
 }
 
+/* Shown and hidden from script with the hidden attribute. */
+.btn-clear-all[hidden],
+.heatmap-tooltip[hidden] {
+  display: none;
+}
+
 /* ---- Panel (shared grey card) --------------------------- */
 .panel {
   background: var(--n-grouped);
@@ -168,19 +187,18 @@
   margin-bottom: 14px;
 }
 
-.panel-title {
+.panel-title,
+.heatmap-summary {
   font-size: 13px;
   font-weight: 600;
   color: var(--n-text-1);
+}
+
+.panel-title {
   white-space: nowrap;
 }
 
-.panel-head .panel-meta {
-  font-size: 11px;
-  color: var(--n-text-3);
-}
-
-/* ---- Activity map (heatmap) ----------------------------- */
+/* ---- Activity map --------------------------------------- */
 .panel-heat {
   margin-bottom: 16px;
   /* Positioning context for the absolutely-placed tooltip whose
@@ -196,22 +214,85 @@
   margin-bottom: 14px;
 }
 
-.heatmap-summary {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--n-text-1);
-}
-
+/* Drawn at its natural size (11 px cells, 3 px gaps); scrolls sideways only
+   when the column is narrower than the map. */
 .heatmap-scroll-area {
-  position: relative;
   overflow-x: auto;
-  overflow-y: visible;
 }
 
-.heatmap-scroll-area svg {
-  display: block;
-  width: 100%;
-  height: auto;
+.heatmap-chart {
+  width: max-content;
+}
+
+/* Month labels: one 11 px slot per week column after the 30 px day-label
+   column. A label sits over its month's first full week and overflows right. */
+.heatmap-months {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 11px;
+  column-gap: 3px;
+  height: 14px;
+  margin-left: 30px;
+  font-size: 11px;
+  line-height: 14px;
+  color: var(--n-text-3);
+  white-space: nowrap;
+}
+
+.heatmap-body {
+  display: flex;
+  margin-top: 4px;
+}
+
+.heatmap-days {
+  flex: none;
+  width: 30px;
+  display: grid;
+  grid-template-rows: repeat(7, 11px);
+  row-gap: 3px;
+  font-size: 11px;
+  line-height: 11px;
+  color: var(--n-text-3);
+}
+
+.heatmap-cells {
+  display: grid;
+  grid-template-rows: repeat(7, 11px);
+  grid-auto-flow: column;
+  grid-auto-columns: 11px;
+  gap: 3px;
+}
+
+.heatmap-cell {
+  border-radius: var(--n-r-icon);
+}
+
+/* The hovered day (the one the tooltip describes): a white gap, then a ring. */
+.heatmap-cell:hover {
+  box-shadow:
+    0 0 0 1.5px var(--n-card),
+    0 0 0 3px var(--n-text-1);
+}
+
+/* Activity steps — the --n-data ramp, for cells and legend swatches. */
+.heat-0 {
+  background: var(--n-data-0);
+}
+
+.heat-1 {
+  background: var(--n-data-1);
+}
+
+.heat-2 {
+  background: var(--n-data-2);
+}
+
+.heat-3 {
+  background: var(--n-data-3);
+}
+
+.heat-4 {
+  background: var(--n-data-4);
 }
 
 .heatmap-legend {
@@ -224,37 +305,46 @@
   color: var(--n-text-3);
 }
 
-.heatmap-legend-label {
-  color: var(--n-text-3);
+.heatmap-legend-label:first-child {
+  margin-right: 4px;
+}
+
+.heatmap-legend-label:last-child {
+  margin-left: 4px;
 }
 
 .heatmap-legend-cell {
   width: 10px;
   height: 10px;
-  border-radius: 2px;
+  border-radius: var(--n-r-key);
 }
 
-/* Heatmap tooltip */
+/* Day tooltip — a small popover in the menu material (solid when the OS
+   asks to reduce transparency, via the tokens). */
 .heatmap-tooltip {
   position: absolute;
+  z-index: var(--z-dropdown);
   transform: translate(-50%, -100%);
-  background: var(--n-text-1);
-  color: var(--n-page);
-  padding: 5px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 7px 10px 8px;
   border-radius: var(--n-r-control);
-  font-size: 11px;
+  background: var(--n-menu-bg);
+  backdrop-filter: var(--n-menu-blur);
+  box-shadow: var(--n-menu-shadow);
+  font-size: 12px;
   white-space: nowrap;
   pointer-events: none;
-  z-index: 10;
-  line-height: 1.5;
 }
 
 .heatmap-tooltip-title {
   font-weight: 600;
+  color: var(--n-text-1);
 }
 
 .heatmap-tooltip-sub {
-  opacity: 0.8;
+  color: var(--n-text-2);
 }
 
 /* ---- Analytics grid (Top sites + Categories) ----------- */
@@ -262,7 +352,6 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--spacing-md);
-  align-items: start;
   margin-bottom: var(--spacing-md);
 }
 
@@ -270,19 +359,21 @@
   min-width: 0;
 }
 
-/* Stat row — favicon/icon | name | value on row 1, bar on row 2 */
 .stat-list {
   display: flex;
   flex-direction: column;
   gap: 9px;
 }
 
+/* Stat row — icon | name | value on one line (as tall as the 16 px icon),
+   the bar 5 px below it. */
 .domain-row,
 .category-row {
   display: grid;
-  grid-template-columns: 16px 1fr auto;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 10px;
+  column-gap: 10px;
+  row-gap: 5px;
 }
 
 .domain-favicon,
@@ -319,8 +410,9 @@
   text-overflow: ellipsis;
 }
 
-.domain-name .domain-suffix {
-  color: var(--n-text-3);
+/* Category ids are lower-case data ("news"); show them in sentence case. */
+.category-name {
+  text-transform: capitalize;
 }
 
 .domain-duration,
@@ -331,34 +423,29 @@
   white-space: nowrap;
 }
 
-.domain-duration .unit,
-.category-duration .unit {
-  color: var(--n-text-3);
-  margin-left: 4px;
-}
-
 .domain-bar-track,
 .category-bar-track {
   grid-column: 1 / -1;
   height: 4px;
-  background: var(--n-separator);
-  border-radius: 2px;
-  overflow: hidden;
   margin-left: 26px;
-  margin-top: 1px;
+  background: var(--n-track);
+  border-radius: var(--n-r-key);
+  overflow: hidden;
 }
 
 .domain-bar-fill,
 .category-bar-fill {
   height: 100%;
   background: var(--n-data-2);
-  border-radius: 2px;
+  border-radius: var(--n-r-key);
   transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ---- History list (date groups + rows) ----------------- */
+/* The first day header sits 28 px below the charts (this margin collapses
+   with the header's own 22 px); later headers sit 22 px below the last row. */
 .history-list {
-  margin-top: 4px;
+  margin-top: 28px;
 }
 
 /* Date group header — "Today · Friday, November 13" */
@@ -366,17 +453,21 @@
   display: flex;
   align-items: baseline;
   gap: 6px;
-  margin: 20px 0 4px;
+  margin: 22px 0 4px;
   padding: 0 12px 8px;
   border-bottom: 1px solid var(--n-separator);
+  font-size: 13px;
+  line-height: 18px;
 }
 
 .date-group-label .day-label {
-  font-size: 13px;
-  line-height: 18px;
   font-weight: 600;
   color: var(--n-text-1);
   text-transform: capitalize;
+}
+
+.date-group-label .day-date {
+  color: var(--n-text-3);
 }
 
 /* History row — table-like with a hover-revealed delete.
@@ -384,9 +475,9 @@
    pill is present: time | favicon | content | badge | duration | delete. */
 .history-entry {
   display: grid;
-  grid-template-columns: 60px 28px 1fr auto auto auto;
+  grid-template-columns: 60px 28px minmax(0, 1fr) auto auto auto;
   align-items: center;
-  gap: 12px;
+  column-gap: 12px;
   height: 54px;
   padding: 0 8px 0 12px;
   border-radius: var(--n-r-control);
@@ -418,21 +509,25 @@
 .entry-favicon svg {
   width: 16px;
   height: 16px;
-  border-radius: 2px;
   display: block;
 }
 
-.entry-content {
-  min-width: 0;
+.entry-favicon img {
+  border-radius: var(--n-r-control);
 }
 
-.entry-title-row {
+/* Title over domain, 2 px apart. Both truncate with an ellipsis. */
+.entry-content {
+  min-width: 0;
   display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
+  flex-direction: column;
+  gap: 2px;
 }
 
 .entry-title {
+  /* Only as wide as its text (the click target), never wider than the column. */
+  align-self: flex-start;
+  max-width: 100%;
   font-size: 13px;
   color: var(--n-text-1);
   font-weight: 500;
@@ -447,10 +542,8 @@
 }
 
 .entry-domain {
-  display: block;
   font-size: 12px;
   color: var(--n-text-3);
-  margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -468,7 +561,6 @@
   color: var(--n-text-2);
   background: var(--n-fill);
   border-radius: var(--n-r-badge);
-  flex-shrink: 0;
   white-space: nowrap;
   text-transform: capitalize;
 }
@@ -480,42 +572,45 @@
   flex-shrink: 0;
 }
 
-/* Duration pill — single filled pill with a vertical partition.
-   Active (left) uses primary text; total (right) is muted. */
+/* Duration pill — active (primary text) | total (muted), split by a
+   12 px --n-tab-divider (DESIGN.md §3.2), which steps up under
+   prefers-contrast like every other hairline. */
 .entry-duration {
   display: inline-flex;
   align-items: center;
   height: 22px;
   background: var(--n-fill);
   border-radius: var(--n-r-badge);
-  overflow: hidden;
-  flex-shrink: 0;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
-}
-
-.entry-active-dur,
-.entry-total-dur {
-  display: inline-flex;
-  align-items: center;
+  white-space: nowrap;
 }
 
 .entry-active-dur {
   color: var(--n-text-1);
   padding: 0 7px 0 8px;
-  border-right: 1px solid var(--n-scrim);
 }
 
 .entry-total-dur {
+  display: inline-flex;
+  align-items: center;
   color: var(--n-text-3);
-  padding: 0 8px 0 7px;
+  padding-right: 8px;
 }
 
-/* Hover-reveal delete button */
+.entry-total-dur::before {
+  content: '';
+  width: 1px;
+  height: 12px;
+  margin-right: 7px;
+  background: var(--n-tab-divider);
+}
+
+/* Hover-reveal delete button (also shown while it has keyboard focus) */
 .entry-delete-btn {
   width: 26px;
   height: 26px;
-  border-radius: var(--n-r-control);
+  border-radius: var(--n-r-icon);
   border: 0;
   background: transparent;
   color: var(--n-text-3);
@@ -528,7 +623,8 @@
   padding: 0;
 }
 
-.history-entry:hover .entry-delete-btn {
+.history-entry:hover .entry-delete-btn,
+.entry-delete-btn:focus-visible {
   opacity: 1;
 }
 
@@ -545,7 +641,8 @@
   font-size: 12px;
 }
 
-.no-history i {
+/* createIcons() swaps the <i> for an <svg>, so style the svg. */
+.no-history svg {
   margin-bottom: 12px;
   opacity: 0.4;
 }
@@ -565,8 +662,25 @@
   margin-top: 28px;
 }
 
-/* Honour reduced-motion for the bar growth animation. */
+/* The page ends 56 px below the last row (DESIGN.md §4.2): the footer
+   placeholder adds nothing while it's empty, and the sentinel keeps the 1 px
+   box the observer needs without taking up layout space. */
+.history-footer:empty {
+  margin-top: 0;
+}
+
+.scroll-sentinel {
+  height: 1px;
+  margin-bottom: -1px;
+}
+
+/* Honour reduced motion: no hover/focus fades or bar growth. */
 @media (prefers-reduced-motion: reduce) {
+  .search-container,
+  .time-range-btn,
+  .btn-clear-all,
+  .history-entry,
+  .entry-delete-btn,
   .domain-bar-fill,
   .category-bar-fill {
     transition: none;

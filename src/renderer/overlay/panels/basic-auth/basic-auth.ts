@@ -40,14 +40,14 @@ const BASIC_AUTH_HTML = `
           <i data-lucide="triangle-alert" width="14" height="14"></i>
           <span>Your credentials will be sent over an unencrypted connection.</span>
         </div>
-        <label class="basic-auth-label" for="basic-auth-username">Username</label>
-        <input type="text" class="basic-auth-input" id="basic-auth-username" autocomplete="off" />
-        <label class="basic-auth-label" for="basic-auth-password">Password</label>
-        <input type="password" class="basic-auth-input" id="basic-auth-password" autocomplete="off" />
+        <label class="form-label basic-auth-label" for="basic-auth-username">Username</label>
+        <input type="text" class="form-control" id="basic-auth-username" autocomplete="off" />
+        <label class="form-label basic-auth-label" for="basic-auth-password">Password</label>
+        <input type="password" class="form-control" id="basic-auth-password" autocomplete="off" />
       </div>
       <div class="basic-auth-actions">
-        <button class="basic-auth-btn basic-auth-btn-secondary" id="basic-auth-cancel">Cancel</button>
-        <button class="basic-auth-btn basic-auth-btn-primary" id="basic-auth-signin">Sign in</button>
+        <button class="btn btn-sm btn-secondary" id="basic-auth-cancel">Cancel</button>
+        <button class="btn btn-sm btn-primary" id="basic-auth-signin">Sign in</button>
       </div>
     </div>
   </div>

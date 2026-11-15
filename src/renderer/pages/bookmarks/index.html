@@ -11,15 +11,15 @@
   <body>
     <div id="bookmarks-page" class="bookmarks-page">
       <div class="bookmarks-wrapper">
-        <!-- Editorial masthead -->
+        <!-- Large title, no rule -->
         <div class="bookmarks-head">
           <h1 class="bookmarks-title">Bookmarks</h1>
         </div>
 
-        <!-- Toolbar: search + folder seg + danger Clear -->
+        <!-- Toolbar: filled search + folder segmented control + secondary Clear -->
         <div class="bookmarks-toolbar">
           <div class="search-container">
-            <i data-lucide="search" class="search-icon" width="16" height="16"></i>
+            <i data-lucide="search" class="search-icon" width="15" height="15"></i>
             <input
               type="text"
               id="search-input"
@@ -29,27 +29,27 @@
           </div>
           <div class="folder-seg" id="tab-filters" role="tablist">
             <button class="folder-seg-btn active" id="tab-queue" data-tab="queue">
-              <i data-lucide="book-open" width="13" height="13"></i> Reading queue
+              <i data-lucide="book-open" width="14" height="14"></i> Reading queue
               <span class="folder-seg-count" id="queue-count">0</span>
             </button>
             <button class="folder-seg-btn" id="tab-reference" data-tab="reference">
-              <i data-lucide="bookmark" width="13" height="13"></i> Reference
+              <i data-lucide="bookmark" width="14" height="14"></i> Reference
               <span class="folder-seg-count" id="reference-count">0</span>
             </button>
           </div>
-          <button id="delete-all" class="btn-clear-all" style="display: none">
+          <button id="delete-all" class="btn-clear-all d-none">
             <i data-lucide="trash-2" width="14" height="14"></i> Clear All Bookmarks
           </button>
         </div>
 
-        <!-- Cross-folder category chips -->
+        <!-- Category chips (filter the active folder) -->
         <div class="cat-row" id="cat-row">
           <span class="cat-label">Categories</span>
           <div id="category-filters" class="category-filters"></div>
         </div>
 
         <!-- Stale bookmarks alert (reference tab only) -->
-        <div class="stale-gauge" id="stale-bar" style="display: none">
+        <div class="stale-gauge d-none" id="stale-bar">
           <div class="stale-header">
             <span class="stale-label" id="stale-text"></span>
             <button class="stale-review-btn" id="stale-review-btn">Review</button>
@@ -57,7 +57,7 @@
         </div>
 
         <!-- Stale review panel -->
-        <div class="stale-review-panel" id="stale-review" style="display: none">
+        <div class="stale-review-panel d-none" id="stale-review">
           <div class="stale-review-header">
             <span>Dormant bookmarks — keep or let go?</span>
             <button class="stale-review-btn" id="stale-done-btn">Done</button>
@@ -69,7 +69,7 @@
         <div class="bookmarks-folder" id="folder-header">
           <span class="folder-label">
             <span class="folder-icon"
-              ><i id="folder-icon" data-lucide="book-open" width="14" height="14"></i
+              ><i id="folder-icon" data-lucide="book-open" width="15" height="15"></i
             ></span>
             <span id="folder-name">Reading queue</span>
           </span>
@@ -79,7 +79,7 @@
         <!-- Bookmarks list -->
         <div class="bookmarks-container">
           <ul id="bookmarks-list" class="bookmarks-list"></ul>
-          <div id="no-bookmarks" class="no-bookmarks">No bookmarks match your search.</div>
+          <div id="no-bookmarks" class="no-bookmarks d-none">No bookmarks match your search.</div>
         </div>
 
         <!-- Footer placeholder (Clear moved to toolbar) -->

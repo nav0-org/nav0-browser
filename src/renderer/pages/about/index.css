@@ -1,37 +1,34 @@
 @import url('../../styles/global.css');
 
 /* ============================================================
-   About — editorial dashboard, shared page spec (DESIGN.md §4.2).
-   White canvas, a single narrow 680px column. Lightweight 28px
-   title above four grouped sections (Software · System · Integrity
-   · Links). Each section has a header OUTSIDE the grey panel (a
-   small Lucide icon + a label), then a grey panel holding the rows.
-   Hash fields sit in white boxes with a copy button and a "Copied"
-   tooltip; hashes and the application path use mono. Links are
-   3-col rows: icon well · name + URL · external-link arrow.
+   About (DESIGN.md §4.2). Each group is a header outside its
+   grey panel, then the panel's rows.
    ============================================================ */
 
 .about-page {
   min-height: 100vh;
   background: var(--n-page);
-  color: var(--n-text-2);
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: var(--n-text-1);
+  /* The body's 1.5 would loosen every row; the title and group headers set
+     their own line heights. */
+  line-height: normal;
 
-  /* Local mono stack — only used for inherently code-like content
-     (SHA-256 hashes and the application path). */
+  /* Mono stack (DESIGN.md §3.7) — only for code-like content: the
+     checksums and the application path. */
   --about-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
 }
 
+/* A 680 px column; the side padding is added to the max-width so it only
+   shows as a gutter on narrow windows. */
 .about-wrapper {
-  max-width: 680px;
+  max-width: calc(680px + 2 * var(--spacing-md));
   margin: 0 auto;
   padding: 40px var(--spacing-md) 56px;
   display: flex;
   flex-direction: column;
 }
 
-/* ---- Masthead ------------------------------------------- */
+/* ---- Title ---------------------------------------------- */
 .about-head {
   display: flex;
 }
@@ -45,12 +42,7 @@
   margin: 0;
 }
 
-/* ---- Group ---------------------------------------------- */
-.group {
-  margin-bottom: 0;
-}
-
-/* Header sits OUTSIDE the grey panel: a small icon + a label. */
+/* ---- Group header (outside the panel) ------------------- */
 .group-head {
   display: flex;
   align-items: center;
@@ -60,23 +52,19 @@
   color: var(--n-text-2);
 }
 
-/* The first group tightens the gap below the title. */
-.group:first-of-type .group-head {
+/* The first group sits closer to the title. */
+.about-head + .group .group-head {
   margin-top: 22px;
 }
 
+/* The icon keeps the 14 px size set on its <i>. */
 .group-icon {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
+  flex: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--n-text-2);
-}
-
-.group-icon svg {
-  width: 16px;
-  height: 16px;
 }
 
 .group-title {
@@ -84,21 +72,23 @@
   line-height: 18px;
   font-weight: 600;
   color: var(--n-text-1);
-  letter-spacing: normal;
-  text-transform: none;
 }
 
-/* ---- Grey panel ----------------------------------------- */
+/* ---- Grey panel ------------------------------------------
+   The header shares .group with the rows, so the rows paint the panel:
+   the first row after the header rounds the top corners, the group's last
+   row the bottom ones. A checksum row can be hidden (value unavailable),
+   so the first VISIBLE checksum row takes the top corners. */
 .group > .kv-row,
 .group > .hash-row,
 .group > .link-row {
   background: var(--n-grouped);
+  position: relative;
 }
 
-/* Round the shared panel's outer corners. */
-.group > .kv-row:first-of-type,
-.group > .hash-row:first-of-type,
-.group > .link-row:first-of-type {
+.group-head + .kv-row,
+.group-head + .link-row,
+.group-head ~ .hash-row:not(.hash-row:not([hidden]) ~ .hash-row) {
   border-top-left-radius: var(--n-r-panel);
   border-top-right-radius: var(--n-r-panel);
 }
@@ -110,6 +100,25 @@
   border-bottom-right-radius: var(--n-r-panel);
 }
 
+/* Hairline between rows, inset on the left (past the icon well under links).
+   It takes the top pixel of the row below, so that row's top padding grows by
+   1 px to keep the line outside the row's own height. */
+.kv-row + .kv-row::before,
+.hash-row:not([hidden]) ~ .hash-row::before,
+.link-row + .link-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--spacing-md);
+  right: 0;
+  height: 1px;
+  background: var(--n-panel-line);
+}
+
+.link-row + .link-row::before {
+  left: 56px;
+}
+
 /* ---- Key / value rows ----------------------------------- */
 .kv-row {
   display: grid;
@@ -117,133 +126,118 @@
   gap: var(--spacing-md);
   align-items: center;
   padding: 11px var(--spacing-md);
-  position: relative;
 }
 
-/* Inset hairline divider between rows. */
-.kv-row + .kv-row::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: var(--spacing-md);
-  right: 0;
-  height: 1px;
-  background: var(--n-panel-line);
+.kv-row + .kv-row {
+  padding-top: calc(11px + 1px);
 }
 
 .kv-row .k {
   font-size: 13px;
-  color: var(--n-text-2);
+  color: var(--n-text-1);
 }
 
 .kv-row .v {
-  font-size: 13px;
-  color: var(--n-text-1);
-  font-variant-numeric: tabular-nums;
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-sm);
+  font-size: 13px;
+  color: var(--n-text-2);
+  font-variant-numeric: tabular-nums;
 }
 
+/* Build badge: the global state badge (.badge-success / .badge-warning).
+   The build type arrives lowercase ("release" / "dev"). */
 .kv-row .v .badge {
-  display: inline-flex;
-  align-items: center;
-  height: 20px;
-  padding: 0 7px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: normal;
   text-transform: capitalize;
-  color: var(--n-success);
-  background: var(--n-success-soft);
-  border: 0;
-  border-radius: var(--n-r-badge);
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-.kv-row .v .badge.dev {
-  color: var(--n-warning);
-  background: var(--n-warning-soft);
-}
-
-/* ---- Hash rows ------------------------------------------ */
+/* ---- Checksum / path rows ------------------------------- */
 .hash-row {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
   padding: 12px var(--spacing-md) 14px;
-  position: relative;
 }
 
-.hash-row + .hash-row::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: var(--spacing-md);
-  right: 0;
-  height: 1px;
-  background: var(--n-panel-line);
+.hash-row:not([hidden]) ~ .hash-row {
+  padding-top: calc(12px + 1px);
 }
 
+.hash-row[hidden] {
+  display: none;
+}
+
+/* Flex drops the space before "SHA-256", leaving only its 6 px margin. */
 .hash-row .k {
+  display: flex;
+  align-items: baseline;
   font-size: 13px;
   color: var(--n-text-1);
 }
 
 .hash-row .k .hash-algo {
-  color: var(--n-text-3);
-  font-size: 12px;
   margin-left: 6px;
+  font-size: 12px;
+  color: var(--n-text-3);
 }
 
-/* White box holding the hash / path in mono. */
+/* White read-only field: a lighter 0.5 px edge with no drop shadow, so it
+   doesn't read as an editable input (DESIGN.md §3.8). */
 .hash {
-  font-family: var(--about-mono);
-  font-size: 11.5px;
-  color: var(--n-text-1);
-  background: var(--n-card);
-  box-shadow: var(--n-raised-shadow);
-  border-radius: var(--n-r-control);
-  height: 32px;
-  padding: 0 4px 0 10px;
-  word-break: break-all;
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
+  height: 32px;
+  padding: 0 4px 0 10px;
+  background: var(--n-card);
+  border-radius: var(--n-r-control);
+  box-shadow: var(--n-readonly-field-shadow);
 }
 
-.hash.muted {
-  color: var(--n-text-3);
-  font-style: italic;
-}
-
+/* The mono stack has to sit on the text element itself: global.css gives
+   every element the sans stack through `*`, so it isn't inherited. */
 .hash .hash-value {
   flex: 1;
   min-width: 0;
+  font-family: var(--about-mono);
+  font-size: 11.5px;
+  color: var(--n-text-2);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Copy button + its "Copied" tooltip. */
+/* "not packaged (dev mode)" is a message, not code: secondary text in the
+   sans stack, like a placeholder. */
+.hash.muted .hash-value {
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--n-text-3);
+}
+
+/* Copy button + its "Copied" status bubble. */
 .hash .copy-btn {
   position: relative;
-  flex-shrink: 0;
+  flex: none;
   width: 26px;
   height: 26px;
   border: 0;
-  background: transparent;
-  color: var(--n-text-2);
-  cursor: pointer;
   padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  background: transparent;
+  color: var(--n-text-2);
   border-radius: var(--n-r-icon);
+  cursor: pointer;
   transition:
     background var(--dur-fast),
     color var(--dur-fast);
+}
+
+.hash .copy-btn[hidden] {
+  display: none;
 }
 
 .hash .copy-btn:hover {
@@ -256,18 +250,18 @@
   color: var(--n-success);
 }
 
+/* Status bubble (DESIGN.md §5.3): --n-on-accent text on an --n-text-1 fill;
+   its top 30 px above the button's, right-aligned with it. */
 .hash .copy-btn.copied::after {
   content: 'Copied';
   position: absolute;
+  top: -30px;
   right: 0;
-  bottom: calc(100% + 4px);
   padding: 4px 8px;
   border-radius: var(--n-r-control);
   background: var(--n-text-1);
-  color: #fff;
+  color: var(--n-on-accent);
   font-size: 11px;
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   white-space: nowrap;
   pointer-events: none;
 }
@@ -279,34 +273,44 @@
   gap: 12px;
   align-items: center;
   padding: 10px 14px 10px var(--spacing-md);
-  cursor: pointer;
-  transition: background var(--dur-fast);
+  /* Own stacking context, so the hover layer below can sit between the
+     panel grey and the row's content. */
+  isolation: isolate;
   color: inherit;
   text-decoration: none;
-  position: relative;
+  cursor: pointer;
 }
 
-/* Divider inset past the icon well. */
-.link-row + .link-row::before {
+.link-row + .link-row {
+  padding-top: calc(10px + 1px);
+}
+
+/* Hover: --n-hover is translucent, so it is laid OVER the panel grey (as a
+   row background it would show the white page through). Full width with no
+   radius of its own: it follows the panel's corners on the first and last
+   rows, and leaves the hairline above the row on the plain panel. */
+.link-row::after {
   content: '';
   position: absolute;
-  top: 0;
-  left: 56px;
-  right: 0;
-  height: 1px;
-  background: var(--n-panel-line);
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--n-hover);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-fast);
+}
+
+.link-row + .link-row::after {
+  top: 1px;
 }
 
 .link-row:hover {
-  background: var(--n-hover);
-  border-radius: var(--n-r-control);
   text-decoration: none;
 }
 
-/* Hide the divider adjacent to a hovered row so the highlight reads clean. */
-.link-row:hover + .link-row::before,
-.link-row:hover::before {
-  background: transparent;
+.link-row:hover::after {
+  opacity: 1;
 }
 
 .link-row .link-icon {
@@ -330,15 +334,30 @@
 }
 
 .link-row .link-url {
+  margin-top: 1px;
   font-size: 12px;
   color: var(--n-text-3);
-  margin-top: 1px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .link-row .link-arrow {
-  color: var(--n-text-3);
   display: inline-flex;
+  color: var(--n-text-3);
+}
+
+/* ---- Accessibility preferences -------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .hash .copy-btn,
+  .link-row::after {
+    transition: none;
+  }
+}
+
+/* A firmer field edge when the OS asks for more contrast. */
+@media (prefers-contrast: more) {
+  .hash {
+    box-shadow: 0 0 0 1px var(--n-control-edge);
+  }
 }

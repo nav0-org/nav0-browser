@@ -124,11 +124,14 @@
             autocomplete="off"
             spellcheck="false"
           />
+          <!-- Display-only copy of the URL, drawn over the input while it
+               isn't focused (domain emphasis). Filled by browser-manager.ts. -->
+          <div class="url-display" id="url-display" aria-hidden="true"></div>
           <button
             id="reader-mode-button"
             title="Reader Mode"
             class="btn-icon btn-ghost rounded-circle p-0 reader-mode-btn"
-            style="display: none"
+            hidden
           >
             <i data-lucide="book-open-text" width="16" height="16"></i>
           </button>
@@ -136,7 +139,7 @@
             id="pdf-download-button"
             title="Download PDF"
             class="btn-icon btn-ghost rounded-circle p-0"
-            style="display: none"
+            hidden
           >
             <i data-lucide="file-down" width="16" height="16"></i>
           </button>
@@ -144,6 +147,7 @@
             id="bookmark-button"
             title="Bookmark this page"
             class="btn-icon btn-ghost rounded-circle p-0"
+            hidden
           >
             <i data-lucide="bookmark" width="16" height="16"></i>
           </button>
@@ -151,6 +155,7 @@
             id="unbookmark-button"
             title="Add to reading list"
             class="btn-icon btn-ghost rounded-circle p-0"
+            hidden
           >
             <i data-lucide="bookmark-check" width="16" height="16"></i>
           </button>
@@ -158,6 +163,7 @@
             id="readinglist-button"
             title="Remove from reading list"
             class="btn-icon btn-ghost rounded-circle p-0"
+            hidden
           >
             <i data-lucide="book-open-check" width="16" height="16"></i>
           </button>
@@ -229,7 +235,9 @@
             <span class="perm-label" id="perm-label"></span>
           </div>
           <div class="permission-strip-actions">
-            <button id="perm-allow-once" class="perm-btn perm-btn-allow">Allow Once</button>
+            <button id="perm-allow-once" class="perm-btn perm-btn-allow btn-primary">
+              Allow Once
+            </button>
             <button id="perm-always-allow" class="perm-btn perm-btn-always-allow">
               Always Allow
             </button>

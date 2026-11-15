@@ -29,7 +29,7 @@
 8. **Seven type sizes, four weights.** 11 / 12 / 13 / 14 / 17 / 22 / 28 px; weights 400 / 500 / 600 / 700. Page titles are 28 px bold. No weight 200 or 300.
 9. **Focus rings are for the keyboard only.** Use `:focus-visible` with `--n-focus-ring`. Never show an outline on mouse click, and never a black outline.
 10. **No inline styles in HTML or TS.** Define a class in the page's CSS.
-11. **Icons are Lucide** (the version pinned in `package.json`) at the default 2 px stroke: 18 px in the toolbar, 16 px in fields, menus and buttons, 14 px inline.
+11. **Icons are Lucide** (the version pinned in `package.json`) at the default 2 px stroke: 18 px in the toolbar, 16 px in menus, lists on a white page and the address field, 14 px in text buttons. §6 gives the size for every other place (search fields, the Settings sidebar, chips, badges).
 12. **Mono is for code only:** error codes, hashes, file paths, the user-agent string, and key combos inside prose.
 13. **Nothing animates forever.** Only the tab loader and download progress move. Respect `prefers-reduced-motion`.
 14. **Categories are named, not coloured.** An icon and a label on a neutral badge. Colour hues appear only in the storage bar, with a legend.
@@ -57,28 +57,28 @@ The `--nav0-red-*`, `--nav0-blue-*` and `--nav0-slate-*` ramps stay in `global.c
 
 ### 3.2 Surfaces and lines
 
-| Token              | Value               | Use                                                                                    |
-| ------------------ | ------------------- | -------------------------------------------------------------------------------------- |
-| `--n-page`         | `#ffffff`           | Built-in page canvas (every page)                                                      |
-| `--n-grouped`      | `#f5f5f7`           | Grey panels on a page (settings groups, history charts, storage), the Settings sidebar |
-| `--n-card`         | `#ffffff`           | Fields and buttons inside grey panels; the address field                               |
-| `--n-strip`        | `#e6e6e9`           | Tab strip, behind inactive tabs                                                        |
-| `--n-toolbar`      | `#f6f6f7`           | Toolbar, the active tab and the find bar — one connected surface                       |
-| `--n-chrome-line`  | `#d1d1d6`           | Under the tab strip (except under the active tab) and under the toolbar                |
-| `--n-separator`    | `#e5e5ea`           | Row dividers on white, inset 16 px                                                     |
-| `--n-panel-line`   | `rgba(0,0,0,0.07)`  | Row dividers inside grey panels                                                        |
-| `--n-fill`         | `rgba(0,0,0,0.05)`  | Search fields on a page, secondary buttons, chips and badges at rest                   |
-| `--n-fill-2`       | `rgba(0,0,0,0.07)`  | Segmented-control track, keycaps, pressed toolbar button                               |
-| `--n-hover`        | `rgba(0,0,0,0.04)`  | Row hover                                                                              |
-| `--n-tab-hover`    | `rgba(0,0,0,0.045)` | Inactive tab hover                                                                     |
-| `--n-tab-divider`  | `rgba(0,0,0,0.14)`  | 16 px divider between inactive tabs                                                    |
-| `--n-control-edge` | `#8e8e93`           | Edge of an off switch, checkbox or radio (3.3:1 on white)                              |
-| `--n-track`        | `#e5e5ea`           | Off switch track                                                                       |
-| `--n-scrim`        | `rgba(0,0,0,0.12)`  | Behind ⌘K, ⌘O and dialogs                                                              |
-| `--n-well`         | `#f2f2f4`           | Icon and favicon wells on a white page (use `--n-card` for wells inside grey panels)   |
-| `--n-menu-line`    | `rgba(0,0,0,0.09)`  | Separators inside menus                                                                |
-| `--n-ring-track`   | `rgba(0,0,0,0.12)`  | Track of the tab loader and the download ring                                          |
-| `--n-menu-solid`   | `#f8f8fa`           | Menu background when the OS asks to reduce transparency                                |
+| Token              | Value               | Use                                                                                          |
+| ------------------ | ------------------- | -------------------------------------------------------------------------------------------- |
+| `--n-page`         | `#ffffff`           | Built-in page canvas (every page)                                                            |
+| `--n-grouped`      | `#f5f5f7`           | Grey panels on a page (settings groups, history charts, storage), the Settings sidebar       |
+| `--n-card`         | `#ffffff`           | Fields and buttons inside grey panels; the address field                                     |
+| `--n-strip`        | `#e6e6e9`           | Tab strip, behind inactive tabs                                                              |
+| `--n-toolbar`      | `#f6f6f7`           | Toolbar, the active tab and the find bar — one connected surface                             |
+| `--n-chrome-line`  | `#d1d1d6`           | Under the tab strip (except under the active tab) and under the toolbar                      |
+| `--n-separator`    | `#e5e5ea`           | Row dividers on white, inset 16 px                                                           |
+| `--n-panel-line`   | `rgba(0,0,0,0.07)`  | Row dividers inside grey panels                                                              |
+| `--n-fill`         | `rgba(0,0,0,0.05)`  | Search fields on a page, secondary buttons, chips and badges at rest                         |
+| `--n-fill-2`       | `rgba(0,0,0,0.07)`  | Segmented-control track, keycaps, pressed toolbar button                                     |
+| `--n-hover`        | `rgba(0,0,0,0.04)`  | Row hover                                                                                    |
+| `--n-tab-hover`    | `rgba(0,0,0,0.045)` | Inactive tab hover                                                                           |
+| `--n-tab-divider`  | `rgba(0,0,0,0.14)`  | Short vertical dividers: 16 px between inactive tabs, 12 px inside the History duration pill |
+| `--n-control-edge` | `#8e8e93`           | Edge of an off switch, checkbox or radio (3.3:1 on white)                                    |
+| `--n-track`        | `#e5e5ea`           | Off switch track                                                                             |
+| `--n-scrim`        | `rgba(0,0,0,0.12)`  | Behind ⌘K, ⌘O and dialogs                                                                    |
+| `--n-well`         | `#f2f2f4`           | Icon and favicon wells on a white page (use `--n-card` for wells inside grey panels)         |
+| `--n-menu-line`    | `rgba(0,0,0,0.09)`  | Separators inside menus, ⌘K, ⌘O and popovers                                                 |
+| `--n-ring-track`   | `rgba(0,0,0,0.12)`  | Track of the tab loader and the download ring                                                |
+| `--n-menu-solid`   | `#f8f8fa`           | Menu background when the OS asks to reduce transparency                                      |
 
 ### 3.3 Text
 
@@ -88,6 +88,8 @@ The `--nav0-red-*`, `--nav0-blue-*` and `--nav0-slate-*` ramps stay in `global.c
 | `--n-text-2` | `#424245` | 10.0:1 on white, 8.0:1 on strip  | Body, inactive tabs, icons                         |
 | `--n-text-3` | `#6e6e73` | 5.1:1 on white                   | Secondary text, meta, placeholders. Never on strip |
 | `--n-text-4` | `#aeaeb2` | —                                | Disabled only                                      |
+
+`--n-on-accent` (`#ffffff`) is the text and icon colour on a filled `--n-accent` or `--n-danger` surface (primary and danger buttons, the checkbox mark, the radio dot; 5.4:1) and on dark `--n-text-1` fills: the status bubble ("Copied" on About) and the attachment remove button in Report an Issue (hover `--n-text-2`). Use it instead of a `#fff` literal.
 
 ### 3.4 Accent, semantic, private, data
 
@@ -112,16 +114,16 @@ The `--nav0-red-*`, `--nav0-blue-*` and `--nav0-slate-*` ramps stay in `global.c
 | `--n-data-0` … `--n-data-4`                    | `#e2e5e9` `#a4afbf` `#8693a6` `#6a788e` `#4f5f76`                                                                                                                                               | Activity map steps; bars use step 2 and always show their value                |
 | `--n-storage-*` (storage bar only, this order) | `--n-storage-images` `#5b9a5f`, `--n-storage-media` `#8a6bbf`, `--n-storage-archives` `#b98a35`, `--n-storage-apps` `#547ebe`, `--n-storage-documents` `#c0744d`, `--n-storage-other` `#8e8e93` | Parts of a whole, always with a legend                                         |
 
-When the OS asks for more contrast (`prefers-contrast: more`), separators step up to `#8e8e93`, control edges to `#6e6e73`, and tertiary text becomes secondary.
+When the OS asks for more contrast (`prefers-contrast: more`), every separator and hairline (`--n-separator`, `--n-chrome-line`, `--n-menu-line`, `--n-panel-line`, `--n-tab-divider`, `--n-private-line`) steps up to `#8e8e93`, control edges (`--n-control-edge`) to `#6e6e73`, and tertiary text becomes secondary. The 0.5 px edges inside the shadow tokens (§3.8) don't change.
 
 ### 3.5 Radii
 
 ```
---n-r-key:     2px;   /* keycaps, checkboxes */
+--n-r-key:     2px;   /* keycaps, checkboxes, segmented-control segments, progress bars */
 --n-r-icon:    3px;   /* icon buttons, the "Private" label */
---n-r-control: 4px;   /* tabs (top corners), address field, buttons, inputs, selects, segmented, list and menu rows, icon wells */
+--n-r-control: 4px;   /* tabs (top corners), address field, buttons, inputs, selects, segmented, list and menu rows, icon wells, ⌘O tab cards, tooltips */
 --n-r-badge:   5px;   /* badges */
---n-r-panel:   6px;   /* grey panels, menus, cards, popovers */
+--n-r-panel:   6px;   /* grey panels (.card), menus, popovers, the screen-share picker's source cards */
 --n-r-chip:    7px;   /* filter chips */
 --n-r-dialog:  8px;   /* dialogs, ⌘K palette, ⌘O switcher */
 --n-r-full:  999px;   /* switches, radios, dots, rings */
@@ -137,16 +139,16 @@ Font stack (unchanged): `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
 
 Mono: `ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace`. Reader mode keeps its Georgia serif for article text.
 
-| Role        | Size / line height           | Weight           | Use                                                |
-| ----------- | ---------------------------- | ---------------- | -------------------------------------------------- |
-| Large title | 28 / 34                      | 700, −0.02em     | Page titles (History, Settings sections, About)    |
-| Title       | 22 / 28                      | 700              | Interstitial headings                              |
-| Headline    | 17 / 22                      | 600              | Dialog titles                                      |
-| Address     | 14 / 20                      | 400 (domain 600) | The address field                                  |
-| Body        | 13 / 18                      | 400 / 500        | Default UI text; 500 for row titles, tabs, buttons |
-| Callout     | 12 / 16                      | 400 / 600        | Secondary lines, meta, group labels (600)          |
-| Footnote    | 11 / 14                      | 400 / 600        | Badges, keycaps, tiny labels                       |
-| Mono        | 12 / 16 (11.5 in tight rows) | 400              | Codes, hashes, paths, UA string                    |
+| Role        | Size / line height           | Weight           | Use                                                                                                                 |
+| ----------- | ---------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Large title | 28 / 34                      | 700, −0.02em     | Page titles (History, Settings sections, About)                                                                     |
+| Title       | 22 / 28                      | 700              | Interstitial headings                                                                                               |
+| Headline    | 17 / 22                      | 600              | Dialog titles                                                                                                       |
+| Address     | 14 / 20                      | 400 (domain 600) | The address field                                                                                                   |
+| Body        | 13 / 18                      | 400 / 500 / 600  | Default UI text; 500 for row titles, buttons and the chosen chip or segment; 600 for group and day headers          |
+| Callout     | 12 / 16                      | 400 / 500 / 600  | Secondary lines and meta (400); tab titles and field labels (500); a label over a group, such as "Categories" (600) |
+| Footnote    | 11 / 14                      | 400 / 500 / 600  | Tiny labels (400); keycaps (500); small badges, state badges and ⌘K group labels (600)                              |
+| Mono        | 12 / 16 (11.5 in tight rows) | 400              | Codes, hashes, paths, UA string                                                                                     |
 
 Use tabular numerals (`font-variant-numeric: tabular-nums`) for times, sizes, counts and versions.
 
@@ -156,13 +158,25 @@ Use tabular numerals (`font-variant-numeric: tabular-nums`) for times, sizes, co
 --n-menu-bg:      rgba(248, 248, 250, 0.88);
 --n-menu-blur:    blur(30px) saturate(1.8);          /* backdrop-filter for menus, popovers, ⌘K, ⌘O, dialogs */
 --n-menu-shadow:  0 0 0 0.5px rgba(0,0,0,0.14), 0 24px 60px rgba(0,0,0,0.20), 0 4px 12px rgba(0,0,0,0.08);
---n-field-shadow: 0 0 0 0.5px rgba(0,0,0,0.18), 0 1px 1px rgba(0,0,0,0.04);   /* address field, white inputs */
+--n-field-shadow: 0 0 0 0.5px rgba(0,0,0,0.18), 0 1px 1px rgba(0,0,0,0.04);   /* white fields in the chrome: address field, find field */
+--n-sidebar-field-shadow: 0 0 0 0.5px rgba(0,0,0,0.14);                       /* the white search field on the grey Settings sidebar */
+--n-input-shadow: 0 0 0 0.5px rgba(0,0,0,0.16), inset 0 1px 1px rgba(0,0,0,0.04); /* white text inputs in grey panels and dialogs */
+--n-select-shadow: 0 0 0 0.5px rgba(0,0,0,0.16), 0 1px 2px rgba(0,0,0,0.06);  /* selects (pop-up buttons) */
+--n-readonly-field-shadow: 0 0 0 0.5px rgba(0,0,0,0.12);                      /* read-only value fields (About checksums) */
 --n-raised-shadow: 0 0 0 0.5px rgba(0,0,0,0.18), 0 1px 1px rgba(0,0,0,0.05);  /* white buttons on grey panels */
+--n-card-shadow:  0 0 0 0.5px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.04);   /* cards on a frosted surface (⌘O tab cards) */
+--n-thumb-shadow: 0 0 0 0.5px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.10);   /* the chosen segment of a segmented control */
+--n-knob-shadow:  0 1px 2px rgba(0,0,0,0.30);                                   /* switch knob, on */
+--n-knob-shadow-off: 0 0 0 0.5px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.25); /* switch knob, off */
 --n-focus-ring:   0 0 0 3px var(--n-focus);                                     /* buttons, rows, chips */
 --n-focus-ring-field: 0 0 0 1px var(--n-accent), 0 0 0 4px var(--n-focus);     /* text fields */
 --n-focus-danger: rgba(215, 0, 21, 0.18);                                       /* danger focus halo */
 --n-focus-ring-field-danger: 0 0 0 1px var(--n-danger), 0 0 0 4px var(--n-focus-danger); /* invalid field (find: no matches / invalid regex) */
+--shadow-sm:      0 1px 2px rgba(0,0,0,0.06);                                   /* generic: the .shadow-sm utility */
+--shadow-md:      0 2px 8px rgba(0,0,0,0.06);                                   /* generic: the .shadow utility, the notification toast */
 ```
+
+Shadows come only from these tokens. Each `--n-*` one belongs to a kind of control, so pick by role, not by look; a control that needs a new elevation gets a token here (and in `global.css`) first. `--shadow-sm` and `--shadow-md` are older generic shadows kept for the `.shadow-sm` and `.shadow` utilities (`.shadow-lg` is `--n-menu-shadow`) and the notification toast in `notification.css`. No redesigned control uses them; don't reach for them in new work.
 
 Under `prefers-reduced-transparency: reduce`, menus drop the blur and use `--n-menu-solid`.
 
@@ -206,63 +220,73 @@ Unchanged: `--z-dropdown 100`, `--z-sticky 200`, `--z-modal 1000`, `--z-toast 11
 
 - Canvas `--n-page`. Content column 880 px (new tab, history, bookmarks, downloads) or 680 px (settings, about), centred, 36–40 px top padding, 56 px bottom. The new-tab page is a hero exception: its content is centred lower (≈96 px top) and its search field is a taller filled field (44 px, `--n-r-panel`).
 - Title: Large title (28 / 34, 700). **No masthead rule.**
-- Toolbar under the title: a filled search field (`--n-fill`, `--n-r-control`, 32 px), a segmented control (track `--n-fill-2`, white raised thumb), secondary buttons (`--n-fill`), in that order.
+- Toolbar under the title: a filled search field (`.search-field`: `--n-fill`, `--n-r-control`, 32 px; white with the field ring while focused), a segmented control (track `--n-fill-2`, the chosen segment a white thumb with `--n-thumb-shadow`), secondary buttons (`--n-fill`), in that order, 12 px apart.
 - **Grey panels** (`--n-grouped`, `--n-r-panel`, 18–22 px padding) for charts, summaries and groups. No borders, no shadows.
-- Lists sit directly on white: rows 54 px, hover `--n-hover` with `--n-r-control`; 32 px icon wells (`--n-r-control`, `--n-well`); title 13 px 500; meta 12 px `--n-text-3` (URLs are grey, not link blue); trailing actions appear on hover. Day or group headers are 13 px 600 with the date in `--n-text-3` and a `--n-separator` underneath.
-- Filter chips: 28 px, `--n-r-chip`, `--n-fill` at rest, selection style when chosen, 14 px icons. Badges: 22 px, `--n-r-badge`, `--n-fill`, icon + label, `--n-text-2`.
+- Lists sit directly on white: rows 54 px, hover `--n-hover` with `--n-r-control`; 28 px icon wells (`--n-r-control`, `--n-well`) holding a 16 px icon or favicon; title 13 px 500; meta 12 px `--n-text-3` (URLs are grey, not link blue); trailing actions appear on hover. Day or group headers are 13 px 600 with the date in `--n-text-3` and a `--n-separator` underneath.
+- Filter chips (`.chip`): 28 px, `--n-r-chip`, `--n-fill` at rest, selection style when chosen, 13 px icons. Badges (`.badge`): 22 px, `--n-r-badge`, `--n-fill`, 12 px icon + 12 px label, `--n-text-2`.
 
 ### 4.3 Settings (`src/renderer/pages/browser-settings/`)
 
-- Sidebar 248 px, `--n-grouped`, right border `--n-separator`; search field white with `--n-field-shadow`; items 32 px, `--n-r-control`, 15 px icons; the current section uses the selection style.
+- Sidebar 248 px, `--n-grouped`, right border `--n-separator`; search field 30 px, white with `--n-sidebar-field-shadow` and a 14 px search icon; items 32 px, `--n-r-control`, 15 px icons; the current section uses the selection style.
 - Content: white page, 680 px column. Each group = a header **outside** the panel (13 px 600 title, 12 px `--n-text-3` description, 16 px left inset) + a grey panel.
 - Rows inside panels: 12 px × 16 px padding, label 13 px, description 12 px `--n-text-3`, control on the right. Dividers `--n-panel-line`, inset 16 px (44 px under radio rows).
-- Controls inside panels are white: inputs and selects (`--n-field-shadow`), buttons (`--n-raised-shadow`). Buttons that sit on the white page use the secondary fill.
+- Controls inside panels are white: text inputs (`--n-input-shadow`, 30 px), selects (`--n-select-shadow`, 28 px; 26–30 px to match a row's other controls), buttons (`--n-raised-shadow`, 26–30 px). Buttons that sit on the white page use the secondary fill.
 - "Recommended" is a neutral badge, not red. Permission names are sentence case (no `text-transform: uppercase`).
 
 ### 4.4 Overlays (`src/renderer/overlay/panels/<name>/`)
 
 - Material: `--n-menu-bg` + `backdrop-filter: var(--n-menu-blur)` + `--n-menu-shadow`. Radius `--n-r-panel` for menus and popovers, `--n-r-dialog` for ⌘K, ⌘O and dialogs. ⌘K, ⌘O and dialogs sit on `--n-scrim`.
 - Menu rows 30 px, `--n-r-control`, 6 px panel padding, 16 px icons in `--n-text-2`; hover or keyboard selection = selection style. Shortcuts right-aligned, 12 px `--n-text-3`, as glyphs on macOS (⌘T, ⇧⌘N, ⌥⌘I) and `Ctrl+T` elsewhere. Separators 1 px `--n-menu-line`, 8 px inset.
-- ⌘K: group labels 12 px 600 `--n-text-3`; secondary lines in `--n-text-3` (never link blue); keycap hints stay in the header, small and grey.
-- ⌘O: four columns, cards `--n-r-panel`, two-line titles, neutral window headers (no coloured rules); the active tab of each window is a small grey dot.
-- Inputs inside overlays are white with `--n-field-shadow`.
+- ⌘K: group labels 11 px 600 `--n-text-3`; secondary lines in `--n-text-3` (never link blue); keycap hints stay in the header, small and grey.
+- ⌘O: four columns of white cards (`--n-card`, `--n-r-control`, `--n-card-shadow`; the chosen card takes the selection style and drops the shadow), two-line titles, neutral window headers (no coloured rules); the active tab of each window is a small grey dot.
+- Text inputs inside dialogs are white with `--n-input-shadow` (30 px, a 12 px 500 `--n-text-2` label 5 px above); selects use `--n-select-shadow` and are 28 px (`select.form-control`).
 - Slide-in ~180 ms, gated on `prefers-reduced-motion`. The URL autocomplete is closed before any modal overlay opens (unchanged).
 
 ### 4.5 Dialogs and interstitials
 
 - Dialogs: overlay material, `--n-r-dialog`, 20 px padding, title Headline (17 / 22, 600); actions right-aligned: Cancel (secondary) then the primary action. A destructive confirm uses the danger button — the only place red fills a surface.
+- Page dialogs (`alert`, `confirm`, `prompt`) have no Headline: the "… says" line naming the page's origin is 13 px 600 `--n-text-1`, the message (13 / 19 px `--n-text-2`) sits 6 px under it; a prompt's field (`.form-control`) sits 12 px under the message; the actions come 16 px after the last of these.
 - Network error and certificate warning pages are **light** like every other page: an icon well, a small mono code line, a 22 px heading, plain-language text, a numbered "Try this" list (not radio circles), and one primary action. The certificate warning uses a red title and icon; "Proceed (unsafe)" is a red text link behind "Advanced".
 
 ---
 
 ## 5. Component patterns
 
-All of these live in `global.css` — **reuse them.** Fork a class into page-local CSS only when the design genuinely diverges.
+Every class named below lives in `global.css` — **reuse it.** Fork a class into page-local CSS only when the design genuinely diverges. The switch, checkbox, radio and segmented control have no shared class yet: build them from the tokens and the exact values given here.
 
-### 5.1 Buttons (32 px on pages, 28–30 px in panels and dialogs; `--n-r-control`; 13 px 500)
+### 5.1 Buttons (32 px on pages, 26–30 px in panels and dialogs; `--n-r-control`; 13 px 500)
 
-| Class            | Look                                                      | Use                                             |
-| ---------------- | --------------------------------------------------------- | ----------------------------------------------- |
-| `.btn-primary`   | `--n-accent` fill, white text                             | One per view                                    |
-| `.btn-secondary` | `--n-fill`, `--n-text-1`                                  | Default action on a white page; Cancel          |
-| `.btn-raised`    | White, `--n-raised-shadow`                                | Actions inside grey panels                      |
-| `.btn-ghost`     | Transparent, hover `--n-fill`                             | Reset and other tertiary actions                |
-| `.btn-danger`    | `--n-danger` fill, white text                             | Only the confirm button of a destructive action |
-| `.btn-icon`      | 32 × 32 (toolbar) or 28 × 28 (fields, bars), `--n-r-icon` | Icon-only; always `aria-label` + `title`        |
+`.btn` is the base: 32 px tall, `0 14px` padding, no border, 13 px 500. A Lucide icon is 14 px and sits 6 px from the label (the flex `gap`, never an icon margin). `.btn-sm` makes it 28 px for panels and dialogs; set other heights (26 or 30 px) on the page.
+
+| Class            | Look                                                                           | Use                                             |
+| ---------------- | ------------------------------------------------------------------------------ | ----------------------------------------------- |
+| `.btn-primary`   | `--n-accent` fill, `--n-on-accent` text; hover `--n-accent-hover`              | One per view                                    |
+| `.btn-secondary` | `--n-fill`, `--n-text-1`; hover `--n-fill-2`                                   | Default action on a white page; Cancel          |
+| `.btn-raised`    | White, `--n-raised-shadow` (kept under the focus ring)                         | Actions inside grey panels                      |
+| `.btn-ghost`     | Transparent, `--n-text-2`; hover `--n-fill`                                    | Reset and other tertiary actions                |
+| `.btn-danger`    | `--n-danger` fill, `--n-on-accent` text                                        | Only the confirm button of a destructive action |
+| `.btn-icon`      | 32 × 32 (toolbar) or 28 × 28 (fields, bars), `--n-r-icon`, no border or margin | Icon-only; always `aria-label` + `title`        |
+
+Pair `.btn-icon` with `.btn-ghost` for its hover fill; the container sets the spacing between icon buttons (2 px in the toolbar).
 
 ### 5.2 Form controls
 
-- Text inputs and selects: white, `--n-field-shadow`, `--n-r-control`, 28–32 px, 13 px; focus `--n-focus-ring-field`. Search fields on a page are filled (`--n-fill`) instead.
-- Switch: 38 × 22 (32 × 19 in dense lists); on = `--n-accent`; off = `--n-track` with an inset 1 px `--n-control-edge`. White knob.
-- Checkbox 16 px, `--n-r-key`; radio 16 px round. On = `--n-accent` with a white mark; off = white with `--n-control-edge`.
-- Segmented control: track `--n-fill-2`, 2 px padding, the chosen segment is a white raised thumb (no colour).
+- **Text input** (`.form-control`): white, `--n-input-shadow`, `--n-r-control`, 30 px (13 / 18 text, 10 px side padding), `--n-text-1`, placeholder `--n-text-3`; focus `--n-focus-ring-field`. Its label (`.form-label`) is 12 px 500 `--n-text-2`, 5 px above. The address and find fields in the chrome use `--n-field-shadow` instead.
+- **Select**: a white pop-up button: `--n-select-shadow`, `--n-r-control`, 32 px on a page and 28 px in a panel or dialog, text 10 px in, a 13 px `chevron-down` in `--n-text-2` 8 px from the right. The bare `select` element gets this look by default at 32 px; `select.form-control` is the 28 px size. The field ring is on `:focus-visible`; Chromium also matches that after a mouse click on a select (it takes typed input, like a text field), so the ring follows a click there too.
+- **Search field on a page** (`.search-field`): filled, not white: 32 px, `--n-fill`, `--n-r-control`, a 15 px search icon and the placeholder in `--n-text-3`, 8 px apart. While its input has focus, the field turns `--n-card` with `--n-focus-ring-field`; the icon stays `--n-text-3`. The input inside draws no ring of its own.
+- **Switch**: 38 × 22 (32 × 19 in dense lists), round; on = `--n-accent`; off = `--n-track` with an inset 1 px `--n-control-edge`. A white knob (18 px, or 15 px dense) 2 px in from the edge, `--n-knob-shadow` when on and `--n-knob-shadow-off` when off. Disabled = the switch at 40 % opacity and its label in `--n-text-4`.
+- **Checkbox** 16 px, `--n-r-key`; **radio** 16 px round. On = `--n-accent` with an `--n-on-accent` mark (an 11 px check, a 6 px dot); off = white with an inset 1 px `--n-control-edge`.
+- **Segmented control**: a 32 px track, `--n-fill-2`, `--n-r-control`, 2 px padding and 2 px between segments. Segments are 28 px, `0 12px`, `--n-r-key`, 13 px `--n-text-2`; the chosen one is a white thumb with `--n-thumb-shadow` and `--n-text-1` 500 text (no colour).
 
-### 5.3 Panels, rows, badges, keycaps, progress
+### 5.3 Panels, rows, chips, badges, keycaps, progress
 
-- Panel: `--n-grouped`, `--n-r-panel`. No `.card` borders.
-- Keycaps: 20 px tall, min-width 20, `--n-r-key`, `--n-fill-2`, 11 px 500 `--n-text-2`, one keycap per key.
-- Progress bar: 4 px, track `--n-track`, fill `--n-accent`. Download ring: 2 px.
-- Tooltip: `--n-text-1` background, white 11 px text, `--n-r-control`.
+- Panel (`.card`): `--n-grouped`, `--n-r-panel`, no border, no shadow. Dividers inside it are `--n-panel-line`.
+- Filter chip (`.chip`; chosen = `.selected` or `.active`): 28 px, `0 10px`, `--n-r-chip`, `--n-fill` (hover `--n-fill-2`), 13 px `--n-text-1` with a 13 px `--n-text-2` icon 6 px from the label. Chosen = the selection style (`--n-accent-soft`, 500, icon `--n-accent`).
+- Badge (`.badge`): 22 px, `0 8px`, `--n-r-badge`, `--n-fill`, 12 px `--n-text-2`, an optional 12 px icon 5 px from the label. Never a colour per category. `.badge-sm` is the 18 px, `0 7px`, 11 px 600 neutral tag ("Recommended"). A state badge (`.badge-success`, `.badge-warning`, `.badge-danger`) is a 20 px, `0 7px`, 11 px 600 tag in a soft pair (`--n-success` on `--n-success-soft`, and so on), like the Release / Dev build badge on About.
+- Keycaps (`.keycap`): 20 px tall, min-width 20, `0 5px`, `--n-r-key`, `--n-fill-2`, 11 px 500 `--n-text-2` in the system sans stack, one keycap per key, no border, shadow or margin. Put a row of caps in a flex container 4 px apart.
+- Progress bar (`.progress-track` holding a `.progress-fill`): 4 px, track `--n-track`, fill `--n-accent`, both `--n-r-key`. Download ring: 2 px.
+- Tooltip (`.tooltip` + `.tooltip-text`): a small popover in the menu material (`--n-menu-bg`, `--n-menu-blur`, `--n-menu-shadow`), `--n-r-control`, 24 px tall: one line of 12 px `--n-text-1` on a 14 px line inside `5px 9px` padding, 8 px above the element it describes. The tight line and the 5 / 9 px padding are deliberate exceptions to §3.6 and §3.7. A confirmation that appears after an action ("Copied" on About) is a dark status bubble instead: `--n-text-1` fill, `--n-on-accent` 11 px text, `4px 8px`, `--n-r-control`.
+- The `hidden` attribute always wins: `global.css` sets `[hidden] { display: none !important }`, so a page's `display` rule can't reveal a hidden element. Show and hide with `el.hidden`.
 
 ---
 
@@ -277,7 +301,20 @@ import { createIcons, icons } from 'lucide';
 createIcons({ icons });
 ```
 
-- Sizes: 18 px toolbar, 16 px fields, menus and buttons, 14 px inline. Default 2 px stroke.
+- Sizes, at the default 2 px stroke unless noted:
+
+  | Size     | Where                                                                                                                                                                                                                                                                                                                                                                                      |
+  | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+  | 18 px    | The toolbar, the new-tab "+" and tab-scroll buttons; the large search fields (⌘K, new tab); the Report an Issue attachment area; a new-tab tile's fallback globe                                                                                                                                                                                                                           |
+  | 16 px    | The address field (security indicator and field buttons); menu, popover, ⌘K and autocomplete rows; dialog and popover title icons (Sign in, Report an Issue, site info); find-bar buttons; list rows on a white page (in a 28 px well); the ⌘O search field; Settings permission rows                                                                                                      |
+  | 15 px    | Page search fields, Settings sidebar items, the Bookmarks folder header, About's link rows and History's top-site and category rows                                                                                                                                                                                                                                                        |
+  | 14 px    | Text buttons and segments; small icon buttons (tab close, row actions, popover close, zoom, attachment remove), submenu chevrons and About's trailing link arrows; icons in page group headers and labels (About's group headers, the "Private" label) and icons inline with a line of text (the permission strip, the sign-in warning); the 30 px find and Settings sidebar search fields |
+  | 13 px    | Filter chips; icon buttons inside a field (About's copy buttons)                                                                                                                                                                                                                                                                                                                           |
+  | 12 px    | Badges; small marks beside text (the pin on a ⌘O card, the Downloads status line)                                                                                                                                                                                                                                                                                                          |
+  | 30–32 px | The one icon of an empty state or a file preview                                                                                                                                                                                                                                                                                                                                           |
+
+  Two marks are drawn heavier: the fullscreen traffic lights (8 px glyphs, `stroke-width="3.5"`, to match the native buttons) and the select chevron `global.css` draws (the 13 px `chevron-down` at stroke 2.4, §5.2).
+
 - Colour comes from `currentColor` — set `color` on the container.
 - The error page and certificate warning keep their own inline SVGs (they're served from the main process); everything in the renderer uses Lucide.
 
@@ -340,7 +377,7 @@ createIcons({ icons });
 - [ ] Selection uses `--n-accent-soft` + `--n-text-1` + `--n-accent` icon.
 - [ ] Built-in pages are white; groups are grey panels; controls inside panels are white.
 - [ ] Focus rings use `:focus-visible`; nothing outlines on mouse click.
-- [ ] Icons are Lucide at 18 / 16 / 14 px; no inline `<svg>` in the renderer.
+- [ ] Icons are Lucide at the §6 sizes; no inline `<svg>` in the renderer.
 - [ ] No inline `style=""` in HTML; no DOM-level inline styles in TS.
 - [ ] Mono only on code-like content.
 - [ ] `prefers-reduced-motion` and `prefers-reduced-transparency` honoured.

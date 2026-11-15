@@ -1,5 +1,6 @@
 import './url-autocomplete.css';
 import { createIcons, icons } from 'lucide';
+import { UrlDisplay } from '../../../common/url-display';
 
 type Suggestion = {
   type: 'tab' | 'bookmark' | 'history' | 'search';
@@ -35,23 +36,27 @@ const buildItem = (item: Suggestion, index: number): HTMLElement => {
   el.className = `url-ac-item${index === activeIndex ? ' active' : ''}`;
   el.dataset.index = String(index);
 
+  const hasFavicon = item.type !== 'search' && !!item.faviconUrl;
   let iconHtml = '';
   if (item.type === 'search') {
     iconHtml = `<div class="url-ac-icon"><i data-lucide="search" width="16" height="16"></i></div>`;
-  } else if (item.faviconUrl) {
-    iconHtml = `<div class="url-ac-favicon"><img src="${escapeHtml(item.faviconUrl)}" onerror="this.parentElement.textContent='${getFaviconLetter(item.url)}'"></div>`;
+  } else if (hasFavicon) {
+    iconHtml = `<div class="url-ac-favicon"></div>`;
   } else if (item.type === 'tab') {
     iconHtml = `<div class="url-ac-icon"><i data-lucide="app-window" width="16" height="16"></i></div>`;
   } else {
-    iconHtml = `<div class="url-ac-favicon">${getFaviconLetter(item.url)}</div>`;
+    iconHtml = `<div class="url-ac-favicon">${escapeHtml(getFaviconLetter(item.url))}</div>`;
   }
 
+  // Built-in pages show as nav0://… (display only; the stored URL is unchanged). A search
+  // row's title is the user's own text, so it is left as typed.
+  const title = item.type === 'search' ? item.title : UrlDisplay.format(item.title || '');
   const metaHtml = item.meta
     ? `<div class="url-ac-meta"><span>${escapeHtml(item.meta)}</span></div>`
     : '';
   const urlHtml =
     item.type !== 'search' && item.url
-      ? `<div class="url-ac-url">${escapeHtml(item.url)}</div>`
+      ? `<div class="url-ac-url">${escapeHtml(UrlDisplay.format(item.url))}</div>`
       : '';
   const sublineHtml =
     metaHtml || urlHtml ? `<div class="url-ac-subline">${metaHtml}${urlHtml}</div>` : '';
@@ -59,10 +64,29 @@ const buildItem = (item: Suggestion, index: number): HTMLElement => {
   el.innerHTML = `
     ${iconHtml}
     <div class="url-ac-content">
-      <div class="url-ac-title">${escapeHtml(item.title)}</div>
+      <div class="url-ac-title">${escapeHtml(title)}</div>
       ${sublineHtml}
     </div>
   `;
+
+  // Attached here, not in the markup, because the overlay's CSP blocks inline onerror
+  // handlers. A favicon that fails to load falls back to the site's first letter.
+  if (hasFavicon) {
+    const well = el.querySelector('.url-ac-favicon') as HTMLElement | null;
+    if (well) {
+      const img = document.createElement('img');
+      img.alt = '';
+      img.addEventListener(
+        'error',
+        () => {
+          well.textContent = getFaviconLetter(item.url);
+        },
+        { once: true }
+      );
+      img.src = item.faviconUrl as string;
+      well.appendChild(img);
+    }
+  }
 
   el.addEventListener('mousedown', (e) => {
     e.preventDefault();

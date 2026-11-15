@@ -15,13 +15,18 @@
   justify-content: stretch;
 }
 
+/* The overlay view is cut to the panel's bounds so it never covers the page,
+   which clips the material's outer ring and shadow; an inset hairline keeps
+   the dropdown's edge visible on light pages. */
 #overlay-url-autocomplete .url-autocomplete-panel {
   flex: 1;
   background: var(--n-menu-bg);
   backdrop-filter: var(--n-menu-blur);
   -webkit-backdrop-filter: var(--n-menu-blur);
   border-radius: var(--n-r-panel);
-  box-shadow: var(--n-menu-shadow);
+  box-shadow:
+    inset 0 0 0 0.5px var(--n-menu-line),
+    var(--n-menu-shadow);
   overflow-y: auto;
   max-height: 100%;
   padding: 6px;
@@ -31,10 +36,9 @@
   padding: 0;
 }
 
-/* Row layout mirrors command-K's .result-item exactly so the two surfaces
-   render the same shape. Height locks the rendered row to the value
-   used by the dropdown-height estimator (ITEM_HEIGHT), so no gap appears
-   after the last row. */
+/* Fixed-height rows. The row height and the panel's 6 px padding must match
+   ITEM_HEIGHT and PANEL_PADDING in browser-layout/url-autocomplete.ts, which
+   sizes the overlay view to fit the rows. */
 #overlay-url-autocomplete .url-ac-item {
   display: flex;
   align-items: center;
@@ -76,7 +80,9 @@
   flex-shrink: 0;
 }
 
-#overlay-url-autocomplete .url-ac-icon i {
+/* Lucide swaps the <i data-lucide> for an <svg data-lucide>. */
+#overlay-url-autocomplete .url-ac-icon [data-lucide] {
+  flex-shrink: 0;
   width: 16px;
   height: 16px;
 }
@@ -95,22 +101,28 @@
   font-weight: bold;
 }
 
+/* 16 px favicon centred in the 28 px well. */
 #overlay-url-autocomplete .url-ac-favicon img {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border-radius: var(--n-r-key);
 }
 
+/* Title over one muted line, at the font's natural line height rather than
+   the panel's 1.4. */
 #overlay-url-autocomplete .url-ac-content {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  line-height: normal;
 }
 
 #overlay-url-autocomplete .url-ac-title {
   font-size: 13px;
   font-weight: 500;
   color: var(--n-text-1);
-  margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -127,37 +139,28 @@
 #overlay-url-autocomplete .url-ac-meta {
   display: flex;
   align-items: center;
-  font-size: var(--font-xs);
+  flex-shrink: 0;
+  font-size: var(--font-sm);
   color: var(--n-text-3);
-  margin-top: 2px;
 }
 
 #overlay-url-autocomplete .url-ac-meta span {
   display: flex;
   align-items: center;
-  margin-right: var(--spacing-sm);
 }
 
-/* Subline collapses the former url + meta rows into a single row. Meta
-   appears first; each child keeps its original color/typography. */
+/* Subline: meta first, then the URL, joined by a middle dot. */
 #overlay-url-autocomplete .url-ac-subline {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 2px;
   min-width: 0;
-}
-
-#overlay-url-autocomplete .url-ac-subline .url-ac-meta {
-  margin-top: 0;
-  flex-shrink: 0;
-}
-
-#overlay-url-autocomplete .url-ac-subline .url-ac-meta span {
-  margin-right: 0;
 }
 
 #overlay-url-autocomplete .url-ac-subline .url-ac-url {
   flex: 1;
   min-width: 0;
+}
+
+#overlay-url-autocomplete .url-ac-meta + .url-ac-url::before {
+  content: '\00a0\00b7\00a0';
 }

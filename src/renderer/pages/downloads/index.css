@@ -1,14 +1,10 @@
 @import url('../../styles/global.css');
 
 /* ============================================================
-   Downloads — built-in page (DESIGN.md §4.2).
-   White canvas, 880 px centred column, Large title, a filled
-   search + secondary Clear in the toolbar, a dedicated row of
-   filter chips, a grey storage panel with a stacked bar + legend
-   (the only place colour appears — the six storage hues), then a
-   day-grouped list of rows on white. Categories are named, not
-   coloured: row badge, file icon and progress fill stay neutral /
-   accent.
+   Downloads — built-in page (DESIGN.md §4.2). The storage hues
+   on the bar and legend are the page's only colour. Text that
+   sets the vertical rhythm has an explicit line height, so rows
+   keep their size whatever the platform font's `normal` is.
    ============================================================ */
 
 .downloads-page {
@@ -16,25 +12,27 @@
   background: var(--n-page);
   color: var(--n-text-2);
   opacity: 0;
-  transition: opacity var(--transition-medium, 220ms) ease;
+  transition: opacity var(--dur-med) ease;
 }
 
 .downloads-page.loaded {
   opacity: 1;
 }
 
+/* An 880 px content column: the side gutters are added to the max-width,
+   so they only show on narrow windows. */
 .downloads-wrapper {
-  max-width: 880px;
+  max-width: calc(880px + 2 * var(--spacing-lg));
   margin: 0 auto;
-  padding: 36px 24px 56px;
+  padding: 36px var(--spacing-lg) 56px;
 }
 
-/* ---- Masthead (Large title, no rule) -------------------- */
+/* ---- Title (Large title, no rule) ----------------------- */
 .downloads-head {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 32px;
+  gap: var(--spacing-xl);
   flex-wrap: wrap;
 }
 
@@ -55,29 +53,33 @@
   margin: 20px 0 0;
 }
 
+/* Filled search field (DESIGN.md §5.2). The ring belongs to the wrapper;
+   the bare input must not add its own halo. */
 .search-container {
-  position: relative;
   flex: 1;
   min-width: 0;
   display: flex;
   align-items: center;
+  gap: var(--spacing-sm);
   height: 32px;
-  padding: 0 10px 0 32px;
+  padding: 0 10px;
   background: var(--n-fill);
   border-radius: var(--n-r-control);
   color: var(--n-text-3);
-  transition: box-shadow var(--dur-fast);
+  transition:
+    background var(--dur-fast),
+    box-shadow var(--dur-fast);
 }
 
 .search-container:focus-within {
+  background: var(--n-card);
   box-shadow: var(--n-focus-ring-field);
 }
 
 .search-icon {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
+  flex: none;
+  width: 15px;
+  height: 15px;
   color: var(--n-text-3);
   pointer-events: none;
 }
@@ -85,6 +87,7 @@
 .search-input {
   flex: 1;
   min-width: 0;
+  align-self: stretch;
   border: 0;
   outline: 0;
   background: transparent;
@@ -92,6 +95,10 @@
   font-size: 13px;
   color: var(--n-text-1);
   padding: 0;
+}
+
+.search-input:focus-visible {
+  box-shadow: none;
 }
 
 .search-input::placeholder {
@@ -117,6 +124,10 @@
   transition: background var(--dur-fast);
 }
 
+.btn-clear-all[hidden] {
+  display: none;
+}
+
 .btn-clear-all:hover {
   background: var(--n-fill-2);
 }
@@ -127,16 +138,18 @@
   flex-shrink: 0;
 }
 
-/* ---- Filter chips (one row, fits at 880 px) ------------- */
+/* ---- Filter chips (one line at 880 px; wrap if more) ---- */
 .downloads-filter-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
   margin: 14px 0 0;
 }
 
+/* The 28 px line box centres the label on the first line of chips. */
 .downloads-filter-label {
   font-size: 12px;
+  line-height: 28px;
   font-weight: 600;
   color: var(--n-text-3);
   margin-right: 4px;
@@ -145,6 +158,7 @@
 
 .type-filters {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
   min-width: 0;
@@ -178,10 +192,11 @@
 }
 
 /* Selection style — one everywhere: accent-soft fill, primary text,
-   accent icon. */
+   accent icon. The chosen chip's label is medium weight. */
 .type-pill.selected {
   background: var(--n-accent-soft);
   color: var(--n-text-1);
+  font-weight: 500;
 }
 
 .type-pill.selected:hover {
@@ -189,8 +204,8 @@
 }
 
 .type-pill svg {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   flex-shrink: 0;
   color: var(--n-text-2);
 }
@@ -203,19 +218,21 @@
 .panel {
   background: var(--n-grouped);
   border-radius: var(--n-r-panel);
-  padding: 18px 22px;
+  padding: 16px var(--spacing-lg) 18px;
 }
 
 .storage-panel {
   margin-top: 16px;
 }
 
+/* "Storage" on the left, "3.5 GB used · 22 files · 1 paused" on the
+   right, on one 16 px line. */
 .panel-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 12px;
+  line-height: 16px;
 }
 
 .panel-title {
@@ -225,10 +242,11 @@
   white-space: nowrap;
 }
 
-/* "Storage · 3.5 GB · 22 files · 1 paused" — the title provides
-   "Storage"; each meta part is prefixed with a dot separator. */
+/* A shorter line box than the title's, so the baseline-aligned 12 px text
+   doesn't push the row past 16 px. */
 .panel-meta {
   font-size: 12px;
+  line-height: 15px;
   color: var(--n-text-3);
   display: inline-flex;
   align-items: baseline;
@@ -243,10 +261,10 @@
   gap: 4px;
 }
 
-.panel-meta span::before {
+/* Dot separators sit between the parts only, never before the first. */
+.panel-meta span + span::before {
   content: '·';
   color: var(--n-text-3);
-  margin-right: 4px;
 }
 
 .panel-meta strong {
@@ -256,29 +274,57 @@
   font-family: inherit;
 }
 
-/* Stacked storage bar — segments carry the storage hue inline. */
+/* Stacked storage bar. Each segment carries its share as an inline width;
+   segments may shrink so the 2 px gaps stay inside the panel, and never get
+   narrower than 6 px, so a tiny type still shows. */
 .storage-bar {
   display: flex;
   gap: 2px;
   height: 10px;
-  margin-top: 4px;
+  margin-top: 12px;
 }
 
 .storage-bar-segment {
   height: 100%;
-  flex: none;
+  flex: 0 1 auto;
+  min-width: 6px;
 }
 
 .storage-bar-segment:first-child {
-  border-radius: var(--n-r-key) 0 0 var(--n-r-key);
+  border-radius: var(--n-r-control) 0 0 var(--n-r-control);
 }
 
 .storage-bar-segment:last-child {
-  border-radius: 0 var(--n-r-key) var(--n-r-key) 0;
+  border-radius: 0 var(--n-r-control) var(--n-r-control) 0;
 }
 
 .storage-bar-segment:only-child {
-  border-radius: var(--n-r-key);
+  border-radius: var(--n-r-control);
+}
+
+/* The six storage hues (DESIGN.md §3.4), on the bar and legend only. */
+.storage-hue-images {
+  background: var(--n-storage-images);
+}
+
+.storage-hue-media {
+  background: var(--n-storage-media);
+}
+
+.storage-hue-archives {
+  background: var(--n-storage-archives);
+}
+
+.storage-hue-apps {
+  background: var(--n-storage-apps);
+}
+
+.storage-hue-documents {
+  background: var(--n-storage-documents);
+}
+
+.storage-hue-other {
+  background: var(--n-storage-other);
 }
 
 .storage-legend {
@@ -293,6 +339,7 @@
   align-items: center;
   gap: 6px;
   font-size: 12px;
+  line-height: 15px;
   color: var(--n-text-1);
 }
 
@@ -321,42 +368,65 @@
 }
 
 /* ---- Day / group header --------------------------------- */
+/* "Today · Friday, November 13" — the relative day is the 600 heading,
+   the date after it is secondary text; the count sits on the right. */
 .date-group-label {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 6px;
   margin: 22px 0 0;
   padding: 0 12px 8px;
   border-bottom: 1px solid var(--n-separator);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+/* The category filter hides a day with no matching rows (the `hidden`
+   attribute; display: flex above would otherwise override it). */
+.date-group-label[hidden] {
+  display: none;
 }
 
 .date-group-label .day-label {
-  font-size: 13px;
   font-weight: 600;
   color: var(--n-text-1);
   text-transform: capitalize;
 }
 
+.date-group-label .day-date {
+  color: var(--n-text-3);
+}
+
+/* Callout 12/16, so the baseline-aligned row stays 18 px. */
 .date-group-label .day-sub {
+  margin-left: auto;
   font-size: 12px;
+  line-height: 16px;
   color: var(--n-text-3);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 /* ---- Downloads list / rows ------------------------------ */
-/* 7-column grid: time | 32px icon well | filename + meta |
-   badge | status | size | hover actions. */
+/* Row: time | icon well | name + meta | badge | [status] | size | actions.
+   The size column is at least 110 px and grows when an active row's
+   "received / total" needs it. The status column exists only while a
+   download is active or paused, so a finished row has no empty column
+   (and gap) before the size. */
 .download-item {
   display: grid;
-  grid-template-columns: 60px 32px 1fr auto auto auto auto;
+  grid-template-columns: 60px 28px minmax(0, 1fr) auto minmax(110px, auto) 56px;
+  grid-template-rows: 54px;
   align-items: center;
-  gap: 12px;
-  min-height: 54px;
+  column-gap: 12px;
   padding: 0 8px 0 12px;
   border-radius: var(--n-r-control);
   transition: background var(--dur-fast);
   cursor: pointer;
+}
+
+.download-item:has(> .download-status) {
+  grid-template-columns: 60px 28px minmax(0, 1fr) auto auto minmax(110px, auto) 56px;
 }
 
 .download-item:hover {
@@ -373,10 +443,10 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* 32-px neutral icon well */
+/* 28 px neutral icon well holding a 16 px icon */
 .download-type-icon {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -397,6 +467,7 @@
 
 .download-filename {
   font-size: 13px;
+  line-height: 16px;
   color: var(--n-text-1);
   font-weight: 500;
   white-space: nowrap;
@@ -405,8 +476,10 @@
   display: block;
 }
 
+/* "host · path" — the dot sits a word space from each side. */
 .download-meta {
   font-size: 12px;
+  line-height: 15px;
   color: var(--n-text-3);
   margin-top: 2px;
   white-space: nowrap;
@@ -415,7 +488,7 @@
   max-width: 100%;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 /* URLs are grey, never link-blue. */
@@ -450,7 +523,7 @@
   text-transform: capitalize;
 }
 
-/* Status — colour per state (accent / warning). */
+/* Status — accent while downloading, grey when paused. */
 .download-status {
   display: inline-flex;
   align-items: center;
@@ -467,10 +540,10 @@
 }
 
 .download-status.paused {
-  color: var(--n-warning);
+  color: var(--n-text-3);
 }
 
-.download-status.progress {
+.download-status.in-progress {
   color: var(--n-accent);
 }
 
@@ -484,11 +557,11 @@
   color: var(--n-text-2);
   font-variant-numeric: tabular-nums;
   text-align: right;
-  min-width: 64px;
   white-space: nowrap;
 }
 
-/* Hover-revealed action buttons */
+/* Hover-revealed action buttons (also shown while a button inside the row
+   has keyboard focus). */
 .download-actions {
   display: inline-flex;
   gap: 2px;
@@ -498,7 +571,8 @@
   transition: opacity var(--dur-fast);
 }
 
-.download-item:hover .download-actions {
+.download-item:hover .download-actions,
+.download-item:focus-within .download-actions {
   opacity: 1;
 }
 
@@ -531,51 +605,45 @@
   color: var(--n-text-1);
 }
 
-.action-btn.remove-btn:hover,
-.action-btn.cancel-btn:hover {
-  color: var(--n-danger);
-}
-
 .action-btn svg {
   width: 14px;
   height: 14px;
 }
 
-/* ---- In-progress row with progress bar underneath ------ */
-.download-item.downloading {
-  row-gap: 6px;
-  padding-top: 12px;
-  padding-bottom: 14px;
-}
-
+/* ---- Progress bar under an active / paused row ---------- */
+/* A second grid row, from inside the name column to the row's end. */
 .download-progress {
-  grid-column: 3 / 6;
-  grid-row: 2 / 3;
+  grid-column: 3 / -1;
+  grid-row: 2;
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 2px;
+  margin: 0 0 10px 34px;
 }
 
 .download-progress-bar {
   flex: 1;
   height: 4px;
-  background: var(--n-separator);
+  background: var(--n-track);
   border-radius: var(--n-r-key);
   overflow: hidden;
   position: relative;
 }
 
+/* The width is the inline percentage; the fill is the accent, never a
+   per-type hue, and a neutral grey while paused. */
 .download-progress-fill {
   height: 100%;
   background: var(--n-accent);
   border-radius: var(--n-r-key);
-  transition: width var(--dur-med, 220ms) var(--ease-out, ease);
+  transition: width var(--dur-med) ease;
+}
+
+.download-item.paused .download-progress-fill {
+  background: var(--n-control-edge);
 }
 
 .download-progress.indeterminate .download-progress-fill {
   width: 30%;
-  animation: download-progress-slide 1.4s var(--ease-in-out, ease-in-out) infinite;
+  animation: download-progress-slide 1.4s ease-in-out infinite;
 }
 
 @keyframes download-progress-slide {
@@ -585,21 +653,6 @@
   100% {
     transform: translateX(400%);
   }
-}
-
-.download-progress-stats {
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-  font-size: 12px;
-  color: var(--n-text-3);
-  font-variant-numeric: tabular-nums;
-  flex-shrink: 0;
-}
-
-.download-progress-stats strong {
-  color: var(--n-text-1);
-  font-weight: 500;
 }
 
 /* ---- Detail panel (expanded row — grey, flat) ----------- */
@@ -650,10 +703,11 @@
   color: var(--n-text-3);
 }
 
+/* Names and paths are long unbroken strings: wrap them anywhere. */
 .detail-field-value {
   font-size: 13px;
   color: var(--n-text-1);
-  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .detail-actions {
@@ -663,10 +717,12 @@
   margin-top: 8px;
 }
 
+/* Buttons inside a grey panel: 30 px; white raised (secondary), accent
+   (primary) or bare (ghost) — DESIGN.md §5.1. */
 .detail-btn-primary,
 .detail-btn-secondary,
 .detail-btn-ghost {
-  height: 32px;
+  height: 30px;
   padding: 0 14px;
   font-family: inherit;
   font-size: 13px;
@@ -677,12 +733,15 @@
   background: var(--n-card);
   color: var(--n-text-1);
   box-shadow: var(--n-raised-shadow);
-  transition: filter var(--dur-fast);
+  transition:
+    background var(--dur-fast),
+    color var(--dur-fast),
+    filter var(--dur-fast);
 }
 
 .detail-btn-primary {
   background: var(--n-accent);
-  color: #fff;
+  color: var(--n-on-accent);
   box-shadow: none;
 }
 
@@ -704,13 +763,24 @@
   color: var(--n-text-1);
 }
 
+/* The box-shadow rules above match as strongly as global.css's
+   :focus-visible and come later, so restate the keyboard ring here. The
+   white button keeps its raised edge under the halo. */
+.detail-btn-primary:focus-visible,
+.detail-btn-ghost:focus-visible {
+  box-shadow: var(--n-focus-ring);
+}
+
+.detail-btn-secondary:focus-visible {
+  box-shadow: var(--n-raised-shadow), var(--n-focus-ring);
+}
+
 /* ---- Empty + loading + footer ---------------------------- */
 .no-downloads {
   text-align: center;
-  padding: 60px 0;
+  padding: var(--spacing-xxl) 0;
   color: var(--n-text-3);
   font-size: 13px;
-  display: none;
 }
 
 .loading-indicator {
@@ -724,12 +794,24 @@
   margin-top: 28px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .downloads-page {
-    transition: none;
-  }
+/* An empty footer adds no space, so the page ends 56 px below the last row
+   (DESIGN.md §4.2). */
+.downloads-footer:empty {
+  margin-top: 0;
+}
 
-  .download-progress-fill {
+@media (prefers-reduced-motion: reduce) {
+  .downloads-page,
+  .search-container,
+  .btn-clear-all,
+  .type-pill,
+  .download-item,
+  .download-actions,
+  .action-btn,
+  .download-progress-fill,
+  .detail-btn-primary,
+  .detail-btn-secondary,
+  .detail-btn-ghost {
     transition: none;
   }
 

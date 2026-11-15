@@ -1,5 +1,6 @@
 import './command-o.css';
 import { createIcons, icons } from 'lucide';
+import { UrlDisplay } from '../../../common/url-display';
 
 type TabInfo = {
   id: string;
@@ -42,7 +43,7 @@ const COMMAND_O_HTML = `
     <div class="search-bar">
       <span class="shortcut-badge" id="cmdo-shortcut-badge"></span>
       <i data-lucide="search" class="search-icon" width="16" height="16"></i>
-      <input type="text" id="cmdo-search-input" class="search-input" placeholder="Search across all tabs..." autofocus>
+      <input type="text" id="cmdo-search-input" class="search-input" placeholder="Search across all tabs…" autofocus>
       <span class="tab-count" id="cmdo-tab-count">0 tabs</span>
     </div>
 
@@ -65,8 +66,8 @@ const COMMAND_O_HTML = `
         <span class="key">esc</span>
         <span class="key-label">close</span>
       </div>
-      <div class="footer-right" id="cmdo-footer-drag-hint" style="display:none;">drag tabs between windows</div>
-      <div class="footer-right" id="cmdo-footer-private" style="display:none;">private mode</div>
+      <div class="footer-right" id="cmdo-footer-drag-hint" hidden>drag tabs between windows</div>
+      <div class="footer-right" id="cmdo-footer-private" hidden>private mode</div>
     </div>
   </div>
 `;
@@ -76,6 +77,10 @@ const escapeHtml = (str: string): string => {
   div.textContent = str;
   return div.innerHTML;
 };
+
+// Smooth scrolling is motion: skip it when the OS asks to reduce motion.
+const prefersReducedMotion = (): boolean =>
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const getFaviconLetter = (url: string): string => {
   try {
@@ -160,7 +165,7 @@ const render = () => {
   const canMoveBetweenWindows = !window.BrowserAPI.isPrivate && allGroups.length > 1;
   const canReorder = !isFiltered;
   const canDrag = canMoveBetweenWindows || canReorder;
-  footerDragHint.style.display = canDrag ? '' : 'none';
+  footerDragHint.hidden = !canDrag;
   footerDragHint.textContent = canMoveBetweenWindows
     ? 'drag to reorder or move between windows'
     : 'drag to reorder tabs';
@@ -225,12 +230,13 @@ const render = () => {
 
       let faviconHtml = '';
       if (tab.faviconUrl) {
-        faviconHtml = `<div class="tab-favicon"><img src="${escapeHtml(tab.faviconUrl)}" onerror="this.parentElement.innerHTML='<div class=\\'tab-favicon-letter\\'>${getFaviconLetter(tab.url)}</div>'"></div>`;
+        faviconHtml = `<div class="tab-favicon"><img src="${escapeHtml(tab.faviconUrl)}" alt=""></div>`;
       } else {
         faviconHtml = `<div class="tab-favicon-letter">${getFaviconLetter(tab.url)}</div>`;
       }
 
-      const titleText = tab.title || tab.url || 'New Tab';
+      // A URL standing in for a missing title shows nav0:// in lower case.
+      const titleText = UrlDisplay.format(tab.title || tab.url || 'New Tab');
       const truncatedTitle = escapeHtml(titleText);
 
       const pinHtml = tab.isPinned
@@ -244,6 +250,22 @@ const render = () => {
         ${tab.isActive ? '<span class="tab-active-dot"></span>' : ''}
       `;
       if (tab.isPinned) card.classList.add('pinned');
+
+      // Favicon fallback: swap a favicon that fails to load for the letter chip.
+      // Wired here because the page CSP blocks inline onerror handlers.
+      const faviconImg = card.querySelector<HTMLImageElement>('.tab-favicon img');
+      if (faviconImg) {
+        const letter = getFaviconLetter(tab.url);
+        faviconImg.addEventListener('error', () => {
+          const well = faviconImg.parentElement;
+          if (!well) return;
+          const letterEl = document.createElement('div');
+          letterEl.className = 'tab-favicon-letter';
+          letterEl.textContent = letter;
+          well.textContent = '';
+          well.appendChild(letterEl);
+        });
+      }
 
       if (canDrag) {
         card.draggable = true;
@@ -310,7 +332,10 @@ const render = () => {
 
   // Scroll selected into view
   const selectedCard = tabsBody.querySelector('.tab-card.selected') as HTMLElement;
-  selectedCard?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  selectedCard?.scrollIntoView({
+    behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+    block: 'nearest',
+  });
 };
 
 const switchToTab = (tab: TabInfo, windowId: string) => {
@@ -431,7 +456,7 @@ export function init(container: HTMLElement): void {
   }
 
   if (window.BrowserAPI.isPrivate) {
-    footerPrivate.style.display = '';
+    footerPrivate.hidden = false;
   }
 
   document.addEventListener('keydown', handleKeydown);

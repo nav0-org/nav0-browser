@@ -41,7 +41,6 @@
   animation: alertSlideIn 0.18s ease-out;
   display: flex;
   flex-direction: column;
-  gap: 14px;
 }
 
 @keyframes alertSlideIn {
@@ -61,94 +60,46 @@
   }
 }
 
+/* Page dialogs name the origin in a 13 px 600 line, not a Headline
+   (DESIGN.md §4.5). text-box trims the half-leading, so one line is as tall
+   as at line-height: normal, while a long origin that wraps gets 18 px lines. */
 .alert-header {
-  font-size: var(--font-xl);
-  line-height: 22px;
+  font-size: var(--font-md);
+  line-height: 18px;
+  text-box: trim-both text;
   font-weight: 600;
-  letter-spacing: -0.01em;
   color: var(--n-text-1);
-  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
+/* The message sits 6 px under the origin line. */
 .alert-body {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  margin-top: 6px;
 }
 
 .alert-message {
   font-size: var(--font-md);
   color: var(--n-text-2);
-  line-height: 1.5;
+  line-height: 19px;
   white-space: pre-wrap;
   word-break: break-word;
   max-height: 40vh;
   overflow-y: auto;
 }
 
+/* The prompt field is the global 30 px .form-control (DESIGN.md §5.2). */
 .alert-input-wrap {
   display: block;
 }
 
-.alert-input {
-  display: block;
-  width: 100%;
-  padding: 8px 10px;
-  font-size: var(--font-md);
-  color: var(--n-text-1);
-  background-color: var(--n-card);
-  border: 1px solid transparent;
-  border-radius: var(--n-r-control);
-  box-shadow: var(--n-field-shadow);
-  box-sizing: border-box;
-  font-family: inherit;
-}
-
-.alert-input:focus {
-  outline: none;
-  box-shadow: var(--n-focus-ring-field);
-}
-
+/* Actions: global .btn-sm buttons (28 px, DESIGN.md §5.1), 16 px under the
+   message, or under a prompt's field. */
 .alert-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: 2px;
-}
-
-.alert-btn {
-  height: 28px;
-  padding: 0 14px;
-  font-size: var(--font-md);
-  font-weight: 500;
-  border-radius: var(--n-r-control);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  border: 1px solid transparent;
-  font-family: inherit;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-}
-
-.alert-btn-primary {
-  background-color: var(--n-accent);
-  color: #fff;
-  border-color: var(--n-accent);
-}
-
-.alert-btn-primary:hover {
-  background-color: var(--n-accent-hover);
-  border-color: var(--n-accent-hover);
-}
-
-.alert-btn-secondary {
-  background-color: var(--n-fill);
-  color: var(--n-text-1);
-  border-color: transparent;
-}
-
-.alert-btn-secondary:hover {
-  background-color: var(--n-fill-2);
+  margin-top: 16px;
 }

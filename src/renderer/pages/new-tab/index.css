@@ -19,16 +19,19 @@ body {
   color: var(--n-text-2);
 }
 
+/* 880 px content column (DESIGN.md §4.2). content-box so the 32 px side
+   gutter (kept for narrow windows) sits outside the column instead of
+   shrinking it. */
 .new-tab-wrapper {
+  box-sizing: content-box;
   max-width: 880px;
   margin: 0 auto;
   padding: 96px var(--spacing-xl) 56px;
   display: flex;
   flex-direction: column;
-  gap: 40px;
 }
 
-/* ---- Masthead ------------------------------------------- */
+/* ---- Hero: greeting + search field ---------------------- */
 .new-tab-head {
   display: flex;
   flex-direction: column;
@@ -44,8 +47,12 @@ body {
   margin: 0;
 }
 
+/* The field sits 20 px under the greeting; the tile sections follow 40 px
+   apart (margins rather than a wrapper gap, because the greeting and the
+   field are siblings of the sections). */
 .bento-container {
   width: 100%;
+  margin-top: 20px;
 }
 
 .search-item {
@@ -61,6 +68,7 @@ body {
   align-items: center;
 }
 
+/* The icon stays --n-text-3 when the field is focused. */
 .search-shell-icon {
   position: absolute;
   left: 14px;
@@ -68,14 +76,10 @@ body {
   transform: translateY(-50%);
   color: var(--n-text-3);
   pointer-events: none;
-  transition: color var(--dur-fast) ease;
 }
 
-.search-shell:focus-within .search-shell-icon {
-  color: var(--n-text-2);
-}
-
-/* Big filled search field spanning the column. */
+/* Big filled search field spanning the column. The input is the field
+   itself (no wrapper ring), so its own focus ring is the only one. */
 .search-bar {
   width: 100%;
   height: 44px;
@@ -85,22 +89,28 @@ body {
   border-radius: var(--n-r-panel);
   background-color: var(--n-fill);
   outline: none;
-  transition: box-shadow var(--dur-fast) ease;
+  transition:
+    background-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease;
   color: var(--n-text-1);
+  caret-color: var(--n-accent);
 }
 
 .search-bar::placeholder {
   color: var(--n-text-3);
 }
 
-.search-bar:focus {
+/* Focused, a filled search field turns white with the field ring. */
+.search-bar:focus-visible {
+  background-color: var(--n-card);
   box-shadow: var(--n-focus-ring-field);
 }
 
-/* ---- Search results panel (Command-K styled, inline) ----- */
+/* ---- Search results popover (the ⌘K rows, inline) -------- */
 .search-results {
   margin-top: var(--spacing-sm);
-  background: var(--n-page);
+  background: var(--n-menu-bg);
+  backdrop-filter: var(--n-menu-blur);
   border-radius: var(--n-r-panel);
   box-shadow: var(--n-menu-shadow);
   max-height: 60vh;
@@ -116,7 +126,7 @@ body {
 
 .search-results-list {
   overflow-y: auto;
-  padding: var(--spacing-xs) var(--spacing-sm);
+  padding: 6px var(--spacing-sm) 10px;
   flex: 1;
 }
 
@@ -128,66 +138,78 @@ body {
 }
 
 .search-section-title {
-  padding: 8px 8px 4px;
+  padding: 12px 12px var(--spacing-xs);
   font-size: 11px;
+  line-height: 14px;
   color: var(--n-text-3);
   letter-spacing: 0.02em;
   font-weight: 600;
 }
 
+/* Rows: 46 px, 28 px icon well, title over a one-line meta · URL subline.
+   The search-engine row is an ordinary row (no rule under it). */
 .search-result-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 10px;
+  gap: 10px;
+  height: 46px;
+  padding: 0 10px;
   cursor: pointer;
   position: relative;
   border-radius: var(--n-r-control);
   transition: background-color var(--dur-fast) ease;
 }
 
+/* Selection style: soft accent ground, primary text, accent icon. */
 .search-result-item:hover,
 .search-result-item.active {
   background-color: var(--n-accent-soft);
 }
 
-.search-result-item.search-engine-item {
-  border-bottom: 1px solid var(--n-separator);
-  margin-bottom: var(--spacing-xs);
-  padding-bottom: 12px;
-  border-radius: var(--n-r-control) var(--n-r-control) 0 0;
+.search-result-item:hover .search-result-icon,
+.search-result-item.active .search-result-icon {
+  color: var(--n-accent);
+}
+
+.search-result-item:hover .search-result-meta,
+.search-result-item.active .search-result-meta {
+  color: var(--n-text-2);
 }
 
 .search-result-icon,
 .search-result-favicon {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--n-r-control);
-  background: var(--n-well);
-  color: var(--n-text-3);
+  background: var(--n-fill);
+  color: var(--n-text-2);
   flex-shrink: 0;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .search-result-favicon img {
-  width: 20px;
-  height: 20px;
-  border-radius: var(--n-r-key);
+  width: 16px;
+  height: 16px;
+  border-radius: var(--n-r-control);
   display: block;
 }
 
 .search-result-content {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .search-result-title {
   display: block;
   font-size: 13px;
+  line-height: 16px;
   font-weight: 500;
   color: var(--n-text-1);
   white-space: nowrap;
@@ -197,66 +219,30 @@ body {
 
 .search-result-subline {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 2px;
+  align-items: baseline;
   min-width: 0;
+  font-size: 12px;
+  line-height: 14px;
+  color: var(--n-text-3);
 }
 
 .search-result-meta {
-  font-size: 11px;
-  color: var(--n-text-4);
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .search-result-url {
   flex: 1;
   min-width: 0;
-  font-size: 12px;
-  color: var(--n-text-3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.shortcut-link {
-  text-decoration: none;
-  color: inherit;
-  display: block;
-  cursor: pointer;
-}
-
-.shortcut-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.icon-container {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--n-r-panel);
-  background-color: var(--n-well);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.icon {
-  width: 22px;
-  height: 22px;
-}
-
-.shortcut-title {
-  font-size: 20px;
-  font-weight: 500;
-}
-
-.shortcut-description {
-  color: var(--n-text-3);
-  font-size: 12px;
-  line-height: 1.3;
+/* "Meta · URL", as in ⌘K. Decorative, so it has empty alt text. */
+.search-result-meta + .search-result-url::before {
+  content: '\00b7' / '';
+  margin: 0 var(--spacing-xs);
 }
 
 /* ---- Tile rows (Bookmarks + Frequently visited) ---------- */
@@ -264,6 +250,14 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  margin-top: 40px;
+}
+
+/* Sections stay hidden until loadTileRows() fills them (a private window
+   has none); without this, display: flex overrides the hidden attribute
+   and the headings show over empty rows. */
+.tile-section[hidden] {
+  display: none;
 }
 
 .tile-section-head {
@@ -294,10 +288,15 @@ body {
   color: inherit;
   cursor: pointer;
   min-width: 0;
+  border-radius: var(--n-r-control);
 }
 
-/* Favicon well — a per-site favicon stand-in, so the well keeps its
-   own colour and is NOT a neutral category chip. */
+/* Tiles aren't text links: keep the global a:hover underline off them. */
+.tile:hover {
+  text-decoration: none;
+}
+
+/* Neutral favicon well; any colour on a tile comes from the site's favicon. */
 .tile-icon {
   width: 56px;
   height: 56px;
@@ -310,8 +309,8 @@ body {
   overflow: hidden;
 }
 
-.tile-icon img,
-.tile-icon svg {
+/* The globe fallback (a Lucide icon) keeps its own 18 px size. */
+.tile-icon img {
   width: 28px;
   height: 28px;
   display: block;
@@ -346,6 +345,7 @@ body {
   display: block;
   max-width: 100%;
   font-size: 11px;
+  line-height: 14px;
   color: var(--n-text-3);
   white-space: nowrap;
   overflow: hidden;
@@ -362,5 +362,12 @@ body {
 @media (max-width: 640px) {
   .tile-row {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .search-bar,
+  .search-result-item {
+    transition: none;
   }
 }

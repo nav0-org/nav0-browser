@@ -103,15 +103,15 @@ export class AppWindow {
       // Chromium-drawn minimize/maximize/close buttons for the frameless
       // window. Electron supports this Window Controls Overlay on Linux since
       // v30.2 (electron/electron#41769) — without it, a 'hidden' title bar on
-      // Linux shows no window controls at all. Colours match the tab strip
-      // (--tab-inactive, or the dark private strip) so the overlay reads as
-      // part of it.
+      // Linux shows no window controls at all. Colours mirror the tab strip's
+      // tokens (--n-strip / --n-text-2, or the lavender --n-private-strip /
+      // --n-private-text) so the overlay reads as part of the 40 px strip.
       ...(isWindows || isLinux
         ? {
             titleBarOverlay: {
-              color: this.isPrivate ? '#2a0a0a' : '#e7e5e1',
-              symbolColor: this.isPrivate ? '#ffffff' : '#333333',
-              height: 38,
+              color: this.isPrivate ? '#e4def4' : '#e6e6e9',
+              symbolColor: this.isPrivate ? '#3f3a52' : '#424245',
+              height: 40,
             },
           }
         : {}),
@@ -393,7 +393,8 @@ export class AppWindow {
   }
 
   private getYOffset(): number {
-    return 82 + (this.permissionStripVisible ? 48 : 0) + (this.isFindInPageVisible() ? 48 : 0);
+    // Tab strip 40 + toolbar 44, then the permission strip (51) and find bar (44) when shown.
+    return 84 + (this.permissionStripVisible ? 51 : 0) + (this.isFindInPageVisible() ? 44 : 0);
   }
 
   private resizeActiveTab(): void {

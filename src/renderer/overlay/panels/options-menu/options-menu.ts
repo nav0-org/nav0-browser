@@ -1,5 +1,6 @@
 import './options-menu.css';
 import { InAppUrls } from '../../../../constants/app-constants';
+import { UrlDisplay } from '../../../common/url-display';
 
 let containerEl: HTMLElement;
 let optionsElement: HTMLElement | null = null;
@@ -103,8 +104,8 @@ const OPTIONS_MENU_HTML = `
           </div>
 
           <!-- Section 4: Restore Previous Session -->
-          <div class="divider" id="om-restore-session-divider" style="display:none"></div>
-          <div class="dropdown-item" id="om-restore-session-option" style="display:none">
+          <div class="divider" id="om-restore-session-divider" hidden></div>
+          <div class="dropdown-item" id="om-restore-session-option" hidden>
             <i data-lucide="rotate-ccw" width="16" height="16"></i>
             <span class="dropdown-item-text">Restore Previous Session</span>
           </div>
@@ -173,7 +174,7 @@ function initializeDomElements(): void {
   const isMac = window.BrowserAPI.platform === 'darwin';
   const modKey = isMac ? 'Cmd' : 'Ctrl';
 
-  // Menu-item shortcuts are muted text, not keycap boxes (DESIGN §4.4). On
+  // Menu-item shortcuts are muted text, not keycap boxes (DESIGN.md §4.4). On
   // macOS they are glyphs ordered ⌃⌥⇧⌘ before the key with no plus signs
   // (e.g. "⇧⌘N"); on Windows/Linux the "Ctrl+Shift+N" text form.
   const MAC_GLYPHS: Record<string, string> = {
@@ -244,15 +245,15 @@ async function populateHistorySubmenu(): Promise<void> {
           favicon.className = 'closed-tab-favicon';
           favicon.src = tab.faviconUrl;
           favicon.onerror = () => {
-            favicon.style.display = 'none';
+            favicon.hidden = true;
           };
           item.appendChild(favicon);
         }
 
         const title = document.createElement('span');
         title.className = 'closed-tab-title';
-        title.textContent = tab.title || tab.url;
-        title.title = tab.url;
+        title.textContent = UrlDisplay.format(tab.title || tab.url || '');
+        title.title = UrlDisplay.format(tab.url || '');
         item.appendChild(title);
 
         const index = i;
@@ -285,7 +286,9 @@ async function populateHistorySubmenu(): Promise<void> {
         const title = document.createElement('span');
         title.className = 'closed-window-title';
         const firstTab = win.tabs && win.tabs.length > 0 ? win.tabs[0] : null;
-        title.textContent = firstTab ? firstTab.title || firstTab.url : 'Window';
+        title.textContent = firstTab
+          ? UrlDisplay.format(firstTab.title || firstTab.url || '')
+          : 'Window';
         item.appendChild(title);
 
         const count = document.createElement('span');
@@ -317,8 +320,8 @@ async function populateHistorySubmenu(): Promise<void> {
   if (restoreSessionItem && restoreSessionDivider && !isPrivate) {
     const sessionState = await window.BrowserAPI.fetchSessionState();
     if (sessionState) {
-      restoreSessionDivider.style.display = '';
-      restoreSessionItem.style.display = '';
+      restoreSessionDivider.hidden = false;
+      restoreSessionItem.hidden = false;
       const newItem = restoreSessionItem.cloneNode(true) as HTMLElement;
       restoreSessionItem.parentNode?.replaceChild(newItem, restoreSessionItem);
       newItem.addEventListener('click', async (e) => {
@@ -327,12 +330,12 @@ async function populateHistorySubmenu(): Promise<void> {
         await window.BrowserAPI.hideOptionsMenu(appWindowId);
       });
     } else {
-      restoreSessionDivider.style.display = 'none';
-      restoreSessionItem.style.display = 'none';
+      restoreSessionDivider.hidden = true;
+      restoreSessionItem.hidden = true;
     }
   } else if (restoreSessionItem && restoreSessionDivider) {
-    restoreSessionDivider.style.display = 'none';
-    restoreSessionItem.style.display = 'none';
+    restoreSessionDivider.hidden = true;
+    restoreSessionItem.hidden = true;
   }
 }
 
@@ -469,7 +472,7 @@ export function show(_data?: any): void {
           : true;
       const devtoolsItem = containerEl?.querySelector('#om-devtools-option') as HTMLElement | null;
       if (devtoolsItem) {
-        devtoolsItem.style.display = devToolsEnabled ? '' : 'none';
+        devtoolsItem.hidden = !devToolsEnabled;
       }
     })
     .catch(() => {

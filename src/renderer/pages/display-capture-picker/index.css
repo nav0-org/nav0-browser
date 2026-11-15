@@ -81,8 +81,6 @@ body {
 .picker-source-type {
   font-size: var(--font-xs);
   color: var(--n-text-3);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
   margin-top: var(--spacing-xs);
 }
 
@@ -114,6 +112,8 @@ body {
   padding: var(--spacing-lg);
 }
 
+/* Cancel and Share are the global dialog buttons (.btn .btn-sm with
+   .btn-secondary / .btn-primary, DESIGN.md §5.1), right-aligned. */
 .picker-actions {
   display: flex;
   justify-content: flex-end;
@@ -122,42 +122,8 @@ body {
   border-top: 1px solid var(--n-separator);
 }
 
-.picker-btn {
-  font-size: var(--font-md);
-  font-weight: 500;
-  line-height: 1;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border: 1px solid transparent;
-  background-color: var(--n-fill);
-  color: var(--n-text-1);
-  border-radius: var(--n-r-control);
-  cursor: pointer;
-  transition: all var(--transition-medium);
-}
-
-.picker-btn:hover:not(:disabled) {
-  background-color: var(--n-fill-2);
-}
-
-.picker-btn-primary {
-  background-color: var(--n-accent);
-  color: #fff;
-  border-color: var(--n-accent);
-}
-
-.picker-btn-primary:hover:not(:disabled) {
-  background-color: var(--n-accent-hover);
-  border-color: var(--n-accent-hover);
-}
-
-.picker-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .picker-source,
-  .picker-btn {
+  .picker-source {
     transition: none;
   }
 }

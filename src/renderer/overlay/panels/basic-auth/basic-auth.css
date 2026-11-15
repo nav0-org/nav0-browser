@@ -78,22 +78,30 @@
   color: var(--n-text-2);
 }
 
+/* Blocks 14 px apart, like the dialog's own gap; the realm hangs 4 px under
+   the host line. Margins collapse, so a hidden realm or warning leaves the
+   same 14 px. */
 .basic-auth-body {
   display: block;
 }
 
+/* Host and realm lines: text-box trims the half-leading, so one line is as tall
+   as at line-height: normal, while a long host or realm that wraps gets Body
+   (18 px) or Callout (16 px) line spacing instead of being set solid. */
 .basic-auth-subtitle {
   font-size: var(--font-md);
   color: var(--n-text-1);
   margin-bottom: 4px;
-  line-height: 1.4;
+  line-height: 18px;
+  text-box: trim-both text;
   word-break: break-word;
 }
 
 .basic-auth-realm {
   font-size: var(--font-sm);
+  line-height: 16px;
+  text-box: trim-both text;
   color: var(--n-text-3);
-  margin-bottom: 12px;
   word-break: break-word;
 }
 
@@ -101,7 +109,7 @@
   display: flex;
   align-items: flex-start;
   gap: 6px;
-  margin: 10px 0 12px 0;
+  margin-top: 14px;
   color: var(--n-danger);
   font-size: var(--font-sm);
   line-height: 17px;
@@ -113,73 +121,17 @@
   margin-top: 1px;
 }
 
+/* A .form-label sits 5 px above its 30 px .form-control (DESIGN.md §4.4), at
+   the font's natural line height so the gap reads as 5 px. */
 .basic-auth-label {
-  display: block;
-  margin: 10px 0 5px 0;
-  font-size: var(--font-sm);
-  font-weight: 500;
-  color: var(--n-text-2);
+  margin-top: 14px;
+  line-height: normal;
 }
 
-.basic-auth-input {
-  display: block;
-  width: 100%;
-  padding: 8px 10px;
-  font-size: var(--font-md);
-  color: var(--n-text-1);
-  background-color: var(--n-card);
-  border: 1px solid transparent;
-  border-radius: var(--n-r-control);
-  box-shadow: var(--n-field-shadow);
-  box-sizing: border-box;
-  font-family: inherit;
-}
-
-.basic-auth-input:focus {
-  outline: none;
-  box-shadow: var(--n-focus-ring-field);
-}
-
+/* Actions: global .btn-sm buttons (28 px, DESIGN.md §5.1). */
 .basic-auth-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
   margin-top: 2px;
-}
-
-.basic-auth-btn {
-  height: 28px;
-  padding: 0 14px;
-  font-size: var(--font-md);
-  font-weight: 500;
-  border-radius: var(--n-r-control);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  border: 1px solid transparent;
-  font-family: inherit;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-}
-
-.basic-auth-btn-primary {
-  background-color: var(--n-accent);
-  color: #fff;
-  border-color: var(--n-accent);
-}
-
-.basic-auth-btn-primary:hover {
-  background-color: var(--n-accent-hover);
-  border-color: var(--n-accent-hover);
-}
-
-.basic-auth-btn-secondary {
-  background-color: var(--n-fill);
-  color: var(--n-text-1);
-  border-color: transparent;
-}
-
-.basic-auth-btn-secondary:hover {
-  background-color: var(--n-fill-2);
 }

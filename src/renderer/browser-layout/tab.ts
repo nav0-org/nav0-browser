@@ -2,11 +2,11 @@ import { createIcons, icons } from 'lucide';
 import TabTemplate from './tab.html';
 import { ImageBase64Strings, InAppUrls } from '../../constants/app-constants';
 
+// A tab with no favicon (or one that fails to load) keeps an empty 16 px slot:
+// never a broken-image glyph or a placeholder box. A 1 × 1 transparent GIF
+// fills the <img> so it stays blank.
 const EMPTY_FAVICON =
-  'data:image/svg+xml,' +
-  encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><rect x="0.5" y="0.5" width="15" height="15" rx="2" fill="none" stroke="#ccc" stroke-width="1"/></svg>'
-  );
+  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
 export class Tab {
   public id: string;

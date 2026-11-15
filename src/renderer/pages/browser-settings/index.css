@@ -4,7 +4,7 @@
    Settings — DESIGN.md §4.3.
    White page with a 248-px grey sidebar. Each group is a header
    OUTSIDE a grey panel (--n-grouped), then the panel holds the
-   rows. Controls inside panels are white (field / raised shadow);
+   rows. Controls inside panels are white (input / select / raised shadow);
    controls on the white page use the secondary fill. One selection
    style everywhere (--n-accent-soft bg, --n-text-1 text, --n-accent
    icon). System sans for chrome, mono for code and the UA string.
@@ -38,7 +38,7 @@
   overflow-y: auto;
 }
 
-/* Search — white field with the field shadow */
+/* Search — white field with the sidebar field shadow (DESIGN.md §4.3) */
 .sidebar-search {
   position: relative;
   display: flex;
@@ -49,7 +49,7 @@
   background: var(--n-card);
   border: 0;
   border-radius: var(--n-r-control);
-  box-shadow: var(--n-field-shadow);
+  box-shadow: var(--n-sidebar-field-shadow);
   color: var(--n-text-3);
   margin-bottom: 12px;
   transition: box-shadow var(--dur-fast);
@@ -84,6 +84,12 @@
   color: var(--n-text-3);
 }
 
+/* The wrapper draws the field ring (:focus-within); the bare input must not
+   add the global :focus-visible halo inside it (a box inside the box). */
+.sidebar-search-input:focus-visible {
+  box-shadow: none;
+}
+
 /* Nav list */
 .sidebar-nav {
   list-style: none;
@@ -99,6 +105,8 @@
   margin: 0;
 }
 
+/* A tight 16-px line: the body's 19.5-px line sets the label slightly high
+   in the 32-px row. */
 .sidebar-link {
   display: flex;
   align-items: center;
@@ -108,8 +116,9 @@
   border-radius: var(--n-r-control);
   font-family: inherit;
   font-size: 13px;
+  line-height: 16px;
   font-weight: 400;
-  color: var(--n-text-2);
+  color: var(--n-text-1);
   text-decoration: none;
   position: relative;
   transition:
@@ -119,7 +128,7 @@
 
 .sidebar-link:hover {
   background: var(--n-hover);
-  color: var(--n-text-2);
+  color: var(--n-text-1);
   text-decoration: none;
 }
 
@@ -187,8 +196,16 @@
   display: none;
 }
 
+/* A flex column, so sibling margins add up instead of collapsing
+   (title 2 px + first group 22 px = 24 px; 28 px between groups). */
 .settings-section.active {
-  display: block;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sidebar search can show several matching sections; keep them apart. */
+.settings-section.active ~ .settings-section.active {
+  margin-top: 40px;
 }
 
 /* ---- Page header — the section title ------------------- */
@@ -230,13 +247,14 @@
   border: 0;
   border-radius: 0;
   overflow: visible;
-  margin-bottom: 22px;
+  margin: 0;
   padding: 0;
 }
 
+/* 28 px above each group header; 22 px for the first one, under the title */
 .setting-group-header {
-  padding: 0 4px 8px 16px;
-  margin-top: 22px;
+  padding: 0 4px 0 16px;
+  margin: 28px 0 8px;
   border: 0;
   background: transparent;
   display: flex;
@@ -244,8 +262,7 @@
   gap: 16px;
 }
 
-.setting-group:first-child .setting-group-header,
-.settings-section > .setting-group:first-of-type .setting-group-header {
+.page-header + .setting-group > .setting-group-header {
   margin-top: 22px;
 }
 
@@ -277,9 +294,10 @@
   background: var(--n-fill);
   border: 0;
   padding: 1px 5px;
-  border-radius: var(--n-r-icon);
-  font-size: 11px;
-  color: var(--n-text-2);
+  border-radius: var(--n-r-badge);
+  font-size: 11.5px;
+  color: var(--n-text-1);
+  white-space: nowrap;
 }
 
 /* The grey panel that holds the rows */
@@ -290,30 +308,75 @@
   padding: 0;
 }
 
+/* Radio panels: the rows carry their own 12-px padding (no extra inset). */
 .setting-group-body-padded {
-  padding: 4px 0;
+  padding: 0;
 }
 
-/* Ad-blocker: the toggle lives in the header row next to the title.
-   Keep it aligned but off the grey panel. */
+/* Proxy: the radio panel, the manual / PAC forms and the bypass row are
+   siblings in the markup but read as one grey panel: square inner corners
+   and a full-width line above the bypass row. */
+.setting-group-body:has(~ .setting-group-body) {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.setting-group-body ~ .setting-group-body {
+  border-top: 1px solid var(--n-panel-line);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* Ad-blocker: the switch lives in the group header, off the grey panel,
+   bottom-aligned with the description. */
 .setting-group > .setting-group-header > .toggle {
-  align-self: center;
+  align-self: flex-end;
 }
 
 /* ====== FIELD ROWS (label + control) ==================== */
 .setting-toggle-row,
 .setting-action-row {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 16px;
   align-items: center;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--n-panel-line);
+  border-bottom: 1px solid transparent;
+}
+
+/* A row holding a 28-px select is 48 px tall (10 px above and below). */
+.setting-action-row:has(> .form-select) {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+/* Row dividers inside a panel: 1 px --n-panel-line, inset 16 px on the
+   left, drawn in the row's transparent bottom border (DESIGN.md §4.3). */
+.setting-toggle-row::after,
+.setting-action-row::after,
+.sub-setting::after,
+.list-item::after {
+  content: '';
+  position: absolute;
+  left: 16px;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--n-panel-line);
+  pointer-events: none;
 }
 
 .setting-toggle-row:last-child,
 .setting-action-row:last-child {
   border-bottom: 0;
+}
+
+.setting-toggle-row:last-child::after,
+.setting-action-row:last-child::after,
+.sub-setting:last-child::after,
+.list-item:last-child::after {
+  content: none;
 }
 
 .setting-toggle-row > div:first-child,
@@ -327,9 +390,10 @@
   flex-shrink: 0;
 }
 
-/* Labels & descriptions */
+/* Labels & descriptions — Body 13/18, Callout 12/16 */
 .setting-label {
   font-size: 13px;
+  line-height: 18px;
   font-weight: 400;
   color: var(--n-text-1);
   margin: 0;
@@ -338,6 +402,7 @@
 
 .setting-label-sm {
   font-size: 13px;
+  line-height: 18px;
   font-weight: 400;
   color: var(--n-text-1);
   margin: 0;
@@ -356,35 +421,58 @@
   background: var(--n-fill);
   border: 0;
   padding: 1px 5px;
-  border-radius: var(--n-r-icon);
+  border-radius: var(--n-r-badge);
   font-size: 11.5px;
   color: var(--n-text-1);
   font-weight: 400;
   box-shadow: none;
   min-width: 0;
   height: auto;
+  white-space: nowrap;
 }
 
-/* A description that follows a .sub-label inside a group body needs
-   the same 16px inset so it lines up with the label and list rows. */
-#adblocker-details > .setting-description {
-  padding-left: 16px;
-  padding-right: 16px;
-}
-
+/* Sub-section labels inside a panel ("Filter Lists", "Allowed Sites",
+   "Clear on Close"). A later one opens with a full-width line in place of
+   the .mt-md gap. */
 .sub-label {
   padding: 14px 16px 6px;
   font-size: 12px;
+  line-height: 15px;
   color: var(--n-text-2);
   font-weight: 600;
   letter-spacing: 0;
 }
 
-/* Download path display — wraps, never breaks mid-word */
+.sub-label:first-child {
+  padding-top: 12px;
+}
+
+.sub-label:not(:first-child) {
+  margin-top: 0;
+  border-top: 1px solid var(--n-panel-line);
+}
+
+/* A label with a description: 2 px between them, the 6-px bottom inset
+   moves under the description. */
+.sub-label:has(+ .setting-description) {
+  padding-bottom: 0;
+}
+
+.sub-label + .setting-description {
+  margin: 2px 0 0;
+  padding: 0 16px 6px;
+}
+
+/* Download path display — one line, truncated with an ellipsis. A tight
+   16-px line centres it on the buttons; the body's 19.5 px sets it high. */
 .setting-path-value {
+  display: block;
   font-size: 13px;
+  line-height: 16px;
   color: var(--n-text-1);
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ====== TOGGLES / SWITCHES ============================== */
@@ -422,9 +510,12 @@
   left: 2px;
   top: 2px;
   border-radius: var(--n-r-full);
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  transition: transform var(--dur-fast);
+  background: var(--n-card);
+  /* The off knob keeps a hairline on the grey track (DESIGN.md §5.2). */
+  box-shadow: var(--n-knob-shadow-off);
+  transition:
+    transform var(--dur-fast),
+    box-shadow var(--dur-fast);
 }
 
 .toggle input:checked + .toggle-slider {
@@ -434,14 +525,32 @@
 
 .toggle input:checked + .toggle-slider::before {
   transform: translateX(16px);
+  box-shadow: var(--n-knob-shadow);
 }
 
 .toggle input:focus-visible + .toggle-slider {
-  box-shadow: var(--n-focus-ring);
+  box-shadow:
+    inset 0 0 0 1px var(--n-control-edge),
+    var(--n-focus-ring);
 }
 
 .toggle input:checked:focus-visible + .toggle-slider {
   box-shadow: var(--n-focus-ring);
+}
+
+/* Dense list switch (filter lists): 32 x 19, 15-px knob (DESIGN.md §5.2) */
+.list-item .toggle {
+  width: 32px;
+  height: 19px;
+}
+
+.list-item .toggle-slider::before {
+  width: 15px;
+  height: 15px;
+}
+
+.list-item .toggle input:checked + .toggle-slider::before {
+  transform: translateX(13px);
 }
 
 /* ====== RADIO GROUPS ==================================== */
@@ -454,7 +563,7 @@
 .radio-option {
   position: relative;
   display: grid;
-  grid-template-columns: 20px 1fr;
+  grid-template-columns: 16px 1fr;
   gap: 12px;
   align-items: start;
   padding: 12px 16px;
@@ -464,13 +573,18 @@
   border-radius: 0;
 }
 
-/* Dividers under radio rows are inset 44px (past the control). */
+/* Dividers under radio rows are inset 44 px (past the control), drawn in
+   a 1-px gap between the rows. */
+.radio-option:not(:last-child) {
+  margin-bottom: 1px;
+}
+
 .radio-option:not(:last-child)::after {
   content: '';
   position: absolute;
   left: 44px;
   right: 0;
-  bottom: 0;
+  bottom: -1px;
   height: 1px;
   background: var(--n-panel-line);
   pointer-events: none;
@@ -484,12 +598,13 @@
   background: transparent;
 }
 
+/* Radio: 16 px, white with the control edge; on = accent with a 6-px dot */
 .radio-option input[type='radio'] {
   appearance: none;
   -webkit-appearance: none;
-  margin: 1px 0 0;
-  width: 18px;
-  height: 18px;
+  margin: 0;
+  width: 16px;
+  height: 16px;
   border-radius: var(--n-r-full);
   border: 0;
   box-shadow: inset 0 0 0 1px var(--n-control-edge);
@@ -508,13 +623,15 @@
 .radio-option input[type='radio']:checked::after {
   content: '';
   position: absolute;
-  inset: 6px;
+  inset: 5px;
   border-radius: var(--n-r-full);
-  background: #fff;
+  background: var(--n-card);
 }
 
 .radio-option input[type='radio']:focus-visible {
-  box-shadow: var(--n-focus-ring);
+  box-shadow:
+    inset 0 0 0 1px var(--n-control-edge),
+    var(--n-focus-ring);
   outline: none;
 }
 
@@ -522,194 +639,85 @@
   box-shadow: var(--n-focus-ring);
 }
 
+/* Compact two-line radio rows (56 px): the text column starts 1 px above
+   the control so the label's first line centres on it. */
 .radio-content {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
+  margin-top: -1px;
 }
 
 .radio-label {
   font-size: 13px;
   font-weight: 400;
   color: var(--n-text-1);
-  line-height: 18px;
+  line-height: 16px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
 }
 
+/* 2 px under the label, on a tight 15-px line so the row stays 56 px. */
 .radio-description {
   font-size: 12px;
   color: var(--n-text-3);
   margin-top: 2px;
-  line-height: 16px;
+  line-height: 15px;
   padding: 0;
 }
 
-/* Neutral "Recommended" badge — sentence case, no uppercase */
-.badge-recommend {
-  display: inline-flex;
-  align-items: center;
-  height: 18px;
-  padding: 0 7px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0;
-  color: var(--n-text-2);
-  background: var(--n-fill);
-  border: 0;
-  border-radius: var(--n-r-badge);
-  vertical-align: middle;
-  line-height: 1;
-}
-
 /* ====== BUTTONS ========================================= */
-/* Base button — overrides the global default so Settings keeps its
-   32-px page button grammar. Specific variants below. */
-.btn {
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 0 14px;
-  height: 32px;
-  border-radius: var(--n-r-control);
-  border: 0;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--n-fill);
+/* The global .btn family (DESIGN.md §5.1) sets the size, fills, hover and
+   focus ring. Only the Settings differences are below. */
+
+/* Add-forms pair the button with 30-px fields */
+.add-item-form .btn {
+  height: 30px;
+}
+
+/* Reset's label also darkens on hover; the global ghost hover only fills
+   (DESIGN.md §5.1). */
+.setting-action-buttons .btn-ghost:hover:not(:disabled) {
   color: var(--n-text-1);
-  white-space: nowrap;
-  line-height: 1;
-  transition:
-    background var(--dur-fast),
-    box-shadow var(--dur-fast),
-    filter var(--dur-fast);
-}
-
-.btn:hover {
-  background: var(--n-fill-2);
-}
-
-.btn-sm {
-  padding: 0 14px;
-  height: 28px;
-  font-size: 13px;
-}
-
-/* Buttons that sit on the white page use the secondary fill. */
-.btn-secondary {
-  background: var(--n-fill);
-  color: var(--n-text-1);
-}
-
-.btn-secondary:hover {
-  background: var(--n-fill-2);
-}
-
-/* Buttons INSIDE a grey panel are white (raised). */
-.setting-group-body .btn-secondary,
-.sub-setting-panel .btn-secondary,
-.add-item-form .btn-secondary {
-  background: var(--n-card);
-  box-shadow: var(--n-raised-shadow);
-}
-
-.setting-group-body .btn-secondary:hover,
-.sub-setting-panel .btn-secondary:hover,
-.add-item-form .btn-secondary:hover {
-  background: var(--n-card);
-  filter: brightness(0.97);
-}
-
-.btn-primary {
-  background: var(--n-accent);
-  color: #fff;
-}
-
-.btn-primary:hover {
-  background: var(--n-accent-hover);
-}
-
-.btn-ghost {
-  background: transparent;
-  color: var(--n-text-2);
-}
-
-.btn-ghost:hover {
-  background: var(--n-fill);
-  color: var(--n-text-1);
-}
-
-.btn-danger {
-  background: var(--n-fill);
-  color: var(--n-danger);
-}
-
-.btn-danger:hover {
-  background: var(--n-danger-soft);
-}
-
-.btn:focus-visible {
-  outline: none;
-  box-shadow: var(--n-focus-ring);
-}
-
-.setting-group-body .btn-secondary:focus-visible,
-.sub-setting-panel .btn-secondary:focus-visible,
-.add-item-form .btn-secondary:focus-visible {
-  box-shadow: var(--n-raised-shadow), var(--n-focus-ring);
 }
 
 /* ====== FORM ELEMENTS =================================== */
-/* Inside panels these are white with the field shadow. */
+/* Inside panels these are white (DESIGN.md §4.3). Selects are the global
+   <select> pop-up button (--n-select-shadow, the 13-px chevron 8 px from
+   the right, the field ring on focus), here 28 px tall; text fields take
+   the inset --n-input-shadow. */
 .form-select,
 .form-select-sm {
-  font-family: inherit;
-  font-size: 13px;
-  color: var(--n-text-1);
-  background-color: var(--n-card);
-  border: 0;
-  box-shadow: var(--n-field-shadow);
-  border-radius: var(--n-r-control);
-  padding: 0 32px 0 10px;
-  height: 32px;
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23424245' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  min-width: 200px;
-  transition: box-shadow var(--dur-fast);
-}
-
-.form-select-sm {
   height: 28px;
-  font-size: 13px;
-  background-position: right 8px center;
-  min-width: 120px;
-  padding: 0 28px 0 10px;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
-.form-select:focus-visible,
-.form-select-sm:focus-visible {
-  outline: none;
-  box-shadow: var(--n-focus-ring-field);
+.form-select {
+  min-width: 200px;
+}
+
+#search-engine-select {
+  width: 180px;
+  min-width: 0;
+}
+
+#user-agent-select {
+  width: 200px;
 }
 
 .form-input {
   font-family: inherit;
   font-size: 13px;
   padding: 0 10px;
-  height: 32px;
+  height: 30px;
   border: 0;
   border-radius: var(--n-r-control);
   background: var(--n-card);
-  box-shadow: var(--n-field-shadow);
+  box-shadow: var(--n-input-shadow);
   color: var(--n-text-1);
   outline: none;
   transition: box-shadow var(--dur-fast);
@@ -737,29 +745,42 @@
   gap: 8px;
 }
 
-/* PAC form field row inside the grey proxy panel */
+/* PAC form field row inside the grey proxy panel — same grammar as the
+   manual proxy rows (96-px label column at the radio text's 44-px inset). */
 .sub-setting-panel .form-group {
-  padding: 10px 16px;
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 16px;
+  margin: 0;
+  padding: 6px 16px 14px 44px;
   font-size: 13px;
+  line-height: 16px;
+  color: var(--n-text-1);
 }
 
 .sub-setting-panel .form-group .form-input {
-  flex: 1;
   min-width: 0;
 }
 
-/* ====== ITEMS LIST (e.g. specific startup pages) ======= */
+/* ====== ITEMS LIST (startup pages, custom engines, …) === */
 .items-list {
   padding: 0;
 }
 
+/* Rows with a remove button: 9 px above/below the 26-px button, 10 px to
+   the right of it; rows without one (filter lists) keep 10 px / 16 px. */
 .list-item {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 12px;
+  gap: 16px;
   align-items: center;
   padding: 10px 16px;
-  border-bottom: 1px solid var(--n-panel-line);
+  border-bottom: 1px solid transparent;
+}
+
+.list-item:has(.list-item-btn) {
+  padding: 9px 10px 9px 16px;
 }
 
 .list-item:last-child {
@@ -770,6 +791,43 @@
   min-width: 0;
 }
 
+.list-item-text {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--n-text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.list-item-description {
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--n-text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* A custom engine's URL template is code, so it's set in mono (DESIGN.md §3.7) */
+#custom-engines-list .list-item-description {
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 11.5px;
+}
+
+/* Filter-list names are row titles (13 px 500) */
+#filter-lists-container .list-item-text {
+  font-weight: 500;
+}
+
+/* Site rows (cookie exceptions, allowed / blocked sites) render their text
+   in a <span>: make it a block so it gets the 18-px line box and the
+   ellipsis, like the other list rows. */
+.list-item-content > span.list-item-text {
+  display: block;
+}
+
 .list-item-actions {
   display: flex;
   align-items: center;
@@ -777,66 +835,188 @@
   flex-shrink: 0;
 }
 
+/* Remove (×): a quiet 26-px icon button, --n-text-3, hover --n-fill */
+.list-item-btn {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--n-r-icon);
+  background: transparent;
+  color: var(--n-text-3);
+  cursor: pointer;
+  transition:
+    background var(--dur-fast),
+    color var(--dur-fast);
+}
+
+.list-item-btn:hover {
+  background: var(--n-fill);
+  color: var(--n-text-1);
+}
+
+.list-item-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
 .add-item-form {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 8px;
   align-items: center;
-  padding: 12px 16px;
+  padding: 10px 16px 12px;
 }
 
-/* The custom search engine form has a third field (name), so it needs
-   an extra column or the URL input collapses and the button wraps. */
+/* The custom search engine form has a third field (name, 170 px). */
 #add-engine-form {
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 170px 1fr auto;
+}
+
+/* A divider (inset 16 px) between a non-empty list and its add-form */
+.items-list:not(:empty) + .add-item-form {
+  border-top: 1px solid transparent;
+}
+
+.items-list:not(:empty) + .add-item-form::before {
+  content: '';
+  position: absolute;
+  left: 16px;
+  right: 0;
+  top: -1px;
+  height: 1px;
+  background: var(--n-panel-line);
+  pointer-events: none;
+}
+
+/* Startup pages and custom engines sit directly in their group: the list
+   and the add-form together read as one grey panel. */
+.setting-group > .items-list,
+.setting-group > .add-item-form {
+  background: var(--n-grouped);
+}
+
+.setting-group > .items-list:not(:empty) {
+  border-radius: var(--n-r-panel) var(--n-r-panel) 0 0;
+}
+
+.setting-group > .items-list:not(:empty) + .add-item-form {
+  border-radius: 0 0 var(--n-r-panel) var(--n-r-panel);
+}
+
+.setting-group > .items-list:empty + .add-item-form {
+  border-radius: var(--n-r-panel);
 }
 
 /* ====== SUB-SETTINGS (nested panels) ==================== */
 .sub-setting {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 16px;
   align-items: center;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--n-panel-line);
+  border-bottom: 1px solid transparent;
 }
 
 .sub-setting:last-child {
   border-bottom: 0;
 }
 
-/* List-style sub-settings (allow / block / exception lists) stack their
-   label, description, list and add-form vertically instead of using the
-   default label|control grid, which would split them into a 2x2 layout. */
+/* Custom UA string: a long free-text value fills the row after its label
+   (like the add-forms and "No proxy for"), instead of a 165-px field. */
+#custom-ua-container {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+/* List-style sub-sections under a radio group (cookie exceptions, pop-up
+   allow / block lists) stack vertically instead of using the label | control
+   grid. Each is the last block of its panel, so it draws no row divider. */
 #cookie-exceptions-container,
 #popup-allowed-container,
 #popup-blocked-container {
   display: block;
-  padding: 12px 16px;
+  padding: 0;
+  border-top: 1px solid var(--n-panel-line);
+  border-bottom: 0;
 }
 
-#cookie-exceptions-container .list-item,
-#popup-allowed-container .list-item,
-#popup-blocked-container .list-item,
-#cookie-exceptions-container .add-item-form,
-#popup-allowed-container .add-item-form,
-#popup-blocked-container .add-item-form {
-  padding-left: 0;
-  padding-right: 0;
+#cookie-exceptions-container::after,
+#popup-allowed-container::after,
+#popup-blocked-container::after {
+  content: none;
 }
 
-/* Manual proxy / PAC forms sit between grey panels on the white page;
-   style them as their own grey panel so the detail rows read as part of
-   the Proxy group. Their white inputs keep the field shadow. */
+#cookie-exceptions-container > .setting-label,
+#popup-allowed-container > .setting-label,
+#popup-blocked-container > .setting-label {
+  padding: 14px 16px 0;
+  font-size: 12px;
+  line-height: 15px;
+  font-weight: 600;
+  color: var(--n-text-2);
+}
+
+#cookie-exceptions-container > .setting-description,
+#popup-allowed-container > .setting-description,
+#popup-blocked-container > .setting-description {
+  margin: 2px 0 0;
+  padding: 0 16px 6px;
+}
+
+/* Manual proxy / PAC forms sit between the proxy radio panel and the
+   bypass row; they continue that one grey panel (square corners, no gap).
+   Their rows are indented to the radio text (44 px). */
 .sub-setting-panel {
+  position: relative;
   background: var(--n-grouped);
   border: 0;
-  border-radius: var(--n-r-panel);
-  margin: -12px 0 22px;
-  padding: 4px 0;
+  border-radius: 0;
+  margin: 0;
+  padding: 0;
+}
+
+/* The manual form follows the last (PAC) radio row in the markup, so it
+   opens with the same 44-px-inset divider the radio rows use. */
+#manual-proxy-form {
+  padding-top: 8px;
+}
+
+#manual-proxy-form::before {
+  content: '';
+  position: absolute;
+  left: 44px;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: var(--n-panel-line);
+  pointer-events: none;
 }
 
 /* ====== RETENTION (Privacy section) ===================== */
+/* The retention periods continue the "Auto-delete" row, so neither that
+   row nor the periods draw a divider. */
+.setting-toggle-row:has(+ #retention-settings) {
+  border-bottom: 0;
+}
+
+.setting-toggle-row:has(+ #retention-settings)::after {
+  content: none;
+}
+
+#retention-settings {
+  display: block;
+  padding: 0 0 8px;
+  border-bottom: 0;
+}
+
+#retention-settings::after {
+  content: none;
+}
+
 .retention-grid {
   display: flex;
   flex-direction: column;
@@ -848,13 +1028,10 @@
   grid-template-columns: 1fr auto;
   gap: 16px;
   align-items: center;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--n-panel-line);
+  padding: 6px 16px 6px 32px;
   font-size: 13px;
-}
-
-.retention-row:last-child {
-  border-bottom: 0;
+  line-height: 18px;
+  color: var(--n-text-1);
 }
 
 /* ====== PROXY (Network section) ========================= */
@@ -870,18 +1047,39 @@
   gap: 8px;
 }
 
+/* Manual proxy rows: no dividers, 6-px rhythm, 30-px fields. The labels
+   take a tight 16-px line, which centres them on the fields (the body's
+   19.5 px sets them high). */
 .proxy-row {
   display: grid;
   grid-template-columns: 96px 1fr;
   gap: 16px;
   align-items: center;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--n-panel-line);
+  padding: 6px 16px 6px 44px;
   font-size: 13px;
+  line-height: 16px;
+  color: var(--n-text-1);
 }
 
 .proxy-row:last-child {
-  border-bottom: 0;
+  padding-bottom: 14px;
+}
+
+.proxy-inputs .form-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.proxy-inputs .form-input-sm {
+  flex: none;
+  width: 76px;
+}
+
+.proxy-inputs .form-select-sm {
+  flex: none;
+  width: 96px;
+  min-width: 0;
+  height: 30px;
 }
 
 /* ====== USER AGENT — mono "Current" strip =============== */
@@ -890,6 +1088,17 @@
 .setting-group:has(> .ua-preview-strip) > .setting-group-body {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
+}
+
+/* The body's last row also gets the inset divider, because the strip
+   follows it. (While the custom-UA field is hidden it is the last child,
+   so the Identity row above it draws the divider instead — never both.) */
+.setting-group-body:has(+ .ua-preview-strip) > :last-child {
+  border-bottom: 1px solid transparent;
+}
+
+.setting-group-body:has(+ .ua-preview-strip) > :last-child::after {
+  content: '';
 }
 
 .ua-preview-strip {
@@ -902,16 +1111,17 @@
   grid-template-columns: 64px 1fr;
   gap: 16px;
   align-items: start;
-  border-top: 1px solid var(--n-panel-line);
 }
 
+/* 17-px line box: "Current" centres on the UA string's first line */
 .ua-preview-label {
   font-size: 12px;
+  line-height: 17px;
   color: var(--n-text-3);
   letter-spacing: 0;
   font-weight: 400;
   margin: 0;
-  padding: 1px 0 0;
+  padding: 0;
 }
 
 .ua-preview-value {
@@ -938,6 +1148,7 @@
 
 .shortcuts-filter-label {
   font-size: 12px;
+  line-height: 15px;
   letter-spacing: 0;
   font-weight: 600;
   color: var(--n-text-3);
@@ -945,11 +1156,16 @@
   flex-shrink: 0;
 }
 
+/* Keep the eight chips on one line: the row may run past the 680-px column
+   into the white margin, up to 16 px short of the window edge, and wraps
+   only when the window is too narrow for that. */
 .shortcuts-filter {
   display: flex;
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
+  width: max-content;
+  max-width: min(calc(50vw + 200px), calc(100vw - 264px));
 }
 
 .shortcuts-filter .cat-pill {
@@ -987,10 +1203,12 @@
   box-shadow: var(--n-focus-ring);
 }
 
-/* Selection style for the chosen chip (the renderer adds .active). */
+/* Selection style for the chosen chip (index.ts adds .active); its label
+   is 500, like the Bookmarks / Downloads chips (DESIGN.md §5.3). */
 .shortcuts-filter .cat-pill.active {
   background: var(--n-accent-soft);
   color: var(--n-text-1);
+  font-weight: 500;
   border-color: transparent;
 }
 
@@ -1033,7 +1251,17 @@
   box-shadow: none;
 }
 
+/* The wrapper draws the field ring; the bare input must not add the global
+   :focus-visible halo inside it (a box inside the box). */
+.shortcuts-search .form-input:focus-visible {
+  box-shadow: none;
+}
+
+/* 15-px magnifier, like every page search field (DESIGN.md §5.2) */
 .shortcuts-search-icon {
+  flex: none;
+  width: 15px;
+  height: 15px;
   color: var(--n-text-3);
   position: static;
   transform: none;
@@ -1047,41 +1275,83 @@
   overflow: hidden;
 }
 
+/* Columns: Action fills, Category 170 px, Shortcut 150 px, with 16-px gaps
+   and insets. Each cell carries the 16-px gap on its left, so the column
+   widths below include it. */
 .shortcuts-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
 }
 
+.shortcuts-table th,
+.shortcuts-table td {
+  padding: 0 0 0 16px;
+  text-align: left;
+}
+
+.shortcuts-table th:nth-child(2) {
+  width: 186px;
+}
+
+.shortcuts-table th:nth-child(3) {
+  width: 182px;
+}
+
+.shortcuts-table th:nth-child(3),
+.shortcuts-table td:nth-child(3) {
+  padding-right: 16px;
+}
+
+/* Header row: 12 px 600 --n-text-3, 10 px above and below, full-width line */
 .shortcuts-table thead th {
+  padding-top: 10px;
+  padding-bottom: 10px;
   font-size: 12px;
+  line-height: 15px;
   letter-spacing: 0;
   color: var(--n-text-3);
   font-weight: 600;
-  text-align: left;
-  padding: 10px 16px;
   border-bottom: 1px solid var(--n-panel-line);
   background: transparent;
 }
 
-.shortcuts-table thead th:nth-child(2) {
-  width: 170px;
-}
-
-.shortcuts-table thead th:nth-child(3) {
-  width: 150px;
-}
-
+/* Rows: 40 px plus a 1-px --n-panel-line inset 16 px (the Action cell draws
+   its part with ::after, the other cells with their bottom border). */
 .shortcuts-table tbody td {
-  padding: 9px 16px;
+  height: 41px;
   border-bottom: 1px solid var(--n-panel-line);
   vertical-align: middle;
   font-family: inherit;
   font-size: 13px;
+  line-height: 16px;
   color: var(--n-text-1);
 }
 
+.shortcuts-table tbody td:first-child {
+  position: relative;
+  border-bottom-color: transparent;
+}
+
+.shortcuts-table tbody td:first-child::after {
+  content: '';
+  position: absolute;
+  left: 16px;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--n-panel-line);
+  pointer-events: none;
+}
+
 .shortcuts-table tbody tr:last-child td {
+  height: 40px;
   border-bottom: 0;
+}
+
+.shortcuts-table tbody tr:last-child td:first-child::after {
+  content: none;
 }
 
 .shortcuts-table tbody tr:hover {
@@ -1098,32 +1368,22 @@
   background: var(--n-fill);
   color: var(--n-text-2);
   font-size: 12px;
+  line-height: 15px;
   font-weight: 400;
   white-space: nowrap;
 }
 
-/* Keycap — one per key (the renderer emits one <span class="keycap">
-   per key). Reuse the global keycap look but at the Settings size. */
-.shortcuts-table .keycap,
-kbd.keycap,
-.keycap {
+/* A row of keycaps (the global .keycap, one per key), 4 px apart
+   (DESIGN.md §5.3). */
+.shortcut-keys {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 5px;
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--n-text-2);
-  background: var(--n-fill-2);
-  border: 0;
-  border-radius: var(--n-r-key);
-  box-shadow: none;
-  letter-spacing: 0;
-  line-height: 1;
-  margin: 0 2px 0 0;
+  gap: 4px;
+}
+
+/* A shortcut with no binding */
+.shortcut-none {
+  color: var(--n-text-4);
+  font-style: italic;
 }
 
 /* ====== DEVELOPER — inline code chips =================== */
@@ -1133,7 +1393,7 @@ kbd.keycap,
   font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
   background: var(--n-fill);
   border: 0;
-  border-radius: var(--n-r-icon);
+  border-radius: var(--n-r-badge);
   padding: 1px 5px;
   font-size: 11.5px;
   font-weight: 400;
@@ -1141,17 +1401,36 @@ kbd.keycap,
   box-shadow: none;
   min-width: 0;
   height: auto;
+  white-space: nowrap;
+}
+
+/* The long, chip-bearing description: a 19-px line box gives the chips
+   room, and the switch aligns with the first line instead of centring.
+   The label takes a tight 16-px line and the description starts 3 px
+   under it, which keeps the taller row compact. */
+#section-developer .setting-toggle-row {
+  align-items: start;
+}
+
+#section-developer .setting-label {
+  line-height: 16px;
+}
+
+#section-developer .setting-description {
+  margin-top: 3px;
+  line-height: 19px;
 }
 
 /* ====== PERMISSIONS ===================================== */
-/* Search field on the white page — filled */
+/* Search field on the white page — filled, 15-px magnifier; the refresh
+   button sits 4 px from its right edge. */
 .permissions-search {
   position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
   height: 32px;
-  padding: 0 10px;
+  padding: 0 4px 0 10px;
   background: var(--n-fill);
   border: 0;
   border-radius: var(--n-r-control);
@@ -1160,11 +1439,16 @@ kbd.keycap,
   transition: box-shadow var(--dur-fast);
 }
 
-.permissions-search:focus-within {
+/* The field ring shows while the text field has focus — not when the
+   refresh button inside the wrapper is clicked or tabbed to. */
+.permissions-search:has(> input:focus) {
   box-shadow: var(--n-focus-ring-field);
 }
 
 .permissions-search-icon {
+  flex: none;
+  width: 15px;
+  height: 15px;
   color: var(--n-text-3);
   position: static;
   transform: none;
@@ -1185,65 +1469,90 @@ kbd.keycap,
   box-shadow: none;
 }
 
+/* The wrapper draws the field ring; the bare input must not add the global
+   :focus-visible halo inside it (a box inside the box). */
+.permissions-search .form-input:focus-visible {
+  box-shadow: none;
+}
+
+/* Refresh: a quiet 26-px icon button with a 14-px --n-text-2 icon */
+.permissions-search .btn {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: var(--n-r-icon);
+  color: var(--n-text-2);
+}
+
+.permissions-search .btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* The site panels and the empty state sit 14 px under the search field
+   and 14 px apart. */
+#permissions-list > .permission-origin-group,
 .permissions-empty {
-  padding: 64px 20px;
+  margin-top: 14px;
+}
+
+/* Empty state — a grey panel, centred: a 30-px --n-text-4 shield, the
+   title (14 px 600) and a 13/19 hint with the choices in --n-text-1. */
+.permissions-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 44px 24px 46px;
   text-align: center;
+  background: var(--n-grouped);
+  border-radius: var(--n-r-panel);
   color: var(--n-text-3);
 }
 
 .permissions-empty-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--n-r-control);
-  background: var(--n-well);
-  border: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--n-text-2);
-  margin-bottom: 12px;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  color: var(--n-text-4);
 }
 
 .permissions-empty-title {
+  margin: 6px 0 0;
   font-size: 14px;
+  line-height: 18px;
   font-weight: 600;
   color: var(--n-text-1);
-  letter-spacing: -0.1px;
-  margin: 0 0 6px;
 }
 
 .permissions-empty-hint {
-  font-size: 12px;
-  color: var(--n-text-3);
+  max-width: 380px;
   margin: 0;
-}
-
-.permissions-empty-hint b {
-  color: var(--n-text-1);
-  font-weight: 500;
-}
-
-.permissions-footer {
-  padding: 12px 0 0;
-  font-size: 12px;
+  font-size: 13px;
+  line-height: 19px;
   color: var(--n-text-3);
-  text-align: right;
+}
+
+.permissions-empty-hint strong {
+  color: var(--n-text-1);
+  font-weight: 600;
+}
+
+/* "Clear All Permissions" sits on the white page: right-aligned, 16 px
+   under the last site, secondary fill, 30 px tall. */
+.permissions-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding: 0;
+}
+
+.permissions-footer .btn {
+  height: 30px;
 }
 
 /* Permission entry (flat list fallback) */
-.permission-entry {
-  display: grid;
-  grid-template-columns: auto 1fr auto auto;
-  align-items: center;
-  gap: 12px;
-  padding: 7px 12px 7px 16px;
-  border-bottom: 1px solid var(--n-panel-line);
-}
-
-.permission-entry:last-child {
-  border-bottom: 0;
-}
-
 .permission-entry-favicon {
   width: 18px;
   height: 18px;
@@ -1256,7 +1565,7 @@ kbd.keycap,
 .permission-entry-favicon svg {
   width: 16px;
   height: 16px;
-  border-radius: 2px;
+  border-radius: var(--n-r-key);
 }
 
 .permission-entry-origin {
@@ -1269,43 +1578,42 @@ kbd.keycap,
   min-width: 0;
 }
 
-.permission-entry-label {
-  font-size: 13px;
-  color: var(--n-text-1);
-  letter-spacing: 0;
-}
-
-.permission-entry-decision .form-select-sm {
-  min-width: 120px;
-}
-
-/* Origin group — a grey panel grouping all permissions for one site */
+/* Origin group: one grey panel per site. Its dividers are inset 44 px, to
+   the permission label text. */
 .permission-origin-group {
-  margin-bottom: 16px;
   border: 0;
   border-radius: var(--n-r-panel);
   background: var(--n-grouped);
   overflow: hidden;
 }
 
-.permission-origin-group:last-child {
-  margin-bottom: 0;
-}
-
 .permission-origin-header {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
   padding: 10px 12px 10px 16px;
   background: transparent;
-  border-bottom: 1px solid var(--n-panel-line);
+  border-bottom: 1px solid transparent;
+}
+
+.permission-origin-header::after,
+.permission-entry:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 44px;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--n-panel-line);
+  pointer-events: none;
 }
 
 .permission-origin-title {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
 }
 
@@ -1313,13 +1621,14 @@ kbd.keycap,
   flex-shrink: 0;
   width: 16px;
   height: 16px;
-  border-radius: 2px;
+  border-radius: var(--n-r-key);
   object-fit: contain;
   color: var(--n-text-2);
 }
 
 .permission-origin-name {
   font-size: 13px;
+  line-height: 16px;
   font-weight: 600;
   color: var(--n-text-1);
   white-space: nowrap;
@@ -1330,15 +1639,100 @@ kbd.keycap,
 
 .permission-origin-actions {
   flex-shrink: 0;
+  display: flex;
+}
+
+/* "Remove All" is an action inside the panel: the global .btn-raised,
+   26 px tall. */
+.permission-remove-all-btn {
+  height: 26px;
+}
+
+/* Permission row: 16-px --n-text-2 icon, 12 px, the label; then the
+   96 x 26 select and, 6 px after it, the 26-px remove button. */
+.permission-entry {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 7px 12px 7px 16px;
+  border-bottom: 1px solid transparent;
+}
+
+.permission-entry:last-child {
+  border-bottom: 0;
+}
+
+.permission-entry-icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-right: 12px;
+  color: var(--n-text-2);
+}
+
+.permission-entry-label {
+  flex: 1;
+  min-width: 0;
+  margin-right: 16px;
+  font-size: 13px;
+  line-height: 16px;
+  color: var(--n-text-1);
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.permission-entry-decision {
+  flex: none;
+  display: flex;
+  margin-right: 6px;
+}
+
+.permission-entry-decision .form-select-sm {
+  width: 96px;
+  min-width: 0;
+  height: 26px;
+}
+
+/* Remove (×): a quiet 26-px icon button, --n-text-3, hover --n-fill */
+.permission-entry-remove {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--n-r-icon);
+  background: transparent;
+  color: var(--n-text-3);
+  cursor: pointer;
+  transition:
+    background var(--dur-fast),
+    color var(--dur-fast);
+}
+
+.permission-entry-remove:hover {
+  background: var(--n-fill);
+  color: var(--n-text-1);
+}
+
+.permission-entry-remove svg {
+  width: 14px;
+  height: 14px;
 }
 
 /* ====== CHECKBOX OPTIONS (dialogs etc.) ================ */
+/* 26-px rows, the label 9 px after the box */
 .checkbox-option {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 0;
+  gap: 9px;
+  min-height: 26px;
+  padding: 0;
   font-size: 13px;
+  line-height: 16px;
   color: var(--n-text-1);
   cursor: pointer;
 }
@@ -1346,6 +1740,7 @@ kbd.keycap,
 .checkbox-option input[type='checkbox'] {
   appearance: none;
   -webkit-appearance: none;
+  margin: 0;
   width: 16px;
   height: 16px;
   border-radius: var(--n-r-key);
@@ -1372,7 +1767,7 @@ kbd.keycap,
   top: 2px;
   width: 4px;
   height: 8px;
-  border: solid #fff;
+  border: solid var(--n-on-accent);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
@@ -1397,7 +1792,12 @@ kbd.keycap,
   z-index: 1000;
 }
 
+/* Title, field, option list and actions stack 14 px apart (16 px above
+   the actions). */
 .dialog-box {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   background: var(--n-menu-bg);
   backdrop-filter: var(--n-menu-blur);
   -webkit-backdrop-filter: var(--n-menu-blur);
@@ -1405,7 +1805,7 @@ kbd.keycap,
   border-radius: var(--n-r-dialog);
   padding: 20px;
   width: 100%;
-  max-width: 440px;
+  max-width: 420px;
   box-shadow: var(--n-menu-shadow);
 }
 
@@ -1415,34 +1815,59 @@ kbd.keycap,
   font-weight: 600;
   color: var(--n-text-1);
   letter-spacing: -0.01em;
-  margin: 0 0 8px;
+  margin: 0;
 }
 
 .dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   font-size: 13px;
   color: var(--n-text-2);
   line-height: 1.5;
-  margin: 0 0 16px;
 }
 
+/* "Time range": a 12-px 500 field label, 6 px above the select */
+#clear-data-dialog .form-group {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+}
+
+#clear-data-dialog .form-group > .setting-label {
+  font-size: 12px;
+  line-height: 15px;
+  font-weight: 500;
+  color: var(--n-text-2);
+}
+
+/* The options sit in one white card on the frosted dialog (DESIGN.md §3.8). */
 .dialog-checkboxes {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin: 0 0 20px;
+  padding: 6px 12px;
+  background: var(--n-card);
+  border-radius: var(--n-r-control);
+  box-shadow: var(--n-card-shadow);
 }
 
 .dialog-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+  margin-top: 2px;
 }
 
 /* ====== REDUCED MOTION ================================== */
+/* The Clear Data dialog sits outside .settings-layout, so it's listed too. */
 @media (prefers-reduced-motion: reduce) {
   .settings-layout *,
   .settings-layout *::before,
-  .settings-layout *::after {
+  .settings-layout *::after,
+  .dialog-overlay *,
+  .dialog-overlay *::before,
+  .dialog-overlay *::after {
     transition: none !important;
     animation: none !important;
   }

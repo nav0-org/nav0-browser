@@ -82,20 +82,12 @@ body.is-private .permission-strip {
 
 @media (prefers-reduced-motion: no-preference) {
   .perm-btn {
-    transition:
-      background-color 0.15s,
-      filter 0.15s;
+    transition: background-color var(--dur-fast);
   }
 }
 
-.perm-btn-allow {
-  background-color: var(--n-accent);
-  color: #fff;
-}
-
-.perm-btn-allow:hover {
-  filter: brightness(0.95);
-}
+/* "Allow Once" is the strip's one primary action: its accent fill, white
+   label and hover come from the shared .btn-primary (index.html). */
 
 .perm-btn-always-allow {
   background-color: var(--n-fill-2);

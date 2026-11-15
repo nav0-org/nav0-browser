@@ -9,15 +9,9 @@ createIcons({ icons });
 
 // --- Constants ---
 const PAGE_SIZE = 100;
-// Slate data ramp (--n-data-0..4) from the Nav0 design system — used for
-// both the heatmap cells and the legend swatches.
-const HEATMAP_LEVELS = [
-  'var(--n-data-0)',
-  'var(--n-data-1)',
-  'var(--n-data-2)',
-  'var(--n-data-3)',
-  'var(--n-data-4)',
-];
+// Activity-map steps 0–4. Each step maps to a `.heat-N` class in index.css
+// (the --n-data-0…4 ramp), used by both the map cells and the legend swatches.
+const HEATMAP_LEVELS = [0, 1, 2, 3, 4];
 
 // Per-category lucide icon for the "By category" panel rows.
 const CATEGORY_ICONS: Record<string, string> = {
@@ -48,6 +42,36 @@ function getCategoryForDomain(domain: string): string {
     if (domain.endsWith('.' + d)) return cat;
   }
   return 'other';
+}
+
+// createIcons() re-renders every icon on the page, so batch the calls that
+// favicon fallbacks trigger into one per frame.
+let iconRefreshQueued = false;
+function queueIconRefresh(): void {
+  if (iconRefreshQueued) return;
+  iconRefreshQueued = true;
+  requestAnimationFrame(() => {
+    iconRefreshQueued = false;
+    createIcons({ icons });
+  });
+}
+
+// The page CSP has no 'unsafe-inline', so an inline onerror="…" never runs and
+// a missing favicon showed the broken-image glyph. Wire the intended fallback
+// (a Lucide globe in place of the image) from script instead.
+function attachFaviconFallbacks(root: ParentNode, selector: string, iconSize: number): void {
+  root.querySelectorAll<HTMLImageElement>(selector).forEach((img) => {
+    img.addEventListener(
+      'error',
+      () => {
+        const wrap = img.parentElement;
+        if (!wrap) return;
+        wrap.innerHTML = `<i data-lucide="globe" width="${iconSize}" height="${iconSize}"></i>`;
+        queueIconRefresh();
+      },
+      { once: true }
+    );
+  });
 }
 
 // --- State ---
@@ -130,7 +154,7 @@ async function loadHistoryPage(): Promise<void> {
   currentSearchTerm = searchInput.value || '';
 
   const loadingEl = document.getElementById('loading-indicator') as HTMLElement;
-  loadingEl.style.display = 'block';
+  loadingEl.hidden = false;
 
   const data: BrowsingHistoryRecord[] = await window.BrowserAPI.fetchBrowsingHistory(
     window.BrowserAPI.appWindowId,
@@ -139,7 +163,7 @@ async function loadHistoryPage(): Promise<void> {
     currentOffset
   );
 
-  loadingEl.style.display = 'none';
+  loadingEl.hidden = true;
 
   if (data.length < PAGE_SIZE) hasMore = false;
 
@@ -171,10 +195,9 @@ function renderAll(): void {
   renderCategoryChart();
 
   const hasEntries = allEntries.length > 0;
-  noHistory.style.display = hasEntries ? 'none' : 'block';
-  // Empty string clears the inline style so the CSS rule (inline-flex) applies.
-  deleteAllBtn.style.display = hasEntries ? '' : 'none';
-  if (historyFooter) historyFooter.style.display = hasEntries ? 'block' : 'none';
+  noHistory.hidden = hasEntries;
+  deleteAllBtn.hidden = !hasEntries;
+  if (historyFooter) historyFooter.hidden = !hasEntries;
 }
 
 // --- Day grouping (flat, no sessions) ---
@@ -220,14 +243,17 @@ function renderHistoryList(): void {
     const dayDate = new Date(dg.entries[0].createdDate);
     const daysAgo = Math.floor((Date.now() - dayDate.getTime()) / 86400000);
     // For today / yesterday / this-week, prepend the relative label to the
-    // absolute date so it reads "Today · Wednesday, May 20".
+    // absolute date so it reads "Today · Wednesday, May 20". The relative day is
+    // the heading; the date after it is secondary text (DESIGN.md §4.2).
     const absoluteDate = dayDate.toLocaleDateString([], {
       weekday: 'long',
       month: 'long',
       day: 'numeric',
     });
-    const dayLabelText = daysAgo < 7 ? `${dg.label} · ${absoluteDate}` : absoluteDate;
-    dateLabel.innerHTML = `<span class="day-label">${dayLabelText}</span>`;
+    dateLabel.innerHTML =
+      daysAgo < 7
+        ? `<span class="day-label">${dg.label}</span> <span class="day-date">· ${absoluteDate}</span>`
+        : `<span class="day-label">${absoluteDate}</span>`;
     historyList.appendChild(dateLabel);
 
     for (const entry of dg.entries) {
@@ -261,7 +287,7 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
 
   row.innerHTML = `
     <span class="entry-time">${time}</span>
-    <div class="entry-favicon"><img src="${faviconUrl}" width="18" height="18" onerror="this.parentElement.innerHTML='<i data-lucide=\\'globe\\' width=\\'18\\' height=\\'18\\'></i>'"></div>
+    <div class="entry-favicon"><img src="${faviconUrl}" width="18" height="18"></div>
     <div class="entry-content">
       <span class="entry-title" title="${escapeHtml(entry.title)}">${escapeHtml(entry.title)}</span>
       <span class="entry-domain">${escapeHtml(entry.topLevelDomain)}</span>
@@ -270,6 +296,7 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
     ${durationHtml}
     <button class="entry-delete-btn" title="Remove"><i data-lucide="x" width="14" height="14"></i></button>
   `;
+  attachFaviconFallbacks(row, '.entry-favicon img', 18);
 
   row.querySelector('.entry-title')?.addEventListener('click', () => {
     window.BrowserAPI.createTab(window.BrowserAPI.appWindowId, entry.url, true);
@@ -283,15 +310,15 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
     renderDomainChart();
     renderCategoryChart();
     if (allEntries.length === 0) {
-      noHistory.style.display = 'block';
-      deleteAllBtn.style.display = 'none';
+      noHistory.hidden = false;
+      deleteAllBtn.hidden = true;
     }
   });
 
   return row;
 }
 
-// --- Heatmap (responsive SVG via viewBox) ---
+// --- Heatmap (cell grid, natural size; scrolls sideways if the page is narrow) ---
 function renderHeatmap(
   stats: Array<{ date: string; count: number; activeDuration: number }>
 ): void {
@@ -330,7 +357,9 @@ function renderHeatmap(
     if (m !== lastMonth) {
       monthLabels.push({
         month: cursor.toLocaleDateString([], { month: 'short' }),
-        weekIndex: weeks.length,
+        // Label the month's first full week (the column starting on its first
+        // Sunday), so a label never sits over the tail of the previous month.
+        weekIndex: cursor.getDay() === 0 ? weeks.length : weeks.length + 1,
       });
       lastMonth = m;
     }
@@ -351,12 +380,9 @@ function renderHeatmap(
   }
   if (currentWeek.length) weeks.push(currentWeek);
 
-  const cellSize = 11;
-  const cellGap = 2;
-  const dayLabelW = 28;
-  const topPad = 18;
-  const gridW = weeks.length * (cellSize + cellGap);
-  const gridH = 7 * (cellSize + cellGap);
+  // Cell size, gaps and label type live in index.css (.heatmap-*): 11 px cells,
+  // 3 px gaps. The 14 px week pitch is only needed here to space month labels.
+  const weekPitch = 14;
   const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   function getLevel(count: number): number {
@@ -368,60 +394,54 @@ function renderHeatmap(
     return 4;
   }
 
-  let svgContent = '';
-
-  // Month labels — skip labels that are too close together
+  // Month labels — one slot per week column; each label sits over its month's
+  // first full week. Skip labels that are too close together.
+  const monthSlots: string[] = weeks.map(() => '');
   let lastLabelX = -Infinity;
   const minLabelGap = 30;
   for (const m of monthLabels) {
-    const x = dayLabelW + m.weekIndex * (cellSize + cellGap);
-    if (x - lastLabelX < minLabelGap) continue;
-    svgContent += `<text x="${x}" y="12" font-size="9" fill="var(--n-text-3)">${m.month}</text>`;
+    const x = m.weekIndex * weekPitch;
+    // A month that began in the current, partial week has no full week yet.
+    if (m.weekIndex >= weeks.length || x - lastLabelX < minLabelGap) continue;
+    monthSlots[m.weekIndex] = m.month;
     lastLabelX = x;
   }
 
-  // Day labels — right-aligned next to the cell grid.
-  for (let i = 0; i < dayLabels.length; i++) {
-    svgContent += `<text x="${dayLabelW - 6}" y="${topPad + i * (cellSize + cellGap) + cellSize - 1}" font-size="8" text-anchor="end" fill="var(--n-text-3)">${dayLabels[i]}</text>`;
-  }
-
-  // Cells
-  for (let wi = 0; wi < weeks.length; wi++) {
-    for (const day of weeks[wi]) {
-      const level = getLevel(day.count);
-      const isToday = day.date.toDateString() === now.toDateString();
-      const x = dayLabelW + wi * (cellSize + cellGap);
-      const y = topPad + day.dow * (cellSize + cellGap);
-      // Per Nav0 design system: today's cell is just the standard fill — no ring.
-      void isToday;
-      svgContent += `<rect class="heatmap-cell" x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" rx="2" style="fill:${HEATMAP_LEVELS[level]}" data-label="${day.label}" data-count="${day.count}" data-active="${day.active}" />`;
+  // Cells — the grid fills column by column (Sun to Sat), one column per week.
+  // Today's cell is the standard fill; only the hovered cell gets a ring.
+  let cellsHtml = '';
+  for (const week of weeks) {
+    for (const day of week) {
+      cellsHtml += `<span class="heatmap-cell heat-${getLevel(day.count)}" data-label="${day.label}" data-count="${day.count}" data-active="${day.active}"></span>`;
     }
   }
-
-  const svgW = dayLabelW + gridW + 4;
-  const svgH = topPad + gridH + 4;
 
   heatmapContainer.innerHTML = `
     <div class="heatmap-header">
       <span class="heatmap-summary">${totalPages.toLocaleString()} pages visited in the last year</span>
     </div>
     <div class="heatmap-scroll-area">
-      <svg viewBox="0 0 ${svgW} ${svgH}" preserveAspectRatio="xMinYMid meet">${svgContent}</svg>
+      <div class="heatmap-chart">
+        <div class="heatmap-months">${monthSlots.map((m) => `<span>${m}</span>`).join('')}</div>
+        <div class="heatmap-body">
+          <div class="heatmap-days">${dayLabels.map((d) => `<span>${d}</span>`).join('')}</div>
+          <div class="heatmap-cells">${cellsHtml}</div>
+        </div>
+      </div>
       <div class="heatmap-legend">
         <span class="heatmap-legend-label">less</span>
-        ${HEATMAP_LEVELS.map((c) => `<div class="heatmap-legend-cell" style="background:${c}"></div>`).join('')}
-        <span class="heatmap-legend-label" style="margin-left:4px">more</span>
+        ${HEATMAP_LEVELS.map((l) => `<span class="heatmap-legend-cell heat-${l}"></span>`).join('')}
+        <span class="heatmap-legend-label">more</span>
       </div>
     </div>
   `;
 
   // Tooltip behavior
-  const svgEl = heatmapContainer.querySelector('svg')!;
-  const scrollArea = heatmapContainer.querySelector('.heatmap-scroll-area') as HTMLElement;
+  const cellsEl = heatmapContainer.querySelector('.heatmap-cells') as HTMLElement;
   let tooltip: HTMLElement | null = null;
 
-  svgEl.addEventListener('mouseover', (e) => {
-    const target = e.target as SVGElement;
+  cellsEl.addEventListener('mouseover', (e) => {
+    const target = e.target as HTMLElement;
     if (!target.classList.contains('heatmap-cell')) return;
     const label = target.getAttribute('data-label') || '';
     const count = parseInt(target.getAttribute('data-count') || '0');
@@ -435,15 +455,16 @@ function renderHeatmap(
       heatmapContainer.appendChild(tooltip);
     }
     tooltip.innerHTML = `<div class="heatmap-tooltip-title">${label}</div><div class="heatmap-tooltip-sub">${count === 0 ? 'no activity' : `${count} pages \u00b7 ${FormatUtils.formatDuration(active)} active`}</div>`;
+    // Centred above the hovered cell with 8 px clear (computed position).
     tooltip.style.left = `${rect.left - cr.left + rect.width / 2}px`;
-    tooltip.style.top = `${rect.top - cr.top - 4}px`;
-    tooltip.style.display = 'block';
+    tooltip.style.top = `${rect.top - cr.top - 8}px`;
+    tooltip.hidden = false;
   });
 
-  svgEl.addEventListener('mouseout', (e) => {
-    const target = e.target as SVGElement;
+  cellsEl.addEventListener('mouseout', (e) => {
+    const target = e.target as HTMLElement;
     if (target.classList.contains('heatmap-cell') && tooltip) {
-      tooltip.style.display = 'none';
+      tooltip.hidden = true;
     }
   });
 }
@@ -487,7 +508,7 @@ function renderDomainChart(): void {
       const valLabel = useTime ? FormatUtils.formatDuration(d.active) : `${d.visits}`;
       return `
     <div class="domain-row">
-      <span class="domain-favicon"><img src="${d.faviconUrl}" width="16" height="16" onerror="this.parentElement.innerHTML='<i data-lucide=\\'globe\\' width=\\'14\\' height=\\'14\\'></i>'" /></span>
+      <span class="domain-favicon"><img src="${d.faviconUrl}" width="16" height="16" /></span>
       <span class="domain-name">${escapeHtml(d.domain)}</span>
       <span class="domain-duration">${valLabel}</span>
       <div class="domain-bar-track">
@@ -496,6 +517,7 @@ function renderDomainChart(): void {
     </div>`;
     })
     .join('');
+  attachFaviconFallbacks(domainChartContainer, '.domain-favicon img', 14);
   createIcons({ icons });
 }
 

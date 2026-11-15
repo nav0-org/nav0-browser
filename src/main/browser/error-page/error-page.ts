@@ -16,10 +16,10 @@ interface ErrorContent {
   title: string;
   /** Uppercase mono code label rendered above the heading ("DNS_LOOKUP_FAILED") */
   eyebrow: string;
-  /** Specific h2 inside the main panel ("linkedin.com's server can't be found") */
+  /** Specific h2 in the message column ("linkedin.com's server can't be found") */
   heading: string;
   /** Body paragraph — may contain a single {{HOST}} placeholder that gets
-   *  rendered as a mono inline chip. */
+   *  rendered as the bold inline hostname. */
   message: string;
   /** Optional troubleshooting checklist for the side rail. */
   checklist: ChecklistItem[];
@@ -170,7 +170,7 @@ function escapeHtml(text: string): string {
     .replace(/>/g, '&gt;');
 }
 
-/** Replaces {{HOST:hostname}} markers with a mono `.host` inline chip. */
+/** Replaces {{HOST:hostname}} markers with the bold `.host` inline span. */
 function renderMessage(template: string): string {
   return template.replace(/\{\{HOST:([^}]+)\}\}/g, (_match, host) => {
     return `<span class="host">${escapeHtml(host)}</span>`;

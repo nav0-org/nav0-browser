@@ -1,13 +1,8 @@
 @import url('../../styles/global.css');
 
 /* ============================================================
-   Bookmarks — built-in page (DESIGN.md §4.2).
-   White canvas, 880px centred column. Large-title masthead
-   with no rule. Toolbar: filled search + segmented folder
-   control + secondary Clear. Cross-folder category chips.
-   Group header per folder. Bookmark rows sit on white: icon
-   well + title + grey URL + neutral category badge, with
-   hover-revealed actions.
+   Bookmarks — built-in page (DESIGN.md §4.2). The category
+   chips filter the active folder; category badges are neutral.
    ============================================================ */
 
 .bookmarks-page {
@@ -22,8 +17,10 @@
   opacity: 1;
 }
 
+/* An 880 px content column (DESIGN.md §4.2): the side padding is added to
+   the max-width so it only shows as a gutter on narrow windows. */
 .bookmarks-wrapper {
-  max-width: 880px;
+  max-width: calc(880px + 2 * var(--spacing-xl));
   margin: 0 auto;
   padding: 36px var(--spacing-xl) 56px;
 }
@@ -54,29 +51,32 @@
   margin: 20px 0 0;
 }
 
+/* Filled search field (DESIGN.md §5.2). */
 .search-container {
-  position: relative;
   flex: 1;
   min-width: 0;
   display: flex;
   align-items: center;
+  gap: var(--spacing-sm);
   height: 32px;
-  padding: 0 10px 0 32px;
+  padding: 0 10px;
   background: var(--n-fill);
   border-radius: var(--n-r-control);
   color: var(--n-text-3);
-  transition: box-shadow var(--dur-fast);
+  transition:
+    background var(--dur-fast),
+    box-shadow var(--dur-fast);
 }
 
 .search-container:focus-within {
+  background: var(--n-card);
   box-shadow: var(--n-focus-ring-field);
 }
 
 .search-icon {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
+  flex: none;
+  width: 15px;
+  height: 15px;
   color: var(--n-text-3);
   pointer-events: none;
 }
@@ -84,6 +84,7 @@
 .search-input {
   flex: 1;
   min-width: 0;
+  align-self: stretch;
   border: 0;
   outline: 0;
   background: transparent;
@@ -93,13 +94,20 @@
   padding: 0;
 }
 
+/* The wrapper draws the field ring; the input must not add the global
+   :focus-visible halo inside it. */
+.search-input:focus-visible {
+  box-shadow: none;
+}
+
 .search-input::placeholder {
   color: var(--n-text-3);
 }
 
-/* Folder segmented control */
+/* Folder segmented control (DESIGN.md §5.2). */
 .folder-seg {
   display: inline-flex;
+  height: 32px;
   background: var(--n-fill-2);
   border-radius: var(--n-r-control);
   padding: 2px;
@@ -116,7 +124,7 @@
   font-size: 13px;
   font-weight: 400;
   color: var(--n-text-2);
-  border-radius: 2px;
+  border-radius: var(--n-r-key);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -127,15 +135,30 @@
     box-shadow var(--dur-fast);
 }
 
+.folder-seg-btn svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+
 .folder-seg-btn:hover {
   color: var(--n-text-1);
 }
 
 .folder-seg-btn.active {
-  background: var(--n-page);
+  background: var(--n-card);
   color: var(--n-text-1);
   font-weight: 500;
-  box-shadow: var(--n-raised-shadow);
+  box-shadow: var(--n-thumb-shadow);
+}
+
+/* The thumb's shadow would otherwise replace the keyboard focus ring. */
+.folder-seg-btn:focus-visible {
+  box-shadow: var(--n-focus-ring);
+}
+
+.folder-seg-btn.active:focus-visible {
+  box-shadow: var(--n-focus-ring), var(--n-thumb-shadow);
 }
 
 .folder-seg-count {
@@ -172,7 +195,7 @@
   background: var(--n-fill-2);
 }
 
-/* ---- Category chip row (cross-folder filters) ----------- */
+/* ---- Category chip row (filter the active folder) ------- */
 .cat-row {
   display: flex;
   align-items: center;
@@ -221,6 +244,10 @@
   height: 13px;
   flex-shrink: 0;
   color: var(--n-text-2);
+}
+
+.cat-pill:not(.active):hover {
+  background: var(--n-fill-2);
 }
 
 .cat-pill.active {
@@ -301,11 +328,12 @@
   border-bottom: 0;
 }
 
+/* Wells inside a grey panel are white (DESIGN.md §3.2). */
 .stale-review-item .bk-favicon {
   width: 32px;
   height: 32px;
   border-radius: var(--n-r-control);
-  background: var(--n-well);
+  background: var(--n-card);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -379,6 +407,7 @@
   flex: 1;
   min-width: 0;
   font-size: 13px;
+  line-height: 18px;
   font-weight: 600;
   color: var(--n-text-1);
   display: inline-flex;
@@ -392,8 +421,14 @@
   align-items: center;
 }
 
+.folder-label .folder-icon svg {
+  width: 15px;
+  height: 15px;
+}
+
 .folder-sub {
   font-size: 12px;
+  line-height: 18px;
   color: var(--n-text-3);
 }
 
@@ -408,9 +443,11 @@
   padding: 0;
 }
 
+/* Row: 52 px date, 28 px well, content, badge, 54 px of hover actions
+   (kept as reserved space when hidden), 12 px gaps. */
 .bookmark-item {
   display: grid;
-  grid-template-columns: 52px 32px 1fr auto 54px;
+  grid-template-columns: 52px 28px 1fr auto 54px;
   align-items: center;
   gap: 12px;
   height: 54px;
@@ -431,10 +468,10 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* 32px favicon well */
+/* 28 px favicon well holding a 16 px favicon */
 .bk-favicon {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -446,19 +483,20 @@
 .bk-favicon svg {
   width: 16px;
   height: 16px;
-  border-radius: 2px;
+  border-radius: var(--n-r-control);
   display: block;
 }
 
+/* Title over meta with no gap: their 18 / 16 px line heights space them. */
 .bookmark-content {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
 }
 
 .bookmark-title {
   font-size: 13px;
+  line-height: 18px;
   color: var(--n-text-1);
   font-weight: 500;
   white-space: nowrap;
@@ -468,6 +506,7 @@
 
 .bookmark-meta {
   font-size: 12px;
+  line-height: 16px;
   color: var(--n-text-3);
   white-space: nowrap;
   overflow: hidden;
@@ -480,7 +519,9 @@
   color: var(--n-text-2);
 }
 
+/* "host · path · age": a word space either side of each dot. */
 .bookmark-meta .dot {
+  margin: 0 0.25em;
   color: var(--n-text-3);
 }
 
@@ -551,7 +592,9 @@
   transition: opacity var(--dur-fast);
 }
 
-.bookmark-item:hover .bookmark-actions {
+/* Also reveal them while one has keyboard focus. */
+.bookmark-item:hover .bookmark-actions,
+.bookmark-item:focus-within .bookmark-actions {
   opacity: 1;
 }
 
@@ -567,19 +610,12 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  transition:
-    background var(--dur-fast),
-    color var(--dur-fast);
+  transition: background var(--dur-fast);
 }
 
+/* On a hovered row (--n-hover) the hovered button steps up to --n-fill-2. */
 .action-btn:hover {
-  background: var(--n-fill);
-  color: var(--n-text-1);
-}
-
-.action-btn.remove-btn:hover {
-  background: var(--n-fill);
-  color: var(--n-text-1);
+  background: var(--n-fill-2);
 }
 
 .action-btn svg {
@@ -588,21 +624,34 @@
 }
 
 /* ---- Empty + footer ------------------------------------ */
+/* Hidden with the global .d-none utility until the list is empty. */
 .no-bookmarks {
   text-align: center;
   padding: 60px 0;
   color: var(--n-text-3);
   font-size: 12px;
-  display: none;
 }
 
 .bookmarks-footer {
   margin-top: 28px;
 }
 
+/* An empty footer adds no space, so the page ends 56 px below the last row
+   (DESIGN.md §4.2). */
+.bookmarks-footer:empty {
+  margin-top: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .bookmarks-page,
-  .bookmark-actions {
+  .search-container,
+  .folder-seg-btn,
+  .btn-clear-all,
+  .cat-pill,
+  .stale-review-btn,
+  .bookmark-item,
+  .bookmark-actions,
+  .action-btn {
     transition: none;
   }
 }

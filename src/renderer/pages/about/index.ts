@@ -29,7 +29,7 @@ function setHash(id: string, value: string): void {
   // stays tidy — same behavior the prior implementation used.
   const row = el.closest('.hash-row') as HTMLElement | null;
   if (value === 'unavailable') {
-    if (row) row.style.display = 'none';
+    if (row) row.hidden = true;
     return;
   }
   if (value === 'not packaged') {
@@ -37,7 +37,7 @@ function setHash(id: string, value: string): void {
     el.textContent = 'not packaged (dev mode)';
     // Hide the copy button — nothing to copy.
     const btn = wrap?.querySelector('.copy-btn') as HTMLElement | null;
-    if (btn) btn.style.display = 'none';
+    if (btn) btn.hidden = true;
     return;
   }
   el.textContent = value;
@@ -74,7 +74,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const buildBadge = document.getElementById('kv-build-badge');
     if (buildBadge) {
       buildBadge.textContent = info.isPackaged ? 'release' : 'dev';
-      buildBadge.classList.toggle('dev', !info.isPackaged);
+      buildBadge.classList.toggle('badge-success', info.isPackaged);
+      buildBadge.classList.toggle('badge-warning', !info.isPackaged);
       buildBadge.hidden = false;
     }
     setText('kv-electron', info.electronVersion);

@@ -407,7 +407,7 @@ Hard rules (full details in `DESIGN.md`):
 - **Type:** the system font stack; sizes 11 / 12 / 13 / 14 / 17 / 22 / 28 px; weights 400–700. Page titles are 28 px bold with no rule under them.
 - **Mono is for code only:** error codes, hashes, file paths, the user-agent string, and key combos inside prose. Versions, dates, labels and keycaps use the system sans stack.
 - **Focus rings on `:focus-visible` only** (`--n-focus-ring`; fields `--n-focus-ring-field`). Nothing outlines on mouse click.
-- **Icons via Lucide only:** `<i data-lucide="…">` + `createIcons({ icons })`, 18 px in the toolbar, 16 px in fields, menus and buttons, 14 px inline. No raw `<svg>` in the renderer.
+- **Icons via Lucide only:** `<i data-lucide="…">` + `createIcons({ icons })`, 18 px in the toolbar, 16 px in menus, lists on a white page and the address field, 14 px in text buttons; DESIGN.md §6 gives every other size. No raw `<svg>` in the renderer.
 - **Reuse the components in `global.css`** (buttons, form controls, cards, badges, keycaps, utilities). Fork into a page-local class only when the design genuinely diverges.
 - **No inline styles** in HTML or TS; define a class in the module's CSS.
 - **Honour `prefers-reduced-motion`, `prefers-reduced-transparency` and `prefers-contrast`.** Only the tab loader and download progress animate continuously.

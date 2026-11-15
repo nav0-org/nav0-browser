@@ -559,7 +559,7 @@ function renderFilterLists() {
     item.className = 'list-item';
     item.innerHTML = `
       <div class="list-item-content">
-        <div class="list-item-text" style="font-weight: 500;">${list.name}</div>
+        <div class="list-item-text">${list.name}</div>
         <div class="list-item-description">${list.description}</div>
       </div>
       <div class="list-item-actions">
@@ -1102,12 +1102,34 @@ function formatShortcutKey(part: string): string {
   }
 }
 
+// macOS lists modifiers in a fixed order — ⌃ ⌥ ⇧ ⌘, then the key
+// (⇧⌘T, ⌥⌘I). Display only: the stored combo keeps its own order.
+const MAC_MODIFIER_RANK = new Map<string, number>([
+  ['Ctrl', 0],
+  ['Alt', 1],
+  ['Opt', 1],
+  ['Option', 1],
+  ['Shift', 2],
+  ['mod', 3],
+  ['Cmd', 3],
+]);
+
+function orderShortcutParts(parts: string[]): string[] {
+  if (!isMac) return parts;
+  const rank = (part: string) => MAC_MODIFIER_RANK.get(part) ?? 4;
+  return parts
+    .map((part, index) => ({ part, index }))
+    .sort((a, b) => rank(a.part) - rank(b.part) || a.index - b.index)
+    .map(({ part }) => part);
+}
+
 function formatShortcutDisplay(combo: string): string {
-  if (!combo) return '<span style="color: var(--n-text-4); font-style: italic;">None</span>';
-  return combo
-    .split('+')
+  if (!combo) return '<span class="shortcut-none">None</span>';
+  // One keycap per key, in a row that spaces them (DESIGN.md §5.3).
+  const keycaps = orderShortcutParts(combo.split('+'))
     .map((part) => `<span class="keycap">${formatShortcutKey(part)}</span>`)
     .join('');
+  return `<span class="shortcut-keys">${keycaps}</span>`;
 }
 
 // ---- Permissions Settings ----
@@ -1241,18 +1263,32 @@ function renderPermissions(permissions: PermissionRecord[]) {
     const header = document.createElement('div');
     header.className = 'permission-origin-header';
     const favicon = perms[0].faviconUrl;
+    const globeIconHtml = `<i data-lucide="globe" class="permission-origin-favicon" width="16" height="16"></i>`;
     const faviconHtml = favicon
-      ? `<img class="permission-origin-favicon" src="${escapeHtml(favicon)}" alt="" onerror="this.outerHTML='<i data-lucide=\\'globe\\' class=\\'permission-origin-favicon\\' width=\\'16\\' height=\\'16\\'></i>'">`
-      : `<i data-lucide="globe" class="permission-origin-favicon" width="16" height="16"></i>`;
+      ? `<img class="permission-origin-favicon" src="${escapeHtml(favicon)}" alt="">`
+      : globeIconHtml;
     header.innerHTML = `
       <span class="permission-origin-title">
         ${faviconHtml}
         <span class="permission-origin-name">${escapeHtml(origin)}</span>
       </span>
       <span class="permission-origin-actions">
-        <button class="btn btn-sm btn-danger permission-remove-all-btn"><i data-lucide="trash-2" width="12" height="12"></i> Remove All</button>
+        <button class="btn btn-sm btn-raised permission-remove-all-btn"><i data-lucide="trash-2" width="14" height="14"></i> Remove All</button>
       </span>
     `;
+    // A favicon that fails to load falls back to the globe icon. The page CSP
+    // blocks inline handlers (no 'unsafe-inline'), so wire it up here.
+    const faviconImg = header.querySelector('img.permission-origin-favicon');
+    if (faviconImg) {
+      faviconImg.addEventListener(
+        'error',
+        () => {
+          faviconImg.outerHTML = globeIconHtml;
+          createIcons({ icons });
+        },
+        { once: true }
+      );
+    }
     header.querySelector('.permission-remove-all-btn')!.addEventListener('click', async () => {
       await (window as any).BrowserAPI.removeAllPermissionsForOrigin(origin);
       group.remove();
@@ -1275,7 +1311,7 @@ function renderPermissions(permissions: PermissionRecord[]) {
       const isAllowed = perm.decision === 'allowed_persistent';
 
       entry.innerHTML = `
-        <i data-lucide="${iconName}" class="permission-entry-icon" width="18" height="18"></i>
+        <i data-lucide="${iconName}" class="permission-entry-icon" width="16" height="16"></i>
         <span class="permission-entry-label">${escapeHtml(label)}</span>
         <span class="permission-entry-decision">
           <select class="form-select-sm permission-decision-select">

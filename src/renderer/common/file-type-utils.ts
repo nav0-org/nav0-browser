@@ -1,25 +1,9 @@
 // File type display utilities — shared across renderer pages.
 
 /**
- * The six storage hues (DESIGN.md §2 / global.css). These are the ONLY
- * colours allowed on the Downloads page, and only on the storage bar + its
- * legend. Everywhere else categories are neutral (an icon + a label).
- *
- * Each value is a CSS custom-property reference so the colour stays a token.
- */
-export const STORAGE_BUCKET_COLORS: Record<string, string> = {
-  images: 'var(--n-storage-images)',
-  media: 'var(--n-storage-media)', // video & audio
-  archives: 'var(--n-storage-archives)',
-  apps: 'var(--n-storage-apps)', // installers / apps
-  documents: 'var(--n-storage-documents)',
-  other: 'var(--n-storage-other)',
-};
-
-/**
- * Folds the fine-grained display types into the six storage buckets used by
- * the storage bar + legend. This mapping is for the chart ONLY — row badges,
- * file icons and progress fills stay neutral/accent.
+ * Folds the fine-grained display types into the six storage buckets of the
+ * Downloads storage bar and legend. Each bucket is drawn in its --n-storage-*
+ * hue (DESIGN.md §3.4) through a `.storage-hue-<bucket>` class.
  */
 export const STORAGE_BUCKET_MAP: Record<string, string> = {
   image: 'images',

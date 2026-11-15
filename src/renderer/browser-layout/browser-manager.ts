@@ -1,6 +1,7 @@
 import { Tab } from './tab';
 import { InAppUrls } from '../../constants/app-constants';
 import { initUrlAutocomplete } from './url-autocomplete';
+import { UrlDisplay } from '../common/url-display';
 
 export class BrowserTabManager {
   // DOM Elements
@@ -14,6 +15,9 @@ export class BrowserTabManager {
   private refreshButton: HTMLButtonElement;
   private commandKButton: HTMLButtonElement;
   private urlInput: HTMLInputElement;
+  // Inert, aria-hidden copy of the URL drawn over the input while it isn't
+  // focused, with the registrable domain emphasised (see renderUrlDisplay).
+  private urlDisplay: HTMLElement | null = null;
   private optionsButton: HTMLButtonElement;
   private bookmarkButton: HTMLButtonElement;
   private unbookmarkButton: HTMLButtonElement;
@@ -83,6 +87,7 @@ export class BrowserTabManager {
     this.refreshButton = document.getElementById('refresh-button') as HTMLButtonElement;
     this.commandKButton = document.getElementById('command-k-button') as HTMLButtonElement;
     this.urlInput = document.getElementById('url-input') as HTMLInputElement;
+    this.urlDisplay = document.getElementById('url-display');
     this.optionsButton = document.getElementById('options-button') as HTMLButtonElement;
     this.bookmarkButton = document.getElementById('bookmark-button') as HTMLButtonElement;
     this.unbookmarkButton = document.getElementById('unbookmark-button') as HTMLButtonElement;
@@ -214,6 +219,10 @@ export class BrowserTabManager {
       this.navigateToURL();
     });
 
+    // Keep the at-rest display in step with whatever the field holds, typed or set.
+    this.urlInput.addEventListener('input', () => this.renderUrlDisplay());
+    this.urlInput.addEventListener('blur', () => this.renderUrlDisplay());
+
     this.downloadsButton.addEventListener('click', () => {
       window.BrowserAPI.createTab(this.appWindowId, InAppUrls.DOWNLOADS, true);
     });
@@ -275,7 +284,7 @@ export class BrowserTabManager {
       const newActiveTab = this.getTabById(data.id);
       this.activeTabId = data.id;
       this.updateActiveTab();
-      this.urlInput.value = newActiveTab.url;
+      this.setUrlInputValue(newActiveTab.url);
       this.backButton.disabled = !newActiveTab.canGoBack;
       this.forwardButton.disabled = !newActiveTab.canGoForward;
       this.handleBookmark();
@@ -341,7 +350,7 @@ export class BrowserTabManager {
           tab.sslDetails = data.sslDetails || null;
         }
         if (data.id === this.activeTabId) {
-          this.urlInput.value = data.url;
+          this.setUrlInputValue(data.url);
           this.backButton.disabled = !data.canGoBack;
           this.forwardButton.disabled = !data.canGoForward;
           this.handleBookmark();
@@ -444,6 +453,8 @@ export class BrowserTabManager {
     });
   }
 
+  // The trailing field buttons show and hide with the hidden attribute, not
+  // style.display, so a shown button keeps the stylesheet's flex centring.
   private handleBookmark(): void {
     const activeTab = this.getTabById(this.activeTabId);
     if (activeTab) {
@@ -452,24 +463,24 @@ export class BrowserTabManager {
       const url = (activeTab.url || '').trim();
       const isInternal = !url || url.toLowerCase().startsWith(InAppUrls.PREFIX.toLowerCase());
       if (isInternal) {
-        this.bookmarkButton.style.display = 'none';
-        this.unbookmarkButton.style.display = 'none';
-        this.readinglistButton.style.display = 'none';
+        this.bookmarkButton.hidden = true;
+        this.unbookmarkButton.hidden = true;
+        this.readinglistButton.hidden = true;
       } else if (activeTab.isBookmark && activeTab.bookmarkType === 'queue') {
         // State 3: Reading list — show reading list button
-        this.bookmarkButton.style.display = 'none';
-        this.unbookmarkButton.style.display = 'none';
-        this.readinglistButton.style.display = 'block';
+        this.bookmarkButton.hidden = true;
+        this.unbookmarkButton.hidden = true;
+        this.readinglistButton.hidden = false;
       } else if (activeTab.isBookmark) {
         // State 2: Bookmarked (reference) — show unbookmark button
-        this.bookmarkButton.style.display = 'none';
-        this.unbookmarkButton.style.display = 'block';
-        this.readinglistButton.style.display = 'none';
+        this.bookmarkButton.hidden = true;
+        this.unbookmarkButton.hidden = false;
+        this.readinglistButton.hidden = true;
       } else {
         // State 1: Not bookmarked — show bookmark button
-        this.bookmarkButton.style.display = 'block';
-        this.unbookmarkButton.style.display = 'none';
-        this.readinglistButton.style.display = 'none';
+        this.bookmarkButton.hidden = false;
+        this.unbookmarkButton.hidden = true;
+        this.readinglistButton.hidden = true;
       }
     }
   }
@@ -477,10 +488,10 @@ export class BrowserTabManager {
   private updateReaderModeButton(): void {
     const activeTab = this.getTabById(this.activeTabId);
     if (!activeTab || !activeTab.isReaderModeEligible) {
-      this.readerModeButton.style.display = 'none';
+      this.readerModeButton.hidden = true;
       return;
     }
-    this.readerModeButton.style.display = 'block';
+    this.readerModeButton.hidden = false;
     if (activeTab.isReaderModeActive) {
       this.readerModeButton.classList.add('active');
       this.readerModeButton.title = 'Exit Reader Mode';
@@ -493,7 +504,7 @@ export class BrowserTabManager {
   private updatePdfDownloadButton(): void {
     const activeTab = this.getTabById(this.activeTabId);
     if (!activeTab || !activeTab.url) {
-      this.pdfDownloadButton.style.display = 'none';
+      this.pdfDownloadButton.hidden = true;
       return;
     }
     // Detect PDF by URL extension or Chrome's built-in PDF viewer URL
@@ -503,7 +514,7 @@ export class BrowserTabManager {
       url.includes('.pdf?') ||
       url.includes('.pdf#') ||
       url.includes('content-type=application/pdf');
-    this.pdfDownloadButton.style.display = isPdf ? 'block' : 'none';
+    this.pdfDownloadButton.hidden = !isPdf;
   }
 
   private removeTab(tabId: string): void {
@@ -534,7 +545,7 @@ export class BrowserTabManager {
     if (this.activeTabId) {
       const activeTab = this.getTabById(this.activeTabId);
       if (activeTab) {
-        this.urlInput.value = activeTab.url;
+        this.setUrlInputValue(activeTab.url);
         this.handleBookmark();
         this.backButton.disabled = !activeTab.canGoBack;
         this.forwardButton.disabled = !activeTab.canGoForward;
@@ -558,10 +569,54 @@ export class BrowserTabManager {
       urlInput: this.urlInput,
       getActiveTabId: () => this.activeTabId,
       onSelectionEnter: (url: string) => {
-        this.urlInput.value = url;
+        this.setUrlInputValue(url);
         this.navigateToURL(url);
       },
     });
+  }
+
+  // Every programmatic write to the address field goes through here, so the
+  // display drawn over it can never diverge from the value.
+  private setUrlInputValue(value: string): void {
+    this.urlInput.value = value;
+    this.renderUrlDisplay();
+  }
+
+  // Draws the field's value for display only, with the registrable domain
+  // emphasised (DESIGN.md §4.1); the input keeps the raw URL and shows it while
+  // focused. Text nodes only — never innerHTML with URL text.
+  private renderUrlDisplay(): void {
+    if (!this.urlDisplay) return;
+    const value = this.urlInput.value;
+    const parts = UrlDisplay.split(value);
+    if (!parts) {
+      this.urlDisplay.replaceChildren(UrlDisplay.format(value));
+      return;
+    }
+    const activeTab = this.getTabById(this.activeTabId);
+    const isBypassedCertificate =
+      parts.scheme.toLowerCase() === 'https' &&
+      activeTab?.sslStatus === 'insecure' &&
+      activeTab.url === value;
+    this.urlDisplay.replaceChildren(
+      ...[
+        this.urlDisplaySegment(
+          parts.scheme,
+          isBypassedCertificate ? 'url-display-scheme-insecure' : 'url-display-muted'
+        ),
+        this.urlDisplaySegment(parts.beforeDomain, 'url-display-muted'),
+        this.urlDisplaySegment(parts.domain, 'url-display-domain'),
+        this.urlDisplaySegment(parts.afterDomain, 'url-display-muted'),
+      ].filter((segment): segment is HTMLSpanElement => segment !== null)
+    );
+  }
+
+  private urlDisplaySegment(text: string, className: string): HTMLSpanElement | null {
+    if (!text) return null;
+    const segment = document.createElement('span');
+    segment.className = className;
+    segment.textContent = text;
+    return segment;
   }
 
   private updateDownloadProgress(): void {

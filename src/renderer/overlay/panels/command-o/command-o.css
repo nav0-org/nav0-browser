@@ -1,4 +1,5 @@
-/* Command-O overlay panel styles — TabSwitcher mock-up */
+/* Command-O overlay panel styles (DESIGN.md §4.4). Every rule is scoped to
+   #overlay-command-o: all overlay panels share one document. */
 
 #overlay-command-o {
   background-color: var(--n-scrim);
@@ -7,14 +8,18 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 60px;
+  /* The overlay covers the whole window, so this clears the 84 px chrome by 8 px. */
+  padding-top: 92px;
 }
 
-/* MENU MATERIAL — tokens only, so the prefers-reduced-transparency fallback
-   in global.css swaps --n-menu-bg->--n-menu-solid and --n-menu-blur->none. */
-.cmdo-overlay-container {
-  width: 720px;
+/* Menu material from tokens only, so the reduced-transparency fallback in
+   global.css can make it solid (DESIGN.md §3.8). The fixed height keeps the
+   footer in place while a search narrows the list. */
+#overlay-command-o .cmdo-overlay-container {
+  width: 900px;
   max-width: 90vw;
+  height: 760px;
+  max-height: calc(100vh - 92px - var(--spacing-xxl));
   background: var(--n-menu-bg);
   backdrop-filter: var(--n-menu-blur);
   -webkit-backdrop-filter: var(--n-menu-blur);
@@ -23,26 +28,40 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  max-height: 75vh;
+  animation: cmdo-reveal 180ms ease-out;
 }
 
-/* ---- Search bar ---- */
-.search-bar {
+@keyframes cmdo-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- Search bar (content-box: the 1 px rule sits outside the height) ---- */
+#overlay-command-o .search-bar {
+  flex: none;
+  box-sizing: content-box;
   display: flex;
   align-items: center;
   height: 54px;
-  padding: 0 16px;
+  padding: 0 18px 0 14px;
   gap: 10px;
+  border-bottom: 1px solid var(--n-menu-line);
 }
 
-/* ⌘O keycap — shared keycap spec */
-.shortcut-badge {
+/* ⌘O keycap — keycap spec (DESIGN.md §5.3) */
+#overlay-command-o .shortcut-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 20px;
   height: 20px;
-  padding: 0 4px;
+  padding: 0 var(--spacing-xs);
   background-color: var(--n-fill-2);
   border-radius: var(--n-r-key);
   font-size: 11px;
@@ -59,67 +78,82 @@
 
 #overlay-command-o .search-input {
   flex: 1;
+  min-width: 0;
+  padding: 0;
   border: none;
   outline: none;
-  font-size: 15px;
+  font-size: 14px;
   color: var(--n-text-1);
   caret-color: var(--n-accent);
   background: transparent;
+}
+
+/* The switcher header shows only the caret when focused. Text inputs always
+   match :focus-visible, so drop the global halo here (no box inside the box). */
+#overlay-command-o .search-input:focus-visible {
+  box-shadow: none;
 }
 
 #overlay-command-o .search-input::placeholder {
   color: var(--n-text-3);
 }
 
-.tab-count {
+#overlay-command-o .tab-count {
   font-size: 12px;
   color: var(--n-text-3);
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
-/* ---- Tabs body (scrollable) ---- */
-.tabs-body {
+/* ---- Tabs body (scrollable) ----
+   The right edge is a stable 8 px scrollbar gutter plus 8 px of padding, so
+   the cards keep a 16 px inset on both sides whether or not the body scrolls. */
+#overlay-command-o .tabs-body {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  padding: 12px 16px;
+  padding: 0 8px 16px 16px;
+  scrollbar-gutter: stable;
 }
 
-.tabs-body::-webkit-scrollbar {
-  width: 6px;
+#overlay-command-o .tabs-body::-webkit-scrollbar {
+  width: 8px;
 }
 
-.tabs-body::-webkit-scrollbar-track {
+#overlay-command-o .tabs-body::-webkit-scrollbar-track {
   background: transparent;
+  margin: 4px 0;
 }
 
-.tabs-body::-webkit-scrollbar-thumb {
-  background: var(--n-separator);
-  border-radius: var(--n-r-key);
+/* A slim 4 px thumb centred in the gutter (the transparent border insets it). */
+#overlay-command-o .tabs-body::-webkit-scrollbar-thumb {
+  background-color: var(--n-chrome-line);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+  border-radius: var(--n-r-control);
 }
 
-.tabs-body::-webkit-scrollbar-thumb:hover {
-  background: var(--n-control-edge);
+#overlay-command-o .tabs-body::-webkit-scrollbar-thumb:hover {
+  background-color: var(--n-control-edge);
 }
 
 /* ---- Window group ---- */
-.window-group {
-  margin-bottom: 16px;
-}
-
-.window-group:last-child {
-  margin-bottom: 0;
-}
-
-/* NEUTRAL header — no coloured rule. */
-.window-header {
+/* Neutral header, no coloured rule (DESIGN.md §4.4). */
+#overlay-command-o .window-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
+  padding: 14px 2px 8px;
+  line-height: 16px;
 }
 
-.window-dot {
+/* A single window has no header: start its cards 16 px under the search bar. */
+#overlay-command-o .window-group > .tab-grid:first-child {
+  margin-top: 16px;
+}
+
+#overlay-command-o .window-dot {
   width: 7px;
   height: 7px;
   border-radius: var(--n-r-full);
@@ -127,61 +161,62 @@
   flex-shrink: 0;
 }
 
-.window-name {
+#overlay-command-o .window-name {
   font-size: 13px;
   font-weight: 600;
   color: var(--n-text-1);
 }
 
-.window-tab-count {
+#overlay-command-o .window-tab-count {
   font-size: 12px;
   color: var(--n-text-3);
+  font-variant-numeric: tabular-nums;
 }
 
-.window-line {
+#overlay-command-o .window-line {
   flex: 1;
   height: 1px;
-  margin-left: 8px;
   background: var(--n-separator);
 }
 
 /* ---- Tab grid ---- */
-.tab-grid {
+#overlay-command-o .tab-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 
-/* ---- Tab card ---- Raised cards float on the menu material. */
-.tab-card {
+/* ---- Tab card ---- White cards on the menu material. */
+#overlay-command-o .tab-card {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   padding: 10px 10px 10px 12px;
   border-radius: var(--n-r-control);
   background: var(--n-card);
-  box-shadow: var(--n-raised-shadow);
+  box-shadow: var(--n-card-shadow);
   cursor: pointer;
   overflow: hidden;
   position: relative;
   min-width: 0;
 }
 
-/* Selection style — one style for hover and keyboard-selected/active cards.
-   Soft accent fill, no outline, no raised-white treatment. */
-.tab-card:hover,
-.tab-card.selected,
-.tab-card[aria-selected='true'] {
+/* One selection style for hover and keyboard-selected cards; the chosen card
+   drops its shadow (DESIGN.md §4.4). */
+#overlay-command-o .tab-card:hover,
+#overlay-command-o .tab-card.selected,
+#overlay-command-o .tab-card[aria-selected='true'] {
   background: var(--n-accent-soft);
+  box-shadow: none;
 }
 
-.tab-card:hover .tab-title,
-.tab-card.selected .tab-title,
-.tab-card[aria-selected='true'] .tab-title {
+#overlay-command-o .tab-card:hover .tab-title,
+#overlay-command-o .tab-card.selected .tab-title,
+#overlay-command-o .tab-card[aria-selected='true'] .tab-title {
   color: var(--n-text-1);
 }
 
-.tab-favicon {
+#overlay-command-o .tab-favicon {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
@@ -192,62 +227,82 @@
   overflow: hidden;
 }
 
-.tab-favicon img {
+#overlay-command-o .tab-favicon img {
   width: 16px;
   height: 16px;
   border-radius: var(--n-r-control);
 }
 
-.tab-favicon-letter {
+/* Letter chip standing in for a missing favicon. */
+#overlay-command-o .tab-favicon-letter {
   width: 16px;
   height: 16px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--n-fill-2);
+  background: var(--n-text-3);
   border-radius: var(--n-r-control);
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--n-on-accent);
+}
+
+/* The favicon sits 1 px below the top of the first title line. */
+#overlay-command-o .tab-card > .tab-favicon,
+#overlay-command-o .tab-card > .tab-favicon-letter {
+  margin-top: 1px;
+}
+
+/* Pin marker — signals tabs that are anchored to the left of their window.
+   4 px after the favicon (the card gap is 8) and centred on it. */
+#overlay-command-o .tab-pin-icon {
+  flex-shrink: 0;
+  margin-top: 3px;
+  margin-left: calc(var(--spacing-xs) * -1);
   color: var(--n-text-3);
 }
 
-/* Two-line title — clamps at 2 lines, ~32px tall. */
-.tab-title {
+/* A fixed two-line title box, clamped, so every card is the same height. */
+#overlay-command-o .tab-title {
   flex: 1;
   font-size: 12px;
   line-height: 16px;
   font-weight: 500;
   color: var(--n-text-1);
   min-width: 0;
-  max-height: 32px;
+  height: 32px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.tab-active-dot {
+/* Marks each window's active tab, centred on the first title line. */
+#overlay-command-o .tab-active-dot {
   width: 6px;
   height: 6px;
+  margin-top: 6px;
   border-radius: var(--n-r-full);
-  background: var(--n-control-edge);
+  background: var(--n-text-2);
   flex-shrink: 0;
 }
 
 /* ---- Drag and drop ---- */
-.tab-card.dragging {
+#overlay-command-o .tab-card.dragging {
   opacity: 0.4;
 }
 
-.tab-card[draggable='true'] {
+#overlay-command-o .tab-card[draggable='true'] {
   cursor: grab;
 }
 
-.tab-card[draggable='true']:active {
+#overlay-command-o .tab-card[draggable='true']:active {
   cursor: grabbing;
 }
 
-.window-group.drop-target {
+#overlay-command-o .window-group.drop-target {
   background: var(--n-accent-soft);
   border-radius: var(--n-r-control);
   outline: 2px dashed var(--n-accent);
@@ -255,18 +310,12 @@
 }
 
 /* Within-window reorder: an accent bar marks the insertion edge. */
-.tab-card.drop-before {
+#overlay-command-o .tab-card.drop-before {
   box-shadow: inset 2px 0 0 0 var(--n-accent);
 }
 
-.tab-card.drop-after {
+#overlay-command-o .tab-card.drop-after {
   box-shadow: inset -2px 0 0 0 var(--n-accent);
-}
-
-/* Pin marker — signals tabs that are anchored to the left of their window. */
-.tab-pin-icon {
-  flex-shrink: 0;
-  color: var(--n-text-3);
 }
 
 /* ---- Empty state ---- */
@@ -277,29 +326,33 @@
   font-size: 13px;
 }
 
-/* ---- Footer bar ---- */
-.footer-bar {
+/* ---- Footer bar (content-box: the 1 px rule sits outside the height) ---- */
+#overlay-command-o .footer-bar {
+  flex: none;
+  box-sizing: content-box;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
   gap: 12px;
+  height: 40px;
+  padding: 0 16px;
+  border-top: 1px solid var(--n-menu-line);
 }
 
-.footer-keys {
+#overlay-command-o .footer-keys {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 
-/* Keycaps — shared keycap spec. */
+/* Keycaps — keycap spec (DESIGN.md §5.3). */
 #overlay-command-o .key {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 20px;
   height: 20px;
-  padding: 0 4px;
+  padding: 0 var(--spacing-xs);
   font-size: 11px;
   font-weight: 500;
   border-radius: var(--n-r-key);
@@ -307,15 +360,24 @@
   color: var(--n-text-2);
 }
 
-.key-label {
+#overlay-command-o .key-label {
   font-size: 12px;
   color: var(--n-text-3);
   margin-right: 8px;
 }
 
-.footer-right {
+#overlay-command-o .key-label:last-child {
+  margin-right: 0;
+}
+
+#overlay-command-o .footer-right {
   font-size: 12px;
   color: var(--n-text-3);
+  white-space: nowrap;
+}
+
+#overlay-command-o .footer-right[hidden] {
+  display: none;
 }
 
 /* ---- Responsive ---- */
@@ -323,19 +385,22 @@
   #overlay-command-o {
     padding-top: 40px;
   }
-  .tab-grid {
+  #overlay-command-o .tab-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 500px) {
-  .tab-grid {
+  #overlay-command-o .tab-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tabs-body {
+  #overlay-command-o .cmdo-overlay-container {
+    animation: none;
+  }
+  #overlay-command-o .tabs-body {
     scroll-behavior: auto;
   }
 }

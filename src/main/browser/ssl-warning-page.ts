@@ -4,12 +4,9 @@
  * - The user navigates to an HTTP (non-SSL) website
  * - The SSL certificate for a website is invalid or untrusted
  *
- * A light page (DESIGN.md §4.5): a 28-px bold red title, a soft-red icon
- * well, a mono eyebrow code label, a specific heading, a body paragraph with
- * the hostname bolded inline, a mono error-code chip, a primary blue "Go back
- * to safety" action, and a collapsible Advanced section with a risks list in
- * a grey panel + a red "Proceed (unsafe)" link. CSS is self-contained with
- * literal values that mirror the global design tokens.
+ * Follows DESIGN.md §4.5: a light page where red marks only the title, the
+ * icon and the "Proceed (unsafe)" link, which stays behind "Advanced" so
+ * "Go back to safety" is the one primary action.
  */
 
 // Loaded as a raw string via webpack asset/source
@@ -42,12 +39,12 @@ export function generateSSLWarningHTML(options: SSLWarningOptions): string {
   // Uppercase mono code label
   const eyebrow = isHttp ? 'HTTP_NOT_ENCRYPTED' : 'TLS_HANDSHAKE_FAILED';
 
-  // Specific h2 inside the main panel
+  // Specific h2 under the code label
   const heading = isHttp
     ? `${hostname} is served over plain HTTP`
     : `${hostname}’s certificate is not trusted`;
 
-  // Body paragraph — hostname rendered as a mono chip
+  // Body paragraph — hostname set in bold inline
   const hostChip = `<span class="host">${escapeHtml(hostname)}</span>`;
   const message = isHttp
     ? `Traffic to and from ${hostChip} travels in plain text. Anything you send — passwords, messages, payment details — can be read or modified by anyone on the network between you and the site.`
@@ -58,10 +55,10 @@ export function generateSSLWarningHTML(options: SSLWarningOptions): string {
     ? 'net::ERR_HTTP_NOT_ENCRYPTED'
     : errorCode || 'net::ERR_CERT_AUTHORITY_INVALID';
 
-  // Glyph (white-on-red tile in the template, so just the inner path)
-  const iconSvg = isHttp
-    ? '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'
-    : '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>';
+  // Shield-alert glyph for the soft-red icon well (the template supplies the
+  // <svg> wrapper, so just the inner shapes). Same for both warning types.
+  const iconSvg =
+    '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
 
   // Risk list — rendered as <li> rows inside the Advanced panel
   const riskItems = isHttp

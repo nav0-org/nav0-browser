@@ -99,6 +99,38 @@ function escapeHtml(str: string): string {
   return div.innerHTML;
 }
 
+// --- Favicons ---
+
+// createIcons() re-renders every icon on the page, so batch the calls that
+// favicon fallbacks need into one per frame.
+let iconRefreshQueued = false;
+function refreshIconsSoon(): void {
+  if (iconRefreshQueued) return;
+  iconRefreshQueued = true;
+  requestAnimationFrame(() => {
+    iconRefreshQueued = false;
+    createIcons({ icons });
+  });
+}
+
+// The page CSP has no 'unsafe-inline', so an inline onerror="…" never runs
+// and a favicon that fails to load leaves a broken-image glyph. Attach the
+// fallback (the globe icon) from script before the image starts loading.
+function loadFavicon(img: HTMLImageElement | null, url: string, fallbackSize: number): void {
+  if (!img) return;
+  img.addEventListener(
+    'error',
+    () => {
+      const well = img.parentElement;
+      if (!well) return;
+      well.innerHTML = `<i data-lucide="globe" width="${fallbackSize}" height="${fallbackSize}"></i>`;
+      refreshIconsSoon();
+    },
+    { once: true }
+  );
+  img.src = url;
+}
+
 // --- State ---
 
 const PAGE_SIZE = 50;
@@ -134,7 +166,6 @@ const staleDoneBtn = document.getElementById('stale-done-btn') as HTMLButtonElem
 const bookmarksFooter = document.getElementById('bookmarks-footer') as HTMLElement;
 const deleteAllBtn = document.getElementById('delete-all') as HTMLButtonElement;
 const folderName = document.getElementById('folder-name') as HTMLElement;
-const folderIcon = document.getElementById('folder-icon') as HTMLElement;
 const folderSub = document.getElementById('folder-sub') as HTMLElement;
 
 // --- Init ---
@@ -192,7 +223,7 @@ async function updateCounts(): Promise<void> {
   referenceCountEl.textContent = String(refItems.length);
   // Clear All wipes both tabs in one go, so its visibility tracks the
   // combined total — not just the active tab's items.
-  deleteAllBtn.style.display = queueItems.length + refItems.length > 0 ? '' : 'none';
+  deleteAllBtn.classList.toggle('d-none', queueItems.length + refItems.length === 0);
 
   // Derive available categories + per-category counts from the active tab's
   // full unfiltered result set, so chip ordering and counts react to tab/search.
@@ -210,7 +241,7 @@ async function updateCounts(): Promise<void> {
   folderSub.textContent = `${activeTabTotal} saved`;
 
   // Stale-bookmark alert removed — bar stays hidden permanently.
-  staleBar.style.display = 'none';
+  staleBar.classList.add('d-none');
 }
 
 function switchTab(tab: 'queue' | 'reference'): void {
@@ -219,7 +250,11 @@ function switchTab(tab: 'queue' | 'reference'): void {
   tabReferenceBtn.classList.toggle('active', tab === 'reference');
   // Mirror the seg button label/icon into the folder section header below the chip row.
   folderName.textContent = tab === 'queue' ? 'Reading queue' : 'Reference';
-  folderIcon.setAttribute('data-lucide', tab === 'queue' ? 'book-open' : 'bookmark');
+  // Look the icon up each time: createIcons() replaces it with a new <svg>
+  // on every call, so a reference kept from page load goes stale.
+  document
+    .getElementById('folder-icon')
+    ?.setAttribute('data-lucide', tab === 'queue' ? 'book-open' : 'bookmark');
   createIcons({ icons });
   selectedCategory = 'all';
   hideStaleReview();
@@ -265,18 +300,18 @@ async function loadBookmarks(): Promise<void> {
 
 function updateVisibility(): void {
   if (allLoadedItems.length === 0) {
-    noBookmarks.style.display = 'block';
+    noBookmarks.classList.remove('d-none');
     noBookmarks.textContent = currentSearchTerm
       ? `No bookmarks matching "${currentSearchTerm}".`
       : 'No bookmarks saved yet.';
   } else {
-    noBookmarks.style.display = 'none';
+    noBookmarks.classList.add('d-none');
   }
   // Clear All button visibility is driven by updateCounts (totals across
   // both tabs) — Clear wipes both, so its presence shouldn't depend on the
   // active tab being non-empty.
-  // Footer is no longer used as a wrapper for Clear; kept as an empty spacer.
-  if (bookmarksFooter) bookmarksFooter.style.display = 'block';
+  // The footer is an empty placeholder (Clear moved to the toolbar); it adds no space while empty.
+  if (bookmarksFooter) bookmarksFooter.classList.remove('d-none');
 }
 
 function renderCategoryPills(): void {
@@ -333,12 +368,13 @@ function renderBookmarkItems(items: BookmarkWithStats[]): void {
     const category = getCategoryForUrl(item.url);
     const savedDate = formatSavedDate(item.createdDate as unknown as string);
 
-    // Favicon (rendered inside a 24px tile via CSS)
+    // Favicon (16 px inside a 28 px well via CSS). The image source is set by
+    // loadFavicon() below, after its globe fallback is attached.
     const faviconHtml = item.faviconUrl
-      ? `<img src="${item.faviconUrl}" alt="" onerror="this.parentElement.innerHTML='<i data-lucide=\\'globe\\' width=\\'14\\' height=\\'14\\'></i>'">`
+      ? '<img alt="">'
       : `<i data-lucide="globe" width="14" height="14"></i>`;
 
-    // Meta line: host (accent) + path + queue age / visits (reference)
+    // Meta line: host (--n-text-2) · path · queue age / visits (reference)
     const metaParts: string[] = [`<span class="host">${escapeHtml(domain)}</span>`];
     if (path) {
       metaParts.push('<span class="dot">·</span>');
@@ -381,6 +417,10 @@ function renderBookmarkItems(items: BookmarkWithStats[]): void {
       </div>
     `;
 
+    if (item.faviconUrl) {
+      loadFavicon(row.querySelector<HTMLImageElement>('.bk-favicon img'), item.faviconUrl, 14);
+    }
+
     // Click content → open
     row.querySelector('.bookmark-content')?.addEventListener('click', () => {
       window.BrowserAPI.createTab(window.BrowserAPI.appWindowId, item.url, true);
@@ -416,8 +456,8 @@ function renderBookmarkItems(items: BookmarkWithStats[]): void {
 // --- Stale review ---
 
 async function showStaleReview(): Promise<void> {
-  staleBar.style.display = 'none';
-  staleReview.style.display = 'block';
+  staleBar.classList.add('d-none');
+  staleReview.classList.remove('d-none');
   staleReviewList.innerHTML = '';
 
   const refItems: BookmarkWithStats[] = await window.BrowserAPI.fetchBookmarksWithStats(
@@ -436,11 +476,7 @@ async function showStaleReview(): Promise<void> {
     el.className = 'stale-review-item';
     el.innerHTML = `
       <div class="bk-favicon">
-        ${
-          item.faviconUrl
-            ? `<img src="${item.faviconUrl}" alt="" style="width:16px;height:16px" onerror="this.parentElement.textContent='🌐'">`
-            : '<i data-lucide="globe" width="16" height="16"></i>'
-        }
+        ${item.faviconUrl ? '<img alt="">' : '<i data-lucide="globe" width="16" height="16"></i>'}
       </div>
       <div class="stale-review-content">
         <div class="stale-review-title">${escapeHtml(item.title)}</div>
@@ -455,6 +491,12 @@ async function showStaleReview(): Promise<void> {
         </button>
       </div>
     `;
+
+    // Same globe as the no-favicon case, drawn with Lucide rather than the
+    // emoji the dead inline onerror used to insert.
+    if (item.faviconUrl) {
+      loadFavicon(el.querySelector<HTMLImageElement>('.bk-favicon img'), item.faviconUrl, 16);
+    }
 
     el.querySelector('[data-action="keep"]')?.addEventListener('click', () => {
       el.remove();
@@ -477,5 +519,5 @@ async function showStaleReview(): Promise<void> {
 }
 
 function hideStaleReview(): void {
-  staleReview.style.display = 'none';
+  staleReview.classList.add('d-none');
 }

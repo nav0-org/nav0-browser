@@ -5,7 +5,6 @@ import { createIcons, icons } from 'lucide';
 import { FormatUtils } from '../../../renderer/common/format-utils';
 import { DownloadRecord } from '../../../types/download-record';
 import {
-  STORAGE_BUCKET_COLORS,
   getStorageBucket,
   getDisplayTypeFromExtension,
   getFileIcon,
@@ -113,8 +112,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     downloadsListElement.innerHTML = '';
     allLoadedItems = [];
     selectedItemId = null;
-    noDownloads.style.display = 'block';
-    deleteAllBtn.style.display = 'none';
+    noDownloads.hidden = false;
+    deleteAllBtn.hidden = true;
     updateStorageGauge();
     renderTypeFilters();
   });
@@ -237,16 +236,15 @@ const loadDownloadsPage = async (): Promise<void> => {
   }
 
   if (currentOffset === 0 && downloadData.length === 0) {
-    noDownloads.style.display = 'block';
-    deleteAllBtn.style.display = 'none';
+    noDownloads.hidden = false;
+    deleteAllBtn.hidden = true;
     isLoading = false;
     updateStorageGauge();
     renderTypeFilters();
     return;
   } else {
-    noDownloads.style.display = 'none';
-    // Empty string clears the inline style so the CSS rule (inline-flex) applies.
-    deleteAllBtn.style.display = '';
+    noDownloads.hidden = true;
+    deleteAllBtn.hidden = false;
   }
 
   allLoadedItems = allLoadedItems.concat(downloadData);
@@ -270,9 +268,16 @@ const rerenderList = (): void => {
   }
 };
 
+interface DayLabel {
+  // "Today" / "Yesterday", or '' for older days.
+  relative: string;
+  // e.g. "Friday, November 13".
+  absolute: string;
+}
+
 interface DayGroup {
   dateKey: string;
-  label: string;
+  label: DayLabel;
   items: DownloadRecord[];
 }
 
@@ -299,7 +304,7 @@ const groupByDay = (items: DownloadRecord[]): DayGroup[] => {
   return groups;
 };
 
-const formatDayLabel = (date: Date): string => {
+const formatDayLabel = (date: Date): DayLabel => {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -309,10 +314,9 @@ const formatDayLabel = (date: Date): string => {
     month: 'long',
     day: 'numeric',
   });
-  if (diff === 0) return `Today · ${absolute}`;
-  if (diff === 1) return `Yesterday · ${absolute}`;
-  if (diff < 7) return absolute;
-  return absolute;
+  if (diff === 0) return { relative: 'Today', absolute };
+  if (diff === 1) return { relative: 'Yesterday', absolute };
+  return { relative: '', absolute };
 };
 
 const renderDayHeader = (group: DayGroup): HTMLElement => {
@@ -321,8 +325,15 @@ const renderDayHeader = (group: DayGroup): HTMLElement => {
   const fileWord = group.items.length === 1 ? 'file' : 'files';
   const totalBytes = group.items.reduce((a, b) => a + (b.fileSize || 0), 0);
   const sizeStr = totalBytes > 0 ? ` · ${FormatUtils.formatFileSize(totalBytes)}` : '';
+  // "Today · Friday, November 13": the relative day is the heading and the
+  // date after it is secondary text (DESIGN.md §4.2). Older days show the
+  // date alone as the heading.
+  const { relative, absolute } = group.label;
+  const labelHtml = relative
+    ? `<span class="day-label">${relative}</span> <span class="day-date">· ${absolute}</span>`
+    : `<span class="day-label">${absolute}</span>`;
   header.innerHTML = `
-    <span class="day-label">${group.label}</span>
+    ${labelHtml}
     <span class="day-sub">${group.items.length} ${fileWord}${sizeStr}</span>
   `;
   return header;
@@ -346,7 +357,7 @@ const renderTypeFilters = (): void => {
   const allPill = document.createElement('button');
   allPill.className = 'type-pill';
   allPill.dataset.type = 'all';
-  allPill.innerHTML = `<i data-lucide="layers" width="14" height="14"></i> All`;
+  allPill.innerHTML = `<i data-lucide="layers" width="13" height="13"></i> All`;
   if (selectedTypeFilter === 'all') {
     allPill.classList.add('selected');
   }
@@ -362,7 +373,7 @@ const renderTypeFilters = (): void => {
     pill.className = 'type-pill';
     pill.dataset.type = type;
     const iconName = TYPE_ICONS[type] || TYPE_ICONS.other;
-    pill.innerHTML = `<i data-lucide="${iconName}" width="14" height="14"></i> ${type}`;
+    pill.innerHTML = `<i data-lucide="${iconName}" width="13" height="13"></i> ${type}`;
     // Neutral at rest; selection style (accent-soft + accent icon) when chosen.
     // Categories are named, not coloured — no per-type hue here.
     if (selectedTypeFilter === type) {
@@ -380,16 +391,14 @@ const renderTypeFilters = (): void => {
   createIcons({ icons });
 };
 
+// Rows, detail panels and day headers are shown and hidden with the `hidden`
+// attribute, not inline styles.
 const applyTypeFilter = (): void => {
   const rows = downloadsListElement.querySelectorAll('.download-item-wrapper');
   rows.forEach((wrapper) => {
     const el = wrapper as HTMLElement;
     const fileType = el.dataset.fileType;
-    if (selectedTypeFilter === 'all' || fileType === selectedTypeFilter) {
-      el.style.display = '';
-    } else {
-      el.style.display = 'none';
-    }
+    el.hidden = !(selectedTypeFilter === 'all' || fileType === selectedTypeFilter);
   });
 
   // Hide/show detail panels based on filter
@@ -397,11 +406,7 @@ const applyTypeFilter = (): void => {
   details.forEach((panel) => {
     const el = panel as HTMLElement;
     const fileType = el.dataset.fileType;
-    if (selectedTypeFilter === 'all' || fileType === selectedTypeFilter) {
-      el.style.display = '';
-    } else {
-      el.style.display = 'none';
-    }
+    el.hidden = !(selectedTypeFilter === 'all' || fileType === selectedTypeFilter);
   });
 
   // Hide day-group headers that no longer have any visible rows under
@@ -411,7 +416,7 @@ const applyTypeFilter = (): void => {
   let currentHeaderHasVisible = false;
   const finalizeHeader = () => {
     if (currentHeader) {
-      currentHeader.style.display = currentHeaderHasVisible ? '' : 'none';
+      currentHeader.hidden = !currentHeaderHasVisible;
     }
   };
   for (const child of children) {
@@ -419,20 +424,15 @@ const applyTypeFilter = (): void => {
       finalizeHeader();
       currentHeader = child;
       currentHeaderHasVisible = false;
-    } else if (
-      child.classList.contains('download-item-wrapper') &&
-      child.style.display !== 'none'
-    ) {
+    } else if (child.classList.contains('download-item-wrapper') && !child.hidden) {
       currentHeaderHasVisible = true;
     }
   }
   finalizeHeader();
 
   // Check if any visible
-  const anyVisible = downloadsListElement.querySelector(
-    '.download-item-wrapper:not([style*="display: none"])'
-  );
-  noDownloads.style.display = anyVisible ? 'none' : 'block';
+  const anyVisible = downloadsListElement.querySelector('.download-item-wrapper:not([hidden])');
+  noDownloads.hidden = anyVisible !== null;
 };
 
 // ---------------------------------------------------------------------------
@@ -453,10 +453,10 @@ const updateStorageGauge = (): void => {
   ).length;
   const fileWord = allLoadedItems.length === 1 ? 'file' : 'files';
 
-  // Each file type is coloured by its storage-bucket hue. The six hues are the
-  // only colour on this page, and only on the bar + legend (DESIGN.md §3.4).
-  const hue = (type: string): string =>
-    STORAGE_BUCKET_COLORS[getStorageBucket(type)] || STORAGE_BUCKET_COLORS.other;
+  // Each file type is coloured by its storage-bucket hue (a .storage-hue-*
+  // class). The six hues are the only colour on this page, and only on the
+  // bar + legend (DESIGN.md §3.4).
+  const hueClass = (type: string): string => `storage-hue-${getStorageBucket(type)}`;
 
   // Panel header meta — "3.5 GB used · 22 files · 1 paused".
   const totalStr = FormatUtils.formatFileSize(total) || '0 B';
@@ -469,13 +469,13 @@ const updateStorageGauge = (): void => {
   }
   storageMeta.innerHTML = metaParts.join('');
 
-  // Bar segments — one per type, coloured by its storage-hue token.
+  // Bar segments — one per type, coloured by its storage hue. The width is
+  // the type's share of the total.
   storageBar.innerHTML = '';
   sortedTypes.forEach(([type, size]) => {
     const segment = document.createElement('div');
-    segment.className = 'storage-bar-segment';
+    segment.className = `storage-bar-segment ${hueClass(type)}`;
     segment.style.width = total > 0 ? `${(size / total) * 100}%` : '0%';
-    segment.style.background = hue(type);
     storageBar.appendChild(segment);
   });
 
@@ -485,7 +485,7 @@ const updateStorageGauge = (): void => {
     const item = document.createElement('div');
     item.className = 'storage-legend-item';
     item.innerHTML = `
-      <div class="storage-legend-dot" style="background: ${hue(type)}"></div>
+      <div class="storage-legend-dot ${hueClass(type)}"></div>
       <span class="storage-legend-text">
         <strong>${type}</strong>
         <span class="size">${FormatUtils.formatFileSize(size)}</span>
@@ -552,7 +552,7 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
         '<span class="download-status paused"><i data-lucide="pause" width="10" height="10"></i> paused</span>';
     } else if (isActive) {
       const pctLabel = activeInfo.totalBytes > 0 ? `${pct}%` : '…';
-      statusHtml = `<span class="download-status progress"><i data-lucide="arrow-down" width="10" height="10"></i> <span class="pct-num">${pctLabel}</span></span>`;
+      statusHtml = `<span class="download-status in-progress"><i data-lucide="arrow-down" width="10" height="10"></i> <span class="pct-num">${pctLabel}</span></span>`;
     }
 
     // Action buttons
@@ -589,24 +589,23 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
         </button>`;
     }
 
-    // Progress bar for active downloads — wrapped in .download-progress
-    // which spans grid cols 3-6 on row 2 via CSS.
+    // Progress bar for active downloads — .download-progress is a second
+    // grid row under the 54 px row (CSS). The fill colour comes from CSS
+    // (accent, grey on a .paused row); only its width is set here.
     let progressHtml = '';
     if (isActive) {
       const hasTotal = activeInfo.totalBytes > 0;
       const barWidth = hasTotal ? `${pct}%` : '30%';
-      // Progress fill is accent; paused dims to warning. Never a per-type hue.
-      const barColor = isPaused ? 'var(--n-warning)' : 'var(--n-accent)';
       const indeterminateClass = hasTotal ? '' : ' indeterminate';
       progressHtml = `
         <div class="download-progress${indeterminateClass}">
           <div class="download-progress-bar">
-            <div class="download-progress-fill" style="width: ${barWidth}; background: ${barColor}"></div>
+            <div class="download-progress-fill" style="width: ${barWidth}"></div>
           </div>
         </div>`;
     }
 
-    // Meta line — source host (accent) · file path. Falls back gracefully.
+    // Meta line — source host (grey) · file path. Falls back gracefully.
     const metaParts: string[] = [];
     if (sourceHost) metaParts.push(`<span class="from">${escapeHtml(sourceHost)}</span>`);
     if (item.fileLocation) {
@@ -677,8 +676,8 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
         wrapper.remove();
         allLoadedItems.splice(allLoadedItems.indexOf(item), 1);
         if (allLoadedItems.length === 0) {
-          noDownloads.style.display = 'block';
-          deleteAllBtn.style.display = 'none';
+          noDownloads.hidden = false;
+          deleteAllBtn.hidden = true;
         }
         updateStorageGauge();
         renderTypeFilters();
@@ -810,9 +809,6 @@ const updateProgressBar = (fileName: string, receivedBytes: number, totalBytes: 
     bar = newProgressEl.querySelector('.download-progress-fill') as HTMLElement;
   }
 
-  // Progress fill is always accent — never a per-type hue.
-  bar.style.background = 'var(--n-accent)';
-
   let pct = 0;
   if (totalBytes > 0) {
     // Determinate: show actual percentage
@@ -826,7 +822,7 @@ const updateProgressBar = (fileName: string, receivedBytes: number, totalBytes: 
   }
 
   // Update status pill (percentage)
-  const pctNum = row.querySelector('.download-status.progress .pct-num') as HTMLElement;
+  const pctNum = row.querySelector('.download-status.in-progress .pct-num') as HTMLElement;
   if (pctNum) pctNum.textContent = totalBytes > 0 ? `${pct}%` : '…';
 
   // Update file size display
@@ -882,11 +878,7 @@ const setRowPaused = (fileName: string): void => {
     createIcons({ icons });
   }
 
-  // Paused fill dims to warning.
-  const progressFill = row.querySelector('.download-progress-fill') as HTMLElement;
-  if (progressFill) {
-    progressFill.style.background = 'var(--n-warning)';
-  }
+  // The .paused row class greys the progress fill (CSS).
 
   // Swap status pill to paused
   const statusEl = row.querySelector('.download-status') as HTMLElement;
@@ -919,16 +911,12 @@ const setRowResumed = (fileName: string): void => {
     createIcons({ icons });
   }
 
-  // Restore the accent progress fill.
-  const progressFill = row.querySelector('.download-progress-fill') as HTMLElement;
-  if (progressFill) {
-    progressFill.style.background = 'var(--n-accent)';
-  }
+  // Dropping .paused restores the accent progress fill (CSS).
 
   // Swap status pill back to in-progress
   const statusEl = row.querySelector('.download-status') as HTMLElement;
   if (statusEl) {
-    statusEl.className = 'download-status progress';
+    statusEl.className = 'download-status in-progress';
     statusEl.innerHTML =
       '<i data-lucide="arrow-down" width="10" height="10"></i> <span class="pct-num">…</span>';
     createIcons({ icons });
@@ -943,7 +931,7 @@ const showLoadingIndicator = (): void => {
   const loader = document.createElement('div');
   loader.id = 'loading-indicator';
   loader.className = 'loading-indicator';
-  loader.textContent = 'Loading...';
+  loader.textContent = 'Loading…';
   downloadsListElement.appendChild(loader);
 };
 

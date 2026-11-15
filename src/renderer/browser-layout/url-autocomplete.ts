@@ -27,7 +27,15 @@ type BookmarkRow = {
 
 const DEBOUNCE_MS = 120;
 const MAX_PER_GROUP = 4;
-const ITEM_HEIGHT = 58;
+// Must match the panel's rows (url-autocomplete.css: 44 px rows inside 6 px of
+// panel padding), or the overlay view ends below the last row and its
+// transparent remainder swallows clicks meant for the page.
+const ITEM_HEIGHT = 44;
+const PANEL_PADDING = 6;
+// Where the dropdown sits relative to the address field: inset 2 px from each
+// side, 6 px below the toolbar's bottom edge.
+const FIELD_INSET_X = 2;
+const GAP_BELOW_FIELD = 12;
 const getDropdownMaxHeight = (): number => Math.round(window.innerHeight * 0.7);
 
 let urlInput: HTMLInputElement;
@@ -56,8 +64,8 @@ const formatDate = (dateStr: string): string => {
 
 const estimateDropdownHeight = (results: Suggestion[]): number => {
   if (results.length === 0) return 0;
-  // Account for the 1px top + 1px bottom border on .url-autocomplete-panel.
-  const chrome = 2;
+  // Account for the panel's padding above the first row and below the last.
+  const chrome = 2 * PANEL_PADDING;
   return Math.min(getDropdownMaxHeight(), chrome + results.length * ITEM_HEIGHT);
 };
 
@@ -79,9 +87,9 @@ const computeBounds = () => {
   const addressBar = urlInput.closest('.address-bar') as HTMLElement | null;
   const rect = (addressBar ?? urlInput).getBoundingClientRect();
   return {
-    x: Math.round(rect.left),
-    y: Math.round(rect.bottom + 4),
-    width: Math.round(rect.width),
+    x: Math.round(rect.left + FIELD_INSET_X),
+    y: Math.round(rect.bottom + GAP_BELOW_FIELD),
+    width: Math.round(rect.width - 2 * FIELD_INSET_X),
     height: estimateDropdownHeight(currentResults),
   };
 };

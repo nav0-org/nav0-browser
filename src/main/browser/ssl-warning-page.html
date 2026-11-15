@@ -5,29 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{TITLE}}</title>
     <style>
+      /* Self-contained styles — this page is served as a data: URL so it
+         can't load the renderer stylesheet. The custom properties below are
+         literal mirrors of the global design tokens (DESIGN.md §3). */
       :root {
-        --bg-0: #ffffff;
-        --bg-panel: #f5f5f7;
-        --bg-panel-strong: rgba(0, 0, 0, 0.05);
-        --fg-1: #1d1d1f;
-        --fg-2: #424245;
-        --fg-3: #6e6e73;
-        --fg-4: #6e6e73;
-        --border-1: #e5e5ea;
-        --border-2: #d1d1d6;
-        --icon-well: #f2f2f4;
-        --danger: #d70015;
-        --danger-soft: rgba(215, 0, 21, 0.08);
-        --accent: #0066d6;
-        --accent-hover: #0058b9;
-        --r-xs: 4px;
-        --r-sm: 4px;
-        --r-md: 6px;
-        --r-lg: 8px;
+        --n-page: #ffffff;
+        --n-grouped: #f5f5f7;
+        --n-separator: #e5e5ea;
+        --n-fill: rgba(0, 0, 0, 0.05);
+        --n-fill-2: rgba(0, 0, 0, 0.07);
+        --n-control-edge: #8e8e93;
+        --n-text-1: #1d1d1f;
+        --n-text-2: #424245;
+        --n-text-3: #6e6e73;
+        --n-on-accent: #ffffff;
+        --n-accent: #0066d6;
+        --n-accent-hover: #0058b9;
+        --n-danger: #d70015;
+        --n-danger-soft: rgba(215, 0, 21, 0.08);
+        --n-focus-ring: 0 0 0 3px rgba(0, 102, 214, 0.28);
+        --n-r-control: 4px;
+        --n-r-panel: 6px;
         --dur-fast: 120ms;
         --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
         --font-sans:
           -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      }
+
+      /* Same contrast step-up as global.css (DESIGN.md §3.4). */
+      @media (prefers-contrast: more) {
+        :root {
+          --n-separator: #8e8e93;
+          --n-control-edge: #6e6e73;
+          --n-text-3: #424245;
+        }
       }
 
       * {
@@ -38,15 +49,17 @@
 
       html,
       body {
-        background: var(--bg-0);
-        color: var(--fg-1);
+        background: var(--n-page);
+        color: var(--n-text-1);
         font-family: var(--font-sans);
         min-height: 100vh;
         -webkit-font-smoothing: antialiased;
       }
 
+      /* An 880 px content column; the side padding is added to the max-width
+         so it only shows as a gutter on narrow windows. */
       .ssl-wrapper {
-        max-width: 880px;
+        max-width: calc(880px + 2 * 24px);
         margin: 0 auto;
         padding: 72px 24px 80px;
       }
@@ -59,7 +72,7 @@
         font-size: 28px;
         font-weight: 700;
         letter-spacing: -0.02em;
-        color: var(--danger);
+        color: var(--n-danger);
         margin: 0;
         line-height: 34px;
       }
@@ -72,12 +85,12 @@
       .ssl-glyph {
         width: 52px;
         height: 52px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: var(--r-xs);
-        background: var(--danger-soft);
-        color: var(--danger);
+        flex: none;
+        display: grid;
+        place-items: center;
+        border-radius: var(--n-r-control);
+        background: var(--n-danger-soft);
+        color: var(--n-danger);
       }
 
       .ssl-glyph svg {
@@ -91,29 +104,32 @@
         font-family: var(--font-mono);
         font-size: 11px;
         letter-spacing: 0.04em;
-        color: var(--fg-3);
+        color: var(--n-text-3);
       }
 
+      /* The heading, text and proceed link carry the hostname, which can be
+         one unbroken string: let it break rather than run off the page. */
       .ssl-heading {
         margin: 6px 0 0;
         font-size: 22px;
         line-height: 28px;
         font-weight: 700;
         letter-spacing: -0.015em;
-        color: var(--fg-1);
+        color: var(--n-text-1);
+        overflow-wrap: anywhere;
       }
 
       .ssl-text {
         margin: 10px 0 0;
         font-size: 13px;
         line-height: 20px;
-        color: var(--fg-2);
-        max-width: 620px;
+        color: var(--n-text-2);
+        overflow-wrap: anywhere;
       }
 
       .ssl-text .host {
         font-weight: 600;
-        color: var(--fg-1);
+        color: var(--n-text-1);
       }
 
       .ssl-code {
@@ -124,87 +140,102 @@
         padding: 3px 8px;
         font-family: var(--font-mono);
         font-size: 12px;
-        color: var(--fg-2);
-        background: var(--bg-panel-strong);
-        border-radius: var(--r-xs);
+        color: var(--n-text-2);
+        background: var(--n-fill);
+        border-radius: var(--n-r-control);
+        overflow-wrap: anywhere;
       }
 
       .ssl-actions {
-        display: inline-flex;
+        display: flex;
         flex-wrap: wrap;
         gap: 10px;
         margin-top: 22px;
       }
 
+      /* Mirrors global.css .btn / .btn-primary / .btn-secondary. */
       .btn {
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 6px;
         padding: 0 14px;
         height: 32px;
-        border-radius: var(--r-xs);
+        border-radius: var(--n-r-control);
         font-size: 13px;
         font-weight: 500;
+        line-height: 1;
+        white-space: nowrap;
         cursor: pointer;
-        border: 1px solid transparent;
+        border: 0;
+        flex: none;
         font-family: var(--font-sans);
         transition:
-          background var(--dur-fast),
-          border-color var(--dur-fast),
-          color var(--dur-fast);
+          background-color var(--dur-fast),
+          box-shadow var(--dur-fast);
       }
 
       .btn.primary {
-        background: var(--accent);
-        color: #ffffff;
-        border-color: var(--accent);
+        background: var(--n-accent);
+        color: var(--n-on-accent);
       }
 
       .btn.primary:hover {
-        background: var(--accent-hover);
-        border-color: var(--accent-hover);
+        background: var(--n-accent-hover);
       }
 
       .btn.secondary {
-        background: transparent;
-        color: var(--fg-1);
-        border-color: var(--border-2);
+        background: var(--n-fill);
+        color: var(--n-text-1);
       }
 
       .btn.secondary:hover {
-        background: var(--bg-panel);
+        background: var(--n-fill-2);
       }
 
       .btn svg {
         width: 14px;
         height: 14px;
+        flex: none;
       }
 
-      /* Advanced toggle + risks panel */
+      /* Keyboard focus only: a soft accent halo, never an outline. */
+      :focus-visible {
+        outline: none;
+        box-shadow: var(--n-focus-ring);
+      }
+
+      /* Advanced toggle + risks panel. The toggle is inline-flex, so this
+         rule's line height, not the button's own, sets its row's height. */
       .advanced {
         margin-top: 30px;
         padding-top: 18px;
-        border-top: 1px solid var(--border-1);
+        border-top: 1px solid var(--n-separator);
+        line-height: 20px;
       }
 
       .advanced-toggle {
         display: inline-flex;
         align-items: center;
         gap: 6px;
+        font-family: var(--font-sans);
         font-size: 13px;
+        line-height: 16px;
         font-weight: 600;
-        color: var(--fg-1);
+        color: var(--n-text-1);
         background: transparent;
         border: 0;
+        border-radius: var(--n-r-control);
         padding: 0;
         cursor: pointer;
       }
 
       .advanced-toggle .chev {
-        display: inline-block;
+        width: 14px;
+        height: 14px;
+        flex: none;
+        color: var(--n-text-3);
         transition: transform var(--dur-fast);
-        font-size: 10px;
-        color: var(--fg-3);
       }
 
       .advanced-toggle.open .chev {
@@ -221,41 +252,42 @@
       }
 
       .panel {
-        background: var(--bg-panel);
-        border-radius: var(--r-md);
-        overflow: hidden;
-      }
-
-      .panel-head {
-        padding: 14px 16px 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 14px 16px 16px;
+        background: var(--n-grouped);
+        border-radius: var(--n-r-panel);
       }
 
       .panel-head .panel-title {
         font-size: 12px;
+        line-height: 15px;
         font-weight: 600;
-        color: var(--fg-3);
+        color: var(--n-text-3);
       }
 
       .panel-head .panel-sub {
         font-size: 12px;
-        color: var(--fg-3);
+        line-height: 15px;
+        color: var(--n-text-3);
         margin-top: 2px;
       }
 
       .risk-list {
         list-style: none;
-        margin: 0;
-        padding: 0 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
       }
 
       .risk-list li {
         display: grid;
         grid-template-columns: 4px 1fr;
         gap: 10px;
-        padding: 3px 0;
         font-size: 13px;
         line-height: 19px;
-        color: var(--fg-2);
+        color: var(--n-text-2);
       }
 
       .risk-list li::before {
@@ -263,12 +295,15 @@
         width: 4px;
         height: 4px;
         border-radius: 50%;
-        background: #8e8e93;
+        background: var(--n-control-edge);
         margin-top: 8px;
       }
 
       .panel-foot {
-        padding: 10px 16px 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        margin-top: 4px;
       }
 
       /* Proceed link — plain red text link inside the Advanced panel so it's
@@ -280,19 +315,24 @@
         gap: 6px;
         padding: 0;
         font-size: 13px;
+        line-height: 16px;
         font-weight: 500;
-        color: var(--danger);
+        color: var(--n-danger);
         background: transparent;
         border: 0;
+        border-radius: var(--n-r-control);
         cursor: pointer;
         font-family: var(--font-sans);
+        overflow-wrap: anywhere;
+        text-align: left;
       }
 
       .ssl-url {
-        margin-top: 10px;
-        font-size: 11.5px;
-        color: var(--fg-4);
-        word-break: break-all;
+        margin-top: 4px;
+        font-size: 12px;
+        line-height: 16px;
+        color: var(--n-text-3);
+        overflow-wrap: anywhere;
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -348,7 +388,20 @@
 
       <div class="advanced">
         <button class="advanced-toggle" id="advancedToggle" type="button">
-          <span class="chev">▶</span> Advanced
+          <svg
+            class="chev"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="m9 18 6-6-6-6" />
+          </svg>
+          Advanced
         </button>
 
         <div class="advanced-body" id="advancedBody">
@@ -362,7 +415,7 @@
             </ul>
             <div class="panel-foot">
               <button class="proceed-link" id="proceedBtn" data-url="{{ENCODED_URL}}">
-                Proceed to {{HOSTNAME}} (unsafe) →
+                Proceed to {{HOSTNAME}} (unsafe)&nbsp;→
               </button>
               <div class="ssl-url">{{URL_DISPLAY}}</div>
             </div>

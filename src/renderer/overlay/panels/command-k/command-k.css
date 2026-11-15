@@ -1,4 +1,4 @@
-/* Command-K overlay panel styles */
+/* Command-K overlay panel styles (DESIGN.md §4.4) */
 
 #overlay-command-k {
   background-color: var(--n-scrim);
@@ -7,13 +7,16 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 80px;
+  /* The overlay covers the whole window, so this clears the 84 px chrome by 12 px. */
+  padding-top: 96px;
 }
 
-/* Palette dialog — MENU MATERIAL */
+/* Palette dialog: menu material from tokens only, so the reduced-transparency
+   fallback in global.css can make it solid (DESIGN.md §3.8). */
 #overlay-command-k .command-container {
-  width: 850px;
+  width: 760px;
   max-width: 90vw;
+  max-height: 70vh;
   background: var(--n-menu-bg);
   backdrop-filter: var(--n-menu-blur);
   -webkit-backdrop-filter: var(--n-menu-blur);
@@ -22,11 +25,26 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  max-height: 70vh;
+  animation: cmdk-reveal 180ms ease-out;
 }
 
-/* Search input area (header) */
+@keyframes cmdk-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Search input area. content-box keeps the 1 px rule outside the 56 px height;
+   flex: none, because as a shrinkable flex item it collapsed to its content
+   height whenever the result list overflowed. */
 #overlay-command-k .search-area {
+  flex: none;
+  box-sizing: content-box;
   height: 56px;
   padding: 0 16px 0 18px;
   border-bottom: 1px solid var(--n-menu-line);
@@ -42,12 +60,20 @@
 
 #overlay-command-k .search-input {
   flex: 1;
+  min-width: 0;
+  padding: 0;
   border: none;
   outline: none;
   font-size: 17px;
   color: var(--n-text-1);
   caret-color: var(--n-accent);
   background: transparent;
+}
+
+/* The palette header shows only the caret when focused. Text inputs always
+   match :focus-visible, so drop the global halo here (no box inside the box). */
+#overlay-command-k .search-input:focus-visible {
+  box-shadow: none;
 }
 
 #overlay-command-k .search-input::placeholder {
@@ -58,8 +84,10 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-shrink: 0;
 }
 
+/* Keycaps — DESIGN.md §5.3 (one per key, 4 px apart). */
 #overlay-command-k .key {
   display: inline-flex;
   align-items: center;
@@ -72,14 +100,17 @@
   border-radius: var(--n-r-key);
   background-color: var(--n-fill-2);
   color: var(--n-text-2);
-  margin: 0 2px;
 }
 
-/* Results section */
+/* Results section. The right edge is a stable 8 px scrollbar gutter instead of
+   padding, so rows keep the same 8 px inset on both sides whether or not the
+   list scrolls. */
 #overlay-command-k .results-container {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  padding: var(--spacing-sm);
+  padding: 6px 0 10px 8px;
+  scrollbar-gutter: stable;
 }
 
 #overlay-command-k .results-container::-webkit-scrollbar {
@@ -88,20 +119,26 @@
 
 #overlay-command-k .results-container::-webkit-scrollbar-track {
   background: transparent;
+  margin: 4px 0;
 }
 
+/* A slim 4 px thumb centred in the gutter (the transparent border insets it). */
 #overlay-command-k .results-container::-webkit-scrollbar-thumb {
-  background: var(--n-fill-2);
+  background-color: var(--n-chrome-line);
+  background-clip: padding-box;
+  border: 2px solid transparent;
   border-radius: var(--n-r-control);
 }
 
 #overlay-command-k .results-container::-webkit-scrollbar-thumb:hover {
-  background: var(--n-fill);
+  background-color: var(--n-control-edge);
 }
 
+/* Group label */
 #overlay-command-k .section-title {
-  padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-xs);
+  padding: 12px 12px 4px;
   font-size: 11px;
+  line-height: 14px;
   font-weight: 600;
   color: var(--n-text-3);
   letter-spacing: 0.02em;
@@ -118,7 +155,7 @@
   position: relative;
 }
 
-/* SELECTION STYLE — hover and keyboard-selected rows share one look */
+/* Selection style: hover and keyboard-selected rows share one look. */
 #overlay-command-k .result-item:hover,
 #overlay-command-k .result-item.active,
 #overlay-command-k .result-item[aria-selected='true'] {
@@ -137,6 +174,15 @@
   color: var(--n-accent);
 }
 
+/* On the selected row the meta ("Switch to tab", the date) steps up to
+   secondary text; the URL stays tertiary. */
+#overlay-command-k .result-item:hover .result-meta,
+#overlay-command-k .result-item.active .result-meta,
+#overlay-command-k .result-item[aria-selected='true'] .result-meta {
+  color: var(--n-text-2);
+}
+
+/* 28 px icon well */
 #overlay-command-k .result-icon {
   width: 28px;
   height: 28px;
@@ -149,6 +195,8 @@
   flex-shrink: 0;
 }
 
+/* 28 px favicon well; holds a 16 px favicon, or the site's first letter when
+   there is none. */
 #overlay-command-k .result-favicon {
   width: 28px;
   height: 28px;
@@ -160,7 +208,13 @@
   color: var(--n-text-2);
   flex-shrink: 0;
   font-size: var(--font-lg);
-  font-weight: bold;
+  font-weight: 700;
+}
+
+#overlay-command-k .result-favicon img {
+  width: 16px;
+  height: 16px;
+  border-radius: var(--n-r-control);
 }
 
 #overlay-command-k .result-content {
@@ -170,9 +224,9 @@
 
 #overlay-command-k .result-title {
   font-size: 13px;
+  line-height: 16px;
   font-weight: 500;
   color: var(--n-text-1);
-  margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -200,6 +254,7 @@
   align-items: center;
   font-size: 12px;
   color: var(--n-text-3);
+  font-variant-numeric: tabular-nums;
   margin-top: 2px;
 }
 
@@ -209,14 +264,14 @@
   margin-right: var(--spacing-sm);
 }
 
-/* Subline collapses the former url + meta rows into a single row. Meta
-   appears first; each child keeps its original color/typography. */
+/* Secondary line: meta first, then the URL. */
 #overlay-command-k .result-subline {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 2px;
   min-width: 0;
+  margin-top: 1px;
+  font-size: 12px;
+  line-height: 14px;
 }
 
 #overlay-command-k .result-subline .result-meta {
@@ -231,6 +286,13 @@
 #overlay-command-k .result-subline .result-url {
   flex: 1;
   min-width: 0;
+}
+
+/* Decorative middle dot between the meta and the URL ("Switch to tab · …"),
+   skipped when the URL is empty, as on a New Tab row. */
+#overlay-command-k .result-meta + .result-url:not(:empty)::before {
+  content: '\00b7' / '';
+  margin: 0 var(--spacing-xs);
 }
 
 #overlay-command-k .result-meta i {
@@ -266,25 +328,18 @@
   color: var(--n-text-3);
 }
 
-/* Search engine result item */
-#overlay-command-k .result-item.search-engine-item {
-  border-bottom: 1px solid var(--n-menu-line);
-  margin-bottom: 4px;
-}
-
-/* Result favicon image */
-#overlay-command-k .result-favicon img {
-  width: 20px;
-  height: 20px;
-  border-radius: 2px;
-}
-
 /* Loading indicator */
 #overlay-command-k .loading {
-  display: none;
   padding: 12px;
   text-align: center;
   color: var(--n-text-3);
+}
+
+/* The empty state and loading indicator are toggled with the hidden
+   attribute; keep it winning over their display values. */
+#overlay-command-k .empty-state[hidden],
+#overlay-command-k .loading[hidden] {
+  display: none;
 }
 
 #overlay-command-k .loading .loader {
@@ -307,6 +362,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  #overlay-command-k .command-container,
   #overlay-command-k .loading .loader {
     animation: none;
   }
@@ -314,7 +370,7 @@
 
 #overlay-command-k .highlight {
   padding: 0 2px;
-  border-radius: 2px;
+  border-radius: var(--n-r-key);
 }
 
 /* Responsive adjustments */

@@ -73,15 +73,24 @@ body.is-private .find-in-page-bar .find-bar {
   flex-shrink: 0;
 }
 
+/* The text starts right after the icon's 8 px gap (no input padding). */
 .find-in-page-bar .find-input {
   flex: 1;
   min-width: 0;
+  margin: 0;
+  padding: 0;
   border: 0;
   outline: none;
   background: transparent;
   font-size: 13px;
   color: var(--n-text-1);
   caret-color: var(--n-accent);
+}
+
+/* The field draws the ring (above); the input inside it gets no halo of
+   its own, which would show as a box inside the box. */
+.find-in-page-bar .find-input:focus-visible {
+  box-shadow: none;
 }
 
 .find-in-page-bar .find-input::placeholder {
@@ -109,13 +118,15 @@ body.is-private .find-in-page-bar .find-bar {
   color: var(--n-danger);
 }
 
-/* Actions */
+/* Actions: 14 px after the field (the bar's 4 px gap plus this margin), then
+   4 px apart. */
 .find-in-page-bar .find-actions {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   flex: 1;
   min-width: 0;
+  margin-left: 10px;
 }
 
 .find-in-page-bar .find-separator {
@@ -123,6 +134,16 @@ body.is-private .find-in-page-bar .find-bar {
   height: 18px;
   background-color: var(--n-chrome-line);
   margin: 0 4px;
+}
+
+/* One divider only, between the options and previous / next; close sits
+   alone at the far right. */
+.find-in-page-bar .find-separator:has(+ .find-close-btn) {
+  display: none;
+}
+
+body.is-private .find-in-page-bar .find-separator {
+  background-color: var(--n-private-line);
 }
 
 /* Toggle buttons (Match Case, Whole Word, Regex) */
@@ -155,12 +176,14 @@ body.is-private .find-in-page-bar .find-bar {
   color: var(--n-accent);
 }
 
+/* "ab" between two bars, at the button's own 12 px 600; the 11 px line
+   height keeps the bars 11 px tall. */
 .find-in-page-bar .whole-word-icon {
-  font-size: 11px;
+  display: inline-block;
   border-left: 1.5px solid currentColor;
   border-right: 1.5px solid currentColor;
   padding: 0 2px;
-  line-height: 1;
+  line-height: 11px;
 }
 
 /* Navigation + close buttons */

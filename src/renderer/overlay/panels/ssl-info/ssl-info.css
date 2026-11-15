@@ -1,6 +1,6 @@
 @import url('../../../styles/global.css');
 
-/* SSL Info overlay panel styles — Popovers site-information spec (DESIGN.md §4.4) */
+/* SSL Info overlay panel styles: the site-information popover (DESIGN.md §4.4) */
 
 #overlay-ssl-info {
   background: transparent;
@@ -9,19 +9,22 @@
   cursor: default;
 }
 
+/* Anchored under the lock: 84 px is the chrome height (DESIGN.md §4.1) and
+   144 px puts the left edge 6 px before the address field. In a narrow window
+   it slides left to stay whole. */
 .ssl-info-panel {
   position: absolute;
-  top: 93px;
-  left: 12px;
+  top: calc(84px + var(--spacing-xs));
+  left: max(var(--spacing-sm), min(144px, calc(100% - 340px - var(--spacing-sm))));
   width: 340px;
-  max-width: calc(100% - 24px);
+  max-width: calc(100% - 2 * var(--spacing-sm));
   pointer-events: auto;
   display: flex;
   flex-direction: column;
   gap: 10px;
   padding: 12px 14px 14px;
 
-  /* MENU MATERIAL */
+  /* Menu material */
   background: var(--n-menu-bg);
   backdrop-filter: var(--n-menu-blur);
   -webkit-backdrop-filter: var(--n-menu-blur);
@@ -31,6 +34,25 @@
   line-height: 17px;
   color: var(--n-text-2);
   overflow: hidden;
+  animation: ssl-info-reveal 180ms ease-out;
+}
+
+/* Reveal each time the panel is shown (DESIGN.md §3.9). */
+@keyframes ssl-info-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ssl-info-panel {
+    animation: none;
+  }
 }
 
 .ssl-info-header {
@@ -54,23 +76,26 @@
 }
 
 .ssl-info-header-icon svg {
+  flex-shrink: 0;
   width: 16px;
   height: 16px;
 }
 
-/* SECURE — neutral, no green */
+/* Secure: neutral, never green */
 .ssl-info-header.secure .ssl-info-header-icon {
   color: var(--n-text-2);
 }
 
-/* NOT SECURE — danger triangle */
+/* Not secure: the danger triangle */
 .ssl-info-header.insecure .ssl-info-header-icon {
   color: var(--n-danger);
 }
 
+/* No padding: the UA button padding would squeeze the glyph. */
 .ssl-info-close {
   width: 22px;
   height: 22px;
+  padding: 0;
   background: none;
   border: none;
   cursor: pointer;
@@ -83,6 +108,7 @@
 }
 
 .ssl-info-close svg {
+  flex-shrink: 0;
   width: 14px;
   height: 14px;
 }
@@ -105,12 +131,13 @@
   line-height: 17px;
 }
 
+/* The host name is bold in the body colour, not a darker text colour. */
 .ssl-info-detail strong {
-  color: var(--n-text-1);
-  font-weight: 600;
+  color: inherit;
+  font-weight: 700;
 }
 
-/* DANGER BANNER (not-secure state) */
+/* Danger banner (not-secure state) */
 .ssl-info-warning-banner {
   padding: 8px 10px;
   border-radius: var(--n-r-control);
@@ -118,7 +145,7 @@
   color: var(--n-danger);
   font-size: 12px;
   font-weight: 600;
-  line-height: 17px;
+  line-height: normal;
 }
 
 .ssl-info-protocol {
@@ -138,6 +165,7 @@
 .ssl-info-section-heading {
   font-size: 12px;
   font-weight: 600;
+  line-height: normal;
   color: var(--n-text-1);
   margin-bottom: 4px;
 }
@@ -152,17 +180,32 @@
 
 .ssl-info-risks ul {
   margin: 0;
-  padding-left: 16px;
+  padding: 0;
+  list-style: none;
+}
+
+/* Risk rows: a small grey dot, with wrapped lines hanging under the text. */
+.ssl-info-risks li {
+  display: flex;
+  gap: 8px;
+}
+
+.ssl-info-risks li::before {
+  content: '';
+  flex: none;
+  width: 4px;
+  height: 4px;
+  margin-top: 7px;
+  border-radius: var(--n-r-full);
+  background-color: var(--n-control-edge);
 }
 
 /* Detail-row label */
 .ssl-label {
   color: var(--n-text-3);
-  font-weight: 500;
 }
 
 /* Not-secure protocol value */
 .ssl-text-danger {
   color: var(--n-danger);
-  font-weight: 500;
 }
