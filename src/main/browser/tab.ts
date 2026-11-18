@@ -625,6 +625,14 @@ export class Tab {
       this.injectHoverStatusBar();
     });
 
+    // One handler per tab: the last view's would otherwise stay on the session,
+    // keeping the tab alive, and handle downloads a second time.
+    if (this.willDownloadHandler) {
+      this.webContentsViewInstance.webContents.session.removeListener(
+        'will-download',
+        this.willDownloadHandler
+      );
+    }
     this.willDownloadHandler = async (
       event: Electron.Event,
       item: Electron.DownloadItem,
@@ -634,7 +642,10 @@ export class Tab {
       // (their downloadWebContents won't match any tab's webContents)
       const downloadId = item.getStartTime().toString() + '_' + item.getFilename();
       const isCrossSessionResume = DownloadManager.isResuming(downloadId);
-      if (!isCrossSessionResume && downloadWebContents !== this.webContentsViewInstance.webContents)
+      if (
+        !isCrossSessionResume &&
+        downloadWebContents !== this.webContentsViewInstance?.webContents
+      )
         return;
 
       await this.handleDownload(item);
