@@ -5,6 +5,7 @@ import {
   dialog,
   Menu,
   MenuItem,
+  session,
   shell,
   WebContentsView,
 } from 'electron';
@@ -19,6 +20,7 @@ import {
 } from '../../constants/app-constants';
 import { v4 as uuid } from 'uuid';
 import { AppWindow } from './app-window';
+import { AppWindowManager } from './app-window-manager';
 import { BookmarkManager } from './bookmark-manager';
 import { BookmarkRecord } from '../../types/bookmark-record';
 import { BrowsingHistoryManager } from './browsing-history-manager';
@@ -28,6 +30,7 @@ import path from 'path';
 import { Utils } from '../browser/utils';
 import { SearchEngine } from '../web/search-engine';
 import { PermissionManager } from './permission-manager';
+import { NotificationManager } from './notification-manager';
 import { ReaderModeManager, ReaderModeState } from './reader-mode-manager';
 import { DataStoreManager } from '../database/data-store-manager';
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from '../../types/settings-types';
@@ -438,6 +441,22 @@ export class Tab {
   }
 
   private initEventHandlers() {
+    // A page can close its own tab with window.close() (Electron lets any page,
+    // Chrome only a tab opened by script or with one history entry): Electron
+    // destroys the webContents, and the tab goes as if the user had closed it.
+    // The tab's own closes don't count: they mark it destroyed or take its
+    // listeners off first, or replace the view (initWebContentsView();
+    // 'destroyed' comes once close() has returned).
+    const view = this.webContentsViewInstance;
+    const webContentsId = view.webContents.id;
+    view.webContents.once(WebContentsEvents.DESTROYED, () => {
+      if (this._destroyed || this.webContentsViewInstance !== view) return;
+      // closeTab() can't reach its notifications through the view any more.
+      NotificationManager.clearNotificationsForWebContents(webContentsId);
+      const closedRecord = this.parentAppWindow.closeTab(this.id, false);
+      if (closedRecord) AppWindowManager.recordClosedTab(closedRecord);
+    });
+
     // Intercept navigations to external protocols (mailto:, tel:, etc.)
     // and hand them off to the OS default handler instead of navigating.
     this.webContentsViewInstance.webContents.on('will-navigate', (event, url) => {
@@ -1636,11 +1655,12 @@ export class Tab {
       clearTimeout(this.readerModeCheckTimer);
       this.readerModeCheckTimer = null;
     }
-    if (this.willDownloadHandler && this.webContentsViewInstance) {
-      this.webContentsViewInstance.webContents.session.removeListener(
-        'will-download',
-        this.willDownloadHandler
-      );
+    if (this.willDownloadHandler) {
+      // The partition's session: a page that closed its own tab has taken the
+      // webContents with it.
+      session
+        .fromPartition(this.partitionSetting)
+        .removeListener('will-download', this.willDownloadHandler);
       this.willDownloadHandler = null;
     }
   }
@@ -1750,17 +1770,16 @@ export class Tab {
       clearTimeout(this.readerModeCheckTimer);
       this.readerModeCheckTimer = null;
     }
-    if (this.willDownloadHandler && this.webContentsViewInstance) {
-      this.webContentsViewInstance.webContents.session.removeListener(
-        'will-download',
-        this.willDownloadHandler
-      );
+    if (this.willDownloadHandler) {
+      session
+        .fromPartition(this.partitionSetting)
+        .removeListener('will-download', this.willDownloadHandler);
       this.willDownloadHandler = null;
     }
     if (this.webContentsViewInstance) {
-      this.webContentsViewInstance.webContents.removeAllListeners();
+      this.webContentsViewInstance.webContents?.removeAllListeners();
       this.webContentsViewInstance.removeAllListeners();
-      this.webContentsViewInstance.webContents.close();
+      this.webContentsViewInstance.webContents?.close();
       this.webContentsViewInstance = null;
     }
     this.showingSSLWarning = false;

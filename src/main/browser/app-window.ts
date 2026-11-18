@@ -526,9 +526,10 @@ export class AppWindow {
       tab.finalizePageTime();
       tab.clearPendingTimers();
       PermissionManager.clearSessionPermissionsForTab(id);
-      // Clean up notifications for this tab's webContents
+      // Clean up notifications for this tab's webContents (a page that closed
+      // its own tab has taken its webContents with it: see Tab)
       const tabView = tab.getWebContentsViewInstance();
-      if (tabView) {
+      if (tabView?.webContents) {
         NotificationManager.clearNotificationsForWebContents(tabView.webContents.id);
       }
       // Clean up per-tab strip state
@@ -536,9 +537,9 @@ export class AppWindow {
       this.permissionPrompts.delete(id);
       const view = tab.getWebContentsViewInstance();
       if (view) {
-        view.webContents.removeAllListeners();
+        view.webContents?.removeAllListeners();
         view.removeAllListeners();
-        view.webContents.close();
+        view.webContents?.close();
       }
     }
     this.tabs.delete(id);
@@ -1100,8 +1101,10 @@ export class AppWindow {
 
   findTabByWebContentsId(webContentsId: number): Tab | null {
     for (const tab of this.tabs.values()) {
+      // A view has no webContents once its page is gone: a window being torn
+      // down (destroyAllTabs()) keeps its tabs until it has closed.
       const view = tab.getWebContentsViewInstance();
-      if (view && view.webContents.id === webContentsId) {
+      if (view?.webContents?.id === webContentsId) {
         return tab;
       }
     }
