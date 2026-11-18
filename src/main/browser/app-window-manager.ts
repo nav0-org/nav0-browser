@@ -1300,9 +1300,10 @@ export abstract class AppWindowManager {
 
         const view = tab.getWebContentsViewInstance();
         if (!view) return; // Tab is suspended
-        const webContents = view.webContents;
-        const isMuted = webContents.isAudioMuted();
+        const isMuted = view.webContents.isAudioMuted();
 
+        // Items read the tab's webContents when clicked: the page can close
+        // the tab (window.close()) while the menu is open.
         const template: Electron.MenuItemConstructorOptions[] = [
           {
             label: isPinned ? 'Unpin Tab' : 'Pin Tab',
@@ -1314,12 +1315,14 @@ export abstract class AppWindowManager {
           {
             label: 'Reload Tab',
             click: () => {
-              webContents.reload();
+              tab.getLiveWebContents()?.reload();
             },
           },
           {
             label: 'Hard Reload Tab',
             click: () => {
+              const webContents = tab.getLiveWebContents();
+              if (!webContents) return;
               const webSession = webContents.session;
               const currentUrl = webContents.getURL();
               try {
@@ -1343,14 +1346,14 @@ export abstract class AppWindowManager {
           {
             label: 'Print...',
             click: () => {
-              webContents.print();
+              tab.getLiveWebContents()?.print();
             },
           },
           { type: 'separator' },
           {
             label: isMuted ? 'Unmute Site' : 'Mute Site',
             click: () => {
-              webContents.setAudioMuted(!isMuted);
+              tab.getLiveWebContents()?.setAudioMuted(!isMuted);
             },
           },
           { type: 'separator' },

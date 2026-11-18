@@ -1680,6 +1680,14 @@ export class Tab {
     return this.webContentsViewInstance;
   }
 
+  // The tab's webContents, or null once it has gone. Menus read it when an
+  // item is clicked: a page can close its own tab (window.close()), or the tab
+  // be suspended, while a menu for it is open.
+  getLiveWebContents(): Electron.WebContents | null {
+    const wc = this.webContentsViewInstance?.webContents;
+    return this._destroyed || !wc || wc.isDestroyed() ? null : wc;
+  }
+
   getIsSuspended(): boolean {
     return this.isSuspended;
   }
@@ -2239,13 +2247,13 @@ export class Tab {
         {
           label: 'Save Image As...',
           click: async () => {
-            this.webContentsViewInstance.webContents.downloadURL(srcURL);
+            this.getLiveWebContents()?.downloadURL(srcURL);
           },
         },
         {
           label: 'Copy Image',
           click: () => {
-            this.webContentsViewInstance.webContents.copyImageAt(params.x, params.y);
+            this.getLiveWebContents()?.copyImageAt(params.x, params.y);
           },
         },
         { type: 'separator' }
@@ -2260,7 +2268,7 @@ export class Tab {
         {
           label: 'Copy',
           click: () => {
-            this.webContentsViewInstance.webContents.copy();
+            this.getLiveWebContents()?.copy();
           },
         },
         {
@@ -2285,13 +2293,14 @@ export class Tab {
       {
         label: 'Reload',
         click: () => {
-          this.webContentsViewInstance.webContents.reload();
+          this.getLiveWebContents()?.reload();
         },
       },
       {
         label: 'Hard Reload',
         click: () => {
-          const webContents = this.webContentsViewInstance.webContents;
+          const webContents = this.getLiveWebContents();
+          if (!webContents) return;
           const webSession = webContents.session;
           const currentUrl = webContents.getURL();
           try {
@@ -2309,7 +2318,7 @@ export class Tab {
       {
         label: 'Print...',
         click: () => {
-          this.webContentsViewInstance.webContents.print();
+          this.getLiveWebContents()?.print();
         },
       }
     );
