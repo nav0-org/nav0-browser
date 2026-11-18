@@ -234,6 +234,7 @@ export abstract class MainToRendererEventsForBrowserIPC {
   public static readonly TAB_TITLE_UPDATED = 'browser:tab-title-updated';
   public static readonly TAB_FAVICON_UPDATED = 'browser:tab-favicon-updated';
   public static readonly TAB_URL_UPDATED = 'browser:tab-url-updated';
+  public static readonly TAB_BACK_FORWARD_UPDATED = 'browser:tab-back-forward-updated';
   public static readonly NAVIGATION_FAILED = 'browser:navigation-failed';
   public static readonly DOWNLOAD_STARTED = 'browser:download-started';
   public static readonly DOWNLOAD_PROGRESS = 'browser:download-progress';

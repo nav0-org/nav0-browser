@@ -4,6 +4,7 @@ import {
   PartitionNames,
   RendererToMainEventsForBrowserIPC,
   MULTI_PART_TLDS,
+  STREAMING_SITES,
 } from '../../constants/app-constants';
 import { DataStoreManager } from '../database/data-store-manager';
 import { DatabaseManager } from '../database/database-manager';
@@ -18,7 +19,7 @@ import {
   CAPTCHA_URL_MARKERS,
 } from '../ad-blocker/ad-block-lists';
 import { applyClientHints, alignUAWithRealChromeVersion } from '../browser/ua-switcher';
-import { STREAMING_SITES } from '../../constants/app-constants';
+import { pageFetchingFavicon } from '../browser/favicon-fetch';
 
 export abstract class SettingsEnforcer {
   private static autoDeleteInterval: ReturnType<typeof setInterval> | null = null;
@@ -413,8 +414,13 @@ export abstract class SettingsEnforcer {
           return;
         }
 
-        // Check allowed sites (per-site disable)
-        const topFrameUrl = details.frame?.url || details.referrer || '';
+        // Check allowed sites (per-site disable). A favicon the main process
+        // fetches for a page has no frame or referrer: the page stands in.
+        const topFrameUrl =
+          details.frame?.url ||
+          details.referrer ||
+          pageFetchingFavicon(details.id, details.url) ||
+          '';
         let topHostname = '';
         if (topFrameUrl) {
           try {
@@ -466,9 +472,7 @@ export abstract class SettingsEnforcer {
         // still blocked.
         if (
           topHostname &&
-          STREAMING_SITES.some(
-            (site) => topHostname === site || topHostname.endsWith('.' + site)
-          )
+          STREAMING_SITES.some((site) => topHostname === site || topHostname.endsWith('.' + site))
         ) {
           callback({});
           return;

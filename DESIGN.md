@@ -209,12 +209,12 @@ Unchanged: `--z-dropdown 100`, `--z-sticky 200`, `--z-modal 1000`, `--z-toast 11
 **Address field** — 32 px, `--n-card`, `--n-r-control`, `--n-field-shadow`; focused: `--n-focus-ring-field`. 14 px text.
 
 - At rest, the URL is split for display: scheme, subdomain and path in `--n-text-3`; the registrable domain in `--n-text-1` weight 600. The scheme is lowercase (`nav0://`, never `Nav0://`).
-- Leading indicator (30 × 28): secure = `lock` in `--n-text-3` (neutral, never green); not secure (HTTP or bypassed certificate) = `triangle-alert` in `--n-danger`, static. A bypassed certificate also shows `https` struck through in red. Built-in pages, a failed load and typing (the field no longer holds the page's URL) show `search`, which is display-only.
+- Leading indicator (30 × 28): secure = `lock` in `--n-text-3` (neutral, never green); not secure (HTTP, a certificate warning, or a bypassed certificate) = `triangle-alert` in `--n-danger`, static. A certificate error (on the warning, or after bypassing it) also shows `https` struck through in red. Built-in pages, a failed load and typing (the field no longer holds the page's URL) show `search`, which is display-only.
 - Trailing field buttons (reader, PDF, bookmark / reading queue): 28 × 28, 16 px icons in `--n-text-3`; when on, icon `--n-accent` on `--n-accent-soft`. They hide while the URL is being edited.
 
 **Find in page** — a 44 px bar under the toolbar, `--n-toolbar`, bottom line `--n-chrome-line`. Field 400 px wide, 30 px, white, ring as above, match counter inside the field at the right (12 px `--n-text-3`, e.g. "3 of 12"). "No matches" and "Invalid regex" turn the text, counter and ring `--n-danger`. Option toggles **Aa**, **|ab|**, **.\*** are 28 px; on = `--n-accent` text on `--n-accent-soft`. Divider, previous/next (disabled `--n-text-4` when there's nothing to move to), and close at the far right.
 
-**Private windows** — strip `--n-private-strip`, toolbar and active tab `--n-private-toolbar`, lines `--n-private-line`, text and icons `--n-private-text`, plus a "Private" label (`shield-check` + "Private", 12 px 600, `--n-private-label-bg` / `--n-private-label-text`, `--n-r-icon`) after the traffic lights. Never red.
+**Private windows** — strip `--n-private-strip`, toolbar and active tab `--n-private-toolbar`, lines `--n-private-line`, text and icons `--n-private-text`, plus a "Private" label (`shield-check` + "Private", 12 px 600, `--n-private-label-bg` / `--n-private-label-text`, `--n-r-icon`) first in the strip, after the traffic lights when they sit at the left. Never red.
 
 ### 4.2 Built-in pages (`src/renderer/pages/<page>/`)
 
@@ -241,7 +241,7 @@ Unchanged: `--z-dropdown 100`, `--z-sticky 200`, `--z-modal 1000`, `--z-toast 11
 - ⌘O: four columns of white cards (`--n-card`, `--n-r-control`, `--n-card-shadow`; the chosen card takes the selection style and drops the shadow), two-line titles, neutral window headers (no coloured rules); the active tab of each window is a small grey dot.
 - Text inputs inside dialogs are white with `--n-input-shadow` (30 px, a 12 px 500 `--n-text-2` label 5 px above); selects use `--n-select-shadow` and are 28 px (`select.form-control`).
 - Slide-in ~180 ms, gated on `prefers-reduced-motion`. The URL autocomplete is closed before any modal overlay opens (unchanged).
-- The URL autocomplete hangs 6 px under the toolbar, inset 2 px from each side of the address field. Its overlay view covers just the dropdown and its shadow's reach (6 px above, up to the toolbar's bottom line, 60 px either side, 84 px below), so the rest of the window stays clickable and the shadow shows whole except where the toolbar cuts it. A press in the shadow's margin is a click outside: the dropdown closes and the press goes on to whatever lies beneath, the page or the chrome.
+- The URL autocomplete hangs 6 px under the toolbar, inset 2 px from each side of the address field. Its overlay view covers just the dropdown and its shadow's reach (6 px above, up to the toolbar's bottom line, 60 px either side, 84 px below), so the rest of the window stays clickable and the shadow shows whole except where the toolbar cuts it. A press in the shadow's margin is a click outside: the dropdown closes and the press (left, middle or right button, with its modifier keys) goes on to whatever lies beneath, the page or the chrome. Three limits while the dropdown is open: a press there can't reach a cross-site iframe, the mouse's Back and Forward buttons only close the dropdown (focus goes to the page), and wheel, hover and drags over the margin don't reach the page.
 
 ### 4.5 Dialogs and interstitials
 

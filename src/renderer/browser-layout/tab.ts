@@ -128,9 +128,20 @@ export class Tab {
     } else if (wasBuiltIn) {
       // Leaving a built-in page: drop the compass until the site reports its
       // own favicon, so a site without one isn't shown (or bookmarked) with it.
-      this.faviconUrl = null;
-      this.setFaviconSource(EMPTY_FAVICON);
+      this.clearFavicon();
     }
+  }
+
+  // Back to the empty slot, with no favicon to bookmark: for a page that hasn't
+  // reported one yet, or an error page, which never does. A built-in page
+  // keeps the compass.
+  clearFavicon(): void {
+    if (isBuiltInUrl(this.url)) {
+      this.updateTabFavicon(ImageBase64Strings.FAVICON);
+      return;
+    }
+    this.faviconUrl = null;
+    this.setFaviconSource(EMPTY_FAVICON);
   }
 
   setLoading(isLoading: boolean): void {

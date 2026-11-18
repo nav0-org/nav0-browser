@@ -320,7 +320,15 @@ export function init() {
     },
     dismissUrlAutocompleteOverlay: (
       appWindowId: string,
-      press: { x: number; y: number; button: number }
+      press: {
+        x: number;
+        y: number;
+        button: number;
+        shiftKey: boolean;
+        ctrlKey: boolean;
+        altKey: boolean;
+        metaKey: boolean;
+      }
     ) => {
       ipcRenderer.send(
         RendererToMainEventsForBrowserIPC.DISMISS_URL_AUTOCOMPLETE_OVERLAY,
@@ -551,7 +559,7 @@ export function init() {
         callback(data)
       );
     },
-    onTabFaviconUpdated: (callback: (data: { id: string; faviconUrl: string }) => void) => {
+    onTabFaviconUpdated: (callback: (data: { id: string; faviconUrl: string | null }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.TAB_FAVICON_UPDATED, (_event, data) =>
         callback(data)
       );
@@ -568,6 +576,13 @@ export function init() {
       }) => void
     ) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.TAB_URL_UPDATED, (_event, data) =>
+        callback(data)
+      );
+    },
+    onTabBackForwardUpdated: (
+      callback: (data: { id: string; canGoBack: boolean; canGoForward: boolean }) => void
+    ) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.TAB_BACK_FORWARD_UPDATED, (_event, data) =>
         callback(data)
       );
     },

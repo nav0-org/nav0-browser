@@ -186,11 +186,7 @@ export abstract class AppMenuManager {
             click: () => {
               const activeWindow = AppWindowManager.getActiveWindow();
               if (!activeWindow) return;
-              const activeTab = activeWindow.getActiveTab();
-              const wc = activeTab?.getWebContentsViewInstance()?.webContents;
-              if (wc?.navigationHistory.canGoBack()) {
-                wc.navigationHistory.goBack();
-              }
+              activeWindow.getActiveTab()?.goBack();
             },
           },
           {
@@ -199,11 +195,7 @@ export abstract class AppMenuManager {
             click: () => {
               const activeWindow = AppWindowManager.getActiveWindow();
               if (!activeWindow) return;
-              const activeTab = activeWindow.getActiveTab();
-              const wc = activeTab?.getWebContentsViewInstance()?.webContents;
-              if (wc?.navigationHistory.canGoForward()) {
-                wc.navigationHistory.goForward();
-              }
+              activeWindow.getActiveTab()?.goForward();
             },
           },
           { type: 'separator' as const },

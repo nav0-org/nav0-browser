@@ -118,7 +118,15 @@ declare global {
       // closes the dropdown and passes the press on to what lies beneath.
       dismissUrlAutocompleteOverlay: (
         appWindowId: string,
-        press: { x: number; y: number; button: number }
+        press: {
+          x: number;
+          y: number;
+          button: number;
+          shiftKey: boolean;
+          ctrlKey: boolean;
+          altKey: boolean;
+          metaKey: boolean;
+        }
       ) => void;
       sendUrlAutocompleteResultClicked: (appWindowId: string, data: any) => void;
       onUrlAutocompleteResultForwarded: (callback: (data: any) => void) => void;
@@ -230,7 +238,12 @@ declare global {
           canGoForward: boolean;
         }) => void
       ) => void;
-      onTabFaviconUpdated: (callback: (data: { id: string; faviconUrl: string }) => void) => void;
+      onTabFaviconUpdated: (
+        callback: (data: { id: string; faviconUrl: string | null }) => void
+      ) => void;
+      onTabBackForwardUpdated: (
+        callback: (data: { id: string; canGoBack: boolean; canGoForward: boolean }) => void
+      ) => void;
       onNavigationFailed: (
         callback: (data: {
           id: string;

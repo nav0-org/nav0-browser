@@ -36,6 +36,9 @@ export class BrowserTabManager {
   private activeDownloads: Map<string, { receivedBytes: number; totalBytes: number }> = new Map();
   private activeTabId: string | null = null;
   private appWindowId: string | null = null;
+  // The user has typed in the address field since the chrome last set it,
+  // and hasn't submitted it yet.
+  private urlEdited = false;
   private isPrivate = false;
   private urlAutocomplete: ReturnType<typeof initUrlAutocomplete> | null = null;
 
@@ -224,6 +227,7 @@ export class BrowserTabManager {
 
     // Keep the at-rest display in step with whatever the field holds, typed or set.
     this.urlInput.addEventListener('input', () => {
+      this.urlEdited = true;
       this.renderUrlDisplay();
       this.updateSSLIndicator();
     });
@@ -366,8 +370,23 @@ export class BrowserTabManager {
       }
     );
 
-    window.BrowserAPI.onTabFaviconUpdated((data: { id: string; faviconUrl: string }) => {
-      this.getTabById(data.id)?.updateTabFavicon(data.faviconUrl);
+    // Back and Forward changed without a navigation of the page's own (an
+    // iframe's, or the user's first input on the page): the field stays as is.
+    window.BrowserAPI.onTabBackForwardUpdated((data) => {
+      const tab = this.getTabById(data.id);
+      if (!tab) return;
+      tab.canGoBack = data.canGoBack;
+      tab.canGoForward = data.canGoForward;
+      if (data.id === this.activeTabId) {
+        this.backButton.disabled = !data.canGoBack;
+        this.forwardButton.disabled = !data.canGoForward;
+      }
+    });
+
+    window.BrowserAPI.onTabFaviconUpdated((data: { id: string; faviconUrl: string | null }) => {
+      const tab = this.getTabById(data.id);
+      if (data.faviconUrl) tab?.updateTabFavicon(data.faviconUrl);
+      else tab?.clearFavicon();
     });
 
     // A failed load commits no URL update, so the failure stands in for one:
@@ -377,6 +396,16 @@ export class BrowserTabManager {
     window.BrowserAPI.onNavigationFailed((data) => {
       const tab = this.getTabById(data.id);
       if (!tab) return;
+      // A failure can arrive long after the load started (a timeout), while
+      // the user is already typing something else: leave their text alone.
+      // Not text they submitted, or left when focus went elsewhere (the field
+      // stays the document's active element when focus moves to the page or
+      // another app).
+      const isTyping =
+        data.id === this.activeTabId &&
+        this.urlEdited &&
+        document.hasFocus() &&
+        document.activeElement === this.urlInput;
       tab.handleUrlChange(
         data.url,
         data.isBookmark,
@@ -388,8 +417,13 @@ export class BrowserTabManager {
       tab.loadFailed = true;
       tab.sslStatus = 'internal';
       tab.sslDetails = null;
+      tab.clearFavicon();
       if (data.id === this.activeTabId) {
-        this.setUrlInputValue(data.url);
+        if (isTyping) {
+          this.updateSSLIndicator();
+        } else {
+          this.setUrlInputValue(data.url);
+        }
         this.backButton.disabled = !data.canGoBack;
         this.forwardButton.disabled = !data.canGoForward;
         this.handleBookmark();
@@ -548,7 +582,8 @@ export class BrowserTabManager {
 
   private updatePdfDownloadButton(): void {
     const activeTab = this.getTabById(this.activeTabId);
-    if (!activeTab || !activeTab.url) {
+    // An error page has no PDF to download, whatever its URL says.
+    if (!activeTab || !activeTab.url || activeTab.loadFailed) {
       this.pdfDownloadButton.hidden = true;
       return;
     }
@@ -603,6 +638,7 @@ export class BrowserTabManager {
 
   private navigateToURL(url?: string): void {
     const target = (url ?? this.urlInput.value).trim();
+    this.urlEdited = false;
     if (target) {
       window.BrowserAPI.navigate(this.appWindowId, this.activeTabId, target);
     }
@@ -624,6 +660,7 @@ export class BrowserTabManager {
   // display drawn over it can never diverge from the value.
   private setUrlInputValue(value: string): void {
     this.urlInput.value = value;
+    this.urlEdited = false;
     this.renderUrlDisplay();
     this.updateSSLIndicator();
   }
@@ -640,7 +677,9 @@ export class BrowserTabManager {
       return;
     }
     const activeTab = this.getTabById(this.activeTabId);
-    const isBypassedCertificate =
+    // A certificate error (on the warning, or after bypassing it): an https
+    // URL whose connection is marked not secure.
+    const isCertificateError =
       parts.scheme.toLowerCase() === 'https' &&
       activeTab?.sslStatus === 'insecure' &&
       activeTab.url === value;
@@ -648,7 +687,7 @@ export class BrowserTabManager {
       ...[
         this.urlDisplaySegment(
           parts.scheme,
-          isBypassedCertificate ? 'url-display-scheme-insecure' : 'url-display-muted'
+          isCertificateError ? 'url-display-scheme-insecure' : 'url-display-muted'
         ),
         this.urlDisplaySegment(parts.beforeDomain, 'url-display-muted'),
         this.urlDisplaySegment(parts.domain, 'url-display-domain'),
@@ -815,7 +854,18 @@ export class BrowserTabManager {
     // Remove all state classes
     this.sslIndicator.classList.remove('ssl-search', 'ssl-secure', 'ssl-insecure');
 
-    if (this.showsSearchIndicator(activeTab)) {
+    // The search icon is display-only: it leaves the tab order and the
+    // accessibility tree rather than reading as a button that does nothing.
+    const isSearch = this.showsSearchIndicator(activeTab);
+    if (isSearch) {
+      this.sslIndicator.tabIndex = -1;
+      this.sslIndicator.setAttribute('aria-hidden', 'true');
+    } else {
+      this.sslIndicator.removeAttribute('tabindex');
+      this.sslIndicator.removeAttribute('aria-hidden');
+    }
+
+    if (isSearch) {
       this.sslIndicator.innerHTML = BrowserTabManager.SSL_ICON_SEARCH;
       this.sslIndicator.classList.add('ssl-search');
       this.sslIndicator.title = 'Search';

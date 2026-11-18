@@ -98,6 +98,19 @@ body.platform-darwin.is-fullscreen .traffic-lights {
   display: flex;
 }
 
+/* A right-to-left language mirrors the native cluster to the right end, close
+   rightmost; the drawn one follows it there, and the strip's left end keeps
+   the windowed strip's 10 px inset. */
+body.platform-darwin.titlebar-rtl.is-fullscreen .traffic-lights {
+  order: 1;
+  flex-direction: row-reverse;
+  padding: 0 14px 0 12px;
+}
+
+body.platform-darwin.titlebar-rtl.is-fullscreen .tab-bar {
+  padding-left: var(--spacing-sm);
+}
+
 .traffic-light {
   width: 12px;
   height: 12px;
@@ -667,7 +680,8 @@ body.is-private .nav-bar > .btn-icon:disabled {
   font-weight: 600;
 }
 
-/* A bypassed certificate: "https" struck through in red. */
+/* A certificate error (on the warning, or after bypassing it): "https"
+   struck through in red. */
 .url-display-scheme-insecure {
   color: var(--n-danger);
   text-decoration: line-through;

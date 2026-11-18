@@ -71,11 +71,11 @@ export class PermissionManager {
   private static hidePromptCallback: HidePromptCallback | null = null;
   private static findTabCallback: FindTabCallback | null = null;
 
-  // Permissions auto-granted without prompting
+  // Permissions auto-granted without prompting. Pointer lock ('pointerLock')
+  // isn't one: it prompts, and a stored decision for it holds.
   static readonly AUTO_GRANT_PERMISSIONS = new Set([
     'fullscreen',
     'clipboard-sanitized-write',
-    'pointerLock',
     'mediaKeySystem',
   ]);
 

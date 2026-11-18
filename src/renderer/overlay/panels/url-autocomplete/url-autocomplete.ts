@@ -144,6 +144,10 @@ export function init(container: HTMLElement): void {
       x: e.clientX,
       y: e.clientY,
       button: e.button,
+      shiftKey: e.shiftKey,
+      ctrlKey: e.ctrlKey,
+      altKey: e.altKey,
+      metaKey: e.metaKey,
     });
   });
 

@@ -28,9 +28,8 @@ type BookmarkRow = {
 const DEBOUNCE_MS = 120;
 const MAX_PER_GROUP = 4;
 // Must match the panel's rows (url-autocomplete.css: 44 px rows inside 6 px of
-// panel padding), or the overlay view reaches further below the last row than
-// the panel's shadow needs, and that transparent strip swallows clicks meant
-// for the page.
+// panel padding), so the dropdown's box, and the overlay view main derives from
+// it, fits the rows: no scrolling, and no margin beyond the shadow's room.
 const ITEM_HEIGHT = 44;
 const PANEL_PADDING = 6;
 // Where the dropdown sits relative to the address field: inset 2 px from each
@@ -116,12 +115,23 @@ const pushToOverlay = (showIfHidden: boolean) => {
   });
 };
 
-const closeDropdown = () => {
+const hideDropdown = () => {
   if (!isOpen) return;
   isOpen = false;
   activeIndex = -1;
   currentResults = [];
   window.BrowserAPI.hideUrlAutocompleteOverlay(appWindowId);
+};
+
+// Closing also drops suggestions still to come for what was typed, which
+// would open the dropdown again.
+const closeDropdown = () => {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+    debounceTimer = null;
+  }
+  lastQueryAt = 0;
+  hideDropdown();
 };
 
 const navigate = (direction: number) => {
@@ -157,6 +167,10 @@ const selectSuggestion = (item: Suggestion) => {
   urlInput.blur();
 };
 
+// The field keeps being the document's active element when focus moves to
+// the page or another app, so ask the document too.
+const fieldHasFocus = (): boolean => document.hasFocus() && document.activeElement === urlInput;
+
 const fetchSuggestions = async (query: string) => {
   const requestedAt = Date.now();
   lastQueryAt = requestedAt;
@@ -174,6 +188,9 @@ const fetchSuggestions = async (query: string) => {
       ),
     ]);
     if (requestedAt !== lastQueryAt) return;
+    // Focus left the field while the suggestions were fetched (a press on the
+    // page or elsewhere already closed the dropdown): don't open it again.
+    if (!fieldHasFocus()) return;
 
     const lower = trimmed.toLowerCase();
     const activeTabId = getActiveTabId();
@@ -244,9 +261,9 @@ const fetchSuggestions = async (query: string) => {
     // whatever the user typed. They can ArrowDown/ArrowUp to pick a suggestion.
     activeIndex = -1;
     if (results.length > 0) pushToOverlay(true);
-    else closeDropdown();
+    else hideDropdown();
   } catch {
-    if (requestedAt !== lastQueryAt) return;
+    if (requestedAt !== lastQueryAt || !fieldHasFocus()) return;
     currentResults = [
       {
         type: 'search',
@@ -328,12 +345,12 @@ export function initUrlAutocomplete(opts: UrlAutocompleteOptions): {
   urlInput.addEventListener('keydown', handleKeydown);
 
   // Escape closes the dropdown from anywhere in the main renderer, not just
-  // when the URL input still has focus. Idempotent — closeDropdown guards on isOpen.
+  // when the URL input still has focus, and keeps one about to open shut.
+  // Idempotent — closeDropdown guards on isOpen.
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && isOpen) {
-      e.preventDefault();
-      closeDropdown();
-    }
+    if (e.key !== 'Escape') return;
+    if (isOpen) e.preventDefault();
+    closeDropdown();
   });
 
   // Click anywhere in the chrome outside the URL bar / address bar closes

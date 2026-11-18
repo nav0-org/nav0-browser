@@ -32,7 +32,12 @@ const escapeHtml = (str: string): string => {
   return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 };
 
-function renderSSLInfo(data: { sslStatus: string; sslDetails: any; url: string }): void {
+function renderSSLInfo(data: {
+  sslStatus: string;
+  sslDetails: any;
+  url: string;
+  isBypassed?: boolean;
+}): void {
   let hostname = '';
   let protocol = '';
   try {
@@ -88,8 +93,7 @@ function renderSSLInfo(data: { sslStatus: string; sslDetails: any; url: string }
       html += '<li>The identity of this website cannot be verified</li>';
       html += '</ul></div>';
     } else {
-      html +=
-        '<div class="ssl-info-warning-banner">Certificate error — you bypassed the warning</div>';
+      html += `<div class="ssl-info-warning-banner">Certificate error${data.isBypassed ? ' — you bypassed the warning' : ''}</div>`;
       html += `<div class="ssl-info-detail">The certificate for <strong>${escapeHtml(hostname)}</strong> is not trusted. Someone could be intercepting your connection.</div>`;
       html += '<div class="ssl-info-protocol">';
       html += `<div><span class="ssl-label">Protocol:</span> <span class="ssl-text-danger">HTTPS (certificate invalid)</span></div>`;
@@ -153,7 +157,9 @@ export function init(container: HTMLElement): void {
 
 export function show(data?: any): void {
   if (data) {
-    renderSSLInfo(data as { sslStatus: string; sslDetails: any; url: string });
+    renderSSLInfo(
+      data as { sslStatus: string; sslDetails: any; url: string; isBypassed?: boolean }
+    );
   }
 }
 

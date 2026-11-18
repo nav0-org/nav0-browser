@@ -40,7 +40,7 @@
 
 /* Fixed-height rows. The row height and the panel's 6 px padding must match
    ITEM_HEIGHT and PANEL_PADDING in browser-layout/url-autocomplete.ts, which
-   sizes the overlay view to fit the rows. */
+   sizes the dropdown's box to fit the rows (main adds the shadow room). */
 #overlay-url-autocomplete .url-ac-item {
   display: flex;
   align-items: center;

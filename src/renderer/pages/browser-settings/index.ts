@@ -1193,7 +1193,10 @@ async function initPermissionsSettings() {
     showToast('Permissions refreshed');
   });
 
-  document.getElementById('clear-all-permissions-btn')?.addEventListener('click', async () => {
+  document.getElementById('clear-all-permissions-btn')?.addEventListener('click', async (event) => {
+    // A double-click on the last site's Remove All, or the last row's ×,
+    // lands its second click here once that site or row has gone.
+    if (event.detail > 1) return;
     if (!confirm('Remove all site permissions? Sites will need to request permissions again.'))
       return;
     await (window as any).BrowserAPI.clearAllPermissions();
@@ -1236,14 +1239,14 @@ async function loadAndRenderPermissions(searchTerm?: string) {
       searchTerm,
       sample: matches[0],
     });
-    renderPermissions(matches);
+    renderPermissions(matches, term !== '');
   } catch (err) {
     console.error('[permissions] fetch failed', err);
     renderPermissions([]);
   }
 }
 
-function renderPermissions(permissions: PermissionRecord[]) {
+function renderPermissions(permissions: PermissionRecord[], isFiltered = false) {
   const container = document.getElementById('permissions-list')!;
   const emptyState = document.getElementById('permissions-empty')!;
   const footer = document.getElementById('permissions-footer')!;
@@ -1302,10 +1305,30 @@ function renderPermissions(permissions: PermissionRecord[]) {
         { once: true }
       );
     }
-    header.querySelector('.permission-remove-all-btn')!.addEventListener('click', async () => {
-      await (window as any).BrowserAPI.removeAllPermissionsForOrigin(origin);
+    const removeAllButton = header.querySelector('.permission-remove-all-btn') as HTMLButtonElement;
+    removeAllButton.addEventListener('click', async (event) => {
+      // A double-click's second click lands on whatever slid under the
+      // pointer: the next site's button.
+      if (event.detail > 1) return;
+      removeAllButton.disabled = true;
+      // While a search filters the list, remove only the rows it shows: the
+      // site can have other decisions that aren't on screen. (A row's × can
+      // still be at work: go by the rows as they are now.)
+      const rows = perms.slice();
+      if (isFiltered) {
+        for (const perm of rows) {
+          await window.BrowserAPI.removePermission(perm.id);
+        }
+      } else {
+        await (window as any).BrowserAPI.removeAllPermissionsForOrigin(origin);
+      }
       group.remove();
-      showToast(`Permissions removed for ${origin}`);
+      const removed = !isFiltered
+        ? 'Permissions'
+        : rows.length === 1
+          ? getPermLabel(rows[0].permissionType)
+          : `${rows.length} permissions`;
+      showToast(`${removed} removed for ${origin}`);
       if (container.children.length === 0) {
         emptyState.hidden = false;
         footer.hidden = true;
@@ -1343,7 +1366,14 @@ function renderPermissions(permissions: PermissionRecord[]) {
         );
       });
 
-      entry.querySelector('.permission-entry-remove')!.addEventListener('click', async () => {
+      const removeButton = entry.querySelector('.permission-entry-remove') as HTMLButtonElement;
+      removeButton.addEventListener('click', async (event) => {
+        // Likewise the next row's ×.
+        if (event.detail > 1) return;
+        removeButton.disabled = true;
+        // The site's Remove All acts on (and counts) only the rows left.
+        const index = perms.indexOf(perm);
+        if (index !== -1) perms.splice(index, 1);
         await (window as any).BrowserAPI.removePermission(perm.id);
         entry.remove();
         showToast(`${label} permission removed`);

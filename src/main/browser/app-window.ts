@@ -1,4 +1,4 @@
-import { app, BrowserWindow, session } from 'electron';
+import { app, BrowserWindow, session, WebContents } from 'electron';
 import path from 'path';
 import { v4 as uuid } from 'uuid';
 import { Tab } from './tab';
@@ -16,6 +16,7 @@ import { NotificationManager } from './notification-manager';
 import { FindInPageManager } from './find-in-page-manager';
 import { UnifiedOverlayManager, OverlayType } from './unified-overlay-manager';
 import { UrlAutocompleteHandler } from './overlay-handlers/url-autocomplete-handler';
+import { SSLManager } from './ssl-manager';
 import { ZoomManager } from './zoom-manager';
 import { TabSwitchManager } from './tab-switch-manager';
 import type { Database as DB } from 'better-sqlite3';
@@ -362,8 +363,9 @@ export class AppWindow {
     if (!this.browserWindowInstance) return { x: 0, y: 0, width: 0, height: 0 };
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
     // If url-autocomplete is the only visible overlay, restrict bounds to its region
-    // (the dropdown plus room for its shadow, never above it) so the rest of the
-    // page (including the URL input) keeps receiving mouse events.
+    // (the dropdown plus its shadow room: 6 px above, up to the toolbar's bottom
+    // line, 60 px either side and 84 px below) so the rest of the window
+    // (including the URL input) keeps receiving mouse events.
     if (
       this.unifiedOverlayManager &&
       this.unifiedOverlayManager.isVisible('url-autocomplete') &&
@@ -859,14 +861,32 @@ export class AppWindow {
   // A press in the transparent margin the overlay view keeps around the
   // dropdown for its shadow (x, y in the view). It is a press on whatever lies
   // under the margin — the page, or the chrome's strips: the dropdown closes,
-  // and the press is passed on there, so the margin never swallows a click.
-  // Focus moves to that target even when the chrome has already hidden the
-  // dropdown (the press can focus the overlay view first); otherwise it would
-  // stay in the removed view. The chrome's blur handler
+  // and the press is passed on there with its button and modifier keys. Only
+  // the overlay itself may ask: a replayed press is a trusted click.
+  // Focus moves to that target, or to the page for a press that isn't passed
+  // on (Back / Forward), even when the chrome has already hidden the dropdown
+  // (the press can focus the overlay view first); otherwise it would stay in
+  // the removed view. The chrome's blur handler
   // (browser-layout/url-autocomplete.ts) then resets its own dropdown state.
-  dismissUrlAutocompleteOverlay(press?: { x: number; y: number; button: number }): void {
+  // Limits (DESIGN.md §4.4): a press can't reach a cross-site iframe, the
+  // mouse's Back and Forward buttons only close the dropdown, and wheel, hover
+  // and drags over the margin don't reach the page.
+  dismissUrlAutocompleteOverlay(
+    sender: WebContents,
+    press?: {
+      x: number;
+      y: number;
+      button: number;
+      shiftKey: boolean;
+      ctrlKey: boolean;
+      altKey: boolean;
+      metaKey: boolean;
+    }
+  ): void {
+    const overlayView = this.unifiedOverlayManager?.getWebContentsViewInstance();
+    if (!overlayView || sender !== overlayView.webContents) return;
     // Read before hiding: the view's bounds turn the press into window space.
-    const viewBounds = this.unifiedOverlayManager?.getWebContentsViewInstance().getBounds();
+    const viewBounds = overlayView.getBounds();
     this.hideUrlAutocompleteOverlay();
     if (this.unifiedOverlayManager?.hasAnyVisible() || !this.browserWindowInstance) return;
 
@@ -884,14 +904,37 @@ export class AppWindow {
         y < tabBounds.y + tabBounds.height);
     const target = onPage ? tabView?.webContents : this.browserWindowInstance.webContents;
     if (!target) return;
-    target.focus();
-    if (!isPress) return;
+    // Only the main three buttons replay: Back / Forward (3 / 4) would turn
+    // into a left click. Those only close the dropdown, leaving focus with the
+    // page: focusing the chrome would re-focus the address field and open the
+    // dropdown again.
+    if (!isPress || press.button < 0 || press.button > 2) {
+      (tabView?.webContents ?? target).focus();
+      return;
+    }
 
     const origin = onPage && tabBounds ? tabBounds : { x: 0, y: 0 };
     const point = { x: Math.round(x - origin.x), y: Math.round(y - origin.y) };
     const button = press.button === 2 ? 'right' : press.button === 1 ? 'middle' : 'left';
-    target.sendInputEvent({ type: 'mouseDown', ...point, button, clickCount: 1 });
-    target.sendInputEvent({ type: 'mouseUp', ...point, button, clickCount: 1 });
+    const modifiers: Array<'shift' | 'control' | 'alt' | 'meta'> = [];
+    if (press.shiftKey) modifiers.push('shift');
+    if (press.ctrlKey) modifiers.push('control');
+    if (press.altKey) modifiers.push('alt');
+    if (press.metaKey) modifiers.push('meta');
+    const replay = () => {
+      target.sendInputEvent({ type: 'mouseDown', ...point, button, clickCount: 1, modifiers });
+      target.sendInputEvent({ type: 'mouseUp', ...point, button, clickCount: 1, modifiers });
+    };
+    // Focus the page before the press, as a real click would. The chrome is
+    // the other way round: focusing it first re-focuses the address field,
+    // which would open the dropdown again.
+    if (onPage) {
+      target.focus();
+      replay();
+    } else {
+      replay();
+      target.focus();
+    }
   }
 
   forwardUrlAutocompleteResultClicked(data: unknown): void {
@@ -1155,9 +1198,18 @@ export class AppWindow {
 
     this.unifiedOverlayManager.setSSLInfoOnDismiss(() => this.hideSSLInfoOverlay());
 
+    // The field shows a certificate error on the warning too, before anything
+    // is bypassed, so the popover only says "you bypassed" when it's true.
+    let isBypassed = false;
+    try {
+      isBypassed = SSLManager.isHostBypassed(new URL(data.url).hostname);
+    } catch {
+      /* not a URL */
+    }
+
     await this.unifiedOverlayManager.whenReady();
     this.ensureOverlayViewAdded();
-    this.unifiedOverlayManager.showOverlay('ssl-info', data);
+    this.unifiedOverlayManager.showOverlay('ssl-info', { ...data, isBypassed });
   }
 
   hideSSLInfoOverlay(): void {

@@ -418,9 +418,7 @@ export abstract class AppWindowManager {
           tab = appWindow.getActiveTab();
         }
 
-        if (tab?.getWebContentsViewInstance()?.webContents.navigationHistory.canGoBack()) {
-          return tab.getWebContentsViewInstance().webContents.navigationHistory.goBack();
-        }
+        tab?.goBack();
       }
     );
 
@@ -440,9 +438,7 @@ export abstract class AppWindowManager {
           tab = appWindow.getActiveTab();
         }
 
-        if (tab?.getWebContentsViewInstance()?.webContents.navigationHistory.canGoForward()) {
-          return tab.getWebContentsViewInstance().webContents.navigationHistory.goForward();
-        }
+        tab?.goForward();
       }
     );
 
@@ -678,11 +674,23 @@ export abstract class AppWindowManager {
 
     ipcMain.on(
       RendererToMainEventsForBrowserIPC.DISMISS_URL_AUTOCOMPLETE_OVERLAY,
-      (event, appWindowId: string, press?: { x: number; y: number; button: number }) => {
+      (
+        event,
+        appWindowId: string,
+        press?: {
+          x: number;
+          y: number;
+          button: number;
+          shiftKey: boolean;
+          ctrlKey: boolean;
+          altKey: boolean;
+          metaKey: boolean;
+        }
+      ) => {
         const window = appWindowId
           ? AppWindowManager.getWindowById(appWindowId)
           : AppWindowManager.getActiveWindow();
-        if (window) window.dismissUrlAutocompleteOverlay(press);
+        if (window) window.dismissUrlAutocompleteOverlay(event.sender, press);
       }
     );
 
