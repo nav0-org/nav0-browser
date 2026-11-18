@@ -150,6 +150,10 @@ export class AppWindow {
 
     this.overlayInitPromise = new Promise<void>((resolve) => {
       setTimeout(() => {
+        // The window may have closed already, with no overlay yet to close
+        // ('closed' below): one made now would never be closed. Callers waiting
+        // for it belong to the closed window and keep waiting.
+        if (!this.browserWindowInstance) return;
         this.unifiedOverlayManager = new UnifiedOverlayManager(
           this.id,
           this.isPrivate,
@@ -204,6 +208,9 @@ export class AppWindow {
       this.pendingDialogs.clear();
       for (const [, callback] of this.pendingBasicAuth) callback(null);
       this.pendingBasicAuth.clear();
+      // The overlay's page would otherwise outlive the window (a private
+      // window's keeping a renderer of the private session running).
+      this.unifiedOverlayManager?.destroy();
       this.browserWindowInstance = null;
     });
 

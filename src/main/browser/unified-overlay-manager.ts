@@ -84,6 +84,16 @@ export class UnifiedOverlayManager {
     return this.webContentsViewInstance;
   }
 
+  // A WebContentsView's page isn't closed with its window, so the window calls
+  // this once it has closed. Listeners go first, as for a closing tab: nothing
+  // here should run for a page that is going away.
+  destroy(): void {
+    const webContents = this.webContentsViewInstance.webContents;
+    if (!webContents || webContents.isDestroyed()) return;
+    webContents.removeAllListeners();
+    webContents.close();
+  }
+
   // Called on every show and hide, so the window chrome can mirror an
   // overlay's state (e.g. keep the button that opened it pressed).
   setOnVisibilityChange(callback: (type: OverlayType, visible: boolean) => void): void {
