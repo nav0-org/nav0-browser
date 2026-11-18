@@ -35,6 +35,9 @@ export class BrowserTabManager {
   private tabs: Tab[] = [];
   private activeDownloads: Map<string, { receivedBytes: number; totalBytes: number }> = new Map();
   private activeTabId: string | null = null;
+  // The tab we asked main to activate after the active one closed, until main
+  // confirms it with TAB_ACTIVATED
+  private pendingActiveTabId: string | null = null;
   private appWindowId: string | null = null;
   // The user has typed in the address field since the chrome last set it,
   // and hasn't submitted it yet.
@@ -293,6 +296,7 @@ export class BrowserTabManager {
     window.BrowserAPI.onTabActivated((data: { id: string; url: string }) => {
       const newActiveTab = this.getTabById(data.id);
       this.activeTabId = data.id;
+      this.pendingActiveTabId = null;
       this.updateActiveTab();
       this.setUrlInputValue(newActiveTab.url);
       this.backButton.disabled = !newActiveTab.canGoBack;
@@ -306,7 +310,9 @@ export class BrowserTabManager {
     // Tab closed
     window.BrowserAPI.onTabClosed((data: { id: string }) => {
       let newActiveTabId;
-      if (data.id === this.activeTabId) {
+      // The tab we handed over to can close before main activates it (two tabs
+      // closing at once, Close Other Tabs): hand over again from there.
+      if (data.id === this.activeTabId || data.id === this.pendingActiveTabId) {
         const oldTabIndex = this.tabs.findIndex((tab) => tab.id === data.id);
         if (oldTabIndex === 0 && this.tabs.length > 1) {
           newActiveTabId = this.tabs[1].id;
@@ -317,6 +323,7 @@ export class BrowserTabManager {
 
       this.removeTab(data.id);
       if (newActiveTabId) {
+        this.pendingActiveTabId = newActiveTabId;
         window.BrowserAPI.activateTab(this.appWindowId, newActiveTabId, true);
       } else if (this.tabs.length === 0) {
         window.BrowserAPI.closeAppWindow(this.appWindowId);

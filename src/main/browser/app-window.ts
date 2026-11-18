@@ -555,6 +555,9 @@ export class AppWindow {
   }
 
   async activateTab(id: string, isUserInitiated = true): Promise<void> {
+    // A tab that has already closed (a request that crossed its close, or a
+    // stale ⌘O entry) changes nothing: the current tab stays on screen.
+    if (!this.tabs.has(id)) return;
     // A tab switch closes the ⋮ menu: the new tab's view would otherwise stack
     // over the menu and hide it while it still counts as open (its overlay
     // eating the next click, and ⋮ staying pressed). Covers menu items that
