@@ -532,8 +532,10 @@ export class AppWindow {
       if (tabView?.webContents) {
         NotificationManager.clearNotificationsForWebContents(tabView.webContents.id);
       }
-      // Clean up per-tab strip state
+      // Clean up per-tab strip state. The find bar belongs to its tab: it goes
+      // with it, or it would stay over the next tab, searching a page that's gone.
       this.findInPageState.delete(id);
+      if (id === this.activeTabId && this.isFindInPageVisible()) this.findInPageManager.hide();
       this.permissionPrompts.delete(id);
       const view = tab.getWebContentsViewInstance();
       if (view) {
