@@ -54,10 +54,10 @@ export abstract class AppWindowManager {
           window.showPermissionPrompt(promptData);
         }
       },
-      (appWindowId: string) => {
+      (appWindowId: string, tabId: string) => {
         const window = AppWindowManager.getWindowById(appWindowId);
         if (window) {
-          window.hidePermissionPrompt();
+          window.hidePermissionPrompt(tabId);
         }
       },
       (webContentsId: number) => {

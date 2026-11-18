@@ -987,12 +987,11 @@ export class AppWindow {
     }
   }
 
-  hidePermissionPrompt(): void {
-    // Remove the active tab's permission data
-    if (this.activeTabId) {
-      this.permissionPrompts.delete(this.activeTabId);
-    }
-    if (!this.permissionStripVisible) return;
+  hidePermissionPrompt(tabId: string): void {
+    this.permissionPrompts.delete(tabId);
+    // Only the active tab's prompt is on screen: a background tab's going
+    // (say that tab closed) mustn't take the active tab's strip down with it
+    if (tabId !== this.activeTabId || !this.permissionStripVisible) return;
     this.permissionStripVisible = false;
     this.browserWindowInstance?.webContents.send(
       MainToRendererEventsForBrowserIPC.HIDE_PERMISSION_STRIP

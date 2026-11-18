@@ -51,7 +51,7 @@ export interface PermissionRecord {
 
 // Callback type for showing/hiding the prompt UI
 type ShowPromptCallback = (appWindowId: string, request: PermissionRequest) => void;
-type HidePromptCallback = (appWindowId: string) => void;
+type HidePromptCallback = (appWindowId: string, tabId: string) => void;
 
 // Callback type for finding tab info from a webContents
 type FindTabCallback = (
@@ -559,7 +559,7 @@ export class PermissionManager {
     }
 
     // Hide the prompt
-    PermissionManager.hidePromptCallback?.(request.appWindowId);
+    PermissionManager.hidePromptCallback?.(request.appWindowId, request.tabId);
 
     // Process next queued request for this tab
     const respondedTabId = request.tabId;
@@ -634,7 +634,7 @@ export class PermissionManager {
     if (active) {
       PermissionManager.activePrompts.delete(tabId);
       active.callbacks.forEach((cb) => cb(false));
-      PermissionManager.hidePromptCallback?.(active.appWindowId);
+      PermissionManager.hidePromptCallback?.(active.appWindowId, active.tabId);
     }
   }
 
