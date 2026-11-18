@@ -712,12 +712,9 @@ export class BrowserTabManager {
   }
 
   private updateDownloadProgress(): void {
-    if (this.activeDownloads.size === 0) {
-      this.downloadProgressRing.style.display = 'none';
-      return;
-    }
-
-    this.downloadProgressRing.style.display = 'block';
+    // An <svg> has no hidden property: toggle the attribute.
+    this.downloadProgressRing.toggleAttribute('hidden', this.activeDownloads.size === 0);
+    if (this.activeDownloads.size === 0) return;
 
     let totalReceived = 0;
     let totalSize = 0;

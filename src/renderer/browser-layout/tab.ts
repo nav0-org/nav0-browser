@@ -150,13 +150,8 @@ export class Tab {
       const faviconElement = this.tabElement.querySelector('.tab-favicon') as HTMLElement;
       const loaderElement = this.tabElement.querySelector('.tab-loader') as HTMLElement;
       if (faviconElement && loaderElement) {
-        if (isLoading) {
-          faviconElement.style.display = 'none';
-          loaderElement.style.display = 'block';
-        } else {
-          faviconElement.style.display = '';
-          loaderElement.style.display = 'none';
-        }
+        faviconElement.hidden = isLoading;
+        loaderElement.hidden = !isLoading;
       }
     }
   }
@@ -201,9 +196,9 @@ export class Tab {
     if (this.tabElement) {
       this.tabElement.classList.add('pinned');
       const titleSpan = this.tabElement.querySelector('#tab-title') as HTMLElement;
-      if (titleSpan) titleSpan.style.display = 'none';
+      if (titleSpan) titleSpan.hidden = true;
       const closeButton = this.tabElement.querySelector('#tab-close-button') as HTMLElement;
-      if (closeButton) closeButton.style.display = 'none';
+      if (closeButton) closeButton.hidden = true;
     }
   }
 
@@ -212,9 +207,9 @@ export class Tab {
     if (this.tabElement) {
       this.tabElement.classList.remove('pinned');
       const titleSpan = this.tabElement.querySelector('#tab-title') as HTMLElement;
-      if (titleSpan) titleSpan.style.display = '';
+      if (titleSpan) titleSpan.hidden = false;
       const closeButton = this.tabElement.querySelector('#tab-close-button') as HTMLElement;
-      if (closeButton) closeButton.style.display = '';
+      if (closeButton) closeButton.hidden = false;
     }
   }
 

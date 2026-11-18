@@ -1393,8 +1393,9 @@ select.form-control {
 
 /* --------------------------------------------------------------------------
    The hidden attribute always hides: without this, any rule that sets
-   `display` beats the UA's [hidden] rule. It comes after the !important
-   display utilities so none of them can out-rank it.
+   `display` beats the UA's [hidden] rule, which doesn't cover <svg> (a
+   Lucide icon) at all. It comes after the !important display utilities so
+   none of them can out-rank it.
    -------------------------------------------------------------------------- */
 [hidden] {
   display: none !important;
