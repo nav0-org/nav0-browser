@@ -211,7 +211,7 @@ src/
 │   ├── web-content/               # Web page rendering host
 │   ├── common/                    # Shared utilities (api wrappers, formatters, html helpers, file types)
 │   ├── assets/                    # Images, icons, logos
-│   └── styles/                    # Shared CSS (global.css, notification.css)
+│   └── styles/                    # Shared CSS (global.css)
 ├── preload/                       # IPC bridge scripts
 │   ├── internals-api.ts           # DataStoreAPI + BrowserAPI for internal pages and the overlay
 │   ├── externals-api.ts           # Externally facing API for web content

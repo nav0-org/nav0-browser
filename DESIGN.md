@@ -173,10 +173,10 @@ Use tabular numerals (`font-variant-numeric: tabular-nums`) for times, sizes, co
 --n-focus-danger: rgba(215, 0, 21, 0.18);                                       /* danger focus halo */
 --n-focus-ring-field-danger: 0 0 0 1px var(--n-danger), 0 0 0 4px var(--n-focus-danger); /* invalid field (find: no matches / invalid regex) */
 --shadow-sm:      0 1px 2px rgba(0,0,0,0.06);                                   /* generic: the .shadow-sm utility */
---shadow-md:      0 2px 8px rgba(0,0,0,0.06);                                   /* generic: the .shadow utility, the notification toast */
+--shadow-md:      0 2px 8px rgba(0,0,0,0.06);                                   /* generic: the .shadow utility */
 ```
 
-Shadows come only from these tokens. Each `--n-*` one belongs to a kind of control, so pick by role, not by look; a control that needs a new elevation gets a token here (and in `global.css`) first. `--shadow-sm` and `--shadow-md` are older generic shadows kept for the `.shadow-sm` and `.shadow` utilities (`.shadow-lg` is `--n-menu-shadow`) and the notification toast in `notification.css`. No redesigned control uses them; don't reach for them in new work.
+Shadows come only from these tokens. Each `--n-*` one belongs to a kind of control, so pick by role, not by look; a control that needs a new elevation gets a token here (and in `global.css`) first. `--shadow-sm` and `--shadow-md` are older generic shadows kept for the `.shadow-sm` and `.shadow` utilities (`.shadow-lg` is `--n-menu-shadow`). No redesigned control uses them; don't reach for them in new work.
 
 Under `prefers-reduced-transparency: reduce`, menus drop the blur and use `--n-menu-solid`.
 
@@ -327,7 +327,6 @@ createIcons({ icons });
 | Where                                           | What                                                    |
 | ----------------------------------------------- | ------------------------------------------------------- |
 | `src/renderer/styles/global.css`                | Tokens, resets, utilities, base components              |
-| `src/renderer/styles/notification.css`          | Cross-page notification styles                          |
 | `src/renderer/pages/<page>/index.css`           | Per-page CSS — must `@import` global.css                |
 | `src/renderer/overlay/panels/<name>/<name>.css` | Overlay panel CSS                                       |
 | `src/renderer/browser-layout/*.css`             | Chrome (tabs, nav bar, find in page, permission prompt) |
