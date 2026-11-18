@@ -20,6 +20,7 @@ export abstract class DownloadManager {
       totalBytes: number;
       state: 'progressing' | 'paused';
       dbRecordId: string;
+      isPrivate: boolean;
     }
   > = new Map();
 
@@ -40,7 +41,8 @@ export abstract class DownloadManager {
     downloadId: string,
     fileName: string,
     totalBytes: number,
-    dbRecordId: string
+    dbRecordId: string,
+    isPrivate: boolean
   ): void {
     this.activeDownloads.set(downloadId, {
       fileName,
@@ -48,6 +50,7 @@ export abstract class DownloadManager {
       totalBytes,
       state: 'progressing',
       dbRecordId,
+      isPrivate,
     });
   }
 
@@ -114,11 +117,22 @@ export abstract class DownloadManager {
     if (item) item.cancel(); // triggers 'done' with state='cancelled'
   }
 
+  /** Cancel the private session's downloads (which deletes their partial files). */
+  public static cancelPrivateDownloads(): void {
+    for (const [downloadId, entry] of this.activeDownloads) {
+      if (entry.isPrivate) this.cancelDownload(downloadId);
+    }
+  }
+
   public static isShuttingDown(): boolean {
     return this.shuttingDown;
   }
 
-  /** Pause every in-progress download and persist its state to the DB. Called before window close. */
+  /**
+   * Pause every in-progress download and persist its state to the DB. Called
+   * on quit only: a download belongs to its session, not to the window it was
+   * started in, so it carries on when that window closes.
+   */
   public static pauseAllDownloads(): void {
     if (this.shuttingDown) return; // already handled
     this.shuttingDown = true;
@@ -232,16 +246,16 @@ export abstract class DownloadManager {
   }
 
   // ── DB helpers ──
+  // These take the download's isPrivate rather than a window id: the window
+  // that started the download may have closed since.
 
   public static updateRecordStatus(
-    appWindowId: string,
+    isPrivate: boolean,
     recordId: string,
     status: string,
     receivedBytes?: number
   ): void {
-    const db = DatabaseManager.getDatabase(
-      AppWindowManager.getWindowById(appWindowId)?.isPrivate ?? false
-    );
+    const db = DatabaseManager.getDatabase(isPrivate);
     if (receivedBytes !== undefined) {
       // Also backfill fileSize when completing — getTotalBytes() may have returned 0
       // at download start if the server didn't send Content-Length.
@@ -254,16 +268,14 @@ export abstract class DownloadManager {
   }
 
   public static updateRecordResumeMetadata(
-    appWindowId: string,
+    isPrivate: boolean,
     recordId: string,
     urlChain: string,
     eTag: string,
     lastModified: string,
     startTime: number
   ): void {
-    const db = DatabaseManager.getDatabase(
-      AppWindowManager.getWindowById(appWindowId)?.isPrivate ?? false
-    );
+    const db = DatabaseManager.getDatabase(isPrivate);
     db.prepare(
       'UPDATE download SET urlChain = ?, eTag = ?, lastModified = ?, startTime = ? WHERE id = ?;'
     ).run(urlChain, eTag, lastModified, startTime, recordId);
@@ -299,13 +311,13 @@ export abstract class DownloadManager {
 
     ipcMain.handle(
       RendererToMainEventsForBrowserIPC.PAUSE_DOWNLOAD,
-      async (_event, downloadId: string, appWindowId: string) => {
+      async (_event, downloadId: string) => {
         const ok = DownloadManager.pauseDownload(downloadId);
         if (ok) {
           const entry = DownloadManager.activeDownloads.get(downloadId);
           if (entry) {
             DownloadManager.updateRecordStatus(
-              appWindowId,
+              entry.isPrivate,
               entry.dbRecordId,
               'paused',
               entry.receivedBytes
@@ -331,7 +343,7 @@ export abstract class DownloadManager {
           if (ok) {
             const entry = DownloadManager.activeDownloads.get(downloadId);
             if (entry) {
-              DownloadManager.updateRecordStatus(appWindowId, entry.dbRecordId, 'in_progress');
+              DownloadManager.updateRecordStatus(entry.isPrivate, entry.dbRecordId, 'in_progress');
               DownloadManager.broadcastToAll(MainToRendererEventsForBrowserIPC.DOWNLOAD_RESUMED, {
                 downloadId,
                 fileName: entry.fileName,
@@ -373,6 +385,23 @@ export abstract class DownloadManager {
   /** Broadcast an event to all browser windows and their tabs. */
   private static broadcastToAll(channel: string, data: any): void {
     for (const window of AppWindowManager.getWindows()) {
+      try {
+        window.getBrowserWindowInstance()?.webContents?.send(channel, data);
+        window.broadcastToTabs(channel, data);
+      } catch (_) {
+        /* window may be closing */
+      }
+    }
+  }
+
+  /**
+   * Send a download's event to every window of its session (normal or
+   * private) and their tabs, so it stays on show after the window it was
+   * started in has closed.
+   */
+  public static broadcastToSession(isPrivate: boolean, channel: string, data: unknown): void {
+    for (const window of AppWindowManager.getWindows()) {
+      if (window.isPrivate !== isPrivate) continue;
       try {
         window.getBrowserWindowInstance()?.webContents?.send(channel, data);
         window.broadcastToTabs(channel, data);

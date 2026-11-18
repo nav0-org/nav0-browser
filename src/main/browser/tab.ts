@@ -1056,6 +1056,9 @@ export class Tab {
     }
     const requestedFileName = item.getFilename();
     const downloadId = item.getStartTime().toString() + '_' + requestedFileName;
+    // The download carries on if this tab or its window closes, so from here on
+    // it goes by its session (normal or private), not by the window.
+    const isPrivate = this.parentAppWindow.isPrivate;
 
     // Prevent duplicate handling when multiple tabs share the same session
     if (Tab.handledDownloads.has(downloadId)) return;
@@ -1079,7 +1082,7 @@ export class Tab {
 
     if (dbRecordId) {
       // Resuming from previous session – update existing record
-      DownloadManager.updateRecordStatus(this.parentAppWindow.id, dbRecordId, 'in_progress');
+      DownloadManager.updateRecordStatus(isPrivate, dbRecordId, 'in_progress');
     } else {
       // New download – create DB record
       const record = await DownloadManager.addRecord(
@@ -1096,7 +1099,7 @@ export class Tab {
 
     // Store resume metadata in the DB for cross-session resume
     DownloadManager.updateRecordResumeMetadata(
-      this.parentAppWindow.id,
+      isPrivate,
       dbRecordId,
       JSON.stringify(item.getURLChain()),
       item.getETag(),
@@ -1105,20 +1108,24 @@ export class Tab {
     );
 
     // Track in main process so renderer can query on page load
-    DownloadManager.trackDownloadStarted(downloadId, fileName, item.getTotalBytes(), dbRecordId);
+    DownloadManager.trackDownloadStarted(
+      downloadId,
+      fileName,
+      item.getTotalBytes(),
+      dbRecordId,
+      isPrivate
+    );
     DownloadManager.storeDownloadItem(downloadId, item);
 
-    // Notify renderer (browser chrome + all tabs) that a download has started
+    // Notify every window of the session (browser chrome + tabs) that a download has started
     const startedData = {
       downloadId,
       dbRecordId,
       fileName,
       totalBytes: item.getTotalBytes(),
     };
-    this.parentAppWindow
-      .getBrowserWindowInstance()
-      .webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_STARTED, startedData);
-    this.parentAppWindow.broadcastToTabs(
+    DownloadManager.broadcastToSession(
+      isPrivate,
       MainToRendererEventsForBrowserIPC.DOWNLOAD_STARTED,
       startedData
     );
@@ -1136,18 +1143,13 @@ export class Tab {
           item.getReceivedBytes(),
           item.getTotalBytes()
         );
-        const browserWindow = this.parentAppWindow.getBrowserWindowInstance();
-        if (!browserWindow?.webContents) return;
         const progressData = {
           downloadId,
           receivedBytes: item.getReceivedBytes(),
           totalBytes: item.getTotalBytes(),
         };
-        browserWindow.webContents.send(
-          MainToRendererEventsForBrowserIPC.DOWNLOAD_PROGRESS,
-          progressData
-        );
-        this.parentAppWindow.broadcastToTabs(
+        DownloadManager.broadcastToSession(
+          isPrivate,
           MainToRendererEventsForBrowserIPC.DOWNLOAD_PROGRESS,
           progressData
         );
@@ -1161,7 +1163,7 @@ export class Tab {
       // Update DB record status
       if (state === 'completed') {
         DownloadManager.updateRecordStatus(
-          this.parentAppWindow.id,
+          isPrivate,
           dbRecordId,
           'completed',
           item.getTotalBytes() || item.getReceivedBytes()
@@ -1170,7 +1172,7 @@ export class Tab {
         // During shutdown, downloads are auto-cancelled after being paused by
         // pauseAllDownloads() – don't overwrite the 'paused' status in the DB
         if (!DownloadManager.isShuttingDown()) {
-          DownloadManager.updateRecordStatus(this.parentAppWindow.id, dbRecordId, 'cancelled');
+          DownloadManager.updateRecordStatus(isPrivate, dbRecordId, 'cancelled');
         }
       } else {
         console.error(`Download failed: ${state}`);
@@ -1186,14 +1188,9 @@ export class Tab {
         }
       }
 
-      const browserWindow = this.parentAppWindow.getBrowserWindowInstance();
-      if (!browserWindow?.webContents) return;
       const completedData = { downloadId, state, fileName, dbRecordId };
-      browserWindow.webContents.send(
-        MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED,
-        completedData
-      );
-      this.parentAppWindow.broadcastToTabs(
+      DownloadManager.broadcastToSession(
+        isPrivate,
         MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED,
         completedData
       );

@@ -195,12 +195,6 @@ export class AppWindow {
       else this.resetZoomActiveTab();
     });
 
-    // Pause all active downloads before the window is destroyed
-    // so their resume metadata can be persisted to the DB
-    this.browserWindowInstance.on('close', () => {
-      DownloadManager.pauseAllDownloads();
-    });
-
     this.browserWindowInstance.on('closed', () => {
       this.tabSwitchManager.dispose();
       // Resolve any outstanding dialogs / auth prompts so awaiting callers don't hang
@@ -325,6 +319,13 @@ export class AppWindow {
    * so the next private sitting starts empty.
    */
   public static clearPrivateSession(): void {
+    // Private downloads end with the session, as in Chrome and Firefox: their
+    // records go with the private db, and their partial files shouldn't stay.
+    try {
+      DownloadManager.cancelPrivateDownloads();
+    } catch (e) {
+      console.error('Failed to cancel private downloads:', e);
+    }
     PermissionManager.clearMemoryPermissions();
     try {
       const privateSession = session.fromPartition(PartitionNames.PRIVATE);
