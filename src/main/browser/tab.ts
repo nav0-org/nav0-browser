@@ -43,7 +43,7 @@ import {
 import { SSLManager } from './ssl-manager';
 import { ZoomManager } from './zoom-manager';
 import { buildErrorPageScript, NavigationError } from './error-page/error-page';
-import { HOVER_STATUS_BAR_SCRIPT } from './hover-status-bar-script';
+import { BuiltInPage, hoverStatusBarScript } from './hover-status-bar-script';
 import { fetchFavicon } from './favicon-fetch';
 import { FaviconCache } from './favicon-cache';
 const domainPattern = /^[^\s]+\.[^\s]+$/;
@@ -115,21 +115,26 @@ function pageAddress(url: string): string | null {
   }
 }
 
+// Each built-in page: the address its view loads, a webpack dev-server URL or,
+// once packaged, a file:// path inside the app, and its nav0:// URL as shown.
+function builtInPages(): BuiltInPage[] {
+  return [
+    { entry: ABOUT_WEBPACK_ENTRY, url: InAppUrls.ABOUT },
+    { entry: BOOKMARKS_WEBPACK_ENTRY, url: InAppUrls.BOOKMARKS },
+    { entry: BROWSER_SETTINGS_WEBPACK_ENTRY, url: InAppUrls.BROWSER_SETTINGS },
+    { entry: DOWNLOADS_WEBPACK_ENTRY, url: InAppUrls.DOWNLOADS },
+    { entry: HISTORY_WEBPACK_ENTRY, url: InAppUrls.HISTORY },
+    { entry: NEW_TAB_WEBPACK_ENTRY, url: InAppUrls.NEW_TAB },
+  ].map((page) => ({ ...page, url: page.url.replace(/^nav0:\/\//i, 'nav0://') }));
+}
+
 // Whether url is a built-in page: its nav0:// address in either case, or the
-// one its view loads, a webpack dev-server URL or, once packaged, a file://
-// path inside the app.
+// one its view loads.
 function isBuiltInPageUrl(url: string): boolean {
   if (/^nav0:\/\//i.test(url)) return true;
   const address = pageAddress(url);
   if (address === null) return false;
-  return [
-    ABOUT_WEBPACK_ENTRY,
-    BOOKMARKS_WEBPACK_ENTRY,
-    BROWSER_SETTINGS_WEBPACK_ENTRY,
-    DOWNLOADS_WEBPACK_ENTRY,
-    HISTORY_WEBPACK_ENTRY,
-    NEW_TAB_WEBPACK_ENTRY,
-  ].some((entry) => pageAddress(entry) === address);
+  return builtInPages().some(({ entry }) => pageAddress(entry) === address);
 }
 
 // A script for a page: the favicons Chromium reports for it, the <link>s among
@@ -1328,12 +1333,14 @@ export class Tab {
    * Injects the Chrome-style hover URL status bar into the page's main world.
    * Done from the main process (like reader mode / error pages) because a
    * sandboxed preload's webFrame.executeJavaScript can't reach the main world.
-   * The injected script is idempotent (guards on a window flag).
+   * The injected script is idempotent (guards on a window flag). A built-in
+   * page's bar shows nav0:// URLs, never the address the page loads from.
    */
   private injectHoverStatusBar(): void {
-    this.webContentsViewInstance?.webContents
-      .executeJavaScript(HOVER_STATUS_BAR_SCRIPT)
-      .catch(() => {});
+    const webContents = this.webContentsViewInstance?.webContents;
+    if (!webContents) return;
+    const pages = isBuiltInPageUrl(webContents.getURL()) ? builtInPages() : [];
+    webContents.executeJavaScript(hoverStatusBarScript(pages)).catch(() => {});
   }
 
   private debouncedHandleNavigationCompletion(url: string): void {
