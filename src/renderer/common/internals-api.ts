@@ -1,3 +1,5 @@
+import type { BrowsingHistorySummary } from '../../types/browsing-history-record';
+
 export {};
 
 declare global {
@@ -78,6 +80,11 @@ declare global {
       fetchBrowsingHistoryStats: (
         appWindowId: string
       ) => Promise<Array<{ date: string; count: number; activeDuration: number }>>;
+      fetchBrowsingHistorySummary: (
+        appWindowId: string,
+        since: string | null,
+        limit?: number
+      ) => Promise<BrowsingHistorySummary>;
       fetchTopSites: (
         appWindowId: string,
         limit?: number

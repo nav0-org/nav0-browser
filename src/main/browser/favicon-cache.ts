@@ -41,7 +41,11 @@ export abstract class FaviconCache {
   /** The icon kept for a page's host, as a data: URL, or null. */
   public static get(db: Database, pageUrl: string): string | null {
     const host = FaviconCache.hostOf(pageUrl);
-    if (!host) return null;
+    return host ? FaviconCache.getForHost(db, host) : null;
+  }
+
+  /** The icon kept for a host, as a data: URL, or null. */
+  public static getForHost(db: Database, host: string): string | null {
     const row = db.prepare('SELECT dataUrl FROM favicon WHERE host = ?;').get(host) as
       | { dataUrl: string }
       | undefined;

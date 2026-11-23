@@ -1,6 +1,12 @@
 import { ipcMain } from 'electron';
 import { RendererToMainEventsForBrowserIPC } from '../../constants/app-constants';
-import { BrowsingHistoryRecord } from '../../types/browsing-history-record';
+import { getCategoryForDomain } from '../../constants/data-constants';
+import {
+  BrowsingHistoryCategoryTotal,
+  BrowsingHistoryRecord,
+  BrowsingHistorySiteTotal,
+  BrowsingHistorySummary,
+} from '../../types/browsing-history-record';
 import { DatabaseManager } from '../database/database-manager';
 import { AppWindowManager } from './app-window-manager';
 import { FaviconCache } from './favicon-cache';
@@ -25,6 +31,13 @@ export abstract class BrowsingHistoryManager {
       RendererToMainEventsForBrowserIPC.FETCH_BROWSING_HISTORY_STATS,
       async (event, appWindowId: string) => {
         return await BrowsingHistoryManager.fetchHistoryStats(appWindowId);
+      }
+    );
+
+    ipcMain.handle(
+      RendererToMainEventsForBrowserIPC.FETCH_BROWSING_HISTORY_SUMMARY,
+      async (event, appWindowId: string, since?: string | null, limit?: number) => {
+        return await BrowsingHistoryManager.fetchHistorySummary(appWindowId, since, limit);
       }
     );
 
@@ -191,5 +204,54 @@ export abstract class BrowsingHistoryManager {
       ORDER BY date ASC;
     `);
     return stmt.all() as Array<{ date: string; count: number; activeDuration: number }>;
+  }
+
+  /**
+   * Totals the history since an ISO date (all of it when since is null) by
+   * site and by category, in the window's own database, and returns the
+   * leading few of each. Both rank by active time, or by visits when nothing
+   * in the range has any.
+   */
+  public static async fetchHistorySummary(
+    appWindowId: string,
+    since?: string | null,
+    limit?: number
+  ): Promise<BrowsingHistorySummary> {
+    limit = limit || 10;
+    const db = BrowsingHistoryManager.getDb(appWindowId);
+    if (!db) return { byActiveTime: false, sites: [], categories: [] };
+    const hasStart = typeof since === 'string' && since !== '';
+    const stmt = db.prepare(`
+      SELECT topLevelDomain as domain, COUNT(*) as visits, COALESCE(SUM(activeDuration), 0) as activeDuration
+      FROM browsingHistory
+      ${hasStart ? 'WHERE createdDate >= ?' : ''}
+      GROUP BY topLevelDomain;
+    `);
+    const sites = (hasStart ? stmt.all(since) : stmt.all()) as Array<BrowsingHistorySiteTotal>;
+
+    const categoryTotals = new Map<string, BrowsingHistoryCategoryTotal>();
+    for (const site of sites) {
+      const category = getCategoryForDomain(site.domain);
+      const total = categoryTotals.get(category) || { category, visits: 0, activeDuration: 0 };
+      total.visits += site.visits;
+      total.activeDuration += site.activeDuration;
+      categoryTotals.set(category, total);
+    }
+
+    const byActiveTime = sites.some((site) => site.activeDuration > 0);
+    const rank = (
+      a: { visits: number; activeDuration: number },
+      b: { visits: number; activeDuration: number }
+    ) => (byActiveTime ? b.activeDuration - a.activeDuration : 0) || b.visits - a.visits;
+
+    const topSites = sites.sort(rank).slice(0, limit);
+    for (const site of topSites) {
+      site.faviconUrl = site.domain ? FaviconCache.getForHost(db, site.domain) : null;
+    }
+    return {
+      byActiveTime,
+      sites: topSites,
+      categories: Array.from(categoryTotals.values()).sort(rank).slice(0, limit),
+    };
   }
 }

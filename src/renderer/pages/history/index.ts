@@ -1,7 +1,10 @@
 import { HtmlUtils } from '../../../renderer/common/html-utils';
 import { FormatUtils } from '../../../renderer/common/format-utils';
-import { BrowsingHistoryRecord } from '../../../types/browsing-history-record';
-import { WEBSITE_CATEGORY_MAP } from '../../../constants/data-constants';
+import {
+  BrowsingHistoryRecord,
+  BrowsingHistorySummary,
+} from '../../../types/browsing-history-record';
+import { getCategoryForDomain } from '../../../constants/data-constants';
 import './index.css';
 
 import { createIcons, icons } from 'lucide';
@@ -9,6 +12,8 @@ createIcons({ icons });
 
 // --- Constants ---
 const PAGE_SIZE = 100;
+// Rows in the Top sites and By category panels.
+const SUMMARY_ROWS = 10;
 // Activity-map steps 0–4. Each step maps to a `.heat-N` class in index.css
 // (the --n-data-0…4 ramp), used by both the map cells and the legend swatches.
 const HEATMAP_LEVELS = [0, 1, 2, 3, 4];
@@ -35,14 +40,6 @@ const CATEGORY_ICONS: Record<string, string> = {
   lifestyle: 'coffee',
   other: 'globe',
 };
-
-function getCategoryForDomain(domain: string): string {
-  if (WEBSITE_CATEGORY_MAP[domain]) return WEBSITE_CATEGORY_MAP[domain];
-  for (const [d, cat] of Object.entries(WEBSITE_CATEGORY_MAP)) {
-    if (domain.endsWith('.' + d)) return cat;
-  }
-  return 'other';
-}
 
 // createIcons() re-renders every icon on the page, so batch the calls that
 // favicon fallbacks trigger into one per frame.
@@ -92,6 +89,7 @@ let isLoading = false;
 let hasMore = true;
 let currentSearchTerm = '';
 let currentTimeRange = 'all';
+let summaryRequest = 0;
 
 // --- DOM refs ---
 const historyList = document.getElementById('history-list') as HTMLElement;
@@ -107,6 +105,7 @@ const categoryContainer = document.getElementById('category-container') as HTMLE
 document.addEventListener('DOMContentLoaded', async () => {
   loadHistoryPage();
   loadAnalytics();
+  loadSummary();
 
   searchInput?.addEventListener(
     'input',
@@ -121,6 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       btn.classList.add('active');
       currentTimeRange = (btn as HTMLElement).dataset.range || 'all';
       resetAndReload();
+      loadSummary();
     });
   });
 
@@ -128,6 +128,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await window.BrowserAPI.removeAllBrowsingHistory(window.BrowserAPI.appWindowId);
     allEntries = [];
     renderAll();
+    loadSummary();
   });
 
   // Infinite scroll via IntersectionObserver on sentinel element
@@ -150,6 +151,22 @@ async function loadAnalytics(): Promise<void> {
   const stats: Array<{ date: string; count: number; activeDuration: number }> =
     await window.BrowserAPI.fetchBrowsingHistoryStats(window.BrowserAPI.appWindowId);
   renderHeatmap(stats);
+}
+
+// Top sites and By category total the whole range in the database, not just the
+// rows the list has loaded so far.
+async function loadSummary(): Promise<void> {
+  const request = ++summaryRequest;
+  const start = rangeStart();
+  const summary = await window.BrowserAPI.fetchBrowsingHistorySummary(
+    window.BrowserAPI.appWindowId,
+    start === null ? null : new Date(start).toISOString(),
+    SUMMARY_ROWS
+  );
+  // A later range, or a deletion, has asked again since.
+  if (request !== summaryRequest) return;
+  renderDomainChart(summary);
+  renderCategoryChart(summary);
 }
 
 function resetAndReload(): void {
@@ -186,24 +203,22 @@ async function loadHistoryPage(): Promise<void> {
   isLoading = false;
 }
 
+// The start of the selected range in ms, or null for All.
+function rangeStart(): number | null {
+  if (currentTimeRange === 'today') return new Date().setHours(0, 0, 0, 0);
+  if (currentTimeRange === 'week') return Date.now() - 7 * 86400000;
+  return null;
+}
+
 function filterByTimeRange(entries: BrowsingHistoryRecord[]): BrowsingHistoryRecord[] {
-  if (currentTimeRange === 'all') return entries;
-  const now = Date.now();
-  if (currentTimeRange === 'today') {
-    const todayStart = new Date().setHours(0, 0, 0, 0);
-    return entries.filter((e) => new Date(e.createdDate).getTime() >= todayStart);
-  }
-  if (currentTimeRange === 'week') {
-    return entries.filter((e) => new Date(e.createdDate).getTime() >= now - 7 * 86400000);
-  }
-  return entries;
+  const start = rangeStart();
+  if (start === null) return entries;
+  return entries.filter((e) => new Date(e.createdDate).getTime() >= start);
 }
 
 // --- Rendering ---
 function renderAll(): void {
   renderHistoryList();
-  renderDomainChart();
-  renderCategoryChart();
 
   const hasEntries = allEntries.length > 0;
   noHistory.hidden = hasEntries;
@@ -317,8 +332,7 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
     await window.BrowserAPI.removeBrowsingHistory(window.BrowserAPI.appWindowId, entry.id);
     allEntries = allEntries.filter((item) => item.id !== entry.id);
     row.remove();
-    renderDomainChart();
-    renderCategoryChart();
+    loadSummary();
     if (allEntries.length === 0) {
       noHistory.hidden = false;
       deleteAllBtn.hidden = true;
@@ -480,42 +494,19 @@ function renderHeatmap(
 }
 
 // --- Domain Chart (heat bar) ---
-function renderDomainChart(): void {
-  const map = new Map<
-    string,
-    { domain: string; visits: number; active: number; faviconUrl: string | null }
-  >();
-  for (const e of allEntries) {
-    const existing = map.get(e.topLevelDomain);
-    if (existing) {
-      existing.visits++;
-      existing.active += e.activeDuration || 0;
-    } else {
-      map.set(e.topLevelDomain, {
-        domain: e.topLevelDomain,
-        visits: 1,
-        active: e.activeDuration || 0,
-        faviconUrl: e.faviconUrl || null,
-      });
-    }
-  }
-
-  const totalActive = Array.from(map.values()).reduce((a, d) => a + d.active, 0);
-  const useTime = totalActive > 0;
-
-  const sorted = Array.from(map.values())
-    .sort((a, b) => (useTime ? b.active - a.active : b.visits - a.visits))
-    .slice(0, 10);
+function renderDomainChart(summary: BrowsingHistorySummary): void {
+  const useTime = summary.byActiveTime;
+  const sites = summary.sites;
 
   const label = document.getElementById('domain-chart-label');
   if (label) label.textContent = useTime ? 'Top sites by active time' : 'Top sites by visits';
 
-  const maxVal = Math.max(...sorted.map((d) => (useTime ? d.active : d.visits)), 1);
+  const maxVal = Math.max(...sites.map((d) => (useTime ? d.activeDuration : d.visits)), 1);
 
-  domainChartContainer.innerHTML = sorted
+  domainChartContainer.innerHTML = sites
     .map((d) => {
-      const val = useTime ? d.active : d.visits;
-      const valLabel = useTime ? FormatUtils.formatDuration(d.active) : `${d.visits}`;
+      const val = useTime ? d.activeDuration : d.visits;
+      const valLabel = useTime ? FormatUtils.formatDuration(d.activeDuration) : `${d.visits}`;
       return `
     <div class="domain-row">
       <span class="domain-favicon">${faviconHtml(d.faviconUrl, 16, 14)}</span>
@@ -532,27 +523,13 @@ function renderDomainChart(): void {
 }
 
 // --- Category Chart (line bars) ---
-function renderCategoryChart(): void {
-  if (allEntries.length === 0) {
-    categoryContainer.innerHTML = '';
-    return;
-  }
-
-  // Aggregate by active duration; fall back to visit count if all durations are 0
-  const durationMap = new Map<string, number>();
-  const countMap = new Map<string, number>();
-  for (const e of allEntries) {
-    const cat = getCategoryForDomain(e.topLevelDomain);
-    durationMap.set(cat, (durationMap.get(cat) || 0) + (e.activeDuration || 0));
-    countMap.set(cat, (countMap.get(cat) || 0) + 1);
-  }
-
-  const totalDuration = Array.from(durationMap.values()).reduce((a, b) => a + b, 0);
-  const useDuration = totalDuration > 0;
-  const catMap = useDuration ? durationMap : countMap;
-  const cats = Array.from(catMap.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10);
+function renderCategoryChart(summary: BrowsingHistorySummary): void {
+  // By active time; by visit count when nothing in the range has any.
+  const useDuration = summary.byActiveTime;
+  const cats = summary.categories.map((c): [string, number] => [
+    c.category,
+    useDuration ? c.activeDuration : c.visits,
+  ]);
 
   const catLabel = document.getElementById('category-label');
   if (catLabel)

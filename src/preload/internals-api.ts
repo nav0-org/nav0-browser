@@ -243,6 +243,18 @@ export function init() {
         appWindowId
       );
     },
+    fetchBrowsingHistorySummary: async (
+      appWindowId: string,
+      since: string | null,
+      limit?: number
+    ) => {
+      return ipcRenderer.invoke(
+        RendererToMainEventsForBrowserIPC.FETCH_BROWSING_HISTORY_SUMMARY,
+        appWindowId,
+        since,
+        limit
+      );
+    },
     handleFileSelection: async (appWindowId: string, tabId: string, extensions: string[]) => {
       return ipcRenderer.invoke(
         RendererToMainEventsForBrowserIPC.HANDLE_FILE_SELECTION,
