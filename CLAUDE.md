@@ -68,6 +68,7 @@ Every feature is encapsulated in a manager class:
 | `DownloadManager`        | `src/main/browser/`               | Download tracking and control                     |
 | `BookmarkManager`        | `src/main/browser/`               | Bookmark CRUD operations                          |
 | `BrowsingHistoryManager` | `src/main/browser/`               | Browsing history CRUD                             |
+| `FaviconCache`           | `src/main/browser/`               | Local copies of site icons, keyed by host         |
 | `PermissionManager`      | `src/main/browser/`               | Site permission policies + prompts                |
 | `SettingsEnforcer`       | `src/main/settings/`              | Applies user preferences to sessions              |
 | `ReaderModeManager`      | `src/main/browser/`               | Reader mode extraction (@mozilla/readability)     |
@@ -110,6 +111,8 @@ Always use these constants for IPC channel names — never hardcode strings.
   - `browsing-history-schema.ts`
   - `download-schema.ts`
   - `permission-schema.ts`
+  - `favicon-schema.ts` (the favicon cache: built-in pages render only these local copies, never a remote icon URL)
+- **Migrations**: `src/main/database/migrations.ts`, run once each by `SchemaManager` and counted in `PRAGMA user_version` — only ever append
 
 ### Sessions / partitions
 

@@ -224,6 +224,7 @@ Unchanged: `--z-dropdown 100`, `--z-sticky 200`, `--z-modal 1000`, `--z-toast 11
 - **Grey panels** (`--n-grouped`, `--n-r-panel`, 18–22 px padding) for charts, summaries and groups. No borders, no shadows.
 - Lists sit directly on white: rows 54 px, hover `--n-hover` with `--n-r-control`; 28 px icon wells (`--n-r-control`, `--n-well`) holding a 16 px icon or favicon; title 13 px 500; meta 12 px `--n-text-3` (URLs are grey, not link blue); trailing actions appear on hover. Day or group headers are 13 px 600 with the date in `--n-text-3` and a `--n-separator` underneath.
 - Filter chips (`.chip`): 28 px, `--n-r-chip`, `--n-fill` at rest, selection style when chosen, 13 px icons. Badges (`.badge`): 22 px, `--n-r-badge`, `--n-fill`, 12 px icon + 12 px label, `--n-text-2`.
+- **Built-in pages never load remote resources. Site icons come from the local favicon cache, or the letter tile.** The same goes for the overlay and the chrome: no `img-src` in their CSPs allows `http:` or `https:`.
 
 ### 4.3 Settings (`src/renderer/pages/browser-settings/`)
 

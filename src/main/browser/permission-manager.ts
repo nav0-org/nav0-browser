@@ -11,6 +11,7 @@ import {
 import { v4 as uuid } from 'uuid';
 import { PartitionNames, RendererToMainEventsForBrowserIPC } from '../../constants/app-constants';
 import type { Database as DatabaseType } from 'better-sqlite3';
+import { FaviconCache } from './favicon-cache';
 
 // Types
 type SessionDecision = 'allowed_session' | 'denied_session';
@@ -718,24 +719,21 @@ export class PermissionManager {
   static getAllPersistentPermissions(searchTerm?: string): PermissionRecord[] {
     if (!PermissionManager.db) return [];
     try {
-      const baseSelect = `
-        SELECT p.*,
-          (SELECT h.faviconUrl FROM browsingHistory h
-           WHERE h.faviconUrl IS NOT NULL
-             AND (h.url = p.origin OR h.url LIKE p.origin || '/%')
-           ORDER BY h.createdDate DESC LIMIT 1) AS faviconUrl
-        FROM site_permission p
-      `;
-      if (searchTerm) {
-        return PermissionManager.db
-          .prepare(
-            `${baseSelect} WHERE p.origin LIKE ? OR p.permissionType LIKE ? ORDER BY p.origin, p.permissionType`
-          )
-          .all(`%${searchTerm}%`, `%${searchTerm}%`) as PermissionRecord[];
+      const baseSelect = 'SELECT p.* FROM site_permission p';
+      const records = (
+        searchTerm
+          ? PermissionManager.db
+              .prepare(
+                `${baseSelect} WHERE p.origin LIKE ? OR p.permissionType LIKE ? ORDER BY p.origin, p.permissionType`
+              )
+              .all(`%${searchTerm}%`, `%${searchTerm}%`)
+          : PermissionManager.db.prepare(`${baseSelect} ORDER BY p.origin, p.permissionType`).all()
+      ) as PermissionRecord[];
+      // Each site's icon from the favicon cache.
+      for (const record of records) {
+        record.faviconUrl = FaviconCache.get(PermissionManager.db, record.origin);
       }
-      return PermissionManager.db
-        .prepare(`${baseSelect} ORDER BY p.origin, p.permissionType`)
-        .all() as PermissionRecord[];
+      return records;
     } catch {
       return [];
     }

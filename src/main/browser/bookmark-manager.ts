@@ -3,6 +3,7 @@ import { RendererToMainEventsForBrowserIPC } from '../../constants/app-constants
 import { BookmarkRecord, BookmarkWithStats } from '../../types/bookmark-record';
 import { DatabaseManager } from '../database/database-manager';
 import { AppWindowManager } from './app-window-manager';
+import { FaviconCache } from './favicon-cache';
 import { v4 as uuid } from 'uuid';
 
 export abstract class BookmarkManager {
@@ -36,19 +37,11 @@ export abstract class BookmarkManager {
 
     ipcMain.handle(
       RendererToMainEventsForBrowserIPC.ADD_BOOKMARK,
-      async (
-        event,
-        appWindowId: string,
-        title: string,
-        url: string,
-        faviconUrl: string,
-        type?: string
-      ) => {
+      async (event, appWindowId: string, title: string, url: string, type?: string) => {
         return await BookmarkManager.addRecord(
           appWindowId,
           title,
           url,
-          faviconUrl,
           type as 'reference' | 'queue'
         );
       }
@@ -106,7 +99,7 @@ export abstract class BookmarkManager {
       limit,
       offset
     ) as Array<BookmarkRecord>;
-    return records;
+    return FaviconCache.attach(db, records);
   }
 
   public static async fetchBookmarksWithStats(
@@ -142,7 +135,7 @@ export abstract class BookmarkManager {
       limit,
       offset
     ) as Array<BookmarkWithStats>;
-    return records;
+    return FaviconCache.attach(db, records);
   }
 
   public static async getCountByType(
@@ -160,27 +153,27 @@ export abstract class BookmarkManager {
     return counts;
   }
 
+  // The bookmark keeps no favicon: the site's icon is in the favicon cache.
   public static async addRecord(
     appWindowId: string,
     title: string,
     url: string,
-    faviconUrl: string,
     type?: 'reference' | 'queue'
   ): Promise<BookmarkRecord | null> {
     const db = BookmarkManager.getDb(appWindowId);
     if (!db) return null;
     const bookmarkType = type || 'reference';
     const stmt = db.prepare(
-      'INSERT INTO bookmark (id, title, url, createdDate, faviconUrl, type) VALUES (?, ?, ?, ?, ?, ?);'
+      'INSERT INTO bookmark (id, title, url, createdDate, type) VALUES (?, ?, ?, ?, ?);'
     );
     const id = uuid();
-    stmt.run(id, title, url, new Date().toISOString(), faviconUrl, bookmarkType);
+    stmt.run(id, title, url, new Date().toISOString(), bookmarkType);
     const newlyCreatedRecord: BookmarkRecord = {
       id,
       title,
       url,
       createdDate: new Date(),
-      faviconUrl,
+      faviconUrl: FaviconCache.get(db, url),
       type: bookmarkType,
     };
     return newlyCreatedRecord;
@@ -197,7 +190,7 @@ export abstract class BookmarkManager {
     updateStmt.run(type, bookmarkId);
     const selectStmt = db.prepare('SELECT * FROM bookmark WHERE id = ?;');
     const record = selectStmt.get(bookmarkId) as BookmarkRecord | undefined;
-    return record || null;
+    return record ? FaviconCache.attach(db, [record])[0] : null;
   }
 
   public static async removeRecord(appWindowId: string, recordId: string): Promise<boolean> {
@@ -205,6 +198,7 @@ export abstract class BookmarkManager {
     if (!db) return false;
     const stmt = db.prepare('DELETE FROM bookmark WHERE id = ?;');
     stmt.run(recordId);
+    FaviconCache.prune(db);
     return true;
   }
 
@@ -213,6 +207,7 @@ export abstract class BookmarkManager {
     if (!db) return false;
     const stmt = db.prepare('DELETE FROM bookmark;');
     stmt.run();
+    FaviconCache.prune(db);
     return true;
   }
 

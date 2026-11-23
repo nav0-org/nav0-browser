@@ -519,15 +519,6 @@ function deriveTitle(rawTitle: string, url: string): string {
   return deriveDomain(url);
 }
 
-function buildFaviconFallback(url: string): string {
-  try {
-    const u = new URL(url);
-    return `${u.protocol}//${u.host}/favicon.ico`;
-  } catch {
-    return '';
-  }
-}
-
 function renderTile(item: {
   url: string;
   title: string;
@@ -536,9 +527,9 @@ function renderTile(item: {
 }): string {
   const domain = deriveDomain(item.url);
   const title = deriveTitle(item.title, item.url);
-  const favicon = item.faviconUrl || buildFaviconFallback(item.url);
   const safeUrl = escapeAttr(item.url);
-  const safeFavicon = escapeAttr(favicon);
+  // The site's icon from the favicon cache, or the globe.
+  const safeFavicon = escapeAttr(item.faviconUrl || '');
   return `
     <a class="tile" href="${safeUrl}" data-url="${safeUrl}" title="${escapeAttr(title)}">
       <span class="tile-icon">

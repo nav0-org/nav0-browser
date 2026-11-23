@@ -27,13 +27,7 @@ declare global {
       refreshTab: (appWindowId: string, tabId: string) => Promise<any>;
       hardReloadTab: (appWindowId: string, tabId: string) => Promise<any>;
       stopLoadingTab: (appWindowId: string, tabId: string) => Promise<any>;
-      addBookmark: (
-        appWindowId: string,
-        title: string,
-        url: string,
-        faviconUrl: string,
-        type?: string
-      ) => Promise<any>;
+      addBookmark: (appWindowId: string, title: string, url: string, type?: string) => Promise<any>;
       removeBookmark: (appWindowId: string, bookmarkId: string) => Promise<any>;
       removeAllBookmarks: (appWindowId: string) => Promise<any>;
       fetchBookmarks: (

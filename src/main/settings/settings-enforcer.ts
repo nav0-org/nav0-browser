@@ -20,6 +20,7 @@ import {
 } from '../ad-blocker/ad-block-lists';
 import { applyClientHints, alignUAWithRealChromeVersion } from '../browser/ua-switcher';
 import { pageFetchingFavicon } from '../browser/favicon-fetch';
+import { FaviconCache } from '../browser/favicon-cache';
 
 export abstract class SettingsEnforcer {
   private static autoDeleteInterval: ReturnType<typeof setInterval> | null = null;
@@ -542,6 +543,7 @@ export abstract class SettingsEnforcer {
       if (!isNaN(days)) {
         const cutoff = new Date(now - days * 24 * 60 * 60 * 1000).toISOString();
         db.prepare('DELETE FROM browsingHistory WHERE createdDate < ?').run(cutoff);
+        FaviconCache.prune(db);
       }
     }
 
@@ -626,6 +628,7 @@ export abstract class SettingsEnforcer {
         const result = db.prepare('DELETE FROM browsingHistory').run();
         deletedCount += result.changes;
       }
+      FaviconCache.prune(db);
     }
 
     if (options.downloadHistory) {
@@ -653,6 +656,7 @@ export abstract class SettingsEnforcer {
     try {
       const db = DatabaseManager.getDatabase(false);
       db.prepare('DELETE FROM browsingHistory').run();
+      FaviconCache.prune(db);
     } catch (e) {
       console.error('Failed to clear history:', e);
     }

@@ -180,7 +180,6 @@ export class BrowserTabManager {
         this.appWindowId,
         activeTab.title,
         activeTab.url,
-        activeTab.faviconUrl,
         'reference'
       );
       activeTab.isBookmark = true;

@@ -83,19 +83,12 @@ export function init() {
     stopLoadingTab: async (appWindowId: string, tabId: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.STOP_LOADING, appWindowId, tabId);
     },
-    addBookmark: async (
-      appWindowId: string,
-      title: string,
-      url: string,
-      faviconUrl: string,
-      type?: string
-    ) => {
+    addBookmark: async (appWindowId: string, title: string, url: string, type?: string) => {
       return ipcRenderer.invoke(
         RendererToMainEventsForBrowserIPC.ADD_BOOKMARK,
         appWindowId,
         title,
         url,
-        faviconUrl,
         type
       );
     },

@@ -29,8 +29,8 @@ export type Favicon = { type: string; bytes: Buffer };
 // A favicon request that met a redirect it wouldn't follow.
 const REDIRECTED = Symbol('redirected');
 
-// The favicon goes to the chrome, the history and the saved session.
-const MAX_FAVICON_BYTES = 1024 * 1024;
+// The favicon goes to the chrome, the favicon cache and the saved session.
+export const MAX_FAVICON_BYTES = 1024 * 1024;
 
 function isOnOrigin(url: string, origin: string): boolean {
   try {

@@ -33,6 +33,7 @@ import { PermissionManager } from './permission-manager';
 import { NotificationManager } from './notification-manager';
 import { ReaderModeManager, ReaderModeState } from './reader-mode-manager';
 import { DataStoreManager } from '../database/data-store-manager';
+import { DatabaseManager } from '../database/database-manager';
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from '../../types/settings-types';
 import {
   COSMETIC_FILTER_CSS,
@@ -44,6 +45,7 @@ import { ZoomManager } from './zoom-manager';
 import { buildErrorPageScript, NavigationError } from './error-page/error-page';
 import { HOVER_STATUS_BAR_SCRIPT } from './hover-status-bar-script';
 import { fetchFavicon } from './favicon-fetch';
+import { FaviconCache } from './favicon-cache';
 const domainPattern = /^[^\s]+\.[^\s]+$/;
 // Protocols that should be handed off to the OS default handler.
 // Covers communication (mailto, tel, sms), calendar (webcal), and
@@ -728,10 +730,13 @@ export class Tab {
         let favicon: string | null = null;
         for (const candidate of candidates) {
           if (this._destroyed) return;
-          if (!candidate.startsWith('http')) {
+          // A page's data: icon, or a local file's, is already local. One on
+          // any other scheme but the web's (blob:, ftp:) can't be fetched.
+          if (/^(data|file):/i.test(candidate)) {
             favicon = candidate;
             break;
           }
+          if (!/^https?:/i.test(candidate)) continue;
           try {
             const icon = await fetchFavicon(wc.session, candidate, pageUrl, pageOrigin);
             if (icon) {
@@ -743,12 +748,15 @@ export class Tab {
           }
         }
 
-        // Every candidate failed — send the best URL and let the renderer's
-        // onerror handler swap in the empty-favicon placeholder.
-        if (favicon === null && candidates.length > 0) favicon = candidates[0];
-
         // A newer report has overtaken this one.
         if (this._destroyed || request !== this.faviconRequestSeq) return;
+        // The chrome and the built-in pages show only local copies: keep the
+        // site's icon in the favicon cache (a private window's in memory).
+        // Should every candidate fail, the copy kept from an earlier visit
+        // stands in, if there is one; the chrome never gets a remote URL.
+        const db = DatabaseManager.getDatabase(this.parentAppWindow.isPrivate);
+        if (favicon !== null) FaviconCache.save(db, pageUrl, favicon);
+        else favicon = FaviconCache.get(db, pageUrl);
         this.faviconUrl = favicon;
         this.faviconFetchedFor = request;
         // Shown if the page that reported it is still the tab's; otherwise
@@ -1428,11 +1436,6 @@ export class Tab {
       // brand new history entry (e.g. page.html#section1 vs page.html#section2
       // are the same visit).
       const urlWithoutFragment = url.split('#')[0];
-      // The page's favicon if it's known by now, as with its title, or a
-      // guess at the usual place (the page's own replaces it when it is).
-      const favicon =
-        this.currentPageFavicon() ??
-        (urlObject ? `${urlObject.protocol}//${urlObject.host}/favicon.ico` : '');
       // One row per visit — revisits to the same URL intentionally create
       // new rows so the history timeline and per-visit time tracking are
       // preserved.
@@ -1440,8 +1443,7 @@ export class Tab {
         this.parentAppWindow.id,
         urlWithoutFragment,
         this.title,
-        urlObject ? urlObject.hostname : '',
-        favicon
+        urlObject ? urlObject.hostname : ''
       );
       this.lastHistoryRecordId = record?.id ?? null;
       this.historyDocument = this.documentSeq;
@@ -1563,26 +1565,12 @@ export class Tab {
     }, Tab.FAVICON_REPORT_WAIT_MS);
   }
 
-  // Shows the current page's favicon, once known, and gives it to the page's
-  // history row. Until that row is recorded the last row is another page's;
-  // the page's own takes the favicon when it is.
+  // Shows the current page's favicon, once known.
   private showPageFavicon(): void {
     if (this.faviconDocument !== this.documentSeq || this.isBuiltInPage()) return;
     if (this.loadFailed || this.showingSSLWarning) return;
     if (this.faviconFetchedFor !== this.faviconRequestSeq) return;
     this.sendFavicon(this.faviconUrl);
-    if (
-      this.faviconUrl &&
-      this.lastHistoryRecordId &&
-      !this.navigationDebounceTimer &&
-      this.historyDocument === this.documentSeq
-    ) {
-      BrowsingHistoryManager.updateRecordFavicon(
-        this.parentAppWindow.id,
-        this.lastHistoryRecordId,
-        this.faviconUrl
-      ).catch(() => {});
-    }
   }
 
   // null empties the tab's favicon slot.

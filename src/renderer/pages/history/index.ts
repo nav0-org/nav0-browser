@@ -56,9 +56,20 @@ function queueIconRefresh(): void {
   });
 }
 
-// The page CSP has no 'unsafe-inline', so an inline onerror="…" never runs and
-// a missing favicon showed the broken-image glyph. Wire the intended fallback
-// (a Lucide globe in place of the image) from script instead.
+// A site without an icon in the favicon cache shows the Lucide globe. The page
+// CSP has no 'unsafe-inline', so an inline onerror="…" never runs and an icon
+// that fails to load showed the broken-image glyph: wire the same fallback from
+// script instead.
+function faviconHtml(
+  faviconUrl: string | null | undefined,
+  imageSize: number,
+  globeSize: number
+): string {
+  return faviconUrl
+    ? `<img src="${escapeHtml(faviconUrl)}" width="${imageSize}" height="${imageSize}" alt="">`
+    : `<i data-lucide="globe" width="${globeSize}" height="${globeSize}"></i>`;
+}
+
 function attachFaviconFallbacks(root: ParentNode, selector: string, iconSize: number): void {
   root.querySelectorAll<HTMLImageElement>(selector).forEach((img) => {
     img.addEventListener(
@@ -272,7 +283,6 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
     hour: '2-digit',
     minute: '2-digit',
   });
-  const faviconUrl = entry.faviconUrl || `https://${entry.topLevelDomain}/favicon.ico`;
   const category = getCategoryForDomain(entry.topLevelDomain);
   const catIcon = CATEGORY_ICONS[category] || CATEGORY_ICONS.other;
 
@@ -287,7 +297,7 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
 
   row.innerHTML = `
     <span class="entry-time">${time}</span>
-    <div class="entry-favicon"><img src="${escapeHtml(faviconUrl)}" width="18" height="18"></div>
+    <div class="entry-favicon">${faviconHtml(entry.faviconUrl, 18, 18)}</div>
     <div class="entry-content">
       <span class="entry-title" title="${escapeHtml(entry.title)}">${escapeHtml(entry.title)}</span>
       <span class="entry-domain">${escapeHtml(entry.topLevelDomain)}</span>
@@ -473,7 +483,7 @@ function renderHeatmap(
 function renderDomainChart(): void {
   const map = new Map<
     string,
-    { domain: string; visits: number; active: number; faviconUrl: string }
+    { domain: string; visits: number; active: number; faviconUrl: string | null }
   >();
   for (const e of allEntries) {
     const existing = map.get(e.topLevelDomain);
@@ -485,7 +495,7 @@ function renderDomainChart(): void {
         domain: e.topLevelDomain,
         visits: 1,
         active: e.activeDuration || 0,
-        faviconUrl: e.faviconUrl || `https://${e.topLevelDomain}/favicon.ico`,
+        faviconUrl: e.faviconUrl || null,
       });
     }
   }
@@ -508,7 +518,7 @@ function renderDomainChart(): void {
       const valLabel = useTime ? FormatUtils.formatDuration(d.active) : `${d.visits}`;
       return `
     <div class="domain-row">
-      <span class="domain-favicon"><img src="${escapeHtml(d.faviconUrl)}" width="16" height="16" /></span>
+      <span class="domain-favicon">${faviconHtml(d.faviconUrl, 16, 14)}</span>
       <span class="domain-name">${escapeHtml(d.domain)}</span>
       <span class="domain-duration">${valLabel}</span>
       <div class="domain-bar-track">

@@ -3,6 +3,7 @@ import { RendererToMainEventsForBrowserIPC } from '../../constants/app-constants
 import { BrowsingHistoryRecord } from '../../types/browsing-history-record';
 import { DatabaseManager } from '../database/database-manager';
 import { AppWindowManager } from './app-window-manager';
+import { FaviconCache } from './favicon-cache';
 import { v4 as uuid } from 'uuid';
 
 export abstract class BrowsingHistoryManager {
@@ -69,36 +70,35 @@ export abstract class BrowsingHistoryManager {
       limit,
       offset
     ) as Array<BrowsingHistoryRecord>;
-    return records;
+    return FaviconCache.attach(db, records);
   }
 
   /**
    * Inserts a new history record for a single visit. One row per visit —
    * revisiting the same URL always creates a new row so the history
-   * timeline and per-visit time tracking are preserved.
+   * timeline and per-visit time tracking are preserved. The row keeps no
+   * favicon: the site's icon is in the favicon cache.
    */
   public static insertRecord(
     appWindowId: string,
     url: string,
     title: string,
-    topLevelDomain: string,
-    faviconUrl: string
+    topLevelDomain: string
   ): BrowsingHistoryRecord | null {
     const db = BrowsingHistoryManager.getDb(appWindowId);
     if (!db) return null;
     const id = uuid();
     const createdDate = new Date();
     const stmt = db.prepare(
-      'INSERT INTO browsingHistory (id, url, title, createdDate, topLevelDomain, faviconUrl) VALUES (?, ?, ?, ?, ?, ?);'
+      'INSERT INTO browsingHistory (id, url, title, createdDate, topLevelDomain) VALUES (?, ?, ?, ?, ?);'
     );
-    stmt.run(id, url, title, createdDate.toISOString(), topLevelDomain, faviconUrl);
+    stmt.run(id, url, title, createdDate.toISOString(), topLevelDomain);
     return {
       id,
       url,
       title,
       createdDate,
       topLevelDomain,
-      faviconUrl,
       totalDuration: 0,
       activeDuration: 0,
     };
@@ -115,22 +115,12 @@ export abstract class BrowsingHistoryManager {
     await stmt.run(title, recordId);
   }
 
-  public static async updateRecordFavicon(
-    appWindowId: string,
-    recordId: string,
-    faviconUrl: string
-  ): Promise<void> {
-    const db = BrowsingHistoryManager.getDb(appWindowId);
-    if (!db) return;
-    const stmt = db.prepare('UPDATE browsingHistory SET faviconUrl = ? WHERE id = ?;');
-    await stmt.run(faviconUrl, recordId);
-  }
-
   public static async removeRecord(appWindowId: string, recordId: string): Promise<boolean> {
     const db = BrowsingHistoryManager.getDb(appWindowId);
     if (!db) return false;
     const stmt = db.prepare('DELETE FROM browsingHistory WHERE id = ?;');
     await stmt.run(recordId);
+    FaviconCache.prune(db);
     return true;
   }
 
@@ -139,6 +129,7 @@ export abstract class BrowsingHistoryManager {
     if (!db) return false;
     const stmt = db.prepare('DELETE FROM browsingHistory;');
     await stmt.run();
+    FaviconCache.prune(db);
     return true;
   }
 
@@ -159,7 +150,8 @@ export abstract class BrowsingHistoryManager {
 
   /**
    * Aggregates browsing history by URL and returns the most-visited sites,
-   * with the latest title/favicon and the visit count. Skips internal pages.
+   * with the latest title, the site's icon and the visit count. Skips
+   * internal pages.
    */
   public static async fetchTopSites(
     appWindowId: string,
@@ -170,20 +162,20 @@ export abstract class BrowsingHistoryManager {
     const stmt = db.prepare(`
       SELECT url,
         COUNT(*) as visits,
-        (SELECT title FROM browsingHistory WHERE url = h.url ORDER BY createdDate DESC LIMIT 1) as title,
-        (SELECT faviconUrl FROM browsingHistory WHERE url = h.url AND faviconUrl IS NOT NULL ORDER BY createdDate DESC LIMIT 1) as faviconUrl
+        (SELECT title FROM browsingHistory WHERE url = h.url ORDER BY createdDate DESC LIMIT 1) as title
       FROM browsingHistory h
       WHERE url NOT LIKE 'Nav0://%' AND url NOT LIKE 'nav0://%'
       GROUP BY url
       ORDER BY visits DESC, MAX(createdDate) DESC
       LIMIT ?;
     `);
-    return stmt.all(limit || 8) as Array<{
+    const sites = stmt.all(limit || 8) as Array<{
       url: string;
       title: string;
       faviconUrl: string;
       visits: number;
     }>;
+    return FaviconCache.attach(db, sites);
   }
 
   public static async fetchHistoryStats(
