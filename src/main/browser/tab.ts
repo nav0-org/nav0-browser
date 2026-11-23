@@ -102,6 +102,36 @@ function documentOrigin(wc: Electron.WebContents): string {
   }
 }
 
+// A URL without its query and fragment, as Chromium writes it, or null for one
+// that doesn't parse.
+function pageAddress(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    parsed.search = '';
+    parsed.hash = '';
+    return parsed.href;
+  } catch {
+    return null;
+  }
+}
+
+// Whether url is a built-in page: its nav0:// address in either case, or the
+// one its view loads, a webpack dev-server URL or, once packaged, a file://
+// path inside the app.
+function isBuiltInPageUrl(url: string): boolean {
+  if (/^nav0:\/\//i.test(url)) return true;
+  const address = pageAddress(url);
+  if (address === null) return false;
+  return [
+    ABOUT_WEBPACK_ENTRY,
+    BOOKMARKS_WEBPACK_ENTRY,
+    BROWSER_SETTINGS_WEBPACK_ENTRY,
+    DOWNLOADS_WEBPACK_ENTRY,
+    HISTORY_WEBPACK_ENTRY,
+    NEW_TAB_WEBPACK_ENTRY,
+  ].some((entry) => pageAddress(entry) === address);
+}
+
 // A script for a page: the favicons Chromium reports for it, the <link>s among
 // document.head's own children with an href attribute that parses, whose last
 // icon keyword in rel (split on spaces and newlines only) is "icon".
@@ -1423,7 +1453,10 @@ export class Tab {
   }
 
   private recordHistory(url: string): void {
-    if (this.url.startsWith(InAppUrls.PREFIX) || this.url === '') {
+    // Built-in pages get no row. The page committed may be one while this.url
+    // is already a site's: a window opening on a URL replaces its New Tab page
+    // before the debounce is up.
+    if (this.url === '' || isBuiltInPageUrl(this.url) || isBuiltInPageUrl(url)) {
       this.lastHistoryRecordId = null;
       return;
     }
