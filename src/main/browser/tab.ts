@@ -160,6 +160,9 @@ export class Tab {
   private faviconOrigin: string | null = null;
   // The last report's favicon URLs, sorted.
   private faviconList: string[] = [];
+  // The icon of a tab restored without loading (see restoredFaviconFor()),
+  // shown until its first page loads.
+  private restoredFavicon: string | null = null;
   // The document lastHistoryRecordId is the row of.
   private historyDocument: number | null = null;
   // The current document is the error page.
@@ -220,7 +223,7 @@ export class Tab {
     parentAppWindow: AppWindow,
     url: string,
     partitionSetting: string,
-    options?: { suspended?: boolean; title?: string }
+    options?: { suspended?: boolean; title?: string; faviconUrl?: string | null }
   ) {
     this.parentAppWindow = parentAppWindow;
     this.id = uuid();
@@ -229,6 +232,7 @@ export class Tab {
     this.partitionSetting = partitionSetting;
     if (options?.suspended) {
       this.isSuspended = true;
+      this.restoredFavicon = this.restoredFaviconFor(options.faviconUrl);
     } else {
       this.loadURL();
     }
@@ -328,8 +332,10 @@ export class Tab {
       this.webContentsViewInstance.webContents.close();
     }
     // A new view reports its pages' favicons afresh: the old view's favicon,
-    // and any fetch still running for it, belong to no page here.
+    // and any fetch still running for it, belong to no page here. A restored
+    // tab's icon gives way to its page's too.
     this.faviconUrl = null;
+    this.restoredFavicon = null;
     this.faviconRequestSeq++;
     this.faviconDocument = null;
     this.faviconOrigin = null;
@@ -1481,7 +1487,23 @@ export class Tab {
     // Built-in pages (the New Tab page's URL is '') never report a favicon, and
     // this.faviconUrl may still hold the last site's: they show the compass.
     if (this.isBuiltInPage()) return ImageBase64Strings.FAVICON;
-    return this.currentPageFavicon();
+    return this.currentPageFavicon() ?? this.restoredFavicon;
+  }
+
+  // A tab restored without loading (from the saved session, or a closed
+  // window) shows the icon saved with it, which the next saved session keeps.
+  // Only a local copy will do (an older build's session may hold a remote
+  // URL); without one, the favicon cache's for its host.
+  private restoredFaviconFor(saved: string | null | undefined): string | null {
+    if (saved && /^(data|file):/i.test(saved)) return saved;
+    try {
+      return FaviconCache.get(
+        DatabaseManager.getDatabase(this.parentAppWindow.isPrivate),
+        this.url
+      );
+    } catch {
+      return null;
+    }
   }
 
   private isBuiltInPage(): boolean {

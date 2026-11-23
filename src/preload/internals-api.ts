@@ -531,7 +531,13 @@ export function init() {
 
     // Event listeners
     onNewTabCreated: (
-      callback: (tab: { id: string; url: string; title: string; index?: number }) => void
+      callback: (tab: {
+        id: string;
+        url: string;
+        title: string;
+        index?: number;
+        faviconUrl?: string | null;
+      }) => void
     ) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.NEW_TAB_CREATED, (_event, tab) =>
         callback(tab)

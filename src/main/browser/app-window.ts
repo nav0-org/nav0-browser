@@ -500,16 +500,19 @@ export class AppWindow {
     return insertIndex;
   }
 
-  createSuspendedTab(url: string, title: string): Tab {
-    const tab = new Tab(this, url, this.partitionSetting, { suspended: true, title });
+  createSuspendedTab(url: string, title: string, faviconUrl: string | null = null): Tab {
+    const tab = new Tab(this, url, this.partitionSetting, { suspended: true, title, faviconUrl });
     this.tabs.set(tab.getId(), tab);
 
+    // It loads only when activated: until then the strip shows the icon it was
+    // restored with.
     this.browserWindowInstance?.webContents.send(
       MainToRendererEventsForBrowserIPC.NEW_TAB_CREATED,
       {
         id: tab.id,
         title: tab.getTitle(),
         url: tab.getUrl(),
+        faviconUrl: tab.getFaviconUrl(),
       }
     );
 

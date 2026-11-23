@@ -264,11 +264,19 @@ export class BrowserTabManager {
 
   private setupIpcListeners(): void {
     window.BrowserAPI.onNewTabCreated(
-      (tab: { id: string; url: string; title: string; index?: number }) => {
+      (tab: {
+        id: string;
+        url: string;
+        title: string;
+        index?: number;
+        faviconUrl?: string | null;
+      }) => {
         if (this.getTabById(tab.id)) return;
 
         const newTab = new Tab(tab.id, tab.url, tab.title);
         newTab.createTabElement(this.appWindowId);
+        // A restored tab that hasn't loaded comes with its icon.
+        if (tab.faviconUrl) newTab.updateTabFavicon(tab.faviconUrl);
         const newElement = newTab.getTabElement();
 
         // Tabs spawned from a page arrive with the index they should occupy
