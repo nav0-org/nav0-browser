@@ -13,13 +13,13 @@
 }
 
 /* Menu material from tokens only, so the reduced-transparency fallback in
-   global.css can make it solid (DESIGN.md §3.8). The fixed height keeps the
-   footer in place while a search narrows the list. */
+   global.css can make it solid (DESIGN.md §3.8). It fits its content up to
+   75vh, and the tab grid scrolls; the top edge stays put while a search
+   narrows the list. */
 #overlay-command-o .cmdo-overlay-container {
   width: 900px;
   max-width: 90vw;
-  height: 760px;
-  max-height: calc(100vh - 92px - var(--spacing-xxl));
+  max-height: 75vh;
   background: var(--n-menu-bg);
   backdrop-filter: var(--n-menu-blur);
   -webkit-backdrop-filter: var(--n-menu-blur);
@@ -110,7 +110,7 @@
    The right edge is a stable 8 px scrollbar gutter plus 8 px of padding, so
    the cards keep a 16 px inset on both sides whether or not the body scrolls. */
 #overlay-command-o .tabs-body {
-  flex: 1;
+  flex: 0 1 auto;
   min-height: 0;
   overflow-y: auto;
   padding: 0 8px 16px 16px;
