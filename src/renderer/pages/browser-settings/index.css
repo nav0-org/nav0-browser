@@ -1139,86 +1139,11 @@
 }
 
 /* ====== KEYBOARD SHORTCUTS ============================== */
-/* "Categories" label above the filter chips, then a wrapping chip row.
-   Chips use the selection style when chosen (handled below). */
+/* The shared chip row (global.css): "Categories" beside the chips, which
+   wrap inside the column. Here it sits 16 px from the search field and
+   the table. */
 .shortcuts-filter-row {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 8px;
-  margin: 16px 0 16px;
-  padding-top: 0;
-  border-top: 0;
-}
-
-.shortcuts-filter-label {
-  font-size: 12px;
-  line-height: 15px;
-  letter-spacing: 0;
-  font-weight: 600;
-  color: var(--n-text-3);
-  margin: 0;
-  flex-shrink: 0;
-}
-
-/* Keep the eight chips on one line: the row may run past the 680-px column
-   into the white margin, up to 16 px short of the window edge, and wraps
-   only when the window is too narrow for that. */
-.shortcuts-filter {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  width: max-content;
-  max-width: min(calc(50vw + 200px), calc(100vw - 264px));
-}
-
-.shortcuts-filter .cat-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 28px;
-  padding: 0 10px;
-  background: var(--n-fill);
-  border: 0;
-  border-radius: var(--n-r-chip);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--n-text-1);
-  cursor: pointer;
-  transition:
-    background var(--dur-fast),
-    color var(--dur-fast);
-}
-
-.shortcuts-filter .cat-pill:hover {
-  background: var(--n-fill-2);
-}
-
-.shortcuts-filter .cat-pill svg {
-  width: 13px;
-  height: 13px;
-  flex-shrink: 0;
-  color: var(--n-text-2);
-}
-
-.shortcuts-filter .cat-pill:focus-visible {
-  outline: none;
-  box-shadow: var(--n-focus-ring);
-}
-
-/* Selection style for the chosen chip (index.ts adds .active); its label
-   is 500, like the Bookmarks / Downloads chips (DESIGN.md §5.3). */
-.shortcuts-filter .cat-pill.active {
-  background: var(--n-accent-soft);
-  color: var(--n-text-1);
-  font-weight: 500;
-  border-color: transparent;
-}
-
-.shortcuts-filter .cat-pill.active svg {
-  color: var(--n-accent);
+  margin: 16px 0;
 }
 
 /* Search bar above shortcut table — filled field on the white page */

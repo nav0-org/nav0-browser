@@ -1038,7 +1038,7 @@ function renderShortcutFilters() {
 
   const buildPill = (label: string, value: string, iconName: string) => {
     const pill = document.createElement('button');
-    pill.className = 'cat-pill';
+    pill.className = 'chip';
     pill.dataset.filter = value;
     pill.innerHTML = `<i data-lucide="${iconName}" width="13" height="13"></i> ${label}`;
     const isActive = activeFilter === value;
