@@ -1459,7 +1459,8 @@
   box-shadow: none;
 }
 
-/* Refresh: a quiet 26-px icon button with a 14-px --n-text-2 icon */
+/* Refresh: a quiet 26-px icon button with a 16-px --n-text-2 icon, the
+   size of other icons in fields */
 .permissions-search .btn {
   flex: none;
   width: 26px;
@@ -1470,8 +1471,8 @@
 }
 
 .permissions-search .btn svg {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
 }
 
 /* The site panels and the empty state sit 14 px under the search field
@@ -1524,16 +1525,13 @@
 }
 
 /* "Clear All Permissions" sits on the white page: right-aligned, 16 px
-   under the last site, secondary fill, 30 px tall. */
+   under the last site, secondary fill, 32 px tall like the other "Clear
+   All…" buttons. */
 .permissions-footer {
   display: flex;
   justify-content: flex-end;
   margin-top: 16px;
   padding: 0;
-}
-
-.permissions-footer .btn {
-  height: 30px;
 }
 
 /* Permission entry (flat list fallback) */
@@ -1577,7 +1575,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 10px 12px 10px 16px;
+  padding: 10px 16px;
   background: transparent;
   border-bottom: 1px solid transparent;
 }
@@ -1638,7 +1636,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  padding: 7px 12px 7px 16px;
+  padding: 7px 16px;
   border-bottom: 1px solid transparent;
 }
 
