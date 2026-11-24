@@ -1234,10 +1234,15 @@
   border-radius: var(--n-r-control);
   color: var(--n-text-3);
   margin: 22px 0 0;
-  transition: box-shadow var(--dur-fast);
+  transition:
+    background-color var(--dur-fast),
+    box-shadow var(--dur-fast);
 }
 
+/* Focused, it turns white with the field ring, like every page search
+   field (DESIGN.md §5.2). */
 .shortcuts-search:focus-within {
+  background: var(--n-card);
   box-shadow: var(--n-focus-ring-field);
 }
 
@@ -1441,12 +1446,15 @@
   border-radius: var(--n-r-control);
   color: var(--n-text-3);
   margin-top: 22px;
-  transition: box-shadow var(--dur-fast);
+  transition:
+    background-color var(--dur-fast),
+    box-shadow var(--dur-fast);
 }
 
-/* The field ring shows while the text field has focus — not when the
-   refresh button inside the wrapper is clicked or tabbed to. */
+/* The field turns white with its ring while the text field has focus — not
+   when the refresh button inside the wrapper is clicked or tabbed to. */
 .permissions-search:has(> input:focus) {
+  background: var(--n-card);
   box-shadow: var(--n-focus-ring-field);
 }
 
