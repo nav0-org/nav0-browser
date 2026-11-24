@@ -240,6 +240,7 @@ Unchanged: `--z-dropdown 100`, `--z-sticky 200`, `--z-modal 1000`, `--z-toast 11
 - Content: white page, 680 px column. Each group = a header **outside** the panel (13 px 600 title, 12 px `--n-text-3` description, 16 px left inset) + a grey panel.
 - Rows inside panels: 12 px × 16 px padding, label 13 px, description 12 px `--n-text-3`, control on the right. Dividers `--n-panel-line`, inset 16 px (44 px under radio rows).
 - Controls inside panels are white: text inputs (`--n-input-shadow`, 30 px), selects (`--n-select-shadow`, 28 px; 26–30 px to match a row's other controls), buttons (`--n-raised-shadow`, 26–30 px). Buttons that sit on the white page use the secondary fill.
+- Settings uses one switch size; a section switch aligns with the panel's switches.
 - "Recommended" is a neutral badge, not red. Permission names are sentence case (no `text-transform: uppercase`).
 
 ### 4.4 Overlays (`src/renderer/overlay/panels/<name>/`)
@@ -288,7 +289,7 @@ Pair `.btn-icon` with `.btn-ghost` for its hover fill; the container sets the sp
 - **Text input** (`.form-control`): white, `--n-input-shadow`, `--n-r-control`, 30 px (13 / 18 text, 10 px side padding), `--n-text-1`, placeholder `--n-text-3`; focus `--n-focus-ring-field`. Its label (`.form-label`) is 12 px 500 `--n-text-2`, 5 px above. The address and find fields in the chrome use `--n-field-shadow` instead.
 - **Select**: a white pop-up button: `--n-select-shadow`, `--n-r-control`, 32 px on a page and 28 px in a panel or dialog, text 10 px in, a 13 px `chevron-down` in `--n-text-2` 8 px from the right. The bare `select` element gets this look by default at 32 px; `select.form-control` is the 28 px size. The field ring is on `:focus-visible`; Chromium also matches that after a mouse click on a select (it takes typed input, like a text field), so the ring follows a click there too.
 - **Search field on a page** (`.search-field`): filled, not white: 32 px, `--n-fill`, `--n-r-control`, a 15 px search icon and the placeholder in `--n-text-3`, 8 px apart. While its input has focus, the field turns `--n-card` with `--n-focus-ring-field`; the icon stays `--n-text-3`. The input inside draws no ring of its own.
-- **Switch**: 38 × 22 (32 × 19 in dense lists), round; on = `--n-accent`; off = `--n-track` with an inset 1 px `--n-control-edge`. A white knob (18 px, or 15 px dense) 2 px in from the edge, `--n-knob-shadow` when on and `--n-knob-shadow-off` when off. Disabled = the switch at 40 % opacity and its label in `--n-text-4`.
+- **Switch**: 38 × 22, round; on = `--n-accent`; off = `--n-track` with an inset 1 px `--n-control-edge`. A white knob (18 px) 2 px in from the edge, `--n-knob-shadow` when on and `--n-knob-shadow-off` when off. Disabled = the switch at 40 % opacity and its label in `--n-text-4`.
 - **Checkbox** 16 px, `--n-r-key`; **radio** 16 px round. On = `--n-accent` with an `--n-on-accent` mark (an 11 px check, a 6 px dot); off = white with an inset 1 px `--n-control-edge`.
 - **Segmented control**: a 32 px track, `--n-fill-2`, `--n-r-control`, 2 px padding and 2 px between segments. Segments are 28 px, `0 12px`, `--n-r-key`, 13 px `--n-text-2`; the chosen one is a white thumb with `--n-thumb-shadow` and `--n-text-1` 500 text (no colour).
 

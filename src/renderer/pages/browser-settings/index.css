@@ -330,9 +330,11 @@
 }
 
 /* Ad-blocker: the switch lives in the group header, off the grey panel,
-   bottom-aligned with the description. */
+   bottom-aligned with the description. 12 px in from the header's 4-px
+   inset, its right edge lines up with the switches in the panel (16 px). */
 .setting-group > .setting-group-header > .toggle {
   align-self: flex-end;
+  margin-right: 12px;
 }
 
 /* ====== FIELD ROWS (label + control) ==================== */
@@ -538,21 +540,6 @@
 
 .toggle input:checked:focus-visible + .toggle-slider {
   box-shadow: var(--n-focus-ring);
-}
-
-/* Dense list switch (filter lists): 32 x 19, 15-px knob (DESIGN.md §5.2) */
-.list-item .toggle {
-  width: 32px;
-  height: 19px;
-}
-
-.list-item .toggle-slider::before {
-  width: 15px;
-  height: 15px;
-}
-
-.list-item .toggle input:checked + .toggle-slider::before {
-  transform: translateX(13px);
 }
 
 /* ====== RADIO GROUPS ==================================== */
@@ -816,11 +803,6 @@
 #custom-engines-list .list-item-description {
   font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
   font-size: 11.5px;
-}
-
-/* Filter-list names are row titles (13 px 500) */
-#filter-lists-container .list-item-text {
-  font-weight: 500;
 }
 
 /* Site rows (cookie exceptions, allowed / blocked sites) render their text
