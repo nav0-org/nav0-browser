@@ -236,12 +236,18 @@ function renderHistoryList(): void {
     const dateLabel = document.createElement('div');
     dateLabel.className = 'list-group-header';
     const dayDate = new Date(dg.entries[0].createdDate);
-    const daysAgo = Math.floor((Date.now() - dayDate.getTime()) / 86400000);
+    // Calendar days, as the relative label counts them.
+    const daysAgo = Math.round(
+      (new Date().setHours(0, 0, 0, 0) - new Date(dayDate).setHours(0, 0, 0, 0)) / 86400000
+    );
     // For today / yesterday / this-week, prepend the relative label to the
     // absolute date so it reads "Today · Wednesday, May 20". The relative day is
-    // the heading; the date after it is secondary text (DESIGN.md §4.2).
+    // the heading; the date after it is secondary text (DESIGN.md §4.2). When
+    // the label is already the weekday ("Sunday · November 15"), the date
+    // doesn't repeat it.
+    const labelIsWeekday = daysAgo >= 2 && daysAgo < 7;
     const absoluteDate = dayDate.toLocaleDateString([], {
-      weekday: 'long',
+      weekday: labelIsWeekday ? undefined : 'long',
       month: 'long',
       day: 'numeric',
     });

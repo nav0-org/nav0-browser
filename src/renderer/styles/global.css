@@ -1713,6 +1713,22 @@ select.form-control {
   margin: 0 0.25em;
 }
 
+/* "host · path": the path truncates, the host never does. */
+.list-row-meta:has(> .meta-path) {
+  display: flex;
+  align-items: baseline;
+}
+
+.list-row-meta > .meta-host {
+  flex: none;
+}
+
+.list-row-meta > .meta-path {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Category and file-type ids are lower-case data; a one-word id
    capitalised is sentence case. The badge sits at the start of its fixed
    120 px column, so badges line up row to row. */

@@ -16,8 +16,11 @@
 }
 
 /* Drawn at its natural size (11 px cells, 3 px gaps); scrolls sideways only
-   when the column is narrower than the map. */
+   when the column is narrower than the map. As wide as the map, so the
+   legend under it ends where the grid ends. */
 .heatmap-scroll-area {
+  width: fit-content;
+  max-width: 100%;
   overflow-x: auto;
 }
 

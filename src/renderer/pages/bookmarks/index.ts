@@ -86,14 +86,6 @@ function daysSince(dateStr: string | null): number {
   return Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
 }
 
-function queueAgeText(createdDate: string): { text: string } {
-  const days = daysSince(createdDate);
-  if (days < 7) return { text: 'This week' };
-  if (days < 30) return { text: `${Math.floor(days / 7)}w ago` };
-  if (days < 90) return { text: `${Math.floor(days / 30)}mo ago` };
-  return { text: `${Math.floor(days / 30)}mo ago` };
-}
-
 function escapeHtml(str: string): string {
   const div = document.createElement('div');
   div.textContent = str;
@@ -356,20 +348,12 @@ function renderBookmarkItems(items: BookmarkWithStats[]): void {
     // fallback is attached.
     const faviconHtml = item.faviconUrl ? '<img alt="">' : FaviconTile.html(item.url);
 
-    // Meta line: host · path · queue age / visits (reference)
-    const metaParts: string[] = [`<span class="host">${escapeHtml(domain)}</span>`];
+    // Meta line: domain · path. The path truncates, the domain never does;
+    // the saved date has its own column.
+    const metaParts: string[] = [`<span class="meta-host">${escapeHtml(domain)}</span>`];
     if (path) {
       metaParts.push('<span class="dot">·</span>');
-      metaParts.push(`<span>${escapeHtml(path)}</span>`);
-    }
-    if (item.type === 'queue') {
-      const age = queueAgeText(item.createdDate as unknown as string);
-      metaParts.push('<span class="dot">·</span>');
-      metaParts.push(`<span>${age.text}</span>`);
-    }
-    if (item.type === 'reference') {
-      metaParts.push('<span class="dot">·</span>');
-      metaParts.push(`<span class="bookmark-visits">${item.visits} visits</span>`);
+      metaParts.push(`<span class="meta-path">${escapeHtml(path)}</span>`);
     }
 
     // Badges cell — category only (dormant badge removed). Neutral badge:

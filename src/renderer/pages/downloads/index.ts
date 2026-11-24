@@ -614,10 +614,10 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
 
     // Meta line — source host (grey) · file path. Falls back gracefully.
     const metaParts: string[] = [];
-    if (sourceHost) metaParts.push(`<span class="from">${escapeHtml(sourceHost)}</span>`);
+    if (sourceHost) metaParts.push(`<span class="meta-host">${escapeHtml(sourceHost)}</span>`);
     if (item.fileLocation) {
       if (sourceHost) metaParts.push('<span class="dot">·</span>');
-      metaParts.push(`<span class="path">${escapeHtml(item.fileLocation)}</span>`);
+      metaParts.push(`<span class="meta-path">${escapeHtml(item.fileLocation)}</span>`);
     }
 
     downloadItem.innerHTML = `

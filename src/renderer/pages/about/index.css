@@ -120,16 +120,20 @@
 }
 
 /* ---- Key / value rows ----------------------------------- */
+/* Every row is 38 px, whatever it holds: the build badge (20 px) is
+   centred inside that height rather than adding to it. A row under a
+   hairline gives the line its top pixel and centres below it. */
 .kv-row {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: var(--spacing-md);
   align-items: center;
-  padding: 11px var(--spacing-md);
+  min-height: 38px;
+  padding: 0 var(--spacing-md);
 }
 
 .kv-row + .kv-row {
-  padding-top: calc(11px + 1px);
+  padding-top: 1px;
 }
 
 .kv-row .k {
