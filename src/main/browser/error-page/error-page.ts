@@ -101,7 +101,7 @@ function getErrorContent(error: NavigationError): ErrorContent {
 
   if (errorCode === -106 || errorCode === -109) {
     return {
-      title: 'No internet connection',
+      title: 'No Internet Connection',
       eyebrow: 'NETWORK_OFFLINE',
       heading: 'You’re not connected to the internet',
       message:
@@ -111,7 +111,7 @@ function getErrorContent(error: NavigationError): ErrorContent {
   }
   if (errorCode === -105) {
     return {
-      title: 'Site can’t be reached',
+      title: 'Site Can’t Be Reached',
       eyebrow: 'DNS_LOOKUP_FAILED',
       heading: `${host}’s server can’t be found`,
       message: `The DNS lookup for ${hostRef} didn’t resolve to an address. Most often this means the URL has a typo, the site is down, or your network can’t reach a DNS server right now.`,
@@ -120,7 +120,7 @@ function getErrorContent(error: NavigationError): ErrorContent {
   }
   if (errorCode === -7 || errorCode === -118) {
     return {
-      title: 'Connection timed out',
+      title: 'Connection Timed Out',
       eyebrow: 'CONNECTION_TIMED_OUT',
       heading: `${host} took too long to respond`,
       message: `Nav0 waited but ${hostRef} didn’t answer. The site could be temporarily down or simply too busy — try again in a moment.`,
@@ -129,7 +129,7 @@ function getErrorContent(error: NavigationError): ErrorContent {
   }
   if (errorCode === -102) {
     return {
-      title: 'Connection refused',
+      title: 'Connection Refused',
       eyebrow: 'CONNECTION_REFUSED',
       heading: `${host} refused the connection`,
       message: `The server at ${hostRef} actively refused our request. Either nothing is listening on that port, or a firewall in between dropped the connection.`,
@@ -138,7 +138,7 @@ function getErrorContent(error: NavigationError): ErrorContent {
   }
   if (errorCode === -100 || errorCode === -101 || errorCode === -104) {
     return {
-      title: 'Connection lost',
+      title: 'Connection Lost',
       eyebrow: 'CONNECTION_INTERRUPTED',
       heading: 'The connection was interrupted',
       message: `Something cut the connection between Nav0 and ${hostRef} mid-flight. A reload usually fixes this.`,
@@ -147,7 +147,7 @@ function getErrorContent(error: NavigationError): ErrorContent {
   }
   if (errorCode <= -200 && errorCode >= -299) {
     return {
-      title: 'Connection is not private',
+      title: 'Connection Is Not Private',
       eyebrow: 'CERTIFICATE_UNTRUSTED',
       heading: `${host}’s certificate can’t be verified`,
       message: `Nav0 couldn’t verify the identity of ${hostRef}. Proceed only if you trust the site owner.`,
@@ -156,7 +156,7 @@ function getErrorContent(error: NavigationError): ErrorContent {
   }
 
   return {
-    title: 'This page can’t be reached',
+    title: 'This Page Can’t Be Reached',
     eyebrow: 'UNKNOWN_ERROR',
     heading: 'Something went wrong while loading this page',
     message: `Nav0 couldn’t load ${hostRef}. Check your connection and try again.`,
@@ -200,7 +200,7 @@ function renderChecklist(items: ChecklistItem[]): string {
     <aside class="error-side">
       <div class="panel">
         <div class="panel-head">
-          <div class="panel-title">Try this</div>
+          <div class="panel-title">Try This</div>
           <div class="panel-sub">In order — most-likely first.</div>
         </div>
         <ul class="check-list">${rows}</ul>

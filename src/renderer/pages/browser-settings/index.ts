@@ -200,7 +200,7 @@ function initDeveloperSettings() {
   toggle.addEventListener('change', () => {
     settings.devToolsEnabled = toggle.checked;
     saveSettings();
-    showToast(toggle.checked ? 'Developer Tools enabled' : 'Developer Tools disabled');
+    showToast(toggle.checked ? 'Developer tools enabled' : 'Developer tools disabled');
   });
 }
 

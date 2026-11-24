@@ -34,7 +34,7 @@ function setHash(id: string, value: string): void {
   }
   if (value === 'not packaged') {
     if (wrap) wrap.classList.add('muted');
-    el.textContent = 'not packaged (dev mode)';
+    el.textContent = 'Not packaged (dev mode)';
     // Hide the copy button — nothing to copy.
     const btn = wrap?.querySelector('.copy-btn') as HTMLElement | null;
     if (btn) btn.hidden = true;

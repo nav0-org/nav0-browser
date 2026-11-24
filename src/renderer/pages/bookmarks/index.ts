@@ -220,7 +220,7 @@ function switchTab(tab: 'queue' | 'reference'): void {
   tabQueueBtn.classList.toggle('active', tab === 'queue');
   tabReferenceBtn.classList.toggle('active', tab === 'reference');
   // Mirror the seg button label/icon into the folder section header below the chip row.
-  folderName.textContent = tab === 'queue' ? 'Reading queue' : 'Reference';
+  folderName.textContent = tab === 'queue' ? 'Reading Queue' : 'Reference';
   // Look the icon up each time: createIcons() replaces it with a new <svg>
   // on every call, so a reference kept from page load goes stale.
   document

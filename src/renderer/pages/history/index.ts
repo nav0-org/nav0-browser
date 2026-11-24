@@ -277,7 +277,7 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
     (entry.activeDuration || 0) > 0 ? FormatUtils.formatDuration(entry.activeDuration || 0) : '0s';
   const totalStr =
     (entry.totalDuration || 0) > 0 ? FormatUtils.formatDuration(entry.totalDuration || 0) : '0s';
-  const durationHtml = `<div class="entry-duration" title="active · total">
+  const durationHtml = `<div class="entry-duration" title="Active · total">
         <span class="entry-active-dur">${activeStr}</span>
         <span class="entry-total-dur">${totalStr}</span>
       </div>`;
@@ -427,9 +427,9 @@ function renderHeatmap(
         </div>
       </div>
       <div class="heatmap-legend">
-        <span class="heatmap-legend-label">less</span>
+        <span class="heatmap-legend-label">Less</span>
         ${HEATMAP_LEVELS.map((l) => `<span class="heatmap-legend-cell heat-${l}"></span>`).join('')}
-        <span class="heatmap-legend-label">more</span>
+        <span class="heatmap-legend-label">More</span>
       </div>
     </div>
   `;
@@ -452,7 +452,7 @@ function renderHeatmap(
       tooltip.className = 'heatmap-tooltip';
       heatmapContainer.appendChild(tooltip);
     }
-    tooltip.innerHTML = `<div class="heatmap-tooltip-title">${label}</div><div class="heatmap-tooltip-sub">${count === 0 ? 'no activity' : `${count} pages \u00b7 ${FormatUtils.formatDuration(active)} active`}</div>`;
+    tooltip.innerHTML = `<div class="heatmap-tooltip-title">${label}</div><div class="heatmap-tooltip-sub">${count === 0 ? 'No activity' : `${count} pages \u00b7 ${FormatUtils.formatDuration(active)} active`}</div>`;
     // Centred above the hovered cell with 8 px clear (computed position).
     tooltip.style.left = `${rect.left - cr.left + rect.width / 2}px`;
     tooltip.style.top = `${rect.top - cr.top - 8}px`;
@@ -473,7 +473,7 @@ function renderDomainChart(summary: BrowsingHistorySummary): void {
   const sites = summary.sites;
 
   const label = document.getElementById('domain-chart-label');
-  if (label) label.textContent = useTime ? 'Top sites by active time' : 'Top sites by visits';
+  if (label) label.textContent = useTime ? 'Top Sites by Active Time' : 'Top Sites by Visits';
 
   const maxVal = Math.max(...sites.map((d) => (useTime ? d.activeDuration : d.visits)), 1);
 
@@ -509,7 +509,7 @@ function renderCategoryChart(summary: BrowsingHistorySummary): void {
 
   const catLabel = document.getElementById('category-label');
   if (catLabel)
-    catLabel.textContent = useDuration ? 'Time spent by category' : 'Visits by category';
+    catLabel.textContent = useDuration ? 'Time Spent by Category' : 'Visits by Category';
 
   const maxVal = Math.max(...cats.map(([, val]) => val), 1);
 

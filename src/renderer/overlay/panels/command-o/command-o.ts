@@ -67,8 +67,8 @@ const COMMAND_O_HTML = `
         <span class="key">esc</span>
         <span class="key-label">close</span>
       </div>
-      <div class="footer-right" id="cmdo-footer-drag-hint" hidden>drag tabs between windows</div>
-      <div class="footer-right" id="cmdo-footer-private" hidden>private mode</div>
+      <div class="footer-right" id="cmdo-footer-drag-hint" hidden>Drag tabs between windows</div>
+      <div class="footer-right" id="cmdo-footer-private" hidden>Private mode</div>
     </div>
   </div>
 `;

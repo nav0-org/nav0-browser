@@ -590,10 +590,10 @@ export class BrowserTabManager {
     this.readerModeButton.hidden = false;
     if (activeTab.isReaderModeActive) {
       this.readerModeButton.classList.add('active');
-      this.readerModeButton.title = 'Exit Reader Mode';
+      this.readerModeButton.title = 'Exit reader mode';
     } else {
       this.readerModeButton.classList.remove('active');
-      this.readerModeButton.title = 'Reader Mode';
+      this.readerModeButton.title = 'Reader mode';
     }
   }
 

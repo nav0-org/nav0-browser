@@ -49,7 +49,7 @@ const ISSUE_REPORT_HTML = `
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="ir-issue-reported-by">Reported By <span class="form-label-optional">(optional)</span></label>
+          <label class="form-label" for="ir-issue-reported-by">Reported by <span class="form-label-optional">(optional)</span></label>
           <input type="text" class="form-control" id="ir-issue-reported-by" placeholder="Your name, email, or GitHub handle" maxlength="200" />
         </div>
 
@@ -66,7 +66,7 @@ const ISSUE_REPORT_HTML = `
         </div>
 
         <div class="issue-report-sysinfo">
-          <label class="form-label">System Info (auto-attached)</label>
+          <label class="form-label">System info (auto-attached)</label>
           <div class="sysinfo-preview" id="ir-sysinfo-preview"></div>
         </div>
       </div>

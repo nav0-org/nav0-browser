@@ -34,7 +34,7 @@ export function generateSSLWarningHTML(options: SSLWarningOptions): string {
   const isHttp = type === 'http';
 
   // Title shown in tab + masthead
-  const title = isHttp ? 'This connection isn’t secure' : 'This connection isn’t safe';
+  const title = isHttp ? 'This Connection Isn’t Secure' : 'This Connection Isn’t Safe';
 
   // Uppercase mono code label
   const eyebrow = isHttp ? 'HTTP_NOT_ENCRYPTED' : 'TLS_HANDSHAKE_FAILED';

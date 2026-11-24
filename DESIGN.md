@@ -156,6 +156,8 @@ Use tabular numerals (`font-variant-numeric: tabular-nums`) for times, sizes, co
 
 One time and date format, from `FormatUtils` (`src/renderer/common/format-utils.ts`: `formatTime`, `formatDate`, `formatDateTime`) in History, Downloads, Bookmarks, ⌘K, the New Tab search and the URL autocomplete. Times use the app locale with hour `'numeric'` and minute `'2-digit'`, so an hour never has a leading zero: "5:03 PM" in US English, "5:03 pm" in Indian English, "17:03" in British English. Dates read "May 24", with the year only when it isn't the current year. Relative labels ("Today, 5:03 PM", "Yesterday", "5mo ago") stay, built on these.
 
+Capitalisation follows the macOS rule. **Title Case** for page and dialog titles, section and panel headings, buttons, menu items, tabs, segments, sidebar items, column headers and link rows that open a page (About's links): "Top Sites by Active Time", "Reading Queue", "Sign In". **Sentence case** for row labels (including switch, radio, checkbox and field labels), descriptions, placeholders, tooltips, messages and badges: "Custom user agent string", "Match case (Alt+C)". Permission names are sentence case ("Camera/microphone").
+
 ### 3.8 Materials, shadows and focus
 
 ```
