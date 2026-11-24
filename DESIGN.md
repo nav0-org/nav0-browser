@@ -241,6 +241,7 @@ Unchanged: `--z-dropdown 100`, `--z-sticky 200`, `--z-modal 1000`, `--z-toast 11
 - Rows inside panels: 12 px × 16 px padding, label 13 px, description 12 px `--n-text-3`, control on the right. Dividers `--n-panel-line`, inset 16 px (44 px under radio rows).
 - Controls inside panels are white: text inputs (`--n-input-shadow`, 30 px), selects (`--n-select-shadow`, 28 px; 26–30 px to match a row's other controls), buttons (`--n-raised-shadow`, 26–30 px). Buttons that sit on the white page use the secondary fill.
 - Settings uses one switch size; a section switch aligns with the panel's switches.
+- Buttons and selects in panel rows are both 28 px, so a single-line row with either is 52 px. The "Recommended" badge never makes its row taller.
 - "Recommended" is a neutral badge, not red. Permission names are sentence case (no `text-transform: uppercase`).
 
 ### 4.4 Overlays (`src/renderer/overlay/panels/<name>/`)

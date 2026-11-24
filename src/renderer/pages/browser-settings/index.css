@@ -349,12 +349,6 @@
   border-bottom: 1px solid transparent;
 }
 
-/* A row holding a 28-px select is 48 px tall (10 px above and below). */
-.setting-action-row:has(> .form-select) {
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
-
 /* Row dividers inside a panel: 1 px --n-panel-line, inset 16 px on the
    left, drawn in the row's transparent bottom border (DESIGN.md §4.3). */
 .setting-toggle-row::after,
@@ -647,6 +641,12 @@
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+/* The 18-px "Recommended" badge takes no more than the label's 16-px line,
+   so its row stays 56 px like the others. */
+.radio-label .badge-sm {
+  margin: -1px 0;
 }
 
 /* 2 px under the label, on a tight 15-px line so the row stays 56 px. */
