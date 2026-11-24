@@ -257,6 +257,16 @@ export class AppWindow {
       if (isLinux) {
         this.browserWindowInstance?.maximize();
       }
+      // Showing the window makes it key. When no view is first responder by
+      // then (the tab's view was focused while the window was hidden), macOS
+      // focuses the first control in the chrome, the + button, as if Tab had
+      // been pressed: it shows its ring and typing goes nowhere. Focus where
+      // the user will type instead: now, and again when the window becomes
+      // key if it isn't yet (the app may still be activating).
+      this.focusForTyping();
+      if (!this.browserWindowInstance?.isFocused()) {
+        this.browserWindowInstance?.once('focus', () => this.focusForTyping());
+      }
     });
 
     // this.browserWindowInstance.webContents.openDevTools({mode : 'detach'});
@@ -969,6 +979,19 @@ export class AppWindow {
     if (!this.browserWindowInstance) return;
     this.browserWindowInstance.webContents.focus();
     this.browserWindowInstance.webContents.send(MainToRendererEventsForBrowserIPC.FOCUS_URL_BAR);
+  }
+
+  // Where typing goes when a window opens: the New Tab page (which keeps an
+  // empty address) focuses its own search field; any other page gets the
+  // address field.
+  private focusForTyping(): void {
+    const tab = this.getActiveTab();
+    if (!this.browserWindowInstance || !tab) return;
+    if (tab.getUrl() === '') {
+      tab.getWebContentsViewInstance()?.webContents.focus();
+    } else {
+      this.focusUrlBar();
+    }
   }
 
   broadcastToTabs(channel: string, data: any): void {
