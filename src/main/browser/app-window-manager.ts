@@ -1482,5 +1482,10 @@ export abstract class AppWindowManager {
       if (result.canceled || result.filePaths.length === 0) return null;
       return result.filePaths[0];
     });
+
+    // Where downloads go when no folder has been chosen (Settings shows it).
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.GET_DEFAULT_DOWNLOAD_FOLDER, () => {
+      return app.getPath('downloads');
+    });
   }
 }

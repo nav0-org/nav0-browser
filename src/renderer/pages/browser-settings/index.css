@@ -461,14 +461,35 @@
   padding: 0 16px 6px;
 }
 
-/* Download path display — one line, truncated with an ellipsis. A tight
-   16-px line centres it on the buttons; the body's 19.5 px sets it high. */
+/* Download path display — a file path, so mono (12 / 16), on one line and
+   truncated in the middle: the head shrinks with an ellipsis, the last
+   folder stays whole (index.ts splits them). A tight 16-px line centres it
+   on the buttons; the body's 19.5 px sets it high. */
 .setting-path-value {
-  display: block;
-  font-size: 13px;
+  display: flex;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 12px;
   line-height: 16px;
   color: var(--n-text-1);
   white-space: nowrap;
+}
+
+/* global.css gives every element the sans stack, so the two parts take
+   the mono from the path display explicitly. */
+.setting-path-head,
+.setting-path-tail {
+  font-family: inherit;
+}
+
+.setting-path-head {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.setting-path-tail {
+  flex: none;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
 }

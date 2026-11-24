@@ -238,10 +238,21 @@ function initGeneralSettings() {
   const changeBtn = document.getElementById('change-download-path-btn');
   const resetBtn = document.getElementById('reset-download-path-btn');
 
-  function updatePathDisplay() {
-    if (pathDisplay) {
-      pathDisplay.textContent = settings.downloadPath || 'Default downloads folder';
-    }
+  // The chosen folder, or the system's downloads folder when none is. The
+  // path truncates in the middle: its head shrinks with an ellipsis and the
+  // last folder stays whole; the tooltip holds the full path.
+  async function updatePathDisplay() {
+    if (!pathDisplay) return;
+    const folder = settings.downloadPath || (await window.BrowserAPI.getDefaultDownloadFolder());
+    const split = folder.search(/[\\/][^\\/]*$/);
+    const head = document.createElement('span');
+    head.className = 'setting-path-head';
+    head.textContent = split > 0 ? folder.slice(0, split) : '';
+    const tail = document.createElement('span');
+    tail.className = 'setting-path-tail';
+    tail.textContent = split > 0 ? folder.slice(split) : folder;
+    pathDisplay.replaceChildren(head, tail);
+    pathDisplay.title = folder;
   }
 
   updatePathDisplay();

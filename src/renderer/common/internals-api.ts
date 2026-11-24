@@ -69,6 +69,7 @@ declare global {
       cancelDownload: (downloadId: string, appWindowId: string) => Promise<boolean>;
       openDownloadedFile: (filePath: string) => Promise<string>;
       showItemInFolder: (filePath: string) => Promise<void>;
+      getDefaultDownloadFolder: () => Promise<string>;
       removeBrowsingHistory: (appWindowId: string, historyId: string) => Promise<any>;
       removeAllBrowsingHistory: (appWindowId: string) => Promise<any>;
       fetchBrowsingHistory: (

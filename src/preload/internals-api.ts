@@ -227,6 +227,9 @@ export function init() {
     selectDownloadFolder: async () => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.SELECT_DOWNLOAD_FOLDER);
     },
+    getDefaultDownloadFolder: async (): Promise<string> => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GET_DEFAULT_DOWNLOAD_FOLDER);
+    },
     removeBrowsingHistory: async (appWindowId: string, historyId: string) => {
       return ipcRenderer.invoke(
         RendererToMainEventsForBrowserIPC.REMOVE_BROWSING_HISTORY,
