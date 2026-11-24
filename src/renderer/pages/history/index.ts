@@ -234,7 +234,7 @@ function renderHistoryList(): void {
 
   for (const dg of dateGroups) {
     const dateLabel = document.createElement('div');
-    dateLabel.className = 'date-group-label';
+    dateLabel.className = 'list-group-header';
     const dayDate = new Date(dg.entries[0].createdDate);
     const daysAgo = Math.floor((Date.now() - dayDate.getTime()) / 86400000);
     // For today / yesterday / this-week, prepend the relative label to the
@@ -247,8 +247,8 @@ function renderHistoryList(): void {
     });
     dateLabel.innerHTML =
       daysAgo < 7
-        ? `<span class="day-label">${dg.label}</span> <span class="day-date">· ${absoluteDate}</span>`
-        : `<span class="day-label">${absoluteDate}</span>`;
+        ? `<span class="list-group-title">${dg.label}</span> <span class="list-group-date">· ${absoluteDate}</span>`
+        : `<span class="list-group-title">${absoluteDate}</span>`;
     historyList.appendChild(dateLabel);
 
     for (const entry of dg.entries) {
@@ -261,7 +261,7 @@ function renderHistoryList(): void {
 
 function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
   const row = document.createElement('div');
-  row.className = 'history-entry';
+  row.className = 'list-row history-entry';
 
   const time = new Date(entry.createdDate).toLocaleTimeString([], {
     hour: '2-digit',
@@ -280,15 +280,17 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
       </div>`;
 
   row.innerHTML = `
-    <span class="entry-time">${time}</span>
-    <div class="entry-favicon">${faviconHtml(entry.faviconUrl, entry.url, 18)}</div>
-    <div class="entry-content">
-      <span class="entry-title" title="${escapeHtml(entry.title)}">${escapeHtml(entry.title)}</span>
-      <span class="entry-domain">${escapeHtml(entry.topLevelDomain)}</span>
+    <span class="list-row-lead">${time}</span>
+    <div class="list-row-well entry-favicon">${faviconHtml(entry.faviconUrl, entry.url, 18)}</div>
+    <div class="list-row-content">
+      <span class="list-row-title entry-title" title="${escapeHtml(entry.title)}">${escapeHtml(entry.title)}</span>
+      <span class="list-row-meta">${escapeHtml(entry.topLevelDomain)}</span>
     </div>
-    <span class="entry-category-badge"><i data-lucide="${catIcon}" width="12" height="12"></i>${category}</span>
+    <span class="badge"><i data-lucide="${catIcon}" width="12" height="12"></i>${category}</span>
     ${durationHtml}
-    <button class="entry-delete-btn" title="Remove"><i data-lucide="x" width="14" height="14"></i></button>
+    <div class="list-row-actions">
+      <button class="list-row-action entry-delete-btn" title="Remove"><i data-lucide="x" width="14" height="14"></i></button>
+    </div>
   `;
   FaviconTile.attachFallback(row.querySelector('.entry-favicon img'), entry.url);
 
@@ -410,8 +412,8 @@ function renderHeatmap(
   }
 
   heatmapContainer.innerHTML = `
-    <div class="heatmap-header">
-      <span class="heatmap-summary">${totalPages.toLocaleString()} pages visited in the last year</span>
+    <div class="panel-head">
+      <span class="panel-title">${totalPages.toLocaleString()} pages visited in the last year</span>
     </div>
     <div class="heatmap-scroll-area">
       <div class="heatmap-chart">

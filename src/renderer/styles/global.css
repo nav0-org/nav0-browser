@@ -834,6 +834,39 @@ select.form-control {
   border-top: 1px solid var(--n-panel-line);
 }
 
+/* The padded grey panel of the list pages (DESIGN.md §5.3): charts,
+   summaries and the storage bar. A header line holds a 13 px 600 title and,
+   on the right, 12 px --n-text-3 meta. */
+.panel {
+  padding: 20px;
+  border-radius: var(--n-r-panel);
+  background-color: var(--n-grouped);
+}
+
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-bottom: 12px;
+  line-height: 16px;
+}
+
+.panel-title {
+  color: var(--n-text-1);
+  font-size: var(--font-md);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* A shorter line box than the title's, so the baseline-aligned 12 px text
+   doesn't push the header past 16 px. */
+.panel-meta {
+  color: var(--n-text-3);
+  font-size: var(--font-sm);
+  line-height: 15px;
+}
+
 /* --------------------------------------------------------------------------
    Navigation Elements
    -------------------------------------------------------------------------- */
@@ -1210,6 +1243,101 @@ select.form-control {
   color: var(--n-accent);
 }
 
+/* Chip row (DESIGN.md §5.3): a "Categories" label beside the chips, which
+   wrap inside their own column, 6 px apart. */
+.chip-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+/* The 28 px line box centres the label on the first line of chips. */
+.chip-row-label {
+  flex: none;
+  margin-right: var(--spacing-xs);
+  color: var(--n-text-3);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  line-height: 28px;
+}
+
+.chip-row-chips {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Category and file-type ids are lower-case data ("dev"); a chip shows them
+   capitalised. */
+.chip-row .chip {
+  text-transform: capitalize;
+}
+
+/* Segmented control (DESIGN.md §5.2): a --n-fill-2 track of .segmented-btn
+   segments; the chosen one (.active) is a white thumb. An optional
+   .segmented-count follows a segment's label. */
+.segmented {
+  display: inline-flex;
+  gap: 2px;
+  height: 32px;
+  padding: 2px;
+  border-radius: var(--n-r-control);
+  background-color: var(--n-fill-2);
+}
+
+.segmented-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--n-r-key);
+  background-color: transparent;
+  color: var(--n-text-2);
+  font-size: var(--font-md);
+  font-weight: 400;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast),
+    color var(--dur-fast),
+    box-shadow var(--dur-fast);
+}
+
+.segmented-btn svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+
+.segmented-btn:hover {
+  color: var(--n-text-1);
+}
+
+.segmented-btn.active {
+  background-color: var(--n-card);
+  color: var(--n-text-1);
+  font-weight: 500;
+  box-shadow: var(--n-thumb-shadow);
+}
+
+/* The thumb's shadow outranks the global :focus-visible ring, so put the
+   keyboard ring back over it on the chosen segment. */
+.segmented-btn.active:focus-visible {
+  box-shadow: var(--n-focus-ring), var(--n-thumb-shadow);
+}
+
+.segmented-count {
+  color: var(--n-text-3);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Alerts */
 .alert {
   position: relative;
@@ -1416,6 +1544,242 @@ select.form-control {
 }
 
 /* --------------------------------------------------------------------------
+   List pages — History, Bookmarks and Downloads share one layout
+   (DESIGN.md §4.2): an 880 px column, the Large title, a toolbar, grey
+   panels and 54 px rows on white, grouped under day or folder headers.
+   -------------------------------------------------------------------------- */
+/* The body's 1.5 would loosen every row and panel; text that sets the
+   rhythm has its own line height. */
+.list-page {
+  min-height: 100vh;
+  background-color: var(--n-page);
+  color: var(--n-text-2);
+  line-height: normal;
+}
+
+/* The side gutters are added to the max-width, so they only show on narrow
+   windows. */
+.list-column {
+  max-width: calc(880px + 2 * var(--spacing-xl));
+  margin: 0 auto;
+  padding: 36px var(--spacing-xl) 56px;
+}
+
+.list-title {
+  margin: 0;
+  color: var(--n-text-1);
+  font-size: var(--font-xxxl);
+  font-weight: 700;
+  line-height: 34px;
+  letter-spacing: -0.02em;
+}
+
+/* Search field, segmented control, secondary buttons, in that order. */
+.list-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.list-toolbar > .search-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.list-toolbar > .segmented,
+.list-toolbar > .btn {
+  flex: none;
+}
+
+/* Day or folder header over a group of rows: a 13 px 600 title, an optional
+   --n-text-3 date after it and a 12 px count on the right. */
+.list-group-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 22px 0 4px;
+  padding: 0 12px 8px;
+  border-bottom: 1px solid var(--n-separator);
+  font-size: var(--font-md);
+  line-height: 18px;
+}
+
+.list-group-title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  min-width: 0;
+  color: var(--n-text-1);
+  font-weight: 600;
+}
+
+.list-group-title svg {
+  flex: none;
+  color: var(--n-text-2);
+}
+
+.list-group-date {
+  color: var(--n-text-3);
+}
+
+.list-group-sub {
+  margin-left: auto;
+  color: var(--n-text-3);
+  font-size: var(--font-sm);
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* A 54 px row: lead (time or date) | 28 px well | title over meta | the
+   page's trailing columns. Each page sets grid-template-columns; a second
+   grid row (a download's progress bar) takes its own height. */
+.list-row {
+  display: grid;
+  grid-template-rows: 54px;
+  align-items: center;
+  column-gap: 12px;
+  padding: 0 8px 0 12px;
+  border-radius: var(--n-r-control);
+  cursor: pointer;
+  transition: background-color var(--dur-fast);
+}
+
+.list-row:hover {
+  background-color: var(--n-hover);
+}
+
+.list-row-lead {
+  color: var(--n-text-3);
+  font-size: var(--font-sm);
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* 28 px well holding a 16 px icon or favicon. */
+.list-row-well {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--n-r-control);
+  background-color: var(--n-well);
+  color: var(--n-text-2);
+}
+
+.list-row-well img,
+.list-row-well svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.list-row-well img {
+  border-radius: var(--n-r-control);
+}
+
+/* Title over meta with no gap: their 18 / 16 px line heights space them. */
+.list-row-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.list-row-title,
+.list-row-meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-row-title {
+  color: var(--n-text-1);
+  font-size: var(--font-md);
+  font-weight: 500;
+  line-height: 18px;
+}
+
+/* URLs and paths are grey, never link blue. */
+.list-row-meta {
+  color: var(--n-text-3);
+  font-size: var(--font-sm);
+  line-height: 16px;
+}
+
+.list-row-meta .dot {
+  margin: 0 0.25em;
+}
+
+/* Category and file-type ids are lower-case data; a one-word id
+   capitalised is sentence case. */
+.list-row .badge {
+  text-transform: capitalize;
+}
+
+/* Row actions appear on hover, or while one of them has focus. */
+.list-row-actions {
+  display: inline-flex;
+  justify-content: flex-end;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity var(--dur-fast);
+}
+
+.list-row:hover .list-row-actions,
+.list-row:focus-within .list-row-actions {
+  opacity: 1;
+}
+
+.list-row-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--n-r-icon);
+  background-color: transparent;
+  color: var(--n-text-2);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast),
+    color var(--dur-fast);
+}
+
+/* On a hovered row (--n-hover) the hovered button steps up to --n-fill-2. */
+.list-row-action:hover {
+  background-color: var(--n-fill-2);
+  color: var(--n-text-1);
+}
+
+.list-row-action svg {
+  width: 14px;
+  height: 14px;
+}
+
+.list-empty {
+  padding: var(--spacing-xxl) 0;
+  color: var(--n-text-3);
+  font-size: var(--font-md);
+  line-height: 18px;
+  text-align: center;
+}
+
+/* createIcons() swaps the <i> for an <svg>, so style the svg. */
+.list-empty svg {
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+
+.list-empty p {
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
    The hidden attribute always hides: without this, any rule that sets
    `display` beats the UA's [hidden] rule, which doesn't cover <svg> (a
    Lucide icon) at all. It comes after the !important display utilities so
@@ -1436,6 +1800,10 @@ select.form-control {
   .form-control,
   .search-field,
   .chip,
+  .segmented-btn,
+  .list-row,
+  .list-row-actions,
+  .list-row-action,
   .tooltip-text {
     transition: none;
   }

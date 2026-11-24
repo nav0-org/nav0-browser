@@ -302,7 +302,7 @@ function renderCategoryPills(): void {
 
   // "All" chip — selection style when no individual category is selected.
   const allPill = document.createElement('button');
-  allPill.className = 'cat-pill';
+  allPill.className = 'chip';
   allPill.innerHTML = `<i data-lucide="layers" width="13" height="13"></i> All`;
   if (selectedCategory === 'all') {
     allPill.classList.add('active');
@@ -318,7 +318,7 @@ function renderCategoryPills(): void {
     const pill = document.createElement('button');
     const isActive = selectedCategory === cat;
     const iconName = getCategoryIcon(cat);
-    pill.className = 'cat-pill';
+    pill.className = 'chip';
     pill.innerHTML = `<i data-lucide="${iconName}" width="13" height="13"></i> ${cat}`;
     // Neutral chip: --n-fill at rest, selection style (--n-accent-soft)
     // when active. No per-category colour.
@@ -344,7 +344,7 @@ function renderCategoryPills(): void {
 function renderBookmarkItems(items: BookmarkWithStats[]): void {
   items.forEach((item) => {
     const row = document.createElement('li');
-    row.className = 'bookmark-item';
+    row.className = 'list-row bookmark-item';
 
     const domain = getDomain(item.url);
     const path = getPath(item.url);
@@ -356,7 +356,7 @@ function renderBookmarkItems(items: BookmarkWithStats[]): void {
     // fallback is attached.
     const faviconHtml = item.faviconUrl ? '<img alt="">' : FaviconTile.html(item.url);
 
-    // Meta line: host (--n-text-2) · path · queue age / visits (reference)
+    // Meta line: host · path · queue age / visits (reference)
     const metaParts: string[] = [`<span class="host">${escapeHtml(domain)}</span>`];
     if (path) {
       metaParts.push('<span class="dot">·</span>');
@@ -375,25 +375,25 @@ function renderBookmarkItems(items: BookmarkWithStats[]): void {
     // Badges cell — category only (dormant badge removed). Neutral badge:
     // identical --n-fill / --n-text-2 styling for every category.
     const categoryIcon = getCategoryIcon(category);
-    const badgesHtml = `<span class="badge-category"><i data-lucide="${categoryIcon}" width="12" height="12"></i> ${category}</span>`;
+    const badgesHtml = `<span class="badge"><i data-lucide="${categoryIcon}" width="12" height="12"></i> ${category}</span>`;
 
     // Move action tooltip + icon depend on which folder the item lives in.
     const moveTitle = item.type === 'queue' ? 'Move to Reference' : 'Move to Queue';
     const moveIcon = item.type === 'queue' ? 'bookmark' : 'book-open';
 
     row.innerHTML = `
-      <span class="bookmark-date">${savedDate}</span>
-      <span class="bk-favicon">${faviconHtml}</span>
-      <div class="bookmark-content">
-        <div class="bookmark-title">${escapeHtml(item.title)}</div>
-        <div class="bookmark-meta">${metaParts.join('')}</div>
+      <span class="list-row-lead">${savedDate}</span>
+      <span class="list-row-well bk-favicon">${faviconHtml}</span>
+      <div class="list-row-content bookmark-content">
+        <div class="list-row-title">${escapeHtml(item.title)}</div>
+        <div class="list-row-meta">${metaParts.join('')}</div>
       </div>
-      <div class="bookmark-badges">${badgesHtml}</div>
-      <div class="bookmark-actions">
-        <button class="action-btn move-btn" title="${moveTitle}" data-action="move">
+      ${badgesHtml}
+      <div class="list-row-actions">
+        <button class="list-row-action" title="${moveTitle}" data-action="move">
           <i data-lucide="${moveIcon}" width="14" height="14"></i>
         </button>
-        <button class="action-btn remove-btn" title="Remove" data-action="remove">
+        <button class="list-row-action" title="Remove" data-action="remove">
           <i data-lucide="x" width="14" height="14"></i>
         </button>
       </div>
@@ -469,10 +469,10 @@ async function showStaleReview(): Promise<void> {
         <div class="stale-review-meta">${escapeHtml(domain)} · ${item.visits} visits · last visited ${daysAgo === Infinity ? 'never' : daysAgo + ' days ago'}</div>
       </div>
       <div class="stale-review-actions">
-        <button class="action-btn" title="Keep" data-action="keep">
+        <button class="list-row-action" title="Keep" data-action="keep">
           <i data-lucide="check" width="12" height="12"></i>
         </button>
-        <button class="action-btn" title="Remove" data-action="remove">
+        <button class="list-row-action" title="Remove" data-action="remove">
           <i data-lucide="x" width="12" height="12"></i>
         </button>
       </div>

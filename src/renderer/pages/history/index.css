@@ -2,216 +2,17 @@
 
 /* ============================================================
    History (DESIGN.md §4.2): the activity map and charts sit in
-   grey panels above the list, which is grouped by day.
+   grey panels above the list, which is grouped by day. The page,
+   toolbar, panels and rows use the shared list-page classes in
+   global.css; only what is History's own is here.
    ============================================================ */
 
-.history-page {
-  min-height: 100vh;
-  background: var(--n-page);
-  color: var(--n-text-2);
-  /* The body's 1.5 would loosen every panel and row; titles, headers and
-     the activity-map labels set their own line heights. */
-  line-height: normal;
-}
-
-/* An 880 px content column (DESIGN.md §4.2): the side padding is added to
-   the max-width so it only shows as a gutter on narrow windows. */
-.history-container {
-  max-width: calc(880px + 2 * var(--spacing-xl));
-  margin: 0 auto;
-  padding: 36px var(--spacing-xl) 56px;
-}
-
-/* ---- Header ---------------------------------------------- */
-.history-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--spacing-xl);
-  flex-wrap: wrap;
-}
-
-.history-title {
-  font-size: 28px;
-  line-height: 34px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--n-text-1);
-  margin: 0;
-}
-
-/* ---- Toolbar (search + segmented + clear) --------------- */
-.history-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 20px 0 16px;
-}
-
-/* Filled search field (DESIGN.md §5.2). The wrapper draws the field ring;
-   the bare input must not add its own halo. */
-.search-container {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 32px;
-  padding: 0 10px;
-  background: var(--n-fill);
-  border-radius: var(--n-r-control);
-  color: var(--n-text-3);
-  transition:
-    background var(--dur-fast),
-    box-shadow var(--dur-fast);
-}
-
-.search-container:focus-within {
-  background: var(--n-card);
-  box-shadow: var(--n-focus-ring-field);
-}
-
-.search-icon {
-  flex: none;
-  width: 15px;
-  height: 15px;
-  color: var(--n-text-3);
-  pointer-events: none;
-}
-
-.search-input {
-  flex: 1;
-  min-width: 0;
-  height: 100%;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  font-family: inherit;
-  font-size: 13px;
-  color: var(--n-text-1);
-  padding: 0;
-}
-
-.search-input:focus-visible {
-  box-shadow: none;
-}
-
-.search-input::placeholder {
-  color: var(--n-text-3);
-}
-
-/* Segmented "All / Week / Today" control */
-.time-range-group {
-  display: inline-flex;
-  flex: none;
-  height: 32px;
-  padding: 2px;
-  box-sizing: border-box;
-  background: var(--n-fill-2);
-  border-radius: var(--n-r-control);
-  gap: 2px;
-}
-
-.time-range-btn {
-  display: inline-flex;
-  align-items: center;
-  border: 0;
-  background: transparent;
-  height: 28px;
-  padding: 0 12px;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--n-text-2);
-  border-radius: var(--n-r-key);
-  cursor: pointer;
-  transition:
-    background var(--dur-fast),
-    color var(--dur-fast);
-}
-
-.time-range-btn.active {
-  background: var(--n-card);
-  color: var(--n-text-1);
-  font-weight: 500;
-  box-shadow: var(--n-thumb-shadow);
-}
-
-/* The thumb's shadow outranks the global :focus-visible ring, so put the
-   keyboard ring back over it on the selected segment. */
-.time-range-btn.active:focus-visible {
-  box-shadow: var(--n-focus-ring), var(--n-thumb-shadow);
-}
-
-/* Clear All History (secondary button look) */
-.btn-clear-all {
-  height: 32px;
-  flex: none;
-  padding: 0 14px;
-  border: 0;
-  background: var(--n-fill);
-  border-radius: var(--n-r-control);
-  color: var(--n-text-1);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: background var(--dur-fast);
-}
-
-.btn-clear-all:hover {
-  background: var(--n-fill-2);
-}
-
-/* Shown and hidden from script with the hidden attribute. */
-.btn-clear-all[hidden],
-.heatmap-tooltip[hidden] {
-  display: none;
-}
-
-/* ---- Panel (shared grey card) --------------------------- */
-.panel {
-  background: var(--n-grouped);
-  border-radius: var(--n-r-panel);
-  padding: 18px 22px 20px;
-}
-
-.panel-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--spacing-md);
-  margin-bottom: 14px;
-}
-
-.panel-title,
-.heatmap-summary {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--n-text-1);
-}
-
-.panel-title {
-  white-space: nowrap;
-}
-
 /* ---- Activity map --------------------------------------- */
+/* 16 px under the toolbar and above the charts; the positioning context
+   for the day tooltip. */
 .panel-heat {
-  margin-bottom: 16px;
-  /* Positioning context for the absolutely-placed tooltip whose
-     coordinates are measured relative to this container. */
   position: relative;
-}
-
-.heatmap-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--spacing-md);
-  margin-bottom: 14px;
+  margin: 16px 0;
 }
 
 /* Drawn at its natural size (11 px cells, 3 px gaps); scrolls sideways only
@@ -441,135 +242,27 @@
   transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ---- History list (date groups + rows) ----------------- */
-/* The first day header sits 28 px below the charts (this margin collapses
-   with the header's own 22 px); later headers sit 22 px below the last row. */
-.history-list {
-  margin-top: 28px;
-}
-
-/* Date group header — "Today · Friday, November 13" */
-.date-group-label {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  margin: 22px 0 4px;
-  padding: 0 12px 8px;
-  border-bottom: 1px solid var(--n-separator);
-  font-size: 13px;
-  line-height: 18px;
-}
-
-.date-group-label .day-label {
-  font-weight: 600;
-  color: var(--n-text-1);
+/* ---- History list (day groups + rows) ------------------ */
+/* Day labels are lower-case data ("today", "monday"). */
+.history-list .list-group-title {
   text-transform: capitalize;
 }
 
-.date-group-label .day-date {
-  color: var(--n-text-3);
-}
-
-/* History row — table-like with a hover-revealed delete.
-   Six columns so the delete button never wraps when a duration
-   pill is present: time | favicon | content | badge | duration | delete. */
+/* time | favicon | title + domain | badge | duration | delete */
 .history-entry {
-  display: grid;
   grid-template-columns: 60px 28px minmax(0, 1fr) auto auto auto;
-  align-items: center;
-  column-gap: 12px;
-  height: 54px;
-  padding: 0 8px 0 12px;
-  border-radius: var(--n-r-control);
-  transition: background var(--dur-fast);
-  cursor: pointer;
 }
 
-.history-entry:hover {
-  background: var(--n-hover);
-}
-
-.entry-time {
-  font-size: 12px;
-  color: var(--n-text-3);
-  font-variant-numeric: tabular-nums;
-}
-
-.entry-favicon {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--n-well);
-  border-radius: var(--n-r-control);
-}
-
-.entry-favicon img,
-.entry-favicon svg {
-  width: 16px;
-  height: 16px;
-  display: block;
-}
-
-.entry-favicon img {
-  border-radius: var(--n-r-control);
-}
-
-/* Title over domain, 2 px apart. Both truncate with an ellipsis. */
-.entry-content {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.entry-title {
-  /* Only as wide as its text (the click target), never wider than the column. */
+/* Only the title opens the page: it is only as wide as its text, never
+   wider than the column. */
+.history-entry .entry-title {
   align-self: flex-start;
   max-width: 100%;
-  font-size: 13px;
-  color: var(--n-text-1);
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   cursor: pointer;
 }
 
-.entry-title:hover {
+.history-entry .entry-title:hover {
   text-decoration: underline;
-}
-
-.entry-domain {
-  font-size: 12px;
-  color: var(--n-text-3);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Category badge — neutral pill, identical for every category */
-.entry-category-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  height: 22px;
-  padding: 0 8px;
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--n-text-2);
-  background: var(--n-fill);
-  border-radius: var(--n-r-badge);
-  white-space: nowrap;
-  text-transform: capitalize;
-}
-
-.entry-category-badge svg {
-  width: 12px;
-  height: 12px;
-  display: block;
-  flex-shrink: 0;
 }
 
 /* Duration pill — active (primary text) | total (muted), split by a
@@ -606,51 +299,7 @@
   background: var(--n-tab-divider);
 }
 
-/* Hover-reveal delete button (also shown while it has keyboard focus) */
-.entry-delete-btn {
-  width: 26px;
-  height: 26px;
-  border-radius: var(--n-r-icon);
-  border: 0;
-  background: transparent;
-  color: var(--n-text-3);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity var(--dur-fast);
-  padding: 0;
-}
-
-.history-entry:hover .entry-delete-btn,
-.entry-delete-btn:focus-visible {
-  opacity: 1;
-}
-
-.entry-delete-btn:hover {
-  background: var(--n-fill);
-  color: var(--n-text-1);
-}
-
-/* ---- Empty + loading + footer --------------------------- */
-.no-history {
-  text-align: center;
-  padding: 48px 0;
-  color: var(--n-text-3);
-  font-size: 12px;
-}
-
-/* createIcons() swaps the <i> for an <svg>, so style the svg. */
-.no-history svg {
-  margin-bottom: 12px;
-  opacity: 0.4;
-}
-
-.no-history p {
-  margin: 0;
-}
-
+/* ---- Loading + footer ---------------------------------- */
 .loading-indicator {
   text-align: center;
   padding: 8px;
@@ -676,11 +325,6 @@
 
 /* Honour reduced motion: no hover/focus fades or bar growth. */
 @media (prefers-reduced-motion: reduce) {
-  .search-container,
-  .time-range-btn,
-  .btn-clear-all,
-  .history-entry,
-  .entry-delete-btn,
   .domain-bar-fill,
   .category-bar-fill {
     transition: none;

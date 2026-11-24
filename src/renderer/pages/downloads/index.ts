@@ -323,7 +323,7 @@ const formatDayLabel = (date: Date): DayLabel => {
 
 const renderDayHeader = (group: DayGroup): HTMLElement => {
   const header = document.createElement('div');
-  header.className = 'date-group-label';
+  header.className = 'list-group-header';
   const fileWord = group.items.length === 1 ? 'file' : 'files';
   const totalBytes = group.items.reduce((a, b) => a + (b.fileSize || 0), 0);
   const sizeStr = totalBytes > 0 ? ` · ${FormatUtils.formatFileSize(totalBytes)}` : '';
@@ -332,11 +332,11 @@ const renderDayHeader = (group: DayGroup): HTMLElement => {
   // date alone as the heading.
   const { relative, absolute } = group.label;
   const labelHtml = relative
-    ? `<span class="day-label">${relative}</span> <span class="day-date">· ${absolute}</span>`
-    : `<span class="day-label">${absolute}</span>`;
+    ? `<span class="list-group-title">${relative}</span> <span class="list-group-date">· ${absolute}</span>`
+    : `<span class="list-group-title">${absolute}</span>`;
   header.innerHTML = `
     ${labelHtml}
-    <span class="day-sub">${group.items.length} ${fileWord}${sizeStr}</span>
+    <span class="list-group-sub">${group.items.length} ${fileWord}${sizeStr}</span>
   `;
   return header;
 };
@@ -357,7 +357,7 @@ const renderTypeFilters = (): void => {
 
   // "All" chip — selection style when active, neutral fill otherwise.
   const allPill = document.createElement('button');
-  allPill.className = 'type-pill';
+  allPill.className = 'chip';
   allPill.dataset.type = 'all';
   allPill.innerHTML = `<i data-lucide="layers" width="13" height="13"></i> All`;
   if (selectedTypeFilter === 'all') {
@@ -372,7 +372,7 @@ const renderTypeFilters = (): void => {
 
   types.forEach((type) => {
     const pill = document.createElement('button');
-    pill.className = 'type-pill';
+    pill.className = 'chip';
     pill.dataset.type = type;
     const iconName = TYPE_ICONS[type] || TYPE_ICONS.other;
     pill.innerHTML = `<i data-lucide="${iconName}" width="13" height="13"></i> ${type}`;
@@ -422,7 +422,7 @@ const applyTypeFilter = (): void => {
     }
   };
   for (const child of children) {
-    if (child.classList.contains('date-group-label')) {
+    if (child.classList.contains('list-group-header')) {
       finalizeHeader();
       currentHeader = child;
       currentHeaderHasVisible = false;
@@ -511,7 +511,7 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
     wrapper.dataset.recordId = item.id;
 
     const downloadItem = document.createElement('div');
-    downloadItem.className = 'download-item';
+    downloadItem.className = 'list-row download-item';
     downloadItem.dataset.fileName = item.fileName;
     downloadItem.dataset.recordId = item.id;
 
@@ -563,30 +563,30 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
       const downloadId = activeInfo.downloadId;
       if (isPaused) {
         actionsHtml = `
-          <button class="action-btn resume-btn" data-download-id="${escapeHtml(downloadId)}" title="Resume">
+          <button class="list-row-action resume-btn" data-download-id="${escapeHtml(downloadId)}" title="Resume">
             <i data-lucide="play" width="14" height="14"></i>
           </button>`;
       } else {
         actionsHtml = `
-          <button class="action-btn pause-btn" data-download-id="${escapeHtml(downloadId)}" title="Pause">
+          <button class="list-row-action pause-btn" data-download-id="${escapeHtml(downloadId)}" title="Pause">
             <i data-lucide="pause" width="14" height="14"></i>
           </button>`;
       }
       actionsHtml += `
-        <button class="action-btn cancel-btn" data-download-id="${escapeHtml(downloadId)}" title="Cancel">
+        <button class="list-row-action cancel-btn" data-download-id="${escapeHtml(downloadId)}" title="Cancel">
           <i data-lucide="x" width="14" height="14"></i>
         </button>`;
     } else if (isPausedFromDb) {
       actionsHtml = `
-        <button class="action-btn resume-db-btn" data-record-id="${item.id}" title="Resume">
+        <button class="list-row-action resume-db-btn" data-record-id="${item.id}" title="Resume">
           <i data-lucide="play" width="14" height="14"></i>
         </button>
-        <button class="action-btn remove-btn delete-button" title="Remove">
+        <button class="list-row-action remove-btn delete-button" title="Remove">
           <i data-lucide="x" width="14" height="14"></i>
         </button>`;
     } else {
       actionsHtml = `
-        <button class="action-btn remove-btn delete-button" title="Remove">
+        <button class="list-row-action remove-btn delete-button" title="Remove">
           <i data-lucide="x" width="14" height="14"></i>
         </button>`;
     }
@@ -616,24 +616,24 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
     }
 
     downloadItem.innerHTML = `
-      <span class="download-time">${formatRowTime(item.createdDate)}</span>
-      <span class="download-type-icon">
+      <span class="list-row-lead">${formatRowTime(item.createdDate)}</span>
+      <span class="list-row-well">
         <i data-lucide="${iconName}" width="16" height="16"></i>
       </span>
-      <div class="download-content">
-        <span class="download-filename" title="${escapeHtml(item.fileName)}">${escapeHtml(item.fileName)}</span>
-        <div class="download-meta">${metaParts.join('')}</div>
+      <div class="list-row-content">
+        <span class="list-row-title" title="${escapeHtml(item.fileName)}">${escapeHtml(item.fileName)}</span>
+        <div class="list-row-meta download-meta">${metaParts.join('')}</div>
       </div>
-      <span class="download-tag">${displayType}</span>
+      <span class="badge">${displayType}</span>
       ${statusHtml}
       <span class="download-size">${sizeText}</span>
-      <div class="download-actions">${actionsHtml}</div>
+      <div class="list-row-actions download-actions">${actionsHtml}</div>
       ${progressHtml}
     `;
 
     // Row click → toggle detail panel (only for completed downloads)
     downloadItem.addEventListener('click', (e) => {
-      if ((e.target as HTMLElement).closest('.action-btn')) return;
+      if ((e.target as HTMLElement).closest('.list-row-action')) return;
       if (activeDownloads.has(item.fileName) || item.status === 'paused') return;
       toggleDetailPanel(item, wrapper, sourceHost);
     });
@@ -725,7 +725,7 @@ const toggleDetailPanel = (
   const iconName = getFileIcon(item.fileExtension);
 
   const panel = document.createElement('div');
-  panel.className = 'detail-panel';
+  panel.className = 'panel detail-panel';
   panel.dataset.fileType = displayType;
 
   panel.innerHTML = `
@@ -851,7 +851,7 @@ const removeProgressBar = (fileName: string): void => {
   const actionsEl = row.querySelector('.download-actions');
   if (actionsEl) {
     actionsEl.innerHTML = `
-      <button class="action-btn remove-btn delete-button" title="Remove">
+      <button class="list-row-action remove-btn delete-button" title="Remove">
         <i data-lucide="x" width="14" height="14"></i>
       </button>`;
     createIcons({ icons });

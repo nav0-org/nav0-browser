@@ -9,30 +9,22 @@
     <title>Browsing History</title>
   </head>
   <body>
-    <div class="history-page">
-      <div class="history-container">
-        <!-- Header -->
-        <div class="history-head">
-          <h1 class="history-title">History</h1>
-        </div>
+    <div class="list-page">
+      <div class="list-column">
+        <h1 class="list-title">History</h1>
 
         <!-- Toolbar: search + time-range + clear -->
-        <div class="history-toolbar">
-          <div class="search-container">
-            <i data-lucide="search" class="search-icon" width="15" height="15"></i>
-            <input
-              type="text"
-              id="search-input"
-              class="search-input"
-              placeholder="Search history…"
-            />
+        <div class="list-toolbar">
+          <label class="search-field">
+            <i data-lucide="search" width="15" height="15"></i>
+            <input type="text" id="search-input" placeholder="Search history…" />
+          </label>
+          <div class="segmented" role="tablist">
+            <button class="segmented-btn time-range-btn active" data-range="all">All</button>
+            <button class="segmented-btn time-range-btn" data-range="week">Week</button>
+            <button class="segmented-btn time-range-btn" data-range="today">Today</button>
           </div>
-          <div class="time-range-group" role="tablist">
-            <button class="time-range-btn active" data-range="all">All</button>
-            <button class="time-range-btn" data-range="week">Week</button>
-            <button class="time-range-btn" data-range="today">Today</button>
-          </div>
-          <button id="delete-all" class="btn-clear-all" hidden>
+          <button id="delete-all" class="btn btn-secondary" hidden>
             <i data-lucide="trash-2" width="14" height="14"></i> Clear All History
           </button>
         </div>
@@ -60,7 +52,7 @@
         <div id="history-list" class="history-list"></div>
 
         <!-- Empty state -->
-        <div id="no-history" class="no-history" hidden>
+        <div id="no-history" class="list-empty" hidden>
           <i data-lucide="clock" width="32" height="32"></i>
           <p>No browsing history found</p>
         </div>

@@ -228,9 +228,10 @@ Unchanged: `--z-dropdown 100`, `--z-sticky 200`, `--z-modal 1000`, `--z-toast 11
 - Canvas `--n-page`. Content column 880 px (new tab, history, bookmarks, downloads) or 680 px (settings, about), centred, 36–40 px top padding, 56 px bottom. The new-tab page is a hero exception: its content is centred lower (≈96 px top) and its search field is a taller filled field (44 px, `--n-r-panel`).
 - Title: Large title (28 / 34, 700). **No masthead rule.**
 - Toolbar under the title: a filled search field (`.search-field`: `--n-fill`, `--n-r-control`, 32 px; white with the field ring while focused), a segmented control (track `--n-fill-2`, the chosen segment a white thumb with `--n-thumb-shadow`), secondary buttons (`--n-fill`), in that order, 12 px apart.
-- **Grey panels** (`--n-grouped`, `--n-r-panel`, 18–22 px padding) for charts, summaries and groups. No borders, no shadows.
+- **Grey panels** (`--n-grouped`, `--n-r-panel`, 20 px padding) for charts, summaries and groups. No borders, no shadows.
 - Lists sit directly on white: rows 54 px, hover `--n-hover` with `--n-r-control`; 28 px icon wells (`--n-r-control`, `--n-well`) holding a 16 px icon or favicon; title 13 px 500; meta 12 px `--n-text-3` (URLs are grey, not link blue); trailing actions appear on hover. Day or group headers are 13 px 600 with the date in `--n-text-3` and a `--n-separator` underneath.
 - Filter chips (`.chip`): 28 px, `--n-r-chip`, `--n-fill` at rest, selection style when chosen, 13 px icons. Badges (`.badge`): 22 px, `--n-r-badge`, `--n-fill`, 12 px icon + 12 px label, `--n-text-2`.
+- History, Bookmarks and Downloads share one layout, built only from the list-page classes in `global.css`: `.list-page` around an 880 px `.list-column`, the `.list-title`, a `.list-toolbar` (`.search-field`, `.segmented`, `.btn-secondary`), a `.chip-row`, `.panel`s, `.list-group-header`s, and `.list-row`s (`.list-row-lead`, `.list-row-well`, `.list-row-content` holding `.list-row-title` and `.list-row-meta`, a `.badge`, `.list-row-actions` of `.list-row-action` buttons). A page's CSS sets only its own grid columns and what no other page has; never copy these into a page.
 - **Built-in pages never load remote resources. Site icons come from the local favicon cache, or the letter tile.** The same goes for the overlay and the chrome: no `img-src` in their CSPs allows `http:` or `https:`.
 
 ### 4.3 Settings (`src/renderer/pages/browser-settings/`)
@@ -268,7 +269,7 @@ Unchanged: `--z-dropdown 100`, `--z-sticky 200`, `--z-modal 1000`, `--z-toast 11
 
 ## 5. Component patterns
 
-Every class named below lives in `global.css` — **reuse it.** Fork a class into page-local CSS only when the design genuinely diverges. The switch, checkbox, radio and segmented control have no shared class yet: build them from the tokens and the exact values given here.
+Every class named below lives in `global.css` — **reuse it.** Fork a class into page-local CSS only when the design genuinely diverges. The switch, checkbox and radio have no shared class yet: build them from the tokens and the exact values given here.
 
 ### 5.1 Buttons (32 px on pages, 26–30 px in panels and dialogs; `--n-r-control`; 13 px 500)
 
@@ -294,10 +295,13 @@ Pair `.btn-icon` with `.btn-ghost` for its hover fill; the container sets the sp
 - **Switch**: 38 × 22, round; on = `--n-accent`; off = `--n-track` with an inset 1 px `--n-control-edge`. A white knob (18 px) 2 px in from the edge, `--n-knob-shadow` when on and `--n-knob-shadow-off` when off. Disabled = the switch at 40 % opacity and its label in `--n-text-4`.
 - **Checkbox** 16 px, `--n-r-key`; **radio** 16 px round. On = `--n-accent` with an `--n-on-accent` mark (an 11 px check, a 6 px dot); off = white with an inset 1 px `--n-control-edge`.
 - **Segmented control**: a 32 px track, `--n-fill-2`, `--n-r-control`, 2 px padding and 2 px between segments. Segments are 28 px, `0 12px`, `--n-r-key`, 13 px `--n-text-2`; the chosen one is a white thumb with `--n-thumb-shadow` and `--n-text-1` 500 text (no colour).
+- The segmented control is `.segmented` holding `.segmented-btn` segments; the chosen one is `.active` (hover turns a segment's text `--n-text-1`), and a segment's count is a `.segmented-count` in `--n-text-3`.
 
 ### 5.3 Panels, rows, chips, badges, keycaps, progress
 
 - Panel (`.card`): `--n-grouped`, `--n-r-panel`, no border, no shadow. Dividers inside it are `--n-panel-line`.
+- Padded panel (`.panel`): the same grey panel with 20 px padding, for charts, summaries and the storage bar. Its header (`.panel-head`, 12 px above the content) holds a 13 px 600 `.panel-title` and, on the right, 12 px `--n-text-3` `.panel-meta`.
+- Chip row (`.chip-row`): a `.chip-row-label` ("Categories", 12 px 600 `--n-text-3`), then the chips in a `.chip-row-chips` box.
 - Filter chip (`.chip`; chosen = `.selected` or `.active`): 28 px, `0 10px`, `--n-r-chip`, `--n-fill` (hover `--n-fill-2`), 13 px `--n-text-1` with a 13 px `--n-text-2` icon 6 px from the label. Chosen = the selection style (`--n-accent-soft`, 500, icon `--n-accent`).
 - Badge (`.badge`): 22 px, `0 8px`, `--n-r-badge`, `--n-fill`, 12 px `--n-text-2`, an optional 12 px icon 5 px from the label. Never a colour per category. `.badge-sm` is the 18 px, `0 7px`, 11 px 600 neutral tag ("Recommended"). A state badge (`.badge-success`, `.badge-warning`, `.badge-danger`) is a 20 px, `0 7px`, 11 px 600 tag in a soft pair (`--n-success` on `--n-success-soft`, and so on), like the Release / Dev build badge on About.
 - Keycaps (`.keycap`): 20 px tall, min-width 20, `0 5px`, `--n-r-key`, `--n-fill-2`, 11 px 500 `--n-text-2` in the system sans stack, one keycap per key, no border, shadow or margin. Put a row of caps in a flex container 4 px apart.
