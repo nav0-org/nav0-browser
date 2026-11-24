@@ -189,6 +189,10 @@ function renderStartupPages() {
 
 // ---- Developer Settings ----
 function initDeveloperSettings() {
+  // Only this platform's shortcut, as the View menu's Toggle Developer Tools has it.
+  const shortcut = document.getElementById('devtools-shortcut');
+  if (shortcut) shortcut.textContent = isMac ? '⌥⌘I' : 'Ctrl+Shift+I';
+
   const toggle = document.getElementById('devtools-toggle') as HTMLInputElement;
   if (!toggle) return;
   toggle.checked = settings.devToolsEnabled || false;
