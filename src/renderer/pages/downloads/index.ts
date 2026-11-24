@@ -625,8 +625,10 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
         <div class="list-row-meta download-meta">${metaParts.join('')}</div>
       </div>
       <span class="badge">${displayType}</span>
-      ${statusHtml}
-      <span class="download-size">${sizeText}</span>
+      <div class="download-state">
+        ${statusHtml}
+        <span class="download-size">${sizeText}</span>
+      </div>
       <div class="list-row-actions download-actions">${actionsHtml}</div>
       ${progressHtml}
     `;

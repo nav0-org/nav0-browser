@@ -248,9 +248,11 @@
   text-transform: capitalize;
 }
 
-/* time | favicon | title + domain | badge | duration | delete */
+/* time | favicon | title + domain | badge | duration | delete. The badge
+   and the duration pill have fixed columns, so neither moves with the
+   other's width. */
 .history-entry {
-  grid-template-columns: 60px 28px minmax(0, 1fr) auto auto auto;
+  grid-template-columns: 60px 28px minmax(0, 1fr) 120px 112px auto;
 }
 
 /* Only the title opens the page: it is only as wide as its text, never
@@ -267,8 +269,9 @@
 
 /* Duration pill — active (primary text) | total (muted), split by a
    12 px --n-tab-divider (DESIGN.md §3.2), which steps up under
-   prefers-contrast like every other hairline. */
+   prefers-contrast like every other hairline. It ends its column. */
 .entry-duration {
+  justify-self: end;
   display: inline-flex;
   align-items: center;
   height: 22px;

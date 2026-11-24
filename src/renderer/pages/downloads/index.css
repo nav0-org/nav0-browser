@@ -143,17 +143,19 @@
 }
 
 /* ---- Download rows -------------------------------------- */
-/* time | icon well | name + meta | badge | [status] | size | actions.
-   The size column is at least 110 px and grows when an active row's
-   "received / total" needs it. The status column exists only while a
-   download is active or paused, so a finished row has no empty column
-   (and gap) before the size. */
+/* time | icon well | name + meta | badge | state | actions. The badge and
+   the state (an active or paused download's status, then the size) have
+   fixed columns, so the badges line up row to row; the state column only
+   grows if a "received / total" outgrows it. */
 .download-item {
-  grid-template-columns: 60px 28px minmax(0, 1fr) auto minmax(110px, auto) 56px;
+  grid-template-columns: 60px 28px minmax(0, 1fr) 120px minmax(150px, auto) 56px;
 }
 
-.download-item:has(> .download-status) {
-  grid-template-columns: 60px 28px minmax(0, 1fr) auto auto minmax(110px, auto) 56px;
+.download-state {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
 }
 
 .download-item.selected {

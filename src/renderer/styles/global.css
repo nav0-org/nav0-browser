@@ -1714,8 +1714,10 @@ select.form-control {
 }
 
 /* Category and file-type ids are lower-case data; a one-word id
-   capitalised is sentence case. */
+   capitalised is sentence case. The badge sits at the start of its fixed
+   120 px column, so badges line up row to row. */
 .list-row .badge {
+  justify-self: start;
   text-transform: capitalize;
 }
 

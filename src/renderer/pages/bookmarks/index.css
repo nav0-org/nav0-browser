@@ -133,10 +133,10 @@
   list-style: none;
 }
 
-/* date | favicon | title + meta | badge | two hover actions (kept as
-   reserved space while hidden) */
+/* date | favicon | title + meta | badge (a fixed column) | two hover
+   actions (kept as reserved space while hidden) */
 .bookmark-item {
-  grid-template-columns: 60px 28px minmax(0, 1fr) auto 54px;
+  grid-template-columns: 60px 28px minmax(0, 1fr) 120px 54px;
 }
 
 /* ---- Footer -------------------------------------------- */
