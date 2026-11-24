@@ -25,6 +25,21 @@ export const getStorageBucket = (displayType: string): string => {
   return STORAGE_BUCKET_MAP[displayType] || 'other';
 };
 
+/** The name the storage legend shows for each bucket. */
+export const STORAGE_BUCKET_LABELS: Record<string, string> = {
+  images: 'Image',
+  media: 'Video & audio',
+  archives: 'Archive',
+  apps: 'Installer',
+  documents: 'Document',
+  other: 'Other',
+};
+
+/** The legend name of a storage bucket. */
+export const getStorageBucketLabel = (bucket: string): string => {
+  return STORAGE_BUCKET_LABELS[bucket] || STORAGE_BUCKET_LABELS.other;
+};
+
 /** Maps file extensions to a human-friendly display type. */
 export const EXTENSION_TYPE_MAP: Record<string, string> = {
   // Documents

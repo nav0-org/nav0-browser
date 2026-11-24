@@ -6,6 +6,7 @@ import { FormatUtils } from '../../../renderer/common/format-utils';
 import { DownloadRecord } from '../../../types/download-record';
 import {
   getStorageBucket,
+  getStorageBucketLabel,
   getDisplayTypeFromExtension,
   getFileIcon,
 } from '../../../renderer/common/file-type-utils';
@@ -442,23 +443,26 @@ const applyTypeFilter = (): void => {
 // ---------------------------------------------------------------------------
 
 const updateStorageGauge = (): void => {
-  const byType: Record<string, number> = {};
+  // The bar and legend show the six storage groups (video and audio
+  // together, spreadsheets with documents, code with other), one hue each;
+  // the filter chips keep the finer file types.
+  const byGroup: Record<string, number> = {};
   allLoadedItems.forEach((d) => {
-    const displayType = getDisplayType(d);
-    byType[displayType] = (byType[displayType] || 0) + d.fileSize;
+    const group = getStorageBucket(getDisplayType(d));
+    byGroup[group] = (byGroup[group] || 0) + d.fileSize;
   });
 
-  const total = Object.values(byType).reduce((a, b) => a + b, 0);
-  const sortedTypes = Object.entries(byType).sort((a, b) => b[1] - a[1]);
+  const total = Object.values(byGroup).reduce((a, b) => a + b, 0);
+  const sortedGroups = Object.entries(byGroup).sort((a, b) => b[1] - a[1]);
   const pausedCount = allLoadedItems.filter(
     (d) => d.status === 'paused' || activeDownloads.get(d.fileName)?.state === 'paused'
   ).length;
   const fileWord = allLoadedItems.length === 1 ? 'file' : 'files';
 
-  // Each file type is coloured by its storage-bucket hue (a .storage-hue-*
-  // class). The six hues are the only colour on this page, and only on the
-  // bar + legend (DESIGN.md §3.4).
-  const hueClass = (type: string): string => `storage-hue-${getStorageBucket(type)}`;
+  // Each group is drawn in its storage hue (a .storage-hue-* class). The six
+  // hues are the only colour on this page, and only on the bar + legend
+  // (DESIGN.md §3.4).
+  const hueClass = (group: string): string => `storage-hue-${group}`;
 
   // Panel header meta — "3.5 GB used · 22 files · 1 paused".
   const totalStr = FormatUtils.formatFileSize(total) || '0 B';
@@ -471,25 +475,25 @@ const updateStorageGauge = (): void => {
   }
   storageMeta.innerHTML = metaParts.join('');
 
-  // Bar segments — one per type, coloured by its storage hue. The width is
-  // the type's share of the total.
+  // Bar segments — one per group, in its storage hue. The width is the
+  // group's share of the total.
   storageBar.innerHTML = '';
-  sortedTypes.forEach(([type, size]) => {
+  sortedGroups.forEach(([group, size]) => {
     const segment = document.createElement('div');
-    segment.className = `storage-bar-segment ${hueClass(type)}`;
+    segment.className = `storage-bar-segment ${hueClass(group)}`;
     segment.style.width = total > 0 ? `${(size / total) * 100}%` : '0%';
     storageBar.appendChild(segment);
   });
 
-  // Legend — hue swatch + type label + size.
+  // Legend — hue swatch + group name + size.
   storageLegend.innerHTML = '';
-  sortedTypes.forEach(([type, size]) => {
+  sortedGroups.forEach(([group, size]) => {
     const item = document.createElement('div');
     item.className = 'storage-legend-item';
     item.innerHTML = `
-      <div class="storage-legend-dot ${hueClass(type)}"></div>
+      <div class="storage-legend-dot ${hueClass(group)}"></div>
       <span class="storage-legend-text">
-        <strong>${type}</strong>
+        <strong>${escapeHtml(getStorageBucketLabel(group))}</strong>
         <span class="size">${FormatUtils.formatFileSize(size)}</span>
       </span>
     `;

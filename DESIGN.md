@@ -114,6 +114,8 @@ The `--nav0-red-*`, `--nav0-blue-*` and `--nav0-slate-*` ramps stay in `global.c
 | `--n-data-0` … `--n-data-4`                    | `#e2e5e9` `#a4afbf` `#8693a6` `#6a788e` `#4f5f76`                                                                                                                                               | Activity map steps; bars use step 2 and always show their value                |
 | `--n-storage-*` (storage bar only, this order) | `--n-storage-images` `#5b9a5f`, `--n-storage-media` `#8a6bbf`, `--n-storage-archives` `#b98a35`, `--n-storage-apps` `#547ebe`, `--n-storage-documents` `#c0744d`, `--n-storage-other` `#8e8e93` | Parts of a whole, always with a legend                                         |
 
+The storage bar and its legend show six groups, one hue each, named in the legend: Image, Video & audio, Archive, Installer, Document (with spreadsheets, presentations and ebooks) and Other (with code and fonts). The Downloads filter chips keep the finer file types.
+
 When the OS asks for more contrast (`prefers-contrast: more`), every separator and hairline (`--n-separator`, `--n-chrome-line`, `--n-menu-line`, `--n-panel-line`, `--n-tab-divider`, `--n-private-line`) steps up to `#8e8e93`, control edges (`--n-control-edge`) to `#6e6e73`, and tertiary text becomes secondary. The 0.5 px edges inside the shadow tokens (§3.8) don't change.
 
 ### 3.5 Radii

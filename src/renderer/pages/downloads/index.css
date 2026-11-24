@@ -134,7 +134,6 @@
 .storage-legend-text strong {
   color: var(--n-text-1);
   font-weight: 400;
-  text-transform: capitalize;
 }
 
 .storage-legend-text .size {
