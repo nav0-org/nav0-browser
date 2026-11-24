@@ -567,7 +567,6 @@ const FILE_ICON_MAP: Record<string, string> = {
   bz2: 'file-archive',
   xz: 'file-archive',
   zst: 'file-archive',
-  iso: 'file-archive',
   lz: 'file-archive',
   lzma: 'file-archive',
   lz4: 'file-archive',
@@ -584,7 +583,9 @@ const FILE_ICON_MAP: Record<string, string> = {
   ear: 'file-archive',
   cpio: 'file-archive',
 
-  // Disk images
+  // Disk images. An .iso is an installer (its display type), so it takes
+  // the installer's package icon, never the archive one.
+  iso: 'package',
   img: 'disc',
   dmg: 'disc',
   vhd: 'disc',

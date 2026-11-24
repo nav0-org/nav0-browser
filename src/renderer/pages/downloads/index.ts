@@ -19,7 +19,8 @@ createIcons({ icons });
 const PAGE_SIZE = 50;
 
 // Lucide icon name per display type — used in the toolbar type-filter pills
-// (replaces the count badge so the pills read at a glance without numbers).
+// (replaces the count badge so the pills read at a glance without numbers)
+// and in each row's type badge (badges are always icon + label).
 const TYPE_ICONS: Record<string, string> = {
   document: 'file-text',
   spreadsheet: 'file-spreadsheet',
@@ -628,7 +629,7 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
         <span class="list-row-title" title="${escapeHtml(item.fileName)}">${escapeHtml(item.fileName)}</span>
         <div class="list-row-meta download-meta">${metaParts.join('')}</div>
       </div>
-      <span class="badge">${displayType}</span>
+      <span class="badge"><i data-lucide="${TYPE_ICONS[displayType] || TYPE_ICONS.other}" width="12" height="12"></i>${displayType}</span>
       <div class="download-state">
         ${statusHtml}
         <span class="download-size">${sizeText}</span>
@@ -762,7 +763,7 @@ const toggleDetailPanel = (
         </div>
         <div class="detail-field full-width">
           <span class="detail-field-label">Path</span>
-          <span class="detail-field-value">${escapeHtml(item.fileLocation)}</span>
+          <span class="detail-field-value detail-path">${escapeHtml(item.fileLocation)}</span>
         </div>
       </div>
       <div class="detail-actions">

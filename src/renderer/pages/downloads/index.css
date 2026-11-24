@@ -164,16 +164,20 @@
 /* "host · path": the path truncates, the host never does. */
 .download-meta {
   display: flex;
+  align-items: baseline;
 }
 
 .download-meta .from {
   flex-shrink: 0;
 }
 
+/* File paths are code (DESIGN.md §3.7): mono, 11.5 px in the tight row. */
 .download-meta .path {
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 11.5px;
 }
 
 /* Status — accent while downloading, grey when paused. */
@@ -317,6 +321,13 @@
   line-height: 18px;
   color: var(--n-text-1);
   overflow-wrap: anywhere;
+}
+
+/* The file path is code: mono 12 / 16 (DESIGN.md §3.7). */
+.detail-path {
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 16px;
 }
 
 .detail-actions {
