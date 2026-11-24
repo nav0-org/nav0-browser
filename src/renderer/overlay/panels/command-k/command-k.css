@@ -198,8 +198,8 @@
   flex-shrink: 0;
 }
 
-/* 28 px favicon well; holds a 16 px favicon, or the site's first letter when
-   there is none. */
+/* 28 px favicon well; holds a 16 px favicon, or the favicon fallback tile
+   (global.css) when there is none. */
 #overlay-command-k .result-favicon {
   width: 28px;
   height: 28px;
@@ -208,10 +208,7 @@
   justify-content: center;
   border-radius: var(--n-r-control);
   background-color: var(--n-fill);
-  color: var(--n-text-2);
   flex-shrink: 0;
-  font-size: var(--font-lg);
-  font-weight: 700;
 }
 
 #overlay-command-k .result-favicon img {

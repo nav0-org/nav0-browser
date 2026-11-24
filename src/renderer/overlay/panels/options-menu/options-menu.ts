@@ -1,6 +1,7 @@
 import './options-menu.css';
 import { InAppUrls } from '../../../../constants/app-constants';
 import { UrlDisplay } from '../../../common/url-display';
+import { FaviconTile } from '../../../common/favicon-tile';
 
 let containerEl: HTMLElement;
 let optionsElement: HTMLElement | null = null;
@@ -331,15 +332,10 @@ async function populateHistorySubmenu(): Promise<void> {
         const item = document.createElement('div');
         item.className = 'closed-tab-item';
 
-        if (tab.faviconUrl) {
-          const favicon = document.createElement('img');
-          favicon.className = 'closed-tab-favicon';
-          favicon.src = tab.faviconUrl;
-          favicon.onerror = () => {
-            favicon.hidden = true;
-          };
-          item.appendChild(favicon);
-        }
+        // The site's icon, or the favicon fallback tile.
+        const favicon = FaviconTile.icon(tab.faviconUrl, tab.url || '');
+        if (tab.faviconUrl) favicon.classList.add('closed-tab-favicon');
+        item.appendChild(favicon);
 
         const title = document.createElement('span');
         title.className = 'closed-tab-title';

@@ -1,5 +1,6 @@
 import { HtmlUtils } from '../../../renderer/common/html-utils';
 import { FormatUtils } from '../../../renderer/common/format-utils';
+import { FaviconTile } from '../../../renderer/common/favicon-tile';
 import {
   BrowsingHistoryRecord,
   BrowsingHistorySummary,
@@ -41,45 +42,13 @@ const CATEGORY_ICONS: Record<string, string> = {
   other: 'globe',
 };
 
-// createIcons() re-renders every icon on the page, so batch the calls that
-// favicon fallbacks trigger into one per frame.
-let iconRefreshQueued = false;
-function queueIconRefresh(): void {
-  if (iconRefreshQueued) return;
-  iconRefreshQueued = true;
-  requestAnimationFrame(() => {
-    iconRefreshQueued = false;
-    createIcons({ icons });
-  });
-}
-
-// A site without an icon in the favicon cache shows the Lucide globe. The page
-// CSP has no 'unsafe-inline', so an inline onerror="…" never runs and an icon
-// that fails to load showed the broken-image glyph: wire the same fallback from
-// script instead.
-function faviconHtml(
-  faviconUrl: string | null | undefined,
-  imageSize: number,
-  globeSize: number
-): string {
+// A site without an icon in the favicon cache shows the favicon fallback tile,
+// as does an icon that fails to load (FaviconTile.attachFallback: the page CSP
+// blocks inline onerror handlers).
+function faviconHtml(faviconUrl: string | null | undefined, site: string, size: number): string {
   return faviconUrl
-    ? `<img src="${escapeHtml(faviconUrl)}" width="${imageSize}" height="${imageSize}" alt="">`
-    : `<i data-lucide="globe" width="${globeSize}" height="${globeSize}"></i>`;
-}
-
-function attachFaviconFallbacks(root: ParentNode, selector: string, iconSize: number): void {
-  root.querySelectorAll<HTMLImageElement>(selector).forEach((img) => {
-    img.addEventListener(
-      'error',
-      () => {
-        const wrap = img.parentElement;
-        if (!wrap) return;
-        wrap.innerHTML = `<i data-lucide="globe" width="${iconSize}" height="${iconSize}"></i>`;
-        queueIconRefresh();
-      },
-      { once: true }
-    );
-  });
+    ? `<img src="${escapeHtml(faviconUrl)}" width="${size}" height="${size}" alt="">`
+    : FaviconTile.html(site);
 }
 
 // --- State ---
@@ -312,7 +281,7 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
 
   row.innerHTML = `
     <span class="entry-time">${time}</span>
-    <div class="entry-favicon">${faviconHtml(entry.faviconUrl, 18, 18)}</div>
+    <div class="entry-favicon">${faviconHtml(entry.faviconUrl, entry.url, 18)}</div>
     <div class="entry-content">
       <span class="entry-title" title="${escapeHtml(entry.title)}">${escapeHtml(entry.title)}</span>
       <span class="entry-domain">${escapeHtml(entry.topLevelDomain)}</span>
@@ -321,7 +290,7 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
     ${durationHtml}
     <button class="entry-delete-btn" title="Remove"><i data-lucide="x" width="14" height="14"></i></button>
   `;
-  attachFaviconFallbacks(row, '.entry-favicon img', 18);
+  FaviconTile.attachFallback(row.querySelector('.entry-favicon img'), entry.url);
 
   row.querySelector('.entry-title')?.addEventListener('click', () => {
     window.BrowserAPI.createTab(window.BrowserAPI.appWindowId, entry.url, true);
@@ -509,7 +478,7 @@ function renderDomainChart(summary: BrowsingHistorySummary): void {
       const valLabel = useTime ? FormatUtils.formatDuration(d.activeDuration) : `${d.visits}`;
       return `
     <div class="domain-row">
-      <span class="domain-favicon">${faviconHtml(d.faviconUrl, 16, 14)}</span>
+      <span class="domain-favicon">${faviconHtml(d.faviconUrl, d.domain, 16)}</span>
       <span class="domain-name">${escapeHtml(d.domain)}</span>
       <span class="domain-duration">${valLabel}</span>
       <div class="domain-bar-track">
@@ -518,7 +487,9 @@ function renderDomainChart(summary: BrowsingHistorySummary): void {
     </div>`;
     })
     .join('');
-  attachFaviconFallbacks(domainChartContainer, '.domain-favicon img', 14);
+  domainChartContainer.querySelectorAll('.domain-row').forEach((row, i) => {
+    FaviconTile.attachFallback(row.querySelector('.domain-favicon img'), sites[i].domain);
+  });
   createIcons({ icons });
 }
 

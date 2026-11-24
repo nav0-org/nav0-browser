@@ -1,12 +1,7 @@
 import { createIcons, icons } from 'lucide';
 import TabTemplate from './tab.html';
 import { ImageBase64Strings, InAppUrls } from '../../constants/app-constants';
-
-// A tab with no favicon (or one that fails to load) keeps an empty 16 px slot:
-// never a broken-image glyph or a placeholder box. A 1 × 1 transparent GIF
-// fills the <img> so it stays blank.
-const EMPTY_FAVICON =
-  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+import { FaviconTile } from '../common/favicon-tile';
 
 // Built-in pages (nav0://…, and the New Tab page, whose URL is '') show the
 // Nav0 compass: they never report a favicon of their own.
@@ -18,6 +13,9 @@ export class Tab {
   public title: string;
   public faviconUrl: string | null = null;
   private tabElement: HTMLElement | null = null;
+  // A tab with no favicon, or one that fails to load, shows the favicon
+  // fallback tile (DESIGN.md §5.3): never a broken-image glyph or a blank slot.
+  private showFaviconTile = true;
   public canGoBack = false;
   public canGoForward = false;
   public isLoading = false;
@@ -82,13 +80,11 @@ export class Tab {
       window.BrowserAPI.showTabContextMenu(appWindowId, this.id, this.isPinned);
     });
 
-    // Set default favicon so the <img> never shows a broken image icon
-    const faviconElement = this.tabElement.querySelector('.tab-favicon') as HTMLImageElement;
-    if (faviconElement) {
-      faviconElement.src = EMPTY_FAVICON;
-    }
+    // The tile until the tab has a favicon to show.
     if (isBuiltInUrl(this.url)) {
       this.updateTabFavicon(ImageBase64Strings.FAVICON);
+    } else {
+      this.setFaviconSource(null);
     }
 
     setTimeout(() => {
@@ -130,9 +126,11 @@ export class Tab {
       // own favicon, so a site without one isn't shown (or bookmarked) with it.
       this.clearFavicon();
     }
+    // The tile's letter follows the page's host.
+    this.syncFaviconSlot();
   }
 
-  // Back to the empty slot, with no favicon to bookmark: for a page that hasn't
+  // Back to the tile, with no favicon to bookmark: for a page that hasn't
   // reported one yet, or an error page, which never does. A built-in page
   // keeps the compass.
   clearFavicon(): void {
@@ -141,18 +139,17 @@ export class Tab {
       return;
     }
     this.faviconUrl = null;
-    this.setFaviconSource(EMPTY_FAVICON);
+    this.setFaviconSource(null);
   }
 
   setLoading(isLoading: boolean): void {
     this.isLoading = isLoading;
     if (this.tabElement) {
-      const faviconElement = this.tabElement.querySelector('.tab-favicon') as HTMLElement;
       const loaderElement = this.tabElement.querySelector('.tab-loader') as HTMLElement;
-      if (faviconElement && loaderElement) {
-        faviconElement.hidden = isLoading;
+      if (loaderElement) {
         loaderElement.hidden = !isLoading;
       }
+      this.syncFaviconSlot();
     }
   }
 
@@ -167,16 +164,39 @@ export class Tab {
     this.setFaviconSource(this.faviconUrl);
   }
 
-  private setFaviconSource(source: string): void {
-    if (this.tabElement) {
-      const faviconElement = this.tabElement.querySelector('.tab-favicon') as HTMLImageElement;
-      if (faviconElement) {
-        faviconElement.onerror = () => {
-          faviconElement.onerror = null;
-          faviconElement.src = EMPTY_FAVICON;
-        };
-        faviconElement.src = source;
-      }
+  // The favicon takes the tile's place once it has loaded; with none, or if it
+  // fails to load, the tile shows.
+  private setFaviconSource(source: string | null): void {
+    const faviconElement = this.tabElement?.querySelector('.tab-favicon') as HTMLImageElement;
+    if (!faviconElement) return;
+    if (source) {
+      faviconElement.onload = () => {
+        this.showFaviconTile = false;
+        this.syncFaviconSlot();
+      };
+      faviconElement.onerror = () => {
+        this.showFaviconTile = true;
+        this.syncFaviconSlot();
+      };
+      faviconElement.src = source;
+    } else {
+      faviconElement.onload = null;
+      faviconElement.onerror = null;
+      faviconElement.removeAttribute('src');
+      this.showFaviconTile = true;
+    }
+    this.syncFaviconSlot();
+  }
+
+  // Shows the favicon or the tile, and neither while the loader spins.
+  private syncFaviconSlot(): void {
+    if (!this.tabElement) return;
+    const faviconElement = this.tabElement.querySelector('.tab-favicon') as HTMLElement;
+    const tile = this.tabElement.querySelector('.tab-favicon-tile') as HTMLElement;
+    if (faviconElement) faviconElement.hidden = this.isLoading || this.showFaviconTile;
+    if (tile) {
+      tile.textContent = FaviconTile.letter(this.url);
+      tile.hidden = this.isLoading || !this.showFaviconTile;
     }
   }
 

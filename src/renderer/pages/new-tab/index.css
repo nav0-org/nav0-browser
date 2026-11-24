@@ -309,12 +309,18 @@ body {
   overflow: hidden;
 }
 
-/* The globe fallback (a Lucide icon) keeps its own 18 px size. */
 .tile-icon img {
   width: 28px;
   height: 28px;
   display: block;
   border-radius: var(--n-r-control);
+}
+
+/* The favicon fallback tile takes the icon's 28 px slot. */
+.tile-icon .favicon-tile {
+  width: 28px;
+  height: 28px;
+  font-size: var(--font-xl);
 }
 
 .tile-text {

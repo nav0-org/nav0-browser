@@ -1,4 +1,5 @@
 import { HtmlUtils } from '../../../renderer/common/html-utils';
+import { FaviconTile } from '../../../renderer/common/favicon-tile';
 import { BookmarkWithStats } from '../../../types/bookmark-record';
 import { WEBSITE_CATEGORY_MAP } from '../../../constants/data-constants';
 import './index.css';
@@ -103,33 +104,13 @@ function escapeHtml(str: string): string {
 
 // --- Favicons ---
 
-// createIcons() re-renders every icon on the page, so batch the calls that
-// favicon fallbacks need into one per frame.
-let iconRefreshQueued = false;
-function refreshIconsSoon(): void {
-  if (iconRefreshQueued) return;
-  iconRefreshQueued = true;
-  requestAnimationFrame(() => {
-    iconRefreshQueued = false;
-    createIcons({ icons });
-  });
-}
-
 // The page CSP has no 'unsafe-inline', so an inline onerror="…" never runs
 // and a favicon that fails to load leaves a broken-image glyph. Attach the
-// fallback (the globe icon) from script before the image starts loading.
-function loadFavicon(img: HTMLImageElement | null, url: string, fallbackSize: number): void {
+// fallback (the favicon fallback tile) from script before the image starts
+// loading.
+function loadFavicon(img: HTMLImageElement | null, url: string, siteUrl: string): void {
   if (!img) return;
-  img.addEventListener(
-    'error',
-    () => {
-      const well = img.parentElement;
-      if (!well) return;
-      well.innerHTML = `<i data-lucide="globe" width="${fallbackSize}" height="${fallbackSize}"></i>`;
-      refreshIconsSoon();
-    },
-    { once: true }
-  );
+  FaviconTile.attachFallback(img, siteUrl);
   img.src = url;
 }
 
@@ -370,11 +351,10 @@ function renderBookmarkItems(items: BookmarkWithStats[]): void {
     const category = getCategoryForUrl(item.url);
     const savedDate = formatSavedDate(item.createdDate as unknown as string);
 
-    // Favicon (16 px inside a 28 px well via CSS). The image source is set by
-    // loadFavicon() below, after its globe fallback is attached.
-    const faviconHtml = item.faviconUrl
-      ? '<img alt="">'
-      : `<i data-lucide="globe" width="14" height="14"></i>`;
+    // Favicon (16 px inside a 28 px well via CSS), or the favicon fallback
+    // tile. The image source is set by loadFavicon() below, after its
+    // fallback is attached.
+    const faviconHtml = item.faviconUrl ? '<img alt="">' : FaviconTile.html(item.url);
 
     // Meta line: host (--n-text-2) · path · queue age / visits (reference)
     const metaParts: string[] = [`<span class="host">${escapeHtml(domain)}</span>`];
@@ -420,7 +400,11 @@ function renderBookmarkItems(items: BookmarkWithStats[]): void {
     `;
 
     if (item.faviconUrl) {
-      loadFavicon(row.querySelector<HTMLImageElement>('.bk-favicon img'), item.faviconUrl, 14);
+      loadFavicon(
+        row.querySelector<HTMLImageElement>('.bk-favicon img'),
+        item.faviconUrl,
+        item.url
+      );
     }
 
     // Click content → open
@@ -478,7 +462,7 @@ async function showStaleReview(): Promise<void> {
     el.className = 'stale-review-item';
     el.innerHTML = `
       <div class="bk-favicon">
-        ${item.faviconUrl ? '<img alt="">' : '<i data-lucide="globe" width="16" height="16"></i>'}
+        ${item.faviconUrl ? '<img alt="">' : FaviconTile.html(item.url)}
       </div>
       <div class="stale-review-content">
         <div class="stale-review-title">${escapeHtml(item.title)}</div>
@@ -494,10 +478,9 @@ async function showStaleReview(): Promise<void> {
       </div>
     `;
 
-    // Same globe as the no-favicon case, drawn with Lucide rather than the
-    // emoji the dead inline onerror used to insert.
+    // Same tile as the no-favicon case if the icon fails to load.
     if (item.faviconUrl) {
-      loadFavicon(el.querySelector<HTMLImageElement>('.bk-favicon img'), item.faviconUrl, 16);
+      loadFavicon(el.querySelector<HTMLImageElement>('.bk-favicon img'), item.faviconUrl, item.url);
     }
 
     el.querySelector('[data-action="keep"]')?.addEventListener('click', () => {

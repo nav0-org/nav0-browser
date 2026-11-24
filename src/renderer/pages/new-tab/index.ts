@@ -2,6 +2,7 @@ import './index.css';
 
 import { createIcons, icons } from 'lucide';
 import { UrlDisplay } from '../../common/url-display';
+import { FaviconTile } from '../../common/favicon-tile';
 createIcons({ icons });
 
 const GREETINGS_BY_HOUR: { range: [number, number]; phrases: string[] }[] = [
@@ -168,32 +169,15 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function faviconLetter(url: string): string {
-  try {
-    return new URL(url).hostname.replace('www.', '').charAt(0).toUpperCase();
-  } catch {
-    return (url || '?').charAt(0).toUpperCase();
-  }
-}
-
 function buildResultIconHtml(item: SearchResultItem): string {
-  const fallback = faviconLetter(item.url);
   if (item.type === 'search') {
     return `<div class="search-result-icon"><i data-lucide="search" width="16" height="16"></i></div>`;
   }
   if (item.type === 'download') {
     return `<div class="search-result-icon"><i data-lucide="download" width="16" height="16"></i></div>`;
   }
-  if (item.faviconUrl) {
-    // The letter fallback for a favicon that fails to load is attached in
-    // buildResultRow(): the page CSP blocks inline onerror handlers.
-    const safeFavicon = escapeAttr(item.faviconUrl);
-    return `<div class="search-result-favicon"><img src="${safeFavicon}" alt=""></div>`;
-  }
-  if (item.type === 'tab') {
-    return `<div class="search-result-icon"><i data-lucide="app-window" width="16" height="16"></i></div>`;
-  }
-  return `<div class="search-result-favicon">${fallback}</div>`;
+  // Filled in buildResultRow(): the site's icon, or the favicon fallback tile.
+  return `<div class="search-result-favicon"></div>`;
 }
 
 function buildResultRow(item: SearchResultItem, index: number): HTMLElement {
@@ -220,14 +204,9 @@ function buildResultRow(item: SearchResultItem, index: number): HTMLElement {
     </div>
   `;
 
-  const favicon = row.querySelector<HTMLImageElement>('.search-result-favicon img');
-  favicon?.addEventListener(
-    'error',
-    () => {
-      if (favicon.parentElement) favicon.parentElement.textContent = faviconLetter(item.url);
-    },
-    { once: true }
-  );
+  row
+    .querySelector('.search-result-favicon')
+    ?.appendChild(FaviconTile.icon(item.faviconUrl, item.url));
 
   row.addEventListener('click', () => openSearchResult(item));
   return row;
@@ -528,16 +507,12 @@ function renderTile(item: {
   const domain = deriveDomain(item.url);
   const title = deriveTitle(item.title, item.url);
   const safeUrl = escapeAttr(item.url);
-  // The site's icon from the favicon cache, or the globe.
+  // The site's icon from the favicon cache, or the favicon fallback tile.
   const safeFavicon = escapeAttr(item.faviconUrl || '');
   return `
     <a class="tile" href="${safeUrl}" data-url="${safeUrl}" title="${escapeAttr(title)}">
       <span class="tile-icon">
-        ${
-          safeFavicon
-            ? `<img src="${safeFavicon}" alt="">`
-            : `<i data-lucide="globe" width="18" height="18"></i>`
-        }
+        ${safeFavicon ? `<img src="${safeFavicon}" alt="">` : FaviconTile.html(item.url)}
       </span>
       <span class="tile-text">
         <span class="tile-title">${escapeText(title)}</span>
@@ -547,20 +522,10 @@ function renderTile(item: {
   `;
 }
 
-// A favicon that fails to load falls back to the globe icon. Wired here
-// because the page CSP blocks inline onerror handlers.
+// A favicon that fails to load falls back to the favicon fallback tile.
 function attachTileFaviconFallbacks(row: HTMLElement): void {
   row.querySelectorAll<HTMLImageElement>('.tile-icon img').forEach((img) => {
-    img.addEventListener(
-      'error',
-      () => {
-        const well = img.parentElement;
-        if (!well) return;
-        well.innerHTML = '<i data-lucide="globe" width="18" height="18"></i>';
-        createIcons({ icons });
-      },
-      { once: true }
-    );
+    FaviconTile.attachFallback(img, img.closest<HTMLElement>('.tile')?.dataset.url || '');
   });
 }
 

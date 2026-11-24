@@ -1,6 +1,7 @@
 import './command-k.css';
 import { createIcons, icons } from 'lucide';
 import { UrlDisplay } from '../../../common/url-display';
+import { FaviconTile } from '../../../common/favicon-tile';
 
 type ResultItem = {
   type: 'tab' | 'bookmark' | 'history' | 'download' | 'search';
@@ -86,15 +87,6 @@ const escapeHtml = (str: string): string => {
 const prefersReducedMotion = (): boolean =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-const getFaviconLetter = (url: string): string => {
-  try {
-    const hostname = new URL(url).hostname;
-    return hostname.replace('www.', '').charAt(0).toUpperCase();
-  } catch {
-    return url.charAt(0).toUpperCase();
-  }
-};
-
 const createResultItemElement = (item: ResultItem, index: number): HTMLElement => {
   const el = document.createElement('div');
   el.className = `result-item${index === activeIndex ? ' active' : ''}${item.type === 'search' ? ' search-engine-item' : ''}`;
@@ -105,16 +97,9 @@ const createResultItemElement = (item: ResultItem, index: number): HTMLElement =
     iconHtml = `<div class="result-icon"><i data-lucide="search" width="16" height="16"></i></div>`;
   } else if (item.type === 'download') {
     iconHtml = `<div class="result-icon"><i data-lucide="download" width="16" height="16"></i></div>`;
-  } else if (item.type === 'tab') {
-    if (item.faviconUrl) {
-      iconHtml = `<div class="result-favicon"><img src="${escapeHtml(item.faviconUrl)}" alt=""></div>`;
-    } else {
-      iconHtml = `<div class="result-icon"><i data-lucide="app-window" width="16" height="16"></i></div>`;
-    }
-  } else if (item.faviconUrl) {
-    iconHtml = `<div class="result-favicon"><img src="${escapeHtml(item.faviconUrl)}" alt=""></div>`;
   } else {
-    iconHtml = `<div class="result-favicon">${getFaviconLetter(item.url)}</div>`;
+    // Filled below: the site's icon, or the favicon fallback tile.
+    iconHtml = `<div class="result-favicon"></div>`;
   }
 
   let metaHtml = '';
@@ -142,15 +127,7 @@ const createResultItemElement = (item: ResultItem, index: number): HTMLElement =
     </div>
   `;
 
-  // Favicon fallback: swap a favicon that fails to load for the site's first
-  // letter. Wired here because the page CSP blocks inline onerror handlers.
-  const faviconImg = el.querySelector<HTMLImageElement>('.result-favicon img');
-  if (faviconImg) {
-    const letter = getFaviconLetter(item.url);
-    faviconImg.addEventListener('error', () => {
-      if (faviconImg.parentElement) faviconImg.parentElement.textContent = letter;
-    });
-  }
+  el.querySelector('.result-favicon')?.appendChild(FaviconTile.icon(item.faviconUrl, item.url));
 
   el.addEventListener('click', () => {
     openResult(item);

@@ -11,6 +11,7 @@ import {
   FilterListConfig,
   KeyboardShortcutAction,
 } from '../../../types/settings-types';
+import { FaviconTile } from '../../common/favicon-tile';
 
 // ---- Globals ----
 let settings: BrowserSettings = { ...DEFAULT_BROWSER_SETTINGS };
@@ -1279,10 +1280,9 @@ function renderPermissions(permissions: PermissionRecord[], isFiltered = false) 
     const header = document.createElement('div');
     header.className = 'permission-origin-header';
     const favicon = perms[0].faviconUrl;
-    const globeIconHtml = `<i data-lucide="globe" class="permission-origin-favicon" width="16" height="16"></i>`;
     const faviconHtml = favicon
       ? `<img class="permission-origin-favicon" src="${escapeHtml(favicon)}" alt="">`
-      : globeIconHtml;
+      : FaviconTile.html(origin);
     header.innerHTML = `
       <span class="permission-origin-title">
         ${faviconHtml}
@@ -1292,19 +1292,8 @@ function renderPermissions(permissions: PermissionRecord[], isFiltered = false) 
         <button class="btn btn-sm btn-raised permission-remove-all-btn"><i data-lucide="trash-2" width="14" height="14"></i> Remove All</button>
       </span>
     `;
-    // A favicon that fails to load falls back to the globe icon. The page CSP
-    // blocks inline handlers (no 'unsafe-inline'), so wire it up here.
-    const faviconImg = header.querySelector('img.permission-origin-favicon');
-    if (faviconImg) {
-      faviconImg.addEventListener(
-        'error',
-        () => {
-          faviconImg.outerHTML = globeIconHtml;
-          createIcons({ icons });
-        },
-        { once: true }
-      );
-    }
+    // A favicon that fails to load falls back to the favicon fallback tile.
+    FaviconTile.attachFallback(header.querySelector('img.permission-origin-favicon'), origin);
     const removeAllButton = header.querySelector('.permission-remove-all-btn') as HTMLButtonElement;
     removeAllButton.addEventListener('click', async (event) => {
       // A double-click's second click lands on whatever slid under the

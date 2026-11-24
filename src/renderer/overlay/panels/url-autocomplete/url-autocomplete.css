@@ -104,13 +104,11 @@
   justify-content: center;
   border-radius: var(--n-r-control);
   background: var(--n-fill);
-  color: var(--n-text-2);
   flex-shrink: 0;
-  font-size: var(--font-lg);
-  font-weight: bold;
 }
 
-/* 16 px favicon centred in the 28 px well. */
+/* 16 px favicon centred in the 28 px well, or the favicon fallback tile
+   (global.css) when there is none. */
 #overlay-url-autocomplete .url-ac-favicon img {
   width: 16px;
   height: 16px;

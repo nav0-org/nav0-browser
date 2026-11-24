@@ -217,6 +217,7 @@
   color: var(--n-text-1);
 }
 
+/* Holds the favicon, or the favicon fallback tile (global.css). */
 #overlay-command-o .tab-favicon {
   width: 16px;
   height: 16px;
@@ -224,8 +225,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--n-r-control);
-  overflow: hidden;
 }
 
 #overlay-command-o .tab-favicon img {
@@ -234,25 +233,8 @@
   border-radius: var(--n-r-control);
 }
 
-/* Letter chip standing in for a missing favicon. */
-#overlay-command-o .tab-favicon-letter {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--n-text-3);
-  border-radius: var(--n-r-control);
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--n-on-accent);
-}
-
 /* The favicon sits 1 px below the top of the first title line. */
-#overlay-command-o .tab-card > .tab-favicon,
-#overlay-command-o .tab-card > .tab-favicon-letter {
+#overlay-command-o .tab-card > .tab-favicon {
   margin-top: 1px;
 }
 

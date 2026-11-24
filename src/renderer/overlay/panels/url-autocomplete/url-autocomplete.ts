@@ -1,6 +1,7 @@
 import './url-autocomplete.css';
 import { createIcons, icons } from 'lucide';
 import { UrlDisplay } from '../../../common/url-display';
+import { FaviconTile } from '../../../common/favicon-tile';
 
 type Suggestion = {
   type: 'tab' | 'bookmark' | 'history' | 'search';
@@ -25,30 +26,16 @@ const escapeHtml = (str: string): string => {
   return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 };
 
-const getFaviconLetter = (url: string): string => {
-  try {
-    return new URL(url).hostname.replace('www.', '').charAt(0).toUpperCase() || '?';
-  } catch {
-    return (url || '').charAt(0).toUpperCase() || '?';
-  }
-};
-
 const buildItem = (item: Suggestion, index: number): HTMLElement => {
   const el = document.createElement('div');
   el.className = `url-ac-item${index === activeIndex ? ' active' : ''}`;
   el.dataset.index = String(index);
 
-  const hasFavicon = item.type !== 'search' && !!item.faviconUrl;
-  let iconHtml = '';
-  if (item.type === 'search') {
-    iconHtml = `<div class="url-ac-icon"><i data-lucide="search" width="16" height="16"></i></div>`;
-  } else if (hasFavicon) {
-    iconHtml = `<div class="url-ac-favicon"></div>`;
-  } else if (item.type === 'tab') {
-    iconHtml = `<div class="url-ac-icon"><i data-lucide="app-window" width="16" height="16"></i></div>`;
-  } else {
-    iconHtml = `<div class="url-ac-favicon">${escapeHtml(getFaviconLetter(item.url))}</div>`;
-  }
+  // A site's row gets its icon, or the favicon fallback tile, below.
+  const iconHtml =
+    item.type === 'search'
+      ? `<div class="url-ac-icon"><i data-lucide="search" width="16" height="16"></i></div>`
+      : `<div class="url-ac-favicon"></div>`;
 
   // Built-in pages show as nav0://… (display only; the stored URL is unchanged). A search
   // row's title is the user's own text, so it is left as typed.
@@ -71,24 +58,7 @@ const buildItem = (item: Suggestion, index: number): HTMLElement => {
     </div>
   `;
 
-  // Attached here, not in the markup, because the overlay's CSP blocks inline onerror
-  // handlers. A favicon that fails to load falls back to the site's first letter.
-  if (hasFavicon) {
-    const well = el.querySelector('.url-ac-favicon') as HTMLElement | null;
-    if (well) {
-      const img = document.createElement('img');
-      img.alt = '';
-      img.addEventListener(
-        'error',
-        () => {
-          well.textContent = getFaviconLetter(item.url);
-        },
-        { once: true }
-      );
-      img.src = item.faviconUrl as string;
-      well.appendChild(img);
-    }
-  }
+  el.querySelector('.url-ac-favicon')?.appendChild(FaviconTile.icon(item.faviconUrl, item.url));
 
   el.addEventListener('mousedown', (e) => {
     e.preventDefault();

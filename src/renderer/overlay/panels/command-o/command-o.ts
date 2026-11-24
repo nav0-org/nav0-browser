@@ -1,6 +1,7 @@
 import './command-o.css';
 import { createIcons, icons } from 'lucide';
 import { UrlDisplay } from '../../../common/url-display';
+import { FaviconTile } from '../../../common/favicon-tile';
 
 type TabInfo = {
   id: string;
@@ -83,15 +84,6 @@ const escapeHtml = (str: string): string => {
 // Smooth scrolling is motion: skip it when the OS asks to reduce motion.
 const prefersReducedMotion = (): boolean =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-const getFaviconLetter = (url: string): string => {
-  try {
-    const hostname = new URL(url).hostname;
-    return hostname.replace('www.', '').charAt(0).toUpperCase();
-  } catch {
-    return url.charAt(0).toUpperCase() || '?';
-  }
-};
 
 const buildFlatTabs = () => {
   flatTabs = [];
@@ -230,13 +222,6 @@ const render = () => {
       if (flatIdx === selectedIndex) card.classList.add('selected');
       card.dataset.flatIndex = String(flatIdx);
 
-      let faviconHtml = '';
-      if (tab.faviconUrl) {
-        faviconHtml = `<div class="tab-favicon"><img src="${escapeHtml(tab.faviconUrl)}" alt=""></div>`;
-      } else {
-        faviconHtml = `<div class="tab-favicon-letter">${getFaviconLetter(tab.url)}</div>`;
-      }
-
       // A URL standing in for a missing title shows nav0:// in lower case.
       const titleText = UrlDisplay.format(tab.title || tab.url || 'New Tab');
       const truncatedTitle = escapeHtml(titleText);
@@ -246,28 +231,15 @@ const render = () => {
         : '';
 
       card.innerHTML = `
-        ${faviconHtml}
+        <div class="tab-favicon"></div>
         ${pinHtml}
         <span class="tab-title" title="${escapeHtml(titleText)}">${truncatedTitle}</span>
         ${tab.isActive ? '<span class="tab-active-dot"></span>' : ''}
       `;
       if (tab.isPinned) card.classList.add('pinned');
 
-      // Favicon fallback: swap a favicon that fails to load for the letter chip.
-      // Wired here because the page CSP blocks inline onerror handlers.
-      const faviconImg = card.querySelector<HTMLImageElement>('.tab-favicon img');
-      if (faviconImg) {
-        const letter = getFaviconLetter(tab.url);
-        faviconImg.addEventListener('error', () => {
-          const well = faviconImg.parentElement;
-          if (!well) return;
-          const letterEl = document.createElement('div');
-          letterEl.className = 'tab-favicon-letter';
-          letterEl.textContent = letter;
-          well.textContent = '';
-          well.appendChild(letterEl);
-        });
-      }
+      // The site's icon, or the favicon fallback tile.
+      card.querySelector('.tab-favicon')?.appendChild(FaviconTile.icon(tab.faviconUrl, tab.url));
 
       if (canDrag) {
         card.draggable = true;

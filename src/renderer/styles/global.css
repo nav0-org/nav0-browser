@@ -1366,6 +1366,25 @@ select.form-control {
   background-color: var(--n-fill-2);
 }
 
+/* Favicon fallback tile (DESIGN.md §5.3): the site's first letter, from
+   FaviconTile in common/favicon-tile.ts, wherever a site icon is missing or
+   fails to load. 16 px like a favicon; a slot with a larger icon sizes it. */
+.favicon-tile {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--n-r-icon);
+  background-color: var(--n-text-3);
+  color: var(--n-on-accent);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  line-height: 1;
+  user-select: none;
+}
+
 /* Simple divider */
 .divider {
   height: 1px;
