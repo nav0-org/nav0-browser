@@ -269,10 +269,7 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
   const row = document.createElement('div');
   row.className = 'list-row history-entry';
 
-  const time = new Date(entry.createdDate).toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  const time = FormatUtils.formatTime(entry.createdDate);
   const category = getCategoryForDomain(entry.topLevelDomain);
   const catIcon = CATEGORY_ICONS[category] || CATEGORY_ICONS.other;
 

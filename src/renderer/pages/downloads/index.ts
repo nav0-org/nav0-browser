@@ -59,13 +59,6 @@ const getDisplayType = (item: DownloadRecord): string => {
   return getDisplayTypeFromExtension(item.fileExtension);
 };
 
-// 24-hour HH:MM, matching the prototype's row time column.
-const formatRowTime = (date: Date | string): string => {
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return '';
-  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-};
-
 const escapeHtml = (str: string): string => {
   const div = document.createElement('div');
   div.textContent = str;
@@ -621,7 +614,7 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
     }
 
     downloadItem.innerHTML = `
-      <span class="list-row-lead">${formatRowTime(item.createdDate)}</span>
+      <span class="list-row-lead">${FormatUtils.formatTime(item.createdDate)}</span>
       <span class="list-row-well">
         <i data-lucide="${iconName}" width="16" height="16"></i>
       </span>
@@ -759,7 +752,7 @@ const toggleDetailPanel = (
         </div>
         <div class="detail-field">
           <span class="detail-field-label">Downloaded</span>
-          <span class="detail-field-value">${new Date(item.createdDate).toLocaleString()}</span>
+          <span class="detail-field-value">${FormatUtils.formatDateTime(item.createdDate)}</span>
         </div>
         <div class="detail-field full-width">
           <span class="detail-field-label">Path</span>

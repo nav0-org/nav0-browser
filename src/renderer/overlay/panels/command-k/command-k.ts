@@ -1,5 +1,6 @@
 import './command-k.css';
 import { createIcons, icons } from 'lucide';
+import { FormatUtils } from '../../../common/format-utils';
 import { UrlDisplay } from '../../../common/url-display';
 import { FaviconTile } from '../../../common/favicon-tile';
 
@@ -62,12 +63,12 @@ const formatDate = (dateStr: string): string => {
   const diffMs = now.getTime() - date.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  const timeStr = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const timeStr = FormatUtils.formatTime(date);
 
   if (diffDays === 0) return `Today, ${timeStr}`;
   if (diffDays === 1) return `Yesterday, ${timeStr}`;
   if (diffDays < 7) return `${diffDays} days ago`;
-  return date.toLocaleDateString();
+  return FormatUtils.formatDate(date);
 };
 
 const formatFileSize = (bytes: number): string => {

@@ -1,44 +1,66 @@
 export abstract class FormatUtils {
-  public static getFriendlyDateString(date: Date): string {
-    date = new Date(date);
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+  // The app's one time and date format. `undefined` is the app locale (the language
+  // Electron gives the page). The hour never takes a leading zero: "5:03 PM" in US
+  // English, "5:03 pm" in Indian English, "17:03" in British English. Dates read
+  // "May 24", with the year only when it isn't the current year. Relative labels
+  // ("Today, 5:03 PM", "5mo ago") build on these.
+  private static readonly TIME = new Intl.DateTimeFormat(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+  private static readonly DATE = new Intl.DateTimeFormat(undefined, {
+    month: 'short',
+    day: 'numeric',
+  });
+  private static readonly DATE_WITH_YEAR = new Intl.DateTimeFormat(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+  private static readonly DATE_TIME = new Intl.DateTimeFormat(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+  private static readonly DATE_WITH_YEAR_TIME = new Intl.DateTimeFormat(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
 
-    const itemDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    let formattedDate = '';
-    if (itemDate.getTime() === today.getTime()) {
-      formattedDate = 'Today, ';
-    } else if (itemDate.getTime() === yesterday.getTime()) {
-      formattedDate = 'Yesterday, ';
-    } else {
-      formattedDate = FormatUtils.getShortFormattedDate(date) + ', ';
-    }
-
-    return formattedDate + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  private static toValidDate(date: Date | string | number): Date | null {
+    const d = new Date(date);
+    return isNaN(d.getTime()) ? null : d;
   }
 
-  public static getShortFormattedDate(date: Date): string {
-    const monthNames = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    const day = date.getDate();
-    const monthIndex = date.getMonth();
-    const monthName = monthNames[monthIndex];
-    const year = date.getFullYear();
-    return `${day}-${monthName}-${year.toString().substring(2, 4)}`;
+  private static isThisYear(date: Date): boolean {
+    return date.getFullYear() === new Date().getFullYear();
+  }
+
+  // "5:03 PM"
+  public static formatTime(date: Date | string | number): string {
+    const d = FormatUtils.toValidDate(date);
+    return d ? FormatUtils.TIME.format(d) : '';
+  }
+
+  // "May 24", or "May 24, 2025" outside the current year
+  public static formatDate(date: Date | string | number): string {
+    const d = FormatUtils.toValidDate(date);
+    if (!d) return '';
+    return (FormatUtils.isThisYear(d) ? FormatUtils.DATE : FormatUtils.DATE_WITH_YEAR).format(d);
+  }
+
+  // "May 24, 5:03 PM", or "May 24, 2025, 5:03 PM" outside the current year
+  public static formatDateTime(date: Date | string | number): string {
+    const d = FormatUtils.toValidDate(date);
+    if (!d) return '';
+    const format = FormatUtils.isThisYear(d)
+      ? FormatUtils.DATE_TIME
+      : FormatUtils.DATE_WITH_YEAR_TIME;
+    return format.format(d);
   }
 
   public static formatFileSize(bytes: number): string {

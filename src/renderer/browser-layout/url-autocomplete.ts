@@ -1,3 +1,5 @@
+import { FormatUtils } from '../common/format-utils';
+
 type SuggestionType = 'tab' | 'bookmark' | 'history' | 'search';
 
 type Suggestion = {
@@ -55,11 +57,11 @@ const formatDate = (dateStr: string): string => {
   const now = new Date();
   const diffDays = Math.floor((now.getTime() - date.getTime()) / 86400000);
   if (diffDays === 0) {
-    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    return FormatUtils.formatTime(date);
   }
   if (diffDays === 1) return 'Yesterday';
   if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString();
+  return FormatUtils.formatDate(date);
 };
 
 const estimateDropdownHeight = (results: Suggestion[]): number => {

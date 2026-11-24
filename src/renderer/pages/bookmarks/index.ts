@@ -1,5 +1,6 @@
 import { HtmlUtils } from '../../../renderer/common/html-utils';
 import { FaviconTile } from '../../../renderer/common/favicon-tile';
+import { FormatUtils } from '../../../renderer/common/format-utils';
 import { BookmarkWithStats } from '../../../types/bookmark-record';
 import { WEBSITE_CATEGORY_MAP } from '../../../constants/data-constants';
 import './index.css';
@@ -71,12 +72,7 @@ function getPath(url: string): string {
 }
 
 function formatSavedDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return '';
-  const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-  if (d.getFullYear() !== new Date().getFullYear()) opts.year = 'numeric';
-  return d.toLocaleDateString([], opts);
+  return dateStr ? FormatUtils.formatDate(dateStr) : '';
 }
 
 // --- Freshness / age helpers ---

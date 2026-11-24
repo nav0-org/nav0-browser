@@ -154,6 +154,8 @@ Mono: `ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace`. Rea
 
 Use tabular numerals (`font-variant-numeric: tabular-nums`) for times, sizes, counts and versions.
 
+One time and date format, from `FormatUtils` (`src/renderer/common/format-utils.ts`: `formatTime`, `formatDate`, `formatDateTime`) in History, Downloads, Bookmarks, ⌘K, the New Tab search and the URL autocomplete. Times use the app locale with hour `'numeric'` and minute `'2-digit'`, so an hour never has a leading zero: "5:03 PM" in US English, "5:03 pm" in Indian English, "17:03" in British English. Dates read "May 24", with the year only when it isn't the current year. Relative labels ("Today, 5:03 PM", "Yesterday", "5mo ago") stay, built on these.
+
 ### 3.8 Materials, shadows and focus
 
 ```

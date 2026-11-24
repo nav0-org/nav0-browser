@@ -1,6 +1,7 @@
 import './index.css';
 
 import { createIcons, icons } from 'lucide';
+import { FormatUtils } from '../../common/format-utils';
 import { UrlDisplay } from '../../common/url-display';
 import { FaviconTile } from '../../common/favicon-tile';
 createIcons({ icons });
@@ -156,11 +157,11 @@ function formatRelativeDate(dateStr: string): string {
   const date = new Date(dateStr);
   const now = new Date();
   const diffDays = Math.floor((now.getTime() - date.getTime()) / 86400000);
-  const timeStr = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const timeStr = FormatUtils.formatTime(date);
   if (diffDays === 0) return `Today, ${timeStr}`;
   if (diffDays === 1) return `Yesterday, ${timeStr}`;
   if (diffDays < 7) return `${diffDays} days ago`;
-  return date.toLocaleDateString();
+  return FormatUtils.formatDate(date);
 }
 
 function formatFileSize(bytes: number): string {
