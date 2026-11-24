@@ -9,12 +9,13 @@
   cursor: default;
 }
 
-/* Anchored under the lock: 84 px is the chrome height (DESIGN.md §4.1) and
-   144 px puts the left edge 6 px before the address field. In a narrow window
-   it slides left to stay whole. */
+/* Anchored 4 px under the security indicator (DESIGN.md §4.4), whose bottom
+   edge is 75.5 px down: the 40 px strip, then the 28 px indicator centred in
+   the 43 px of toolbar above its bottom line. 144 px puts the left edge 6 px
+   before the address field. In a narrow window it slides left to stay whole. */
 .ssl-info-panel {
   position: absolute;
-  top: calc(84px + var(--spacing-xs));
+  top: calc(75.5px + var(--spacing-xs));
   left: max(var(--spacing-sm), min(144px, calc(100% - 340px - var(--spacing-sm))));
   width: 340px;
   max-width: calc(100% - 2 * var(--spacing-sm));
@@ -30,8 +31,8 @@
   -webkit-backdrop-filter: var(--n-menu-blur);
   box-shadow: var(--n-menu-shadow);
   border-radius: var(--n-r-panel);
-  font-size: 12px;
-  line-height: 17px;
+  font-size: 13px;
+  line-height: 18px;
   color: var(--n-text-2);
   overflow: hidden;
   animation: ssl-info-reveal 180ms ease-out;
@@ -65,7 +66,8 @@
 .ssl-info-header strong {
   flex: 1;
   font-size: 13px;
-  font-weight: 700;
+  line-height: 18px;
+  font-weight: 600;
   color: var(--n-text-1);
 }
 
@@ -127,14 +129,14 @@
 
 .ssl-info-detail {
   color: var(--n-text-2);
-  font-size: 12px;
-  line-height: 17px;
+  font-size: 13px;
+  line-height: 18px;
 }
 
-/* The host name is bold in the body colour, not a darker text colour. */
+/* The host name is semibold in the body colour, not a darker text colour. */
 .ssl-info-detail strong {
   color: inherit;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 /* Danger banner (not-secure state) */
@@ -143,38 +145,38 @@
   border-radius: var(--n-r-control);
   background-color: var(--n-danger-soft);
   color: var(--n-danger);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: normal;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
 }
 
 .ssl-info-protocol {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 18px;
   color: var(--n-text-1);
 }
 
 .ssl-info-cert {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 18px;
   color: var(--n-text-1);
-  border-top: 1px solid var(--n-separator);
+  border-top: 1px solid var(--n-menu-line);
   padding-top: 10px;
 }
 
 .ssl-info-section-heading {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
-  line-height: normal;
+  line-height: 18px;
   color: var(--n-text-1);
   margin-bottom: 4px;
 }
 
 .ssl-info-risks {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 18px;
   color: var(--n-text-2);
-  border-top: 1px solid var(--n-separator);
+  border-top: 1px solid var(--n-menu-line);
   padding-top: 10px;
 }
 

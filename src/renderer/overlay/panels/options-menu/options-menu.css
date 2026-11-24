@@ -12,11 +12,12 @@
   display: none !important;
 }
 
-/* Hangs under the ⋮ button with the right edges aligned; 84 px is the chrome
-   height (DESIGN.md §4.1). */
+/* Hangs 4 px under the ⋮ button with the right edges aligned (DESIGN.md
+   §4.4). The button's bottom edge is 77.5 px down: the 40 px strip, then the
+   32 px button centred in the 43 px of toolbar above its bottom line. */
 .options-dropdown {
   position: absolute;
-  top: calc(84px + var(--spacing-sm));
+  top: calc(77.5px + var(--spacing-xs));
   right: var(--spacing-sm);
   width: 290px;
   max-width: calc(100% - 2 * var(--spacing-sm));

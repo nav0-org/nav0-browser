@@ -8,8 +8,8 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  /* The overlay covers the whole window, so this clears the 84 px chrome by 8 px. */
-  padding-top: 92px;
+  /* The overlay covers the whole window, so this clears the 84 px chrome by 12 px. */
+  padding-top: 96px;
 }
 
 /* The near-opaque palette material, from tokens only, so the
@@ -177,7 +177,7 @@
 #overlay-command-o .window-line {
   flex: 1;
   height: 1px;
-  background: var(--n-separator);
+  background: var(--n-menu-line);
 }
 
 /* ---- Tab grid ---- */
@@ -365,9 +365,6 @@
 
 /* ---- Responsive ---- */
 @media (max-width: 768px) {
-  #overlay-command-o {
-    padding-top: 40px;
-  }
   #overlay-command-o .tab-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }

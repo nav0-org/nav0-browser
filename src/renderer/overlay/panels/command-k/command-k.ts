@@ -32,7 +32,8 @@ const COMMAND_K_HTML = `
         <span class="key">Tab</span>
         <span class="key">\u2191</span>
         <span class="key">\u2193</span>
-        <span class="key">Enter</span>
+        <span class="key">\u21b5</span>
+        <span class="key">esc</span>
       </div>
     </div>
 
