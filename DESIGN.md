@@ -158,6 +158,8 @@ One time and date format, from `FormatUtils` (`src/renderer/common/format-utils.
 
 Capitalisation follows the macOS rule. **Title Case** for page and dialog titles, section and panel headings, buttons, menu items, tabs, segments, sidebar items, column headers and link rows that open a page (About's links): "Top Sites by Active Time", "Reading Queue", "Sign In". **Sentence case** for row labels (including switch, radio, checkbox and field labels), descriptions, placeholders, tooltips, messages and badges: "Custom user agent string", "Match case (Alt+C)". Permission names are sentence case ("Camera/microphone").
 
+Write "…" (one character), never "...": in placeholders ("Search history…"), commands that open a dialog ("Print…", "Settings…") and progress labels ("Submitting…"). Text that doesn't fit is cut by CSS (`text-overflow: ellipsis`), not in code.
+
 ### 3.8 Materials, shadows and focus
 
 ```
@@ -228,6 +230,8 @@ Unchanged: `--z-dropdown 100`, `--z-sticky 200`, `--z-modal 1000`, `--z-toast 11
 **Find in page** — a 44 px bar under the toolbar, `--n-toolbar`, bottom line `--n-chrome-line`. Field 400 px wide, 30 px, white, ring as above, match counter inside the field at the right (12 px `--n-text-3`, e.g. "3 of 12"). "No matches" and "Invalid regex" turn the text, counter and ring `--n-danger`. Option toggles **Aa**, **|ab|**, **.\*** are 28 px; on = `--n-accent` text on `--n-accent-soft`. Divider, previous/next (disabled `--n-text-4` when there's nothing to move to), and close at the far right.
 
 **Private windows** — strip `--n-private-strip`, toolbar and active tab `--n-private-toolbar`, lines `--n-private-line`, text and icons `--n-private-text`, plus a "Private" label (`eye-off` + "Private", 12 px 600, `--n-private-label-bg` / `--n-private-label-text`, `--n-r-icon`) first in the strip, after the traffic lights when they sit at the left. Never red.
+
+**Link status bar** — hovering or focusing a link in a page shows its URL at the bottom-left of the page: 12 / 16 text (400) in `--n-text-2` on `--n-toolbar`, `4px 8px` padding (24 px tall), a 1 px `--n-chrome-line` edge on the top and right (`#8e8e93` under `prefers-contrast: more`), an `--n-r-control` top-right corner and no shadow. It is at most 60 % of the page wide, cut with "…" (URLs over 120 characters too), and fades in over `--dur-fast` (no 2 px rise under reduced motion). On built-in pages it shows a link's `nav0://` address, or nothing. It lives inside the page (`src/main/browser/hover-status-bar-script.ts` injects it in a closed shadow root), where `global.css` can't reach, so it repeats these tokens' values as literals: change them there when a token changes.
 
 ### 4.2 Built-in pages (`src/renderer/pages/<page>/`)
 

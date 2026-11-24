@@ -21,10 +21,12 @@
  * link into the app's own pages shows nothing, so the bar never shows the
  * dev-server or file:// address a built-in page loads from.
  *
- * Colours use the toolbar palette as literals (#f6f6f7 surface, #d1d1d6 hairline,
- * #424245 text, 4px top-right corner) rather than CSS tokens, since a
- * page-injected element can't reference global.css. `prefers-reduced-motion` is
- * honoured.
+ * A page-injected element can't reference global.css, so the bar repeats the
+ * tokens' values as literals (DESIGN.md, "Link status bar"): 12 / 16 text in
+ * --n-text-2 (#424245) on --n-toolbar (#f6f6f7), a --n-chrome-line (#d1d1d6)
+ * edge, #8e8e93 under prefers-contrast: more, an --n-r-control (4px) corner,
+ * --spacing-xs / --spacing-sm padding and a --dur-fast (120ms) fade. Keep them
+ * in step with global.css. `prefers-reduced-motion` is honoured.
  */
 export function hoverStatusBarScript(builtInPages: BuiltInPage[] = []): string {
   return `
@@ -38,12 +40,13 @@ export function hoverStatusBarScript(builtInPages: BuiltInPage[] = []): string {
   var CSS =
     ":host{all:initial}" +
     ".bar{display:inline-block;box-sizing:border-box;max-width:60vw;" +
-    "padding:3px 8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;" +
-    "font-size:12px;line-height:1.4;color:#424245;background:#f6f6f7;" +
+    "padding:4px 8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;" +
+    "font-size:12px;line-height:16px;font-weight:400;color:#424245;background:#f6f6f7;" +
     "border-top:1px solid #d1d1d6;border-right:1px solid #d1d1d6;border-top-right-radius:4px;" +
-    "box-shadow:0 1px 2px rgba(0,0,0,.06);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" +
-    "opacity:0;transform:translateY(2px);transition:opacity 90ms ease,transform 90ms ease}" +
+    "white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" +
+    "opacity:0;transform:translateY(2px);transition:opacity 120ms ease,transform 120ms ease}" +
     ".bar.visible{opacity:1;transform:translateY(0)}" +
+    "@media (prefers-contrast:more){.bar{border-color:#8e8e93}}" +
     "@media (prefers-reduced-motion:reduce){.bar{transition:none;transform:none}.bar.visible{transform:none}}";
 
   var host = null, label = null, current = '';

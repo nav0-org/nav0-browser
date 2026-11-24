@@ -1344,7 +1344,7 @@ export abstract class AppWindowManager {
             },
           },
           {
-            label: 'Print...',
+            label: 'Print…',
             click: () => {
               tab.getLiveWebContents()?.print();
             },

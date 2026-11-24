@@ -2292,7 +2292,7 @@ export class Tab {
       //for clicking on image
       template.push(
         {
-          label: 'Save Image As...',
+          label: 'Save Image As…',
           click: async () => {
             this.getLiveWebContents()?.downloadURL(srcURL);
           },
@@ -2310,7 +2310,7 @@ export class Tab {
       //for selected text
       const engineName = SearchEngine.getSearchEngineName();
       const truncatedText =
-        selectionText.length > 30 ? selectionText.substring(0, 30) + '...' : selectionText;
+        selectionText.length > 30 ? selectionText.substring(0, 30) + '…' : selectionText;
       template.push(
         {
           label: 'Copy',
@@ -2363,7 +2363,7 @@ export class Tab {
       },
       { type: 'separator' },
       {
-        label: 'Print...',
+        label: 'Print…',
         click: () => {
           this.getLiveWebContents()?.print();
         },

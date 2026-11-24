@@ -45,7 +45,7 @@ const ISSUE_REPORT_HTML = `
 
         <div class="form-group">
           <label class="form-label" for="ir-issue-description">Description</label>
-          <textarea class="form-control" id="ir-issue-description" rows="5" placeholder="Describe the issue or suggestion in detail..."></textarea>
+          <textarea class="form-control" id="ir-issue-description" rows="5" placeholder="Describe the issue or suggestion in detail…"></textarea>
         </div>
 
         <div class="form-group">
@@ -332,7 +332,7 @@ async function submitIssue(): Promise<void> {
   }
 
   submitBtn.disabled = true;
-  submitBtn.textContent = 'Submitting...';
+  submitBtn.textContent = 'Submitting…';
 
   const typeLabel =
     type === 'bug' ? 'Bug Report' : type === 'feature' ? 'Feature Request' : 'Other';
