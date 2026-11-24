@@ -20,7 +20,7 @@ let activeFilter = 'all';
 
 // Lucide icon per shortcut category — surfaced on the toolbar filter pills.
 const SHORTCUT_CATEGORY_ICONS: Record<string, string> = {
-  Tabs: 'layout-grid',
+  Tabs: 'file-plus-2',
   Window: 'app-window',
   Navigation: 'compass',
   Utilities: 'wrench',
@@ -1040,7 +1040,7 @@ function renderShortcutFilters() {
     const pill = document.createElement('button');
     pill.className = 'chip';
     pill.dataset.filter = value;
-    pill.innerHTML = `<i data-lucide="${iconName}" width="13" height="13"></i> ${label}`;
+    pill.innerHTML = `<i data-lucide="${iconName}" width="14" height="14"></i> ${label}`;
     const isActive = activeFilter === value;
     if (isActive) {
       pill.classList.add('active');

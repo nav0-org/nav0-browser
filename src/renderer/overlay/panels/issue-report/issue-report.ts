@@ -24,7 +24,7 @@ const ISSUE_REPORT_HTML = `
     <div class="issue-report-dialog" id="ir-issue-report-dialog" role="dialog" aria-modal="true" aria-labelledby="issue-report-title">
 
       <div class="issue-report-header">
-        <i data-lucide="bug" width="16" height="16"></i>
+        <i data-lucide="message-square-warning" width="16" height="16"></i>
         <span id="ir-issue-report-title">Report an Issue</span>
       </div>
 

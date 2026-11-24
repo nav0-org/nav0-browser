@@ -780,8 +780,8 @@ select.form-control {
 
 .search-field svg {
   flex: none;
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
 }
 
 .search-field input {
@@ -1223,8 +1223,8 @@ select.form-control {
 
 .chip svg {
   flex: none;
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
   color: var(--n-text-2);
 }
 

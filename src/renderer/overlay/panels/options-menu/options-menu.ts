@@ -52,7 +52,7 @@ const OPTIONS_MENU_HTML = `
       </div>
 
       <div class="dropdown-item zoom-row" id="om-zoom-row">
-        <i data-lucide="search" width="16" height="16"></i>
+        <i data-lucide="zoom-in" width="16" height="16"></i>
         <span class="dropdown-item-text">Zoom</span>
         <div class="zoom-controls">
           <button class="zoom-btn" id="om-zoom-out" type="button" aria-label="Zoom out">
@@ -116,7 +116,7 @@ const OPTIONS_MENU_HTML = `
       </div>
 
       <div class="dropdown-item" id="om-bookmarks-option">
-        <i data-lucide="album" width="16" height="16"></i>
+        <i data-lucide="bookmark" width="16" height="16"></i>
         <span class="dropdown-item-text">Bookmarks</span>
         <span id="om-bookmarks-shortcut" class="keyboard-shortcut"></span>
       </div>

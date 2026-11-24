@@ -354,7 +354,7 @@ const renderTypeFilters = (): void => {
   const allPill = document.createElement('button');
   allPill.className = 'chip';
   allPill.dataset.type = 'all';
-  allPill.innerHTML = `<i data-lucide="layers" width="13" height="13"></i> All`;
+  allPill.innerHTML = `<i data-lucide="layers" width="14" height="14"></i> All`;
   if (selectedTypeFilter === 'all') {
     allPill.classList.add('selected');
   }
@@ -370,7 +370,7 @@ const renderTypeFilters = (): void => {
     pill.className = 'chip';
     pill.dataset.type = type;
     const iconName = TYPE_ICONS[type] || TYPE_ICONS.other;
-    pill.innerHTML = `<i data-lucide="${iconName}" width="13" height="13"></i> ${type}`;
+    pill.innerHTML = `<i data-lucide="${iconName}" width="14" height="14"></i> ${type}`;
     // Neutral at rest; selection style (accent-soft + accent icon) when chosen.
     // Categories are named, not coloured — no per-type hue here.
     if (selectedTypeFilter === type) {

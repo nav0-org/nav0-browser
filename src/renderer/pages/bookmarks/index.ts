@@ -291,7 +291,7 @@ function renderCategoryPills(): void {
   // "All" chip — selection style when no individual category is selected.
   const allPill = document.createElement('button');
   allPill.className = 'chip';
-  allPill.innerHTML = `<i data-lucide="layers" width="13" height="13"></i> All`;
+  allPill.innerHTML = `<i data-lucide="layers" width="14" height="14"></i> All`;
   if (selectedCategory === 'all') {
     allPill.classList.add('active');
   }
@@ -307,7 +307,7 @@ function renderCategoryPills(): void {
     const isActive = selectedCategory === cat;
     const iconName = getCategoryIcon(cat);
     pill.className = 'chip';
-    pill.innerHTML = `<i data-lucide="${iconName}" width="13" height="13"></i> ${cat}`;
+    pill.innerHTML = `<i data-lucide="${iconName}" width="14" height="14"></i> ${cat}`;
     // Neutral chip: --n-fill at rest, selection style (--n-accent-soft)
     // when active. No per-category colour.
     if (isActive) {

@@ -1192,11 +1192,11 @@
   box-shadow: none;
 }
 
-/* 15-px magnifier, like every page search field (DESIGN.md §5.2) */
+/* 16-px magnifier, like every page search field (DESIGN.md §5.2) */
 .shortcuts-search-icon {
   flex: none;
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
   color: var(--n-text-3);
   position: static;
   transform: none;
@@ -1385,8 +1385,8 @@
 
 .permissions-search-icon {
   flex: none;
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
   color: var(--n-text-3);
   position: static;
   transform: none;
