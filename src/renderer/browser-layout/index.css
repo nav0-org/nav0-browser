@@ -429,6 +429,12 @@ body.is-private .tab.active .tab-close {
   color: var(--n-text-1);
 }
 
+/* Flush with the window's edge and the toolbar, which would clip an outer
+   ring: the ring is drawn inside. */
+.new-tab-btn:focus-visible {
+  box-shadow: var(--n-focus-ring-inset);
+}
+
 body.is-private .new-tab-btn {
   color: var(--n-private-text);
 }

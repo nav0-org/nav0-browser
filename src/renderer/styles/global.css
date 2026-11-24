@@ -116,6 +116,8 @@
   --n-knob-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   --n-knob-shadow-off: 0 0 0 0.5px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.25);
   --n-focus-ring: 0 0 0 3px var(--n-focus);
+  /* The same ring drawn inside: controls flush with an edge that clips */
+  --n-focus-ring-inset: inset 0 0 0 3px var(--n-focus);
   --n-focus-ring-field: 0 0 0 1px var(--n-accent), 0 0 0 4px var(--n-focus);
   --n-focus-danger: rgba(215, 0, 21, 0.18); /* danger halo for an invalid field */
   --n-focus-ring-field-danger: 0 0 0 1px var(--n-danger), 0 0 0 4px var(--n-focus-danger);

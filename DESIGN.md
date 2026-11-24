@@ -169,6 +169,7 @@ Use tabular numerals (`font-variant-numeric: tabular-nums`) for times, sizes, co
 --n-knob-shadow:  0 1px 2px rgba(0,0,0,0.30);                                   /* switch knob, on */
 --n-knob-shadow-off: 0 0 0 0.5px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.25); /* switch knob, off */
 --n-focus-ring:   0 0 0 3px var(--n-focus);                                     /* buttons, rows, chips */
+--n-focus-ring-inset: inset 0 0 0 3px var(--n-focus);                           /* the same ring inside a control flush with a clipping edge (the strip's +) */
 --n-focus-ring-field: 0 0 0 1px var(--n-accent), 0 0 0 4px var(--n-focus);     /* text fields */
 --n-focus-danger: rgba(215, 0, 21, 0.18);                                       /* danger focus halo */
 --n-focus-ring-field-danger: 0 0 0 1px var(--n-danger), 0 0 0 4px var(--n-focus-danger); /* invalid field (find: no matches / invalid regex) */
@@ -179,6 +180,8 @@ Use tabular numerals (`font-variant-numeric: tabular-nums`) for times, sizes, co
 Shadows come only from these tokens. Each `--n-*` one belongs to a kind of control, so pick by role, not by look; a control that needs a new elevation gets a token here (and in `global.css`) first. `--shadow-sm` and `--shadow-md` are older generic shadows kept for the `.shadow-sm` and `.shadow` utilities (`.shadow-lg` is `--n-menu-shadow`). No redesigned control uses them; don't reach for them in new work.
 
 Under `prefers-reduced-transparency: reduce`, menus drop the blur and use `--n-menu-solid`.
+
+A button or link clicked with the mouse gives up focus afterwards, as on macOS, so no later key (Shift as a screenshot starts, Esc, an arrow) can bring up its ring. Keyboard focus is untouched. The internals preload (`src/preload/internals-api.ts`) does this for the chrome, the overlay and every built-in page.
 
 ### 3.9 Motion
 
@@ -202,6 +205,7 @@ Unchanged: `--z-dropdown 100`, `--z-sticky 200`, `--z-modal 1000`, `--z-toast 11
 - 16 px `--n-tab-divider` between inactive tabs, hidden next to the active or hovered tab.
 - Pinned tabs are 36 px wide, favicon only. While loading, a 14 px ring (2 px, track `--n-ring-track`, arc `--n-accent`) replaces the favicon.
 - New-tab "+" sits at the far right (40 × 34, 18 px icon). Traffic lights and Windows controls are centred on the tab row. On macOS the native lights sit in a 78 px column (centres 20 / 40 / 60 px in, 23 px down: `trafficLightPosition` in `app-window.ts`), at the right end instead when a right-to-left language mirrors the title bar; in fullscreen, where they hide, the strip draws the same cluster itself.
+- The "+" is flush with the window edge and the toolbar, so its focus ring is drawn inside it (`--n-focus-ring-inset`).
 - No coloured bar on the active tab.
 
 **Toolbar** — 44 px, `--n-toolbar`, 1 px `--n-chrome-line` at the bottom. Buttons are 32 × 32, `--n-r-icon`, 18 px icons in `--n-text-2`, hover `--n-fill`, pressed `--n-fill-2`. A button that opens a popover (⋮, and the security indicator) stays pressed while it's open. Order (unchanged): back, forward, reload, `>_` (⌘K), address field, downloads (with a 2 px `--n-accent` progress ring while downloading), ⋮.

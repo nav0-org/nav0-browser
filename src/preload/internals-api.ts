@@ -5,7 +5,31 @@ import {
   RendererToMainEventsForDataStoreIPC,
 } from '../constants/app-constants';
 
+// A button or link clicked with the mouse gives up focus afterwards, as on
+// macOS. Chromium would leave it focused, and the next key that isn't a
+// shortcut (Shift as a screenshot starts, Esc, an arrow) would then show its
+// focus ring. Keyboard use is untouched: Tab still shows the ring, and Enter
+// or Space (a click with detail 0) leaves focus where it is. This preload
+// runs in the chrome, the overlay and every built-in page.
+function releaseFocusAfterMouseClicks(): void {
+  window.addEventListener(
+    'click',
+    (event) => {
+      if (event.detail === 0) return;
+      const target = event.target instanceof Element ? event.target : null;
+      const control = target?.closest('button, a[href], [role="button"], [role="tab"]');
+      if (!(control instanceof HTMLElement)) return;
+      // After the page's own handlers, which may move focus on purpose.
+      setTimeout(() => {
+        if (document.activeElement === control) control.blur();
+      });
+    },
+    true
+  );
+}
+
 export function init() {
+  releaseFocusAfterMouseClicks();
   const appWindowId = process.argv.find((arg) => arg.startsWith('--app-window-id='))?.split('=')[1];
   const tabId = process.argv.find((arg) => arg.startsWith('--tab-id='))?.split('=')[1];
   const isPrivate =
