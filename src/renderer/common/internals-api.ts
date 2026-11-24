@@ -106,7 +106,7 @@ declare global {
       createNewPrivateAppWindow: () => Promise<any>;
 
       showOptionsMenu: (appWindowId: string) => Promise<any>;
-      hideOptionsMenu: (appWindowId: string) => Promise<any>;
+      hideOptionsMenu: (appWindowId: string, returnFocus?: boolean) => Promise<any>;
 
       showCommandKOverlay: (appWindowId: string) => Promise<any>;
       hideCommandKOverlay: (appWindowId: string) => Promise<any>;
@@ -313,7 +313,7 @@ declare global {
       onTabsReordered: (callback: (data: { order: string[] }) => void) => void;
       onFullScreenChanged: (callback: (data: { isFullScreen: boolean }) => void) => void;
       onOverlayVisibilityChanged: (
-        callback: (data: { type: string; visible: boolean }) => void
+        callback: (data: { type: string; visible: boolean; returnFocus?: boolean }) => void
       ) => void;
       onFocusUrlBar: (callback: () => void) => void;
       // Permission system

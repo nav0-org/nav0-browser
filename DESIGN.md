@@ -238,6 +238,7 @@ Unchanged: `--z-dropdown 100`, `--z-sticky 200`, `--z-modal 1000`, `--z-toast 11
 
 - Material: `--n-menu-bg` + `backdrop-filter: var(--n-menu-blur)` + `--n-menu-shadow`. Radius `--n-r-panel` for menus and popovers, `--n-r-dialog` for ⌘K, ⌘O and dialogs. ⌘K, ⌘O and dialogs sit on `--n-scrim`.
 - Menu rows 30 px, `--n-r-control`, 6 px panel padding, 16 px icons in `--n-text-2`; hover or keyboard selection = selection style. Shortcuts right-aligned, 12 px `--n-text-3`, as glyphs on macOS (⌘T, ⇧⌘N, ⌥⌘I) and `Ctrl+T` elsewhere. Separators 1 px `--n-menu-line`, 8 px inset.
+- Menus are keyboard navigable; an open menu button shows `--n-fill-2`, never a ring.
 - ⌘K: group labels 11 px 600 `--n-text-3`; secondary lines in `--n-text-3` (never link blue); keycap hints stay in the header, small and grey.
 - ⌘O: four columns of white cards (`--n-card`, `--n-r-control`, `--n-card-shadow`; the chosen card takes the selection style and drops the shadow), two-line titles, neutral window headers (no coloured rules); the active tab of each window is a small grey dot.
 - Text inputs inside dialogs are white with `--n-input-shadow` (30 px, a 12 px 500 `--n-text-2` label 5 px above); selects use `--n-select-shadow` and are 28 px (`select.form-control`).

@@ -799,10 +799,19 @@ export class AppWindow {
     this.unifiedOverlayManager.showOverlay('options-menu');
   }
 
-  hideOptionsMenuOverlay(): void {
+  // Closing with Esc (returnFocusToButton) hands focus back to the ⋮ button,
+  // as a native menu does.
+  hideOptionsMenuOverlay(returnFocusToButton = false): void {
     if (this.unifiedOverlayManager?.isVisible('options-menu')) {
       this.unifiedOverlayManager.hideOverlay('options-menu');
       this.removeOverlayViewIfEmpty();
+      if (returnFocusToButton && this.browserWindowInstance) {
+        this.browserWindowInstance.webContents.focus();
+        this.browserWindowInstance.webContents.send(
+          MainToRendererEventsForBrowserIPC.OVERLAY_VISIBILITY_CHANGED,
+          { type: 'options-menu', visible: false, returnFocus: true }
+        );
+      }
     }
   }
 

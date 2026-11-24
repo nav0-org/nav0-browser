@@ -288,8 +288,12 @@ export function init() {
     showOptionsMenu: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_OPTIONS_MENU, appWindowId);
     },
-    hideOptionsMenu: async (appWindowId: string) => {
-      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.HIDE_OPTIONS_MENU, appWindowId);
+    hideOptionsMenu: async (appWindowId: string, returnFocus = false) => {
+      return ipcRenderer.send(
+        RendererToMainEventsForBrowserIPC.HIDE_OPTIONS_MENU,
+        appWindowId,
+        returnFocus
+      );
     },
     showCommandKOverlay: async (appWindowId: string) => {
       return ipcRenderer.send(
@@ -731,7 +735,9 @@ export function init() {
         callback(data)
       );
     },
-    onOverlayVisibilityChanged: (callback: (data: { type: string; visible: boolean }) => void) => {
+    onOverlayVisibilityChanged: (
+      callback: (data: { type: string; visible: boolean; returnFocus?: boolean }) => void
+    ) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.OVERLAY_VISIBILITY_CHANGED, (_event, data) =>
         callback(data)
       );

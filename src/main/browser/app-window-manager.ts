@@ -599,7 +599,7 @@ export abstract class AppWindowManager {
 
     ipcMain.on(
       RendererToMainEventsForBrowserIPC.HIDE_OPTIONS_MENU,
-      async (event, appWindowId: string) => {
+      async (event, appWindowId: string, returnFocus?: boolean) => {
         let window: AppWindow | null = null;
         if (appWindowId) {
           window = AppWindowManager.getWindowById(appWindowId);
@@ -607,7 +607,7 @@ export abstract class AppWindowManager {
           window = AppWindowManager.getActiveWindow();
         }
         if (window) {
-          return window.hideOptionsMenuOverlay();
+          return window.hideOptionsMenuOverlay(returnFocus === true);
         }
       }
     );

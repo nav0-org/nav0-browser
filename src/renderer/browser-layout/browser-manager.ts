@@ -446,16 +446,19 @@ export class BrowserTabManager {
     });
 
     // The ⋮ button and the security indicator stay pressed while the popover
-    // they opened is showing.
-    window.BrowserAPI.onOverlayVisibilityChanged((data: { type: string; visible: boolean }) => {
-      const opener =
-        data.type === 'options-menu'
-          ? this.optionsButton
-          : data.type === 'ssl-info'
-            ? this.sslIndicator
-            : null;
-      opener?.setAttribute('aria-expanded', String(data.visible));
-    });
+    // they opened is showing. Closed with Esc, it hands focus back to them.
+    window.BrowserAPI.onOverlayVisibilityChanged(
+      (data: { type: string; visible: boolean; returnFocus?: boolean }) => {
+        const opener =
+          data.type === 'options-menu'
+            ? this.optionsButton
+            : data.type === 'ssl-info'
+              ? this.sslIndicator
+              : null;
+        opener?.setAttribute('aria-expanded', String(data.visible));
+        if (data.returnFocus) opener?.focus();
+      }
+    );
 
     // Tab loading state changed
     window.BrowserAPI.onTabLoadingChanged((data: { id: string; isLoading: boolean }) => {

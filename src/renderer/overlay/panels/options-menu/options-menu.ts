@@ -6,6 +6,8 @@ let containerEl: HTMLElement;
 let optionsElement: HTMLElement | null = null;
 let appWindowId: string;
 let isPrivate: boolean;
+// The one highlighted row, chosen by the pointer or the arrow keys.
+let selectedItem: HTMLElement | null = null;
 
 const OPTIONS_MENU_HTML = `
   <div>
@@ -221,6 +223,95 @@ function initializeDomElements(): void {
   if (historyContainer) {
     historyContainer.addEventListener('mouseenter', () => populateHistorySubmenu());
   }
+}
+
+// --- Selection: one highlighted row, moved by the pointer and the keys ---
+
+const ITEM_SELECTOR = '.dropdown-item, .closed-tab-item, .closed-window-item';
+
+// Rows that can be selected: not hidden, not disabled, and not the zoom row
+// (its buttons are separate controls).
+function isSelectable(item: HTMLElement): boolean {
+  return (
+    !item.hidden &&
+    !item.classList.contains('zoom-row') &&
+    item.getAttribute('aria-disabled') !== 'true'
+  );
+}
+
+// The selectable rows of one menu (the main menu or a submenu), in order;
+// separators and section labels aren't rows.
+function itemsIn(menu: Element): HTMLElement[] {
+  return Array.from(
+    menu.querySelectorAll<HTMLElement>(
+      ':scope > .dropdown-item, :scope > div > .closed-tab-item, :scope > div > .closed-window-item'
+    )
+  ).filter(isSelectable);
+}
+
+// Highlights item (or nothing). `within` is what the pointer is over, or the
+// selected row itself: a submenu row holding it keeps its submenu open and
+// stays highlighted as the open submenu's row.
+function select(item: HTMLElement | null, within: Element | null = item, reveal = false): void {
+  selectedItem?.classList.remove('is-selected');
+  selectedItem = item;
+  item?.classList.add('is-selected');
+  containerEl.querySelectorAll('.has-submenu').forEach((row) => {
+    row.classList.toggle('submenu-active', !!within && row !== within && row.contains(within));
+  });
+  if (reveal) item?.scrollIntoView({ block: 'nearest' });
+}
+
+function openSubmenu(row: HTMLElement): void {
+  const submenu = row.querySelector(':scope > .submenu');
+  if (!submenu) return;
+  if (row.id === 'om-history-submenu-container') populateHistorySubmenu();
+  const first = itemsIn(submenu)[0] ?? null;
+  select(first, first ?? submenu, true);
+}
+
+function handleMenuKey(e: KeyboardEvent): void {
+  if (!optionsElement) return;
+  // A focused zoom button handles its own Enter and Space.
+  if (e.key === 'Enter' && document.activeElement?.closest('.zoom-controls')) return;
+  const submenu = selectedItem?.closest('.submenu') ?? null;
+  switch (e.key) {
+    case 'Escape':
+      // Closes the whole menu; focus goes back to the ⋮ button.
+      window.BrowserAPI.hideOptionsMenu(appWindowId, true);
+      break;
+    case 'ArrowDown':
+    case 'ArrowUp': {
+      const items = itemsIn(submenu ?? optionsElement);
+      if (items.length === 0) return;
+      const step = e.key === 'ArrowDown' ? 1 : -1;
+      const index = selectedItem ? items.indexOf(selectedItem) : -1;
+      const next =
+        index < 0
+          ? items[step > 0 ? 0 : items.length - 1]
+          : items[(index + step + items.length) % items.length];
+      select(next, next, true);
+      break;
+    }
+    case 'ArrowRight':
+      if (!selectedItem?.classList.contains('has-submenu')) return;
+      openSubmenu(selectedItem);
+      break;
+    case 'ArrowLeft': {
+      const row = submenu?.closest<HTMLElement>('.has-submenu');
+      if (!row) return;
+      select(row, row, true);
+      break;
+    }
+    case 'Enter':
+      if (!selectedItem) return;
+      if (selectedItem.classList.contains('has-submenu')) openSubmenu(selectedItem);
+      else selectedItem.click();
+      break;
+    default:
+      return;
+  }
+  e.preventDefault();
 }
 
 function renderZoomLevel(factor: number): void {
@@ -446,16 +537,23 @@ export function init(container: HTMLElement): void {
   initializeDomElements();
   setupEventListeners();
 
-  // Escape key to close
+  // Arrow keys, Enter and Esc while the menu is open (it has keyboard focus).
   document.addEventListener('keydown', (e: KeyboardEvent) => {
-    if (e.key === 'Escape' && !containerEl.hasAttribute('hidden')) {
-      e.preventDefault();
-      window.BrowserAPI.hideOptionsMenu(window.BrowserAPI.appWindowId);
-    }
+    if (!containerEl.hasAttribute('hidden')) handleMenuKey(e);
   });
+
+  // The pointer moves the same selection, so only one row is ever highlighted.
+  optionsElement?.addEventListener('mousemove', (e: MouseEvent) => {
+    const target = e.target as Element;
+    const item = target.closest<HTMLElement>(ITEM_SELECTOR);
+    select(item && isSelectable(item) ? item : null, target);
+  });
+  optionsElement?.addEventListener('mouseleave', () => select(null));
 }
 
 export function show(_data?: any): void {
+  select(null);
+
   // Reflect the active tab's current zoom level in the zoom control.
   window.BrowserAPI.getZoomFactor(appWindowId)
     .then((factor) => renderZoomLevel(factor))
@@ -481,5 +579,5 @@ export function show(_data?: any): void {
 }
 
 export function hide(): void {
-  // Nothing special needed on hide
+  select(null);
 }

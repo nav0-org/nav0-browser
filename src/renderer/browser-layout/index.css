@@ -479,6 +479,8 @@ body.is-private .nav-bar {
 .address-bar .ssl-indicator[aria-expanded='true'],
 .address-bar .ssl-indicator[aria-expanded='true']:hover {
   background-color: var(--n-fill-2);
+  /* The open popover has the keyboard, so its button shows no focus ring. */
+  box-shadow: none;
 }
 
 .nav-bar .btn-icon:disabled {

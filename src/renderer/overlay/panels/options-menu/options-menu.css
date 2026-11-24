@@ -75,9 +75,11 @@
   user-select: none;
 }
 
-/* Selection style on hover and on the open submenu's row, which stays
-   selected while its submenu (a descendant) is hovered. */
-#overlay-options-menu .dropdown-item:hover,
+/* Selection style on the selected row (options-menu.ts moves it with the
+   pointer and the arrow keys, so only one row is ever selected) and on the
+   open submenu's row, which stays selected while its submenu holds the
+   pointer or the selection. */
+#overlay-options-menu .dropdown-item.is-selected,
 #overlay-options-menu .has-submenu.submenu-active {
   background-color: var(--n-accent-soft);
   color: var(--n-text-1);
@@ -92,7 +94,7 @@
   color: var(--n-text-2);
 }
 
-#overlay-options-menu .dropdown-item:hover > [data-lucide]:not(.submenu-indicator),
+#overlay-options-menu .dropdown-item.is-selected > [data-lucide]:not(.submenu-indicator),
 #overlay-options-menu .has-submenu.submenu-active > [data-lucide]:not(.submenu-indicator) {
   color: var(--n-accent);
 }
@@ -171,19 +173,11 @@
 }
 
 /* Zoom row: the row itself isn't clickable (the buttons are), so it keeps
-   the default cursor and no selection fill on hover. */
+   the default cursor and is never selected. */
 #overlay-options-menu .zoom-row {
   height: 32px;
   padding-right: 6px;
   cursor: default;
-}
-
-#overlay-options-menu .zoom-row:hover {
-  background-color: transparent;
-}
-
-#overlay-options-menu .dropdown-item.zoom-row:hover > [data-lucide]:not(.submenu-indicator) {
-  color: var(--n-text-2);
 }
 
 /* Stepper: −, level, +, reset on one filled track. */
@@ -272,8 +266,8 @@
   transition: background-color var(--transition-fast);
 }
 
-.closed-tab-item:hover,
-.closed-window-item:hover {
+.closed-tab-item.is-selected,
+.closed-window-item.is-selected {
   background-color: var(--n-accent-soft);
 }
 
