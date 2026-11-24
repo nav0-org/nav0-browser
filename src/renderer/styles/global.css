@@ -93,6 +93,8 @@
 
   /* Materials, shadows, focus (§3.8) */
   --n-menu-bg: rgba(248, 248, 250, 0.88);
+  /* ⌘K and ⌘O only: near-opaque, so tertiary text keeps 4.5:1 over any page */
+  --n-palette-bg: rgba(248, 248, 250, 0.98);
   --n-menu-blur: blur(30px) saturate(1.8);
   --n-menu-shadow:
     0 0 0 0.5px rgba(0, 0, 0, 0.14), 0 24px 60px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -188,6 +190,7 @@
 @media (prefers-reduced-transparency: reduce) {
   :root {
     --n-menu-bg: var(--n-menu-solid);
+    --n-palette-bg: var(--n-menu-solid);
     --n-menu-blur: none;
   }
 }

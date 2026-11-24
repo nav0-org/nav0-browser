@@ -156,6 +156,7 @@ Use tabular numerals (`font-variant-numeric: tabular-nums`) for times, sizes, co
 
 ```
 --n-menu-bg:      rgba(248, 248, 250, 0.88);
+--n-palette-bg:   rgba(248, 248, 250, 0.98);          /* ⌘K and ⌘O only, with the same blur and shadow */
 --n-menu-blur:    blur(30px) saturate(1.8);          /* backdrop-filter for menus, popovers, ⌘K, ⌘O, dialogs */
 --n-menu-shadow:  0 0 0 0.5px rgba(0,0,0,0.14), 0 24px 60px rgba(0,0,0,0.20), 0 4px 12px rgba(0,0,0,0.08);
 --n-field-shadow: 0 0 0 0.5px rgba(0,0,0,0.18), 0 1px 1px rgba(0,0,0,0.04);   /* white fields in the chrome: address field, find field */
@@ -180,6 +181,8 @@ Use tabular numerals (`font-variant-numeric: tabular-nums`) for times, sizes, co
 Shadows come only from these tokens. Each `--n-*` one belongs to a kind of control, so pick by role, not by look; a control that needs a new elevation gets a token here (and in `global.css`) first. `--shadow-sm` and `--shadow-md` are older generic shadows kept for the `.shadow-sm` and `.shadow` utilities (`.shadow-lg` is `--n-menu-shadow`). No redesigned control uses them; don't reach for them in new work.
 
 Under `prefers-reduced-transparency: reduce`, menus drop the blur and use `--n-menu-solid`.
+
+`--n-palette-bg` is 98 % opaque so that every text colour in ⌘K and ⌘O keeps at least 4.5:1 over any page, a black one included (`--n-text-3` is 4.58:1 there). The ⋮ menu, popovers and dialogs keep `--n-menu-bg`. Under reduced transparency it turns `--n-menu-solid` too.
 
 A button or link clicked with the mouse gives up focus afterwards, as on macOS, so no later key (Shift as a screenshot starts, Esc, an arrow) can bring up its ring. Keyboard focus is untouched. The internals preload (`src/preload/internals-api.ts`) does this for the chrome, the overlay and every built-in page.
 
@@ -240,9 +243,10 @@ Unchanged: `--z-dropdown 100`, `--z-sticky 200`, `--z-modal 1000`, `--z-toast 11
 
 ### 4.4 Overlays (`src/renderer/overlay/panels/<name>/`)
 
-- Material: `--n-menu-bg` + `backdrop-filter: var(--n-menu-blur)` + `--n-menu-shadow`. Radius `--n-r-panel` for menus and popovers, `--n-r-dialog` for ⌘K, ⌘O and dialogs. ⌘K, ⌘O and dialogs sit on `--n-scrim`.
+- Material: `--n-menu-bg` (`--n-palette-bg` for ⌘K and ⌘O) + `backdrop-filter: var(--n-menu-blur)` + `--n-menu-shadow`. Radius `--n-r-panel` for menus and popovers, `--n-r-dialog` for ⌘K, ⌘O and dialogs. ⌘K, ⌘O and dialogs sit on `--n-scrim`.
 - Menu rows 30 px, `--n-r-control`, 6 px panel padding, 16 px icons in `--n-text-2`; hover or keyboard selection = selection style. Shortcuts right-aligned, 12 px `--n-text-3`, as glyphs on macOS (⌘T, ⇧⌘N, ⌥⌘I) and `Ctrl+T` elsewhere. Separators 1 px `--n-menu-line`, 8 px inset.
 - Menus are keyboard navigable; an open menu button shows `--n-fill-2`, never a ring.
+- Secondary text in a selected row uses `--n-text-2`: `--n-text-3` on the `--n-accent-soft` highlight is under 4.5:1.
 - ⌘K: group labels 11 px 600 `--n-text-3`; secondary lines in `--n-text-3` (never link blue); keycap hints stay in the header, small and grey.
 - ⌘O: four columns of white cards (`--n-card`, `--n-r-control`, `--n-card-shadow`; the chosen card takes the selection style and drops the shadow), two-line titles, neutral window headers (no coloured rules); the active tab of each window is a small grey dot.
 - ⌘K and ⌘O fit their content up to 75vh.

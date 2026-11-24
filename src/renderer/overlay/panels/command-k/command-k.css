@@ -11,13 +11,13 @@
   padding-top: 96px;
 }
 
-/* Palette dialog: menu material from tokens only, so the reduced-transparency
-   fallback in global.css can make it solid (DESIGN.md §3.8). */
+/* Palette dialog: the near-opaque palette material, from tokens only, so the
+   reduced-transparency fallback in global.css can make it solid (DESIGN.md §3.8). */
 #overlay-command-k .command-container {
   width: 760px;
   max-width: 90vw;
   max-height: 75vh;
-  background: var(--n-menu-bg);
+  background: var(--n-palette-bg);
   backdrop-filter: var(--n-menu-blur);
   -webkit-backdrop-filter: var(--n-menu-blur);
   box-shadow: var(--n-menu-shadow);
@@ -174,11 +174,14 @@
   color: var(--n-accent);
 }
 
-/* On the selected row the meta ("Switch to tab", the date) steps up to
-   secondary text; the URL stays tertiary. */
+/* On the selected row the grey secondary line (the meta and the URL) steps up
+   to secondary text: tertiary grey on the blue highlight is under 4.5:1. */
 #overlay-command-k .result-item:hover .result-meta,
 #overlay-command-k .result-item.active .result-meta,
-#overlay-command-k .result-item[aria-selected='true'] .result-meta {
+#overlay-command-k .result-item[aria-selected='true'] .result-meta,
+#overlay-command-k .result-item:hover .result-url,
+#overlay-command-k .result-item.active .result-url,
+#overlay-command-k .result-item[aria-selected='true'] .result-url {
   color: var(--n-text-2);
 }
 

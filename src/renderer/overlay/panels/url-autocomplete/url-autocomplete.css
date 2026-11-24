@@ -64,6 +64,13 @@
   color: var(--n-text-1);
 }
 
+/* Grey secondary text steps up to secondary on the blue highlight. */
+#overlay-url-autocomplete .url-ac-item:hover :is(.url-ac-meta, .url-ac-url),
+#overlay-url-autocomplete .url-ac-item.active :is(.url-ac-meta, .url-ac-url),
+#overlay-url-autocomplete .url-ac-item[aria-selected='true'] :is(.url-ac-meta, .url-ac-url) {
+  color: var(--n-text-2);
+}
+
 #overlay-url-autocomplete .url-ac-item:hover .url-ac-icon,
 #overlay-url-autocomplete .url-ac-item.active .url-ac-icon,
 #overlay-url-autocomplete .url-ac-item[aria-selected='true'] .url-ac-icon {

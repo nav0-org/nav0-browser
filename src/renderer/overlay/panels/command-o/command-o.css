@@ -12,15 +12,16 @@
   padding-top: 92px;
 }
 
-/* Menu material from tokens only, so the reduced-transparency fallback in
-   global.css can make it solid (DESIGN.md §3.8). It fits its content up to
+/* The near-opaque palette material, from tokens only, so the
+   reduced-transparency fallback in global.css can make it solid (DESIGN.md
+   §3.8). It fits its content up to
    75vh, and the tab grid scrolls; the top edge stays put while a search
    narrows the list. */
 #overlay-command-o .cmdo-overlay-container {
   width: 900px;
   max-width: 90vw;
   max-height: 75vh;
-  background: var(--n-menu-bg);
+  background: var(--n-palette-bg);
   backdrop-filter: var(--n-menu-blur);
   -webkit-backdrop-filter: var(--n-menu-blur);
   box-shadow: var(--n-menu-shadow);
