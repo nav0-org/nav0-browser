@@ -11,10 +11,12 @@
    ============================================================ */
 
 /* ====== LAYOUT ========================================== */
+/* Exactly the window's height: the sidebar stays put and only the content
+   column scrolls (each column is its own scroller). */
 .settings-layout {
   display: grid;
   grid-template-columns: 248px 1fr;
-  min-height: 100vh;
+  height: 100vh;
   background: var(--n-page);
   color: var(--n-text-1);
   -webkit-font-smoothing: antialiased;

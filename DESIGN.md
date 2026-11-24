@@ -236,6 +236,7 @@ Unchanged: `--z-dropdown 100`, `--z-sticky 200`, `--z-modal 1000`, `--z-toast 11
 ### 4.3 Settings (`src/renderer/pages/browser-settings/`)
 
 - Sidebar 248 px, `--n-grouped`, right border `--n-separator`; search field 30 px, white with `--n-sidebar-field-shadow` and a 14 px search icon; items 32 px, `--n-r-control`, 15 px icons; the current section uses the selection style.
+- The sidebar fills the window height and stays put; only the content column scrolls.
 - Content: white page, 680 px column. Each group = a header **outside** the panel (13 px 600 title, 12 px `--n-text-3` description, 16 px left inset) + a grey panel.
 - Rows inside panels: 12 px × 16 px padding, label 13 px, description 12 px `--n-text-3`, control on the right. Dividers `--n-panel-line`, inset 16 px (44 px under radio rows).
 - Controls inside panels are white: text inputs (`--n-input-shadow`, 30 px), selects (`--n-select-shadow`, 28 px; 26–30 px to match a row's other controls), buttons (`--n-raised-shadow`, 26–30 px). Buttons that sit on the white page use the secondary fill.
