@@ -7,6 +7,8 @@ export class OptionsMenuHandler implements OverlayHandler {
     webContents.send(MainToRendererEventsForBrowserIPC.SHOW_OVERLAY_PANEL, {
       type: 'options-menu',
     });
+    // Take keyboard focus, so the menu's arrow keys, Enter and Esc reach it.
+    webContents.focus();
   }
 
   onHide(webContents: WebContents): void {

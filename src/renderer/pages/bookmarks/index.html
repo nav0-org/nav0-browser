@@ -4,52 +4,44 @@
     <meta charset="UTF-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:;"
+      content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
     />
     <title>Bookmarks</title>
   </head>
   <body>
-    <div id="bookmarks-page" class="bookmarks-page">
-      <div class="bookmarks-wrapper">
-        <!-- Editorial masthead -->
-        <div class="bookmarks-head">
-          <h1 class="bookmarks-title">Bookmarks</h1>
-        </div>
+    <div id="bookmarks-page" class="list-page bookmarks-page">
+      <div class="list-column">
+        <h1 class="list-title">Bookmarks</h1>
 
-        <!-- Toolbar: search + folder seg + danger Clear -->
-        <div class="bookmarks-toolbar">
-          <div class="search-container">
-            <i data-lucide="search" class="search-icon" width="16" height="16"></i>
-            <input
-              type="text"
-              id="search-input"
-              class="search-input"
-              placeholder="Search bookmarks…"
-            />
-          </div>
-          <div class="folder-seg" id="tab-filters" role="tablist">
-            <button class="folder-seg-btn active" id="tab-queue" data-tab="queue">
-              <i data-lucide="book-open" width="13" height="13"></i> Reading queue
-              <span class="folder-seg-count" id="queue-count">0</span>
+        <!-- Toolbar: filled search + folder segmented control + secondary Clear -->
+        <div class="list-toolbar">
+          <label class="search-field">
+            <i data-lucide="search" width="16" height="16"></i>
+            <input type="text" id="search-input" placeholder="Search bookmarks…" />
+          </label>
+          <div class="segmented" id="tab-filters" role="tablist">
+            <button class="segmented-btn active" id="tab-queue" data-tab="queue">
+              <i data-lucide="book-open" width="14" height="14"></i> Reading Queue
+              <span class="segmented-count" id="queue-count">0</span>
             </button>
-            <button class="folder-seg-btn" id="tab-reference" data-tab="reference">
-              <i data-lucide="bookmark" width="13" height="13"></i> Reference
-              <span class="folder-seg-count" id="reference-count">0</span>
+            <button class="segmented-btn" id="tab-reference" data-tab="reference">
+              <i data-lucide="bookmark" width="14" height="14"></i> Reference
+              <span class="segmented-count" id="reference-count">0</span>
             </button>
           </div>
-          <button id="delete-all" class="btn-clear-all" style="display: none">
+          <button id="delete-all" class="btn btn-secondary d-none">
             <i data-lucide="trash-2" width="14" height="14"></i> Clear All Bookmarks
           </button>
         </div>
 
-        <!-- Cross-folder category chips -->
-        <div class="cat-row" id="cat-row">
-          <span class="cat-label">Categories</span>
-          <div id="category-filters" class="category-filters"></div>
+        <!-- Category chips (filter the active folder) -->
+        <div class="chip-row" id="cat-row">
+          <span class="chip-row-label">Categories</span>
+          <div id="category-filters" class="chip-row-chips"></div>
         </div>
 
         <!-- Stale bookmarks alert (reference tab only) -->
-        <div class="stale-gauge" id="stale-bar" style="display: none">
+        <div class="panel stale-gauge d-none" id="stale-bar">
           <div class="stale-header">
             <span class="stale-label" id="stale-text"></span>
             <button class="stale-review-btn" id="stale-review-btn">Review</button>
@@ -57,29 +49,27 @@
         </div>
 
         <!-- Stale review panel -->
-        <div class="stale-review-panel" id="stale-review" style="display: none">
+        <div class="panel stale-review-panel d-none" id="stale-review">
           <div class="stale-review-header">
-            <span>Dormant bookmarks — keep or let go?</span>
+            <span>Dormant Bookmarks — Keep or Let Go?</span>
             <button class="stale-review-btn" id="stale-done-btn">Done</button>
           </div>
           <div id="stale-review-list"></div>
         </div>
 
         <!-- Folder section header (label updates with active tab) -->
-        <div class="bookmarks-folder" id="folder-header">
-          <span class="folder-label">
-            <span class="folder-icon"
-              ><i id="folder-icon" data-lucide="book-open" width="14" height="14"></i
-            ></span>
-            <span id="folder-name">Reading queue</span>
+        <div class="list-group-header" id="folder-header">
+          <span class="list-group-title">
+            <i id="folder-icon" data-lucide="book-open" width="14" height="14"></i>
+            <span id="folder-name">Reading Queue</span>
           </span>
-          <span class="folder-sub" id="folder-sub"></span>
+          <span class="list-group-sub" id="folder-sub"></span>
         </div>
 
         <!-- Bookmarks list -->
         <div class="bookmarks-container">
-          <ul id="bookmarks-list" class="bookmarks-list"></ul>
-          <div id="no-bookmarks" class="no-bookmarks">No bookmarks match your search.</div>
+          <ul id="bookmarks-list" class="list-grid bookmarks-list"></ul>
+          <div id="no-bookmarks" class="list-empty d-none">No bookmarks match your search.</div>
         </div>
 
         <!-- Footer placeholder (Clear moved to toolbar) -->

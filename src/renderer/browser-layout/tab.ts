@@ -1,12 +1,11 @@
 import { createIcons, icons } from 'lucide';
 import TabTemplate from './tab.html';
 import { ImageBase64Strings, InAppUrls } from '../../constants/app-constants';
+import { FaviconTile } from '../common/favicon-tile';
 
-const EMPTY_FAVICON =
-  'data:image/svg+xml,' +
-  encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><rect x="0.5" y="0.5" width="15" height="15" rx="2" fill="none" stroke="#ccc" stroke-width="1"/></svg>'
-  );
+// Built-in pages (nav0://…, and the New Tab page, whose URL is '') show the
+// Nav0 compass: they never report a favicon of their own.
+const isBuiltInUrl = (url: string): boolean => url === '' || url.startsWith(InAppUrls.PREFIX);
 
 export class Tab {
   public id: string;
@@ -14,6 +13,9 @@ export class Tab {
   public title: string;
   public faviconUrl: string | null = null;
   private tabElement: HTMLElement | null = null;
+  // A tab with no favicon, or one that fails to load, shows the favicon
+  // fallback tile (DESIGN.md §5.3): never a broken-image glyph or a blank slot.
+  private showFaviconTile = true;
   public canGoBack = false;
   public canGoForward = false;
   public isLoading = false;
@@ -23,6 +25,9 @@ export class Tab {
   public isReaderModeEligible = false;
   public isReaderModeActive = false;
   public isPinned = false;
+  // The last load failed (the error page is showing). Set after the failure's
+  // own handleUrlChange(); cleared by the next one.
+  public loadFailed = false;
   public sslStatus: 'secure' | 'insecure' | 'internal' = 'internal';
   public sslDetails: {
     issuer: string;
@@ -75,10 +80,11 @@ export class Tab {
       window.BrowserAPI.showTabContextMenu(appWindowId, this.id, this.isPinned);
     });
 
-    // Set default favicon so the <img> never shows a broken image icon
-    const faviconElement = this.tabElement.querySelector('.tab-favicon') as HTMLImageElement;
-    if (faviconElement) {
-      faviconElement.src = EMPTY_FAVICON;
+    // The tile until the tab has a favicon to show.
+    if (isBuiltInUrl(this.url)) {
+      this.updateTabFavicon(ImageBase64Strings.FAVICON);
+    } else {
+      this.setFaviconSource(null);
     }
 
     setTimeout(() => {
@@ -105,49 +111,92 @@ export class Tab {
     canGoBack: boolean,
     canGoForward: boolean
   ): void {
+    const wasBuiltIn = isBuiltInUrl(this.url);
     this.url = url;
+    this.loadFailed = false;
     this.isBookmark = isBookmark;
     this.bookmarkId = bookmarkId;
     this.bookmarkType = bookmarkType;
     this.canGoBack = canGoBack;
     this.canGoForward = canGoForward;
-    if (this.url.startsWith(InAppUrls.PREFIX)) {
+    if (isBuiltInUrl(this.url)) {
       this.updateTabFavicon(ImageBase64Strings.FAVICON);
+    } else if (wasBuiltIn) {
+      // Leaving a built-in page: drop the compass until the site reports its
+      // own favicon, so a site without one isn't shown (or bookmarked) with it.
+      this.clearFavicon();
     }
+    // The tile's letter follows the page's host.
+    this.syncFaviconSlot();
+  }
+
+  // Back to the tile, with no favicon to bookmark: for a page that hasn't
+  // reported one yet, or an error page, which never does. A built-in page
+  // keeps the compass.
+  clearFavicon(): void {
+    if (isBuiltInUrl(this.url)) {
+      this.updateTabFavicon(ImageBase64Strings.FAVICON);
+      return;
+    }
+    this.faviconUrl = null;
+    this.setFaviconSource(null);
   }
 
   setLoading(isLoading: boolean): void {
     this.isLoading = isLoading;
     if (this.tabElement) {
-      const faviconElement = this.tabElement.querySelector('.tab-favicon') as HTMLElement;
       const loaderElement = this.tabElement.querySelector('.tab-loader') as HTMLElement;
-      if (faviconElement && loaderElement) {
-        if (isLoading) {
-          faviconElement.style.display = 'none';
-          loaderElement.style.display = 'block';
-        } else {
-          faviconElement.style.display = '';
-          loaderElement.style.display = 'none';
-        }
+      if (loaderElement) {
+        loaderElement.hidden = !isLoading;
       }
+      this.syncFaviconSlot();
     }
   }
 
   updateTabFavicon(faviconUrl: string): void {
-    if (this.url.startsWith(InAppUrls.PREFIX)) {
+    // A site's favicon can arrive after the tab has moved on to a built-in
+    // page; the compass wins there.
+    if (isBuiltInUrl(this.url)) {
       this.faviconUrl = ImageBase64Strings.FAVICON;
     } else {
       this.faviconUrl = faviconUrl;
     }
-    if (this.tabElement) {
-      const faviconElement = this.tabElement.querySelector('.tab-favicon') as HTMLImageElement;
-      if (faviconElement) {
-        faviconElement.onerror = () => {
-          faviconElement.onerror = null;
-          faviconElement.src = EMPTY_FAVICON;
-        };
-        faviconElement.src = faviconUrl;
-      }
+    this.setFaviconSource(this.faviconUrl);
+  }
+
+  // The favicon takes the tile's place once it has loaded; with none, or if it
+  // fails to load, the tile shows.
+  private setFaviconSource(source: string | null): void {
+    const faviconElement = this.tabElement?.querySelector('.tab-favicon') as HTMLImageElement;
+    if (!faviconElement) return;
+    if (source) {
+      faviconElement.onload = () => {
+        this.showFaviconTile = false;
+        this.syncFaviconSlot();
+      };
+      faviconElement.onerror = () => {
+        this.showFaviconTile = true;
+        this.syncFaviconSlot();
+      };
+      faviconElement.src = source;
+    } else {
+      faviconElement.onload = null;
+      faviconElement.onerror = null;
+      faviconElement.removeAttribute('src');
+      this.showFaviconTile = true;
+    }
+    this.syncFaviconSlot();
+  }
+
+  // Shows the favicon or the tile, and neither while the loader spins.
+  private syncFaviconSlot(): void {
+    if (!this.tabElement) return;
+    const faviconElement = this.tabElement.querySelector('.tab-favicon') as HTMLElement;
+    const tile = this.tabElement.querySelector('.tab-favicon-tile') as HTMLElement;
+    if (faviconElement) faviconElement.hidden = this.isLoading || this.showFaviconTile;
+    if (tile) {
+      tile.textContent = FaviconTile.letter(this.url);
+      tile.hidden = this.isLoading || !this.showFaviconTile;
     }
   }
 
@@ -167,9 +216,9 @@ export class Tab {
     if (this.tabElement) {
       this.tabElement.classList.add('pinned');
       const titleSpan = this.tabElement.querySelector('#tab-title') as HTMLElement;
-      if (titleSpan) titleSpan.style.display = 'none';
+      if (titleSpan) titleSpan.hidden = true;
       const closeButton = this.tabElement.querySelector('#tab-close-button') as HTMLElement;
-      if (closeButton) closeButton.style.display = 'none';
+      if (closeButton) closeButton.hidden = true;
     }
   }
 
@@ -178,9 +227,9 @@ export class Tab {
     if (this.tabElement) {
       this.tabElement.classList.remove('pinned');
       const titleSpan = this.tabElement.querySelector('#tab-title') as HTMLElement;
-      if (titleSpan) titleSpan.style.display = '';
+      if (titleSpan) titleSpan.hidden = false;
       const closeButton = this.tabElement.querySelector('#tab-close-button') as HTMLElement;
-      if (closeButton) closeButton.style.display = '';
+      if (closeButton) closeButton.hidden = false;
     }
   }
 

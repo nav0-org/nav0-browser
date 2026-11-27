@@ -9,69 +9,53 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   min-height: 100vh;
-  color: var(--fg-1);
-  background: var(--bg-0);
+  color: var(--n-text-1);
+  background: var(--n-page);
 }
 
 .new-tab-page {
   min-height: 100vh;
-  background: var(--bg-0);
-  color: var(--fg-2);
-
-  /* Shared floating-card shadow used by the search bar, suggestion tiles,
-     and the search-results popup so all three sit on the same elevation. */
-  --new-tab-card-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+  background: var(--n-page);
+  color: var(--n-text-2);
 }
 
+/* 880 px content column (DESIGN.md §4.2). content-box so the 32 px side
+   gutter (kept for narrow windows) sits outside the column instead of
+   shrinking it. */
 .new-tab-wrapper {
-  max-width: 1080px;
+  box-sizing: content-box;
+  max-width: 880px;
   margin: 0 auto;
-  padding: 48px 56px 80px;
+  padding: 96px var(--spacing-xl) 56px;
+  display: flex;
+  flex-direction: column;
 }
 
-/* ---- Editorial masthead --------------------------------- */
+/* ---- Hero: greeting + search field ---------------------- */
 .new-tab-head {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 32px;
-  flex-wrap: wrap;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--nav0-red-600);
+  flex-direction: column;
+  gap: 20px;
 }
 
 .new-tab-title {
-  font-size: 48px;
-  font-weight: 200;
-  letter-spacing: -0.5px;
-  color: var(--fg-1);
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--n-text-1);
   margin: 0;
-  line-height: 1.2;
 }
 
+/* The field sits 20 px under the greeting; the tile sections follow 40 px
+   apart (margins rather than a wrapper gap, because the greeting and the
+   field are siblings of the sections). */
 .bento-container {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
   width: 100%;
-  margin-top: 28px;
-}
-
-.bento-item {
-  background-color: var(--bg-0);
-  border-radius: var(--r-lg);
-  padding: 24px;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-1);
-  transition: box-shadow 0.2s ease;
-}
-
-.bento-item:hover {
-  box-shadow: var(--shadow-md);
+  margin-top: 20px;
 }
 
 .search-item {
-  grid-column: 1 / -1;
   position: relative;
 }
 
@@ -84,47 +68,51 @@ body {
   align-items: center;
 }
 
+/* The icon stays --n-text-3 when the field is focused. */
 .search-shell-icon {
   position: absolute;
-  left: 20px;
+  left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--fg-3);
+  color: var(--n-text-3);
   pointer-events: none;
-  transition: color 0.12s ease;
 }
 
-.search-shell:focus-within .search-shell-icon {
-  color: var(--fg-2);
-}
-
-/* Search input sits on the same elevation as the suggestion tiles and
-   the results popup — shared floating-card shadow, white surface. */
+/* Big filled search field spanning the column. The input is the field
+   itself (no wrapper ring), so its own focus ring is the only one. */
 .search-bar {
   width: 100%;
-  padding: 16px 24px 16px 52px;
-  font-size: 18px;
+  height: 44px;
+  padding: 0 14px 0 42px;
+  font-size: 14px;
   border: none;
-  border-radius: var(--r-md);
-  background-color: var(--bg-0);
-  box-shadow: var(--new-tab-card-shadow);
+  border-radius: var(--n-r-panel);
+  background-color: var(--n-fill);
   outline: none;
-  transition: box-shadow 0.12s ease;
-  color: inherit;
+  transition:
+    background-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease;
+  color: var(--n-text-1);
+  caret-color: var(--n-accent);
 }
 
-.search-bar:focus {
-  background-color: var(--bg-0);
-  box-shadow: var(--new-tab-card-shadow);
+.search-bar::placeholder {
+  color: var(--n-text-3);
 }
 
-/* ---- Search results panel (Command-K styled, inline) ----- */
+/* Focused, a filled search field turns white with the field ring. */
+.search-bar:focus-visible {
+  background-color: var(--n-card);
+  box-shadow: var(--n-focus-ring-field);
+}
+
+/* ---- Search results popover (the ⌘K rows, inline) -------- */
 .search-results {
-  margin-top: 0;
-  background: var(--bg-0);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-lg);
-  box-shadow: var(--new-tab-card-shadow);
+  margin-top: var(--spacing-sm);
+  background: var(--n-menu-bg);
+  backdrop-filter: var(--n-menu-blur);
+  border-radius: var(--n-r-panel);
+  box-shadow: var(--n-menu-shadow);
   max-height: 60vh;
   overflow: hidden;
   display: flex;
@@ -138,90 +126,92 @@ body {
 
 .search-results-list {
   overflow-y: auto;
-  padding: 6px 0;
+  padding: 6px var(--spacing-sm) 10px;
   flex: 1;
 }
 
 .search-results-empty {
   padding: 18px 20px;
   text-align: center;
-  color: var(--fg-3);
+  color: var(--n-text-3);
   font-size: 13px;
 }
 
 .search-section-title {
-  padding: 8px 16px 4px;
+  padding: 12px 12px var(--spacing-xs);
   font-size: 11px;
-  text-transform: uppercase;
-  color: var(--fg-3);
-  letter-spacing: 0.5px;
-  font-weight: 500;
+  line-height: 14px;
+  color: var(--n-text-3);
+  letter-spacing: 0.02em;
+  font-weight: 600;
 }
 
+/* Rows: 46 px, 28 px icon well, title over a one-line meta · URL subline.
+   The search-engine row is an ordinary row (no rule under it). */
 .search-result-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
+  gap: 10px;
+  height: 46px;
+  padding: 0 10px;
   cursor: pointer;
   position: relative;
-  transition: background-color 0.08s ease;
+  border-radius: var(--n-r-control);
+  transition: background-color var(--dur-fast) ease;
 }
 
+/* Selection style: soft accent ground, primary text, accent icon. */
 .search-result-item:hover,
 .search-result-item.active {
-  background-color: var(--bg-3);
+  background-color: var(--n-accent-soft);
 }
 
-.search-result-item:hover::before,
-.search-result-item.active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--nav0-red-600);
+.search-result-item:hover .search-result-icon,
+.search-result-item.active .search-result-icon {
+  color: var(--n-accent);
 }
 
-.search-result-item.search-engine-item {
-  border-bottom: 1px solid var(--border-1);
-  margin-bottom: 4px;
-  padding-bottom: 12px;
+.search-result-item:hover .search-result-meta,
+.search-result-item.active .search-result-meta {
+  color: var(--n-text-2);
 }
 
 .search-result-icon,
 .search-result-favicon {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--r-md);
-  background: var(--bg-2);
-  color: var(--fg-3);
+  border-radius: var(--n-r-control);
+  background: var(--n-fill);
+  color: var(--n-text-2);
   flex-shrink: 0;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .search-result-favicon img {
-  width: 20px;
-  height: 20px;
-  border-radius: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--n-r-control);
   display: block;
 }
 
 .search-result-content {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .search-result-title {
   display: block;
   font-size: 13px;
+  line-height: 16px;
   font-weight: 500;
-  color: var(--fg-1);
+  color: var(--n-text-1);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -229,94 +219,62 @@ body {
 
 .search-result-subline {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 2px;
+  align-items: baseline;
   min-width: 0;
+  font-size: 12px;
+  line-height: 14px;
+  color: var(--n-text-3);
 }
 
 .search-result-meta {
-  font-size: 11px;
-  color: var(--fg-4);
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .search-result-url {
   flex: 1;
   min-width: 0;
-  font-size: 12px;
-  color: var(--accent);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.shortcut-link {
-  text-decoration: none;
-  color: inherit;
-  display: block;
-  cursor: pointer;
-}
-
-.shortcut-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.icon-container {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--r-lg);
-  background-color: var(--bg-2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.icon {
-  width: 22px;
-  height: 22px;
-}
-
-.shortcut-title {
-  font-size: 20px;
-  font-weight: 500;
-}
-
-.shortcut-description {
-  color: var(--fg-3);
-  font-size: 12px;
-  line-height: 1.3;
-}
-
-@media (max-width: 640px) {
-  .bento-container {
-    grid-template-columns: 1fr;
-  }
+/* "Meta · URL", as in ⌘K. Decorative, so it has empty alt text. */
+.search-result-meta + .search-result-url::before {
+  content: '\00b7' / '';
+  margin: 0 var(--spacing-xs);
 }
 
 /* ---- Tile rows (Bookmarks + Frequently visited) ---------- */
 .tile-section {
-  margin-top: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 40px;
+}
+
+/* Sections stay hidden until loadTileRows() fills them (a private window
+   has none); without this, display: flex overrides the hidden attribute
+   and the headings show over empty rows. */
+.tile-section[hidden] {
+  display: none;
 }
 
 .tile-section-head {
-  margin-bottom: 14px;
+  margin: 0;
 }
 
 .tile-section-title {
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 18px;
   font-weight: 600;
-  color: var(--fg-1);
-  letter-spacing: -0.1px;
+  color: var(--n-text-1);
   margin: 0;
 }
 
 .tile-row {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
+  grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -325,50 +283,51 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  gap: 12px;
-  padding: 22px 12px 16px;
-  background: var(--bg-0);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-md);
-  box-shadow: var(--new-tab-card-shadow);
+  gap: 10px;
   text-decoration: none;
   color: inherit;
   cursor: pointer;
   min-width: 0;
-  transition:
-    background var(--dur-fast),
-    border-color var(--dur-fast),
-    box-shadow var(--dur-fast);
+  border-radius: var(--n-r-control);
 }
 
+/* Tiles aren't text links: keep the global a:hover underline off them. */
 .tile:hover {
-  background: var(--bg-0);
-  border-color: var(--border-2);
-  box-shadow: var(--new-tab-card-shadow);
+  text-decoration: none;
 }
 
+/* Neutral favicon well; any colour on a tile comes from the site's favicon. */
 .tile-icon {
-  width: 36px;
-  height: 36px;
+  width: 56px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-0);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-sm);
+  background: var(--n-well);
+  border-radius: var(--n-r-control);
   flex-shrink: 0;
   overflow: hidden;
 }
 
-.tile-icon img,
-.tile-icon svg {
-  width: 22px;
-  height: 22px;
+.tile-icon img {
+  width: 28px;
+  height: 28px;
   display: block;
+  border-radius: var(--n-r-control);
+}
+
+/* The favicon fallback tile takes the icon's 28 px slot. */
+.tile-icon .favicon-tile {
+  width: 28px;
+  height: 28px;
+  font-size: var(--font-xl);
 }
 
 .tile-text {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
   text-align: center;
   width: 100%;
   max-width: 100%;
@@ -376,14 +335,15 @@ body {
 }
 
 .tile-title {
-  display: block;
+  display: -webkit-box;
   max-width: 100%;
-  font-size: 13px;
+  font-size: 12px;
+  line-height: 15px;
   font-weight: 500;
-  color: var(--fg-1);
-  white-space: nowrap;
+  color: var(--n-text-1);
   overflow: hidden;
-  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   margin: 0;
 }
 
@@ -391,11 +351,12 @@ body {
   display: block;
   max-width: 100%;
   font-size: 11px;
-  color: var(--fg-3);
+  line-height: 14px;
+  color: var(--n-text-3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin: 4px 0 0;
+  margin: 0;
 }
 
 @media (max-width: 960px) {
@@ -407,5 +368,12 @@ body {
 @media (max-width: 640px) {
   .tile-row {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .search-bar,
+  .search-result-item {
+    transition: none;
   }
 }

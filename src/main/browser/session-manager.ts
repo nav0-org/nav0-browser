@@ -48,6 +48,8 @@ export abstract class SessionManager {
         filteredTabs.push({
           url,
           title: tab.getTitle(),
+          // A local copy (never a remote URL), which the tab shows when it's
+          // restored, until it loads.
           faviconUrl: tab.getFaviconUrl(),
           isPinned: tab.getIsPinned(),
           isActive: tab.getId() === activeTabId,
@@ -126,7 +128,11 @@ export abstract class SessionManager {
         if (i === windowRecord.activeTabIndex) {
           await newWindow.createTab(tabRecord.url, false);
         } else {
-          newWindow.createSuspendedTab(tabRecord.url, tabRecord.title || 'Restored Tab');
+          newWindow.createSuspendedTab(
+            tabRecord.url,
+            tabRecord.title || 'Restored Tab',
+            tabRecord.faviconUrl
+          );
         }
       }
 

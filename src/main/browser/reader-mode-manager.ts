@@ -87,21 +87,40 @@ export class ReaderModeManager {
           "var container = document.createElement('div');" +
           "container.id = 'Nav0-reader-mode';" +
           "container.style.opacity = '0';" +
-          "var meta = '';" +
-          "if (article.byline) meta += '<span class=\"Nav0-reader-byline\">' + article.byline + '</span>';" +
-          "if (article.siteName) meta += '<span class=\"Nav0-reader-site\">' + article.siteName + '</span>';" +
+          // Title, byline and site name are plain text with entities already
+          // decoded by Readability, so they go in as text, never as markup:
+          // escaped text such as "&lt;img onerror=…&gt;" would otherwise run.
+          "var articleEl = document.createElement('article');" +
+          "articleEl.className = 'Nav0-reader-article';" +
+          "var header = document.createElement('header');" +
+          "header.className = 'Nav0-reader-header';" +
+          "var titleEl = document.createElement('h1');" +
+          "titleEl.className = 'Nav0-reader-title';" +
+          "titleEl.textContent = article.title || '';" +
+          'header.appendChild(titleEl);' +
+          "var meta = document.createElement('div');" +
+          "meta.className = 'Nav0-reader-meta';" +
+          'function addMeta(className, text) {' +
+          "  var span = document.createElement('span');" +
+          '  span.className = className;' +
+          '  span.textContent = text;' +
+          '  meta.appendChild(span);' +
+          '}' +
+          "if (article.byline) addMeta('Nav0-reader-byline', article.byline);" +
+          "if (article.siteName) addMeta('Nav0-reader-site', article.siteName);" +
           'if (article.publishedTime) {' +
-          "  try { var d = new Date(article.publishedTime); if (!isNaN(d.getTime())) meta += '<span class=\"Nav0-reader-date\">' + d.toLocaleDateString(undefined, {year:'numeric',month:'long',day:'numeric'}) + '</span>'; }" +
+          "  try { var d = new Date(article.publishedTime); if (!isNaN(d.getTime())) addMeta('Nav0-reader-date', d.toLocaleDateString(undefined, {year:'numeric',month:'long',day:'numeric'})); }" +
           '  catch(e) {}' +
           '}' +
-          'container.innerHTML = ' +
-          '  \'<article class="Nav0-reader-article">\' +' +
-          '  \'<header class="Nav0-reader-header">\' +' +
-          "  '<h1 class=\"Nav0-reader-title\">' + article.title + '</h1>' +" +
-          "  (meta ? '<div class=\"Nav0-reader-meta\">' + meta + '</div>' : '') +" +
-          "  '</header>' +" +
-          "  '<div class=\"Nav0-reader-content\">' + article.content + '</div>' +" +
-          "  '</article>';" +
+          'if (meta.childNodes.length) header.appendChild(meta);' +
+          // The article body is HTML that Readability serialised from this
+          // page's own DOM, so it is inserted as markup.
+          "var content = document.createElement('div');" +
+          "content.className = 'Nav0-reader-content';" +
+          'content.innerHTML = article.content;' +
+          'articleEl.appendChild(header);' +
+          'articleEl.appendChild(content);' +
+          'container.appendChild(articleEl);' +
           'document.body.appendChild(container);' +
           'window.scrollTo(0, 0);' +
           'requestAnimationFrame(function() {' +

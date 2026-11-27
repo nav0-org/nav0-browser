@@ -1,51 +1,24 @@
 @import url('../../styles/global.css');
 
 /* ============================================================
-   Settings — editorial dashboard layout.
-   Eight sections re-laid in the same grammar as History,
-   Bookmarks and Downloads: 48-px display heading per panel,
-   hairline-bordered "group" cards with title strip + row
-   dividers, terminal-style mono block for system identity,
-   filter chips + table for shortcuts. System font stack —
-   no webfonts, no Inter-specific letter-spacing tweaks.
+   Settings — DESIGN.md §4.3.
+   White page with a 248-px grey sidebar. Each group is a header
+   OUTSIDE a grey panel (--n-grouped), then the panel holds the
+   rows. Controls inside panels are white (input / select / raised shadow);
+   controls on the white page use the secondary fill. One selection
+   style everywhere (--n-accent-soft bg, --n-text-1 text, --n-accent
+   icon). System sans for chrome, mono for code and the UA string.
    ============================================================ */
 
-/* ====== LOCAL TOKENS — scoped to this page ============== */
-.settings-layout {
-  /* Map prior --n0-* aliases onto current design system tokens so any
-     legacy CSS resolves to the same ramp. */
-  --n0-bg: var(--bg-1);
-  --n0-surface: var(--bg-0);
-  --n0-surface-hover: var(--bg-2);
-  --n0-surface-active: var(--bg-1);
-  --n0-border: var(--border-1);
-  --n0-border-subtle: var(--border-1);
-  --n0-border-strong: var(--border-2);
-  --n0-text: var(--fg-1);
-  --n0-text-2: var(--fg-3);
-  --n0-text-3: var(--fg-4);
-  /* Accent matches the tab-selector red used throughout the redesigned chrome. */
-  --n0-accent: var(--nav0-red-600);
-  --n0-accent-dark: var(--nav0-red-700);
-  --n0-accent-light: rgba(220, 38, 38, 0.08);
-  --n0-accent-ring: rgba(0, 0, 0, 0.1);
-  --n0-red: var(--danger);
-  --n0-red-light: var(--danger-soft, #fdecea);
-  --n0-red-border: rgba(220, 38, 38, 0.25);
-  --n0-green: var(--success);
-  --n0-sans:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --n0-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
-}
-
 /* ====== LAYOUT ========================================== */
+/* Exactly the window's height: the sidebar stays put and only the content
+   column scrolls (each column is its own scroller). */
 .settings-layout {
   display: grid;
-  grid-template-columns: 280px 1fr;
-  min-height: 100vh;
-  background: var(--bg-0);
-  font-family: var(--n0-sans);
-  color: var(--n0-text);
+  grid-template-columns: 248px 1fr;
+  height: 100vh;
+  background: var(--n-page);
+  color: var(--n-text-1);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -58,42 +31,38 @@
 
 /* ====== SIDEBAR (left rail) ============================= */
 .settings-sidebar {
-  background: var(--bg-1);
-  border-right: 1px solid var(--border-1);
-  padding: 32px 16px 32px;
+  background: var(--n-grouped);
+  border-right: 1px solid var(--n-separator);
+  padding: 16px 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   overflow-y: auto;
 }
 
-/* Search */
+/* Search — white field with the sidebar field shadow (DESIGN.md §4.3) */
 .sidebar-search {
   position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 34px;
+  height: 30px;
   padding: 0 10px;
-  background: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-sm);
-  color: var(--n0-text-2);
-  margin-bottom: 14px;
-  transition:
-    background var(--dur-fast),
-    border-color var(--dur-fast),
-    box-shadow var(--dur-fast);
+  background: var(--n-card);
+  border: 0;
+  border-radius: var(--n-r-control);
+  box-shadow: var(--n-sidebar-field-shadow);
+  color: var(--n-text-3);
+  margin-bottom: 12px;
+  transition: box-shadow var(--dur-fast);
 }
 
 .sidebar-search:focus-within {
-  background: var(--bg-0);
-  border-color: var(--fg-1);
-  box-shadow: var(--shadow-focus);
+  box-shadow: var(--n-focus-ring-field);
 }
 
 .sidebar-search-icon {
-  color: var(--n0-text-2);
+  color: var(--n-text-3);
   width: 14px;
   height: 14px;
   pointer-events: none;
@@ -108,13 +77,19 @@
   outline: 0;
   background: transparent;
   font-family: inherit;
-  font-size: 12px;
-  color: var(--n0-text);
+  font-size: 13px;
+  color: var(--n-text-1);
   padding: 0;
 }
 
 .sidebar-search-input::placeholder {
-  color: var(--n0-text-3);
+  color: var(--n-text-3);
+}
+
+/* The wrapper draws the field ring (:focus-within); the bare input must not
+   add the global :focus-visible halo inside it (a box inside the box). */
+.sidebar-search-input:focus-visible {
+  box-shadow: none;
 }
 
 /* Nav list */
@@ -132,19 +107,21 @@
   margin: 0;
 }
 
+/* A tight 16-px line: the body's 19.5-px line sets the label slightly high
+   in the 32-px row. */
 .sidebar-link {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0 12px;
-  height: 38px;
-  border-radius: var(--r-sm);
+  padding: 0 10px;
+  height: 32px;
+  border-radius: var(--n-r-control);
   font-family: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--n0-text);
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 400;
+  color: var(--n-text-1);
   text-decoration: none;
-  border: 1px solid transparent;
   position: relative;
   transition:
     background var(--dur-fast),
@@ -152,55 +129,39 @@
 }
 
 .sidebar-link:hover {
-  background: var(--bg-3);
-  color: var(--n0-text);
+  background: var(--n-hover);
+  color: var(--n-text-1);
   text-decoration: none;
 }
 
 .sidebar-link svg {
-  width: 16px;
-  height: 16px;
-  color: var(--n0-text-2);
-  stroke-width: 1.75;
+  width: 15px;
+  height: 15px;
+  color: var(--n-text-2);
+  stroke-width: 2;
   flex-shrink: 0;
 }
 
-.sidebar-link:hover svg {
-  color: var(--n0-text);
-}
-
+/* Current section — the one selection style */
 .sidebar-link.active {
-  background: var(--bg-0);
-  color: var(--n0-text);
-  border-color: var(--border-1);
-}
-
-/* 2-px compass-red anchor on the active nav item, matching the design */
-.sidebar-link.active::before {
-  content: '';
-  position: absolute;
-  left: -1px;
-  top: -1px;
-  bottom: -1px;
-  width: 2px;
-  background: var(--nav0-red-600);
-  border-radius: 1px;
+  background: var(--n-accent-soft);
+  color: var(--n-text-1);
+  font-weight: 500;
 }
 
 .sidebar-link.active svg {
-  color: var(--n0-text);
-  stroke-width: 2;
+  color: var(--n-accent);
 }
 
-/* Footer — kept for the build status but tiny */
+/* Footer — tiny build status, kept harmless */
 .sidebar-footer {
   padding: 14px 8px 0;
   font-size: 11px;
-  color: var(--n0-text-3);
+  color: var(--n-text-3);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid var(--border-1);
+  border-top: 1px solid var(--n-separator);
   margin-top: 14px;
 }
 
@@ -213,8 +174,8 @@
 .sidebar-status-dot {
   width: 6px;
   height: 6px;
-  border-radius: var(--r-full);
-  background: var(--n0-green);
+  border-radius: var(--n-r-full);
+  background: var(--n-accent);
   display: inline-block;
 }
 
@@ -223,132 +184,197 @@
   flex: 1;
   overflow-y: auto;
   display: block;
-  justify-content: initial;
+  background: var(--n-page);
 }
 
 .settings-content {
-  width: 100%;
-  max-width: 880px;
-  padding: 48px 56px 80px;
-  margin: 0;
+  width: 680px;
+  max-width: 100%;
+  padding: 40px 0 56px;
+  margin: 0 auto;
 }
 
 .settings-section {
   display: none;
 }
 
+/* A flex column, so sibling margins add up instead of collapsing
+   (title 2 px + first group 22 px = 24 px; 28 px between groups). */
 .settings-section.active {
-  display: block;
+  display: flex;
+  flex-direction: column;
 }
 
-/* ---- Page header — editorial section title ------------- */
+/* Sidebar search can show several matching sections; keep them apart. */
+.settings-section.active ~ .settings-section.active {
+  margin-top: 40px;
+}
+
+/* ---- Page header — the section title ------------------- */
 .page-header {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 32px;
   flex-wrap: wrap;
-  margin-bottom: 22px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid var(--nav0-red-600);
+  margin-bottom: 2px;
+  padding-bottom: 0;
 }
 
 .page-title {
-  font-family: var(--n0-sans);
-  font-size: 48px;
-  font-weight: 200;
-  letter-spacing: -0.5px;
-  color: var(--n0-text);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--n-text-1);
   margin: 0;
-  line-height: 1.2;
+  line-height: 34px;
 }
 
 /* Legacy alias for some sections */
 .section-title {
-  font-family: var(--n0-sans);
-  font-size: 48px;
-  font-weight: 200;
-  letter-spacing: -0.5px;
-  color: var(--n0-text);
-  margin: 0 0 22px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--n-text-1);
+  margin: 0 0 2px;
   padding: 0;
   border: none;
 }
 
-/* ====== SETTING GROUPS (HAIRLINE CARDS) ================= */
+/* ====== SETTING GROUPS ================================== */
+/* A group = a header that sits ON the white page, ABOVE a grey
+   panel. No card chrome on the .setting-group wrapper itself. */
 .setting-group {
-  background: var(--bg-0);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-md);
-  overflow: hidden;
-  margin-bottom: 14px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+  margin: 0;
   padding: 0;
 }
 
+/* 28 px above each group header; 22 px for the first one, under the title */
 .setting-group-header {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border-1);
-  background: var(--bg-0);
+  padding: 0 4px 0 16px;
+  margin: 28px 0 8px;
+  border: 0;
+  background: transparent;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 16px;
+}
+
+.page-header + .setting-group > .setting-group-header {
+  margin-top: 22px;
 }
 
 .setting-group-header > div:first-child {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .setting-group-title {
-  font-family: var(--n0-sans);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: var(--n0-text);
+  color: var(--n-text-1);
   margin: 0;
-  line-height: 1.3;
-  letter-spacing: -0.1px;
+  line-height: 18px;
 }
 
 .setting-group-description {
-  font-family: var(--n0-sans);
   font-size: 12px;
-  color: var(--n0-text-2);
-  margin: 2px 0 0;
-  line-height: 1.5;
+  color: var(--n-text-3);
+  margin: 0;
+  line-height: 16px;
 }
 
 .setting-group-description code {
-  font-family: var(--n0-mono);
-  background: var(--bg-2);
-  border: 1px solid var(--border-1);
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  background: var(--n-fill);
+  border: 0;
   padding: 1px 5px;
-  border-radius: var(--r-xs);
-  font-size: 11px;
-  color: var(--n0-accent);
+  border-radius: var(--n-r-badge);
+  font-size: 11.5px;
+  color: var(--n-text-1);
+  white-space: nowrap;
 }
 
+/* The grey panel that holds the rows */
 .setting-group-body {
+  background: var(--n-grouped);
+  border-radius: var(--n-r-panel);
+  overflow: hidden;
   padding: 0;
 }
 
+/* Radio panels: the rows carry their own 12-px padding (no extra inset). */
 .setting-group-body-padded {
-  padding: 12px 16px;
+  padding: 0;
+}
+
+/* Proxy: the radio panel, the manual / PAC forms and the bypass row are
+   siblings in the markup but read as one grey panel: square inner corners
+   and a full-width line above the bypass row. */
+.setting-group-body:has(~ .setting-group-body) {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.setting-group-body ~ .setting-group-body {
+  border-top: 1px solid var(--n-panel-line);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* Ad-blocker: the switch lives in the group header, off the grey panel,
+   bottom-aligned with the description. 12 px in from the header's 4-px
+   inset, its right edge lines up with the switches in the panel (16 px). */
+.setting-group > .setting-group-header > .toggle {
+  align-self: flex-end;
+  margin-right: 12px;
 }
 
 /* ====== FIELD ROWS (label + control) ==================== */
 .setting-toggle-row,
 .setting-action-row {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 16px;
   align-items: center;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--border-1);
+  padding: 12px 16px;
+  border-bottom: 1px solid transparent;
+}
+
+/* Row dividers inside a panel: 1 px --n-panel-line, inset 16 px on the
+   left, drawn in the row's transparent bottom border (DESIGN.md §4.3). */
+.setting-toggle-row::after,
+.setting-action-row::after,
+.sub-setting::after,
+.list-item::after {
+  content: '';
+  position: absolute;
+  left: 16px;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--n-panel-line);
+  pointer-events: none;
 }
 
 .setting-toggle-row:last-child,
 .setting-action-row:last-child {
   border-bottom: 0;
+}
+
+.setting-toggle-row:last-child::after,
+.setting-action-row:last-child::after,
+.sub-setting:last-child::after,
+.list-item:last-child::after {
+  content: none;
 }
 
 .setting-toggle-row > div:first-child,
@@ -362,74 +388,118 @@
   flex-shrink: 0;
 }
 
-/* Labels & descriptions */
+/* Labels & descriptions — Body 13/18, Callout 12/16 */
 .setting-label {
-  font-family: var(--n0-sans);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--n0-text);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 400;
+  color: var(--n-text-1);
   margin: 0;
   display: block;
 }
 
 .setting-label-sm {
-  font-family: var(--n0-sans);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--n0-text);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 400;
+  color: var(--n-text-1);
   margin: 0;
 }
 
 .setting-description {
-  font-family: var(--n0-sans);
   font-size: 12px;
-  color: var(--n0-text-2);
+  color: var(--n-text-3);
   margin: 2px 0 0;
-  line-height: 1.5;
+  line-height: 16px;
 }
 
 .setting-description code,
 .setting-description kbd {
-  font-family: var(--n0-mono);
-  background: var(--bg-2);
-  border: 1px solid var(--border-1);
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  background: var(--n-fill);
+  border: 0;
   padding: 1px 5px;
-  border-radius: var(--r-xs);
-  font-size: 11px;
-  color: var(--n0-text);
-  font-weight: 500;
+  border-radius: var(--n-r-badge);
+  font-size: 11.5px;
+  color: var(--n-text-1);
+  font-weight: 400;
   box-shadow: none;
+  min-width: 0;
+  height: auto;
+  white-space: nowrap;
 }
 
-/* A description that follows a .sub-label inside an unpadded group body
-   needs the same 16px inset so it lines up with the label and list rows. */
-#adblocker-details > .setting-description {
-  padding-left: 16px;
-  padding-right: 16px;
-}
-
+/* Sub-section labels inside a panel ("Filter Lists", "Allowed Sites",
+   "Clear on Close"). A later one opens with a full-width line in place of
+   the .mt-md gap. */
 .sub-label {
-  padding: 12px 16px 6px;
-  font-size: 11px;
-  color: var(--n0-text-2);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* Download path display */
-.setting-path-value {
+  padding: 14px 16px 6px;
   font-size: 12px;
-  color: var(--n0-text);
-  word-break: break-all;
+  line-height: 15px;
+  color: var(--n-text-3);
+  font-weight: 600;
+  letter-spacing: 0;
 }
 
-/* ====== TOGGLES ========================================= */
+.sub-label:first-child {
+  padding-top: 12px;
+}
+
+.sub-label:not(:first-child) {
+  margin-top: 0;
+  border-top: 1px solid var(--n-panel-line);
+}
+
+/* A label with a description: 2 px between them, the 6-px bottom inset
+   moves under the description. */
+.sub-label:has(+ .setting-description) {
+  padding-bottom: 0;
+}
+
+.sub-label + .setting-description {
+  margin: 2px 0 0;
+  padding: 0 16px 6px;
+}
+
+/* Download path display — a file path, so mono (12 / 16), on one line and
+   truncated in the middle: the head shrinks with an ellipsis, the last
+   folder stays whole (index.ts splits them). A tight 16-px line centres it
+   on the buttons; the body's 19.5 px sets it high. */
+.setting-path-value {
+  display: flex;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--n-text-1);
+  white-space: nowrap;
+}
+
+/* global.css gives every element the sans stack, so the two parts take
+   the mono from the path display explicitly. */
+.setting-path-head,
+.setting-path-tail {
+  font-family: inherit;
+}
+
+.setting-path-head {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.setting-path-tail {
+  flex: none;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ====== TOGGLES / SWITCHES ============================== */
 .toggle {
   position: relative;
   display: inline-block;
-  width: 34px;
-  height: 20px;
+  width: 38px;
+  height: 22px;
   flex-shrink: 0;
 }
 
@@ -442,35 +512,49 @@
 .toggle-slider {
   position: absolute;
   inset: 0;
-  background: var(--bg-3);
-  border-radius: 10px;
+  background: var(--n-track);
+  box-shadow: inset 0 0 0 1px var(--n-control-edge);
+  border-radius: var(--n-r-full);
   cursor: pointer;
-  transition: background var(--dur-fast);
+  transition:
+    background var(--dur-fast),
+    box-shadow var(--dur-fast);
 }
 
 .toggle-slider::before {
   position: absolute;
   content: '';
-  height: 16px;
-  width: 16px;
+  height: 18px;
+  width: 18px;
   left: 2px;
   top: 2px;
-  border-radius: var(--r-full);
-  background: #ffffff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-  transition: transform var(--dur-fast);
+  border-radius: var(--n-r-full);
+  background: var(--n-card);
+  /* The off knob keeps a hairline on the grey track (DESIGN.md §5.2). */
+  box-shadow: var(--n-knob-shadow-off);
+  transition:
+    transform var(--dur-fast),
+    box-shadow var(--dur-fast);
 }
 
 .toggle input:checked + .toggle-slider {
-  background: var(--n0-accent);
+  background: var(--n-accent);
+  box-shadow: none;
 }
 
 .toggle input:checked + .toggle-slider::before {
-  transform: translateX(14px);
+  transform: translateX(16px);
+  box-shadow: var(--n-knob-shadow);
 }
 
 .toggle input:focus-visible + .toggle-slider {
-  box-shadow: var(--shadow-focus);
+  box-shadow:
+    inset 0 0 0 1px var(--n-control-edge),
+    var(--n-focus-ring);
+}
+
+.toggle input:checked:focus-visible + .toggle-slider {
+  box-shadow: var(--n-focus-ring);
 }
 
 /* ====== RADIO GROUPS ==================================== */
@@ -481,254 +565,188 @@
 }
 
 .radio-option {
+  position: relative;
   display: grid;
-  grid-template-columns: 22px 1fr;
+  grid-template-columns: 16px 1fr;
   gap: 12px;
   align-items: start;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--border-1);
+  padding: 12px 16px;
+  border: 0;
   cursor: pointer;
   transition: background var(--dur-fast);
   border-radius: 0;
-  border-left: 0;
-  border-right: 0;
 }
 
-.radio-option:last-child {
-  border-bottom: 0;
+/* Dividers under radio rows are inset 44 px (past the control), drawn in
+   a 1-px gap between the rows. */
+.radio-option:not(:last-child) {
+  margin-bottom: 1px;
+}
+
+.radio-option:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 44px;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--n-panel-line);
+  pointer-events: none;
 }
 
 .radio-option:hover {
-  background: var(--bg-3);
+  background: var(--n-hover);
 }
 
 .radio-option:has(input[type='radio']:checked) {
-  background: var(--bg-1);
-  border-color: var(--border-1);
+  background: transparent;
 }
 
+/* Radio: 16 px, white with the control edge; on = accent with a 6-px dot */
 .radio-option input[type='radio'] {
   appearance: none;
   -webkit-appearance: none;
-  margin: 1px 0 0;
-  width: 18px;
-  height: 18px;
-  border-radius: var(--r-full);
-  border: 1.5px solid var(--border-2);
-  background: var(--bg-0);
+  margin: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--n-r-full);
+  border: 0;
+  box-shadow: inset 0 0 0 1px var(--n-control-edge);
+  background: var(--n-card);
   cursor: pointer;
   flex-shrink: 0;
   position: relative;
-  transition: border-color var(--dur-fast);
+  transition: box-shadow var(--dur-fast);
 }
 
 .radio-option input[type='radio']:checked {
-  border-color: var(--n0-accent);
+  background: var(--n-accent);
+  box-shadow: none;
 }
 
 .radio-option input[type='radio']:checked::after {
   content: '';
   position: absolute;
-  inset: 3px;
-  border-radius: var(--r-full);
-  background: var(--n0-accent);
+  inset: 5px;
+  border-radius: var(--n-r-full);
+  background: var(--n-card);
 }
 
 .radio-option input[type='radio']:focus-visible {
-  box-shadow: 0 0 0 3px var(--n0-accent-ring);
+  box-shadow:
+    inset 0 0 0 1px var(--n-control-edge),
+    var(--n-focus-ring);
   outline: none;
 }
 
+.radio-option input[type='radio']:checked:focus-visible {
+  box-shadow: var(--n-focus-ring);
+}
+
+/* Compact two-line radio rows (56 px): the text column starts 1 px above
+   the control so the label's first line centres on it. */
 .radio-content {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
+  margin-top: -1px;
 }
 
 .radio-label {
-  font-family: var(--n0-sans);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--n0-text);
-  line-height: 1.5;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--n-text-1);
+  line-height: 16px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
 }
 
+/* The 18-px "Recommended" badge takes no more than the label's 16-px line,
+   so its row stays 56 px like the others. */
+.radio-label .badge-sm {
+  margin: -1px 0;
+}
+
+/* 2 px under the label, on a tight 15-px line so the row stays 56 px. */
 .radio-description {
-  font-family: var(--n0-sans);
   font-size: 12px;
-  color: var(--n0-text-2);
+  color: var(--n-text-3);
   margin-top: 2px;
-  line-height: 1.5;
+  line-height: 15px;
   padding: 0;
 }
 
-.badge-recommend {
-  display: inline-flex;
-  align-items: center;
-  height: 18px;
-  padding: 0 7px;
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  color: var(--n0-accent);
-  background: var(--n0-accent-light);
-  border: 1px solid rgba(37, 99, 235, 0.25);
-  border-radius: var(--r-xs);
-  vertical-align: middle;
-  line-height: 1;
-}
-
 /* ====== BUTTONS ========================================= */
-.btn {
-  font-family: var(--n0-sans);
-  font-size: 12px;
-  font-weight: 500;
-  padding: 0 12px;
-  height: 32px;
-  border-radius: var(--r-sm);
-  border: 1px solid var(--border-1);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--bg-0);
-  color: var(--n0-text);
-  white-space: nowrap;
-  line-height: 1;
-  transition:
-    background var(--dur-fast),
-    border-color var(--dur-fast),
-    color var(--dur-fast);
+/* The global .btn family (DESIGN.md §5.1) sets the size, fills, hover and
+   focus ring. Only the Settings differences are below. */
+
+/* Add-forms pair the button with 30-px fields */
+.add-item-form .btn {
+  height: 30px;
 }
 
-.btn:hover {
-  background: var(--bg-2);
-}
-
-.btn-sm {
-  padding: 0 10px;
-  height: 28px;
-  font-size: 12px;
-}
-
-.btn-secondary {
-  background: var(--bg-0);
-  color: var(--n0-text);
-  border-color: var(--border-1);
-}
-
-.btn-secondary:hover {
-  background: var(--bg-2);
-  border-color: var(--border-2);
-}
-
-.btn-primary {
-  background: var(--n0-text);
-  color: var(--fg-on-dark, #fff);
-  border-color: var(--n0-text);
-}
-
-.btn-primary:hover {
-  background: #171717;
-  border-color: #171717;
-}
-
-.btn-ghost {
-  background: transparent;
-  color: var(--n0-text-2);
-  border-color: transparent;
-}
-
-.btn-ghost:hover {
-  background: var(--bg-2);
-  color: var(--n0-text);
-}
-
-.btn-danger {
-  background: var(--bg-0);
-  color: var(--n0-red);
-  border-color: var(--border-1);
-}
-
-.btn-danger:hover {
-  background: var(--n0-red-light);
-  border-color: var(--n0-red);
+/* Reset's label also darkens on hover; the global ghost hover only fills
+   (DESIGN.md §5.1). */
+.setting-action-buttons .btn-ghost:hover:not(:disabled) {
+  color: var(--n-text-1);
 }
 
 /* ====== FORM ELEMENTS =================================== */
+/* Inside panels these are white (DESIGN.md §4.3). Selects are the global
+   <select> pop-up button (--n-select-shadow, the 13-px chevron 8 px from
+   the right, the field ring on focus), here 28 px tall; text fields take
+   the inset --n-input-shadow. */
 .form-select,
 .form-select-sm {
-  font-family: var(--n0-sans);
-  font-size: 14px;
-  color: var(--n0-text);
-  background: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-sm);
-  padding: 0 32px 0 12px;
-  height: 32px;
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  min-width: 200px;
-  transition:
-    background-color var(--dur-fast),
-    border-color var(--dur-fast),
-    box-shadow var(--dur-fast);
-}
-
-.form-select-sm {
   height: 28px;
-  font-size: 13px;
-  background-position: right 8px center;
-  min-width: 120px;
-  padding: 0 28px 0 10px;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
-.form-select:focus,
-.form-select-sm:focus {
-  outline: none;
-  background-color: var(--bg-0);
-  border-color: var(--fg-1);
-  box-shadow: var(--shadow-focus);
+.form-select {
+  min-width: 200px;
+}
+
+#search-engine-select {
+  width: 180px;
+  min-width: 0;
+}
+
+#user-agent-select {
+  width: 200px;
 }
 
 .form-input {
-  font-family: var(--n0-sans);
-  font-size: 14px;
-  padding: 0 12px;
-  height: 32px;
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-sm);
-  background: var(--bg-2);
-  color: var(--n0-text);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 0 10px;
+  height: 30px;
+  border: 0;
+  border-radius: var(--n-r-control);
+  background: var(--n-card);
+  box-shadow: var(--n-input-shadow);
+  color: var(--n-text-1);
   outline: none;
-  transition:
-    background var(--dur-fast),
-    border-color var(--dur-fast),
-    box-shadow var(--dur-fast);
+  transition: box-shadow var(--dur-fast);
 }
 
-.form-input:focus {
-  background: var(--bg-0);
-  border-color: var(--fg-1);
-  box-shadow: var(--shadow-focus);
+.form-input:focus-visible {
+  box-shadow: var(--n-focus-ring-field);
 }
 
 .form-input::placeholder {
-  color: var(--n0-text-3);
+  color: var(--n-text-3);
 }
 
 .form-input-narrow {
   max-width: 280px;
+}
+
+.form-input-sm {
+  max-width: 96px;
 }
 
 .form-group {
@@ -737,18 +755,42 @@
   gap: 8px;
 }
 
-/* ====== ITEMS LIST (e.g. specific startup pages) ======= */
+/* PAC form field row inside the grey proxy panel — same grammar as the
+   manual proxy rows (96-px label column at the radio text's 44-px inset). */
+.sub-setting-panel .form-group {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 16px;
+  margin: 0;
+  padding: 6px 16px 14px 44px;
+  font-size: 13px;
+  line-height: 16px;
+  color: var(--n-text-1);
+}
+
+.sub-setting-panel .form-group .form-input {
+  min-width: 0;
+}
+
+/* ====== ITEMS LIST (startup pages, custom engines, …) === */
 .items-list {
   padding: 0;
 }
 
+/* Rows with a remove button: 9 px above/below the 26-px button, 10 px to
+   the right of it; rows without one (filter lists) keep 10 px / 16 px. */
 .list-item {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 12px;
+  gap: 16px;
   align-items: center;
   padding: 10px 16px;
-  border-bottom: 1px solid var(--border-1);
+  border-bottom: 1px solid transparent;
+}
+
+.list-item:has(.list-item-btn) {
+  padding: 9px 10px 9px 16px;
 }
 
 .list-item:last-child {
@@ -759,6 +801,38 @@
   min-width: 0;
 }
 
+.list-item-text {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--n-text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.list-item-description {
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--n-text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* A custom engine's URL template is code, so it's set in mono (DESIGN.md §3.7) */
+#custom-engines-list .list-item-description {
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 11.5px;
+}
+
+/* Site rows (cookie exceptions, allowed / blocked sites) render their text
+   in a <span>: make it a block so it gets the 18-px line box and the
+   ellipsis, like the other list rows. */
+.list-item-content > span.list-item-text {
+  display: block;
+}
+
 .list-item-actions {
   display: flex;
   align-items: center;
@@ -766,60 +840,188 @@
   flex-shrink: 0;
 }
 
+/* Remove (×): a quiet 26-px icon button, --n-text-3, hover --n-fill */
+.list-item-btn {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--n-r-icon);
+  background: transparent;
+  color: var(--n-text-3);
+  cursor: pointer;
+  transition:
+    background var(--dur-fast),
+    color var(--dur-fast);
+}
+
+.list-item-btn:hover {
+  background: var(--n-fill);
+  color: var(--n-text-1);
+}
+
+.list-item-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
 .add-item-form {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 8px;
   align-items: center;
-  padding: 12px 16px;
+  padding: 10px 16px 12px;
 }
 
-/* The custom search engine form has a third field (name), so it needs an
-   extra column or the URL input collapses and the button wraps to a new row. */
+/* The custom search engine form has a third field (name, 170 px). */
 #add-engine-form {
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 170px 1fr auto;
+}
+
+/* A divider (inset 16 px) between a non-empty list and its add-form */
+.items-list:not(:empty) + .add-item-form {
+  border-top: 1px solid transparent;
+}
+
+.items-list:not(:empty) + .add-item-form::before {
+  content: '';
+  position: absolute;
+  left: 16px;
+  right: 0;
+  top: -1px;
+  height: 1px;
+  background: var(--n-panel-line);
+  pointer-events: none;
+}
+
+/* Startup pages and custom engines sit directly in their group: the list
+   and the add-form together read as one grey panel. */
+.setting-group > .items-list,
+.setting-group > .add-item-form {
+  background: var(--n-grouped);
+}
+
+.setting-group > .items-list:not(:empty) {
+  border-radius: var(--n-r-panel) var(--n-r-panel) 0 0;
+}
+
+.setting-group > .items-list:not(:empty) + .add-item-form {
+  border-radius: 0 0 var(--n-r-panel) var(--n-r-panel);
+}
+
+.setting-group > .items-list:empty + .add-item-form {
+  border-radius: var(--n-r-panel);
 }
 
 /* ====== SUB-SETTINGS (nested panels) ==================== */
 .sub-setting {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 16px;
   align-items: center;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--border-1);
+  padding: 12px 16px;
+  border-bottom: 1px solid transparent;
 }
 
 .sub-setting:last-child {
   border-bottom: 0;
 }
 
-/* List-style sub-settings (allow / block / exception lists) stack their
-   label, description, list and add-form vertically instead of using the
-   default label|control grid, which would split them into a 2x2 layout. */
+/* Custom UA string: a long free-text value fills the row after its label
+   (like the add-forms and "No proxy for"), instead of a 165-px field. */
+#custom-ua-container {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+/* List-style sub-sections under a radio group (cookie exceptions, pop-up
+   allow / block lists) stack vertically instead of using the label | control
+   grid. Each is the last block of its panel, so it draws no row divider. */
 #cookie-exceptions-container,
 #popup-allowed-container,
 #popup-blocked-container {
   display: block;
+  padding: 0;
+  border-top: 1px solid var(--n-panel-line);
+  border-bottom: 0;
 }
 
-#cookie-exceptions-container .list-item,
-#popup-allowed-container .list-item,
-#popup-blocked-container .list-item,
-#cookie-exceptions-container .add-item-form,
-#popup-allowed-container .add-item-form,
-#popup-blocked-container .add-item-form {
-  padding-left: 0;
-  padding-right: 0;
+#cookie-exceptions-container::after,
+#popup-allowed-container::after,
+#popup-blocked-container::after {
+  content: none;
 }
 
+#cookie-exceptions-container > .setting-label,
+#popup-allowed-container > .setting-label,
+#popup-blocked-container > .setting-label {
+  padding: 14px 16px 0;
+  font-size: 12px;
+  line-height: 15px;
+  font-weight: 600;
+  color: var(--n-text-3);
+}
+
+#cookie-exceptions-container > .setting-description,
+#popup-allowed-container > .setting-description,
+#popup-blocked-container > .setting-description {
+  margin: 2px 0 0;
+  padding: 0 16px 6px;
+}
+
+/* Manual proxy / PAC forms sit between the proxy radio panel and the
+   bypass row; they continue that one grey panel (square corners, no gap).
+   Their rows are indented to the radio text (44 px). */
 .sub-setting-panel {
-  background: var(--bg-1);
-  border-top: 1px solid var(--border-1);
+  position: relative;
+  background: var(--n-grouped);
+  border: 0;
+  border-radius: 0;
+  margin: 0;
   padding: 0;
 }
 
+/* The manual form follows the last (PAC) radio row in the markup, so it
+   opens with the same 44-px-inset divider the radio rows use. */
+#manual-proxy-form {
+  padding-top: 8px;
+}
+
+#manual-proxy-form::before {
+  content: '';
+  position: absolute;
+  left: 44px;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: var(--n-panel-line);
+  pointer-events: none;
+}
+
 /* ====== RETENTION (Privacy section) ===================== */
+/* The retention periods continue the "Auto-delete" row, so neither that
+   row nor the periods draw a divider. */
+.setting-toggle-row:has(+ #retention-settings) {
+  border-bottom: 0;
+}
+
+.setting-toggle-row:has(+ #retention-settings)::after {
+  content: none;
+}
+
+#retention-settings {
+  display: block;
+  padding: 0 0 8px;
+  border-bottom: 0;
+}
+
+#retention-settings::after {
+  content: none;
+}
+
 .retention-grid {
   display: flex;
   flex-direction: column;
@@ -831,12 +1033,10 @@
   grid-template-columns: 1fr auto;
   gap: 16px;
   align-items: center;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--border-1);
-}
-
-.retention-row:last-child {
-  border-bottom: 0;
+  padding: 6px 16px 6px 32px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--n-text-1);
 }
 
 /* ====== PROXY (Network section) ========================= */
@@ -847,137 +1047,127 @@
   padding: 0;
 }
 
+.proxy-inputs {
+  flex-direction: row;
+  gap: 8px;
+}
+
+/* Manual proxy rows: no dividers, 6-px rhythm, 30-px fields. The labels
+   take a tight 16-px line, which centres them on the fields (the body's
+   19.5 px sets them high). */
 .proxy-row {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 96px 1fr;
   gap: 16px;
   align-items: center;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--border-1);
+  padding: 6px 16px 6px 44px;
+  font-size: 13px;
+  line-height: 16px;
+  color: var(--n-text-1);
 }
 
 .proxy-row:last-child {
-  border-bottom: 0;
+  padding-bottom: 14px;
 }
 
-/* ====== USER AGENT — terminal block ===================== */
+.proxy-inputs .form-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.proxy-inputs .form-input-sm {
+  flex: none;
+  width: 76px;
+}
+
+.proxy-inputs .form-select-sm {
+  flex: none;
+  width: 96px;
+  min-width: 0;
+  height: 30px;
+}
+
+/* ====== USER AGENT — mono "Current" strip =============== */
+/* The strip is a sibling of the group body; join them into one grey
+   panel so "Current" reads as the panel's last row. */
+.setting-group:has(> .ua-preview-strip) > .setting-group-body {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* The body's last row also gets the inset divider, because the strip
+   follows it. (While the custom-UA field is hidden it is the last child,
+   so the Identity row above it draws the divider instead — never both.) */
+.setting-group-body:has(+ .ua-preview-strip) > :last-child {
+  border-bottom: 1px solid transparent;
+}
+
+.setting-group-body:has(+ .ua-preview-strip) > :last-child::after {
+  content: '';
+}
+
 .ua-preview-strip {
-  font-size: 11.5px;
-  color: var(--n0-text-2);
-  background: var(--bg-1);
-  border-top: 1px solid var(--border-1);
-  padding: 10px 16px;
+  background: var(--n-grouped);
+  border: 0;
+  border-bottom-left-radius: var(--n-r-panel);
+  border-bottom-right-radius: var(--n-r-panel);
+  padding: 12px 16px;
   display: grid;
-  grid-template-columns: 110px 1fr;
-  gap: 10px;
-  align-items: baseline;
-  line-height: 1.5;
-  word-break: break-all;
+  grid-template-columns: 64px 1fr;
+  gap: 16px;
+  align-items: start;
 }
 
+/* 17-px line box: "Current" centres on the UA string's first line */
 .ua-preview-label {
-  font-family: var(--n0-sans);
-  font-size: 10px;
-  color: var(--n0-text-3);
-  letter-spacing: 0.5px;
-  font-weight: 600;
-  text-transform: uppercase;
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--n-text-3);
+  letter-spacing: 0;
+  font-weight: 400;
   margin: 0;
   padding: 0;
 }
 
 .ua-preview-value {
-  font-size: 11.5px;
-  color: var(--n0-text);
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--n-text-2);
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 /* ====== KEYBOARD SHORTCUTS ============================== */
-/* Dedicated category-pill row — mirrors the Downloads / Bookmarks
-   grammar (dashed top border, uppercase Categories label, wrapping
-   pill row). The pills themselves use .cat-pill from the chrome
-   library; the rules here cover layout + capitalization + svg size. */
+/* The shared chip row (global.css): "Categories" beside one line of chips.
+   Here it sits 16 px from the search field and the table. */
 .shortcuts-filter-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin: 14px 0 24px;
-  padding-top: 14px;
-  border-top: 1px dashed var(--border-1);
+  margin: 16px 0;
 }
 
-.shortcuts-filter-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--n0-text-2);
-  margin-right: 4px;
-  flex-shrink: 0;
-}
-
-.shortcuts-filter {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.shortcuts-filter .cat-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 28px;
-  padding: 0 12px;
-  background: var(--bg-0);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-pill, 6px);
-  font-family: var(--n0-sans);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--n0-text-2);
-  cursor: pointer;
-  text-transform: capitalize;
-  transition:
-    background var(--dur-fast),
-    color var(--dur-fast),
-    border-color var(--dur-fast),
-    filter var(--dur-fast);
-}
-
-.shortcuts-filter .cat-pill:hover {
-  filter: brightness(0.97);
-}
-
-.shortcuts-filter .cat-pill svg {
-  width: 13px;
-  height: 13px;
-  flex-shrink: 0;
-}
-
-/* Search bar above shortcut table */
+/* Search bar above shortcut table — filled field on the white page */
 .shortcuts-search {
   position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 36px;
-  padding: 0 12px;
-  background: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-sm);
-  color: var(--n0-text-2);
-  margin: 0 0 12px;
+  height: 32px;
+  padding: 0 10px;
+  background: var(--n-fill);
+  border: 0;
+  border-radius: var(--n-r-control);
+  color: var(--n-text-3);
+  margin: 22px 0 0;
   transition:
-    background var(--dur-fast),
-    border-color var(--dur-fast),
+    background-color var(--dur-fast),
     box-shadow var(--dur-fast);
 }
 
+/* Focused, it turns white with the field ring, like every page search
+   field (DESIGN.md §5.2). */
 .shortcuts-search:focus-within {
-  background: var(--bg-0);
-  border-color: var(--fg-1);
-  box-shadow: var(--shadow-focus);
+  background: var(--n-card);
+  box-shadow: var(--n-focus-ring-field);
 }
 
 .shortcuts-search input,
@@ -988,108 +1178,215 @@
   outline: 0;
   background: transparent;
   font-family: inherit;
-  font-size: 14px;
-  color: var(--n0-text);
+  font-size: 13px;
+  color: var(--n-text-1);
   padding: 0;
   height: auto;
   box-shadow: none;
 }
 
+/* The wrapper draws the field ring; the bare input must not add the global
+   :focus-visible halo inside it (a box inside the box). */
+.shortcuts-search .form-input:focus-visible {
+  box-shadow: none;
+}
+
+/* 16-px magnifier, like every page search field (DESIGN.md §5.2) */
 .shortcuts-search-icon {
-  color: var(--n0-text-2);
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--n-text-3);
   position: static;
   transform: none;
 }
 
+/* Shortcuts table sits in a grey panel */
 .shortcuts-table-container {
-  background: var(--bg-0);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-md);
+  background: var(--n-grouped);
+  border: 0;
+  border-radius: var(--n-r-panel);
   overflow: hidden;
 }
 
+/* Columns: Action fills, Category 170 px, Shortcut 150 px, with 16-px gaps
+   and insets. Each cell carries the 16-px gap on its left, so the column
+   widths below include it. */
 .shortcuts-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
 }
 
-.shortcuts-table thead th {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--n0-text-2);
-  font-weight: 500;
+.shortcuts-table th,
+.shortcuts-table td {
+  padding: 0 0 0 16px;
   text-align: left;
-  padding: 8px 16px;
-  border-bottom: 1px solid var(--border-1);
-  background: var(--bg-1);
 }
 
+.shortcuts-table th:nth-child(2) {
+  width: 186px;
+}
+
+.shortcuts-table th:nth-child(3) {
+  width: 182px;
+}
+
+.shortcuts-table th:nth-child(3),
+.shortcuts-table td:nth-child(3) {
+  padding-right: 16px;
+}
+
+/* Header row: 12 px 600 --n-text-3, 10 px above and below, full-width line */
+.shortcuts-table thead th {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-size: 12px;
+  line-height: 15px;
+  letter-spacing: 0;
+  color: var(--n-text-3);
+  font-weight: 600;
+  border-bottom: 1px solid var(--n-panel-line);
+  background: transparent;
+}
+
+/* Rows: 40 px plus a 1-px --n-panel-line inset 16 px (the Action cell draws
+   its part with ::after, the other cells with their bottom border). */
 .shortcuts-table tbody td {
-  padding: 8px 16px;
-  border-bottom: 1px solid var(--border-1);
+  height: 41px;
+  border-bottom: 1px solid var(--n-panel-line);
   vertical-align: middle;
-  font-family: var(--n0-sans);
-  font-size: 14px;
-  color: var(--n0-text);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 16px;
+  color: var(--n-text-1);
+}
+
+.shortcuts-table tbody td:first-child {
+  position: relative;
+  border-bottom-color: transparent;
+}
+
+.shortcuts-table tbody td:first-child::after {
+  content: '';
+  position: absolute;
+  left: 16px;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--n-panel-line);
+  pointer-events: none;
 }
 
 .shortcuts-table tbody tr:last-child td {
+  height: 40px;
   border-bottom: 0;
 }
 
-.shortcuts-table tbody tr:hover {
-  background: var(--bg-3);
+.shortcuts-table tbody tr:last-child td:first-child::after {
+  content: none;
 }
 
-/* Keycap — single-key pill, used in shortcut table + descriptions */
-kbd,
-.kbd,
-.keycap {
+.shortcuts-table tbody tr:hover {
+  background: var(--n-hover);
+}
+
+/* Neutral category badge in the table */
+.shortcut-category-badge {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  min-width: 24px;
   height: 22px;
-  padding: 0 6px;
-  font-family: var(--n0-sans);
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--n0-text);
-  background: var(--bg-0);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-xs);
-  box-shadow: inset 0 -1px 0 var(--border-1);
-  letter-spacing: 0;
-  line-height: 1;
+  padding: 0 8px;
+  border-radius: var(--n-r-badge);
+  background: var(--n-fill);
+  color: var(--n-text-2);
+  font-size: 12px;
+  line-height: 15px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+/* A row of keycaps (the global .keycap, one per key), 4 px apart
+   (DESIGN.md §5.3). */
+.shortcut-keys {
+  display: inline-flex;
+  gap: 4px;
+}
+
+/* A shortcut with no binding */
+.shortcut-none {
+  color: var(--n-text-4);
+  font-style: italic;
+}
+
+/* ====== DEVELOPER — inline code chips =================== */
+#section-developer .setting-description code,
+#section-developer .setting-description kbd,
+#section-developer code {
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  background: var(--n-fill);
+  border: 0;
+  border-radius: var(--n-r-badge);
+  padding: 1px 5px;
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--n-text-1);
+  box-shadow: none;
+  min-width: 0;
+  height: auto;
+  white-space: nowrap;
+}
+
+/* The long, chip-bearing description: a 19-px line box gives the chips
+   room, and the switch aligns with the first line instead of centring.
+   The label takes a tight 16-px line and the description starts 3 px
+   under it, which keeps the taller row compact. */
+#section-developer .setting-toggle-row {
+  align-items: start;
+}
+
+#section-developer .setting-label {
+  line-height: 16px;
+}
+
+#section-developer .setting-description {
+  margin-top: 3px;
+  line-height: 19px;
 }
 
 /* ====== PERMISSIONS ===================================== */
+/* Search field on the white page — filled, 15-px magnifier; the refresh
+   button sits 4 px from its right edge. */
 .permissions-search {
   position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 36px;
-  padding: 0 12px;
-  background: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-sm);
-  color: var(--n0-text-2);
+  height: 32px;
+  padding: 0 4px 0 10px;
+  background: var(--n-fill);
+  border: 0;
+  border-radius: var(--n-r-control);
+  color: var(--n-text-3);
+  margin-top: 22px;
   transition:
-    background var(--dur-fast),
-    border-color var(--dur-fast),
+    background-color var(--dur-fast),
     box-shadow var(--dur-fast);
 }
 
-.permissions-search:focus-within {
-  background: var(--bg-0);
-  border-color: var(--fg-1);
-  box-shadow: var(--shadow-focus);
+/* The field turns white with its ring while the text field has focus — not
+   when the refresh button inside the wrapper is clicked or tabbed to. */
+.permissions-search:has(> input:focus) {
+  background: var(--n-card);
+  box-shadow: var(--n-focus-ring-field);
 }
 
 .permissions-search-icon {
-  color: var(--n0-text-2);
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--n-text-3);
   position: static;
   transform: none;
 }
@@ -1102,72 +1399,95 @@ kbd,
   outline: 0;
   background: transparent;
   font-family: inherit;
-  font-size: 14px;
-  color: var(--n0-text);
+  font-size: 13px;
+  color: var(--n-text-1);
   padding: 0;
   height: auto;
   box-shadow: none;
 }
 
+/* The wrapper draws the field ring; the bare input must not add the global
+   :focus-visible halo inside it (a box inside the box). */
+.permissions-search .form-input:focus-visible {
+  box-shadow: none;
+}
+
+/* Refresh: a quiet 26-px icon button with a 16-px --n-text-2 icon, the
+   size of other icons in fields */
+.permissions-search .btn {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: var(--n-r-icon);
+  color: var(--n-text-2);
+}
+
+.permissions-search .btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* The site panels and the empty state sit 14 px under the search field
+   and 14 px apart. */
+#permissions-list > .permission-origin-group,
 .permissions-empty {
-  padding: 64px 20px;
+  margin-top: 14px;
+}
+
+/* Empty state — a grey panel, centred: a 30-px --n-text-4 shield, the
+   title (14 px 600) and a 13/19 hint with the choices in --n-text-1. */
+.permissions-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 44px 24px 46px;
   text-align: center;
-  color: var(--n0-text-2);
+  background: var(--n-grouped);
+  border-radius: var(--n-r-panel);
+  color: var(--n-text-3);
 }
 
 .permissions-empty-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--r-sm);
-  background: var(--bg-2);
-  border: 1px solid var(--border-1);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--n0-text-2);
-  margin-bottom: 12px;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  color: var(--n-text-4);
 }
 
 .permissions-empty-title {
+  margin: 6px 0 0;
   font-size: 14px;
+  line-height: 18px;
   font-weight: 600;
-  color: var(--n0-text);
-  letter-spacing: -0.1px;
-  margin: 0 0 6px;
+  color: var(--n-text-1);
 }
 
 .permissions-empty-hint {
-  font-size: 12px;
-  color: var(--n0-text-2);
+  max-width: 380px;
   margin: 0;
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--n-text-3);
 }
 
-.permissions-empty-hint b {
-  color: var(--n0-text);
-  font-weight: 500;
+.permissions-empty-hint strong {
+  color: var(--n-text-1);
+  font-weight: 600;
 }
 
+/* "Clear All Permissions" sits on the white page: right-aligned, 16 px
+   under the last site, secondary fill, 32 px tall like the other "Clear
+   All…" buttons. */
 .permissions-footer {
-  padding: 12px 0 0;
-  font-size: 12px;
-  color: var(--n0-text-2);
-  text-align: right;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding: 0;
 }
 
-/* Permission entry (used when entries exist) */
-.permission-entry {
-  display: grid;
-  grid-template-columns: auto 1fr auto auto;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--border-1);
-}
-
-.permission-entry:last-child {
-  border-bottom: 0;
-}
-
+/* Permission entry (flat list fallback) */
 .permission-entry-favicon {
   width: 18px;
   height: 18px;
@@ -1180,12 +1500,12 @@ kbd,
 .permission-entry-favicon svg {
   width: 16px;
   height: 16px;
-  border-radius: 2px;
+  border-radius: var(--n-r-key);
 }
 
 .permission-entry-origin {
-  font-size: 14px;
-  color: var(--n0-text);
+  font-size: 13px;
+  color: var(--n-text-1);
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -1193,44 +1513,42 @@ kbd,
   min-width: 0;
 }
 
-.permission-entry-label {
-  font-size: 11px;
-  color: var(--n0-text-2);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.permission-entry-decision .form-select-sm {
-  min-width: 120px;
-}
-
-/* Origin group: a card grouping all the permissions for one site */
+/* Origin group: one grey panel per site. Its dividers are inset 44 px, to
+   the permission label text. */
 .permission-origin-group {
-  margin-bottom: 16px;
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-sm);
-  background: var(--bg-0);
+  border: 0;
+  border-radius: var(--n-r-panel);
+  background: var(--n-grouped);
   overflow: hidden;
 }
 
-.permission-origin-group:last-child {
-  margin-bottom: 0;
-}
-
 .permission-origin-header {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
   padding: 10px 16px;
-  background: var(--bg-1);
-  border-bottom: 1px solid var(--border-1);
+  background: transparent;
+  border-bottom: 1px solid transparent;
+}
+
+.permission-origin-header::after,
+.permission-entry:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 44px;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--n-panel-line);
+  pointer-events: none;
 }
 
 .permission-origin-title {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
 }
 
@@ -1238,15 +1556,16 @@ kbd,
   flex-shrink: 0;
   width: 16px;
   height: 16px;
-  border-radius: 2px;
+  border-radius: var(--n-r-key);
   object-fit: contain;
-  color: var(--n0-text-2);
+  color: var(--n-text-2);
 }
 
 .permission-origin-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--n0-text);
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--n-text-1);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1255,97 +1574,238 @@ kbd,
 
 .permission-origin-actions {
   flex-shrink: 0;
+  display: flex;
+}
+
+/* "Remove All" is an action inside the panel: the global .btn-raised,
+   26 px tall. */
+.permission-remove-all-btn {
+  height: 26px;
+}
+
+/* Permission row: 16-px --n-text-2 icon, 12 px, the label; then the
+   96 x 26 select and, 6 px after it, the 26-px remove button. */
+.permission-entry {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 7px 16px;
+  border-bottom: 1px solid transparent;
+}
+
+.permission-entry:last-child {
+  border-bottom: 0;
+}
+
+.permission-entry-icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-right: 12px;
+  color: var(--n-text-2);
+}
+
+.permission-entry-label {
+  flex: 1;
+  min-width: 0;
+  margin-right: 16px;
+  font-size: 13px;
+  line-height: 16px;
+  color: var(--n-text-1);
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.permission-entry-decision {
+  flex: none;
+  display: flex;
+  margin-right: 6px;
+}
+
+.permission-entry-decision .form-select-sm {
+  width: 96px;
+  min-width: 0;
+  height: 26px;
+}
+
+/* Remove (×): a quiet 26-px icon button, --n-text-3, hover --n-fill */
+.permission-entry-remove {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--n-r-icon);
+  background: transparent;
+  color: var(--n-text-3);
+  cursor: pointer;
+  transition:
+    background var(--dur-fast),
+    color var(--dur-fast);
+}
+
+.permission-entry-remove:hover {
+  background: var(--n-fill);
+  color: var(--n-text-1);
+}
+
+.permission-entry-remove svg {
+  width: 14px;
+  height: 14px;
 }
 
 /* ====== CHECKBOX OPTIONS (dialogs etc.) ================ */
+/* 26-px rows, the label 9 px after the box */
 .checkbox-option {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 0;
-  font-size: 14px;
-  color: var(--n0-text);
+  gap: 9px;
+  min-height: 26px;
+  padding: 0;
+  font-size: 13px;
+  line-height: 16px;
+  color: var(--n-text-1);
   cursor: pointer;
 }
 
 .checkbox-option input[type='checkbox'] {
   appearance: none;
   -webkit-appearance: none;
+  margin: 0;
   width: 16px;
   height: 16px;
-  border-radius: var(--r-xs);
-  border: 1.5px solid var(--border-2);
-  background: var(--bg-0);
+  border-radius: var(--n-r-key);
+  border: 0;
+  box-shadow: inset 0 0 0 1px var(--n-control-edge);
+  background: var(--n-card);
   cursor: pointer;
   flex-shrink: 0;
   position: relative;
   transition:
-    border-color var(--dur-fast),
+    box-shadow var(--dur-fast),
     background var(--dur-fast);
 }
 
 .checkbox-option input[type='checkbox']:checked {
-  background: var(--n0-accent);
-  border-color: var(--n0-accent);
+  background: var(--n-accent);
+  box-shadow: none;
 }
 
 .checkbox-option input[type='checkbox']:checked::after {
   content: '';
   position: absolute;
-  left: 4px;
-  top: 1px;
-  width: 5px;
-  height: 9px;
-  border: solid #fff;
+  left: 5px;
+  top: 2px;
+  width: 4px;
+  height: 8px;
+  border: solid var(--n-on-accent);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
 
+.checkbox-option input[type='checkbox']:focus-visible {
+  outline: none;
+  box-shadow: var(--n-focus-ring);
+}
+
+.checkbox-option input[type='checkbox']:checked:focus-visible {
+  box-shadow: var(--n-focus-ring);
+}
+
 /* ====== DIALOG OVERLAY (e.g., Clear data confirm) ======= */
+/* Starts with the hidden attribute; index.ts opens it with `hidden = false`,
+   so this rule's flex is what centres the box. */
 .dialog-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--n-scrim);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
 }
 
+/* Title, field, option list and actions stack 14 px apart (16 px above
+   the actions). */
 .dialog-box {
-  background: var(--bg-0);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-md);
-  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--n-menu-bg);
+  backdrop-filter: var(--n-menu-blur);
+  -webkit-backdrop-filter: var(--n-menu-blur);
+  border: 0;
+  border-radius: var(--n-r-dialog);
+  padding: 20px;
   width: 100%;
-  max-width: 440px;
-  box-shadow: var(--shadow-3);
+  max-width: 420px;
+  box-shadow: var(--n-menu-shadow);
 }
 
 .dialog-title {
-  font-size: 16px;
+  font-size: 17px;
+  line-height: 22px;
   font-weight: 600;
-  color: var(--n0-text);
-  letter-spacing: -0.1px;
-  margin: 0 0 8px;
+  color: var(--n-text-1);
+  letter-spacing: -0.01em;
+  margin: 0;
 }
 
 .dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   font-size: 13px;
-  color: var(--n0-text-2);
+  color: var(--n-text-2);
   line-height: 1.5;
-  margin: 0 0 16px;
 }
 
+/* "Time range": a 12-px 500 field label, 6 px above the select */
+#clear-data-dialog .form-group {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+}
+
+#clear-data-dialog .form-group > .setting-label {
+  font-size: 12px;
+  line-height: 15px;
+  font-weight: 500;
+  color: var(--n-text-2);
+}
+
+/* The options sit in one white card on the frosted dialog (DESIGN.md §3.8). */
 .dialog-checkboxes {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin: 0 0 20px;
+  padding: 6px 12px;
+  background: var(--n-card);
+  border-radius: var(--n-r-control);
+  box-shadow: var(--n-card-shadow);
 }
 
 .dialog-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+  margin-top: 2px;
+}
+
+/* ====== REDUCED MOTION ================================== */
+/* The Clear Data dialog sits outside .settings-layout, so it's listed too. */
+@media (prefers-reduced-motion: reduce) {
+  .settings-layout *,
+  .settings-layout *::before,
+  .settings-layout *::after,
+  .dialog-overlay *,
+  .dialog-overlay *::before,
+  .dialog-overlay *::after {
+    transition: none !important;
+    animation: none !important;
+  }
 }

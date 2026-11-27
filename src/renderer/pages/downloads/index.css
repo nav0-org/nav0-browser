@@ -1,280 +1,127 @@
 @import url('../../styles/global.css');
 
 /* ============================================================
-   Downloads — editorial dashboard layout.
-   Centered card with the orange storage-tray on top becomes an
-   editorial masthead, a properly framed storage panel, and a
-   real list grouped by date. Same masthead / toolbar / list
-   grammar the History and Bookmarks pages use.
+   Downloads — built-in page (DESIGN.md §4.2). The storage hues
+   on the bar and legend are the page's only colour. The page,
+   toolbar, chips, panels and rows use the shared list-page
+   classes in global.css; only what is Downloads' own is here.
    ============================================================ */
 
 .downloads-page {
-  min-height: 100vh;
-  background: var(--bg-0);
-  color: var(--fg-2);
   opacity: 0;
-  transition: opacity var(--transition-medium, 220ms) ease;
+  transition: opacity var(--dur-med) ease;
 }
 
 .downloads-page.loaded {
   opacity: 1;
 }
 
-.downloads-wrapper {
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 48px 56px 80px;
-}
-
-/* ---- Editorial masthead --------------------------------- */
-.downloads-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 32px;
-  flex-wrap: wrap;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--nav0-red-600);
-}
-
-.downloads-title {
-  font-size: 48px;
-  font-weight: 200;
-  letter-spacing: -0.5px;
-  color: var(--fg-1);
-  margin: 0;
-  line-height: 1.2;
-}
-
-/* ---- Toolbar (search + type filter + clear) ------------- */
-.downloads-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 28px 0 14px;
-  flex-wrap: wrap;
-}
-
-.search-container {
-  position: relative;
-  flex: 1;
-  min-width: 240px;
-  display: flex;
-  align-items: center;
-  height: 36px;
-  padding: 0 12px 0 36px;
-  background: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: 3px;
-  color: var(--fg-3);
-  transition:
-    background var(--dur-fast),
-    border-color var(--dur-fast),
-    box-shadow var(--dur-fast);
-}
-
-.search-container:focus-within {
-  background: var(--bg-0);
-  border-color: var(--fg-1);
-  box-shadow: var(--shadow-focus);
-}
-
-.search-icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--fg-3);
-  pointer-events: none;
-}
-
-.search-input {
-  flex: 1;
-  min-width: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  font-family: inherit;
-  font-size: 14px;
-  color: var(--fg-1);
-  padding: 0;
-}
-
-.search-input::placeholder {
-  color: var(--fg-4);
-}
-
-/* Type filter — pills with per-type color tint (dynamic via inline style).
-   Active state inverts to a solid fill. */
-/* Dedicated row for category pills — mirrors the Bookmarks .cat-row so the
-   Clear-All button can stay next to the search bar in the toolbar above. */
-.downloads-filter-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin: 0 0 24px;
-  padding-top: 14px;
-  border-top: 1px dashed var(--border-1);
-}
-
-.downloads-filter-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--fg-3);
-  margin-right: 4px;
-  flex-shrink: 0;
-}
-
-.type-filters {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.type-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 28px;
-  padding: 0 12px;
-  background: var(--bg-0);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-pill, 6px);
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--fg-2);
-  cursor: pointer;
-  text-transform: capitalize;
-  transition:
-    background var(--dur-fast),
-    border-color var(--dur-fast),
-    color var(--dur-fast),
-    filter var(--dur-fast);
-}
-
-.type-pill:hover {
-  filter: brightness(0.97);
-}
-
-.type-pill svg {
-  width: 13px;
-  height: 13px;
-  flex-shrink: 0;
-}
-
-/* Danger ghost Clear button — matches History & Bookmarks */
-.btn-clear-all {
-  height: 36px;
-  padding: 0 12px;
-  border: 1px solid var(--border-1);
-  background: var(--bg-0);
-  border-radius: 3px;
-  color: var(--danger);
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition:
-    background var(--dur-fast),
-    border-color var(--dur-fast);
-}
-
-.btn-clear-all:hover {
-  background: var(--danger-soft, #fdecea);
-  border-color: var(--danger);
-}
-
-/* ---- Storage panel (bordered card) --------------------- */
-.panel {
-  background: var(--bg-0);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-md);
-  padding: 20px 22px;
-}
-
+/* ---- Storage panel (grey, flat) ------------------------- */
 .storage-panel {
-  margin-bottom: 24px;
+  margin-top: 16px;
 }
 
-.panel-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 18px;
-}
-
-.panel-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--fg-1);
-  letter-spacing: -0.1px;
-  white-space: nowrap;
-}
-
+/* "Storage" on the left, "3.5 GB used · 22 files · 1 paused" on the
+   right. */
 .panel-meta {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--fg-3);
   display: inline-flex;
   align-items: baseline;
-  gap: 12px;
+  gap: 4px;
   flex-wrap: wrap;
   justify-content: flex-end;
 }
 
+.panel-meta span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+/* Dot separators sit between the parts only, never before the first. */
+.panel-meta span + span::before {
+  content: '·';
+  color: var(--n-text-3);
+}
+
 .panel-meta strong {
-  color: var(--fg-1);
+  color: var(--n-text-1);
   font-weight: 600;
-  font-size: 14px;
-  letter-spacing: 0;
-  text-transform: none;
-  margin-right: 4px;
   font-variant-numeric: tabular-nums;
   font-family: inherit;
 }
 
-/* Hairline segmented progress bar (per-type tint via inline style) */
+/* Stacked storage bar. Each segment carries its share as an inline width;
+   segments may shrink so the 2 px gaps stay inside the panel, and never get
+   narrower than 6 px, so a tiny type still shows. */
 .storage-bar {
   display: flex;
-  height: 8px;
-  border-radius: 2px;
-  overflow: hidden;
-  background: var(--bg-2);
-  border: 1px solid var(--border-1);
+  gap: 2px;
+  height: 10px;
 }
 
 .storage-bar-segment {
   height: 100%;
+  flex: 0 1 auto;
+  min-width: 6px;
+}
+
+.storage-bar-segment:first-child {
+  border-radius: var(--n-r-control) 0 0 var(--n-r-control);
+}
+
+.storage-bar-segment:last-child {
+  border-radius: 0 var(--n-r-control) var(--n-r-control) 0;
+}
+
+.storage-bar-segment:only-child {
+  border-radius: var(--n-r-control);
+}
+
+/* The six storage hues (DESIGN.md §3.4), on the bar and legend only. */
+.storage-hue-images {
+  background: var(--n-storage-images);
+}
+
+.storage-hue-media {
+  background: var(--n-storage-media);
+}
+
+.storage-hue-archives {
+  background: var(--n-storage-archives);
+}
+
+.storage-hue-apps {
+  background: var(--n-storage-apps);
+}
+
+.storage-hue-documents {
+  background: var(--n-storage-documents);
+}
+
+.storage-hue-other {
+  background: var(--n-storage-other);
 }
 
 .storage-legend {
   display: flex;
-  gap: 18px;
+  gap: 8px 18px;
   flex-wrap: wrap;
-  margin-top: 14px;
+  margin-top: 12px;
 }
 
 .storage-legend-item {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-size: 12px;
-  color: var(--fg-3);
+  line-height: 15px;
+  color: var(--n-text-1);
 }
 
 .storage-legend-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--n-r-key);
   flex-shrink: 0;
 }
 
@@ -285,295 +132,131 @@
 }
 
 .storage-legend-text strong {
-  color: var(--fg-1);
-  font-weight: 500;
-  text-transform: capitalize;
+  color: var(--n-text-1);
+  font-weight: 400;
 }
 
 .storage-legend-text .size {
-  color: var(--fg-2);
+  color: var(--n-text-3);
   font-variant-numeric: tabular-nums;
 }
 
-/* ---- Day separator -------------------------------------- */
-.date-group-label {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-  margin: 28px 0 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border-1);
-}
-
-.date-group-label .day-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--fg-1);
-  letter-spacing: -0.1px;
-  text-transform: capitalize;
-}
-
-.date-group-label .day-sub {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--fg-3);
-}
-
-/* ---- Downloads list / rows ------------------------------ */
+/* ---- Download rows -------------------------------------- */
+/* time | icon well | name + meta | badge | state; the actions hang outside
+   the row (global.css). The badge and the state (an active or paused
+   download's status, then the size) columns are as wide as their widest
+   entry, so the two sit 12 px apart. */
 .downloads-list {
-  /* The TS injects day-label dividers + .download-item-wrapper blocks. */
+  grid-template-columns: 72px 28px minmax(0, 1fr) max-content max-content;
 }
 
-/* 7-column grid mirroring the prototype:
-   time | 32px icon tile | filename + meta | tag | status | size | hover actions */
-.download-item {
+/* A row and its detail panel. The wrapper passes the list's columns on to
+   the row. */
+.download-item-wrapper {
   display: grid;
-  grid-template-columns: 90px 32px 1fr auto auto auto auto;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 4px;
-  border-bottom: 1px solid var(--border-1);
-  transition: background var(--dur-fast);
-  cursor: pointer;
+  grid-template-columns: subgrid;
 }
 
-.download-item:hover {
-  background: var(--bg-3);
+.download-item-wrapper > * {
+  grid-column: 1 / -1;
+}
+
+.download-state {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
 }
 
 .download-item.selected {
-  background: var(--bg-3);
+  background: var(--n-hover);
 }
 
-.download-time {
-  font-size: 12px;
-  color: var(--fg-3);
-  font-variant-numeric: tabular-nums;
+/* File paths are code (DESIGN.md §3.7): mono, 11.5 px in the tight row. */
+.download-meta .meta-path {
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 11.5px;
 }
 
-/* 32-px tinted icon tile — per-type background + border via inline style */
-.download-type-icon {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-sm);
-  color: var(--fg-2);
-}
-
-.download-type-icon svg {
-  width: 16px;
-  height: 16px;
-  display: block;
-}
-
-.download-content {
-  min-width: 0;
-}
-
-.download-filename {
-  font-size: 14px;
-  color: var(--fg-1);
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
-}
-
-.download-meta {
-  font-size: 11px;
-  color: var(--fg-3);
-  margin-top: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.download-meta .from {
-  color: var(--accent);
-}
-
-.download-meta .dot {
-  color: var(--fg-4);
-}
-
-.download-meta .path {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
-}
-
-/* Type tag — small pill, neutral by default */
-.download-tag {
-  display: inline-flex;
-  align-items: center;
-  height: 20px;
-  padding: 0 8px;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--fg-2);
-  background: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-xs);
-  letter-spacing: 0;
-  white-space: nowrap;
-  flex-shrink: 0;
-  text-transform: capitalize;
-}
-
-/* Status pill — colored per state */
+/* Status — accent while downloading, grey when paused. */
 .download-status {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  height: 20px;
-  padding: 0 8px;
-  font-size: 11px;
-  font-weight: 500;
-  border-radius: var(--r-xs);
-  letter-spacing: 0;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 400;
   white-space: nowrap;
   flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
 }
 
 .download-status.done {
-  color: var(--success);
-  background: var(--success-soft, #ecfdf5);
-  border: 1px solid rgba(22, 163, 74, 0.2);
+  color: var(--n-success);
 }
 
 .download-status.paused {
-  color: var(--danger);
-  background: var(--danger-soft, #fdecea);
-  border: 1px solid rgba(220, 38, 38, 0.2);
+  color: var(--n-text-3);
 }
 
-.download-status.progress {
-  color: var(--accent);
-  background: rgba(37, 99, 235, 0.06);
-  border: 1px solid rgba(37, 99, 235, 0.25);
+.download-status.in-progress {
+  color: var(--n-accent);
 }
 
-.download-status.progress .pct-num {
-  font-variant-numeric: tabular-nums;
+.download-status svg {
+  width: 12px;
+  height: 12px;
 }
 
 .download-size {
   font-size: 12px;
-  color: var(--fg-2);
+  color: var(--n-text-2);
   font-variant-numeric: tabular-nums;
   text-align: right;
-  min-width: 64px;
   white-space: nowrap;
 }
 
-/* Hover-revealed action buttons */
-.download-actions {
-  display: inline-flex;
-  gap: 2px;
-  opacity: 0;
-  transition: opacity var(--dur-fast);
-}
-
-.download-item:hover .download-actions {
+/* Active and paused rows keep their actions visible, so they can be
+   paused, resumed or cancelled without hovering. */
+.download-item.downloading .list-row-actions,
+.download-item.paused .list-row-actions {
   opacity: 1;
+  pointer-events: auto;
 }
 
-/* Always-visible actions on active/paused rows so the user can act
-   without hovering. */
-.download-item.downloading .download-actions,
-.download-item.paused .download-actions {
-  opacity: 1;
-}
-
-.action-btn {
-  width: 26px;
-  height: 26px;
-  border-radius: var(--r-xs);
-  border: 0;
-  background: transparent;
-  color: var(--fg-3);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  transition:
-    background var(--dur-fast),
-    color var(--dur-fast);
-}
-
-.action-btn:hover {
-  background: var(--bg-2);
-  color: var(--fg-1);
-}
-
-.action-btn.remove-btn:hover,
-.action-btn.cancel-btn:hover {
-  background: var(--danger-soft, #fdecea);
-  color: var(--danger);
-}
-
-.action-btn.resume-btn,
-.action-btn.resume-db-btn {
-  color: var(--success);
-}
-
-.action-btn.resume-btn:hover,
-.action-btn.resume-db-btn:hover {
-  background: var(--success-soft, #ecfdf5);
-}
-
-.action-btn svg {
-  width: 14px;
-  height: 14px;
-}
-
-/* ---- In-progress row with progress bar underneath ------ */
-.download-item.downloading {
-  row-gap: 6px;
-  padding-bottom: 14px;
-}
-
+/* ---- Progress bar under an active / paused row ---------- */
+/* A second grid row, from inside the name column to the row's end. */
 .download-progress {
-  grid-column: 3 / 6;
-  grid-row: 2 / 3;
+  grid-column: 3 / -1;
+  grid-row: 2;
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 2px;
+  margin: 0 0 10px 34px;
 }
 
 .download-progress-bar {
   flex: 1;
   height: 4px;
-  background: var(--bg-2);
-  border-radius: 2px;
+  background: var(--n-track);
+  border-radius: var(--n-r-key);
   overflow: hidden;
   position: relative;
-  border: 1px solid var(--border-1);
 }
 
+/* The width is the inline percentage; the fill is the accent, never a
+   per-type hue, and a neutral grey while paused. */
 .download-progress-fill {
   height: 100%;
-  background: var(--accent);
-  border-radius: 2px;
-  transition: width var(--dur-med, 220ms) var(--ease-out, ease);
+  background: var(--n-accent);
+  border-radius: var(--n-r-key);
+  transition: width var(--dur-med) ease;
+}
+
+.download-item.paused .download-progress-fill {
+  background: var(--n-control-edge);
 }
 
 .download-progress.indeterminate .download-progress-fill {
   width: 30%;
-  animation: download-progress-slide 1.4s var(--ease-in-out, ease-in-out) infinite;
+  animation: download-progress-slide 1.4s ease-in-out infinite;
 }
 
 @keyframes download-progress-slide {
@@ -585,27 +268,9 @@
   }
 }
 
-.download-progress-stats {
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-  font-size: 11px;
-  color: var(--fg-3);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0;
-  flex-shrink: 0;
-}
-
-.download-progress-stats strong {
-  color: var(--fg-1);
-  font-weight: 500;
-}
-
-/* ---- Detail panel (preserved from the legacy implementation) -- */
+/* ---- Detail panel (expanded row — grey, flat) ----------- */
 .detail-panel {
-  background: var(--bg-1);
-  border-bottom: 1px solid var(--border-1);
-  padding: 16px 4px 18px;
+  margin: 4px 0 8px;
 }
 
 .detail-inner {
@@ -618,10 +283,12 @@
 .detail-preview {
   width: 96px;
   height: 96px;
-  border-radius: var(--r-md);
+  border-radius: var(--n-r-control);
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--n-card);
+  color: var(--n-text-2);
 }
 
 .detail-metadata {
@@ -642,16 +309,24 @@
 }
 
 .detail-field-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--fg-3);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--n-text-3);
 }
 
+/* Names and paths are long unbroken strings: wrap them anywhere. */
 .detail-field-value {
   font-size: 13px;
-  color: var(--fg-1);
-  word-break: break-word;
+  line-height: 18px;
+  color: var(--n-text-1);
+  overflow-wrap: anywhere;
+}
+
+/* The file path is code: mono 12 / 16 (DESIGN.md §3.7). */
+.detail-path {
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 16px;
 }
 
 .detail-actions {
@@ -661,65 +336,92 @@
   margin-top: 8px;
 }
 
+/* Buttons inside a grey panel: 30 px; white raised (secondary), accent
+   (primary) or bare (ghost) — DESIGN.md §5.1. */
 .detail-btn-primary,
 .detail-btn-secondary,
 .detail-btn-ghost {
-  height: 32px;
+  height: 30px;
   padding: 0 14px;
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
-  border-radius: 3px;
+  border-radius: var(--n-r-control);
   cursor: pointer;
-  border: 1px solid var(--border-1);
-  background: var(--bg-0);
-  color: var(--fg-1);
+  border: 0;
+  background: var(--n-card);
+  color: var(--n-text-1);
+  box-shadow: var(--n-raised-shadow);
   transition:
     background var(--dur-fast),
-    border-color var(--dur-fast);
+    color var(--dur-fast),
+    filter var(--dur-fast);
 }
 
 .detail-btn-primary {
-  background: var(--fg-1);
-  color: var(--bg-0);
-  border-color: var(--fg-1);
+  background: var(--n-accent);
+  color: var(--n-on-accent);
+  box-shadow: none;
 }
 
 .detail-btn-primary:hover {
-  background: var(--fg-2);
-  border-color: var(--fg-2);
+  background: var(--n-accent-hover);
 }
 
 .detail-btn-secondary:hover {
-  background: var(--bg-2);
+  filter: brightness(0.97);
 }
 
 .detail-btn-ghost {
   background: transparent;
-  border-color: transparent;
-  color: var(--fg-3);
+  box-shadow: none;
+  color: var(--n-text-3);
 }
 
 .detail-btn-ghost:hover {
-  color: var(--fg-1);
+  color: var(--n-text-1);
 }
 
-/* ---- Empty + loading + footer ---------------------------- */
-.no-downloads {
-  text-align: center;
-  padding: 60px 0;
-  color: var(--fg-3);
-  font-size: 12px;
-  display: none;
+/* The box-shadow rules above match as strongly as global.css's
+   :focus-visible and come later, so restate the keyboard ring here. The
+   white button keeps its raised edge under the halo. */
+.detail-btn-primary:focus-visible,
+.detail-btn-ghost:focus-visible {
+  box-shadow: var(--n-focus-ring);
 }
 
+.detail-btn-secondary:focus-visible {
+  box-shadow: var(--n-raised-shadow), var(--n-focus-ring);
+}
+
+/* ---- Loading + footer ----------------------------------- */
 .loading-indicator {
   text-align: center;
   padding: 12px 0;
-  color: var(--fg-3);
+  color: var(--n-text-3);
   font-size: 12px;
 }
 
 .downloads-footer {
   margin-top: 28px;
+}
+
+/* An empty footer adds no space, so the page ends 56 px below the last row
+   (DESIGN.md §4.2). */
+.downloads-footer:empty {
+  margin-top: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .downloads-page,
+  .download-progress-fill,
+  .detail-btn-primary,
+  .detail-btn-secondary,
+  .detail-btn-ghost {
+    transition: none;
+  }
+
+  .download-progress.indeterminate .download-progress-fill {
+    animation: none;
+  }
 }

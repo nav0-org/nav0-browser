@@ -1,4 +1,4 @@
-import { app, BrowserWindow, screen, session } from 'electron';
+import { app, BrowserWindow, session, WebContents } from 'electron';
 import path from 'path';
 import { v4 as uuid } from 'uuid';
 import { Tab } from './tab';
@@ -15,6 +15,8 @@ import { PermissionManager } from './permission-manager';
 import { NotificationManager } from './notification-manager';
 import { FindInPageManager } from './find-in-page-manager';
 import { UnifiedOverlayManager, OverlayType } from './unified-overlay-manager';
+import { UrlAutocompleteHandler } from './overlay-handlers/url-autocomplete-handler';
+import { SSLManager } from './ssl-manager';
 import { ZoomManager } from './zoom-manager';
 import { TabSwitchManager } from './tab-switch-manager';
 import type { Database as DB } from 'better-sqlite3';
@@ -59,7 +61,7 @@ export class AppWindow {
   private database: DB;
   private readyPromise: Promise<void>;
   private resolveReady: () => void;
-  private _desiredFullScreen = true;
+  private _desiredFullScreen = false;
 
   constructor(isPrivate = false, database: DB) {
     this.isPrivate = isPrivate;
@@ -83,16 +85,18 @@ export class AppWindow {
     const isWindows = process.platform === 'win32';
     const isLinux = process.platform === 'linux';
 
-    // macOS opens in its native fullscreen Space. Linux and Windows fill the
-    // screen as a *maximized* window instead — true fullscreen there makes the
-    // window manager hide its own panels (top/bottom bars, taskbar), which we
-    // want to keep visible.
-    this._desiredFullScreen = isMac;
+    // A right-to-left macOS UI language mirrors the title bar, which moves the
+    // native window buttons to the right end of the tab strip. AppKit follows
+    // the app's chosen localization, which app.getLocale() reports.
+    const isTitleBarRtl = isMac && ['ar', 'fa', 'he', 'ur'].includes(app.getLocale().split('-')[0]);
 
+    // Every platform opens in a normal window that fills the screen (zoomed on
+    // macOS, maximized on Linux and Windows), never in true fullscreen: that
+    // would hide the window manager's own panels (top/bottom bars, taskbar)
+    // and, on macOS, the menu bar and the native window buttons.
     this.browserWindowInstance = new BrowserWindow({
       width: 1200,
       height: 800,
-      fullscreen: isMac,
       show: false,
       title: AppConstants.APP_NAME,
       icon:
@@ -103,19 +107,22 @@ export class AppWindow {
       // Chromium-drawn minimize/maximize/close buttons for the frameless
       // window. Electron supports this Window Controls Overlay on Linux since
       // v30.2 (electron/electron#41769) — without it, a 'hidden' title bar on
-      // Linux shows no window controls at all. Colours match the tab strip
-      // (--tab-inactive, or the dark private strip) so the overlay reads as
-      // part of it.
+      // Linux shows no window controls at all. Colours mirror the tab strip's
+      // tokens (--n-strip / --n-text-2, or the lavender --n-private-strip /
+      // --n-private-text) so the overlay reads as part of the 40 px strip.
       ...(isWindows || isLinux
         ? {
             titleBarOverlay: {
-              color: this.isPrivate ? '#2a0a0a' : '#e7e5e1',
-              symbolColor: this.isPrivate ? '#ffffff' : '#333333',
-              height: 38,
+              color: this.isPrivate ? '#e4def4' : '#e6e6e9',
+              symbolColor: this.isPrivate ? '#3f3a52' : '#424245',
+              height: 40,
             },
           }
         : {}),
-      trafficLightPosition: isMac ? { x: 12, y: 10 } : undefined,
+      // Centres the native buttons (14 × 16, 20 px apart) at x 20 / 40 / 60
+      // and y 23: the middle of the 34 px tab row in the 40 px strip, where
+      // the drawn fullscreen cluster sits too.
+      trafficLightPosition: isMac ? { x: 13, y: 15 } : undefined,
       webPreferences: {
         preload: BROWSER_LAYOUT_PRELOAD_WEBPACK_ENTRY,
         nodeIntegration: false,
@@ -124,6 +131,7 @@ export class AppWindow {
           `--app-window-id=${this.id}`,
           `--is-private=${this.isPrivate}`,
           `--platform=${process.platform}`,
+          `--titlebar-rtl=${isTitleBarRtl}`,
         ],
         sandbox: true,
         webSecurity: true,
@@ -142,11 +150,21 @@ export class AppWindow {
 
     this.overlayInitPromise = new Promise<void>((resolve) => {
       setTimeout(() => {
+        // The window may have closed already, with no overlay yet to close
+        // ('closed' below): one made now would never be closed. Callers waiting
+        // for it belong to the closed window and keep waiting.
+        if (!this.browserWindowInstance) return;
         this.unifiedOverlayManager = new UnifiedOverlayManager(
           this.id,
           this.isPrivate,
           this.partitionSetting
         );
+        this.unifiedOverlayManager.setOnVisibilityChange((type, visible) => {
+          this.browserWindowInstance?.webContents.send(
+            MainToRendererEventsForBrowserIPC.OVERLAY_VISIBILITY_CHANGED,
+            { type, visible }
+          );
+        });
         resolve();
       }, 500);
     });
@@ -177,12 +195,6 @@ export class AppWindow {
       else this.resetZoomActiveTab();
     });
 
-    // Pause all active downloads before the window is destroyed
-    // so their resume metadata can be persisted to the DB
-    this.browserWindowInstance.on('close', () => {
-      DownloadManager.pauseAllDownloads();
-    });
-
     this.browserWindowInstance.on('closed', () => {
       this.tabSwitchManager.dispose();
       // Resolve any outstanding dialogs / auth prompts so awaiting callers don't hang
@@ -190,25 +202,18 @@ export class AppWindow {
       this.pendingDialogs.clear();
       for (const [, callback] of this.pendingBasicAuth) callback(null);
       this.pendingBasicAuth.clear();
+      // The overlay's page would otherwise outlive the window (a private
+      // window's keeping a renderer of the private session running).
+      this.unifiedOverlayManager?.destroy();
       this.browserWindowInstance = null;
     });
 
-    // When leaving fullscreen on macOS, set proper windowed bounds and resize
-    // all views — the window started in a fullscreen Space, so it has no
-    // meaningful windowed bounds to return to. On Linux/Windows the window
-    // manager restores the pre-fullscreen state itself (typically maximized);
-    // forcing bounds here would shrink a maximized window to 1200×800 every
-    // time fullscreen ends (F11 or leaving HTML5 video fullscreen).
+    // When fullscreen ends, resize all views. The window manager restores the
+    // pre-fullscreen bounds itself (every window starts windowed); forcing
+    // bounds here would shrink a maximized window every time fullscreen ends
+    // (⌃⌘F, F11 or leaving HTML5 video fullscreen).
     this.browserWindowInstance.on('leave-full-screen', () => {
       this._desiredFullScreen = false;
-      if (isMac) {
-        const { width: screenW, height: screenH } = screen.getPrimaryDisplay().workAreaSize;
-        const w = Math.min(1200, screenW);
-        const h = Math.min(800, screenH);
-        const x = Math.round((screenW - w) / 2);
-        const y = Math.round((screenH - h) / 2);
-        this.browserWindowInstance?.setBounds({ x, y, width: w, height: h });
-      }
       this.handleResizing();
       this.browserWindowInstance?.webContents.send(
         MainToRendererEventsForBrowserIPC.FULLSCREEN_CHANGED,
@@ -238,12 +243,29 @@ export class AppWindow {
         }
       );
       this.resolveReady();
+      // Zoom on macOS while the window is still hidden: maximize() shows a
+      // hidden window, so calling it any earlier would show the window before
+      // the chrome has loaded. Zooming (rather than sizing the window to the
+      // screen) leaves the 1200 × 800 frame for the zoom button to return to.
+      if (isMac) {
+        this.browserWindowInstance?.maximize();
+      }
       this.browserWindowInstance?.show();
       // Re-assert maximization now that the window is mapped. X11 window
       // managers (e.g. Muffin on Linux Mint) may ignore the maximize() issued
       // while the window was still hidden, which left a small floating window.
       if (isLinux) {
         this.browserWindowInstance?.maximize();
+      }
+      // Showing the window makes it key. When no view is first responder by
+      // then (the tab's view was focused while the window was hidden), macOS
+      // focuses the first control in the chrome, the + button, as if Tab had
+      // been pressed: it shows its ring and typing goes nowhere. Focus where
+      // the user will type instead: now, and again when the window becomes
+      // key if it isn't yet (the app may still be activating).
+      this.focusForTyping();
+      if (!this.browserWindowInstance?.isFocused()) {
+        this.browserWindowInstance?.once('focus', () => this.focusForTyping());
       }
     });
 
@@ -307,6 +329,13 @@ export class AppWindow {
    * so the next private sitting starts empty.
    */
   public static clearPrivateSession(): void {
+    // Private downloads end with the session, as in Chrome and Firefox: their
+    // records go with the private db, and their partial files shouldn't stay.
+    try {
+      DownloadManager.cancelPrivateDownloads();
+    } catch (e) {
+      console.error('Failed to cancel private downloads:', e);
+    }
     PermissionManager.clearMemoryPermissions();
     try {
       const privateSession = session.fromPartition(PartitionNames.PRIVATE);
@@ -352,7 +381,9 @@ export class AppWindow {
     if (!this.browserWindowInstance) return { x: 0, y: 0, width: 0, height: 0 };
     const parentBounds = this.browserWindowInstance.contentView.getBounds();
     // If url-autocomplete is the only visible overlay, restrict bounds to its region
-    // so the rest of the page (including the URL input) keeps receiving mouse events.
+    // (the dropdown plus its shadow room: 6 px above, up to the toolbar's bottom
+    // line, 60 px either side and 84 px below) so the rest of the window
+    // (including the URL input) keeps receiving mouse events.
     if (
       this.unifiedOverlayManager &&
       this.unifiedOverlayManager.isVisible('url-autocomplete') &&
@@ -370,13 +401,7 @@ export class AppWindow {
         ] as const
       ).some((t) => this.unifiedOverlayManager!.isVisible(t));
       if (!otherVisible) {
-        const b = this.urlAutocompleteBounds;
-        return {
-          x: Math.max(0, Math.round(b.x)),
-          y: Math.max(0, Math.round(b.y)),
-          width: Math.max(0, Math.min(Math.round(b.width), parentBounds.width)),
-          height: Math.max(0, Math.min(Math.round(b.height), parentBounds.height)),
-        };
+        return UrlAutocompleteHandler.getViewBounds(this.urlAutocompleteBounds, parentBounds);
       }
     }
     return parentBounds;
@@ -393,7 +418,8 @@ export class AppWindow {
   }
 
   private getYOffset(): number {
-    return 82 + (this.permissionStripVisible ? 48 : 0) + (this.isFindInPageVisible() ? 48 : 0);
+    // Tab strip 40 + toolbar 44, then the permission strip (51) and find bar (44) when shown.
+    return 84 + (this.permissionStripVisible ? 51 : 0) + (this.isFindInPageVisible() ? 44 : 0);
   }
 
   private resizeActiveTab(): void {
@@ -484,16 +510,19 @@ export class AppWindow {
     return insertIndex;
   }
 
-  createSuspendedTab(url: string, title: string): Tab {
-    const tab = new Tab(this, url, this.partitionSetting, { suspended: true, title });
+  createSuspendedTab(url: string, title: string, faviconUrl: string | null = null): Tab {
+    const tab = new Tab(this, url, this.partitionSetting, { suspended: true, title, faviconUrl });
     this.tabs.set(tab.getId(), tab);
 
+    // It loads only when activated: until then the strip shows the icon it was
+    // restored with.
     this.browserWindowInstance?.webContents.send(
       MainToRendererEventsForBrowserIPC.NEW_TAB_CREATED,
       {
         id: tab.id,
         title: tab.getTitle(),
         url: tab.getUrl(),
+        faviconUrl: tab.getFaviconUrl(),
       }
     );
 
@@ -518,19 +547,22 @@ export class AppWindow {
       tab.finalizePageTime();
       tab.clearPendingTimers();
       PermissionManager.clearSessionPermissionsForTab(id);
-      // Clean up notifications for this tab's webContents
+      // Clean up notifications for this tab's webContents (a page that closed
+      // its own tab has taken its webContents with it: see Tab)
       const tabView = tab.getWebContentsViewInstance();
-      if (tabView) {
+      if (tabView?.webContents) {
         NotificationManager.clearNotificationsForWebContents(tabView.webContents.id);
       }
-      // Clean up per-tab strip state
+      // Clean up per-tab strip state. The find bar belongs to its tab: it goes
+      // with it, or it would stay over the next tab, searching a page that's gone.
       this.findInPageState.delete(id);
+      if (id === this.activeTabId && this.isFindInPageVisible()) this.findInPageManager.hide();
       this.permissionPrompts.delete(id);
       const view = tab.getWebContentsViewInstance();
       if (view) {
-        view.webContents.removeAllListeners();
+        view.webContents?.removeAllListeners();
         view.removeAllListeners();
-        view.webContents.close();
+        view.webContents?.close();
       }
     }
     this.tabs.delete(id);
@@ -544,6 +576,14 @@ export class AppWindow {
   }
 
   async activateTab(id: string, isUserInitiated = true): Promise<void> {
+    // A tab that has already closed (a request that crossed its close, or a
+    // stale ⌘O entry) changes nothing: the current tab stays on screen.
+    if (!this.tabs.has(id)) return;
+    // A tab switch closes the ⋮ menu: the new tab's view would otherwise stack
+    // over the menu and hide it while it still counts as open (its overlay
+    // eating the next click, and ⋮ staying pressed). Covers menu items that
+    // open a tab and keyboard switches alike.
+    this.hideOptionsMenuOverlay();
     // Save current find-in-page state before switching
     if (this.isFindInPageVisible() && this.activeTabId) {
       this.findInPageState.set(this.activeTabId, {
@@ -759,10 +799,19 @@ export class AppWindow {
     this.unifiedOverlayManager.showOverlay('options-menu');
   }
 
-  hideOptionsMenuOverlay(): void {
+  // Closing with Esc (returnFocusToButton) hands focus back to the ⋮ button,
+  // as a native menu does.
+  hideOptionsMenuOverlay(returnFocusToButton = false): void {
     if (this.unifiedOverlayManager?.isVisible('options-menu')) {
       this.unifiedOverlayManager.hideOverlay('options-menu');
       this.removeOverlayViewIfEmpty();
+      if (returnFocusToButton && this.browserWindowInstance) {
+        this.browserWindowInstance.webContents.focus();
+        this.browserWindowInstance.webContents.send(
+          MainToRendererEventsForBrowserIPC.OVERLAY_VISIBILITY_CHANGED,
+          { type: 'options-menu', visible: false, returnFocus: true }
+        );
+      }
     }
   }
 
@@ -845,6 +894,85 @@ export class AppWindow {
     }
   }
 
+  // A press in the transparent margin the overlay view keeps around the
+  // dropdown for its shadow (x, y in the view). It is a press on whatever lies
+  // under the margin — the page, or the chrome's strips: the dropdown closes,
+  // and the press is passed on there with its button and modifier keys. Only
+  // the overlay itself may ask: a replayed press is a trusted click.
+  // Focus moves to that target, or to the page for a press that isn't passed
+  // on (Back / Forward), even when the chrome has already hidden the dropdown
+  // (the press can focus the overlay view first); otherwise it would stay in
+  // the removed view. The chrome's blur handler
+  // (browser-layout/url-autocomplete.ts) then resets its own dropdown state.
+  // Limits (DESIGN.md §4.4): a press can't reach a cross-site iframe, the
+  // mouse's Back and Forward buttons only close the dropdown, and wheel, hover
+  // and drags over the margin don't reach the page.
+  dismissUrlAutocompleteOverlay(
+    sender: WebContents,
+    press?: {
+      x: number;
+      y: number;
+      button: number;
+      shiftKey: boolean;
+      ctrlKey: boolean;
+      altKey: boolean;
+      metaKey: boolean;
+    }
+  ): void {
+    const overlayView = this.unifiedOverlayManager?.getWebContentsViewInstance();
+    if (!overlayView || sender !== overlayView.webContents) return;
+    // Read before hiding: the view's bounds turn the press into window space.
+    const viewBounds = overlayView.getBounds();
+    this.hideUrlAutocompleteOverlay();
+    if (this.unifiedOverlayManager?.hasAnyVisible() || !this.browserWindowInstance) return;
+
+    const isPress = !!press && !!viewBounds && Number.isFinite(press.x) && Number.isFinite(press.y);
+    const x = isPress ? viewBounds.x + press.x : 0;
+    const y = isPress ? viewBounds.y + press.y : 0;
+    const tabView = this.getActiveTab()?.getWebContentsViewInstance();
+    const tabBounds = tabView?.getBounds();
+    const onPage =
+      !isPress ||
+      (!!tabBounds &&
+        x >= tabBounds.x &&
+        y >= tabBounds.y &&
+        x < tabBounds.x + tabBounds.width &&
+        y < tabBounds.y + tabBounds.height);
+    const target = onPage ? tabView?.webContents : this.browserWindowInstance.webContents;
+    if (!target) return;
+    // Only the main three buttons replay: Back / Forward (3 / 4) would turn
+    // into a left click. Those only close the dropdown, leaving focus with the
+    // page: focusing the chrome would re-focus the address field and open the
+    // dropdown again.
+    if (!isPress || press.button < 0 || press.button > 2) {
+      (tabView?.webContents ?? target).focus();
+      return;
+    }
+
+    const origin = onPage && tabBounds ? tabBounds : { x: 0, y: 0 };
+    const point = { x: Math.round(x - origin.x), y: Math.round(y - origin.y) };
+    const button = press.button === 2 ? 'right' : press.button === 1 ? 'middle' : 'left';
+    const modifiers: Array<'shift' | 'control' | 'alt' | 'meta'> = [];
+    if (press.shiftKey) modifiers.push('shift');
+    if (press.ctrlKey) modifiers.push('control');
+    if (press.altKey) modifiers.push('alt');
+    if (press.metaKey) modifiers.push('meta');
+    const replay = () => {
+      target.sendInputEvent({ type: 'mouseDown', ...point, button, clickCount: 1, modifiers });
+      target.sendInputEvent({ type: 'mouseUp', ...point, button, clickCount: 1, modifiers });
+    };
+    // Focus the page before the press, as a real click would. The chrome is
+    // the other way round: focusing it first re-focuses the address field,
+    // which would open the dropdown again.
+    if (onPage) {
+      target.focus();
+      replay();
+    } else {
+      replay();
+      target.focus();
+    }
+  }
+
   forwardUrlAutocompleteResultClicked(data: unknown): void {
     if (!this.browserWindowInstance) return;
     this.browserWindowInstance.webContents.send(
@@ -860,6 +988,19 @@ export class AppWindow {
     if (!this.browserWindowInstance) return;
     this.browserWindowInstance.webContents.focus();
     this.browserWindowInstance.webContents.send(MainToRendererEventsForBrowserIPC.FOCUS_URL_BAR);
+  }
+
+  // Where typing goes when a window opens: the New Tab page (which keeps an
+  // empty address) focuses its own search field; any other page gets the
+  // address field.
+  private focusForTyping(): void {
+    const tab = this.getActiveTab();
+    if (!this.browserWindowInstance || !tab) return;
+    if (tab.getUrl() === '') {
+      tab.getWebContentsViewInstance()?.webContents.focus();
+    } else {
+      this.focusUrlBar();
+    }
   }
 
   broadcastToTabs(channel: string, data: any): void {
@@ -892,12 +1033,11 @@ export class AppWindow {
     }
   }
 
-  hidePermissionPrompt(): void {
-    // Remove the active tab's permission data
-    if (this.activeTabId) {
-      this.permissionPrompts.delete(this.activeTabId);
-    }
-    if (!this.permissionStripVisible) return;
+  hidePermissionPrompt(tabId: string): void {
+    this.permissionPrompts.delete(tabId);
+    // Only the active tab's prompt is on screen: a background tab's going
+    // (say that tab closed) mustn't take the active tab's strip down with it
+    if (tabId !== this.activeTabId || !this.permissionStripVisible) return;
     this.permissionStripVisible = false;
     this.browserWindowInstance?.webContents.send(
       MainToRendererEventsForBrowserIPC.HIDE_PERMISSION_STRIP
@@ -1008,8 +1148,10 @@ export class AppWindow {
 
   findTabByWebContentsId(webContentsId: number): Tab | null {
     for (const tab of this.tabs.values()) {
+      // A view has no webContents once its page is gone: a window being torn
+      // down (destroyAllTabs()) keeps its tabs until it has closed.
       const view = tab.getWebContentsViewInstance();
-      if (view && view.webContents.id === webContentsId) {
+      if (view?.webContents?.id === webContentsId) {
         return tab;
       }
     }
@@ -1106,9 +1248,18 @@ export class AppWindow {
 
     this.unifiedOverlayManager.setSSLInfoOnDismiss(() => this.hideSSLInfoOverlay());
 
+    // The field shows a certificate error on the warning too, before anything
+    // is bypassed, so the popover only says "you bypassed" when it's true.
+    let isBypassed = false;
+    try {
+      isBypassed = SSLManager.isHostBypassed(new URL(data.url).hostname);
+    } catch {
+      /* not a URL */
+    }
+
     await this.unifiedOverlayManager.whenReady();
     this.ensureOverlayViewAdded();
-    this.unifiedOverlayManager.showOverlay('ssl-info', data);
+    this.unifiedOverlayManager.showOverlay('ssl-info', { ...data, isBypassed });
   }
 
   hideSSLInfoOverlay(): void {

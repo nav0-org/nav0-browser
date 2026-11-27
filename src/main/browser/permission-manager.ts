@@ -9,11 +9,9 @@ import {
   BrowserWindow,
 } from 'electron';
 import { v4 as uuid } from 'uuid';
-import {
-  PartitionNames,
-  RendererToMainEventsForBrowserIPC,
-} from '../../constants/app-constants';
+import { PartitionNames, RendererToMainEventsForBrowserIPC } from '../../constants/app-constants';
 import type { Database as DatabaseType } from 'better-sqlite3';
+import { FaviconCache } from './favicon-cache';
 
 // Types
 type SessionDecision = 'allowed_session' | 'denied_session';
@@ -54,7 +52,7 @@ export interface PermissionRecord {
 
 // Callback type for showing/hiding the prompt UI
 type ShowPromptCallback = (appWindowId: string, request: PermissionRequest) => void;
-type HidePromptCallback = (appWindowId: string) => void;
+type HidePromptCallback = (appWindowId: string, tabId: string) => void;
 
 // Callback type for finding tab info from a webContents
 type FindTabCallback = (
@@ -74,11 +72,11 @@ export class PermissionManager {
   private static hidePromptCallback: HidePromptCallback | null = null;
   private static findTabCallback: FindTabCallback | null = null;
 
-  // Permissions auto-granted without prompting
+  // Permissions auto-granted without prompting. Pointer lock ('pointerLock')
+  // isn't one: it prompts, and a stored decision for it holds.
   static readonly AUTO_GRANT_PERMISSIONS = new Set([
     'fullscreen',
     'clipboard-sanitized-write',
-    'pointer-lock',
     'mediaKeySystem',
   ]);
 
@@ -562,7 +560,7 @@ export class PermissionManager {
     }
 
     // Hide the prompt
-    PermissionManager.hidePromptCallback?.(request.appWindowId);
+    PermissionManager.hidePromptCallback?.(request.appWindowId, request.tabId);
 
     // Process next queued request for this tab
     const respondedTabId = request.tabId;
@@ -637,7 +635,7 @@ export class PermissionManager {
     if (active) {
       PermissionManager.activePrompts.delete(tabId);
       active.callbacks.forEach((cb) => cb(false));
-      PermissionManager.hidePromptCallback?.(active.appWindowId);
+      PermissionManager.hidePromptCallback?.(active.appWindowId, active.tabId);
     }
   }
 
@@ -721,24 +719,21 @@ export class PermissionManager {
   static getAllPersistentPermissions(searchTerm?: string): PermissionRecord[] {
     if (!PermissionManager.db) return [];
     try {
-      const baseSelect = `
-        SELECT p.*,
-          (SELECT h.faviconUrl FROM browsingHistory h
-           WHERE h.faviconUrl IS NOT NULL
-             AND (h.url = p.origin OR h.url LIKE p.origin || '/%')
-           ORDER BY h.createdDate DESC LIMIT 1) AS faviconUrl
-        FROM site_permission p
-      `;
-      if (searchTerm) {
-        return PermissionManager.db
-          .prepare(
-            `${baseSelect} WHERE p.origin LIKE ? OR p.permissionType LIKE ? ORDER BY p.origin, p.permissionType`
-          )
-          .all(`%${searchTerm}%`, `%${searchTerm}%`) as PermissionRecord[];
+      const baseSelect = 'SELECT p.* FROM site_permission p';
+      const records = (
+        searchTerm
+          ? PermissionManager.db
+              .prepare(
+                `${baseSelect} WHERE p.origin LIKE ? OR p.permissionType LIKE ? ORDER BY p.origin, p.permissionType`
+              )
+              .all(`%${searchTerm}%`, `%${searchTerm}%`)
+          : PermissionManager.db.prepare(`${baseSelect} ORDER BY p.origin, p.permissionType`).all()
+      ) as PermissionRecord[];
+      // Each site's icon from the favicon cache.
+      for (const record of records) {
+        record.faviconUrl = FaviconCache.get(PermissionManager.db, record.origin);
       }
-      return PermissionManager.db
-        .prepare(`${baseSelect} ORDER BY p.origin, p.permissionType`)
-        .all() as PermissionRecord[];
+      return records;
     } catch {
       return [];
     }
@@ -910,10 +905,7 @@ export class PermissionManager {
     }
   }
 
-  static extractMediaTypes(
-    permission: string,
-    details: unknown
-  ): string[] {
+  static extractMediaTypes(permission: string, details: unknown): string[] {
     if (permission !== 'media') return [];
     const mediaDetails = details as Electron.MediaAccessPermissionRequest | undefined;
     const types = mediaDetails?.mediaTypes;
@@ -951,19 +943,22 @@ export class PermissionManager {
       notifications: { label: 'notifications', icon: 'bell' },
       midi: { label: 'MIDI devices', icon: 'music' },
       midiSysex: { label: 'MIDI system exclusive', icon: 'music' },
-      pointerLock: { label: 'pointer lock', icon: 'lock' },
+      pointerLock: { label: 'pointer lock', icon: 'mouse-pointer' },
       openExternal: { label: 'external application', icon: 'app-window' },
       'clipboard-read': { label: 'clipboard', icon: 'clipboard' },
       'idle-detection': { label: 'idle detection', icon: 'moon' },
       'display-capture': { label: 'screen sharing', icon: 'monitor' },
       mediaKeySystem: { label: 'protected content', icon: 'hard-drive' },
       'accessibility-events': { label: 'accessibility events', icon: 'eye' },
+      'persistent-storage': { label: 'persistent storage', icon: 'database' },
       'storage-access': { label: 'storage access', icon: 'hard-drive' },
+      'top-level-storage-access': { label: 'top-level storage access', icon: 'hard-drive' },
+      fileSystem: { label: 'file system', icon: 'folder' },
       'window-management': { label: 'window management', icon: 'app-window' },
       'local-fonts': { label: 'local fonts', icon: 'type' },
       'screen-wake-lock': { label: 'screen wake lock', icon: 'monitor' },
       'speaker-selection': { label: 'speaker selection', icon: 'speaker' },
-      'keyboard-lock': { label: 'keyboard lock', icon: 'keyboard' },
+      keyboardLock: { label: 'keyboard lock', icon: 'keyboard' },
       usb: { label: 'USB devices', icon: 'usb' },
       serial: { label: 'serial ports', icon: 'usb' },
       bluetooth: { label: 'Bluetooth devices', icon: 'bluetooth' },

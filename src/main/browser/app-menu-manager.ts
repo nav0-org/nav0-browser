@@ -25,7 +25,7 @@ export abstract class AppMenuManager {
                 { role: 'about' as const },
                 { type: 'separator' as const },
                 {
-                  label: 'Settings...',
+                  label: 'Settings…',
                   accelerator: 'CmdOrCtrl+,',
                   click: async () => {
                     await AppWindowManager.getActiveWindow().createTab(
@@ -37,8 +37,8 @@ export abstract class AppMenuManager {
                 { type: 'separator' as const },
                 {
                   label: CLIInstaller.isInstalled()
-                    ? "Manage 'nav0' Command in PATH..."
-                    : "Install 'nav0' Command in PATH...",
+                    ? "Manage 'nav0' Command in PATH…"
+                    : "Install 'nav0' Command in PATH…",
                   click: async () => {
                     const win = AppWindowManager.getActiveWindow()?.getBrowserWindowInstance();
                     await showInstallCLIDialog(win ?? undefined);
@@ -110,7 +110,7 @@ export abstract class AppMenuManager {
           },
           { type: 'separator' as const },
           {
-            label: 'Print...',
+            label: 'Print…',
             accelerator: 'CmdOrCtrl+P',
             click: async () => {
               const activeWindow = AppWindowManager.getActiveWindow();
@@ -186,11 +186,7 @@ export abstract class AppMenuManager {
             click: () => {
               const activeWindow = AppWindowManager.getActiveWindow();
               if (!activeWindow) return;
-              const activeTab = activeWindow.getActiveTab();
-              const wc = activeTab?.getWebContentsViewInstance()?.webContents;
-              if (wc?.navigationHistory.canGoBack()) {
-                wc.navigationHistory.goBack();
-              }
+              activeWindow.getActiveTab()?.goBack();
             },
           },
           {
@@ -199,11 +195,7 @@ export abstract class AppMenuManager {
             click: () => {
               const activeWindow = AppWindowManager.getActiveWindow();
               if (!activeWindow) return;
-              const activeTab = activeWindow.getActiveTab();
-              const wc = activeTab?.getWebContentsViewInstance()?.webContents;
-              if (wc?.navigationHistory.canGoForward()) {
-                wc.navigationHistory.goForward();
-              }
+              activeWindow.getActiveTab()?.goForward();
             },
           },
           { type: 'separator' as const },
@@ -397,8 +389,8 @@ export abstract class AppMenuManager {
             ? [
                 {
                   label: CLIInstaller.isInstalled()
-                    ? "Manage 'nav0' Command in PATH..."
-                    : "Install 'nav0' Command in PATH...",
+                    ? "Manage 'nav0' Command in PATH…"
+                    : "Install 'nav0' Command in PATH…",
                   click: async () => {
                     const win = AppWindowManager.getActiveWindow()?.getBrowserWindowInstance();
                     await showInstallCLIDialog(win ?? undefined);

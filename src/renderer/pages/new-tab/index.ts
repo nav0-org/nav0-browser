@@ -1,6 +1,9 @@
 import './index.css';
 
 import { createIcons, icons } from 'lucide';
+import { FormatUtils } from '../../common/format-utils';
+import { UrlDisplay } from '../../common/url-display';
+import { FaviconTile } from '../../common/favicon-tile';
 createIcons({ icons });
 
 const GREETINGS_BY_HOUR: { range: [number, number]; phrases: string[] }[] = [
@@ -144,6 +147,8 @@ const searchResultsEmpty = document.getElementById('search-results-empty') as HT
 const bookmarksSection = document.getElementById('bookmarks-section') as HTMLElement | null;
 const topSitesSection = document.getElementById('top-sites-section') as HTMLElement | null;
 
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
 let searchActiveIndex = -1;
 let searchCurrentResults: SearchResultItem[] = [];
 let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -152,11 +157,11 @@ function formatRelativeDate(dateStr: string): string {
   const date = new Date(dateStr);
   const now = new Date();
   const diffDays = Math.floor((now.getTime() - date.getTime()) / 86400000);
-  const timeStr = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const timeStr = FormatUtils.formatTime(date);
   if (diffDays === 0) return `Today, ${timeStr}`;
   if (diffDays === 1) return `Yesterday, ${timeStr}`;
   if (diffDays < 7) return `${diffDays} days ago`;
-  return date.toLocaleDateString();
+  return FormatUtils.formatDate(date);
 }
 
 function formatFileSize(bytes: number): string {
@@ -165,30 +170,15 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function faviconLetter(url: string): string {
-  try {
-    return new URL(url).hostname.replace('www.', '').charAt(0).toUpperCase();
-  } catch {
-    return (url || '?').charAt(0).toUpperCase();
-  }
-}
-
 function buildResultIconHtml(item: SearchResultItem): string {
-  const fallback = faviconLetter(item.url);
   if (item.type === 'search') {
     return `<div class="search-result-icon"><i data-lucide="search" width="16" height="16"></i></div>`;
   }
   if (item.type === 'download') {
     return `<div class="search-result-icon"><i data-lucide="download" width="16" height="16"></i></div>`;
   }
-  if (item.faviconUrl) {
-    const safeFavicon = escapeAttr(item.faviconUrl);
-    return `<div class="search-result-favicon"><img src="${safeFavicon}" alt="" onerror="this.parentElement.textContent='${fallback}'"></div>`;
-  }
-  if (item.type === 'tab') {
-    return `<div class="search-result-icon"><i data-lucide="app-window" width="16" height="16"></i></div>`;
-  }
-  return `<div class="search-result-favicon">${fallback}</div>`;
+  // Filled in buildResultRow(): the site's icon, or the favicon fallback tile.
+  return `<div class="search-result-favicon"></div>`;
 }
 
 function buildResultRow(item: SearchResultItem, index: number): HTMLElement {
@@ -199,7 +189,9 @@ function buildResultRow(item: SearchResultItem, index: number): HTMLElement {
   const subParts: string[] = [];
   if (item.meta) subParts.push(`<span class="search-result-meta">${escapeText(item.meta)}</span>`);
   if (item.type !== 'search' && item.url) {
-    subParts.push(`<span class="search-result-url">${escapeText(item.url)}</span>`);
+    subParts.push(
+      `<span class="search-result-url">${escapeText(UrlDisplay.format(item.url))}</span>`
+    );
   }
   const subline = subParts.length
     ? `<div class="search-result-subline">${subParts.join('')}</div>`
@@ -212,6 +204,10 @@ function buildResultRow(item: SearchResultItem, index: number): HTMLElement {
       ${subline}
     </div>
   `;
+
+  row
+    .querySelector('.search-result-favicon')
+    ?.appendChild(FaviconTile.icon(item.faviconUrl, item.url));
 
   row.addEventListener('click', () => openSearchResult(item));
   return row;
@@ -234,11 +230,12 @@ function openSearchResult(item: SearchResultItem): void {
 function setTilesVisible(visible: boolean): void {
   // Tile sections are also gated by their own data presence, so only flip
   // them when they were already populated. The `hidden` attribute is the
-  // source of truth; we toggle a display override instead of clearing it.
+  // source of truth; we toggle the global `d-none` utility instead of
+  // clearing it.
   [bookmarksSection, topSitesSection].forEach((section) => {
     if (!section) return;
     if (section.hasAttribute('data-has-content')) {
-      section.style.display = visible ? '' : 'none';
+      section.classList.toggle('d-none', !visible);
     }
   });
 }
@@ -402,7 +399,10 @@ function moveSearchSelection(direction: number): void {
   searchActiveIndex = (searchActiveIndex + direction) % searchCurrentResults.length;
   if (searchActiveIndex < 0) searchActiveIndex = searchCurrentResults.length - 1;
   rows[searchActiveIndex]?.classList.add('active');
-  rows[searchActiveIndex]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  rows[searchActiveIndex]?.scrollIntoView({
+    behavior: reducedMotion.matches ? 'auto' : 'smooth',
+    block: 'nearest',
+  });
 }
 
 if (searchBar) {
@@ -499,15 +499,6 @@ function deriveTitle(rawTitle: string, url: string): string {
   return deriveDomain(url);
 }
 
-function buildFaviconFallback(url: string): string {
-  try {
-    const u = new URL(url);
-    return `${u.protocol}//${u.host}/favicon.ico`;
-  } catch {
-    return '';
-  }
-}
-
 function renderTile(item: {
   url: string;
   title: string;
@@ -516,17 +507,13 @@ function renderTile(item: {
 }): string {
   const domain = deriveDomain(item.url);
   const title = deriveTitle(item.title, item.url);
-  const favicon = item.faviconUrl || buildFaviconFallback(item.url);
   const safeUrl = escapeAttr(item.url);
-  const safeFavicon = escapeAttr(favicon);
+  // The site's icon from the favicon cache, or the favicon fallback tile.
+  const safeFavicon = escapeAttr(item.faviconUrl || '');
   return `
     <a class="tile" href="${safeUrl}" data-url="${safeUrl}" title="${escapeAttr(title)}">
       <span class="tile-icon">
-        ${
-          safeFavicon
-            ? `<img src="${safeFavicon}" alt="" onerror="this.parentElement.innerHTML='<i data-lucide=\\'globe\\' width=\\'18\\' height=\\'18\\'></i>'">`
-            : `<i data-lucide="globe" width="18" height="18"></i>`
-        }
+        ${safeFavicon ? `<img src="${safeFavicon}" alt="">` : FaviconTile.html(item.url)}
       </span>
       <span class="tile-text">
         <span class="tile-title">${escapeText(title)}</span>
@@ -534,6 +521,13 @@ function renderTile(item: {
       </span>
     </a>
   `;
+}
+
+// A favicon that fails to load falls back to the favicon fallback tile.
+function attachTileFaviconFallbacks(row: HTMLElement): void {
+  row.querySelectorAll<HTMLImageElement>('.tile-icon img').forEach((img) => {
+    FaviconTile.attachFallback(img, img.closest<HTMLElement>('.tile')?.dataset.url || '');
+  });
 }
 
 function attachTileNavigation(row: HTMLElement): void {
@@ -568,6 +562,7 @@ async function loadTileRows(): Promise<void> {
       const top = merged.sort((a, b) => (b.visits || 0) - (a.visits || 0)).slice(0, TILE_LIMIT);
       if (top.length > 0) {
         bookmarksRow.innerHTML = top.map(renderTile).join('');
+        attachTileFaviconFallbacks(bookmarksRow);
         attachTileNavigation(bookmarksRow);
         bookmarksSection.hidden = false;
         bookmarksSection.setAttribute('data-has-content', 'true');
@@ -584,6 +579,7 @@ async function loadTileRows(): Promise<void> {
       const sites = await window.BrowserAPI.fetchTopSites(appWindowId, TILE_LIMIT);
       if (sites && sites.length > 0) {
         topSitesRow.innerHTML = sites.map(renderTile).join('');
+        attachTileFaviconFallbacks(topSitesRow);
         attachTileNavigation(topSitesRow);
         topSitesSection.hidden = false;
         topSitesSection.setAttribute('data-has-content', 'true');

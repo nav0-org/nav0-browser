@@ -1,5 +1,8 @@
 import './command-k.css';
 import { createIcons, icons } from 'lucide';
+import { FormatUtils } from '../../../common/format-utils';
+import { UrlDisplay } from '../../../common/url-display';
+import { FaviconTile } from '../../../common/favicon-tile';
 
 type ResultItem = {
   type: 'tab' | 'bookmark' | 'history' | 'download' | 'search';
@@ -25,12 +28,13 @@ const COMMAND_K_HTML = `
     <!-- Search input area -->
     <div class="search-area">
       <i data-lucide="search" class="search-icon" width="18" height="18"></i>
-      <input type="text" id="cmdk-search-input" class="search-input" placeholder="Search tabs, bookmarks, history, downloads or the web..." autofocus>
+      <input type="text" id="cmdk-search-input" class="search-input" placeholder="Search tabs, bookmarks, history, downloads or the web…" autofocus>
       <div class="keyboard-hint">
         <span class="key">Tab</span>
         <span class="key">\u2191</span>
         <span class="key">\u2193</span>
-        <span class="key">Enter</span>
+        <span class="key">\u21b5</span>
+        <span class="key">esc</span>
       </div>
     </div>
 
@@ -45,9 +49,9 @@ const COMMAND_K_HTML = `
       </div>
 
       <!-- Loading indicator -->
-      <div class="loading" id="cmdk-loading-indicator">
+      <div class="loading" id="cmdk-loading-indicator" hidden>
         <div class="loader"></div>
-        <div>Searching...</div>
+        <div>Searching…</div>
       </div>
     </div>
   </div>
@@ -59,12 +63,12 @@ const formatDate = (dateStr: string): string => {
   const diffMs = now.getTime() - date.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  const timeStr = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const timeStr = FormatUtils.formatTime(date);
 
   if (diffDays === 0) return `Today, ${timeStr}`;
   if (diffDays === 1) return `Yesterday, ${timeStr}`;
   if (diffDays < 7) return `${diffDays} days ago`;
-  return date.toLocaleDateString();
+  return FormatUtils.formatDate(date);
 };
 
 const formatFileSize = (bytes: number): string => {
@@ -76,17 +80,14 @@ const formatFileSize = (bytes: number): string => {
 const escapeHtml = (str: string): string => {
   const div = document.createElement('div');
   div.textContent = str;
-  return div.innerHTML;
+  // innerHTML leaves quotes alone: escape them so the result is also safe
+  // inside a quoted attribute (title="…", src="…").
+  return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 };
 
-const getFaviconLetter = (url: string): string => {
-  try {
-    const hostname = new URL(url).hostname;
-    return hostname.replace('www.', '').charAt(0).toUpperCase();
-  } catch {
-    return url.charAt(0).toUpperCase();
-  }
-};
+// Smooth scrolling is motion: skip it when the OS asks to reduce motion.
+const prefersReducedMotion = (): boolean =>
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const createResultItemElement = (item: ResultItem, index: number): HTMLElement => {
   const el = document.createElement('div');
@@ -98,16 +99,9 @@ const createResultItemElement = (item: ResultItem, index: number): HTMLElement =
     iconHtml = `<div class="result-icon"><i data-lucide="search" width="16" height="16"></i></div>`;
   } else if (item.type === 'download') {
     iconHtml = `<div class="result-icon"><i data-lucide="download" width="16" height="16"></i></div>`;
-  } else if (item.type === 'tab') {
-    if (item.faviconUrl) {
-      iconHtml = `<div class="result-favicon"><img src="${escapeHtml(item.faviconUrl)}" onerror="this.parentElement.textContent='${getFaviconLetter(item.url)}'"></div>`;
-    } else {
-      iconHtml = `<div class="result-icon"><i data-lucide="app-window" width="16" height="16"></i></div>`;
-    }
-  } else if (item.faviconUrl) {
-    iconHtml = `<div class="result-favicon"><img src="${escapeHtml(item.faviconUrl)}" onerror="this.parentElement.textContent='${getFaviconLetter(item.url)}'"></div>`;
   } else {
-    iconHtml = `<div class="result-favicon">${getFaviconLetter(item.url)}</div>`;
+    // Filled below: the site's icon, or the favicon fallback tile.
+    iconHtml = `<div class="result-favicon"></div>`;
   }
 
   let metaHtml = '';
@@ -117,19 +111,25 @@ const createResultItemElement = (item: ResultItem, index: number): HTMLElement =
 
   let urlHtml = '';
   if (item.type !== 'search') {
-    urlHtml = `<div class="result-url">${escapeHtml(item.url)}</div>`;
+    urlHtml = `<div class="result-url">${escapeHtml(UrlDisplay.format(item.url))}</div>`;
   }
 
   const sublineHtml =
     metaHtml || urlHtml ? `<div class="result-subline">${metaHtml}${urlHtml}</div>` : '';
 
+  // The search row's title is the query itself; other titles may fall back to
+  // the URL, which shows nav0:// in lower case (display only).
+  const titleText = item.type === 'search' ? item.title : UrlDisplay.format(item.title);
+
   el.innerHTML = `
     ${iconHtml}
     <div class="result-content">
-      <div class="result-title">${escapeHtml(item.title)}</div>
+      <div class="result-title">${escapeHtml(titleText)}</div>
       ${sublineHtml}
     </div>
   `;
+
+  el.querySelector('.result-favicon')?.appendChild(FaviconTile.icon(item.faviconUrl, item.url));
 
   el.addEventListener('click', () => {
     openResult(item);
@@ -164,13 +164,13 @@ const renderResults = (results: ResultItem[], query: string) => {
   dynamicElements.forEach((el) => el.remove());
 
   if (results.length === 0 && !query) {
-    emptyState.style.display = 'flex';
-    loadingIndicator.style.display = 'none';
+    emptyState.hidden = false;
+    loadingIndicator.hidden = true;
     return;
   }
 
-  emptyState.style.display = 'none';
-  loadingIndicator.style.display = 'none';
+  emptyState.hidden = true;
+  loadingIndicator.hidden = true;
 
   // Group results by type
   const tabs = results.filter((r) => r.type === 'tab');
@@ -249,8 +249,8 @@ const performSearch = async (query: string) => {
     return;
   }
 
-  loadingIndicator.style.display = 'block';
-  emptyState.style.display = 'none';
+  loadingIndicator.hidden = false;
+  emptyState.hidden = true;
 
   try {
     const results: ResultItem[] = [];
@@ -320,7 +320,7 @@ const performSearch = async (query: string) => {
 
     renderResults(results, query);
   } catch (error) {
-    loadingIndicator.style.display = 'none';
+    loadingIndicator.hidden = true;
     // On error, still show the search option
     renderResults(
       [
@@ -347,7 +347,7 @@ const navigateResults = (direction: number) => {
 
   resultElements[activeIndex]?.classList.add('active');
   resultElements[activeIndex]?.scrollIntoView({
-    behavior: 'smooth',
+    behavior: prefersReducedMotion() ? 'auto' : 'smooth',
     block: 'nearest',
   });
 };

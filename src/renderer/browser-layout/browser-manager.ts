@@ -1,6 +1,7 @@
 import { Tab } from './tab';
 import { InAppUrls } from '../../constants/app-constants';
 import { initUrlAutocomplete } from './url-autocomplete';
+import { UrlDisplay } from '../common/url-display';
 
 export class BrowserTabManager {
   // DOM Elements
@@ -14,6 +15,9 @@ export class BrowserTabManager {
   private refreshButton: HTMLButtonElement;
   private commandKButton: HTMLButtonElement;
   private urlInput: HTMLInputElement;
+  // Inert, aria-hidden copy of the URL drawn over the input while it isn't
+  // focused, with the registrable domain emphasised (see renderUrlDisplay).
+  private urlDisplay: HTMLElement | null = null;
   private optionsButton: HTMLButtonElement;
   private bookmarkButton: HTMLButtonElement;
   private unbookmarkButton: HTMLButtonElement;
@@ -31,7 +35,13 @@ export class BrowserTabManager {
   private tabs: Tab[] = [];
   private activeDownloads: Map<string, { receivedBytes: number; totalBytes: number }> = new Map();
   private activeTabId: string | null = null;
+  // The tab we asked main to activate after the active one closed, until main
+  // confirms it with TAB_ACTIVATED
+  private pendingActiveTabId: string | null = null;
   private appWindowId: string | null = null;
+  // The user has typed in the address field since the chrome last set it,
+  // and hasn't submitted it yet.
+  private urlEdited = false;
   private isPrivate = false;
   private urlAutocomplete: ReturnType<typeof initUrlAutocomplete> | null = null;
 
@@ -48,10 +58,13 @@ export class BrowserTabManager {
     if (platform) {
       document.body.classList.add(`platform-${platform}`);
     }
+    if (window.BrowserAPI.isTitleBarRtl) {
+      document.body.classList.add('titlebar-rtl');
+    }
 
-    // Track fullscreen state — on macOS traffic lights are hidden in fullscreen,
-    // so we remove the left padding. The app starts in fullscreen mode.
-    document.body.classList.add('is-fullscreen');
+    // Track fullscreen state — on macOS the native traffic lights are hidden in
+    // fullscreen, so the strip drops their 78 px column and draws its own.
+    // Windows always open windowed, so the class starts off.
     window.BrowserAPI.onFullScreenChanged?.((data: { isFullScreen: boolean }) => {
       document.body.classList.toggle('is-fullscreen', data.isFullScreen);
     });
@@ -83,6 +96,7 @@ export class BrowserTabManager {
     this.refreshButton = document.getElementById('refresh-button') as HTMLButtonElement;
     this.commandKButton = document.getElementById('command-k-button') as HTMLButtonElement;
     this.urlInput = document.getElementById('url-input') as HTMLInputElement;
+    this.urlDisplay = document.getElementById('url-display');
     this.optionsButton = document.getElementById('options-button') as HTMLButtonElement;
     this.bookmarkButton = document.getElementById('bookmark-button') as HTMLButtonElement;
     this.unbookmarkButton = document.getElementById('unbookmark-button') as HTMLButtonElement;
@@ -166,7 +180,6 @@ export class BrowserTabManager {
         this.appWindowId,
         activeTab.title,
         activeTab.url,
-        activeTab.faviconUrl,
         'reference'
       );
       activeTab.isBookmark = true;
@@ -214,6 +227,14 @@ export class BrowserTabManager {
       this.navigateToURL();
     });
 
+    // Keep the at-rest display in step with whatever the field holds, typed or set.
+    this.urlInput.addEventListener('input', () => {
+      this.urlEdited = true;
+      this.renderUrlDisplay();
+      this.updateSSLIndicator();
+    });
+    this.urlInput.addEventListener('blur', () => this.renderUrlDisplay());
+
     this.downloadsButton.addEventListener('click', () => {
       window.BrowserAPI.createTab(this.appWindowId, InAppUrls.DOWNLOADS, true);
     });
@@ -243,11 +264,19 @@ export class BrowserTabManager {
 
   private setupIpcListeners(): void {
     window.BrowserAPI.onNewTabCreated(
-      (tab: { id: string; url: string; title: string; index?: number }) => {
+      (tab: {
+        id: string;
+        url: string;
+        title: string;
+        index?: number;
+        faviconUrl?: string | null;
+      }) => {
         if (this.getTabById(tab.id)) return;
 
         const newTab = new Tab(tab.id, tab.url, tab.title);
         newTab.createTabElement(this.appWindowId);
+        // A restored tab that hasn't loaded comes with its icon.
+        if (tab.faviconUrl) newTab.updateTabFavicon(tab.faviconUrl);
         const newElement = newTab.getTabElement();
 
         // Tabs spawned from a page arrive with the index they should occupy
@@ -274,8 +303,9 @@ export class BrowserTabManager {
     window.BrowserAPI.onTabActivated((data: { id: string; url: string }) => {
       const newActiveTab = this.getTabById(data.id);
       this.activeTabId = data.id;
+      this.pendingActiveTabId = null;
       this.updateActiveTab();
-      this.urlInput.value = newActiveTab.url;
+      this.setUrlInputValue(newActiveTab.url);
       this.backButton.disabled = !newActiveTab.canGoBack;
       this.forwardButton.disabled = !newActiveTab.canGoForward;
       this.handleBookmark();
@@ -287,7 +317,9 @@ export class BrowserTabManager {
     // Tab closed
     window.BrowserAPI.onTabClosed((data: { id: string }) => {
       let newActiveTabId;
-      if (data.id === this.activeTabId) {
+      // The tab we handed over to can close before main activates it (two tabs
+      // closing at once, Close Other Tabs): hand over again from there.
+      if (data.id === this.activeTabId || data.id === this.pendingActiveTabId) {
         const oldTabIndex = this.tabs.findIndex((tab) => tab.id === data.id);
         if (oldTabIndex === 0 && this.tabs.length > 1) {
           newActiveTabId = this.tabs[1].id;
@@ -298,6 +330,7 @@ export class BrowserTabManager {
 
       this.removeTab(data.id);
       if (newActiveTabId) {
+        this.pendingActiveTabId = newActiveTabId;
         window.BrowserAPI.activateTab(this.appWindowId, newActiveTabId, true);
       } else if (this.tabs.length === 0) {
         window.BrowserAPI.closeAppWindow(this.appWindowId);
@@ -341,7 +374,7 @@ export class BrowserTabManager {
           tab.sslDetails = data.sslDetails || null;
         }
         if (data.id === this.activeTabId) {
-          this.urlInput.value = data.url;
+          this.setUrlInputValue(data.url);
           this.backButton.disabled = !data.canGoBack;
           this.forwardButton.disabled = !data.canGoForward;
           this.handleBookmark();
@@ -351,9 +384,81 @@ export class BrowserTabManager {
       }
     );
 
-    window.BrowserAPI.onTabFaviconUpdated((data: { id: string; faviconUrl: string }) => {
-      this.getTabById(data.id)?.updateTabFavicon(data.faviconUrl);
+    // Back and Forward changed without a navigation of the page's own (an
+    // iframe's, or the user's first input on the page): the field stays as is.
+    window.BrowserAPI.onTabBackForwardUpdated((data) => {
+      const tab = this.getTabById(data.id);
+      if (!tab) return;
+      tab.canGoBack = data.canGoBack;
+      tab.canGoForward = data.canGoForward;
+      if (data.id === this.activeTabId) {
+        this.backButton.disabled = !data.canGoBack;
+        this.forwardButton.disabled = !data.canGoForward;
+      }
     });
+
+    window.BrowserAPI.onTabFaviconUpdated((data: { id: string; faviconUrl: string | null }) => {
+      const tab = this.getTabById(data.id);
+      if (data.faviconUrl) tab?.updateTabFavicon(data.faviconUrl);
+      else tab?.clearFavicon();
+    });
+
+    // A failed load commits no URL update, so the failure stands in for one:
+    // the field keeps the URL that failed, with that URL's bookmark state. No
+    // connection was made, so there's no security state and the field leads
+    // with the search icon, not a lock.
+    window.BrowserAPI.onNavigationFailed((data) => {
+      const tab = this.getTabById(data.id);
+      if (!tab) return;
+      // A failure can arrive long after the load started (a timeout), while
+      // the user is already typing something else: leave their text alone.
+      // Not text they submitted, or left when focus went elsewhere (the field
+      // stays the document's active element when focus moves to the page or
+      // another app).
+      const isTyping =
+        data.id === this.activeTabId &&
+        this.urlEdited &&
+        document.hasFocus() &&
+        document.activeElement === this.urlInput;
+      tab.handleUrlChange(
+        data.url,
+        data.isBookmark,
+        data.bookmarkId,
+        data.bookmarkType,
+        data.canGoBack,
+        data.canGoForward
+      );
+      tab.loadFailed = true;
+      tab.sslStatus = 'internal';
+      tab.sslDetails = null;
+      tab.clearFavicon();
+      if (data.id === this.activeTabId) {
+        if (isTyping) {
+          this.updateSSLIndicator();
+        } else {
+          this.setUrlInputValue(data.url);
+        }
+        this.backButton.disabled = !data.canGoBack;
+        this.forwardButton.disabled = !data.canGoForward;
+        this.handleBookmark();
+        this.updatePdfDownloadButton();
+      }
+    });
+
+    // The ⋮ button and the security indicator stay pressed while the popover
+    // they opened is showing. Closed with Esc, it hands focus back to them.
+    window.BrowserAPI.onOverlayVisibilityChanged(
+      (data: { type: string; visible: boolean; returnFocus?: boolean }) => {
+        const opener =
+          data.type === 'options-menu'
+            ? this.optionsButton
+            : data.type === 'ssl-info'
+              ? this.sslIndicator
+              : null;
+        opener?.setAttribute('aria-expanded', String(data.visible));
+        if (data.returnFocus) opener?.focus();
+      }
+    );
 
     // Tab loading state changed
     window.BrowserAPI.onTabLoadingChanged((data: { id: string; isLoading: boolean }) => {
@@ -444,6 +549,8 @@ export class BrowserTabManager {
     });
   }
 
+  // The trailing field buttons show and hide with the hidden attribute, not
+  // style.display, so a shown button keeps the stylesheet's flex centring.
   private handleBookmark(): void {
     const activeTab = this.getTabById(this.activeTabId);
     if (activeTab) {
@@ -452,24 +559,24 @@ export class BrowserTabManager {
       const url = (activeTab.url || '').trim();
       const isInternal = !url || url.toLowerCase().startsWith(InAppUrls.PREFIX.toLowerCase());
       if (isInternal) {
-        this.bookmarkButton.style.display = 'none';
-        this.unbookmarkButton.style.display = 'none';
-        this.readinglistButton.style.display = 'none';
+        this.bookmarkButton.hidden = true;
+        this.unbookmarkButton.hidden = true;
+        this.readinglistButton.hidden = true;
       } else if (activeTab.isBookmark && activeTab.bookmarkType === 'queue') {
         // State 3: Reading list — show reading list button
-        this.bookmarkButton.style.display = 'none';
-        this.unbookmarkButton.style.display = 'none';
-        this.readinglistButton.style.display = 'block';
+        this.bookmarkButton.hidden = true;
+        this.unbookmarkButton.hidden = true;
+        this.readinglistButton.hidden = false;
       } else if (activeTab.isBookmark) {
         // State 2: Bookmarked (reference) — show unbookmark button
-        this.bookmarkButton.style.display = 'none';
-        this.unbookmarkButton.style.display = 'block';
-        this.readinglistButton.style.display = 'none';
+        this.bookmarkButton.hidden = true;
+        this.unbookmarkButton.hidden = false;
+        this.readinglistButton.hidden = true;
       } else {
         // State 1: Not bookmarked — show bookmark button
-        this.bookmarkButton.style.display = 'block';
-        this.unbookmarkButton.style.display = 'none';
-        this.readinglistButton.style.display = 'none';
+        this.bookmarkButton.hidden = false;
+        this.unbookmarkButton.hidden = true;
+        this.readinglistButton.hidden = true;
       }
     }
   }
@@ -477,23 +584,24 @@ export class BrowserTabManager {
   private updateReaderModeButton(): void {
     const activeTab = this.getTabById(this.activeTabId);
     if (!activeTab || !activeTab.isReaderModeEligible) {
-      this.readerModeButton.style.display = 'none';
+      this.readerModeButton.hidden = true;
       return;
     }
-    this.readerModeButton.style.display = 'block';
+    this.readerModeButton.hidden = false;
     if (activeTab.isReaderModeActive) {
       this.readerModeButton.classList.add('active');
-      this.readerModeButton.title = 'Exit Reader Mode';
+      this.readerModeButton.title = 'Exit reader mode';
     } else {
       this.readerModeButton.classList.remove('active');
-      this.readerModeButton.title = 'Reader Mode';
+      this.readerModeButton.title = 'Reader mode';
     }
   }
 
   private updatePdfDownloadButton(): void {
     const activeTab = this.getTabById(this.activeTabId);
-    if (!activeTab || !activeTab.url) {
-      this.pdfDownloadButton.style.display = 'none';
+    // An error page has no PDF to download, whatever its URL says.
+    if (!activeTab || !activeTab.url || activeTab.loadFailed) {
+      this.pdfDownloadButton.hidden = true;
       return;
     }
     // Detect PDF by URL extension or Chrome's built-in PDF viewer URL
@@ -503,7 +611,7 @@ export class BrowserTabManager {
       url.includes('.pdf?') ||
       url.includes('.pdf#') ||
       url.includes('content-type=application/pdf');
-    this.pdfDownloadButton.style.display = isPdf ? 'block' : 'none';
+    this.pdfDownloadButton.hidden = !isPdf;
   }
 
   private removeTab(tabId: string): void {
@@ -534,7 +642,7 @@ export class BrowserTabManager {
     if (this.activeTabId) {
       const activeTab = this.getTabById(this.activeTabId);
       if (activeTab) {
-        this.urlInput.value = activeTab.url;
+        this.setUrlInputValue(activeTab.url);
         this.handleBookmark();
         this.backButton.disabled = !activeTab.canGoBack;
         this.forwardButton.disabled = !activeTab.canGoForward;
@@ -547,6 +655,7 @@ export class BrowserTabManager {
 
   private navigateToURL(url?: string): void {
     const target = (url ?? this.urlInput.value).trim();
+    this.urlEdited = false;
     if (target) {
       window.BrowserAPI.navigate(this.appWindowId, this.activeTabId, target);
     }
@@ -558,19 +667,64 @@ export class BrowserTabManager {
       urlInput: this.urlInput,
       getActiveTabId: () => this.activeTabId,
       onSelectionEnter: (url: string) => {
-        this.urlInput.value = url;
+        this.setUrlInputValue(url);
         this.navigateToURL(url);
       },
     });
   }
 
-  private updateDownloadProgress(): void {
-    if (this.activeDownloads.size === 0) {
-      this.downloadProgressRing.style.display = 'none';
+  // Every programmatic write to the address field goes through here, so the
+  // display drawn over it can never diverge from the value.
+  private setUrlInputValue(value: string): void {
+    this.urlInput.value = value;
+    this.urlEdited = false;
+    this.renderUrlDisplay();
+    this.updateSSLIndicator();
+  }
+
+  // Draws the field's value for display only, with the registrable domain
+  // emphasised (DESIGN.md §4.1); the input keeps the raw URL and shows it while
+  // focused. Text nodes only — never innerHTML with URL text.
+  private renderUrlDisplay(): void {
+    if (!this.urlDisplay) return;
+    const value = this.urlInput.value;
+    const parts = UrlDisplay.split(value);
+    if (!parts) {
+      this.urlDisplay.replaceChildren(UrlDisplay.format(value));
       return;
     }
+    const activeTab = this.getTabById(this.activeTabId);
+    // A certificate error (on the warning, or after bypassing it): an https
+    // URL whose connection is marked not secure.
+    const isCertificateError =
+      parts.scheme.toLowerCase() === 'https' &&
+      activeTab?.sslStatus === 'insecure' &&
+      activeTab.url === value;
+    this.urlDisplay.replaceChildren(
+      ...[
+        this.urlDisplaySegment(
+          parts.scheme,
+          isCertificateError ? 'url-display-scheme-insecure' : 'url-display-muted'
+        ),
+        this.urlDisplaySegment(parts.beforeDomain, 'url-display-muted'),
+        this.urlDisplaySegment(parts.domain, 'url-display-domain'),
+        this.urlDisplaySegment(parts.afterDomain, 'url-display-muted'),
+      ].filter((segment): segment is HTMLSpanElement => segment !== null)
+    );
+  }
 
-    this.downloadProgressRing.style.display = 'block';
+  private urlDisplaySegment(text: string, className: string): HTMLSpanElement | null {
+    if (!text) return null;
+    const segment = document.createElement('span');
+    segment.className = className;
+    segment.textContent = text;
+    return segment;
+  }
+
+  private updateDownloadProgress(): void {
+    // An <svg> has no hidden property: toggle the attribute.
+    this.downloadProgressRing.toggleAttribute('hidden', this.activeDownloads.size === 0);
+    if (this.activeDownloads.size === 0) return;
 
     let totalReceived = 0;
     let totalSize = 0;
@@ -677,9 +831,7 @@ export class BrowserTabManager {
     this.sslIndicator.addEventListener('click', () => {
       const activeTab = this.getTabById(this.activeTabId);
       if (!activeTab) return;
-      const url = activeTab.url;
-      const isNewTab = !url || url === '' || url.startsWith('Nav0://');
-      if (isNewTab) return;
+      if (this.showsSearchIndicator(activeTab)) return;
       window.BrowserAPI.showSSLInfo(this.appWindowId, {
         sslStatus: activeTab.sslStatus,
         sslDetails: activeTab.sslDetails,
@@ -688,18 +840,46 @@ export class BrowserTabManager {
     });
   }
 
+  // The URL is being edited while the field no longer holds the tab's URL.
+  private isEditingUrl(tab: Tab): boolean {
+    return this.urlInput.value !== tab.url;
+  }
+
+  // The field leads with the display-only search icon on built-in pages, after
+  // a failed load, and while the URL is being edited — DESIGN.md §4.1.
+  private showsSearchIndicator(tab: Tab): boolean {
+    const url = tab.url;
+    const isNewTab = !url || url === '' || url.startsWith('Nav0://');
+    return isNewTab || tab.loadFailed || this.isEditingUrl(tab);
+  }
+
   private updateSSLIndicator(): void {
     const activeTab = this.getTabById(this.activeTabId);
     if (!activeTab) return;
 
-    const url = activeTab.url;
-    const isNewTab = !url || url === '' || url.startsWith('Nav0://');
     const sslStatus = activeTab.sslStatus || 'internal';
+
+    // Editing also hides the trailing buttons, which act on the loaded page
+    // rather than on what's typed (index.css).
+    this.urlInput
+      .closest('.address-bar')
+      ?.classList.toggle('is-editing', this.isEditingUrl(activeTab));
 
     // Remove all state classes
     this.sslIndicator.classList.remove('ssl-search', 'ssl-secure', 'ssl-insecure');
 
-    if (isNewTab) {
+    // The search icon is display-only: it leaves the tab order and the
+    // accessibility tree rather than reading as a button that does nothing.
+    const isSearch = this.showsSearchIndicator(activeTab);
+    if (isSearch) {
+      this.sslIndicator.tabIndex = -1;
+      this.sslIndicator.setAttribute('aria-hidden', 'true');
+    } else {
+      this.sslIndicator.removeAttribute('tabindex');
+      this.sslIndicator.removeAttribute('aria-hidden');
+    }
+
+    if (isSearch) {
       this.sslIndicator.innerHTML = BrowserTabManager.SSL_ICON_SEARCH;
       this.sslIndicator.classList.add('ssl-search');
       this.sslIndicator.title = 'Search';

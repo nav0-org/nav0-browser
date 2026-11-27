@@ -24,7 +24,7 @@ const ISSUE_REPORT_HTML = `
     <div class="issue-report-dialog" id="ir-issue-report-dialog" role="dialog" aria-modal="true" aria-labelledby="issue-report-title">
 
       <div class="issue-report-header">
-        <i data-lucide="bug" width="16" height="16"></i>
+        <i data-lucide="message-square-warning" width="16" height="16"></i>
         <span id="ir-issue-report-title">Report an Issue</span>
       </div>
 
@@ -45,11 +45,11 @@ const ISSUE_REPORT_HTML = `
 
         <div class="form-group">
           <label class="form-label" for="ir-issue-description">Description</label>
-          <textarea class="form-control" id="ir-issue-description" rows="5" placeholder="Describe the issue or suggestion in detail..."></textarea>
+          <textarea class="form-control" id="ir-issue-description" rows="5" placeholder="Describe the issue or suggestion in detail…"></textarea>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="ir-issue-reported-by">Reported By <span class="form-label-optional">(optional)</span></label>
+          <label class="form-label" for="ir-issue-reported-by">Reported by <span class="form-label-optional">(optional)</span></label>
           <input type="text" class="form-control" id="ir-issue-reported-by" placeholder="Your name, email, or GitHub handle" maxlength="200" />
         </div>
 
@@ -57,25 +57,25 @@ const ISSUE_REPORT_HTML = `
           <label class="form-label">Attachments</label>
           <div class="attachment-area" id="ir-attachment-area">
             <label class="attachment-drop-zone" id="ir-attachment-drop-zone" for="ir-attachment-input">
-              <i data-lucide="image-plus" width="20" height="20"></i>
+              <i data-lucide="image-plus" width="18" height="18"></i>
               <span>Click to attach images (max 3, 5MB each)</span>
             </label>
-            <input type="file" id="ir-attachment-input" accept="image/png,image/jpeg,image/gif,image/webp" multiple style="display:none;" />
+            <input type="file" id="ir-attachment-input" accept="image/png,image/jpeg,image/gif,image/webp" multiple hidden />
             <div class="attachment-previews" id="ir-attachment-previews"></div>
           </div>
         </div>
 
         <div class="issue-report-sysinfo">
-          <label class="form-label">System Info (auto-attached)</label>
+          <label class="form-label">System info (auto-attached)</label>
           <div class="sysinfo-preview" id="ir-sysinfo-preview"></div>
         </div>
       </div>
 
-      <div class="issue-report-status" id="ir-issue-report-status" style="display:none;"></div>
+      <div class="issue-report-status" id="ir-issue-report-status" hidden></div>
 
       <div class="issue-report-actions">
-        <button id="ir-issue-cancel-btn" class="btn btn-secondary">Cancel</button>
-        <button id="ir-issue-submit-btn" class="btn btn-primary">Submit</button>
+        <button id="ir-issue-cancel-btn" class="btn btn-sm btn-secondary">Cancel</button>
+        <button id="ir-issue-submit-btn" class="btn btn-sm btn-primary">Submit</button>
       </div>
 
     </div>
@@ -120,7 +120,7 @@ function showStatus(message: string, type: 'success' | 'error'): void {
   if (statusEl) {
     statusEl.textContent = message;
     statusEl.className = `issue-report-status ${type}`;
-    statusEl.style.display = '';
+    statusEl.hidden = false;
   }
 }
 
@@ -129,7 +129,7 @@ function showStatusWithLink(message: string, url: string): void {
   if (statusEl) {
     statusEl.innerHTML = '';
     statusEl.className = 'issue-report-status success';
-    statusEl.style.display = '';
+    statusEl.hidden = false;
 
     const text = document.createTextNode(message + ' ');
     statusEl.appendChild(text);
@@ -137,10 +137,7 @@ function showStatusWithLink(message: string, url: string): void {
     const link = document.createElement('a');
     link.href = '#';
     link.textContent = 'View on GitHub';
-    link.style.color = 'var(--success-color)';
-    link.style.textDecoration = 'underline';
-    link.style.fontWeight = '500';
-    link.style.cursor = 'pointer';
+    link.className = 'issue-report-status-link';
     link.addEventListener('click', (e) => {
       e.preventDefault();
       const appWindowId = window.BrowserAPI?.appWindowId;
@@ -183,8 +180,9 @@ function renderAttachmentPreviews(): void {
 
     const removeBtn = document.createElement('button');
     removeBtn.className = 'attachment-remove';
-    removeBtn.textContent = '\u00d7';
+    removeBtn.innerHTML = '<i data-lucide="x" width="14" height="14"></i>';
     removeBtn.title = 'Remove';
+    removeBtn.setAttribute('aria-label', 'Remove attachment');
     removeBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -196,6 +194,7 @@ function renderAttachmentPreviews(): void {
 
     previewContainer.appendChild(wrapper);
   });
+  createIcons({ icons });
 
   // Update drop zone text
   const dropZone = containerEl.querySelector('#ir-attachment-drop-zone') as HTMLElement;
@@ -291,16 +290,14 @@ function resetForm(): void {
   const titleInput = containerEl.querySelector('#ir-issue-title') as HTMLInputElement;
   const descInput = containerEl.querySelector('#ir-issue-description') as HTMLTextAreaElement;
   const typeSelect = containerEl.querySelector('#ir-issue-type') as HTMLSelectElement;
-  const reportedByInput = containerEl.querySelector(
-    '#ir-issue-reported-by'
-  ) as HTMLInputElement;
+  const reportedByInput = containerEl.querySelector('#ir-issue-reported-by') as HTMLInputElement;
   const statusEl = containerEl.querySelector('#ir-issue-report-status') as HTMLElement;
 
   if (titleInput) titleInput.value = '';
   if (descInput) descInput.value = '';
   if (typeSelect) typeSelect.value = 'bug';
   if (reportedByInput) reportedByInput.value = '';
-  if (statusEl) statusEl.style.display = 'none';
+  if (statusEl) statusEl.hidden = true;
 
   // Clear attachments
   attachedImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
@@ -314,9 +311,7 @@ async function submitIssue(): Promise<void> {
     '#ir-issue-description'
   ) as HTMLTextAreaElement;
   const typeSelect = containerEl.querySelector('#ir-issue-type') as HTMLSelectElement;
-  const reportedByInput = containerEl.querySelector(
-    '#ir-issue-reported-by'
-  ) as HTMLInputElement;
+  const reportedByInput = containerEl.querySelector('#ir-issue-reported-by') as HTMLInputElement;
   const submitBtn = containerEl.querySelector('#ir-issue-submit-btn') as HTMLButtonElement;
 
   const title = titleInput.value.trim();
@@ -337,7 +332,7 @@ async function submitIssue(): Promise<void> {
   }
 
   submitBtn.disabled = true;
-  submitBtn.textContent = 'Submitting...';
+  submitBtn.textContent = 'Submitting…';
 
   const typeLabel =
     type === 'bug' ? 'Bug Report' : type === 'feature' ? 'Feature Request' : 'Other';

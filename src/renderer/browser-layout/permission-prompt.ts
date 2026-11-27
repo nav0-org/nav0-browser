@@ -32,8 +32,8 @@ function updateStrip(data: PermissionPromptData): void {
 
   const originEl = document.getElementById('perm-origin') as HTMLElement;
   const labelEl = document.getElementById('perm-label') as HTMLElement;
-  const lockIcon = document.getElementById('perm-lock-icon') as HTMLElement;
-  const warningIcon = document.getElementById('perm-warning-icon') as HTMLElement;
+  const lockIcon = document.getElementById('perm-lock-icon') as unknown as SVGElement;
+  const warningIcon = document.getElementById('perm-warning-icon') as unknown as SVGElement;
   const privateNote = document.getElementById('perm-private-note') as HTMLElement;
   const insecureNote = document.getElementById('perm-insecure-note') as HTMLElement;
   const allowOnceBtn = document.getElementById('perm-allow-once') as HTMLButtonElement;
@@ -50,36 +50,32 @@ function updateStrip(data: PermissionPromptData): void {
     labelEl.textContent = labels.join(', ');
   }
 
-  // Secure/insecure icon
+  // Secure/insecure icon. Lucide has made these <svg>s, which have no hidden
+  // property: toggle the attribute.
   if (lockIcon && warningIcon) {
-    if (data.isSecure) {
-      lockIcon.style.display = '';
-      warningIcon.style.display = 'none';
-    } else {
-      lockIcon.style.display = 'none';
-      warningIcon.style.display = '';
-    }
+    lockIcon.toggleAttribute('hidden', !data.isSecure);
+    warningIcon.toggleAttribute('hidden', data.isSecure);
   }
 
   // Notes
-  if (privateNote) privateNote.style.display = data.isPrivate ? '' : 'none';
+  if (privateNote) privateNote.hidden = !data.isPrivate;
 
   // Button states
   if (data.isInsecureBlocked) {
-    if (insecureNote) insecureNote.style.display = '';
+    if (insecureNote) insecureNote.hidden = false;
     if (allowOnceBtn) allowOnceBtn.disabled = true;
     if (alwaysAllowBtn) alwaysAllowBtn.disabled = true;
     if (denyOnceBtn) denyOnceBtn.disabled = false;
     if (alwaysDenyBtn) alwaysDenyBtn.disabled = false;
   } else if (data.isFloodBlocked) {
-    if (insecureNote) insecureNote.style.display = 'none';
+    if (insecureNote) insecureNote.hidden = true;
     if (allowOnceBtn) allowOnceBtn.disabled = true;
     if (alwaysAllowBtn) alwaysAllowBtn.disabled = true;
     if (denyOnceBtn) denyOnceBtn.disabled = true;
     if (alwaysDenyBtn) alwaysDenyBtn.disabled = true;
     setTimeout(() => respond('deny_once'), 1500);
   } else {
-    if (insecureNote) insecureNote.style.display = 'none';
+    if (insecureNote) insecureNote.hidden = true;
     if (allowOnceBtn) allowOnceBtn.disabled = false;
     if (alwaysAllowBtn) alwaysAllowBtn.disabled = false;
     if (denyOnceBtn) denyOnceBtn.disabled = false;
@@ -90,13 +86,13 @@ function updateStrip(data: PermissionPromptData): void {
 }
 
 function showStrip(data: PermissionPromptData): void {
-  stripContainer.style.display = 'block';
+  stripContainer.hidden = false;
   updateStrip(data);
   window.dispatchEvent(new Event('resize'));
 }
 
 function hideStrip(): void {
-  stripContainer.style.display = 'none';
+  stripContainer.hidden = true;
   currentRequestId = null;
   window.dispatchEvent(new Event('resize'));
 }
@@ -121,7 +117,7 @@ export function initPermissionPrompt(): void {
 
   // Escape = deny once (when strip visible)
   document.addEventListener('keydown', (e: KeyboardEvent) => {
-    if (stripContainer.style.display === 'none') return;
+    if (stripContainer.hidden) return;
     if (e.key === 'Escape') {
       e.preventDefault();
       respond('deny_once');

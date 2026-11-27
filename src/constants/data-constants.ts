@@ -1723,3 +1723,19 @@ export const WEBSITE_CATEGORY_MAP: Record<string, string> = {
   'zola.com': 'lifestyle',
   'zomato.com': 'lifestyle',
 };
+
+/**
+ * The category of a site's host: its own entry in the map, else that of the
+ * nearest parent domain in it (www.github.com takes github.com's), else
+ * 'other'.
+ */
+export function getCategoryForDomain(domain: string): string {
+  const labels = domain.split('.');
+  for (let i = 0; i < labels.length; i++) {
+    const suffix = labels.slice(i).join('.');
+    if (Object.prototype.hasOwnProperty.call(WEBSITE_CATEGORY_MAP, suffix)) {
+      return WEBSITE_CATEGORY_MAP[suffix];
+    }
+  }
+  return 'other';
+}

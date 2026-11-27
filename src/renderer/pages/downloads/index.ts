@@ -3,11 +3,12 @@ import './index.css';
 
 import { createIcons, icons } from 'lucide';
 import { FormatUtils } from '../../../renderer/common/format-utils';
+import { ChipRow } from '../../../renderer/common/chip-row';
 import { DownloadRecord } from '../../../types/download-record';
 import {
-  TYPE_COLORS,
+  getStorageBucket,
+  getStorageBucketLabel,
   getDisplayTypeFromExtension,
-  hexToRgba,
   getFileIcon,
 } from '../../../renderer/common/file-type-utils';
 createIcons({ icons });
@@ -19,7 +20,8 @@ createIcons({ icons });
 const PAGE_SIZE = 50;
 
 // Lucide icon name per display type — used in the toolbar type-filter pills
-// (replaces the count badge so the pills read at a glance without numbers).
+// (replaces the count badge so the pills read at a glance without numbers)
+// and in each row's type badge (badges are always icon + label).
 const TYPE_ICONS: Record<string, string> = {
   document: 'file-text',
   spreadsheet: 'file-spreadsheet',
@@ -58,17 +60,12 @@ const getDisplayType = (item: DownloadRecord): string => {
   return getDisplayTypeFromExtension(item.fileExtension);
 };
 
-// 24-hour HH:MM, matching the prototype's row time column.
-const formatRowTime = (date: Date | string): string => {
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return '';
-  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-};
-
 const escapeHtml = (str: string): string => {
   const div = document.createElement('div');
   div.textContent = str;
-  return div.innerHTML;
+  // innerHTML leaves quotes alone: escape them so the result is also safe
+  // inside a quoted attribute (title="…", src="…").
+  return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 };
 
 // ---------------------------------------------------------------------------
@@ -79,6 +76,7 @@ const downloadsPage = document.getElementById('downloads-page') as HTMLElement;
 const downloadsListElement = document.getElementById('downloads-list') as HTMLElement;
 const searchInput = document.getElementById('search-input') as HTMLInputElement;
 const typeFiltersContainer = document.getElementById('type-filters') as HTMLElement;
+ChipRow.attach(typeFiltersContainer);
 const storageBar = document.getElementById('storage-bar') as HTMLElement;
 const storageLegend = document.getElementById('storage-legend') as HTMLElement;
 const storageMeta = document.getElementById('storage-meta') as HTMLElement;
@@ -113,8 +111,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     downloadsListElement.innerHTML = '';
     allLoadedItems = [];
     selectedItemId = null;
-    noDownloads.style.display = 'block';
-    deleteAllBtn.style.display = 'none';
+    noDownloads.hidden = false;
+    deleteAllBtn.hidden = true;
     updateStorageGauge();
     renderTypeFilters();
   });
@@ -237,16 +235,15 @@ const loadDownloadsPage = async (): Promise<void> => {
   }
 
   if (currentOffset === 0 && downloadData.length === 0) {
-    noDownloads.style.display = 'block';
-    deleteAllBtn.style.display = 'none';
+    noDownloads.hidden = false;
+    deleteAllBtn.hidden = true;
     isLoading = false;
     updateStorageGauge();
     renderTypeFilters();
     return;
   } else {
-    noDownloads.style.display = 'none';
-    // Empty string clears the inline style so the CSS rule (inline-flex) applies.
-    deleteAllBtn.style.display = '';
+    noDownloads.hidden = true;
+    deleteAllBtn.hidden = false;
   }
 
   allLoadedItems = allLoadedItems.concat(downloadData);
@@ -270,9 +267,16 @@ const rerenderList = (): void => {
   }
 };
 
+interface DayLabel {
+  // "Today" / "Yesterday", or '' for older days.
+  relative: string;
+  // e.g. "Friday, November 13".
+  absolute: string;
+}
+
 interface DayGroup {
   dateKey: string;
-  label: string;
+  label: DayLabel;
   items: DownloadRecord[];
 }
 
@@ -299,7 +303,7 @@ const groupByDay = (items: DownloadRecord[]): DayGroup[] => {
   return groups;
 };
 
-const formatDayLabel = (date: Date): string => {
+const formatDayLabel = (date: Date): DayLabel => {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -309,21 +313,27 @@ const formatDayLabel = (date: Date): string => {
     month: 'long',
     day: 'numeric',
   });
-  if (diff === 0) return `Today · ${absolute}`;
-  if (diff === 1) return `Yesterday · ${absolute}`;
-  if (diff < 7) return absolute;
-  return absolute;
+  if (diff === 0) return { relative: 'Today', absolute };
+  if (diff === 1) return { relative: 'Yesterday', absolute };
+  return { relative: '', absolute };
 };
 
 const renderDayHeader = (group: DayGroup): HTMLElement => {
   const header = document.createElement('div');
-  header.className = 'date-group-label';
+  header.className = 'list-group-header';
   const fileWord = group.items.length === 1 ? 'file' : 'files';
   const totalBytes = group.items.reduce((a, b) => a + (b.fileSize || 0), 0);
   const sizeStr = totalBytes > 0 ? ` · ${FormatUtils.formatFileSize(totalBytes)}` : '';
+  // "Today · Friday, November 13": the relative day is the heading and the
+  // date after it is secondary text (DESIGN.md §4.2). Older days show the
+  // date alone as the heading.
+  const { relative, absolute } = group.label;
+  const labelHtml = relative
+    ? `<span class="list-group-title">${relative}</span> <span class="list-group-date">· ${absolute}</span>`
+    : `<span class="list-group-title">${absolute}</span>`;
   header.innerHTML = `
-    <span class="day-label">${group.label}</span>
-    <span class="day-sub">${group.items.length} ${fileWord}${sizeStr}</span>
+    ${labelHtml}
+    <span class="list-group-sub">${group.items.length} ${fileWord}${sizeStr}</span>
   `;
   return header;
 };
@@ -342,15 +352,13 @@ const renderTypeFilters = (): void => {
   const types = Object.keys(typeCounts).sort();
   typeFiltersContainer.innerHTML = '';
 
-  // "All" pill — solid black when active, neutral otherwise.
+  // "All" chip — selection style when active, neutral fill otherwise.
   const allPill = document.createElement('button');
-  allPill.className = 'type-pill';
+  allPill.className = 'chip';
   allPill.dataset.type = 'all';
-  allPill.innerHTML = `<i data-lucide="layers" width="13" height="13"></i> All`;
+  allPill.innerHTML = `<i data-lucide="layers" width="14" height="14"></i> All`;
   if (selectedTypeFilter === 'all') {
-    allPill.style.background = 'var(--fg-1)';
-    allPill.style.color = 'var(--bg-0)';
-    allPill.style.borderColor = 'var(--fg-1)';
+    allPill.classList.add('selected');
   }
   allPill.addEventListener('click', () => {
     selectedTypeFilter = 'all';
@@ -361,21 +369,14 @@ const renderTypeFilters = (): void => {
 
   types.forEach((type) => {
     const pill = document.createElement('button');
-    pill.className = 'type-pill';
+    pill.className = 'chip';
     pill.dataset.type = type;
-    const color = TYPE_COLORS[type] || TYPE_COLORS.other;
     const iconName = TYPE_ICONS[type] || TYPE_ICONS.other;
-    pill.innerHTML = `<i data-lucide="${iconName}" width="13" height="13"></i> ${type}`;
-    // Per-type tint: soft tinted bg + accented border + colored label;
-    // active state inverts to a solid fill.
+    pill.innerHTML = `<i data-lucide="${iconName}" width="14" height="14"></i> ${type}`;
+    // Neutral at rest; selection style (accent-soft + accent icon) when chosen.
+    // Categories are named, not coloured — no per-type hue here.
     if (selectedTypeFilter === type) {
-      pill.style.background = color;
-      pill.style.color = '#fff';
-      pill.style.borderColor = color;
-    } else {
-      pill.style.background = color + '0f';
-      pill.style.color = color;
-      pill.style.borderColor = color + '40';
+      pill.classList.add('selected');
     }
     pill.addEventListener('click', () => {
       selectedTypeFilter = type;
@@ -389,16 +390,14 @@ const renderTypeFilters = (): void => {
   createIcons({ icons });
 };
 
+// Rows, detail panels and day headers are shown and hidden with the `hidden`
+// attribute, not inline styles.
 const applyTypeFilter = (): void => {
   const rows = downloadsListElement.querySelectorAll('.download-item-wrapper');
   rows.forEach((wrapper) => {
     const el = wrapper as HTMLElement;
     const fileType = el.dataset.fileType;
-    if (selectedTypeFilter === 'all' || fileType === selectedTypeFilter) {
-      el.style.display = '';
-    } else {
-      el.style.display = 'none';
-    }
+    el.hidden = !(selectedTypeFilter === 'all' || fileType === selectedTypeFilter);
   });
 
   // Hide/show detail panels based on filter
@@ -406,11 +405,7 @@ const applyTypeFilter = (): void => {
   details.forEach((panel) => {
     const el = panel as HTMLElement;
     const fileType = el.dataset.fileType;
-    if (selectedTypeFilter === 'all' || fileType === selectedTypeFilter) {
-      el.style.display = '';
-    } else {
-      el.style.display = 'none';
-    }
+    el.hidden = !(selectedTypeFilter === 'all' || fileType === selectedTypeFilter);
   });
 
   // Hide day-group headers that no longer have any visible rows under
@@ -420,28 +415,23 @@ const applyTypeFilter = (): void => {
   let currentHeaderHasVisible = false;
   const finalizeHeader = () => {
     if (currentHeader) {
-      currentHeader.style.display = currentHeaderHasVisible ? '' : 'none';
+      currentHeader.hidden = !currentHeaderHasVisible;
     }
   };
   for (const child of children) {
-    if (child.classList.contains('date-group-label')) {
+    if (child.classList.contains('list-group-header')) {
       finalizeHeader();
       currentHeader = child;
       currentHeaderHasVisible = false;
-    } else if (
-      child.classList.contains('download-item-wrapper') &&
-      child.style.display !== 'none'
-    ) {
+    } else if (child.classList.contains('download-item-wrapper') && !child.hidden) {
       currentHeaderHasVisible = true;
     }
   }
   finalizeHeader();
 
   // Check if any visible
-  const anyVisible = downloadsListElement.querySelector(
-    '.download-item-wrapper:not([style*="display: none"])'
-  );
-  noDownloads.style.display = anyVisible ? 'none' : 'block';
+  const anyVisible = downloadsListElement.querySelector('.download-item-wrapper:not([hidden])');
+  noDownloads.hidden = anyVisible !== null;
 };
 
 // ---------------------------------------------------------------------------
@@ -449,20 +439,28 @@ const applyTypeFilter = (): void => {
 // ---------------------------------------------------------------------------
 
 const updateStorageGauge = (): void => {
-  const byType: Record<string, number> = {};
+  // The bar and legend show the six storage groups (video and audio
+  // together, spreadsheets with documents, code with other), one hue each;
+  // the filter chips keep the finer file types.
+  const byGroup: Record<string, number> = {};
   allLoadedItems.forEach((d) => {
-    const displayType = getDisplayType(d);
-    byType[displayType] = (byType[displayType] || 0) + d.fileSize;
+    const group = getStorageBucket(getDisplayType(d));
+    byGroup[group] = (byGroup[group] || 0) + d.fileSize;
   });
 
-  const total = Object.values(byType).reduce((a, b) => a + b, 0);
-  const sortedTypes = Object.entries(byType).sort((a, b) => b[1] - a[1]);
+  const total = Object.values(byGroup).reduce((a, b) => a + b, 0);
+  const sortedGroups = Object.entries(byGroup).sort((a, b) => b[1] - a[1]);
   const pausedCount = allLoadedItems.filter(
     (d) => d.status === 'paused' || activeDownloads.get(d.fileName)?.state === 'paused'
   ).length;
   const fileWord = allLoadedItems.length === 1 ? 'file' : 'files';
 
-  // Panel header meta — "2.9 GB used · 5 files · 1 paused"
+  // Each group is drawn in its storage hue (a .storage-hue-* class). The six
+  // hues are the only colour on this page, and only on the bar + legend
+  // (DESIGN.md §3.4).
+  const hueClass = (group: string): string => `storage-hue-${group}`;
+
+  // Panel header meta — "3.5 GB used · 22 files · 1 paused".
   const totalStr = FormatUtils.formatFileSize(total) || '0 B';
   const metaParts = [
     `<span><strong>${totalStr}</strong>used</span>`,
@@ -473,25 +471,25 @@ const updateStorageGauge = (): void => {
   }
   storageMeta.innerHTML = metaParts.join('');
 
-  // Bar segments — per-type colour via TYPE_COLORS.
+  // Bar segments — one per group, in its storage hue. The width is the
+  // group's share of the total.
   storageBar.innerHTML = '';
-  sortedTypes.forEach(([type, size]) => {
+  sortedGroups.forEach(([group, size]) => {
     const segment = document.createElement('div');
-    segment.className = 'storage-bar-segment';
+    segment.className = `storage-bar-segment ${hueClass(group)}`;
     segment.style.width = total > 0 ? `${(size / total) * 100}%` : '0%';
-    segment.style.background = TYPE_COLORS[type] || '#a1a1aa';
     storageBar.appendChild(segment);
   });
 
-  // Legend — colored swatch + label + size.
+  // Legend — hue swatch + group name + size.
   storageLegend.innerHTML = '';
-  sortedTypes.forEach(([type, size]) => {
+  sortedGroups.forEach(([group, size]) => {
     const item = document.createElement('div');
     item.className = 'storage-legend-item';
     item.innerHTML = `
-      <div class="storage-legend-dot" style="background: ${TYPE_COLORS[type] || '#a1a1aa'}"></div>
+      <div class="storage-legend-dot ${hueClass(group)}"></div>
       <span class="storage-legend-text">
-        <strong>${type}</strong>
+        <strong>${escapeHtml(getStorageBucketLabel(group))}</strong>
         <span class="size">${FormatUtils.formatFileSize(size)}</span>
       </span>
     `;
@@ -513,7 +511,7 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
     wrapper.dataset.recordId = item.id;
 
     const downloadItem = document.createElement('div');
-    downloadItem.className = 'download-item';
+    downloadItem.className = 'list-row download-item';
     downloadItem.dataset.fileName = item.fileName;
     downloadItem.dataset.recordId = item.id;
 
@@ -527,7 +525,6 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
       if (isPaused) downloadItem.classList.add('paused');
     }
 
-    const color = TYPE_COLORS[displayType] || '#a1a1aa';
     const iconName = getFileIcon(item.fileExtension);
     const sourceHost = extractHostname(item.url);
 
@@ -557,7 +554,7 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
         '<span class="download-status paused"><i data-lucide="pause" width="10" height="10"></i> paused</span>';
     } else if (isActive) {
       const pctLabel = activeInfo.totalBytes > 0 ? `${pct}%` : '…';
-      statusHtml = `<span class="download-status progress"><i data-lucide="arrow-down" width="10" height="10"></i> <span class="pct-num">${pctLabel}</span></span>`;
+      statusHtml = `<span class="download-status in-progress"><i data-lucide="arrow-down" width="10" height="10"></i> <span class="pct-num">${pctLabel}</span></span>`;
     }
 
     // Action buttons
@@ -566,77 +563,79 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
       const downloadId = activeInfo.downloadId;
       if (isPaused) {
         actionsHtml = `
-          <button class="action-btn resume-btn" data-download-id="${downloadId}" title="Resume">
+          <button class="list-row-action resume-btn" data-download-id="${escapeHtml(downloadId)}" title="Resume">
             <i data-lucide="play" width="14" height="14"></i>
           </button>`;
       } else {
         actionsHtml = `
-          <button class="action-btn pause-btn" data-download-id="${downloadId}" title="Pause">
+          <button class="list-row-action pause-btn" data-download-id="${escapeHtml(downloadId)}" title="Pause">
             <i data-lucide="pause" width="14" height="14"></i>
           </button>`;
       }
       actionsHtml += `
-        <button class="action-btn cancel-btn" data-download-id="${downloadId}" title="Cancel">
+        <button class="list-row-action cancel-btn" data-download-id="${escapeHtml(downloadId)}" title="Cancel">
           <i data-lucide="x" width="14" height="14"></i>
         </button>`;
     } else if (isPausedFromDb) {
       actionsHtml = `
-        <button class="action-btn resume-db-btn" data-record-id="${item.id}" title="Resume">
+        <button class="list-row-action resume-db-btn" data-record-id="${item.id}" title="Resume">
           <i data-lucide="play" width="14" height="14"></i>
         </button>
-        <button class="action-btn remove-btn delete-button" title="Remove">
+        <button class="list-row-action remove-btn delete-button" title="Remove">
           <i data-lucide="x" width="14" height="14"></i>
         </button>`;
     } else {
       actionsHtml = `
-        <button class="action-btn remove-btn delete-button" title="Remove">
+        <button class="list-row-action remove-btn delete-button" title="Remove">
           <i data-lucide="x" width="14" height="14"></i>
         </button>`;
     }
 
-    // Progress bar for active downloads — wrapped in .download-progress
-    // which spans grid cols 3-6 on row 2 via CSS.
+    // Progress bar for active downloads — .download-progress is a second
+    // grid row under the 54 px row (CSS). The fill colour comes from CSS
+    // (accent, grey on a .paused row); only its width is set here.
     let progressHtml = '';
     if (isActive) {
       const hasTotal = activeInfo.totalBytes > 0;
       const barWidth = hasTotal ? `${pct}%` : '30%';
-      const barColor = isPaused ? 'var(--bg-3)' : color;
       const indeterminateClass = hasTotal ? '' : ' indeterminate';
       progressHtml = `
         <div class="download-progress${indeterminateClass}">
           <div class="download-progress-bar">
-            <div class="download-progress-fill" style="width: ${barWidth}; background: ${barColor}"></div>
+            <div class="download-progress-fill" style="width: ${barWidth}"></div>
           </div>
         </div>`;
     }
 
-    // Meta line — source host (accent) · file path. Falls back gracefully.
+    // Meta line — source host (grey) · file path. Falls back gracefully.
     const metaParts: string[] = [];
-    if (sourceHost) metaParts.push(`<span class="from">${escapeHtml(sourceHost)}</span>`);
+    if (sourceHost) metaParts.push(`<span class="meta-host">${escapeHtml(sourceHost)}</span>`);
     if (item.fileLocation) {
       if (sourceHost) metaParts.push('<span class="dot">·</span>');
-      metaParts.push(`<span class="path">${escapeHtml(item.fileLocation)}</span>`);
+      metaParts.push(`<span class="meta-path">${escapeHtml(item.fileLocation)}</span>`);
     }
 
     downloadItem.innerHTML = `
-      <span class="download-time">${formatRowTime(item.createdDate)}</span>
-      <span class="download-type-icon" style="background: ${color}14; border-color: ${color}40; color: ${color}">
+      <span class="list-row-lead">${FormatUtils.formatTime(item.createdDate)}</span>
+      <span class="list-row-well">
         <i data-lucide="${iconName}" width="16" height="16"></i>
       </span>
-      <div class="download-content">
-        <span class="download-filename" title="${escapeHtml(item.fileName)}">${escapeHtml(item.fileName)}</span>
-        <div class="download-meta">${metaParts.join('')}</div>
+      <div class="list-row-content">
+        <span class="list-row-title" title="${escapeHtml(item.fileName)}">${escapeHtml(item.fileName)}</span>
+        <div class="list-row-meta download-meta">${metaParts.join('')}</div>
       </div>
-      <span class="download-tag">${displayType}</span>
-      ${statusHtml}
-      <span class="download-size">${sizeText}</span>
-      <div class="download-actions">${actionsHtml}</div>
+      <span class="badge"><i data-lucide="${TYPE_ICONS[displayType] || TYPE_ICONS.other}" width="12" height="12"></i>${displayType}</span>
+      <div class="download-state">
+        ${statusHtml}
+        <span class="download-size">${sizeText}</span>
+      </div>
+      <div class="list-row-actions download-actions">${actionsHtml}</div>
       ${progressHtml}
     `;
 
     // Row click → toggle detail panel (only for completed downloads)
     downloadItem.addEventListener('click', (e) => {
-      if ((e.target as HTMLElement).closest('.action-btn')) return;
+      if ((e.target as HTMLElement).closest('.list-row-action')) return;
       if (activeDownloads.has(item.fileName) || item.status === 'paused') return;
       toggleDetailPanel(item, wrapper, sourceHost);
     });
@@ -681,8 +680,8 @@ const appendDownloadItems = (items: DownloadRecord[]): void => {
         wrapper.remove();
         allLoadedItems.splice(allLoadedItems.indexOf(item), 1);
         if (allLoadedItems.length === 0) {
-          noDownloads.style.display = 'block';
-          deleteAllBtn.style.display = 'none';
+          noDownloads.hidden = false;
+          deleteAllBtn.hidden = true;
         }
         updateStorageGauge();
         renderTypeFilters();
@@ -725,22 +724,21 @@ const toggleDetailPanel = (
   wrapper.querySelector('.download-item')?.classList.add('selected');
 
   const displayType = getDisplayType(item);
-  const color = TYPE_COLORS[displayType] || '#a1a1aa';
   const iconName = getFileIcon(item.fileExtension);
 
   const panel = document.createElement('div');
-  panel.className = 'detail-panel';
+  panel.className = 'panel detail-panel';
   panel.dataset.fileType = displayType;
 
   panel.innerHTML = `
     <div class="detail-inner">
-      <div class="detail-preview" style="background: linear-gradient(135deg, ${hexToRgba(color, 0.07)}, ${hexToRgba(color, 0.16)}); border: 1px solid ${hexToRgba(color, 0.09)}">
-        <i data-lucide="${iconName}" style="color: ${color}" width="32" height="32"></i>
+      <div class="detail-preview">
+        <i data-lucide="${iconName}" width="32" height="32"></i>
       </div>
       <div class="detail-metadata">
         <div class="detail-field">
           <span class="detail-field-label">File</span>
-          <span class="detail-field-value">${item.fileName}</span>
+          <span class="detail-field-value">${escapeHtml(item.fileName)}</span>
         </div>
         <div class="detail-field">
           <span class="detail-field-label">Type</span>
@@ -752,15 +750,15 @@ const toggleDetailPanel = (
         </div>
         <div class="detail-field">
           <span class="detail-field-label">Source</span>
-          <span class="detail-field-value">${sourceHost || item.url}</span>
+          <span class="detail-field-value">${escapeHtml(sourceHost || item.url)}</span>
         </div>
         <div class="detail-field">
           <span class="detail-field-label">Downloaded</span>
-          <span class="detail-field-value">${new Date(item.createdDate).toLocaleString()}</span>
+          <span class="detail-field-value">${FormatUtils.formatDateTime(item.createdDate)}</span>
         </div>
         <div class="detail-field full-width">
           <span class="detail-field-label">Path</span>
-          <span class="detail-field-value">${item.fileLocation}</span>
+          <span class="detail-field-value detail-path">${escapeHtml(item.fileLocation)}</span>
         </div>
       </div>
       <div class="detail-actions">
@@ -815,11 +813,6 @@ const updateProgressBar = (fileName: string, receivedBytes: number, totalBytes: 
     bar = newProgressEl.querySelector('.download-progress-fill') as HTMLElement;
   }
 
-  // Get the type color for this row
-  const fileType = row.closest('.download-item-wrapper')?.getAttribute('data-file-type') || 'other';
-  const color = TYPE_COLORS[fileType] || '#a1a1aa';
-  bar.style.background = color;
-
   let pct = 0;
   if (totalBytes > 0) {
     // Determinate: show actual percentage
@@ -833,7 +826,7 @@ const updateProgressBar = (fileName: string, receivedBytes: number, totalBytes: 
   }
 
   // Update status pill (percentage)
-  const pctNum = row.querySelector('.download-status.progress .pct-num') as HTMLElement;
+  const pctNum = row.querySelector('.download-status.in-progress .pct-num') as HTMLElement;
   if (pctNum) pctNum.textContent = totalBytes > 0 ? `${pct}%` : '…';
 
   // Update file size display
@@ -860,7 +853,7 @@ const removeProgressBar = (fileName: string): void => {
   const actionsEl = row.querySelector('.download-actions');
   if (actionsEl) {
     actionsEl.innerHTML = `
-      <button class="action-btn remove-btn delete-button" title="Remove">
+      <button class="list-row-action remove-btn delete-button" title="Remove">
         <i data-lucide="x" width="14" height="14"></i>
       </button>`;
     createIcons({ icons });
@@ -889,11 +882,7 @@ const setRowPaused = (fileName: string): void => {
     createIcons({ icons });
   }
 
-  // Update progress bar color
-  const progressFill = row.querySelector('.download-progress-fill') as HTMLElement;
-  if (progressFill) {
-    progressFill.style.background = 'var(--bg-3)';
-  }
+  // The .paused row class greys the progress fill (CSS).
 
   // Swap status pill to paused
   const statusEl = row.querySelector('.download-status') as HTMLElement;
@@ -926,18 +915,12 @@ const setRowResumed = (fileName: string): void => {
     createIcons({ icons });
   }
 
-  // Restore progress bar color
-  const progressFill = row.querySelector('.download-progress-fill') as HTMLElement;
-  if (progressFill) {
-    const fileType =
-      row.closest('.download-item-wrapper')?.getAttribute('data-file-type') || 'other';
-    progressFill.style.background = TYPE_COLORS[fileType] || '#a1a1aa';
-  }
+  // Dropping .paused restores the accent progress fill (CSS).
 
   // Swap status pill back to in-progress
   const statusEl = row.querySelector('.download-status') as HTMLElement;
   if (statusEl) {
-    statusEl.className = 'download-status progress';
+    statusEl.className = 'download-status in-progress';
     statusEl.innerHTML =
       '<i data-lucide="arrow-down" width="10" height="10"></i> <span class="pct-num">…</span>';
     createIcons({ icons });
@@ -952,7 +935,7 @@ const showLoadingIndicator = (): void => {
   const loader = document.createElement('div');
   loader.id = 'loading-indicator';
   loader.className = 'loading-indicator';
-  loader.textContent = 'Loading...';
+  loader.textContent = 'Loading…';
   downloadsListElement.appendChild(loader);
 };
 

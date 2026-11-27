@@ -25,31 +25,36 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: var(--n-scrim);
   cursor: pointer;
 }
 
 /* Dialog card */
 .issue-report-dialog {
   position: relative;
-  width: 480px;
+  width: 540px;
   max-width: 90%;
   max-height: 80vh;
-  background-color: var(--chrome-2);
-  border-radius: var(--r-lg);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--border-1);
+  box-sizing: border-box;
+  padding: 20px;
+  background: var(--n-menu-bg);
+  backdrop-filter: var(--n-menu-blur);
+  -webkit-backdrop-filter: var(--n-menu-blur);
+  border-radius: var(--n-r-dialog);
+  box-shadow: var(--n-menu-shadow);
+  border: 0;
   overflow: hidden;
   z-index: 1;
-  animation: issueSlideIn 0.2s ease-out;
+  animation: issueSlideIn 0.18s ease-out;
   display: flex;
   flex-direction: column;
+  gap: 14px;
 }
 
 @keyframes issueSlideIn {
   from {
     opacity: 0;
-    transform: translateY(-12px);
+    transform: translateY(-8px);
   }
   to {
     opacity: 1;
@@ -61,6 +66,11 @@
   .issue-report-dialog {
     animation: none;
   }
+
+  .attachment-drop-zone,
+  .attachment-remove {
+    transition: none;
+  }
 }
 
 /* Header */
@@ -68,73 +78,66 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 16px 20px 12px 20px;
-  border-bottom: 1px solid var(--border-1);
-  font-size: var(--font-lg);
+  font-size: var(--font-xl);
+  line-height: 22px;
   font-weight: 600;
-  color: var(--fg-2);
+  letter-spacing: -0.01em;
+  color: var(--n-text-1);
 }
 
-/* Body */
+.issue-report-header i,
+.issue-report-header svg {
+  flex: none;
+  color: var(--n-text-2);
+}
+
+/* Body. As a scroll container it clips at its edges, so 4 px of padding gives
+   the full-width fields room for their focus ring; the negative margin keeps
+   everything where it was. */
 .issue-report-body {
-  padding: 16px 20px;
   overflow-y: auto;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0 -4px;
+  padding: 0 4px;
 }
 
 .issue-report-body .form-group {
-  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 0;
 }
 
+/* The group's 5 px gap is the space above each field (DESIGN.md §4.4), so the
+   label keeps the font's natural line height and adds no margin. */
 .issue-report-body .form-label {
-  display: block;
-  margin-bottom: 4px;
-  font-weight: 500;
-  font-size: var(--font-sm);
-  color: var(--fg-2);
+  margin-bottom: 0;
+  line-height: normal;
 }
 
 .issue-report-body .form-label-optional {
   font-weight: 400;
-  color: var(--fg-3);
-  font-size: var(--font-xs);
+  color: var(--n-text-3);
+  font-size: var(--font-sm);
 }
 
-.issue-report-body .form-control {
-  display: block;
-  width: 100%;
-  padding: 8px 12px;
-  font-size: var(--font-md);
-  color: var(--fg-2);
-  background-color: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-md);
-  transition: border-color var(--transition-fast);
-  box-sizing: border-box;
-}
-
-.issue-report-body .form-control:focus {
-  outline: none;
-  background-color: var(--bg-0);
-  box-shadow: var(--shadow-focus);
-}
-
+/* Fields are the global 30 px .form-control (DESIGN.md §5.2); the description
+   starts 78 px tall and can be dragged taller. */
 .issue-report-body textarea.form-control {
+  height: 78px;
+  min-height: 78px;
   resize: vertical;
-  min-height: 100px;
   font-family: inherit;
 }
 
+/* The global select.form-control supplies the 28 px height, chevron and
+   --n-select-shadow; in this dialog it is 200 px wide rather than the full
+   row. */
 .issue-report-body select.form-control {
-  /* Keep the global Nav0 <select> treatment — only need to add the right
-     padding to fit the chevron, since .form-control's padding is for text inputs. */
-  padding-right: 32px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  appearance: none;
-  -webkit-appearance: none;
-  cursor: pointer;
+  width: 200px;
 }
 
 /* Attachments */
@@ -149,19 +152,23 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+  min-height: 58px;
   padding: 12px;
-  border: 2px dashed var(--border-1);
-  border-radius: var(--r-md);
-  color: var(--fg-3);
-  font-size: var(--font-sm);
+  border: 1px dashed var(--n-control-edge);
+  border-radius: var(--n-r-control);
+  color: var(--n-text-2);
+  font-size: var(--font-md);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition:
+    background-color var(--dur-fast),
+    border-color var(--dur-fast),
+    color var(--dur-fast);
 }
 
 .attachment-drop-zone:hover {
-  border-color: var(--accent);
-  color: var(--fg-2);
-  background-color: var(--bg-2);
+  border-color: var(--n-accent);
+  color: var(--n-text-1);
+  background-color: var(--n-fill);
 }
 
 .attachment-previews {
@@ -170,13 +177,19 @@
   flex-wrap: wrap;
 }
 
+/* With no thumbnails yet, the empty row would still add the area's 8 px gap
+   under the drop zone. */
+.attachment-previews:empty {
+  display: none;
+}
+
 .attachment-preview {
   position: relative;
   width: 64px;
   height: 64px;
-  border-radius: var(--r-md);
+  border-radius: var(--n-r-control);
   overflow: hidden;
-  border: 1px solid var(--border-1);
+  border: 1px solid var(--n-separator);
 }
 
 .attachment-preview img {
@@ -185,99 +198,94 @@
   object-fit: cover;
 }
 
+/* An icon button (--n-r-icon, DESIGN.md §3.5) in the status bubble's dark
+   pairing (§5.3), not a red disc: removing a draft attachment isn't a
+   destructive confirm, and only switches, radios, dots and rings are round. */
 .attachment-remove {
   position: absolute;
   top: 2px;
   right: 2px;
   width: 18px;
   height: 18px;
-  border-radius: var(--r-full);
-  background-color: var(--danger);
-  color: white;
+  border-radius: var(--n-r-icon);
+  background-color: var(--n-text-1);
+  color: var(--n-on-accent);
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
-  line-height: 1;
   padding: 0;
+  transition: background-color var(--dur-fast);
 }
 
+/* brightness() can't visibly darken a near-black fill, so hover lifts it. */
 .attachment-remove:hover {
-  filter: brightness(0.9);
+  background-color: var(--n-text-2);
 }
 
 /* System info preview */
 .issue-report-sysinfo {
-  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .sysinfo-preview {
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
   font-size: var(--font-xs);
-  color: var(--fg-3);
-  background-color: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-md);
-  padding: 8px 12px;
-  line-height: 1.5;
+  color: var(--n-text-2);
+  background-color: var(--n-fill);
+  border-radius: var(--n-r-control);
+  padding: 8px 10px;
+  line-height: 16px;
   white-space: pre-line;
 }
 
 /* Status message */
 .issue-report-status {
-  padding: 8px 20px;
-  font-size: var(--font-sm);
+  font-size: var(--font-md);
   text-align: center;
 }
 
 .issue-report-status.success {
-  color: var(--success);
-  background-color: var(--success-soft);
+  color: var(--n-success);
 }
 
 .issue-report-status.error {
-  color: var(--danger);
-  background-color: var(--danger-soft);
+  color: var(--n-danger);
+}
+
+/* "View on GitHub" after a successful report: underlined, in the line's
+   success colour rather than link blue. */
+.issue-report-status-link {
+  color: var(--n-success);
+  text-decoration: underline;
+  font-weight: 500;
+  cursor: pointer;
 }
 
 .issue-copy-url-btn {
   margin-left: 4px;
   padding: 2px 8px;
   font-size: var(--font-xs);
-  border: 1px solid var(--success);
-  border-radius: var(--r-md);
+  border: 1px solid var(--n-success);
+  border-radius: var(--n-r-control);
   background: transparent;
-  color: var(--success);
+  color: var(--n-success);
   cursor: pointer;
   vertical-align: middle;
 }
 
 .issue-copy-url-btn:hover {
-  background: var(--success);
-  color: #fff;
+  background: var(--n-success);
+  color: var(--n-on-accent);
 }
 
-/* Actions */
+/* Actions: global .btn-sm buttons (28 px, DESIGN.md §5.1). */
 .issue-report-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  padding: 12px 20px 16px 20px;
-  border-top: 1px solid var(--border-1);
-}
-
-.issue-report-actions .btn {
-  padding: 8px 20px;
-  font-size: var(--font-sm);
-  font-weight: 500;
-  border-radius: var(--r-md);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  border: 1px solid transparent;
-}
-
-.issue-report-actions .btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  margin-top: 2px;
 }

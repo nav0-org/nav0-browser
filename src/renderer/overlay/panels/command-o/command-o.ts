@@ -1,5 +1,7 @@
 import './command-o.css';
 import { createIcons, icons } from 'lucide';
+import { UrlDisplay } from '../../../common/url-display';
+import { FaviconTile } from '../../../common/favicon-tile';
 
 type TabInfo = {
   id: string;
@@ -17,16 +19,6 @@ type WindowGroup = {
   tabs: TabInfo[];
 };
 
-const WINDOW_COLORS = [
-  '#3b82f6',
-  '#f59e0b',
-  '#22c55e',
-  '#ef4444',
-  '#a855f7',
-  '#ec4899',
-  '#14b8a6',
-  '#f97316',
-];
 const GRID_COLS = 4;
 
 let allGroups: WindowGroup[] = [];
@@ -52,7 +44,7 @@ const COMMAND_O_HTML = `
     <div class="search-bar">
       <span class="shortcut-badge" id="cmdo-shortcut-badge"></span>
       <i data-lucide="search" class="search-icon" width="16" height="16"></i>
-      <input type="text" id="cmdo-search-input" class="search-input" placeholder="Search across all tabs..." autofocus>
+      <input type="text" id="cmdo-search-input" class="search-input" placeholder="Search across all tabs…" autofocus>
       <span class="tab-count" id="cmdo-tab-count">0 tabs</span>
     </div>
 
@@ -70,13 +62,13 @@ const COMMAND_O_HTML = `
         <span class="key">&uarr;</span>
         <span class="key">&darr;</span>
         <span class="key-label">rows</span>
-        <span class="key">&#9166;</span>
+        <span class="key">&crarr;</span>
         <span class="key-label">switch</span>
         <span class="key">esc</span>
         <span class="key-label">close</span>
       </div>
-      <div class="footer-right" id="cmdo-footer-drag-hint" style="display:none;">drag tabs between windows</div>
-      <div class="footer-right" id="cmdo-footer-private" style="display:none;">private mode</div>
+      <div class="footer-right" id="cmdo-footer-drag-hint" hidden>Drag tabs between windows</div>
+      <div class="footer-right" id="cmdo-footer-private" hidden>Private mode</div>
     </div>
   </div>
 `;
@@ -84,17 +76,14 @@ const COMMAND_O_HTML = `
 const escapeHtml = (str: string): string => {
   const div = document.createElement('div');
   div.textContent = str;
-  return div.innerHTML;
+  // innerHTML leaves quotes alone: escape them so the result is also safe
+  // inside a quoted attribute (title="…", src="…").
+  return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 };
 
-const getFaviconLetter = (url: string): string => {
-  try {
-    const hostname = new URL(url).hostname;
-    return hostname.replace('www.', '').charAt(0).toUpperCase();
-  } catch {
-    return url.charAt(0).toUpperCase() || '?';
-  }
-};
+// Smooth scrolling is motion: skip it when the OS asks to reduce motion.
+const prefersReducedMotion = (): boolean =>
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const buildFlatTabs = () => {
   flatTabs = [];
@@ -170,7 +159,7 @@ const render = () => {
   const canMoveBetweenWindows = !window.BrowserAPI.isPrivate && allGroups.length > 1;
   const canReorder = !isFiltered;
   const canDrag = canMoveBetweenWindows || canReorder;
-  footerDragHint.style.display = canDrag ? '' : 'none';
+  footerDragHint.hidden = !canDrag;
   footerDragHint.textContent = canMoveBetweenWindows
     ? 'drag to reorder or move between windows'
     : 'drag to reorder tabs';
@@ -212,14 +201,13 @@ const render = () => {
     }
 
     if (showHeaders) {
-      const color = WINDOW_COLORS[gi % WINDOW_COLORS.length];
       const header = document.createElement('div');
       header.className = 'window-header';
       header.innerHTML = `
-        <span class="window-dot" style="background:${color}"></span>
+        <span class="window-dot"></span>
         <span class="window-name">${escapeHtml(group.windowName)}</span>
         <span class="window-tab-count">&mdash; ${group.tabs.length} tab${group.tabs.length !== 1 ? 's' : ''}</span>
-        <span class="window-line" style="background:${color}"></span>
+        <span class="window-line"></span>
       `;
       groupEl.appendChild(header);
     }
@@ -234,14 +222,8 @@ const render = () => {
       if (flatIdx === selectedIndex) card.classList.add('selected');
       card.dataset.flatIndex = String(flatIdx);
 
-      let faviconHtml = '';
-      if (tab.faviconUrl) {
-        faviconHtml = `<div class="tab-favicon"><img src="${escapeHtml(tab.faviconUrl)}" onerror="this.parentElement.innerHTML='<div class=\\'tab-favicon-letter\\'>${getFaviconLetter(tab.url)}</div>'"></div>`;
-      } else {
-        faviconHtml = `<div class="tab-favicon-letter">${getFaviconLetter(tab.url)}</div>`;
-      }
-
-      const titleText = tab.title || tab.url || 'New Tab';
+      // A URL standing in for a missing title shows nav0:// in lower case.
+      const titleText = UrlDisplay.format(tab.title || tab.url || 'New Tab');
       const truncatedTitle = escapeHtml(titleText);
 
       const pinHtml = tab.isPinned
@@ -249,12 +231,15 @@ const render = () => {
         : '';
 
       card.innerHTML = `
-        ${faviconHtml}
+        <div class="tab-favicon"></div>
         ${pinHtml}
         <span class="tab-title" title="${escapeHtml(titleText)}">${truncatedTitle}</span>
         ${tab.isActive ? '<span class="tab-active-dot"></span>' : ''}
       `;
       if (tab.isPinned) card.classList.add('pinned');
+
+      // The site's icon, or the favicon fallback tile.
+      card.querySelector('.tab-favicon')?.appendChild(FaviconTile.icon(tab.faviconUrl, tab.url));
 
       if (canDrag) {
         card.draggable = true;
@@ -321,7 +306,10 @@ const render = () => {
 
   // Scroll selected into view
   const selectedCard = tabsBody.querySelector('.tab-card.selected') as HTMLElement;
-  selectedCard?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  selectedCard?.scrollIntoView({
+    behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+    block: 'nearest',
+  });
 };
 
 const switchToTab = (tab: TabInfo, windowId: string) => {
@@ -442,7 +430,7 @@ export function init(container: HTMLElement): void {
   }
 
   if (window.BrowserAPI.isPrivate) {
-    footerPrivate.style.display = '';
+    footerPrivate.hidden = false;
   }
 
   document.addEventListener('keydown', handleKeydown);

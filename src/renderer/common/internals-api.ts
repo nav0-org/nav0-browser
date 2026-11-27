@@ -1,3 +1,5 @@
+import type { BrowsingHistorySummary } from '../../types/browsing-history-record';
+
 export {};
 
 declare global {
@@ -15,6 +17,7 @@ declare global {
       appWindowId: string;
       isPrivate: boolean;
       platform: string;
+      isTitleBarRtl: boolean;
       tabId: string;
       createTab: (appWindowId: string, url: string, activateNewTab: boolean) => any;
       activateTab: (appWindowId: string, tabId: string, isUserInitiated: boolean) => any;
@@ -26,13 +29,7 @@ declare global {
       refreshTab: (appWindowId: string, tabId: string) => Promise<any>;
       hardReloadTab: (appWindowId: string, tabId: string) => Promise<any>;
       stopLoadingTab: (appWindowId: string, tabId: string) => Promise<any>;
-      addBookmark: (
-        appWindowId: string,
-        title: string,
-        url: string,
-        faviconUrl: string,
-        type?: string
-      ) => Promise<any>;
+      addBookmark: (appWindowId: string, title: string, url: string, type?: string) => Promise<any>;
       removeBookmark: (appWindowId: string, bookmarkId: string) => Promise<any>;
       removeAllBookmarks: (appWindowId: string) => Promise<any>;
       fetchBookmarks: (
@@ -72,6 +69,7 @@ declare global {
       cancelDownload: (downloadId: string, appWindowId: string) => Promise<boolean>;
       openDownloadedFile: (filePath: string) => Promise<string>;
       showItemInFolder: (filePath: string) => Promise<void>;
+      getDefaultDownloadFolder: () => Promise<string>;
       removeBrowsingHistory: (appWindowId: string, historyId: string) => Promise<any>;
       removeAllBrowsingHistory: (appWindowId: string) => Promise<any>;
       fetchBrowsingHistory: (
@@ -83,6 +81,11 @@ declare global {
       fetchBrowsingHistoryStats: (
         appWindowId: string
       ) => Promise<Array<{ date: string; count: number; activeDuration: number }>>;
+      fetchBrowsingHistorySummary: (
+        appWindowId: string,
+        since: string | null,
+        limit?: number
+      ) => Promise<BrowsingHistorySummary>;
       fetchTopSites: (
         appWindowId: string,
         limit?: number
@@ -104,7 +107,7 @@ declare global {
       createNewPrivateAppWindow: () => Promise<any>;
 
       showOptionsMenu: (appWindowId: string) => Promise<any>;
-      hideOptionsMenu: (appWindowId: string) => Promise<any>;
+      hideOptionsMenu: (appWindowId: string, returnFocus?: boolean) => Promise<any>;
 
       showCommandKOverlay: (appWindowId: string) => Promise<any>;
       hideCommandKOverlay: (appWindowId: string) => Promise<any>;
@@ -113,6 +116,20 @@ declare global {
       showUrlAutocompleteOverlay: (appWindowId: string, data: any) => void;
       updateUrlAutocompleteOverlay: (appWindowId: string, data: any) => void;
       hideUrlAutocompleteOverlay: (appWindowId: string) => void;
+      // A press in the dropdown's shadow margin (x, y in the overlay view):
+      // closes the dropdown and passes the press on to what lies beneath.
+      dismissUrlAutocompleteOverlay: (
+        appWindowId: string,
+        press: {
+          x: number;
+          y: number;
+          button: number;
+          shiftKey: boolean;
+          ctrlKey: boolean;
+          altKey: boolean;
+          metaKey: boolean;
+        }
+      ) => void;
       sendUrlAutocompleteResultClicked: (appWindowId: string, data: any) => void;
       onUrlAutocompleteResultForwarded: (callback: (data: any) => void) => void;
       onUrlAutocompleteUpdate: (callback: (data: any) => void) => void;
@@ -207,7 +224,13 @@ declare global {
       downloadCurrentPdf: (appWindowId: string, tabId: string) => Promise<any>;
       // Event listeners
       onNewTabCreated: (
-        callback: (tab: { id: string; url: string; title: string; index?: number }) => void
+        callback: (tab: {
+          id: string;
+          url: string;
+          title: string;
+          index?: number;
+          faviconUrl?: string | null;
+        }) => void
       ) => void;
       onTabActivated: (callback: (tab: { id: string; url: string }) => void) => void;
       onTabClosed: (callback: (data: { id: string }) => void) => void;
@@ -223,8 +246,23 @@ declare global {
           canGoForward: boolean;
         }) => void
       ) => void;
-      onTabFaviconUpdated: (callback: (data: { id: string; faviconUrl: string }) => void) => void;
-      onNavigationFailed: (callback: (data: { id: string }) => void) => void;
+      onTabFaviconUpdated: (
+        callback: (data: { id: string; faviconUrl: string | null }) => void
+      ) => void;
+      onTabBackForwardUpdated: (
+        callback: (data: { id: string; canGoBack: boolean; canGoForward: boolean }) => void
+      ) => void;
+      onNavigationFailed: (
+        callback: (data: {
+          id: string;
+          url: string;
+          isBookmark: boolean;
+          bookmarkId: string | null;
+          bookmarkType: 'reference' | 'queue' | null;
+          canGoBack: boolean;
+          canGoForward: boolean;
+        }) => void
+      ) => void;
       onDownloadStarted: (
         callback: (data: {
           downloadId: string;
@@ -275,6 +313,9 @@ declare global {
       onTabUnpinned: (callback: (data: { id: string }) => void) => void;
       onTabsReordered: (callback: (data: { order: string[] }) => void) => void;
       onFullScreenChanged: (callback: (data: { isFullScreen: boolean }) => void) => void;
+      onOverlayVisibilityChanged: (
+        callback: (data: { type: string; visible: boolean; returnFocus?: boolean }) => void
+      ) => void;
       onFocusUrlBar: (callback: () => void) => void;
       // Permission system
       respondToPermissionPrompt: (appWindowId: string, requestId: string, decision: string) => void;

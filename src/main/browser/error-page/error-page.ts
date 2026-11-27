@@ -16,10 +16,10 @@ interface ErrorContent {
   title: string;
   /** Uppercase mono code label rendered above the heading ("DNS_LOOKUP_FAILED") */
   eyebrow: string;
-  /** Specific h2 inside the main panel ("linkedin.com's server can't be found") */
+  /** Specific h2 in the message column ("linkedin.com's server can't be found") */
   heading: string;
   /** Body paragraph — may contain a single {{HOST}} placeholder that gets
-   *  rendered as a mono inline chip. */
+   *  rendered as the bold inline hostname. */
   message: string;
   /** Optional troubleshooting checklist for the side rail. */
   checklist: ChecklistItem[];
@@ -95,10 +95,13 @@ const LOST_CHECKLIST: ChecklistItem[] = [
 function getErrorContent(error: NavigationError): ErrorContent {
   const { errorCode } = error;
   const host = extractHostname(error.validatedURL);
+  // Marks where renderMessage() puts the bold host. Encoded, so a host that
+  // contains "}" can't end the marker early.
+  const hostRef = `{{HOST:${encodeURIComponent(host)}}}`;
 
   if (errorCode === -106 || errorCode === -109) {
     return {
-      title: 'No internet connection',
+      title: 'No Internet Connection',
       eyebrow: 'NETWORK_OFFLINE',
       heading: 'You’re not connected to the internet',
       message:
@@ -108,55 +111,55 @@ function getErrorContent(error: NavigationError): ErrorContent {
   }
   if (errorCode === -105) {
     return {
-      title: 'Site can’t be reached',
+      title: 'Site Can’t Be Reached',
       eyebrow: 'DNS_LOOKUP_FAILED',
       heading: `${host}’s server can’t be found`,
-      message: `The DNS lookup for {{HOST:${host}}} didn’t resolve to an address. Most often this means the URL has a typo, the site is down, or your network can’t reach a DNS server right now.`,
+      message: `The DNS lookup for ${hostRef} didn’t resolve to an address. Most often this means the URL has a typo, the site is down, or your network can’t reach a DNS server right now.`,
       checklist: DNS_CHECKLIST,
     };
   }
   if (errorCode === -7 || errorCode === -118) {
     return {
-      title: 'Connection timed out',
+      title: 'Connection Timed Out',
       eyebrow: 'CONNECTION_TIMED_OUT',
       heading: `${host} took too long to respond`,
-      message: `Nav0 waited but {{HOST:${host}}} didn’t answer. The site could be temporarily down or simply too busy — try again in a moment.`,
+      message: `Nav0 waited but ${hostRef} didn’t answer. The site could be temporarily down or simply too busy — try again in a moment.`,
       checklist: TIMEOUT_CHECKLIST,
     };
   }
   if (errorCode === -102) {
     return {
-      title: 'Connection refused',
+      title: 'Connection Refused',
       eyebrow: 'CONNECTION_REFUSED',
       heading: `${host} refused the connection`,
-      message: `The server at {{HOST:${host}}} actively refused our request. Either nothing is listening on that port, or a firewall in between dropped the connection.`,
+      message: `The server at ${hostRef} actively refused our request. Either nothing is listening on that port, or a firewall in between dropped the connection.`,
       checklist: REFUSED_CHECKLIST,
     };
   }
   if (errorCode === -100 || errorCode === -101 || errorCode === -104) {
     return {
-      title: 'Connection lost',
+      title: 'Connection Lost',
       eyebrow: 'CONNECTION_INTERRUPTED',
       heading: 'The connection was interrupted',
-      message: `Something cut the connection between Nav0 and {{HOST:${host}}} mid-flight. A reload usually fixes this.`,
+      message: `Something cut the connection between Nav0 and ${hostRef} mid-flight. A reload usually fixes this.`,
       checklist: LOST_CHECKLIST,
     };
   }
   if (errorCode <= -200 && errorCode >= -299) {
     return {
-      title: 'Connection is not private',
+      title: 'Connection Is Not Private',
       eyebrow: 'CERTIFICATE_UNTRUSTED',
       heading: `${host}’s certificate can’t be verified`,
-      message: `Nav0 couldn’t verify the identity of {{HOST:${host}}}. Proceed only if you trust the site owner.`,
+      message: `Nav0 couldn’t verify the identity of ${hostRef}. Proceed only if you trust the site owner.`,
       checklist: [],
     };
   }
 
   return {
-    title: 'This page can’t be reached',
+    title: 'This Page Can’t Be Reached',
     eyebrow: 'UNKNOWN_ERROR',
     heading: 'Something went wrong while loading this page',
-    message: `Nav0 couldn’t load {{HOST:${host}}}. Check your connection and try again.`,
+    message: `Nav0 couldn’t load ${hostRef}. Check your connection and try again.`,
     checklist: [],
   };
 }
@@ -170,10 +173,12 @@ function escapeHtml(text: string): string {
     .replace(/>/g, '&gt;');
 }
 
-/** Replaces {{HOST:hostname}} markers with a mono `.host` inline chip. */
+/** Replaces {{HOST:hostname}} markers with the bold `.host` inline span. A
+ *  load with no host (a missing file:// page) reads "this page" instead. */
 function renderMessage(template: string): string {
-  return template.replace(/\{\{HOST:([^}]+)\}\}/g, (_match, host) => {
-    return `<span class="host">${escapeHtml(host)}</span>`;
+  return template.replace(/\{\{HOST:([^}]*)\}\}/g, (_match, encodedHost: string) => {
+    const host = decodeURIComponent(encodedHost);
+    return host ? `<span class="host">${escapeHtml(host)}</span>` : 'this page';
   });
 }
 
@@ -195,7 +200,7 @@ function renderChecklist(items: ChecklistItem[]): string {
     <aside class="error-side">
       <div class="panel">
         <div class="panel-head">
-          <div class="panel-title">Try this</div>
+          <div class="panel-title">Try This</div>
           <div class="panel-sub">In order — most-likely first.</div>
         </div>
         <ul class="check-list">${rows}</ul>
@@ -214,15 +219,17 @@ export function buildErrorPageScript(error: NavigationError): string {
   const errorCodeLabel = error.errorDescription || `ERR_UNKNOWN (${error.errorCode})`;
   const sidePanel = renderChecklist(content.checklist);
 
+  // Replacer functions, not strings: a URL may contain "$&" or "$`", which a
+  // replacement string would expand into pieces of the template.
   const html = errorPageTemplate
-    .replace(/\{\{ICON\}\}/g, icon)
-    .replace(/\{\{TITLE\}\}/g, escapeHtml(content.title))
-    .replace(/\{\{EYEBROW\}\}/g, escapeHtml(content.eyebrow))
-    .replace(/\{\{HEADING\}\}/g, escapeHtml(content.heading))
-    .replace(/\{\{MESSAGE\}\}/g, renderMessage(content.message))
-    .replace(/\{\{ERROR_CODE\}\}/g, escapeHtml(errorCodeLabel))
+    .replace(/\{\{ICON\}\}/g, () => icon)
+    .replace(/\{\{TITLE\}\}/g, () => escapeHtml(content.title))
+    .replace(/\{\{EYEBROW\}\}/g, () => escapeHtml(content.eyebrow))
+    .replace(/\{\{HEADING\}\}/g, () => escapeHtml(content.heading))
+    .replace(/\{\{MESSAGE\}\}/g, () => renderMessage(content.message))
+    .replace(/\{\{ERROR_CODE\}\}/g, () => escapeHtml(errorCodeLabel))
     .replace(/\{\{BODY_CLASS\}\}/g, sidePanel ? '' : 'no-side')
-    .replace(/\{\{SIDE_PANEL\}\}/g, sidePanel);
+    .replace(/\{\{SIDE_PANEL\}\}/g, () => sidePanel);
 
   // Escape for embedding inside a JS string
   const escaped = html

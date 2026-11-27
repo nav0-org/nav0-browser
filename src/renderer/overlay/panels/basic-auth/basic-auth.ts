@@ -31,7 +31,7 @@ const BASIC_AUTH_HTML = `
     <div class="basic-auth-dialog" id="basic-auth-dialog" role="dialog" aria-modal="true" aria-labelledby="basic-auth-title">
       <div class="basic-auth-header">
         <i data-lucide="lock" width="16" height="16"></i>
-        <span id="basic-auth-title">Sign in</span>
+        <span id="basic-auth-title">Sign In</span>
       </div>
       <div class="basic-auth-body">
         <div class="basic-auth-subtitle" id="basic-auth-subtitle"></div>
@@ -40,14 +40,14 @@ const BASIC_AUTH_HTML = `
           <i data-lucide="triangle-alert" width="14" height="14"></i>
           <span>Your credentials will be sent over an unencrypted connection.</span>
         </div>
-        <label class="basic-auth-label" for="basic-auth-username">Username</label>
-        <input type="text" class="basic-auth-input" id="basic-auth-username" autocomplete="off" />
-        <label class="basic-auth-label" for="basic-auth-password">Password</label>
-        <input type="password" class="basic-auth-input" id="basic-auth-password" autocomplete="off" />
+        <label class="form-label basic-auth-label" for="basic-auth-username">Username</label>
+        <input type="text" class="form-control" id="basic-auth-username" autocomplete="off" />
+        <label class="form-label basic-auth-label" for="basic-auth-password">Password</label>
+        <input type="password" class="form-control" id="basic-auth-password" autocomplete="off" />
       </div>
       <div class="basic-auth-actions">
-        <button class="basic-auth-btn basic-auth-btn-secondary" id="basic-auth-cancel">Cancel</button>
-        <button class="basic-auth-btn basic-auth-btn-primary" id="basic-auth-signin">Sign in</button>
+        <button class="btn btn-sm btn-secondary" id="basic-auth-cancel">Cancel</button>
+        <button class="btn btn-sm btn-primary" id="basic-auth-signin">Sign In</button>
       </div>
     </div>
   </div>
@@ -111,7 +111,7 @@ export function show(data?: BasicAuthPanelData): void {
   if (!data) return;
   currentRequestId = data.requestId;
 
-  titleEl.textContent = data.isProxy ? 'Proxy authentication required' : 'Sign in';
+  titleEl.textContent = data.isProxy ? 'Proxy Authentication Required' : 'Sign In';
 
   const authority = data.port ? `${data.host}:${data.port}` : data.host;
   if (data.isProxy) {

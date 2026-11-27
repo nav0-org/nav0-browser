@@ -5,10 +5,14 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background-color: var(--bg-color);
-  color: var(--text-color);
+  background-color: var(--n-card);
+  color: var(--n-text-2);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   overflow: hidden;
+}
+
+html {
+  border-radius: var(--n-r-dialog);
 }
 
 body {
@@ -22,8 +26,10 @@ body {
 
 .picker-header h1 {
   margin: 0;
-  font-size: var(--font-lg);
+  font-size: 17px;
   font-weight: 600;
+  line-height: 22px;
+  color: var(--n-text-1);
 }
 
 .picker-grid-wrap {
@@ -41,9 +47,9 @@ body {
 }
 
 .picker-source {
-  background-color: var(--bg-0);
+  background-color: var(--n-card);
   border: 2px solid transparent;
-  border-radius: var(--r-md);
+  border-radius: var(--n-r-panel);
   padding: var(--spacing-sm);
   cursor: pointer;
   user-select: none;
@@ -51,11 +57,15 @@ body {
 }
 
 .picker-source:hover {
-  border-color: var(--border-2);
+  border-color: var(--n-chrome-line);
+  border-width: 1px;
+  margin: 1px;
 }
 
 .picker-source.selected {
-  border-color: var(--accent);
+  border-color: var(--n-accent);
+  border-width: 2px;
+  margin: 0;
 }
 
 .picker-source-thumb {
@@ -63,67 +73,57 @@ body {
   height: auto;
   aspect-ratio: 16 / 10;
   object-fit: contain;
-  background-color: #000;
-  border-radius: var(--r-sm);
+  background-color: var(--n-grouped);
+  border-radius: var(--n-r-control);
   display: block;
 }
 
 .picker-source-type {
   font-size: var(--font-xs);
-  color: var(--fg-3);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: var(--n-text-3);
   margin-top: var(--spacing-xs);
 }
 
 .picker-source-name {
   font-size: var(--font-sm);
+  color: var(--n-text-2);
   margin-top: 2px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.picker-source.selected .picker-source-name {
+  background-color: var(--n-accent-soft);
+  color: var(--n-text-1);
+  border-radius: var(--n-r-key);
+  padding: 1px var(--spacing-xs);
+  margin-left: calc(var(--spacing-xs) * -1);
+  margin-right: calc(var(--spacing-xs) * -1);
+}
+
+.picker-source.selected .picker-source-type {
+  color: var(--n-accent);
+}
+
 .picker-empty {
   text-align: center;
-  color: var(--fg-3);
+  color: var(--n-text-3);
   padding: var(--spacing-lg);
 }
 
+/* Cancel and Share are the global dialog buttons (.btn .btn-sm with
+   .btn-secondary / .btn-primary, DESIGN.md §5.1), right-aligned. */
 .picker-actions {
   display: flex;
   justify-content: flex-end;
   gap: var(--spacing-sm);
   padding: var(--spacing-sm) var(--spacing-md) var(--spacing-md);
-  border-top: 1px solid var(--border-1);
+  border-top: 1px solid var(--n-separator);
 }
 
-.picker-btn {
-  font-size: var(--font-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
-  border: 1px solid var(--border-2);
-  background-color: var(--bg-0);
-  color: var(--fg-2);
-  border-radius: var(--r-sm);
-  cursor: pointer;
-}
-
-.picker-btn:hover {
-  background-color: var(--bg-3);
-}
-
-.picker-btn-primary {
-  background-color: var(--primary-color);
-  color: var(--bg-0);
-  border-color: var(--primary-color);
-}
-
-.picker-btn-primary:hover {
-  background-color: var(--primary-dark);
-}
-
-.picker-btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background-color: var(--primary-color);
+@media (prefers-reduced-motion: reduce) {
+  .picker-source {
+    transition: none;
+  }
 }

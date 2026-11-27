@@ -1,7 +1,7 @@
 /* ==========================================================================
-   Global CSS for Browser Application
-   Applies consistent styling across Command+K UI, LLM Model Selection,
-   Notes Management, and Error Pages
+   Nav0 design system — tokens, resets and shared components for the
+   chrome, the overlay panels and every built-in page. DESIGN.md documents
+   everything defined here; keep the two in step.
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -9,8 +9,8 @@
    -------------------------------------------------------------------------- */
 :root {
   /* ----------------------------------------------------------------
-     Nav0 Design System tokens — brand ramps from the compass logo.
-     Sharp corners, hairline borders, paper-flat shadows.
+     Brand ramps — the compass logo only (DESIGN.md §3.1). Never use
+     these for UI; UI colour comes from the --n-* tokens below.
      ---------------------------------------------------------------- */
   --nav0-red-500: #ef4444;
   --nav0-red-600: #dc2626;
@@ -26,37 +26,103 @@
   --nav0-slate-700: #334155;
   --nav0-slate-900: #0f172a;
 
-  /* Nav0 bg/fg scale — paired with the legacy aliases below. */
-  --bg-0: #ffffff; /* canvas / cards / active tab — kept paper-white */
-  --bg-1: #fafafa; /* page background */
-  --bg-2: #f5f5f5; /* subtle surface, input fields */
-  --bg-3: #ebebeb; /* hover */
-  --bg-inverse: #0a0a0a;
+  /* ----------------------------------------------------------------
+     Nav0 design-system tokens (--n-*). Canonical source; DESIGN.md §3
+     mirrors these. Neutral surfaces, one blue accent, red for danger only.
+     ---------------------------------------------------------------- */
 
-  /* Chrome surfaces — warm off-whites that sit a notch under --bg-0 so
-     the active tab / page content reads as the foreground layer.
-     Nav0's compass-red accent reads warm; pulling 2-3% toward red/yellow
-     makes the whole system feel coherent. */
-  --chrome-1: #f7f6f4; /* nav bar, tab strip backplate, page bento panels */
-  --chrome-2: #fbfaf8; /* menus, popovers, command-K/O, overlay panels */
-  --tab-inactive: #e7e5e1; /* warm shift of the prior #e2e2e2 */
-  --fg-1: #0a0a0a;
-  --fg-2: #333333;
-  --fg-3: #6b7280;
-  --fg-4: #9ca3af;
-  --fg-on-dark: #ffffff;
-  --border-1: #dcd9d4; /* hairline — warm gray to match chrome */
-  --border-2: #c8c5bf; /* heavier separator — warm shift of prior #d4d4d4 */
-  --accent: var(--nav0-blue-600);
-  --accent-hover: var(--nav0-blue-700);
-  --danger: var(--nav0-red-600);
-  --danger-soft: #fdecea;
-  --success: #16a34a;
-  --success-soft: #ecfdf5;
-  --warning: #d97706;
-  --warning-soft: #fef3c7;
-  --private-bg: var(--nav0-red-700);
-  --private-fg: #ffffff;
+  /* Surfaces and lines (§3.2) */
+  --n-page: #ffffff;
+  --n-grouped: #f5f5f7;
+  --n-card: #ffffff;
+  --n-strip: #e6e6e9;
+  --n-toolbar: #f6f6f7;
+  --n-chrome-line: #d1d1d6;
+  --n-separator: #e5e5ea;
+  --n-panel-line: rgba(0, 0, 0, 0.07);
+  --n-fill: rgba(0, 0, 0, 0.05);
+  --n-fill-2: rgba(0, 0, 0, 0.07);
+  --n-hover: rgba(0, 0, 0, 0.04);
+  --n-tab-hover: rgba(0, 0, 0, 0.045);
+  --n-tab-divider: rgba(0, 0, 0, 0.14);
+  --n-control-edge: #8e8e93;
+  --n-track: #e5e5ea;
+  --n-scrim: rgba(0, 0, 0, 0.12);
+  --n-well: #f2f2f4;
+  --n-menu-line: rgba(0, 0, 0, 0.09);
+  --n-ring-track: rgba(0, 0, 0, 0.12);
+  --n-menu-solid: #f8f8fa;
+
+  /* Text (§3.3) */
+  --n-text-1: #1d1d1f;
+  --n-text-2: #424245;
+  --n-text-3: #6e6e73;
+  --n-text-4: #aeaeb2;
+  /* Text and icons on accent and danger fills, and on a dark status bubble */
+  --n-on-accent: #ffffff;
+
+  /* Accent, semantic, private, data (§3.4) */
+  --n-accent: #0066d6;
+  --n-accent-hover: #0058b9;
+  --n-accent-soft: rgba(0, 102, 214, 0.12);
+  --n-focus: rgba(0, 102, 214, 0.28);
+  --n-danger: #d70015;
+  --n-danger-soft: rgba(215, 0, 21, 0.08);
+  --n-warning: #a35200;
+  --n-warning-soft: rgba(163, 82, 0, 0.1);
+  --n-success: #1d7a3a;
+  --n-success-soft: rgba(29, 122, 58, 0.1);
+  --n-private-strip: #e4def4;
+  --n-private-toolbar: #efebf8;
+  --n-private-line: #cdc4e6;
+  --n-private-text: #3f3a52;
+  --n-private-label-bg: #d3c8ef;
+  --n-private-label-text: #3b2d78;
+  --n-data-0: #e2e5e9;
+  --n-data-1: #a4afbf;
+  --n-data-2: #8693a6;
+  --n-data-3: #6a788e;
+  --n-data-4: #4f5f76;
+  /* Storage-bar hues (§3.4) — parts of a whole, always shown with a legend */
+  --n-storage-images: #5b9a5f;
+  --n-storage-media: #8a6bbf;
+  --n-storage-archives: #b98a35;
+  --n-storage-apps: #547ebe;
+  --n-storage-documents: #c0744d;
+  --n-storage-other: #8e8e93;
+
+  /* Materials, shadows, focus (§3.8) */
+  --n-menu-bg: rgba(248, 248, 250, 0.88);
+  /* ⌘K and ⌘O only: near-opaque, so tertiary text keeps 4.5:1 over any page */
+  --n-palette-bg: rgba(248, 248, 250, 0.98);
+  --n-menu-blur: blur(30px) saturate(1.8);
+  --n-menu-shadow:
+    0 0 0 0.5px rgba(0, 0, 0, 0.14), 0 24px 60px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.08);
+  /* White fields in the chrome: the address field, the find field */
+  --n-field-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.18), 0 1px 1px rgba(0, 0, 0, 0.04);
+  /* The white search field on the grey Settings sidebar: a hairline, no lift */
+  --n-sidebar-field-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.14);
+  /* White text inputs inside grey panels and dialogs (inset, like a macOS field) */
+  --n-input-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.16), inset 0 1px 1px rgba(0, 0, 0, 0.04);
+  /* Selects (pop-up buttons) */
+  --n-select-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.16), 0 1px 2px rgba(0, 0, 0, 0.06);
+  /* Read-only value fields (the About checksums): an edge, no lift */
+  --n-readonly-field-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12);
+  /* White buttons on grey panels */
+  --n-raised-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.18), 0 1px 1px rgba(0, 0, 0, 0.05);
+  /* Cards on a frosted surface (⌘O tab cards) */
+  --n-card-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.04);
+  /* The chosen segment of a segmented control */
+  --n-thumb-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.1);
+  /* Switch knob: on, and off (the off knob keeps a hairline on the grey track) */
+  --n-knob-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --n-knob-shadow-off: 0 0 0 0.5px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.25);
+  --n-focus-ring: 0 0 0 3px var(--n-focus);
+  /* The same ring drawn inside: controls flush with an edge that clips */
+  --n-focus-ring-inset: inset 0 0 0 3px var(--n-focus);
+  --n-focus-ring-field: 0 0 0 1px var(--n-accent), 0 0 0 4px var(--n-focus);
+  --n-focus-danger: rgba(215, 0, 21, 0.18); /* danger halo for an invalid field */
+  --n-focus-ring-field-danger: 0 0 0 1px var(--n-danger), 0 0 0 4px var(--n-focus-danger);
 
   /* macOS traffic lights — fixed Apple system colours, used only by the
      custom close/minimize/zoom cluster the chrome draws in fullscreen
@@ -69,39 +135,10 @@
   --mac-control-disabled-border: #c8c8c8;
   --mac-control-glyph: rgba(0, 0, 0, 0.55);
 
-  /* Focus rings */
-  --shadow-focus: 0 0 0 2px rgba(0, 0, 0, 0.1);
-  --shadow-focus-accent: 0 0 0 3px rgba(37, 99, 235, 0.18);
-
-  /* ----------------------------------------------------------------
-     Legacy aliases — kept so existing pages keep working, mapped onto
-     the Nav0 ramp. New code should prefer the Nav0 tokens above.
-     ---------------------------------------------------------------- */
-  --primary-color: #000000;
-  --primary-light: var(--bg-2);
-  --primary-dark: #171717;
-  --text-color: var(--fg-2);
-  --text-secondary: var(--fg-3);
-  --text-light: var(--fg-4);
-  --bg-color: var(--bg-2);
-  --bg-light: var(--bg-0);
-  --bg-hover: var(--bg-3);
-  --bg-active: var(--bg-2);
-  --border-color: var(--border-1);
-  --border-color-dark: var(--border-2);
-  --error-color: var(--danger);
-  --error-light: var(--danger-soft);
-  --warning-color: var(--warning);
-  --warning-light: var(--warning-soft);
-  --success-color: var(--success);
-  --success-light: var(--success-soft);
-  --info-color: var(--accent);
-  --info-light: #eff4ff;
-
-  /* Shadows — subtle, paper-flat. No coloured glows. */
+  /* Generic shadows for the .shadow-sm / .shadow utilities. A control takes
+     its role token above (DESIGN.md §3.8). */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
 
   /* Animation speeds */
   --dur-fast: 120ms;
@@ -122,37 +159,56 @@
   /* Font sizes */
   --font-xs: 11px;
   --font-sm: 12px;
-  --font-md: 14px;
-  --font-lg: 16px;
-  --font-xl: 18px;
-  --font-xxl: 24px;
-  --font-xxxl: 32px;
+  --font-md: 13px;
+  --font-lg: 14px;
+  --font-xl: 17px;
+  --font-xxl: 22px;
+  --font-xxxl: 28px;
 
   /* ----------------------------------------------------------------
-     Border radii — tightened toward Nav0's utilitarian aesthetic.
-     Source app used 6/8/12/pill; Nav0 spec is 2/3/4/6 plus circle.
-     "URL-bar pill" is a softly rounded rectangle (6px), not 500px.
+     Radii (§3.5) — half the macOS scale: 2 / 3 / 4 / 5 / 6 / 7 / 8 px,
+     plus fully round for switches, radios, dots and rings.
      ---------------------------------------------------------------- */
-  --r-xs: 2px;
-  --r-sm: 3px;
-  --r-md: 4px;
-  --r-lg: 6px;
-  --r-pill: 6px;
-  --r-full: 50%;
-
-  /* Legacy aliases mapped onto the Nav0 radii. */
-  --radius-sm: var(--r-sm);
-  --radius-md: var(--r-md);
-  --radius-lg: var(--r-lg);
-  --radius-xl: var(--r-lg);
-  --radius-pill: var(--r-pill);
-  --radius-circle: var(--r-full);
+  --n-r-key: 2px; /* keycaps, checkboxes, segmented-control segments, progress bars */
+  --n-r-icon: 3px; /* icon buttons, the "Private" label */
+  --n-r-control: 4px; /* tabs, address field, buttons, inputs, rows, wells, ⌘O cards */
+  --n-r-badge: 5px; /* badges */
+  --n-r-panel: 6px; /* grey panels (.card), menus, popovers, toasts, picker source cards */
+  --n-r-chip: 7px; /* filter chips */
+  --n-r-dialog: 8px; /* dialogs, ⌘K palette, ⌘O switcher */
+  --n-r-full: 999px; /* switches, radios, dots, rings */
 
   /* Z-index layers */
   --z-dropdown: 100;
   --z-sticky: 200;
   --z-modal: 1000;
   --z-toast: 1100;
+}
+
+/* The frosted menu material turns solid when the OS asks to reduce
+   transparency (DESIGN.md §3.8). */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --n-menu-bg: var(--n-menu-solid);
+    --n-palette-bg: var(--n-menu-solid);
+    --n-menu-blur: none;
+  }
+}
+
+/* Raise the contrast of lines, control edges and tertiary text when the OS
+   asks for more contrast (DESIGN.md §3.4). Every line-colour token steps up;
+   the 0.5 px edges inside the shadow tokens don't. */
+@media (prefers-contrast: more) {
+  :root {
+    --n-separator: #8e8e93;
+    --n-chrome-line: #8e8e93;
+    --n-menu-line: #8e8e93;
+    --n-panel-line: #8e8e93;
+    --n-tab-divider: #8e8e93;
+    --n-private-line: #8e8e93;
+    --n-control-edge: #6e6e73;
+    --n-text-3: var(--n-text-2);
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -173,8 +229,8 @@ body {
 }
 
 body {
-  background-color: var(--bg-color);
-  color: var(--text-color);
+  background-color: var(--n-page);
+  color: var(--n-text-2);
   line-height: 1.5;
   font-size: var(--font-md);
   -webkit-font-smoothing: antialiased;
@@ -188,7 +244,7 @@ h3,
 h4,
 h5,
 h6 {
-  color: var(--text-color);
+  color: var(--n-text-1);
   font-weight: 600;
   line-height: 1.3;
 }
@@ -210,7 +266,7 @@ p {
 }
 
 a {
-  color: var(--primary-color);
+  color: var(--n-accent);
   text-decoration: none;
 }
 
@@ -224,23 +280,26 @@ img {
 }
 
 /* --------------------------------------------------------------------------
-   Native <select> — Nav0 design system applied by default so every dropdown
-   in the app gets the same chrome (4-px radius, pale-grey rest, white-on-
-   focus halo, custom chevron) regardless of class. Per-context overrides
-   should keep `appearance: none` and may adjust padding/font-size/min-width.
+   Native <select> — a white pop-up button by default, so every dropdown gets
+   the same look regardless of class (DESIGN.md §5.2). The chevron is a data
+   URI, so its colour is the --n-text-2 value spelled out. It is 32 px tall
+   (7 + 18 + 7); the 29 px right padding is the 13 px chevron, 8 px from the
+   edge, plus an 8 px gap before the text.
    -------------------------------------------------------------------------- */
 select {
   font-family: inherit;
-  font-size: 13px;
-  color: var(--fg-1);
-  padding: 8px 32px 8px 12px;
+  font-size: var(--font-md);
+  line-height: 18px;
+  color: var(--n-text-1);
+  padding: 7px 29px 7px 10px;
   min-width: 120px;
-  border: 1px solid transparent;
-  border-radius: var(--r-md);
-  background-color: var(--bg-2);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  border: 0;
+  border-radius: var(--n-r-control);
+  background-color: var(--n-card);
+  box-shadow: var(--n-select-shadow);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%23424245' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 10px center;
+  background-position: right 8px center;
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
@@ -249,10 +308,9 @@ select {
     box-shadow var(--dur-fast);
 }
 
-select:focus {
+select:focus-visible {
   outline: none;
-  background-color: var(--bg-0);
-  box-shadow: var(--shadow-focus);
+  box-shadow: var(--n-focus-ring-field);
 }
 
 select:disabled {
@@ -275,10 +333,11 @@ select:disabled {
   border-width: 0;
 }
 
-/* Focus visible styles for keyboard navigation */
+/* Focus visible styles for keyboard navigation — keyboard only, never on a
+   mouse click (DESIGN.md §3.8). A soft accent halo, not a hard outline. */
 :focus-visible {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: var(--n-focus-ring);
 }
 
 /* --------------------------------------------------------------------------
@@ -470,23 +529,23 @@ select:disabled {
 }
 
 .text-primary {
-  color: var(--primary-color);
+  color: var(--n-accent);
 }
 
 .text-secondary {
-  color: var(--text-secondary);
+  color: var(--n-text-3);
 }
 
 .text-light {
-  color: var(--text-light);
+  color: var(--n-text-4);
 }
 
 .text-error {
-  color: var(--error-color);
+  color: var(--n-danger);
 }
 
 .text-success {
-  color: var(--success-color);
+  color: var(--n-success);
 }
 
 .text-center {
@@ -510,38 +569,52 @@ select:disabled {
 /* --------------------------------------------------------------------------
    Buttons and Form Controls
    -------------------------------------------------------------------------- */
+/* Text button (DESIGN.md §5.1). Icon-to-label spacing is the flex gap, not an
+   icon margin, so icon-only and icon-plus-label buttons both stay centred. */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius-md);
+  gap: 6px;
+  height: 32px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--n-r-control);
   font-size: var(--font-md);
   font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
   cursor: pointer;
-  transition: all var(--transition-medium);
-  border: 1px solid transparent;
-  line-height: 1.5;
   text-align: center;
   text-decoration: none;
+  transition:
+    background-color var(--dur-fast),
+    box-shadow var(--dur-fast),
+    filter var(--dur-fast);
 }
 
+/* Icon-only button, toolbar size (DESIGN.md §5.1); the chrome sizes its 28 × 28
+   field buttons itself. No margin: the container sets the spacing. Pair it
+   with .btn-ghost for its hover fill. */
 .btn-icon {
   display: inline-flex;
   vertical-align: middle;
-  margin-right: 2px;
-  margin-left: 2px;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-md);
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--n-r-icon);
   font-size: var(--font-md);
   font-weight: 500;
   cursor: pointer;
-  transition: all var(--transition-medium);
-  border: 1px solid transparent;
   line-height: 1;
   text-align: center;
   text-decoration: none;
+  transition:
+    background-color var(--dur-fast),
+    color var(--dur-fast);
 }
 
 .btn:disabled {
@@ -549,56 +622,70 @@ select:disabled {
   cursor: not-allowed;
 }
 
-.btn i,
 .btn svg {
-  margin-right: var(--spacing-sm);
+  flex: none;
 }
 
+/* 28 px: buttons inside grey panels and dialogs. */
 .btn-sm {
-  padding: 4px 10px;
-  font-size: var(--font-sm);
-}
-
-.btn-lg {
-  padding: 12px 20px;
-  font-size: var(--font-lg);
+  height: 28px;
 }
 
 .btn-primary {
-  background-color: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
+  background-color: var(--n-accent);
+  color: var(--n-on-accent);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: var(--primary-dark);
-  border-color: var(--primary-dark);
+  background-color: var(--n-accent-hover);
 }
 
 .btn-secondary {
-  background-color: var(--bg-light);
-  color: var(--text-color);
-  border-color: var(--border-color);
+  background-color: var(--n-fill);
+  color: var(--n-text-1);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background-color: var(--bg-hover);
-  border-color: var(--border-color-dark);
+  background-color: var(--n-fill-2);
+}
+
+.btn-raised {
+  background-color: var(--n-card);
+  color: var(--n-text-1);
+  box-shadow: var(--n-raised-shadow);
+}
+
+.btn-raised:hover:not(:disabled) {
+  filter: brightness(0.97);
+}
+
+/* Keyboard focus keeps the raised edge under the halo. */
+.btn-raised:focus-visible {
+  box-shadow: var(--n-raised-shadow), var(--n-focus-ring);
+}
+
+.btn-danger {
+  background-color: var(--n-danger);
+  color: var(--n-on-accent);
+}
+
+.btn-danger:hover:not(:disabled) {
+  filter: brightness(0.92);
 }
 
 .btn-ghost {
   background-color: transparent;
-  color: var(--text-color);
+  color: var(--n-text-2);
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background-color: var(--bg-hover);
+  background-color: var(--n-fill);
 }
 
 .btn-link {
   background: none;
   border: none;
-  color: var(--primary-color);
+  color: var(--n-accent);
   padding: var(--spacing-xs);
   font-weight: normal;
 }
@@ -613,24 +700,44 @@ select:disabled {
   width: 100%;
 }
 
-/* Form controls */
+/* Form controls — a white, 30 px text input for grey panels and dialogs
+   (DESIGN.md §5.2). */
 .form-control {
   display: block;
   width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: 6px 10px;
   font-size: var(--font-md);
-  line-height: 1.5;
-  color: var(--text-color);
-  background-color: var(--bg-light);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  transition: border-color var(--transition-medium);
+  line-height: 18px;
+  color: var(--n-text-1);
+  background-color: var(--n-card);
+  border: 0;
+  border-radius: var(--n-r-control);
+  box-shadow: var(--n-input-shadow);
+  transition: box-shadow var(--dur-fast);
 }
 
-.form-control:focus {
+.form-control::placeholder {
+  color: var(--n-text-3);
+}
+
+.form-control:focus-visible {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--n-focus-ring-field);
+}
+
+textarea.form-control {
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
+/* A select in a panel or dialog is 28 px (5 + 18 + 5), the .btn-sm height
+   used there; a bare select is 32 px. It restates the chevron's 29 px right
+   padding and the pop-up shadow, which .form-control would replace. */
+select.form-control {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-right: 29px;
+  box-shadow: var(--n-select-shadow);
 }
 
 .form-group {
@@ -639,32 +746,83 @@ select:disabled {
 
 .form-label {
   display: block;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: 5px;
   font-weight: 500;
-  font-size: var(--font-md);
+  font-size: var(--font-sm);
+  color: var(--n-text-2);
 }
 
 .form-text {
   display: block;
   margin-top: var(--spacing-xs);
   font-size: var(--font-sm);
-  color: var(--text-secondary);
+  color: var(--n-text-3);
+}
+
+/* Filled search field for a page toolbar (DESIGN.md §5.2): a <label> (or div)
+   wrapping a Lucide icon and an <input>. The field takes the focus ring and the
+   input draws none, so the global :focus-visible halo can't box it twice. */
+.search-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: var(--n-r-control);
+  background-color: var(--n-fill);
+  color: var(--n-text-3);
+  font-size: var(--font-md);
+  cursor: text;
+  transition:
+    background-color var(--dur-fast),
+    box-shadow var(--dur-fast);
+}
+
+.search-field svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+
+.search-field input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--n-text-1);
+  font: inherit;
+}
+
+.search-field input::placeholder {
+  color: var(--n-text-3);
+}
+
+.search-field input:focus-visible {
+  box-shadow: none;
+}
+
+.search-field:has(input:focus) {
+  background-color: var(--n-card);
+  box-shadow: var(--n-focus-ring-field);
 }
 
 /* --------------------------------------------------------------------------
    Cards and Containers
    -------------------------------------------------------------------------- */
+/* A grey panel on a white page (DESIGN.md §5.3): no border, no shadow, and the
+   controls inside it are white. */
 .card {
-  background-color: var(--bg-light);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
+  background-color: var(--n-grouped);
+  border-radius: var(--n-r-panel);
   overflow: hidden;
-  box-shadow: var(--shadow-md);
 }
 
 .card-header {
   padding: var(--spacing-md);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--n-panel-line);
 }
 
 .card-body {
@@ -673,8 +831,40 @@ select:disabled {
 
 .card-footer {
   padding: var(--spacing-md);
-  border-top: 1px solid var(--border-color);
-  background-color: var(--bg-color);
+  border-top: 1px solid var(--n-panel-line);
+}
+
+/* The padded grey panel of the list pages (DESIGN.md §5.3): charts,
+   summaries and the storage bar. A header line holds a 13 px 600 title and,
+   on the right, 12 px --n-text-3 meta. */
+.panel {
+  padding: 20px;
+  border-radius: var(--n-r-panel);
+  background-color: var(--n-grouped);
+}
+
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-bottom: 12px;
+  line-height: 16px;
+}
+
+.panel-title {
+  color: var(--n-text-1);
+  font-size: var(--font-md);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* A shorter line box than the title's, so the baseline-aligned 12 px text
+   doesn't push the header past 16 px. */
+.panel-meta {
+  color: var(--n-text-3);
+  font-size: var(--font-sm);
+  line-height: 15px;
 }
 
 /* --------------------------------------------------------------------------
@@ -690,7 +880,7 @@ select:disabled {
 }
 
 .nav-link {
-  color: var(--text-color);
+  color: var(--n-text-2);
   text-decoration: none;
   padding: var(--spacing-sm) 0;
   display: block;
@@ -698,12 +888,12 @@ select:disabled {
 }
 
 .nav-link:hover {
-  color: var(--primary-color);
+  color: var(--n-accent);
   text-decoration: none;
 }
 
 .nav-link.active {
-  color: var(--primary-color);
+  color: var(--n-accent);
   font-weight: 500;
 }
 
@@ -733,19 +923,19 @@ select:disabled {
 }
 
 .rounded-sm {
-  border-radius: var(--radius-sm);
+  border-radius: var(--n-r-icon);
 }
 
 .rounded {
-  border-radius: var(--radius-md);
+  border-radius: var(--n-r-control);
 }
 
 .rounded-lg {
-  border-radius: var(--radius-lg);
+  border-radius: var(--n-r-panel);
 }
 
 .rounded-circle {
-  border-radius: var(--radius-circle);
+  border-radius: var(--n-r-full);
 }
 
 .shadow-sm {
@@ -757,7 +947,7 @@ select:disabled {
 }
 
 .shadow-lg {
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--n-menu-shadow);
 }
 
 .w-100 {
@@ -785,7 +975,7 @@ select:disabled {
 }
 
 .border {
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--n-separator);
 }
 
 .border-0 {
@@ -793,60 +983,60 @@ select:disabled {
 }
 
 .border-top {
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--n-separator);
 }
 
 .border-bottom {
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--n-separator);
 }
 
 .border-primary {
-  border-color: var(--primary-color) !important;
+  border-color: var(--n-accent) !important;
 }
 
 /* Background utilities */
 .bg-primary {
-  background-color: var(--primary-color) !important;
+  background-color: var(--n-accent) !important;
 }
 
 .bg-primary-light {
-  background-color: var(--primary-light) !important;
+  background-color: var(--n-grouped) !important;
 }
 
 .bg-light {
-  background-color: var(--bg-light) !important;
+  background-color: var(--n-page) !important;
 }
 
 .bg-error {
-  background-color: var(--error-color) !important;
+  background-color: var(--n-danger) !important;
 }
 
 .bg-error-light {
-  background-color: var(--error-light) !important;
+  background-color: var(--n-danger-soft) !important;
 }
 
 .bg-success {
-  background-color: var(--success-color) !important;
+  background-color: var(--n-success) !important;
 }
 
 .bg-success-light {
-  background-color: var(--success-light) !important;
+  background-color: var(--n-success-soft) !important;
 }
 
 .bg-warning {
-  background-color: var(--warning-color) !important;
+  background-color: var(--n-warning) !important;
 }
 
 .bg-warning-light {
-  background-color: var(--warning-light) !important;
+  background-color: var(--n-warning-soft) !important;
 }
 
 .bg-info {
-  background-color: var(--info-color) !important;
+  background-color: var(--n-accent) !important;
 }
 
 .bg-info-light {
-  background-color: var(--info-light) !important;
+  background-color: var(--n-accent-soft) !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -953,38 +1143,225 @@ select:disabled {
    Common Component Styles
    -------------------------------------------------------------------------- */
 
-/* Badges */
+/* Badges (DESIGN.md §5.3) — a neutral label, never a colour per category.
+   .badge-sm is the small "Recommended" tag. A state (a release build, a dev
+   build, not secure) is a 20 px tag in a soft pair. */
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.25em 0.5em;
-  font-size: 75%;
-  font-weight: 500;
+  gap: 5px;
+  height: 22px;
+  padding: 0 8px;
+  font-size: var(--font-sm);
+  font-weight: 400;
   line-height: 1;
   text-align: center;
   white-space: nowrap;
   vertical-align: baseline;
-  border-radius: var(--radius-pill);
+  border-radius: var(--n-r-badge);
+  background-color: var(--n-fill);
+  color: var(--n-text-2);
 }
 
-.badge-primary {
-  background-color: var(--primary-color);
-  color: white;
+.badge svg {
+  flex: none;
+  width: 12px;
+  height: 12px;
 }
 
-.badge-secondary {
-  background-color: var(--text-secondary);
-  color: white;
+.badge-sm {
+  height: 18px;
+  padding: 0 7px;
+  font-size: var(--font-xs);
+  font-weight: 600;
+}
+
+.badge-success,
+.badge-warning,
+.badge-danger {
+  height: 20px;
+  padding: 0 7px;
+  font-size: var(--font-xs);
+  font-weight: 600;
 }
 
 .badge-success {
-  background-color: var(--success-color);
-  color: white;
+  background-color: var(--n-success-soft);
+  color: var(--n-success);
 }
 
-.badge-error {
-  background-color: var(--error-color);
-  color: white;
+.badge-warning {
+  background-color: var(--n-warning-soft);
+  color: var(--n-warning);
+}
+
+.badge-danger {
+  background-color: var(--n-danger-soft);
+  color: var(--n-danger);
+}
+
+/* Filter chips (DESIGN.md §5.3). The chosen chip takes the selection style;
+   mark it with .selected or .active, plus aria-pressed / aria-selected for
+   assistive tech. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--n-r-chip);
+  background-color: var(--n-fill);
+  color: var(--n-text-1);
+  font-size: var(--font-md);
+  font-weight: 400;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--dur-fast);
+}
+
+.chip svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--n-text-2);
+}
+
+.chip:hover {
+  background-color: var(--n-fill-2);
+}
+
+.chip.selected,
+.chip.active {
+  background-color: var(--n-accent-soft);
+  font-weight: 500;
+}
+
+.chip.selected svg,
+.chip.active svg {
+  color: var(--n-accent);
+}
+
+/* Chip row (DESIGN.md §5.3): a "Categories" label beside one line of chips,
+   6 px apart. */
+.chip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+/* The 28 px line box matches the chips. */
+.chip-row-label {
+  flex: none;
+  margin-right: var(--spacing-xs);
+  color: var(--n-text-3);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  line-height: 28px;
+}
+
+/* The chips never wrap: past the column they scroll sideways, with no
+   scrollbar, and ChipRow (common/chip-row.ts) fades each edge that has more
+   chips beyond it. The mask only sets opacity, so #000 there is not a
+   colour. The 3 px padding, cancelled by the margin, keeps the scroller
+   from clipping focus rings. */
+.chip-row-chips {
+  --chip-fade-start: 0px;
+  --chip-fade-end: 0px;
+
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin: -3px;
+  padding: 3px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--chip-fade-start),
+    #000 calc(100% - var(--chip-fade-end)),
+    transparent
+  );
+}
+
+.chip-row-chips.more-before {
+  --chip-fade-start: var(--spacing-xl);
+}
+
+.chip-row-chips.more-after {
+  --chip-fade-end: var(--spacing-xl);
+}
+
+/* Category and file-type ids are lower-case data ("dev"); a chip shows them
+   capitalised. */
+.chip-row .chip {
+  text-transform: capitalize;
+}
+
+/* Segmented control (DESIGN.md §5.2): a --n-fill-2 track of .segmented-btn
+   segments; the chosen one (.active) is a white thumb. An optional
+   .segmented-count follows a segment's label. */
+.segmented {
+  display: inline-flex;
+  gap: 2px;
+  height: 32px;
+  padding: 2px;
+  border-radius: var(--n-r-control);
+  background-color: var(--n-fill-2);
+}
+
+.segmented-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--n-r-key);
+  background-color: transparent;
+  color: var(--n-text-2);
+  font-size: var(--font-md);
+  font-weight: 400;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast),
+    color var(--dur-fast),
+    box-shadow var(--dur-fast);
+}
+
+.segmented-btn svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+
+.segmented-btn:hover {
+  color: var(--n-text-1);
+}
+
+.segmented-btn.active {
+  background-color: var(--n-card);
+  color: var(--n-text-1);
+  font-weight: 500;
+  box-shadow: var(--n-thumb-shadow);
+}
+
+/* The thumb's shadow outranks the global :focus-visible ring, so put the
+   keyboard ring back over it on the chosen segment. */
+.segmented-btn.active:focus-visible {
+  box-shadow: var(--n-focus-ring), var(--n-thumb-shadow);
+}
+
+.segmented-count {
+  color: var(--n-text-3);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Alerts */
@@ -993,40 +1370,42 @@ select:disabled {
   padding: var(--spacing-md);
   margin-bottom: var(--spacing-md);
   border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  border-radius: var(--n-r-control);
 }
 
 .alert-primary {
-  background-color: var(--primary-light);
-  border-color: var(--primary-color);
-  color: var(--primary-dark);
+  background-color: var(--n-grouped);
+  border-color: var(--n-accent);
+  color: var(--n-accent-hover);
 }
 
 .alert-error {
-  background-color: var(--error-light);
-  border-color: var(--error-color);
-  color: var(--error-color);
+  background-color: var(--n-danger-soft);
+  border-color: var(--n-danger);
+  color: var(--n-danger);
 }
 
 .alert-success {
-  background-color: var(--success-light);
-  border-color: var(--success-color);
-  color: var(--success-color);
+  background-color: var(--n-success-soft);
+  border-color: var(--n-success);
+  color: var(--n-success);
 }
 
 .alert-warning {
-  background-color: var(--warning-light);
-  border-color: var(--warning-color);
-  color: var(--warning-color);
+  background-color: var(--n-warning-soft);
+  border-color: var(--n-warning);
+  color: var(--n-warning);
 }
 
 .alert-info {
-  background-color: var(--info-light);
-  border-color: var(--info-color);
-  color: var(--info-color);
+  background-color: var(--n-accent-soft);
+  border-color: var(--n-accent);
+  color: var(--n-accent);
 }
 
-/* Tooltips (simple CSS version) */
+/* Hover tooltip (DESIGN.md §5.3): a small popover in the menu material, 8 px
+   above the element it describes. The off-scale 5px 9px padding around a
+   14 px line is deliberate: together they make its 24 px height. */
 .tooltip {
   position: relative;
   display: inline-block;
@@ -1034,20 +1413,22 @@ select:disabled {
 
 .tooltip-text {
   visibility: hidden;
-  width: 120px;
-  background-color: #333;
-  color: #fff;
-  text-align: center;
-  border-radius: var(--radius-sm);
-  padding: var(--spacing-xs) var(--spacing-sm);
   position: absolute;
   z-index: var(--z-dropdown);
-  bottom: 125%;
+  bottom: calc(100% + var(--spacing-sm));
   left: 50%;
   transform: translateX(-50%);
-  opacity: 0;
-  transition: opacity var(--transition-medium);
+  padding: 5px 9px;
+  border-radius: var(--n-r-control);
+  background-color: var(--n-menu-bg);
+  backdrop-filter: var(--n-menu-blur);
+  box-shadow: var(--n-menu-shadow);
+  color: var(--n-text-1);
   font-size: var(--font-sm);
+  line-height: 14px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity var(--dur-fast);
   pointer-events: none;
 }
 
@@ -1056,14 +1437,52 @@ select:disabled {
   opacity: 1;
 }
 
+/* Toast (DESIGN.md §5.3): the page-wide form of the status bubble. A short
+   confirmation after an action ("Startup page added"), centred 24 px above
+   the bottom edge. Centred with auto margins rather than a transform, so the
+   reveal can move it; max-content keeps a long message on one line until it
+   meets the side gutters. */
+.toast {
+  position: fixed;
+  z-index: var(--z-toast);
+  right: 0;
+  bottom: var(--spacing-lg);
+  left: 0;
+  width: max-content;
+  max-width: calc(100% - 2 * var(--spacing-lg));
+  margin: 0 auto;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--n-r-panel);
+  background-color: var(--n-text-1);
+  color: var(--n-on-accent);
+  font-size: var(--font-md);
+  font-weight: 500;
+  line-height: 18px;
+  text-align: center;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+  animation: toast-reveal 180ms ease-out;
+}
+
+@keyframes toast-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Avatars */
 .avatar {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--primary-light);
-  color: var(--primary-color);
-  border-radius: var(--radius-circle);
+  background-color: var(--n-grouped);
+  color: var(--n-accent);
+  border-radius: var(--n-r-full);
   width: 40px;
   height: 40px;
   font-weight: 600;
@@ -1082,46 +1501,392 @@ select:disabled {
   font-size: var(--font-lg);
 }
 
-/* Keyboard key styling */
+/* Keycap (DESIGN.md §5.3): one cap per key, in the system sans stack, not mono.
+   No margin: a row of caps sits in a flex container with a 4 px gap. */
 .keycap {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 20px;
   height: 20px;
-  padding: 0 var(--spacing-xs);
+  padding: 0 5px;
   font-size: var(--font-xs);
-  border-radius: var(--radius-sm);
-  background-color: var(--bg-light);
-  border: 1px solid var(--border-color);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
-  margin: 0 2px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--n-text-2);
+  white-space: nowrap;
+  border: 0;
+  border-radius: var(--n-r-key);
+  background-color: var(--n-fill-2);
+}
+
+/* Favicon fallback tile (DESIGN.md §5.3): the site's first letter, from
+   FaviconTile in common/favicon-tile.ts, wherever a site icon is missing or
+   fails to load. 16 px like a favicon; a slot with a larger icon sizes it. */
+.favicon-tile {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--n-r-icon);
+  background-color: var(--n-text-3);
+  color: var(--n-on-accent);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  line-height: 1;
+  user-select: none;
 }
 
 /* Simple divider */
 .divider {
   height: 1px;
-  background-color: var(--border-color);
+  background-color: var(--n-separator);
   margin: var(--spacing-md) 0;
 }
 
 .divider-vertical {
   width: 1px;
   height: 24px;
-  background-color: var(--border-color);
+  background-color: var(--n-separator);
   margin: 0 var(--spacing-sm);
 }
 
-/* Progress bar */
-.progress {
-  height: 6px;
-  background-color: var(--bg-hover);
-  border-radius: var(--radius-sm);
+/* Progress bar (DESIGN.md §5.3): the fill's width is the progress. Named
+   .progress-track / .progress-fill rather than .progress so a page's
+   "progress" state class can't pick it up. */
+.progress-track {
+  height: 4px;
+  background-color: var(--n-track);
+  border-radius: var(--n-r-key);
   overflow: hidden;
 }
 
-.progress-bar {
+.progress-fill {
   height: 100%;
-  background-color: var(--primary-color);
-  border-radius: var(--radius-sm);
+  background-color: var(--n-accent);
+  border-radius: var(--n-r-key);
+}
+
+/* --------------------------------------------------------------------------
+   List pages — History, Bookmarks and Downloads share one layout
+   (DESIGN.md §4.2): an 880 px column, the Large title, a toolbar, grey
+   panels and 54 px rows on white, grouped under day or folder headers.
+   -------------------------------------------------------------------------- */
+/* The body's 1.5 would loosen every row and panel; text that sets the
+   rhythm has its own line height. */
+.list-page {
+  min-height: 100vh;
+  background-color: var(--n-page);
+  color: var(--n-text-2);
+  line-height: normal;
+}
+
+/* The side gutters are added to the max-width, so they only show on narrow
+   windows. They are 64 px so that two row actions, which hang past a row's
+   right edge (4 + 26 + 2 + 26 px), always fit. */
+.list-column {
+  max-width: calc(880px + 4 * var(--spacing-xl));
+  margin: 0 auto;
+  padding: 36px calc(2 * var(--spacing-xl)) 56px;
+}
+
+.list-title {
+  margin: 0;
+  color: var(--n-text-1);
+  font-size: var(--font-xxxl);
+  font-weight: 700;
+  line-height: 34px;
+  letter-spacing: -0.02em;
+}
+
+/* Search field, segmented control, secondary buttons, in that order. */
+.list-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.list-toolbar > .search-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.list-toolbar > .segmented,
+.list-toolbar > .btn {
+  flex: none;
+}
+
+/* Day or folder header over a group of rows: a 13 px 600 title, an optional
+   --n-text-3 date after it and a 12 px count on the right. */
+.list-group-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 22px 0 4px;
+  padding: 0 12px 8px;
+  border-bottom: 1px solid var(--n-separator);
+  font-size: var(--font-md);
+  line-height: 18px;
+}
+
+.list-group-title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  min-width: 0;
+  color: var(--n-text-1);
+  font-weight: 600;
+}
+
+.list-group-title svg {
+  flex: none;
+  color: var(--n-text-2);
+}
+
+.list-group-date {
+  color: var(--n-text-3);
+}
+
+.list-group-sub {
+  margin-left: auto;
+  color: var(--n-text-3);
+  font-size: var(--font-sm);
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* A page's rows sit in one .list-grid, and each row is a subgrid of it, so
+   every row shares the same column tracks. A column sized to its content
+   (a badge, a duration, a size) is as wide as its widest entry in the list:
+   columns line up row to row with no slack held for longer values. Each
+   page sets grid-template-columns on its list; the first track includes the
+   row's 12 px left padding. Anything else in the list (day headers, a
+   loader) spans the full width. Grid margins don't collapse, so a day
+   header's 22 px top margin no longer merges with a margin above the list. */
+.list-grid {
+  display: grid;
+  column-gap: 12px;
+}
+
+.list-grid > * {
+  grid-column: 1 / -1;
+}
+
+/* A 54 px row: lead (time or date) | 28 px well | title over meta | the
+   page's trailing columns, on its list's tracks; a second grid row (a
+   download's progress bar) takes its own height. The row actions take no
+   column: they hang outside the row's right edge. */
+.list-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-template-rows: 54px;
+  align-items: center;
+  column-gap: 12px;
+  padding: 0 8px 0 12px;
+  border-radius: var(--n-r-control);
+  cursor: pointer;
+  transition: background-color var(--dur-fast);
+}
+
+.list-row:hover {
+  background-color: var(--n-hover);
+}
+
+.list-row-lead {
+  color: var(--n-text-3);
+  font-size: var(--font-sm);
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* 28 px well holding a 16 px icon or favicon. */
+.list-row-well {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--n-r-control);
+  background-color: var(--n-well);
+  color: var(--n-text-2);
+}
+
+.list-row-well img,
+.list-row-well svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.list-row-well img {
+  border-radius: var(--n-r-control);
+}
+
+/* Title over meta with no gap: their 18 / 16 px line heights space them. */
+.list-row-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.list-row-title,
+.list-row-meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-row-title {
+  color: var(--n-text-1);
+  font-size: var(--font-md);
+  font-weight: 500;
+  line-height: 18px;
+}
+
+/* URLs and paths are grey, never link blue. */
+.list-row-meta {
+  color: var(--n-text-3);
+  font-size: var(--font-sm);
+  line-height: 16px;
+}
+
+.list-row-meta .dot {
+  margin: 0 0.25em;
+}
+
+/* "host · path": the path truncates, the host never does. */
+.list-row-meta:has(> .meta-path) {
+  display: flex;
+  align-items: baseline;
+}
+
+.list-row-meta > .meta-host {
+  flex: none;
+}
+
+.list-row-meta > .meta-path {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Category and file-type ids are lower-case data; a one-word id
+   capitalised is sentence case. The badge starts its column, which is as
+   wide as the list's widest badge, so badges line up row to row. */
+.list-row .badge {
+  justify-self: start;
+  text-transform: capitalize;
+}
+
+/* Row actions sit just outside the row's right edge, beside its first
+   54 px line, and appear on hover or while one of them has focus. The 4 px
+   gap is their own padding, so the pointer never leaves the row on its way
+   to them. While hidden they take no pointer events, so the empty margin
+   beside a row doesn't light it up. */
+.list-row-actions {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 54px;
+  padding-left: var(--spacing-xs);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-fast);
+}
+
+.list-row:hover .list-row-actions,
+.list-row:focus-within .list-row-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.list-row-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--n-r-icon);
+  background-color: transparent;
+  color: var(--n-text-2);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast),
+    color var(--dur-fast);
+}
+
+/* The hovered button takes --n-fill-2. */
+.list-row-action:hover {
+  background-color: var(--n-fill-2);
+  color: var(--n-text-1);
+}
+
+.list-row-action svg {
+  width: 14px;
+  height: 14px;
+}
+
+.list-empty {
+  padding: var(--spacing-xxl) 0;
+  color: var(--n-text-3);
+  font-size: var(--font-md);
+  line-height: 18px;
+  text-align: center;
+}
+
+/* createIcons() swaps the <i> for an <svg>, so style the svg. */
+.list-empty svg {
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+
+.list-empty p {
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   The hidden attribute always hides: without this, any rule that sets
+   `display` beats the UA's [hidden] rule, which doesn't cover <svg> (a
+   Lucide icon) at all. It comes after the !important display utilities so
+   none of them can out-rank it.
+   -------------------------------------------------------------------------- */
+[hidden] {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion: hover and focus changes snap, nothing fades or slides
+   (DESIGN.md §3.9).
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .btn-icon,
+  select,
+  .form-control,
+  .search-field,
+  .chip,
+  .segmented-btn,
+  .list-row,
+  .list-row-actions,
+  .list-row-action,
+  .tooltip-text {
+    transition: none;
+  }
+
+  .fade-in,
+  .fade-in-up,
+  .toast {
+    animation: none;
+  }
 }

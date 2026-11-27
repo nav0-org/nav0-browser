@@ -54,10 +54,10 @@ export abstract class AppWindowManager {
           window.showPermissionPrompt(promptData);
         }
       },
-      (appWindowId: string) => {
+      (appWindowId: string, tabId: string) => {
         const window = AppWindowManager.getWindowById(appWindowId);
         if (window) {
-          window.hidePermissionPrompt();
+          window.hidePermissionPrompt(tabId);
         }
       },
       (webContentsId: number) => {
@@ -418,9 +418,7 @@ export abstract class AppWindowManager {
           tab = appWindow.getActiveTab();
         }
 
-        if (tab?.getWebContentsViewInstance()?.webContents.navigationHistory.canGoBack()) {
-          return tab.getWebContentsViewInstance().webContents.navigationHistory.goBack();
-        }
+        tab?.goBack();
       }
     );
 
@@ -440,9 +438,7 @@ export abstract class AppWindowManager {
           tab = appWindow.getActiveTab();
         }
 
-        if (tab?.getWebContentsViewInstance()?.webContents.navigationHistory.canGoForward()) {
-          return tab.getWebContentsViewInstance().webContents.navigationHistory.goForward();
-        }
+        tab?.goForward();
       }
     );
 
@@ -603,7 +599,7 @@ export abstract class AppWindowManager {
 
     ipcMain.on(
       RendererToMainEventsForBrowserIPC.HIDE_OPTIONS_MENU,
-      async (event, appWindowId: string) => {
+      async (event, appWindowId: string, returnFocus?: boolean) => {
         let window: AppWindow | null = null;
         if (appWindowId) {
           window = AppWindowManager.getWindowById(appWindowId);
@@ -611,7 +607,7 @@ export abstract class AppWindowManager {
           window = AppWindowManager.getActiveWindow();
         }
         if (window) {
-          return window.hideOptionsMenuOverlay();
+          return window.hideOptionsMenuOverlay(returnFocus === true);
         }
       }
     );
@@ -673,6 +669,28 @@ export abstract class AppWindowManager {
           ? AppWindowManager.getWindowById(appWindowId)
           : AppWindowManager.getActiveWindow();
         if (window) window.hideUrlAutocompleteOverlay();
+      }
+    );
+
+    ipcMain.on(
+      RendererToMainEventsForBrowserIPC.DISMISS_URL_AUTOCOMPLETE_OVERLAY,
+      (
+        event,
+        appWindowId: string,
+        press?: {
+          x: number;
+          y: number;
+          button: number;
+          shiftKey: boolean;
+          ctrlKey: boolean;
+          altKey: boolean;
+          metaKey: boolean;
+        }
+      ) => {
+        const window = appWindowId
+          ? AppWindowManager.getWindowById(appWindowId)
+          : AppWindowManager.getActiveWindow();
+        if (window) window.dismissUrlAutocompleteOverlay(event.sender, press);
       }
     );
 
@@ -1282,9 +1300,10 @@ export abstract class AppWindowManager {
 
         const view = tab.getWebContentsViewInstance();
         if (!view) return; // Tab is suspended
-        const webContents = view.webContents;
-        const isMuted = webContents.isAudioMuted();
+        const isMuted = view.webContents.isAudioMuted();
 
+        // Items read the tab's webContents when clicked: the page can close
+        // the tab (window.close()) while the menu is open.
         const template: Electron.MenuItemConstructorOptions[] = [
           {
             label: isPinned ? 'Unpin Tab' : 'Pin Tab',
@@ -1296,12 +1315,14 @@ export abstract class AppWindowManager {
           {
             label: 'Reload Tab',
             click: () => {
-              webContents.reload();
+              tab.getLiveWebContents()?.reload();
             },
           },
           {
             label: 'Hard Reload Tab',
             click: () => {
+              const webContents = tab.getLiveWebContents();
+              if (!webContents) return;
               const webSession = webContents.session;
               const currentUrl = webContents.getURL();
               try {
@@ -1323,16 +1344,16 @@ export abstract class AppWindowManager {
             },
           },
           {
-            label: 'Print...',
+            label: 'Print…',
             click: () => {
-              webContents.print();
+              tab.getLiveWebContents()?.print();
             },
           },
           { type: 'separator' },
           {
             label: isMuted ? 'Unmute Site' : 'Mute Site',
             click: () => {
-              webContents.setAudioMuted(!isMuted);
+              tab.getLiveWebContents()?.setAudioMuted(!isMuted);
             },
           },
           { type: 'separator' },
@@ -1460,6 +1481,11 @@ export abstract class AppWindowManager {
 
       if (result.canceled || result.filePaths.length === 0) return null;
       return result.filePaths[0];
+    });
+
+    // Where downloads go when no folder has been chosen (Settings shows it).
+    ipcMain.handle(RendererToMainEventsForBrowserIPC.GET_DEFAULT_DOWNLOAD_FOLDER, () => {
+      return app.getPath('downloads');
     });
   }
 }

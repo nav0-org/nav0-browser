@@ -5,12 +5,39 @@ import {
   RendererToMainEventsForDataStoreIPC,
 } from '../constants/app-constants';
 
+// A button or link clicked with the mouse gives up focus afterwards, as on
+// macOS. Chromium would leave it focused, and the next key that isn't a
+// shortcut (Shift as a screenshot starts, Esc, an arrow) would then show its
+// focus ring. Keyboard use is untouched: Tab still shows the ring, and Enter
+// or Space (a click with detail 0) leaves focus where it is. This preload
+// runs in the chrome, the overlay and every built-in page.
+function releaseFocusAfterMouseClicks(): void {
+  window.addEventListener(
+    'click',
+    (event) => {
+      if (event.detail === 0) return;
+      const target = event.target instanceof Element ? event.target : null;
+      const control = target?.closest('button, a[href], [role="button"], [role="tab"]');
+      if (!(control instanceof HTMLElement)) return;
+      // After the page's own handlers, which may move focus on purpose.
+      setTimeout(() => {
+        if (document.activeElement === control) control.blur();
+      });
+    },
+    true
+  );
+}
+
 export function init() {
+  releaseFocusAfterMouseClicks();
   const appWindowId = process.argv.find((arg) => arg.startsWith('--app-window-id='))?.split('=')[1];
   const tabId = process.argv.find((arg) => arg.startsWith('--tab-id='))?.split('=')[1];
   const isPrivate =
     process.argv.find((arg) => arg.startsWith('--is-private='))?.split('=')[1] === 'true' || false;
   const platform = process.platform;
+  // Only the browser chrome gets this flag: its macOS title bar is mirrored.
+  const isTitleBarRtl =
+    process.argv.find((arg) => arg.startsWith('--titlebar-rtl='))?.split('=')[1] === 'true';
 
   contextBridge.exposeInMainWorld('DataStoreAPI', {
     appWindowId: appWindowId,
@@ -28,6 +55,7 @@ export function init() {
     appWindowId: appWindowId,
     isPrivate,
     platform,
+    isTitleBarRtl,
     tabId: tabId,
     createTab: async (appWindowId: string, url: string, activateNewTab: boolean) => {
       return ipcRenderer.send(
@@ -79,19 +107,12 @@ export function init() {
     stopLoadingTab: async (appWindowId: string, tabId: string) => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.STOP_LOADING, appWindowId, tabId);
     },
-    addBookmark: async (
-      appWindowId: string,
-      title: string,
-      url: string,
-      faviconUrl: string,
-      type?: string
-    ) => {
+    addBookmark: async (appWindowId: string, title: string, url: string, type?: string) => {
       return ipcRenderer.invoke(
         RendererToMainEventsForBrowserIPC.ADD_BOOKMARK,
         appWindowId,
         title,
         url,
-        faviconUrl,
         type
       );
     },
@@ -206,6 +227,9 @@ export function init() {
     selectDownloadFolder: async () => {
       return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.SELECT_DOWNLOAD_FOLDER);
     },
+    getDefaultDownloadFolder: async (): Promise<string> => {
+      return ipcRenderer.invoke(RendererToMainEventsForBrowserIPC.GET_DEFAULT_DOWNLOAD_FOLDER);
+    },
     removeBrowsingHistory: async (appWindowId: string, historyId: string) => {
       return ipcRenderer.invoke(
         RendererToMainEventsForBrowserIPC.REMOVE_BROWSING_HISTORY,
@@ -246,6 +270,18 @@ export function init() {
         appWindowId
       );
     },
+    fetchBrowsingHistorySummary: async (
+      appWindowId: string,
+      since: string | null,
+      limit?: number
+    ) => {
+      return ipcRenderer.invoke(
+        RendererToMainEventsForBrowserIPC.FETCH_BROWSING_HISTORY_SUMMARY,
+        appWindowId,
+        since,
+        limit
+      );
+    },
     handleFileSelection: async (appWindowId: string, tabId: string, extensions: string[]) => {
       return ipcRenderer.invoke(
         RendererToMainEventsForBrowserIPC.HANDLE_FILE_SELECTION,
@@ -279,8 +315,12 @@ export function init() {
     showOptionsMenu: async (appWindowId: string) => {
       return ipcRenderer.send(RendererToMainEventsForBrowserIPC.SHOW_OPTIONS_MENU, appWindowId);
     },
-    hideOptionsMenu: async (appWindowId: string) => {
-      return ipcRenderer.send(RendererToMainEventsForBrowserIPC.HIDE_OPTIONS_MENU, appWindowId);
+    hideOptionsMenu: async (appWindowId: string, returnFocus = false) => {
+      return ipcRenderer.send(
+        RendererToMainEventsForBrowserIPC.HIDE_OPTIONS_MENU,
+        appWindowId,
+        returnFocus
+      );
     },
     showCommandKOverlay: async (appWindowId: string) => {
       return ipcRenderer.send(
@@ -312,6 +352,24 @@ export function init() {
       ipcRenderer.send(
         RendererToMainEventsForBrowserIPC.HIDE_URL_AUTOCOMPLETE_OVERLAY,
         appWindowId
+      );
+    },
+    dismissUrlAutocompleteOverlay: (
+      appWindowId: string,
+      press: {
+        x: number;
+        y: number;
+        button: number;
+        shiftKey: boolean;
+        ctrlKey: boolean;
+        altKey: boolean;
+        metaKey: boolean;
+      }
+    ) => {
+      ipcRenderer.send(
+        RendererToMainEventsForBrowserIPC.DISMISS_URL_AUTOCOMPLETE_OVERLAY,
+        appWindowId,
+        press
       );
     },
     sendUrlAutocompleteResultClicked: (appWindowId: string, data: any) => {
@@ -516,7 +574,13 @@ export function init() {
 
     // Event listeners
     onNewTabCreated: (
-      callback: (tab: { id: string; url: string; title: string; index?: number }) => void
+      callback: (tab: {
+        id: string;
+        url: string;
+        title: string;
+        index?: number;
+        faviconUrl?: string | null;
+      }) => void
     ) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.NEW_TAB_CREATED, (_event, tab) =>
         callback(tab)
@@ -537,7 +601,7 @@ export function init() {
         callback(data)
       );
     },
-    onTabFaviconUpdated: (callback: (data: { id: string; faviconUrl: string }) => void) => {
+    onTabFaviconUpdated: (callback: (data: { id: string; faviconUrl: string | null }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.TAB_FAVICON_UPDATED, (_event, data) =>
         callback(data)
       );
@@ -557,7 +621,24 @@ export function init() {
         callback(data)
       );
     },
-    onNavigationFailed: (callback: (data: { id: string }) => void) => {
+    onTabBackForwardUpdated: (
+      callback: (data: { id: string; canGoBack: boolean; canGoForward: boolean }) => void
+    ) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.TAB_BACK_FORWARD_UPDATED, (_event, data) =>
+        callback(data)
+      );
+    },
+    onNavigationFailed: (
+      callback: (data: {
+        id: string;
+        url: string;
+        isBookmark: boolean;
+        bookmarkId: string | null;
+        bookmarkType: 'reference' | 'queue' | null;
+        canGoBack: boolean;
+        canGoForward: boolean;
+      }) => void
+    ) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.NAVIGATION_FAILED, (_event, data) =>
         callback(data)
       );
@@ -678,6 +759,13 @@ export function init() {
     },
     onFullScreenChanged: (callback: (data: { isFullScreen: boolean }) => void) => {
       ipcRenderer.on(MainToRendererEventsForBrowserIPC.FULLSCREEN_CHANGED, (_event, data) =>
+        callback(data)
+      );
+    },
+    onOverlayVisibilityChanged: (
+      callback: (data: { type: string; visible: boolean; returnFocus?: boolean }) => void
+    ) => {
+      ipcRenderer.on(MainToRendererEventsForBrowserIPC.OVERLAY_VISIBILITY_CHANGED, (_event, data) =>
         callback(data)
       );
     },

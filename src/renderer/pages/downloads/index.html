@@ -4,41 +4,33 @@
     <meta charset="UTF-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:;"
+      content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
     />
     <title>Downloads</title>
   </head>
   <body>
-    <div id="downloads-page" class="downloads-page">
-      <div class="downloads-wrapper">
-        <!-- Editorial masthead -->
-        <div class="downloads-head">
-          <h1 class="downloads-title">Downloads</h1>
-        </div>
+    <div id="downloads-page" class="list-page downloads-page">
+      <div class="list-column">
+        <h1 class="list-title">Downloads</h1>
 
-        <!-- Toolbar: search + danger Clear -->
-        <div class="downloads-toolbar">
-          <div class="search-container">
-            <i data-lucide="search" class="search-icon" width="16" height="16"></i>
-            <input
-              type="text"
-              id="search-input"
-              class="search-input"
-              placeholder="Search downloads…"
-            />
-          </div>
-          <button id="delete-all" class="btn-clear-all" style="display: none">
+        <!-- Toolbar: filled search + secondary Clear -->
+        <div class="list-toolbar">
+          <label class="search-field">
+            <i data-lucide="search" width="16" height="16"></i>
+            <input type="text" id="search-input" placeholder="Search downloads…" />
+          </label>
+          <button id="delete-all" class="btn btn-secondary" hidden>
             <i data-lucide="trash-2" width="14" height="14"></i> Clear All Downloads
           </button>
         </div>
 
-        <!-- Type filter pills — dedicated row so Clear stays next to the search bar -->
-        <div class="downloads-filter-row">
-          <span class="downloads-filter-label">Categories</span>
-          <div id="type-filters" class="type-filters"></div>
+        <!-- Type filter chips — dedicated row so Clear stays next to the search bar -->
+        <div class="chip-row">
+          <span class="chip-row-label">Categories</span>
+          <div id="type-filters" class="chip-row-chips"></div>
         </div>
 
-        <!-- Storage panel (bordered card) -->
+        <!-- Storage panel (grey) -->
         <div id="storage-gauge" class="panel storage-panel">
           <div class="panel-head">
             <div class="panel-title">Storage</div>
@@ -50,8 +42,8 @@
 
         <!-- Downloads list (day-grouped, populated by TS) -->
         <div class="downloads-container">
-          <div id="downloads-list" class="downloads-list"></div>
-          <div id="no-downloads" class="no-downloads">No downloads match your search.</div>
+          <div id="downloads-list" class="list-grid downloads-list"></div>
+          <div id="no-downloads" class="list-empty" hidden>No downloads match your search.</div>
         </div>
 
         <!-- Footer placeholder (Clear moved to toolbar) -->

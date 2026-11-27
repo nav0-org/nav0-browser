@@ -1,26 +1,60 @@
-/* Options Menu overlay panel — Nav0 redesign:
-   tightened 4-px container, 32-px rows, 2-px keycaps,
-   submenu cascades to the left with a 4-px gap. */
+/* Options Menu overlay panel styles (DESIGN.md §4.4) */
+
+@import url('../../../styles/global.css');
 
 #overlay-options-menu {
   background-color: transparent !important;
 }
 
+/* Rows toggled from TS use the hidden attribute; the row rules below set
+   display, so restate it. */
+#overlay-options-menu [hidden] {
+  display: none !important;
+}
+
+/* Hangs 4 px under the ⋮ button with the right edges aligned (DESIGN.md
+   §4.4). The button's bottom edge is 77.5 px down: the 40 px strip, then the
+   32 px button centred in the 43 px of toolbar above its bottom line. */
 .options-dropdown {
   position: absolute;
-  top: 80px;
-  right: 0;
-  width: 320px;
-  padding: 6px 0;
-  margin-top: var(--spacing-xs);
-  margin-right: 10px;
-  background-color: var(--chrome-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-md);
-  box-shadow: var(--shadow-lg);
+  top: calc(77.5px + var(--spacing-xs));
+  right: var(--spacing-sm);
+  width: 290px;
+  max-width: calc(100% - 2 * var(--spacing-sm));
+  padding: 6px;
+  border-radius: var(--n-r-panel);
+  box-shadow: var(--n-menu-shadow);
   text-align: left;
-  z-index: 9999;
+  z-index: var(--z-dropdown);
   display: block;
+  animation: options-menu-reveal 180ms ease-out;
+}
+
+/* Slide in each time the panel is shown (DESIGN.md §3.9). No fade: below
+   opacity 1 the menu would be the backdrop root of its ::before material, and
+   the blur would vanish until the slide ended. The submenus open on hover, so
+   they appear without it. */
+@keyframes options-menu-reveal {
+  from {
+    transform: translateY(-8px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* The material sits on a layer behind the rows, not on the menu itself: a
+   backdrop-filter makes an element the backdrop root of its descendants, so
+   the submenus (children of their rows) would show the page through unblurred. */
+.options-dropdown::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--n-menu-bg);
+  backdrop-filter: var(--n-menu-blur);
+  -webkit-backdrop-filter: var(--n-menu-blur);
 }
 
 .options-dropdown.show {
@@ -31,63 +65,45 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 32px;
-  padding: 0 12px;
-  border-radius: 0;
-  border-top: 1px solid transparent;
-  border-bottom: 1px solid transparent;
-  color: var(--fg-1);
+  height: 30px;
+  padding: 0 10px;
+  border-radius: var(--n-r-control);
+  color: var(--n-text-1);
+  font-size: 13px;
   cursor: pointer;
   position: relative;
-  transition:
-    background-color var(--transition-fast),
-    border-color var(--transition-fast);
+  transition: background-color var(--transition-fast);
   user-select: none;
 }
 
-/* Hover/active uses the same row highlight as the URL autocomplete +
-   Command-K results — bg-3 spans the full menu width, with hairline
-   top/bottom rules and a 2-px red anchor bar flush at the left edge. */
-#overlay-options-menu .dropdown-item:hover,
-#overlay-options-menu .has-submenu:hover > .dropdown-item,
-#overlay-options-menu .has-submenu.submenu-active > .dropdown-item {
-  background-color: var(--bg-3);
-  border-top-color: var(--border-1);
-  border-bottom-color: var(--border-1);
+/* Selection style on the selected row (options-menu.ts moves it with the
+   pointer and the arrow keys, so only one row is ever selected) and on the
+   open submenu's row, which stays selected while its submenu holds the
+   pointer or the selection. */
+#overlay-options-menu .dropdown-item.is-selected,
+#overlay-options-menu .has-submenu.submenu-active {
+  background-color: var(--n-accent-soft);
+  color: var(--n-text-1);
 }
 
-#overlay-options-menu .dropdown-item:hover::before,
-#overlay-options-menu .has-submenu:hover > .dropdown-item::before,
-#overlay-options-menu .has-submenu.submenu-active > .dropdown-item::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: -1px;
-  bottom: -1px;
-  width: 2px;
-  background: var(--nav0-red-600);
-}
-
-#overlay-options-menu .dropdown-item > i {
+/* Leading icon. Lucide swaps each <i data-lucide> for an <svg data-lucide>,
+   so these rules target the attribute, not the tag. */
+#overlay-options-menu .dropdown-item > [data-lucide]:not(.submenu-indicator) {
   flex-shrink: 0;
   width: 16px;
   height: 16px;
-  color: var(--fg-3);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  color: var(--n-text-2);
 }
 
-#overlay-options-menu .dropdown-item:hover > i,
-#overlay-options-menu .has-submenu:hover > i,
-#overlay-options-menu .has-submenu.submenu-active > i {
-  color: var(--fg-1);
+#overlay-options-menu .dropdown-item.is-selected > [data-lucide]:not(.submenu-indicator),
+#overlay-options-menu .has-submenu.submenu-active > [data-lucide]:not(.submenu-indicator) {
+  color: var(--n-accent);
 }
 
 #overlay-options-menu .divider {
   height: 1px;
-  margin: 4px 0;
-  background-color: var(--border-1);
+  margin: 5px 8px;
+  background-color: var(--n-menu-line);
 }
 
 .dropdown-item-text {
@@ -99,26 +115,32 @@
   text-overflow: ellipsis;
 }
 
-.submenu-indicator {
+/* Trailing submenu chevron: stays muted even on selection. */
+#overlay-options-menu .submenu-indicator {
   flex-shrink: 0;
-  color: var(--fg-4);
+  width: 14px;
+  height: 14px;
+  color: var(--n-text-3);
 }
 
-/* Submenu — same chrome as main, cascades to the LEFT */
+/* Submenu: same material as the main menu, cascading to the left. top: -6px
+   cancels its padding so its first row lines up with the parent row; 10 px is
+   the row's 6 px inset plus a 4 px gap from the main menu. */
 .has-submenu {
   position: relative;
 }
 
 .submenu {
   position: absolute;
-  top: 0;
-  right: calc(100% + 4px);
+  top: -6px;
+  right: calc(100% + 10px);
   width: 240px;
-  padding: 6px 0;
-  background-color: var(--chrome-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-md);
-  box-shadow: var(--shadow-lg);
+  padding: 6px;
+  background: var(--n-menu-bg);
+  backdrop-filter: var(--n-menu-blur);
+  -webkit-backdrop-filter: var(--n-menu-blur);
+  border-radius: var(--n-r-panel);
+  box-shadow: var(--n-menu-shadow);
   z-index: var(--z-dropdown);
   display: none;
 }
@@ -128,60 +150,46 @@
   display: block;
 }
 
-/* Keyboard shortcut cluster — sharp 2-px keycaps */
+/* Invisible bridge over that 10 px gap, so the pointer can travel from the
+   row into its submenu without the submenu closing on the way. */
+#overlay-options-menu .has-submenu:hover::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 100%;
+  width: 10px;
+  height: 100%;
+}
+
+/* Shortcuts are muted text, not keycaps (DESIGN.md §4.4). */
 #overlay-options-menu .keyboard-shortcut {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   gap: 3px;
   margin-left: auto;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--n-text-3);
 }
 
-#overlay-options-menu .keyboard-shortcut .keycap {
-  min-width: 18px;
-  height: 18px;
-  margin: 0;
-  padding: 0 6px;
-  font-size: 10.5px;
-  font-weight: 500;
-  line-height: 1;
-  color: var(--fg-3);
-  background-color: var(--bg-0);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-xs);
-  box-shadow: inset 0 -1px 0 var(--border-1);
-}
-
-#overlay-options-menu .dropdown-item:hover .keycap {
-  color: var(--fg-2);
-}
-
-/* Zoom control row — label on the left, stepper cluster on the right.
-   The row itself isn't clickable (the buttons are), so it keeps the default
-   cursor and doesn't show the red anchor bar on hover. */
+/* Zoom row: the row itself isn't clickable (the buttons are), so it keeps
+   the default cursor and is never selected. */
 #overlay-options-menu .zoom-row {
+  height: 32px;
+  padding-right: 6px;
   cursor: default;
 }
 
-#overlay-options-menu .zoom-row:hover {
-  background-color: transparent;
-  border-top-color: transparent;
-  border-bottom-color: transparent;
-}
-
-#overlay-options-menu .zoom-row:hover::before {
-  display: none;
-}
-
-#overlay-options-menu .zoom-row:hover > i {
-  color: var(--fg-3);
-}
-
+/* Stepper: −, level, +, reset on one filled track. */
 .zoom-controls {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: 2px;
+  padding: 2px;
   margin-left: auto;
+  border-radius: var(--n-r-icon);
+  background-color: var(--n-fill);
 }
 
 #overlay-options-menu .zoom-btn {
@@ -189,52 +197,53 @@
   align-items: center;
   justify-content: center;
   width: 24px;
-  height: 24px;
+  height: 22px;
   padding: 0;
-  color: var(--fg-2);
-  background-color: var(--bg-0);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-sm);
+  color: var(--n-text-2);
+  background-color: transparent;
+  border: none;
+  border-radius: var(--n-r-icon);
   cursor: pointer;
   transition:
     background-color var(--transition-fast),
-    color var(--transition-fast),
-    border-color var(--transition-fast);
+    color var(--transition-fast);
 }
 
 #overlay-options-menu .zoom-btn:hover {
-  color: var(--fg-1);
-  background-color: var(--bg-3);
-  border-color: var(--border-2);
+  color: var(--n-text-1);
+  background-color: var(--n-accent-soft);
 }
 
-#overlay-options-menu .zoom-btn > i {
+#overlay-options-menu .zoom-btn > [data-lucide] {
+  flex-shrink: 0;
   width: 14px;
   height: 14px;
 }
 
 .zoom-level {
-  min-width: 44px;
+  min-width: 40px;
   text-align: center;
   font-size: 12px;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
-  color: var(--fg-2);
+  color: var(--n-text-1);
   user-select: none;
 }
 
 /* History submenu — wider, scrollable */
 .history-submenu {
-  width: 300px;
+  width: 280px;
   max-height: 400px;
   overflow-y: auto;
 }
 
+/* Submenu group label (e.g. "Recently Closed") */
 .submenu-section-label {
-  padding: 4px 10px;
+  padding: 6px 10px 2px;
   font-size: 11px;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  color: var(--fg-4);
+  font-weight: 600;
+  line-height: normal;
+  color: var(--n-text-3);
   user-select: none;
 }
 
@@ -242,55 +251,39 @@
   padding: 4px 10px;
   font-size: 12px;
   font-style: italic;
-  color: var(--fg-4);
+  color: var(--n-text-3);
 }
 
 .closed-tab-item,
 .closed-window-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: 32px;
-  padding: 0 12px;
-  border-radius: 0;
-  border-top: 1px solid transparent;
-  border-bottom: 1px solid transparent;
+  gap: 10px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: var(--n-r-control);
   cursor: pointer;
   position: relative;
-  transition:
-    background-color var(--transition-fast),
-    border-color var(--transition-fast);
+  transition: background-color var(--transition-fast);
 }
 
-.closed-tab-item:hover,
-.closed-window-item:hover {
-  background-color: var(--bg-3);
-  border-top-color: var(--border-1);
-  border-bottom-color: var(--border-1);
-}
-
-.closed-tab-item:hover::before,
-.closed-window-item:hover::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: -1px;
-  bottom: -1px;
-  width: 2px;
-  background: var(--nav0-red-600);
+.closed-tab-item.is-selected,
+.closed-window-item.is-selected {
+  background-color: var(--n-accent-soft);
 }
 
 .closed-tab-favicon {
   flex-shrink: 0;
   width: 16px;
   height: 16px;
-  border-radius: var(--r-xs);
+  border-radius: var(--n-r-key);
 }
 
 .closed-tab-title,
 .closed-window-title {
   flex: 1;
   font-size: 13px;
+  color: var(--n-text-1);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -299,5 +292,18 @@
 .closed-window-tab-count {
   flex-shrink: 0;
   font-size: 11px;
-  color: var(--fg-4);
+  color: var(--n-text-3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .options-dropdown {
+    animation: none;
+  }
+
+  #overlay-options-menu .dropdown-item,
+  #overlay-options-menu .zoom-btn,
+  .closed-tab-item,
+  .closed-window-item {
+    transition: none;
+  }
 }

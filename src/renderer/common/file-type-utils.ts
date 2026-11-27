@@ -1,19 +1,43 @@
 // File type display utilities — shared across renderer pages.
 
-/** Color palette for file display types. */
-export const TYPE_COLORS: Record<string, string> = {
-  document: '#6366f1', // Indigo
-  spreadsheet: '#22c55e', // Green
-  presentation: '#3b82f6', // Blue
-  ebook: '#f97316', // Orange
-  image: '#06b6d4', // Cyan
-  video: '#ef4444', // Red
-  installer: '#f59e0b', // Amber
-  archive: '#8b5cf6', // Purple
-  audio: '#ec4899', // Pink
-  code: '#10b981', // Emerald
-  font: '#64748b', // Slate
-  other: '#a1a1aa', // Gray
+/**
+ * Folds the fine-grained display types into the six storage buckets of the
+ * Downloads storage bar and legend. Each bucket is drawn in its --n-storage-*
+ * hue (DESIGN.md §3.4) through a `.storage-hue-<bucket>` class.
+ */
+export const STORAGE_BUCKET_MAP: Record<string, string> = {
+  image: 'images',
+  video: 'media',
+  audio: 'media',
+  archive: 'archives',
+  installer: 'apps',
+  document: 'documents',
+  spreadsheet: 'documents',
+  presentation: 'documents',
+  ebook: 'documents',
+  code: 'other',
+  font: 'other',
+  other: 'other',
+};
+
+/** Fold a display type into its storage bucket (for the storage bar/legend). */
+export const getStorageBucket = (displayType: string): string => {
+  return STORAGE_BUCKET_MAP[displayType] || 'other';
+};
+
+/** The name the storage legend shows for each bucket. */
+export const STORAGE_BUCKET_LABELS: Record<string, string> = {
+  images: 'Image',
+  media: 'Video & audio',
+  archives: 'Archive',
+  apps: 'Installer',
+  documents: 'Document',
+  other: 'Other',
+};
+
+/** The legend name of a storage bucket. */
+export const getStorageBucketLabel = (bucket: string): string => {
+  return STORAGE_BUCKET_LABELS[bucket] || STORAGE_BUCKET_LABELS.other;
 };
 
 /** Maps file extensions to a human-friendly display type. */
@@ -373,19 +397,6 @@ export const getDisplayTypeFromExtension = (fileExtension: string): string => {
   return EXTENSION_TYPE_MAP[ext] || 'other';
 };
 
-/** Get the type color for a display type. */
-export const getTypeColor = (displayType: string): string => {
-  return TYPE_COLORS[displayType] || TYPE_COLORS.other;
-};
-
-/** Convert hex color to rgba string. */
-export const hexToRgba = (hex: string, alpha: number): string => {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-};
-
 /** Maps file extensions to Lucide icon names. */
 const FILE_ICON_MAP: Record<string, string> = {
   // Documents - Text
@@ -556,7 +567,6 @@ const FILE_ICON_MAP: Record<string, string> = {
   bz2: 'file-archive',
   xz: 'file-archive',
   zst: 'file-archive',
-  iso: 'file-archive',
   lz: 'file-archive',
   lzma: 'file-archive',
   lz4: 'file-archive',
@@ -573,7 +583,9 @@ const FILE_ICON_MAP: Record<string, string> = {
   ear: 'file-archive',
   cpio: 'file-archive',
 
-  // Disk images
+  // Disk images. An .iso is an installer (its display type), so it takes
+  // the installer's package icon, never the archive one.
+  iso: 'package',
   img: 'disc',
   dmg: 'disc',
   vhd: 'disc',

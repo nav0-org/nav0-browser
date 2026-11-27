@@ -29,12 +29,12 @@ const ALERT_HTML = `
       <div class="alert-body">
         <div class="alert-message" id="alert-message"></div>
         <div class="alert-input-wrap" id="alert-input-wrap" hidden>
-          <input type="text" class="alert-input" id="alert-input" />
+          <input type="text" class="form-control" id="alert-input" />
         </div>
       </div>
       <div class="alert-actions">
-        <button class="alert-btn alert-btn-secondary" id="alert-cancel">Cancel</button>
-        <button class="alert-btn alert-btn-primary" id="alert-ok">OK</button>
+        <button class="btn btn-sm btn-secondary" id="alert-cancel">Cancel</button>
+        <button class="btn btn-sm btn-primary" id="alert-ok">OK</button>
       </div>
     </div>
   </div>
@@ -120,11 +120,7 @@ export function show(data?: AlertPanelData): void {
     inputEl.value = '';
   }
 
-  if (data.kind === 'alert') {
-    cancelBtnEl.style.display = 'none';
-  } else {
-    cancelBtnEl.style.display = '';
-  }
+  cancelBtnEl.hidden = data.kind === 'alert';
 
   setTimeout(() => {
     if (data.kind === 'prompt') {

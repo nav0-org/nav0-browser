@@ -64,19 +64,28 @@ export class FindInPageManager {
     }
   }
 
+  // The tab's webContents, unless it has been destroyed (its page closed, or
+  // swapped for a new view): calling into a destroyed one throws.
+  private get liveTabWebContents(): Electron.WebContents | null {
+    const webContents = this.currentTabWebContents;
+    return webContents && !webContents.isDestroyed() ? webContents : null;
+  }
+
   find(text: string, options?: { matchCase?: boolean; forward?: boolean }): void {
-    if (!this.currentTabWebContents || !text) return;
+    const webContents = this.liveTabWebContents;
+    if (!webContents || !text) return;
     this.lastSearchText = text;
-    this.currentTabWebContents.findInPage(text, {
+    webContents.findInPage(text, {
       forward: options?.forward !== false,
       matchCase: options?.matchCase || false,
     });
   }
 
   findNext(text: string, options?: { matchCase?: boolean }): void {
-    if (!this.currentTabWebContents || !text) return;
+    const webContents = this.liveTabWebContents;
+    if (!webContents || !text) return;
     this.lastSearchText = text;
-    this.currentTabWebContents.findInPage(text, {
+    webContents.findInPage(text, {
       forward: true,
       findNext: true,
       matchCase: options?.matchCase || false,
@@ -84,9 +93,10 @@ export class FindInPageManager {
   }
 
   findPrevious(text: string, options?: { matchCase?: boolean }): void {
-    if (!this.currentTabWebContents || !text) return;
+    const webContents = this.liveTabWebContents;
+    if (!webContents || !text) return;
     this.lastSearchText = text;
-    this.currentTabWebContents.findInPage(text, {
+    webContents.findInPage(text, {
       forward: false,
       findNext: true,
       matchCase: options?.matchCase || false,
@@ -94,9 +104,7 @@ export class FindInPageManager {
   }
 
   clearHighlights(): void {
-    if (this.currentTabWebContents) {
-      this.currentTabWebContents.stopFindInPage('clearSelection');
-    }
+    this.liveTabWebContents?.stopFindInPage('clearSelection');
     this.lastSearchText = '';
   }
 

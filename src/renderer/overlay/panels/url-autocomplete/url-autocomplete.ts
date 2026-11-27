@@ -1,5 +1,7 @@
 import './url-autocomplete.css';
 import { createIcons, icons } from 'lucide';
+import { UrlDisplay } from '../../../common/url-display';
+import { FaviconTile } from '../../../common/favicon-tile';
 
 type Suggestion = {
   type: 'tab' | 'bookmark' | 'history' | 'search';
@@ -19,15 +21,9 @@ let initialized = false;
 const escapeHtml = (str: string): string => {
   const div = document.createElement('div');
   div.textContent = str;
-  return div.innerHTML;
-};
-
-const getFaviconLetter = (url: string): string => {
-  try {
-    return new URL(url).hostname.replace('www.', '').charAt(0).toUpperCase() || '?';
-  } catch {
-    return (url || '').charAt(0).toUpperCase() || '?';
-  }
+  // innerHTML leaves quotes alone: escape them so the result is also safe
+  // inside a quoted attribute (title="…", src="…").
+  return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 };
 
 const buildItem = (item: Suggestion, index: number): HTMLElement => {
@@ -35,23 +31,21 @@ const buildItem = (item: Suggestion, index: number): HTMLElement => {
   el.className = `url-ac-item${index === activeIndex ? ' active' : ''}`;
   el.dataset.index = String(index);
 
-  let iconHtml = '';
-  if (item.type === 'search') {
-    iconHtml = `<div class="url-ac-icon"><i data-lucide="search" width="16" height="16"></i></div>`;
-  } else if (item.faviconUrl) {
-    iconHtml = `<div class="url-ac-favicon"><img src="${escapeHtml(item.faviconUrl)}" onerror="this.parentElement.textContent='${getFaviconLetter(item.url)}'"></div>`;
-  } else if (item.type === 'tab') {
-    iconHtml = `<div class="url-ac-icon"><i data-lucide="app-window" width="16" height="16"></i></div>`;
-  } else {
-    iconHtml = `<div class="url-ac-favicon">${getFaviconLetter(item.url)}</div>`;
-  }
+  // A site's row gets its icon, or the favicon fallback tile, below.
+  const iconHtml =
+    item.type === 'search'
+      ? `<div class="url-ac-icon"><i data-lucide="search" width="16" height="16"></i></div>`
+      : `<div class="url-ac-favicon"></div>`;
 
+  // Built-in pages show as nav0://… (display only; the stored URL is unchanged). A search
+  // row's title is the user's own text, so it is left as typed.
+  const title = item.type === 'search' ? item.title : UrlDisplay.format(item.title || '');
   const metaHtml = item.meta
     ? `<div class="url-ac-meta"><span>${escapeHtml(item.meta)}</span></div>`
     : '';
   const urlHtml =
     item.type !== 'search' && item.url
-      ? `<div class="url-ac-url">${escapeHtml(item.url)}</div>`
+      ? `<div class="url-ac-url">${escapeHtml(UrlDisplay.format(item.url))}</div>`
       : '';
   const sublineHtml =
     metaHtml || urlHtml ? `<div class="url-ac-subline">${metaHtml}${urlHtml}</div>` : '';
@@ -59,10 +53,12 @@ const buildItem = (item: Suggestion, index: number): HTMLElement => {
   el.innerHTML = `
     ${iconHtml}
     <div class="url-ac-content">
-      <div class="url-ac-title">${escapeHtml(item.title)}</div>
+      <div class="url-ac-title">${escapeHtml(title)}</div>
       ${sublineHtml}
     </div>
   `;
+
+  el.querySelector('.url-ac-favicon')?.appendChild(FaviconTile.icon(item.faviconUrl, item.url));
 
   el.addEventListener('mousedown', (e) => {
     e.preventDefault();
@@ -107,6 +103,23 @@ export function init(container: HTMLElement): void {
     </div>
   `;
   resultsContainer = container.querySelector('#url-ac-results') as HTMLElement;
+
+  // The overlay view reaches past the panel to show its shadow (the shell's
+  // padding), over the page. A press there is a press outside the dropdown:
+  // the main process closes it and passes the press on to what lies beneath.
+  container.addEventListener('mousedown', (e) => {
+    if (e.target instanceof Element && e.target.closest('.url-autocomplete-panel')) return;
+    e.preventDefault();
+    window.BrowserAPI.dismissUrlAutocompleteOverlay(window.BrowserAPI.appWindowId, {
+      x: e.clientX,
+      y: e.clientY,
+      button: e.button,
+      shiftKey: e.shiftKey,
+      ctrlKey: e.ctrlKey,
+      altKey: e.altKey,
+      metaKey: e.metaKey,
+    });
+  });
 
   window.BrowserAPI.onUrlAutocompleteUpdate(
     (data: { results?: Suggestion[]; activeIndex: number }) => {

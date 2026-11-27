@@ -16,26 +16,37 @@
  * (and the ad-blocker's cosmetic CSS) can't touch it and it never intercepts
  * clicks on the content beneath it. Long URLs are truncated at 120 chars.
  *
- * Colours mirror the design tokens (--chrome-2 surface, --border-1 hairline,
- * --fg-2 text, --r-md corner, --shadow-sm) since a page-injected element can't
- * reference global.css. `prefers-reduced-motion` is honoured.
+ * A built-in page's script is given the list of built-in pages: there a link to
+ * one shows its nav0:// URL (with the link's query and fragment) and any other
+ * link into the app's own pages shows nothing, so the bar never shows the
+ * dev-server or file:// address a built-in page loads from.
+ *
+ * A page-injected element can't reference global.css, so the bar repeats the
+ * tokens' values as literals (DESIGN.md, "Link status bar"): 12 / 16 text in
+ * --n-text-2 (#424245) on --n-toolbar (#f6f6f7), a --n-chrome-line (#d1d1d6)
+ * edge, #8e8e93 under prefers-contrast: more, an --n-r-control (4px) corner,
+ * --spacing-xs / --spacing-sm padding and a --dur-fast (120ms) fade. Keep them
+ * in step with global.css. `prefers-reduced-motion` is honoured.
  */
-export const HOVER_STATUS_BAR_SCRIPT = `
+export function hoverStatusBarScript(builtInPages: BuiltInPage[] = []): string {
+  return `
 (function () {
   if (window.__nav0HoverBarInstalled) return;
   window.__nav0HoverBarInstalled = true;
 
   var MAX = 120;
   var HOST_ID = '__nav0-hover-status-bar';
+  var BUILT_IN = ${JSON.stringify(builtInPages)};
   var CSS =
     ":host{all:initial}" +
     ".bar{display:inline-block;box-sizing:border-box;max-width:60vw;" +
-    "padding:3px 8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;" +
-    "font-size:12px;line-height:1.4;color:#333333;background:#fbfaf8;" +
-    "border-top:1px solid #dcd9d4;border-right:1px solid #dcd9d4;border-top-right-radius:4px;" +
-    "box-shadow:0 1px 2px rgba(0,0,0,.06);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" +
-    "opacity:0;transform:translateY(2px);transition:opacity 90ms ease,transform 90ms ease}" +
+    "padding:4px 8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;" +
+    "font-size:12px;line-height:16px;font-weight:400;color:#424245;background:#f6f6f7;" +
+    "border-top:1px solid #d1d1d6;border-right:1px solid #d1d1d6;border-top-right-radius:4px;" +
+    "white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" +
+    "opacity:0;transform:translateY(2px);transition:opacity 120ms ease,transform 120ms ease}" +
     ".bar.visible{opacity:1;transform:translateY(0)}" +
+    "@media (prefers-contrast:more){.bar{border-color:#8e8e93}}" +
     "@media (prefers-reduced-motion:reduce){.bar{transition:none;transform:none}.bar.visible{transform:none}}";
 
   var host = null, label = null, current = '';
@@ -87,13 +98,39 @@ export const HOVER_STATUS_BAR_SCRIPT = `
     label.classList.add('visible');
   }
 
+  // Each built-in page's address without query or fragment, parsed here so it
+  // matches a link's href exactly, the folder the app's pages load from, and
+  // its nav0:// URL.
+  var pages = [];
+  BUILT_IN.forEach(function (page) {
+    try {
+      var u = new URL(page.entry);
+      u.search = '';
+      u.hash = '';
+      pages.push({ address: u.href, root: new URL('..', u).href, url: page.url });
+    } catch (e) {}
+  });
+
+  // What the bar shows for a link: a built-in page's nav0:// URL for a link to
+  // it, nothing for any other link into the app, else the link itself.
+  function shown(href) {
+    var cut = href.search(/[?#]/);
+    var address = cut < 0 ? href : href.slice(0, cut);
+    var inApp = false;
+    for (var i = 0; i < pages.length; i++) {
+      if (pages[i].address === address) return pages[i].url + href.slice(address.length);
+      if (href.indexOf(pages[i].root) === 0) inApp = true;
+    }
+    return inApp ? '' : href;
+  }
+
   function linkFor(t) {
     if (!t || !t.closest) return '';
     var a = t.closest('a[href], area[href]');
     if (!a) return '';
     var href = a.href;
     if (!href || href.toLowerCase().indexOf('javascript:') === 0) return '';
-    return href;
+    return shown(href);
   }
 
   document.addEventListener('mouseover', function (e) { render(linkFor(e.target)); }, true);
@@ -103,3 +140,13 @@ export const HOVER_STATUS_BAR_SCRIPT = `
   document.addEventListener('focusout', function () { render(''); }, true);
 })();
 `;
+}
+
+/**
+ * A built-in page for the status bar: the address its view loads (a webpack
+ * dev-server URL, or a file:// path once packaged) and its nav0:// URL.
+ */
+export interface BuiltInPage {
+  entry: string;
+  url: string;
+}

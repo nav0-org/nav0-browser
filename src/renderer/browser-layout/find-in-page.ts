@@ -221,7 +221,7 @@ function resetFindBar(): void {
 }
 
 export function showFindBar(data?: { searchText?: string }): void {
-  findBarContainer.style.display = 'block';
+  findBarContainer.hidden = false;
   if (data?.searchText) {
     findInput.value = data.searchText;
     triggerSearch();
@@ -235,7 +235,7 @@ export function showFindBar(data?: { searchText?: string }): void {
 }
 
 export function hideFindBar(): void {
-  findBarContainer.style.display = 'none';
+  findBarContainer.hidden = true;
   resetFindBar();
   // Trigger resize so updateBrowserViewBounds recalculates tab position
   window.dispatchEvent(new Event('resize'));

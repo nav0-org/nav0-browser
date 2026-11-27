@@ -4,6 +4,8 @@ import { BookmarksSchema } from './schema/bookmark-schema';
 import { BrowsingHistorySchema } from './schema/browsing-history-schema';
 import { DownloadsSchema } from './schema/download-schema';
 import { PermissionSchema } from './schema/permission-schema';
+import { FaviconSchema } from './schema/favicon-schema';
+import { MIGRATIONS } from './migrations';
 
 // Define types for our schema
 export type ColumnType = 'TEXT' | 'INTEGER' | 'REAL' | 'BLOB' | 'NULL';
@@ -105,8 +107,23 @@ export class SchemaManager {
     this.schemas.forEach((schema, tableName) => {
       results[tableName] = this.ensureTableSchema(schema);
     });
+    this.runMigrations();
 
     return results;
+  };
+
+  /**
+   * Run the data migrations the database hasn't had yet, each in one
+   * transaction with the user_version that records it
+   */
+  private runMigrations = (): void => {
+    const applied = this.db.pragma('user_version', { simple: true }) as number;
+    MIGRATIONS.slice(applied).forEach((migrate, i) => {
+      this.db.transaction(() => {
+        migrate(this.db);
+        this.db.pragma(`user_version = ${applied + i + 1}`);
+      })();
+    });
   };
 
   /**
@@ -422,5 +439,6 @@ export class SchemaManager {
     this.registerSchema(BrowsingHistorySchema);
     this.registerSchema(DownloadsSchema);
     this.registerSchema(PermissionSchema);
+    this.registerSchema(FaviconSchema);
   };
 }

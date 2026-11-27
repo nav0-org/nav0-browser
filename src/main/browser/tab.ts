@@ -1,6 +1,17 @@
-import { app, BrowserWindow, dialog, Menu, MenuItem, net, shell, WebContentsView } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  clipboard,
+  dialog,
+  Menu,
+  MenuItem,
+  session,
+  shell,
+  WebContentsView,
+} from 'electron';
 import {
   InAppUrls,
+  ImageBase64Strings,
   DataStoreConstants,
   MainToRendererEventsForBrowserIPC,
   RendererToMainEventsForBrowserIPC,
@@ -9,6 +20,7 @@ import {
 } from '../../constants/app-constants';
 import { v4 as uuid } from 'uuid';
 import { AppWindow } from './app-window';
+import { AppWindowManager } from './app-window-manager';
 import { BookmarkManager } from './bookmark-manager';
 import { BookmarkRecord } from '../../types/bookmark-record';
 import { BrowsingHistoryManager } from './browsing-history-manager';
@@ -18,8 +30,10 @@ import path from 'path';
 import { Utils } from '../browser/utils';
 import { SearchEngine } from '../web/search-engine';
 import { PermissionManager } from './permission-manager';
+import { NotificationManager } from './notification-manager';
 import { ReaderModeManager, ReaderModeState } from './reader-mode-manager';
 import { DataStoreManager } from '../database/data-store-manager';
+import { DatabaseManager } from '../database/database-manager';
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from '../../types/settings-types';
 import {
   COSMETIC_FILTER_CSS,
@@ -29,7 +43,9 @@ import {
 import { SSLManager } from './ssl-manager';
 import { ZoomManager } from './zoom-manager';
 import { buildErrorPageScript, NavigationError } from './error-page/error-page';
-import { HOVER_STATUS_BAR_SCRIPT } from './hover-status-bar-script';
+import { BuiltInPage, hoverStatusBarScript } from './hover-status-bar-script';
+import { fetchFavicon } from './favicon-fetch';
+import { FaviconCache } from './favicon-cache';
 const domainPattern = /^[^\s]+\.[^\s]+$/;
 // Protocols that should be handed off to the OS default handler.
 // Covers communication (mailto, tel, sms), calendar (webcal), and
@@ -66,6 +82,78 @@ function rankFaviconUrls(faviconUrls: string[]): string[] {
     .map((entry) => entry.url);
 }
 
+// A URL's origin, or null for one that has none (data:, file:, about:).
+function originOf(url: string): string | null {
+  try {
+    const origin = new URL(url).origin;
+    return origin === 'null' ? null : origin;
+  } catch {
+    return null;
+  }
+}
+
+// The origin of a tab's document as Chromium has it: 'null' for an opaque one
+// (a sandboxed page's), whatever its URL.
+function documentOrigin(wc: Electron.WebContents): string {
+  try {
+    return wc.mainFrame.origin;
+  } catch {
+    return 'null';
+  }
+}
+
+// A URL without its query and fragment, as Chromium writes it, or null for one
+// that doesn't parse.
+function pageAddress(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    parsed.search = '';
+    parsed.hash = '';
+    return parsed.href;
+  } catch {
+    return null;
+  }
+}
+
+// Each built-in page: the address its view loads, a webpack dev-server URL or,
+// once packaged, a file:// path inside the app, and its nav0:// URL as shown.
+function builtInPages(): BuiltInPage[] {
+  return [
+    { entry: ABOUT_WEBPACK_ENTRY, url: InAppUrls.ABOUT },
+    { entry: BOOKMARKS_WEBPACK_ENTRY, url: InAppUrls.BOOKMARKS },
+    { entry: BROWSER_SETTINGS_WEBPACK_ENTRY, url: InAppUrls.BROWSER_SETTINGS },
+    { entry: DOWNLOADS_WEBPACK_ENTRY, url: InAppUrls.DOWNLOADS },
+    { entry: HISTORY_WEBPACK_ENTRY, url: InAppUrls.HISTORY },
+    { entry: NEW_TAB_WEBPACK_ENTRY, url: InAppUrls.NEW_TAB },
+  ].map((page) => ({ ...page, url: page.url.replace(/^nav0:\/\//i, 'nav0://') }));
+}
+
+// Whether url is a built-in page: its nav0:// address in either case, or the
+// one its view loads.
+function isBuiltInPageUrl(url: string): boolean {
+  if (/^nav0:\/\//i.test(url)) return true;
+  const address = pageAddress(url);
+  if (address === null) return false;
+  return builtInPages().some(({ entry }) => pageAddress(entry) === address);
+}
+
+// A script for a page: the favicons Chromium reports for it, the <link>s among
+// document.head's own children with an href attribute that parses, whose last
+// icon keyword in rel (split on spaces and newlines only) is "icon".
+const FAVICON_LINKS_SCRIPT = `(() => {
+  const hrefs = [];
+  for (const link of document.head ? document.head.children : []) {
+    if (!(link instanceof HTMLLinkElement) || !link.getAttribute('href')) continue;
+    if (!URL.canParse(link.href)) continue;
+    let type = '';
+    for (const token of link.rel.replace(/\\n/g, ' ').toLowerCase().split(' ')) {
+      if (/^(icon|apple-touch-icon|apple-touch-icon-precomposed)$/.test(token)) type = token;
+    }
+    if (type === 'icon') hrefs.push(link.href);
+  }
+  return hrefs;
+})()`;
+
 export class Tab {
   public readonly id: string = uuid();
   private url: string;
@@ -92,6 +180,58 @@ export class Tab {
   private _destroyed = false;
   private showingSSLWarning = false;
   private pendingError: NavigationError | null = null;
+  // Favicons: this.faviconUrl is the one fetched for the last report of a
+  // page's favicons. Reports are counted (new views too), so a fetch that a
+  // newer one has overtaken is dropped.
+  private faviconRequestSeq = 0;
+  // The report this.faviconUrl was fetched for.
+  private faviconFetchedFor = 0;
+  // Counts the documents the tab has shown: pages, error pages and warnings.
+  private documentSeq = 0;
+  // The document the last report's favicons are known to be for (it made the
+  // report, or stopped loading without one: see adoptLastFaviconIfUnreported()),
+  // and its origin.
+  private faviconDocument: number | null = null;
+  private faviconOrigin: string | null = null;
+  // The last report's favicon URLs, sorted.
+  private faviconList: string[] = [];
+  // The icon of a tab restored without loading (see restoredFaviconFor()),
+  // shown until its first page loads.
+  private restoredFavicon: string | null = null;
+  // The document lastHistoryRecordId is the row of.
+  private historyDocument: number | null = null;
+  // The current document is the error page.
+  private loadFailed = false;
+  // The history index of the last commit, which tells a back navigation from
+  // a forward one.
+  private committedIndex = 0;
+  // How long a page that has stopped loading gets to report its favicons
+  // (Chromium's report comes within a millisecond or two of the stop).
+  private static readonly FAVICON_REPORT_WAIT_MS = 50;
+  // The local file whose favicon links are being looked at, how long one gets
+  // to add the ones it had last time, and how often they are looked at (see
+  // adoptLastFaviconIfUnreported()).
+  private faviconWatchDocument: number | null = null;
+  private static readonly FAVICON_WATCH_MS = 10_000;
+  private static readonly FAVICON_WATCH_INTERVAL_MS = 250;
+  // Electron's world for the preload (context isolation): out of the page's
+  // reach.
+  private static readonly PRELOAD_WORLD_ID = 999;
+  // The URL the main frame's latest navigation started for, which tells a
+  // certificate warning committing late from a step onto one (see
+  // DID_NAVIGATE).
+  private lastStartedUrl: string | null = null;
+  // The history entry a warning shown on Back, Forward or Reload stands for
+  // (see showCertificateWarning()), and whether a warning has had an entry in
+  // this view's history (see nearestPage()).
+  private warningFor: { index: number; url: string } | null = null;
+  private warningEntries = false;
+  // Back and Forward as last sent to the chrome, and the waits for Chromium to
+  // hear of the user's input on a page, which can change them (see
+  // refreshBackForward()): a busy page handles it late.
+  private shownBackForward = { canGoBack: false, canGoForward: false };
+  private backForwardTimer: ReturnType<typeof setTimeout> | null = null;
+  private static readonly USER_INPUT_WAITS_MS = [100, 400, 1500];
   private sslStatus: 'secure' | 'insecure' | 'internal' = 'internal';
   private sslCertificate: Electron.Certificate | null = null;
   private willDownloadHandler:
@@ -118,7 +258,7 @@ export class Tab {
     parentAppWindow: AppWindow,
     url: string,
     partitionSetting: string,
-    options?: { suspended?: boolean; title?: string }
+    options?: { suspended?: boolean; title?: string; faviconUrl?: string | null }
   ) {
     this.parentAppWindow = parentAppWindow;
     this.id = uuid();
@@ -127,6 +267,7 @@ export class Tab {
     this.partitionSetting = partitionSetting;
     if (options?.suspended) {
       this.isSuspended = true;
+      this.restoredFavicon = this.restoredFaviconFor(options.faviconUrl);
     } else {
       this.loadURL();
     }
@@ -220,8 +361,26 @@ export class Tab {
 
   private async initWebContentsView() {
     if (this.webContentsViewInstance) {
+      // A certificate warning in the old webContents goes with it (its
+      // listeners die there and never settle).
+      this.showingSSLWarning = false;
       this.webContentsViewInstance.webContents.close();
     }
+    // A new view reports its pages' favicons afresh: the old view's favicon,
+    // and any fetch still running for it, belong to no page here. A restored
+    // tab's icon gives way to its page's too.
+    this.faviconUrl = null;
+    this.restoredFavicon = null;
+    this.faviconRequestSeq++;
+    this.faviconDocument = null;
+    this.faviconOrigin = null;
+    this.faviconList = [];
+    this.documentSeq++;
+    this.committedIndex = 0;
+    this.lastStartedUrl = null;
+    this.warningFor = null;
+    this.warningEntries = false;
+    if (!this.isBuiltInPage()) this.sendFavicon(null);
     this.webContentsViewInstance = new WebContentsView({
       webPreferences: {
         preload: this.preloadScript,
@@ -251,6 +410,8 @@ export class Tab {
     // this.webContentsViewInstance.webContents.openDevTools({mode : 'detach'});
     this.registerPdfHandler();
     this.initEventHandlers();
+    // The new view's history is empty.
+    this.refreshBackForward();
   }
 
   /**
@@ -323,6 +484,22 @@ export class Tab {
   }
 
   private initEventHandlers() {
+    // A page can close its own tab with window.close() (Electron lets any page,
+    // Chrome only a tab opened by script or with one history entry): Electron
+    // destroys the webContents, and the tab goes as if the user had closed it.
+    // The tab's own closes don't count: they mark it destroyed or take its
+    // listeners off first, or replace the view (initWebContentsView();
+    // 'destroyed' comes once close() has returned).
+    const view = this.webContentsViewInstance;
+    const webContentsId = view.webContents.id;
+    view.webContents.once(WebContentsEvents.DESTROYED, () => {
+      if (this._destroyed || this.webContentsViewInstance !== view) return;
+      // closeTab() can't reach its notifications through the view any more.
+      NotificationManager.clearNotificationsForWebContents(webContentsId);
+      const closedRecord = this.parentAppWindow.closeTab(this.id, false);
+      if (closedRecord) AppWindowManager.recordClosedTab(closedRecord);
+    });
+
     // Intercept navigations to external protocols (mailto:, tel:, etc.)
     // and hand them off to the OS default handler instead of navigating.
     this.webContentsViewInstance.webContents.on('will-navigate', (event, url) => {
@@ -370,21 +547,58 @@ export class Tab {
       WebContentsEvents.DID_NAVIGATE,
       async (event, url: string) => {
         if (this._destroyed) return;
-        // Skip data: URLs (SSL warning interstitials) during forward/back navigation.
-        // These are not real pages — go back to where the user came from.
+        const nav = this.webContentsViewInstance.webContents.navigationHistory;
+        const fromIndex = this.committedIndex;
+        this.committedIndex = nav.getActiveIndex();
+        this.documentSeq++;
+        this.loadFailed = false;
+        if (url.startsWith('data:')) this.warningEntries = true;
+        // A data: document while no warning is showing is a certificate
+        // warning's, and no page. One the user left before it was drawn can
+        // still commit, ahead of the navigation they started instead: that
+        // one takes the tab on (should it never commit, the warning comes
+        // back: see showCertificateWarning()). Otherwise a history step has
+        // landed on a warning's entry: one the page itself took, or Chromium's
+        // when it passed over a page's entry (the toolbar's Back and Forward
+        // otherwise pass over them). Carry on in the direction of travel to
+        // the nearest real page, or back to where the user came from.
         if (url.startsWith('data:') && !this.showingSSLWarning) {
-          const nav = this.webContentsViewInstance.webContents.navigationHistory;
-          if (nav.canGoBack()) {
-            nav.goBack();
-          }
+          if (this.lastStartedUrl !== url) return;
+          const forward = this.committedIndex > fromIndex;
+          const ahead = this.nearestPage(forward ? 1 : -1, this.committedIndex);
+          const target =
+            ahead !== -1 ? ahead : this.nearestPage(forward ? -1 : 1, this.committedIndex);
+          if (target !== -1) nav.goToIndex(target);
           return;
         }
+        // The warning is up: the entry it stands for goes.
+        if (url.startsWith('data:') && this.warningFor) this.dropEntry(this.warningFor);
+        this.warningFor = null;
         // Clear any pending error on successful navigation
         this.pendingError = null;
+        if (url.startsWith('data:')) {
+          // The warning has no favicon. It's on its own history entry now, so
+          // Back and Forward change.
+          this.sendFavicon(null);
+          this.sendTabUrlUpdate(this.url);
+        } else {
+          this.startPageFavicon(url);
+          // A page without a <title> reports none: start from the one
+          // Chromium shows for it (its URL, or the title its history entry
+          // kept), never the last document's.
+          if (!this.url.startsWith(InAppUrls.PREFIX) && this.url !== '') {
+            this.title = this.webContentsViewInstance.webContents.getTitle();
+            this.sendTitleUpdate();
+          }
+        }
         // Reset SSL status for new navigation (will be re-evaluated in sendTabUrlUpdate)
         try {
           const hostname = new URL(url).hostname;
-          if (this.sslStatus === 'insecure' && !SSLManager.isHostBypassed(hostname)) {
+          if (
+            this.sslStatus === 'insecure' &&
+            !this.showingSSLWarning &&
+            !SSLManager.isHostBypassed(hostname)
+          ) {
             this.sslStatus = 'secure';
             this.sslCertificate = null;
           }
@@ -404,12 +618,44 @@ export class Tab {
         if (this._destroyed) return;
         // did-navigate-in-page fires for every frame. Ignore subframes (e.g. the
         // gapi hovercard iframe in Gmail changing its #fragment) so an iframe URL
-        // never lands in the address bar — only the main frame drives it.
-        if (!isMainFrame) return;
+        // never lands in the address bar — only the main frame drives it. Its
+        // history entry still counts for Back and Forward.
+        if (!isMainFrame) {
+          this.refreshBackForward();
+          return;
+        }
+        this.committedIndex =
+          this.webContentsViewInstance.webContents.navigationHistory.getActiveIndex();
         this.debouncedHandleNavigationCompletion(url);
         // Re-apply dark mode for back/forward in-page navigations (bfcache restores)
       }
     );
+    this.webContentsViewInstance.webContents.on(
+      WebContentsEvents.DID_FRAME_NAVIGATE,
+      (event, url, httpResponseCode, httpStatusText, isMainFrame) => {
+        if (!isMainFrame) this.refreshBackForward();
+      }
+    );
+    this.webContentsViewInstance.webContents.on(
+      WebContentsEvents.DID_START_NAVIGATION,
+      (details: Electron.Event<Electron.WebContentsDidStartNavigationEventParams>) => {
+        if (details.isMainFrame && !details.isSameDocument) this.lastStartedUrl = details.url;
+      }
+    );
+    // The user's input on a page can let Back reach the entries it added on its
+    // own. Chromium hears of the input once the page has handled it.
+    this.webContentsViewInstance.webContents.on(WebContentsEvents.INPUT_EVENT, (event, input) => {
+      if (!['mouseDown', 'rawKeyDown', 'keyDown', 'touchEnd'].includes(input.type)) return;
+      if (this.backForwardTimer) clearTimeout(this.backForwardTimer);
+      const recheck = (wait: number) => {
+        this.backForwardTimer = setTimeout(() => {
+          this.backForwardTimer = null;
+          this.refreshBackForward();
+          if (wait + 1 < Tab.USER_INPUT_WAITS_MS.length) recheck(wait + 1);
+        }, Tab.USER_INPUT_WAITS_MS[wait]);
+      };
+      recheck(0);
+    });
 
     // Cosmetic ad filtering and DOM cleanup once the DOM is ready
     this.webContentsViewInstance.webContents.on(WebContentsEvents.DOM_READY, () => {
@@ -422,6 +668,14 @@ export class Tab {
       this.injectHoverStatusBar();
     });
 
+    // One handler per tab: the last view's would otherwise stay on the session,
+    // keeping the tab alive, and handle downloads a second time.
+    if (this.willDownloadHandler) {
+      this.webContentsViewInstance.webContents.session.removeListener(
+        'will-download',
+        this.willDownloadHandler
+      );
+    }
     this.willDownloadHandler = async (
       event: Electron.Event,
       item: Electron.DownloadItem,
@@ -431,7 +685,10 @@ export class Tab {
       // (their downloadWebContents won't match any tab's webContents)
       const downloadId = item.getStartTime().toString() + '_' + item.getFilename();
       const isCrossSessionResume = DownloadManager.isResuming(downloadId);
-      if (!isCrossSessionResume && downloadWebContents !== this.webContentsViewInstance.webContents)
+      if (
+        !isCrossSessionResume &&
+        downloadWebContents !== this.webContentsViewInstance?.webContents
+      )
         return;
 
       await this.handleDownload(item);
@@ -446,24 +703,41 @@ export class Tab {
       if (this._destroyed) return;
       this.clearLoadingTimeout();
       this.sendLoadingState(false);
+      this.adoptLastFaviconIfUnreported();
     });
     this.webContentsViewInstance.webContents.on(
       WebContentsEvents.PAGE_TITLE_UPDATED,
       async (event, title: string) => {
         if (this._destroyed) return;
-        this.title = title;
-        this.parentAppWindow
-          .getBrowserWindowInstance()
-          ?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_TITLE_UPDATED, {
-            id: this.id,
-            title: this.title,
-          });
-        // Update the history record with the actual title
-        if (this.lastHistoryRecordId) {
+        // A data: document other than the warning on show isn't the tab's
+        // page: an old warning still on screen while the tab navigates away,
+        // or a warning's history entry being skipped.
+        if (
+          !this.showingSSLWarning &&
+          this.webContentsViewInstance?.webContents.getURL().startsWith('data:')
+        ) {
+          return;
+        }
+        // The warning's "Go back" button signals through its title.
+        if (this.showingSSLWarning && title === SSLManager.GO_BACK_TITLE_SENTINEL) return;
+        // Back or Forward onto an entry without a title reports an empty one:
+        // the tab shows the one Chromium does, the URL.
+        this.title = title || this.webContentsViewInstance.webContents.getTitle();
+        this.sendTitleUpdate();
+        // Update the history record with the actual title. The certificate
+        // warning's title belongs to no history row: the last one recorded is
+        // the page before it. Nor does a new page's while its row is still to
+        // be recorded: that row takes this.title when it is.
+        if (
+          this.lastHistoryRecordId &&
+          !this.showingSSLWarning &&
+          !this.navigationDebounceTimer &&
+          this.historyDocument === this.documentSeq
+        ) {
           await BrowsingHistoryManager.updateRecordTitle(
             this.parentAppWindow.id,
             this.lastHistoryRecordId,
-            title
+            this.title
           );
         }
       }
@@ -472,34 +746,42 @@ export class Tab {
       WebContentsEvents.PAGE_FAVICON_UPDATED,
       async (event, faviconUrls: string[]) => {
         if (this._destroyed) return;
-        if (this.url.startsWith(InAppUrls.PREFIX) || this.url === '') return;
+        if (this.isBuiltInPage()) return;
 
+        // The report is this document's, and lists its favicons.
+        const request = ++this.faviconRequestSeq;
+        const wc = this.webContentsViewInstance.webContents;
+        const pageUrl = wc.getURL();
+        const pageOrigin = documentOrigin(wc);
+        this.faviconDocument = this.documentSeq;
+        this.faviconOrigin = originOf(pageUrl);
+        this.faviconList = [...faviconUrls].sort();
         const candidates = rankFaviconUrls(faviconUrls);
-        if (candidates.length === 0) return;
 
-        // Fetch from the main process using net.fetch so the bytes don't go
-        // through the renderer's <img> tag — some CDNs (e.g. Cloudflare) block
-        // cross-site image requests based on Sec-Fetch-Site/Sec-Fetch-Dest, so
-        // we base64-encode the bytes ourselves to sidestep that. Walk the
-        // candidates best-first and stop at the first one that fetches: many
-        // sites advertise an apple-touch-icon (or other sized variant) they
-        // don't actually serve, and we want to fall back instead of stamping a
-        // broken URL onto the tab.
-        let faviconToSend: string | null = null;
+        // Fetch from the main process so the bytes don't go through the
+        // renderer's <img> tag — some CDNs (e.g. Cloudflare) block cross-site
+        // image requests based on Sec-Fetch-Site/Sec-Fetch-Dest, so we
+        // base64-encode the bytes ourselves to sidestep that. The tab's own
+        // session fetches it (net.fetch would use the default one, on disk,
+        // private windows included). Walk the candidates best-first and stop
+        // at the first one that fetches: many sites advertise an
+        // apple-touch-icon (or other sized variant) they don't actually serve,
+        // and we want to fall back instead of stamping a broken URL onto the
+        // tab.
+        let favicon: string | null = null;
         for (const candidate of candidates) {
           if (this._destroyed) return;
-          if (!candidate.startsWith('http')) {
-            faviconToSend = candidate;
+          // A page's data: icon, or a local file's, is already local. One on
+          // any other scheme but the web's (blob:, ftp:) can't be fetched.
+          if (/^(data|file):/i.test(candidate)) {
+            favicon = candidate;
             break;
           }
+          if (!/^https?:/i.test(candidate)) continue;
           try {
-            const response = await (
-              net.fetch as (input: string, init?: Record<string, unknown>) => Promise<Response>
-            )(candidate, { session: this.webContentsViewInstance?.webContents.session });
-            if (response.ok) {
-              const contentType = response.headers.get('content-type') || 'image/x-icon';
-              const buffer = Buffer.from(await response.arrayBuffer());
-              faviconToSend = `data:${contentType};base64,${buffer.toString('base64')}`;
+            const icon = await fetchFavicon(wc.session, candidate, pageUrl, pageOrigin);
+            if (icon) {
+              favicon = `data:${icon.type};base64,${icon.bytes.toString('base64')}`;
               break;
             }
           } catch {
@@ -507,25 +789,20 @@ export class Tab {
           }
         }
 
-        // Every candidate failed — send the best URL and let the renderer's
-        // onerror handler swap in the empty-favicon placeholder.
-        if (faviconToSend === null) faviconToSend = candidates[0];
-
-        this.faviconUrl = faviconToSend;
-        if (this._destroyed) return;
-        this.parentAppWindow
-          .getBrowserWindowInstance()
-          ?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_FAVICON_UPDATED, {
-            id: this.id,
-            faviconUrl: faviconToSend,
-          });
-        if (this.lastHistoryRecordId) {
-          await BrowsingHistoryManager.updateRecordFavicon(
-            this.parentAppWindow.id,
-            this.lastHistoryRecordId,
-            faviconToSend
-          );
-        }
+        // A newer report has overtaken this one.
+        if (this._destroyed || request !== this.faviconRequestSeq) return;
+        // The chrome and the built-in pages show only local copies: keep the
+        // site's icon in the favicon cache (a private window's in memory).
+        // Should every candidate fail, the copy kept from an earlier visit
+        // stands in, if there is one; the chrome never gets a remote URL.
+        const db = DatabaseManager.getDatabase(this.parentAppWindow.isPrivate);
+        if (favicon !== null) FaviconCache.save(db, pageUrl, favicon);
+        else favicon = FaviconCache.get(db, pageUrl);
+        this.faviconUrl = favicon;
+        this.faviconFetchedFor = request;
+        // Shown if the page that reported it is still the tab's; otherwise
+        // kept for the page after it, should that turn out to share it.
+        this.showPageFavicon();
       }
     );
     this.webContentsViewInstance.webContents.on(
@@ -536,11 +813,46 @@ export class Tab {
         if (!isMainFrame || errorCode === -3) return;
         console.error('Failed to load URL:', this.url, errorCode, errorDescription);
         this.pendingError = { errorCode, errorDescription, validatedURL };
-        this.parentAppWindow
-          .getBrowserWindowInstance()
-          ?.webContents.send(MainToRendererEventsForBrowserIPC.NAVIGATION_FAILED, {
-            id: this.id,
-          });
+      }
+    );
+    // A load that fails before anything commits ends on the error page; only
+    // then is it a failed load for the chrome. (did-fail-load also fires when
+    // a committed page's body is cut off, and that page keeps its URL and
+    // security state.)
+    this.webContentsViewInstance.webContents.on(
+      WebContentsEvents.DID_FAIL_PROVISIONAL_LOAD,
+      (event, errorCode, errorDescription, validatedURL, isMainFrame) => {
+        if (this._destroyed) return;
+        // A subframe's error page has a history entry of its own, as any other
+        // subframe navigation (did-frame-navigate leaves error pages out).
+        if (!isMainFrame) {
+          this.refreshBackForward();
+          return;
+        }
+        if (errorCode === -3) return;
+        // The tab is now on the URL that failed, as after a commit.
+        this.committedIndex =
+          this.webContentsViewInstance.webContents.navigationHistory.getActiveIndex();
+        this.warningFor = null;
+        this.documentSeq++;
+        if (!this.url.startsWith(InAppUrls.PREFIX) && this.url !== '') {
+          this.url = validatedURL;
+        }
+        // The page before is finished and the error page gets no history row,
+        // so its title can't land in the last one. A page still waiting to be
+        // recorded was left too soon to count, as with any navigation within
+        // NAVIGATION_DEBOUNCE_MS.
+        if (this.navigationDebounceTimer) {
+          clearTimeout(this.navigationDebounceTimer);
+          this.navigationDebounceTimer = null;
+        }
+        this.finalizePageTime();
+        this.lastHistoryRecordId = null;
+        // The error page has no favicon (the chrome clears it on the failure)
+        // or article of the page before it.
+        this.loadFailed = true;
+        this.resetReaderMode();
+        this.sendNavigationFailed(validatedURL);
       }
     );
 
@@ -552,7 +864,7 @@ export class Tab {
     // Handle SSL certificate errors — show interstitial warning page
     this.webContentsViewInstance.webContents.on(
       'certificate-error',
-      (event, url, error, certificate, callback) => {
+      (event, url, error, certificate, callback, isMainFrame) => {
         if (this._destroyed) {
           callback(false);
           return;
@@ -569,6 +881,15 @@ export class Tab {
           /* ignore parse errors */
         }
 
+        // An image, script or iframe with a bad certificate is just blocked, as
+        // in Chrome: the warning replaces the whole page, so only the page's own
+        // navigation gets one.
+        if (!isMainFrame) {
+          event.preventDefault();
+          callback(false);
+          return;
+        }
+
         // Guard: don't stack multiple warnings
         if (this.showingSSLWarning) {
           event.preventDefault();
@@ -578,32 +899,66 @@ export class Tab {
 
         event.preventDefault();
         callback(false);
-
-        this.showingSSLWarning = true;
-        this.sslCertificate = certificate;
-        this.url = url;
-        this.sendTabUrlUpdate(url);
-
-        SSLManager.showWarning(this.webContentsViewInstance.webContents, url, error).then(
-          (decision) => {
-            this.showingSSLWarning = false;
-            if (decision === 'proceed') {
-              this.sslStatus = 'insecure';
-              this.navigate(url);
-            } else {
-              const wc = this.webContentsViewInstance.webContents;
-              if (wc.navigationHistory.canGoBack()) {
-                wc.navigationHistory.goBack();
-              } else {
-                this.navigate(InAppUrls.NEW_TAB);
-              }
-            }
-          }
-        );
+        this.showCertificateWarning(url, error, certificate);
       }
     );
 
     this.attachWindowOpenHandling(this.webContentsViewInstance.webContents);
+  }
+
+  /**
+   * Shows the certificate warning in place of the page at url, and acts on
+   * what the user chooses there.
+   */
+  private showCertificateWarning(
+    url: string,
+    error: string,
+    certificate: Electron.Certificate
+  ): void {
+    const wc = this.webContentsViewInstance.webContents;
+    // On Back, Forward or Reload the warning comes after the page the tab is
+    // on, on an entry of its own, rather than on the entry it is for: that
+    // entry would only lead to the warning again, so it goes once the warning
+    // is up (see DID_NAVIGATE).
+    const history = wc.navigationHistory;
+    const target = history.getActiveIndex();
+    this.warningFor = history.getEntryAtIndex(target)?.url === url ? { index: target, url } : null;
+    this.showingSSLWarning = true;
+    this.sslCertificate = certificate;
+    this.url = url;
+    // While the warning is up the field shows the connection as not secure
+    // (red triangle, struck-through https); updateSSLStatus() keeps an
+    // 'insecure' status.
+    this.sslStatus = 'insecure';
+    this.sendTabUrlUpdate(url);
+
+    SSLManager.showWarning(wc, url, error).then((decision) => {
+      this.showingSSLWarning = false;
+      if (decision === 'go-back') {
+        this.sslCertificate = null;
+        // Back to the page before, past any earlier warning's entry.
+        const index = this.nearestPage(-1);
+        if (index === -1) {
+          this.navigate(InAppUrls.NEW_TAB);
+          return;
+        }
+        wc.navigationHistory.goToIndex(index);
+      } else if (decision === 'proceed') {
+        this.sslStatus = 'insecure';
+        this.navigate(url);
+      } else {
+        // Only a bypassed page keeps the rejected certificate's details.
+        this.sslCertificate = null;
+      }
+      // The tab started a navigation away. If that never commits (Stop, a
+      // 204, a download), this warning is still on screen with its listeners
+      // gone, so show it again. From here, without asking for the URL again:
+      // a Stop can't keep it from coming back.
+      wc.once(WebContentsEvents.DID_STOP_LOADING, () => {
+        if (this._destroyed || this.showingSSLWarning || wc.isDestroyed()) return;
+        if (wc.getURL().startsWith('data:')) this.showCertificateWarning(url, error, certificate);
+      });
+    });
   }
 
   /**
@@ -750,6 +1105,9 @@ export class Tab {
     }
     const requestedFileName = item.getFilename();
     const downloadId = item.getStartTime().toString() + '_' + requestedFileName;
+    // The download carries on if this tab or its window closes, so from here on
+    // it goes by its session (normal or private), not by the window.
+    const isPrivate = this.parentAppWindow.isPrivate;
 
     // Prevent duplicate handling when multiple tabs share the same session
     if (Tab.handledDownloads.has(downloadId)) return;
@@ -773,7 +1131,7 @@ export class Tab {
 
     if (dbRecordId) {
       // Resuming from previous session – update existing record
-      DownloadManager.updateRecordStatus(this.parentAppWindow.id, dbRecordId, 'in_progress');
+      DownloadManager.updateRecordStatus(isPrivate, dbRecordId, 'in_progress');
     } else {
       // New download – create DB record
       const record = await DownloadManager.addRecord(
@@ -790,7 +1148,7 @@ export class Tab {
 
     // Store resume metadata in the DB for cross-session resume
     DownloadManager.updateRecordResumeMetadata(
-      this.parentAppWindow.id,
+      isPrivate,
       dbRecordId,
       JSON.stringify(item.getURLChain()),
       item.getETag(),
@@ -799,20 +1157,24 @@ export class Tab {
     );
 
     // Track in main process so renderer can query on page load
-    DownloadManager.trackDownloadStarted(downloadId, fileName, item.getTotalBytes(), dbRecordId);
+    DownloadManager.trackDownloadStarted(
+      downloadId,
+      fileName,
+      item.getTotalBytes(),
+      dbRecordId,
+      isPrivate
+    );
     DownloadManager.storeDownloadItem(downloadId, item);
 
-    // Notify renderer (browser chrome + all tabs) that a download has started
+    // Notify every window of the session (browser chrome + tabs) that a download has started
     const startedData = {
       downloadId,
       dbRecordId,
       fileName,
       totalBytes: item.getTotalBytes(),
     };
-    this.parentAppWindow
-      .getBrowserWindowInstance()
-      .webContents.send(MainToRendererEventsForBrowserIPC.DOWNLOAD_STARTED, startedData);
-    this.parentAppWindow.broadcastToTabs(
+    DownloadManager.broadcastToSession(
+      isPrivate,
       MainToRendererEventsForBrowserIPC.DOWNLOAD_STARTED,
       startedData
     );
@@ -830,18 +1192,13 @@ export class Tab {
           item.getReceivedBytes(),
           item.getTotalBytes()
         );
-        const browserWindow = this.parentAppWindow.getBrowserWindowInstance();
-        if (!browserWindow?.webContents) return;
         const progressData = {
           downloadId,
           receivedBytes: item.getReceivedBytes(),
           totalBytes: item.getTotalBytes(),
         };
-        browserWindow.webContents.send(
-          MainToRendererEventsForBrowserIPC.DOWNLOAD_PROGRESS,
-          progressData
-        );
-        this.parentAppWindow.broadcastToTabs(
+        DownloadManager.broadcastToSession(
+          isPrivate,
           MainToRendererEventsForBrowserIPC.DOWNLOAD_PROGRESS,
           progressData
         );
@@ -855,7 +1212,7 @@ export class Tab {
       // Update DB record status
       if (state === 'completed') {
         DownloadManager.updateRecordStatus(
-          this.parentAppWindow.id,
+          isPrivate,
           dbRecordId,
           'completed',
           item.getTotalBytes() || item.getReceivedBytes()
@@ -864,7 +1221,7 @@ export class Tab {
         // During shutdown, downloads are auto-cancelled after being paused by
         // pauseAllDownloads() – don't overwrite the 'paused' status in the DB
         if (!DownloadManager.isShuttingDown()) {
-          DownloadManager.updateRecordStatus(this.parentAppWindow.id, dbRecordId, 'cancelled');
+          DownloadManager.updateRecordStatus(isPrivate, dbRecordId, 'cancelled');
         }
       } else {
         console.error(`Download failed: ${state}`);
@@ -880,14 +1237,9 @@ export class Tab {
         }
       }
 
-      const browserWindow = this.parentAppWindow.getBrowserWindowInstance();
-      if (!browserWindow?.webContents) return;
       const completedData = { downloadId, state, fileName, dbRecordId };
-      browserWindow.webContents.send(
-        MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED,
-        completedData
-      );
-      this.parentAppWindow.broadcastToTabs(
+      DownloadManager.broadcastToSession(
+        isPrivate,
         MainToRendererEventsForBrowserIPC.DOWNLOAD_COMPLETED,
         completedData
       );
@@ -981,27 +1333,23 @@ export class Tab {
    * Injects the Chrome-style hover URL status bar into the page's main world.
    * Done from the main process (like reader mode / error pages) because a
    * sandboxed preload's webFrame.executeJavaScript can't reach the main world.
-   * The injected script is idempotent (guards on a window flag).
+   * The injected script is idempotent (guards on a window flag). A built-in
+   * page's bar shows nav0:// URLs, never the address the page loads from.
    */
   private injectHoverStatusBar(): void {
-    this.webContentsViewInstance?.webContents
-      .executeJavaScript(HOVER_STATUS_BAR_SCRIPT)
-      .catch(() => {});
+    const webContents = this.webContentsViewInstance?.webContents;
+    if (!webContents) return;
+    const pages = isBuiltInPageUrl(webContents.getURL()) ? builtInPages() : [];
+    webContents.executeJavaScript(hoverStatusBarScript(pages)).catch(() => {});
   }
 
   private debouncedHandleNavigationCompletion(url: string): void {
     if (this._destroyed) return;
     if (this.navigationDebounceTimer) {
       clearTimeout(this.navigationDebounceTimer);
+      this.navigationDebounceTimer = null;
     }
-    // Deactivate reader mode on navigation
-    if (this.readerMode.isActive) {
-      this.deactivateReaderMode();
-    }
-    // Reset reader mode eligibility
-    this.readerMode.isEligible = false;
-    this.readerMode.cachedArticle = null;
-    this.sendReaderModeAvailability();
+    this.resetReaderMode();
 
     // Update URL and send tab update immediately for responsive UI
     // Skip data: URLs (e.g. SSL warning pages) and active SSL warnings
@@ -1010,13 +1358,33 @@ export class Tab {
       this.url = url;
     }
     this.sendTabUrlUpdate(url);
-    // Debounce the history recording to avoid bursts from rapid navigation
+    // Debounce the history recording to avoid bursts from rapid navigation.
+    // While it's pending, lastHistoryRecordId is still the page before's row.
     this.navigationDebounceTimer = setTimeout(() => {
+      this.navigationDebounceTimer = null;
       this.recordHistory(url);
     }, Tab.NAVIGATION_DEBOUNCE_MS);
 
     // Schedule reader mode eligibility check after page settles
     this.scheduleReaderModeCheck();
+  }
+
+  // The error page commits no URL update, so the failure carries what the
+  // chrome needs to show the URL that failed: its bookmark state and history.
+  private async sendNavigationFailed(url: string): Promise<void> {
+    if (this._destroyed) return;
+    const bookmark = await BookmarkManager.isBookmark(this.parentAppWindow.id, url);
+    if (this._destroyed) return;
+    this.parentAppWindow
+      .getBrowserWindowInstance()
+      ?.webContents.send(MainToRendererEventsForBrowserIPC.NAVIGATION_FAILED, {
+        id: this.id,
+        url,
+        isBookmark: bookmark ? true : false,
+        bookmarkId: bookmark ? bookmark.id : null,
+        bookmarkType: bookmark ? bookmark.type : null,
+        ...this.backForward(),
+      });
   }
 
   private async sendTabUrlUpdate(url: string): Promise<void> {
@@ -1052,9 +1420,7 @@ export class Tab {
         isBookmark: this.bookmark ? true : false,
         bookmarkId: this.bookmark ? this.bookmark.id : null,
         bookmarkType: this.bookmark ? this.bookmark.type : null,
-        canGoBack: this.webContentsViewInstance?.webContents.navigationHistory.canGoBack() ?? false,
-        canGoForward:
-          this.webContentsViewInstance?.webContents.navigationHistory.canGoForward() ?? false,
+        ...this.backForward(),
         sslStatus: this.sslStatus,
         sslDetails,
       });
@@ -1094,16 +1460,21 @@ export class Tab {
   }
 
   private recordHistory(url: string): void {
-    if (this.url.startsWith(InAppUrls.PREFIX) || this.url === '') {
+    // Built-in pages get no row. The page committed may be one while this.url
+    // is already a site's: a window opening on a URL replaces its New Tab page
+    // before the debounce is up.
+    if (this.url === '' || isBuiltInPageUrl(this.url) || isBuiltInPageUrl(url)) {
       this.lastHistoryRecordId = null;
       return;
     }
     // Finalize time tracking for the previous page before recording the new one
     this.finalizePageTime();
     try {
+      // The page being recorded is url: this.url may already be the next
+      // address the user typed.
       let urlObject: URL | null = null;
       try {
-        urlObject = new URL(this.url);
+        urlObject = new URL(url);
       } catch (error) {
         //do nothing
       }
@@ -1118,10 +1489,10 @@ export class Tab {
         this.parentAppWindow.id,
         urlWithoutFragment,
         this.title,
-        urlObject ? urlObject.hostname : '',
-        urlObject ? `${urlObject.protocol}//${urlObject.hostname}/favicon.ico` : ''
+        urlObject ? urlObject.hostname : ''
       );
       this.lastHistoryRecordId = record?.id ?? null;
+      this.historyDocument = this.documentSeq;
       // Start time tracking for the new page
       this.pageStartTime = Date.now();
       this.activeTimeAccumulator = 0;
@@ -1153,11 +1524,138 @@ export class Tab {
   }
 
   getFaviconUrl(): string | null {
+    // Built-in pages (the New Tab page's URL is '') never report a favicon, and
+    // this.faviconUrl may still hold the last site's: they show the compass.
+    if (this.isBuiltInPage()) return ImageBase64Strings.FAVICON;
+    return this.currentPageFavicon() ?? this.restoredFavicon;
+  }
+
+  // A tab restored without loading (from the saved session, or a closed
+  // window) shows the icon saved with it, which the next saved session keeps.
+  // Only a local copy will do (an older build's session may hold a remote
+  // URL); without one, the favicon cache's for its host.
+  private restoredFaviconFor(saved: string | null | undefined): string | null {
+    if (saved && /^(data|file):/i.test(saved)) return saved;
+    try {
+      return FaviconCache.get(
+        DatabaseManager.getDatabase(this.parentAppWindow.isPrivate),
+        this.url
+      );
+    } catch {
+      return null;
+    }
+  }
+
+  private isBuiltInPage(): boolean {
+    return this.url === '' || this.url.startsWith(InAppUrls.PREFIX);
+  }
+
+  // The current page's favicon once it's known, else null: an error page and
+  // the warning have none, nor does a page that may still report its own.
+  private currentPageFavicon(): string | null {
+    if (this.loadFailed || this.showingSSLWarning) return null;
+    if (this.faviconDocument !== this.documentSeq) return null;
+    if (this.faviconFetchedFor !== this.faviconRequestSeq) return null;
     return this.faviconUrl;
+  }
+
+  // A new page's favicon is unknown until it reports one or stops loading
+  // without. Meanwhile the strip keeps the last one for a page from the same
+  // origin, which most likely shares it, and shows none for any other.
+  private startPageFavicon(url: string): void {
+    if (this.isBuiltInPage()) return;
+    const origin = /^https?:/.test(url) ? originOf(url) : null;
+    if (origin === null || origin !== this.faviconOrigin) {
+      this.sendFavicon(null);
+    } else if (this.faviconFetchedFor === this.faviconRequestSeq) {
+      this.sendFavicon(this.faviconUrl);
+    }
+  }
+
+  // Electron reports a page's favicons just after it stops loading, and only
+  // when they differ from the last ones it reported: a web page that has
+  // stopped without a report has the last ones. A local file without any
+  // reports none either: its own <link>s tell which it is.
+  private adoptLastFaviconIfUnreported(): void {
+    const document = this.documentSeq;
+    const request = this.faviconRequestSeq;
+    const isCurrent = () =>
+      !this._destroyed && document === this.documentSeq && request === this.faviconRequestSeq;
+    setTimeout(() => {
+      if (!isCurrent()) return;
+      if (this.faviconDocument === null || this.faviconDocument === document) return;
+      if (this.loadFailed || this.showingSSLWarning || this.isBuiltInPage()) return;
+      const wc = this.webContentsViewInstance?.webContents;
+      const pageUrl = wc?.getURL() ?? '';
+      const adopt = () => {
+        this.faviconDocument = document;
+        this.faviconOrigin = originOf(pageUrl);
+        this.showPageFavicon();
+      };
+      if (/^https?:/.test(pageUrl)) {
+        adopt();
+        return;
+      }
+      if (!pageUrl.startsWith('file:') || this.faviconWatchDocument === document) return;
+      // Its scripts may add them after the stop: look again for a while.
+      // (Each look returns at once: one still waiting when the document goes
+      // never settles, and would hold the tab.)
+      this.faviconWatchDocument = document;
+      const deadline = Date.now() + Tab.FAVICON_WATCH_MS;
+      const stop = () => {
+        if (this.faviconWatchDocument === document) this.faviconWatchDocument = null;
+      };
+      const look = () => {
+        if (!isCurrent() || this.showingSSLWarning || wc.isDestroyed()) return stop();
+        wc.executeJavaScriptInIsolatedWorld(Tab.PRELOAD_WORLD_ID, [{ code: FAVICON_LINKS_SCRIPT }])
+          .then((hrefs: string[]) => {
+            if (!isCurrent() || this.showingSSLWarning) return stop();
+            const list = [...new Set(hrefs)].sort();
+            const last = this.faviconList;
+            if (list.length === last.length && list.every((href, i) => href === last[i])) {
+              stop();
+              adopt();
+            } else if (Date.now() < deadline) {
+              setTimeout(look, Tab.FAVICON_WATCH_INTERVAL_MS);
+            } else {
+              stop();
+            }
+          })
+          .catch(stop);
+      };
+      look();
+    }, Tab.FAVICON_REPORT_WAIT_MS);
+  }
+
+  // Shows the current page's favicon, once known.
+  private showPageFavicon(): void {
+    if (this.faviconDocument !== this.documentSeq || this.isBuiltInPage()) return;
+    if (this.loadFailed || this.showingSSLWarning) return;
+    if (this.faviconFetchedFor !== this.faviconRequestSeq) return;
+    this.sendFavicon(this.faviconUrl);
+  }
+
+  // null empties the tab's favicon slot.
+  private sendFavicon(faviconUrl: string | null): void {
+    this.parentAppWindow
+      .getBrowserWindowInstance()
+      ?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_FAVICON_UPDATED, {
+        id: this.id,
+        faviconUrl,
+      });
   }
 
   setTitle(title: string): void {
     this.title = title;
+  }
+
+  private sendTitleUpdate(): void {
+    this.parentAppWindow
+      .getBrowserWindowInstance()
+      ?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_TITLE_UPDATED, {
+        id: this.id,
+        title: this.title,
+      });
   }
 
   async handleFileSelection(extensions: string[]): Promise<string[] | null> {
@@ -1207,21 +1705,34 @@ export class Tab {
       clearTimeout(this.navigationDebounceTimer);
       this.navigationDebounceTimer = null;
     }
+    if (this.backForwardTimer) {
+      clearTimeout(this.backForwardTimer);
+      this.backForwardTimer = null;
+    }
     if (this.readerModeCheckTimer) {
       clearTimeout(this.readerModeCheckTimer);
       this.readerModeCheckTimer = null;
     }
-    if (this.willDownloadHandler && this.webContentsViewInstance) {
-      this.webContentsViewInstance.webContents.session.removeListener(
-        'will-download',
-        this.willDownloadHandler
-      );
+    if (this.willDownloadHandler) {
+      // The partition's session: a page that closed its own tab has taken the
+      // webContents with it.
+      session
+        .fromPartition(this.partitionSetting)
+        .removeListener('will-download', this.willDownloadHandler);
       this.willDownloadHandler = null;
     }
   }
 
   getWebContentsViewInstance(): WebContentsView | null {
     return this.webContentsViewInstance;
+  }
+
+  // The tab's webContents, or null once it has gone. Menus read it when an
+  // item is clicked: a page can close its own tab (window.close()), or the tab
+  // be suspended, while a menu for it is open.
+  getLiveWebContents(): Electron.WebContents | null {
+    const wc = this.webContentsViewInstance?.webContents;
+    return this._destroyed || !wc || wc.isDestroyed() ? null : wc;
   }
 
   getIsSuspended(): boolean {
@@ -1317,23 +1828,27 @@ export class Tab {
       clearTimeout(this.navigationDebounceTimer);
       this.navigationDebounceTimer = null;
     }
+    if (this.backForwardTimer) {
+      clearTimeout(this.backForwardTimer);
+      this.backForwardTimer = null;
+    }
     if (this.readerModeCheckTimer) {
       clearTimeout(this.readerModeCheckTimer);
       this.readerModeCheckTimer = null;
     }
-    if (this.willDownloadHandler && this.webContentsViewInstance) {
-      this.webContentsViewInstance.webContents.session.removeListener(
-        'will-download',
-        this.willDownloadHandler
-      );
+    if (this.willDownloadHandler) {
+      session
+        .fromPartition(this.partitionSetting)
+        .removeListener('will-download', this.willDownloadHandler);
       this.willDownloadHandler = null;
     }
     if (this.webContentsViewInstance) {
-      this.webContentsViewInstance.webContents.removeAllListeners();
+      this.webContentsViewInstance.webContents?.removeAllListeners();
       this.webContentsViewInstance.removeAllListeners();
-      this.webContentsViewInstance.webContents.close();
+      this.webContentsViewInstance.webContents?.close();
       this.webContentsViewInstance = null;
     }
+    this.showingSSLWarning = false;
     this.readerMode = ReaderModeManager.createState();
     this.isSuspended = true;
   }
@@ -1353,6 +1868,103 @@ export class Tab {
       this._destroyed = false;
     }
     this.loadURL(url);
+  }
+
+  // Back and Forward take Chromium's step, which passes over the entries a
+  // page added without the user (to keep them from leaving), and pass over
+  // certificate warnings' data: entries: they aren't pages, and showing one
+  // again would offer no working buttons.
+  canGoBack(): boolean {
+    const history = this.webContentsViewInstance?.webContents?.navigationHistory;
+    return !!history?.canGoBack() && this.nearestPage(-1) !== -1;
+  }
+
+  canGoForward(): boolean {
+    const history = this.webContentsViewInstance?.webContents?.navigationHistory;
+    return !!history?.canGoForward() && this.nearestPage(1) !== -1;
+  }
+
+  goBack(): void {
+    this.stepHistory(-1);
+  }
+
+  goForward(): void {
+    this.stepHistory(1);
+  }
+
+  // Straight past a warning's entry next in line; otherwise Chromium's step
+  // (should it land on a warning's entry, did-navigate carries on past it).
+  private stepHistory(step: 1 | -1): void {
+    const history = this.webContentsViewInstance?.webContents?.navigationHistory;
+    if (!history || !(step === -1 ? this.canGoBack() : this.canGoForward())) return;
+    const target = this.nearestPage(step);
+    if (target !== history.getActiveIndex() + step) {
+      history.goToIndex(target);
+    } else if (step === -1) {
+      history.goBack();
+    } else {
+      history.goForward();
+    }
+  }
+
+  // The nearest history entry past `from` (by default the current one) in
+  // the direction of step that isn't a warning's data: entry, or -1. Entries
+  // come with their pages' saved state, which can be large: they are read only
+  // once a warning has had one in this view's history.
+  private nearestPage(step: 1 | -1, from?: number): number {
+    const history = this.webContentsViewInstance?.webContents?.navigationHistory;
+    if (!history) return -1;
+    const count = history.length();
+    let index = (from ?? history.getActiveIndex()) + step;
+    while (
+      this.warningEntries &&
+      index >= 0 &&
+      index < count &&
+      history.getEntryAtIndex(index).url.startsWith('data:')
+    ) {
+      index += step;
+    }
+    return index >= 0 && index < count ? index : -1;
+  }
+
+  // Removes a history entry, unless the tab is on it (or on its way to it) or
+  // it has since become another's.
+  private dropEntry(entry: { index: number; url: string }): void {
+    const history = this.webContentsViewInstance?.webContents?.navigationHistory;
+    if (!history || entry.index === history.getActiveIndex()) return;
+    if (history.getEntryAtIndex(entry.index)?.url !== entry.url) return;
+    history.removeEntryAtIndex(entry.index);
+    this.committedIndex = history.getActiveIndex();
+  }
+
+  // Back and Forward can change without a navigation of the page's own: an
+  // iframe's navigation adds a history entry, and the user's input on a page
+  // can let Back reach the entries it added on its own. The chrome's buttons
+  // follow.
+  private refreshBackForward(): void {
+    // A page can close its own view (window.close()) while a re-check waits.
+    const wc = this.webContentsViewInstance?.webContents;
+    if (this._destroyed || !wc || wc.isDestroyed()) return;
+    const shown = this.shownBackForward;
+    const backForward = this.backForward();
+    if (
+      backForward.canGoBack === shown.canGoBack &&
+      backForward.canGoForward === shown.canGoForward
+    ) {
+      return;
+    }
+    this.parentAppWindow
+      .getBrowserWindowInstance()
+      ?.webContents.send(MainToRendererEventsForBrowserIPC.TAB_BACK_FORWARD_UPDATED, {
+        id: this.id,
+        ...backForward,
+      });
+  }
+
+  // Back and Forward for the chrome, noted as what it shows.
+  private backForward(): { canGoBack: boolean; canGoForward: boolean } {
+    this.shownBackForward = { canGoBack: this.canGoBack(), canGoForward: this.canGoForward() };
+    return this.shownBackForward;
   }
 
   // Reader Mode methods
@@ -1379,6 +1991,17 @@ export class Tab {
         this.sendReaderModeAvailability();
       }
     }, 1000);
+  }
+
+  // A new document (or an error page) leaves reader mode and drops the
+  // previous page's article.
+  private resetReaderMode(): void {
+    if (this.readerMode.isActive) {
+      this.deactivateReaderMode();
+    }
+    this.readerMode.isEligible = false;
+    this.readerMode.cachedArticle = null;
+    this.sendReaderModeAvailability();
   }
 
   private sendReaderModeAvailability(): void {
@@ -1632,9 +2255,9 @@ export class Tab {
           {
             label: 'Copy link address',
             click: () => {
-              this.webContentsViewInstance.webContents.executeJavaScript(`
-              navigator.clipboard.writeText("${linkURL}");
-            `);
+              // From main, not via page script: the URL is page-controlled and
+              // must never be spliced into code that runs in the page.
+              clipboard.writeText(linkURL);
             },
           },
           { type: 'separator' as const }
@@ -1656,9 +2279,9 @@ export class Tab {
           {
             label: 'Copy link address',
             click: () => {
-              this.webContentsViewInstance.webContents.executeJavaScript(`
-            navigator.clipboard.writeText("${linkURL}");
-          `);
+              // From main, not via page script: the URL is page-controlled and
+              // must never be spliced into code that runs in the page.
+              clipboard.writeText(linkURL);
             },
           },
           { type: 'separator' }
@@ -1669,15 +2292,15 @@ export class Tab {
       //for clicking on image
       template.push(
         {
-          label: 'Save Image As...',
+          label: 'Save Image As…',
           click: async () => {
-            this.webContentsViewInstance.webContents.downloadURL(srcURL);
+            this.getLiveWebContents()?.downloadURL(srcURL);
           },
         },
         {
           label: 'Copy Image',
           click: () => {
-            this.webContentsViewInstance.webContents.copyImageAt(params.x, params.y);
+            this.getLiveWebContents()?.copyImageAt(params.x, params.y);
           },
         },
         { type: 'separator' }
@@ -1687,12 +2310,12 @@ export class Tab {
       //for selected text
       const engineName = SearchEngine.getSearchEngineName();
       const truncatedText =
-        selectionText.length > 30 ? selectionText.substring(0, 30) + '...' : selectionText;
+        selectionText.length > 30 ? selectionText.substring(0, 30) + '…' : selectionText;
       template.push(
         {
           label: 'Copy',
           click: () => {
-            this.webContentsViewInstance.webContents.copy();
+            this.getLiveWebContents()?.copy();
           },
         },
         {
@@ -1708,30 +2331,23 @@ export class Tab {
     template.push(
       {
         label: 'Back',
-        click: () => {
-          if (this.webContentsViewInstance.webContents.navigationHistory.canGoBack()) {
-            this.webContentsViewInstance.webContents.navigationHistory.goBack();
-          }
-        },
+        click: () => this.goBack(),
       },
       {
         label: 'Forward',
-        click: () => {
-          if (this.webContentsViewInstance.webContents.navigationHistory.canGoForward()) {
-            this.webContentsViewInstance.webContents.navigationHistory.goForward();
-          }
-        },
+        click: () => this.goForward(),
       },
       {
         label: 'Reload',
         click: () => {
-          this.webContentsViewInstance.webContents.reload();
+          this.getLiveWebContents()?.reload();
         },
       },
       {
         label: 'Hard Reload',
         click: () => {
-          const webContents = this.webContentsViewInstance.webContents;
+          const webContents = this.getLiveWebContents();
+          if (!webContents) return;
           const webSession = webContents.session;
           const currentUrl = webContents.getURL();
           try {
@@ -1747,9 +2363,9 @@ export class Tab {
       },
       { type: 'separator' },
       {
-        label: 'Print...',
+        label: 'Print…',
         click: () => {
-          this.webContentsViewInstance.webContents.print();
+          this.getLiveWebContents()?.print();
         },
       }
     );

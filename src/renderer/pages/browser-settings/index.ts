@@ -11,6 +11,8 @@ import {
   FilterListConfig,
   KeyboardShortcutAction,
 } from '../../../types/settings-types';
+import { FaviconTile } from '../../common/favicon-tile';
+import { ChipRow } from '../../common/chip-row';
 
 // ---- Globals ----
 let settings: BrowserSettings = { ...DEFAULT_BROWSER_SETTINGS };
@@ -19,7 +21,7 @@ let activeFilter = 'all';
 
 // Lucide icon per shortcut category — surfaced on the toolbar filter pills.
 const SHORTCUT_CATEGORY_ICONS: Record<string, string> = {
-  Tabs: 'layout-grid',
+  Tabs: 'file-plus-2',
   Window: 'app-window',
   Navigation: 'compass',
   Utilities: 'wrench',
@@ -29,7 +31,6 @@ const SHORTCUT_CATEGORY_ICONS: Record<string, string> = {
 };
 
 const isMac = (window as any).DataStoreAPI?.platform === 'darwin';
-const modKey = isMac ? 'Cmd' : 'Ctrl';
 
 // ---- Init ----
 document.addEventListener('DOMContentLoaded', async () => {
@@ -72,12 +73,11 @@ async function saveSettings() {
 }
 
 function showToast(message: string) {
-  const existing = document.querySelector('.settings-toast');
-  if (existing) existing.remove();
   const toast = document.createElement('div');
-  toast.className = 'settings-toast';
+  toast.className = 'toast';
   toast.textContent = message;
-  document.body.appendChild(toast);
+  // One toast at a time, inside the page's persistent status region.
+  document.getElementById('toast-region')?.replaceChildren(toast);
   setTimeout(() => toast.remove(), 2000);
 }
 
@@ -117,7 +117,7 @@ function initStartupSettings() {
     if (r.value === (settings.startupMode || 'continue')) r.checked = true;
   });
   if (pagesContainer) {
-    pagesContainer.style.display = settings.startupMode === 'specific-pages' ? '' : 'none';
+    pagesContainer.hidden = settings.startupMode !== 'specific-pages';
   }
 
   // Radio change handler
@@ -125,7 +125,7 @@ function initStartupSettings() {
     radio.addEventListener('change', () => {
       settings.startupMode = radio.value as BrowserSettings['startupMode'];
       if (pagesContainer) {
-        pagesContainer.style.display = radio.value === 'specific-pages' ? '' : 'none';
+        pagesContainer.hidden = radio.value !== 'specific-pages';
       }
       saveSettings();
       showToast('Startup setting updated');
@@ -168,7 +168,7 @@ function renderStartupPages() {
     item.className = 'list-item';
     item.innerHTML = `
       <div class="list-item-content">
-        <div class="list-item-text">${url}</div>
+        <div class="list-item-text">${escapeHtml(url)}</div>
       </div>
       <div class="list-item-actions">
         <button class="list-item-btn" data-idx="${idx}" title="Remove">
@@ -190,6 +190,10 @@ function renderStartupPages() {
 
 // ---- Developer Settings ----
 function initDeveloperSettings() {
+  // Only this platform's shortcut, as the View menu's Toggle Developer Tools has it.
+  const shortcut = document.getElementById('devtools-shortcut');
+  if (shortcut) shortcut.textContent = isMac ? '⌥⌘I' : 'Ctrl+Shift+I';
+
   const toggle = document.getElementById('devtools-toggle') as HTMLInputElement;
   if (!toggle) return;
   toggle.checked = settings.devToolsEnabled || false;
@@ -197,7 +201,7 @@ function initDeveloperSettings() {
   toggle.addEventListener('change', () => {
     settings.devToolsEnabled = toggle.checked;
     saveSettings();
-    showToast(toggle.checked ? 'Developer Tools enabled' : 'Developer Tools disabled');
+    showToast(toggle.checked ? 'Developer tools enabled' : 'Developer tools disabled');
   });
 }
 
@@ -239,10 +243,21 @@ function initGeneralSettings() {
   const changeBtn = document.getElementById('change-download-path-btn');
   const resetBtn = document.getElementById('reset-download-path-btn');
 
-  function updatePathDisplay() {
-    if (pathDisplay) {
-      pathDisplay.textContent = settings.downloadPath || 'Default downloads folder';
-    }
+  // The chosen folder, or the system's downloads folder when none is. The
+  // path truncates in the middle: its head shrinks with an ellipsis and the
+  // last folder stays whole; the tooltip holds the full path.
+  async function updatePathDisplay() {
+    if (!pathDisplay) return;
+    const folder = settings.downloadPath || (await window.BrowserAPI.getDefaultDownloadFolder());
+    const split = folder.search(/[\\/][^\\/]*$/);
+    const head = document.createElement('span');
+    head.className = 'setting-path-head';
+    head.textContent = split > 0 ? folder.slice(0, split) : '';
+    const tail = document.createElement('span');
+    tail.className = 'setting-path-tail';
+    tail.textContent = split > 0 ? folder.slice(split) : folder;
+    pathDisplay.replaceChildren(head, tail);
+    pathDisplay.title = folder;
   }
 
   updatePathDisplay();
@@ -352,8 +367,8 @@ function renderCustomEngines() {
     item.innerHTML = `
       <div class="list-item-content">
         <div>
-          <div class="list-item-text">${engine.name}</div>
-          <div class="list-item-description">${engine.searchUrlTemplate}</div>
+          <div class="list-item-text">${escapeHtml(engine.name)}</div>
+          <div class="list-item-description">${escapeHtml(engine.searchUrlTemplate)}</div>
         </div>
       </div>
       <div class="list-item-actions">
@@ -398,14 +413,12 @@ function initCookieSettings() {
   clearOnCloseToggle.checked = settings.clearCookiesOnClose || false;
 
   // Show/hide exceptions
-  if (settings.cookiePolicy === 'block-with-exceptions') {
-    exceptionsContainer.style.display = '';
-  }
+  exceptionsContainer.hidden = settings.cookiePolicy !== 'block-with-exceptions';
 
   radios.forEach((radio) => {
     radio.addEventListener('change', () => {
       settings.cookiePolicy = radio.value as BrowserSettings['cookiePolicy'];
-      exceptionsContainer.style.display = radio.value === 'block-with-exceptions' ? '' : 'none';
+      exceptionsContainer.hidden = radio.value !== 'block-with-exceptions';
       saveSettings();
       showToast('Cookie policy updated');
     });
@@ -479,7 +492,7 @@ function renderCookieExceptions() {
     const item = document.createElement('div');
     item.className = 'list-item';
     item.innerHTML = `
-      <div class="list-item-content"><span class="list-item-text">${domain}</span></div>
+      <div class="list-item-content"><span class="list-item-text">${escapeHtml(domain)}</span></div>
       <div class="list-item-actions">
         <button class="list-item-btn" title="Remove"><i data-lucide="x" width="14" height="14"></i></button>
       </div>
@@ -501,11 +514,11 @@ function initAdBlockerSettings() {
   const details = document.getElementById('adblocker-details');
 
   toggle.checked = settings.adBlockerEnabled !== false;
-  details.style.display = toggle.checked ? '' : 'none';
+  details.hidden = !toggle.checked;
 
   toggle.addEventListener('change', () => {
     settings.adBlockerEnabled = toggle.checked;
-    details.style.display = toggle.checked ? '' : 'none';
+    details.hidden = !toggle.checked;
     saveSettings();
     showToast(toggle.checked ? 'Ad-blocker enabled' : 'Ad-blocker disabled');
   });
@@ -560,8 +573,8 @@ function renderFilterLists() {
     item.className = 'list-item';
     item.innerHTML = `
       <div class="list-item-content">
-        <div class="list-item-text" style="font-family: var(--n0-sans); font-weight: 500;">${list.name}</div>
-        <div class="list-item-description" style="font-family: var(--n0-sans);">${list.description}</div>
+        <div class="list-item-text">${escapeHtml(list.name)}</div>
+        <div class="list-item-description">${escapeHtml(list.description)}</div>
       </div>
       <div class="list-item-actions">
         <label class="toggle">
@@ -603,7 +616,7 @@ function renderAllowedSites() {
     const item = document.createElement('div');
     item.className = 'list-item';
     item.innerHTML = `
-      <div class="list-item-content"><span class="list-item-text">${site}</span></div>
+      <div class="list-item-content"><span class="list-item-text">${escapeHtml(site)}</span></div>
       <div class="list-item-actions">
         <button class="list-item-btn" title="Remove"><i data-lucide="x" width="14" height="14"></i></button>
       </div>
@@ -643,8 +656,8 @@ function initPopupSettings() {
   });
 
   function updatePopupContainerVisibility(policy: string) {
-    allowedContainer.style.display = policy === 'block' || policy === 'smart' ? '' : 'none';
-    blockedContainer.style.display = policy === 'allow' ? '' : 'none';
+    allowedContainer.hidden = policy !== 'block' && policy !== 'smart';
+    blockedContainer.hidden = policy !== 'allow';
   }
 
   renderPopupAllowedSites();
@@ -686,7 +699,7 @@ function renderPopupAllowedSites() {
     const item = document.createElement('div');
     item.className = 'list-item';
     item.innerHTML = `
-      <div class="list-item-content"><span class="list-item-text">${site}</span></div>
+      <div class="list-item-content"><span class="list-item-text">${escapeHtml(site)}</span></div>
       <div class="list-item-actions">
         <button class="list-item-btn" title="Remove"><i data-lucide="x" width="14" height="14"></i></button>
       </div>
@@ -711,7 +724,7 @@ function renderPopupBlockedSites() {
     const item = document.createElement('div');
     item.className = 'list-item';
     item.innerHTML = `
-      <div class="list-item-content"><span class="list-item-text">${site}</span></div>
+      <div class="list-item-content"><span class="list-item-text">${escapeHtml(site)}</span></div>
       <div class="list-item-actions">
         <button class="list-item-btn" title="Remove"><i data-lucide="x" width="14" height="14"></i></button>
       </div>
@@ -739,7 +752,7 @@ function initDataRetentionSettings() {
   ) as HTMLInputElement;
 
   autoDeleteToggle.checked = settings.autoDeleteEnabled || false;
-  retentionSettings.style.display = autoDeleteToggle.checked ? '' : 'none';
+  retentionSettings.hidden = !autoDeleteToggle.checked;
   clearHistoryCloseToggle.checked = settings.clearHistoryOnClose || false;
   clearCacheCloseToggle.checked = settings.clearCacheOnClose || false;
 
@@ -752,7 +765,7 @@ function initDataRetentionSettings() {
 
   autoDeleteToggle.addEventListener('change', () => {
     settings.autoDeleteEnabled = autoDeleteToggle.checked;
-    retentionSettings.style.display = autoDeleteToggle.checked ? '' : 'none';
+    retentionSettings.hidden = !autoDeleteToggle.checked;
     saveSettings();
   });
 
@@ -804,15 +817,15 @@ function initDataRetentionSettings() {
   const clearDataConfirm = document.getElementById('clear-data-confirm');
 
   clearDataBtn?.addEventListener('click', () => {
-    clearDataDialog.style.display = 'flex';
+    clearDataDialog.hidden = false;
   });
 
   clearDataCancel?.addEventListener('click', () => {
-    clearDataDialog.style.display = 'none';
+    clearDataDialog.hidden = true;
   });
 
   clearDataDialog?.addEventListener('click', (e) => {
-    if (e.target === clearDataDialog) clearDataDialog.style.display = 'none';
+    if (e.target === clearDataDialog) clearDataDialog.hidden = true;
   });
 
   clearDataConfirm?.addEventListener('click', async () => {
@@ -828,7 +841,7 @@ function initDataRetentionSettings() {
         .checked,
     };
     await (window as any).BrowserAPI.clearBrowsingData(options);
-    clearDataDialog.style.display = 'none';
+    clearDataDialog.hidden = true;
     showToast('Browsing data cleared');
     updateCookieCount();
   });
@@ -852,12 +865,12 @@ function initUserAgentSettings() {
     platform === 'darwin' ? 'chrome-mac' : platform === 'linux' ? 'chrome-linux' : 'chrome-windows';
   select.value = settings.userAgentPreset || defaultPreset;
   customInput.value = settings.userAgentCustomValue || '';
-  customContainer.style.display = select.value === 'custom' ? '' : 'none';
+  customContainer.hidden = select.value !== 'custom';
   updateUAPreview();
 
   select.addEventListener('change', () => {
     settings.userAgentPreset = select.value as BrowserSettings['userAgentPreset'];
-    customContainer.style.display = select.value === 'custom' ? '' : 'none';
+    customContainer.hidden = select.value !== 'custom';
     updateUAPreview();
     saveSettings();
     showToast('User agent updated');
@@ -986,8 +999,8 @@ function initNetworkSettings() {
 function updateProxyFormVisibility(mode: string) {
   const manualForm = document.getElementById('manual-proxy-form');
   const pacForm = document.getElementById('pac-proxy-form');
-  manualForm.style.display = mode === 'manual' ? '' : 'none';
-  pacForm.style.display = mode === 'pac' ? '' : 'none';
+  manualForm.hidden = mode !== 'manual';
+  pacForm.hidden = mode !== 'pac';
 }
 
 // ---- Keyboard Shortcuts ----
@@ -1004,6 +1017,8 @@ function initKeyboardShortcuts() {
     currentShortcut: effectiveDefault(s),
   }));
 
+  const filters = document.getElementById('shortcut-filters');
+  if (filters) ChipRow.attach(filters);
   renderShortcutFilters();
   renderShortcutsTable();
 
@@ -1026,14 +1041,12 @@ function renderShortcutFilters() {
 
   const buildPill = (label: string, value: string, iconName: string) => {
     const pill = document.createElement('button');
-    pill.className = 'cat-pill';
+    pill.className = 'chip';
     pill.dataset.filter = value;
-    pill.innerHTML = `<i data-lucide="${iconName}" width="13" height="13"></i> ${label}`;
+    pill.innerHTML = `<i data-lucide="${iconName}" width="14" height="14"></i> ${label}`;
     const isActive = activeFilter === value;
     if (isActive) {
-      pill.style.background = 'var(--fg-1)';
-      pill.style.color = 'var(--bg-0)';
-      pill.style.borderColor = 'var(--fg-1)';
+      pill.classList.add('active');
     }
     pill.addEventListener('click', () => {
       activeFilter = isActive ? 'all' : value;
@@ -1084,38 +1097,82 @@ function renderShortcutsTable() {
   createIcons({ icons });
 }
 
+// Render a single shortcut key. On macOS modifiers collapse to their
+// glyphs (⌘ ⇧ ⌥ ⌃); on Windows/Linux they stay as text ('Ctrl', 'Shift', …).
+function formatShortcutKey(part: string): string {
+  if (part === 'mod') return isMac ? '⌘' : 'Ctrl';
+  if (!isMac) return part;
+  switch (part) {
+    case 'Cmd':
+      return '⌘';
+    case 'Shift':
+      return '⇧';
+    case 'Alt':
+    case 'Opt':
+    case 'Option':
+      return '⌥';
+    case 'Ctrl':
+      return '⌃';
+    default:
+      return part;
+  }
+}
+
+// macOS lists modifiers in a fixed order — ⌃ ⌥ ⇧ ⌘, then the key
+// (⇧⌘T, ⌥⌘I). Display only: the stored combo keeps its own order.
+const MAC_MODIFIER_RANK = new Map<string, number>([
+  ['Ctrl', 0],
+  ['Alt', 1],
+  ['Opt', 1],
+  ['Option', 1],
+  ['Shift', 2],
+  ['mod', 3],
+  ['Cmd', 3],
+]);
+
+function orderShortcutParts(parts: string[]): string[] {
+  if (!isMac) return parts;
+  const rank = (part: string) => MAC_MODIFIER_RANK.get(part) ?? 4;
+  return parts
+    .map((part, index) => ({ part, index }))
+    .sort((a, b) => rank(a.part) - rank(b.part) || a.index - b.index)
+    .map(({ part }) => part);
+}
+
 function formatShortcutDisplay(combo: string): string {
-  if (!combo) return '<span style="color: var(--n0-text-3); font-style: italic;">None</span>';
-  return combo
-    .split('+')
-    .map((part) => {
-      let display = part;
-      if (part === 'mod') display = modKey;
-      return `<span class="keycap">${display}</span>`;
-    })
+  if (!combo) return '<span class="shortcut-none">None</span>';
+  // One keycap per key, in a row that spaces them (DESIGN.md §5.3).
+  const keycaps = orderShortcutParts(combo.split('+'))
+    .map((part) => `<span class="keycap">${formatShortcutKey(part)}</span>`)
     .join('');
+  return `<span class="shortcut-keys">${keycaps}</span>`;
 }
 
 // ---- Permissions Settings ----
 const PERMISSION_INFO: Record<string, { label: string; icon: string }> = {
-  media: { label: 'Camera/Microphone', icon: 'camera' },
+  media: { label: 'Camera/microphone', icon: 'camera' },
   geolocation: { label: 'Location', icon: 'map-pin' },
   notifications: { label: 'Notifications', icon: 'bell' },
-  midi: { label: 'MIDI Devices', icon: 'music' },
-  midiSysex: { label: 'MIDI System Exclusive', icon: 'music' },
-  'display-capture': { label: 'Screen Sharing', icon: 'monitor' },
+  midi: { label: 'MIDI devices', icon: 'music' },
+  midiSysex: { label: 'MIDI system exclusive', icon: 'music' },
+  'display-capture': { label: 'Screen sharing', icon: 'monitor' },
   'clipboard-read': { label: 'Clipboard', icon: 'clipboard' },
-  'idle-detection': { label: 'Idle Detection', icon: 'moon' },
-  'storage-access': { label: 'Storage Access', icon: 'hard-drive' },
-  'window-management': { label: 'Window Management', icon: 'app-window' },
-  'local-fonts': { label: 'Local Fonts', icon: 'type' },
-  'screen-wake-lock': { label: 'Screen Wake Lock', icon: 'monitor' },
-  'speaker-selection': { label: 'Speaker Selection', icon: 'speaker' },
-  'keyboard-lock': { label: 'Keyboard Lock', icon: 'keyboard' },
-  usb: { label: 'USB Devices', icon: 'usb' },
-  serial: { label: 'Serial Ports', icon: 'usb' },
-  bluetooth: { label: 'Bluetooth Devices', icon: 'bluetooth' },
-  hid: { label: 'HID Devices', icon: 'keyboard' },
+  'idle-detection': { label: 'Idle detection', icon: 'moon' },
+  openExternal: { label: 'External applications', icon: 'app-window' },
+  pointerLock: { label: 'Pointer lock', icon: 'mouse-pointer' },
+  'persistent-storage': { label: 'Persistent storage', icon: 'database' },
+  'storage-access': { label: 'Storage access', icon: 'hard-drive' },
+  'top-level-storage-access': { label: 'Top-level storage access', icon: 'hard-drive' },
+  fileSystem: { label: 'File system', icon: 'folder' },
+  'window-management': { label: 'Window management', icon: 'app-window' },
+  'local-fonts': { label: 'Local fonts', icon: 'type' },
+  'screen-wake-lock': { label: 'Screen wake lock', icon: 'monitor' },
+  'speaker-selection': { label: 'Speaker selection', icon: 'speaker' },
+  keyboardLock: { label: 'Keyboard lock', icon: 'keyboard' },
+  usb: { label: 'USB devices', icon: 'usb' },
+  serial: { label: 'Serial ports', icon: 'usb' },
+  bluetooth: { label: 'Bluetooth devices', icon: 'bluetooth' },
+  hid: { label: 'HID devices', icon: 'keyboard' },
 };
 
 function getPermLabel(permissionType: string): string {
@@ -1155,7 +1212,10 @@ async function initPermissionsSettings() {
     showToast('Permissions refreshed');
   });
 
-  document.getElementById('clear-all-permissions-btn')?.addEventListener('click', async () => {
+  document.getElementById('clear-all-permissions-btn')?.addEventListener('click', async (event) => {
+    // A double-click on the last site's Remove All, or the last row's ×,
+    // lands its second click here once that site or row has gone.
+    if (event.detail > 1) return;
     if (!confirm('Remove all site permissions? Sites will need to request permissions again.'))
       return;
     await (window as any).BrowserAPI.clearAllPermissions();
@@ -1181,20 +1241,31 @@ async function loadAndRenderPermissions(searchTerm?: string) {
       renderPermissions([]);
       return;
     }
-    const permissions = await api.fetchPermissions(searchTerm || '');
+    // Fetch everything and filter here, so a search matches the label a row
+    // shows ("Pointer lock") as well as the stored type ("pointerLock").
+    const permissions = await api.fetchPermissions('');
+    const all: PermissionRecord[] = Array.isArray(permissions) ? permissions : [];
+    const term = (searchTerm || '').toLowerCase();
+    const matches = term
+      ? all.filter((p) =>
+          [p.origin, p.permissionType, getPermLabel(p.permissionType)].some((value) =>
+            (value || '').toLowerCase().includes(term)
+          )
+        )
+      : all;
     console.log('[permissions] fetched', {
-      count: permissions?.length ?? 0,
+      count: matches.length,
       searchTerm,
-      sample: permissions?.[0],
+      sample: matches[0],
     });
-    renderPermissions(Array.isArray(permissions) ? permissions : []);
+    renderPermissions(matches, term !== '');
   } catch (err) {
     console.error('[permissions] fetch failed', err);
     renderPermissions([]);
   }
 }
 
-function renderPermissions(permissions: PermissionRecord[]) {
+function renderPermissions(permissions: PermissionRecord[], isFiltered = false) {
   const container = document.getElementById('permissions-list')!;
   const emptyState = document.getElementById('permissions-empty')!;
   const footer = document.getElementById('permissions-footer')!;
@@ -1202,14 +1273,14 @@ function renderPermissions(permissions: PermissionRecord[]) {
   container.innerHTML = '';
 
   if (permissions.length === 0) {
-    emptyState.style.display = '';
-    footer.style.display = 'none';
+    emptyState.hidden = false;
+    footer.hidden = true;
     createIcons({ icons });
     return;
   }
 
-  emptyState.style.display = 'none';
-  footer.style.display = '';
+  emptyState.hidden = true;
+  footer.hidden = false;
 
   // Group by origin
   const grouped = new Map<string, PermissionRecord[]>();
@@ -1228,24 +1299,46 @@ function renderPermissions(permissions: PermissionRecord[]) {
     header.className = 'permission-origin-header';
     const favicon = perms[0].faviconUrl;
     const faviconHtml = favicon
-      ? `<img class="permission-origin-favicon" src="${escapeHtml(favicon)}" alt="" onerror="this.outerHTML='<i data-lucide=\\'globe\\' class=\\'permission-origin-favicon\\' width=\\'16\\' height=\\'16\\'></i>'">`
-      : `<i data-lucide="globe" class="permission-origin-favicon" width="16" height="16"></i>`;
+      ? `<img class="permission-origin-favicon" src="${escapeHtml(favicon)}" alt="">`
+      : FaviconTile.html(origin);
     header.innerHTML = `
       <span class="permission-origin-title">
         ${faviconHtml}
         <span class="permission-origin-name">${escapeHtml(origin)}</span>
       </span>
       <span class="permission-origin-actions">
-        <button class="btn btn-sm btn-danger permission-remove-all-btn"><i data-lucide="trash-2" width="12" height="12"></i> Remove All</button>
+        <button class="btn btn-sm btn-raised permission-remove-all-btn"><i data-lucide="trash-2" width="14" height="14"></i> Remove All</button>
       </span>
     `;
-    header.querySelector('.permission-remove-all-btn')!.addEventListener('click', async () => {
-      await (window as any).BrowserAPI.removeAllPermissionsForOrigin(origin);
+    // A favicon that fails to load falls back to the favicon fallback tile.
+    FaviconTile.attachFallback(header.querySelector('img.permission-origin-favicon'), origin);
+    const removeAllButton = header.querySelector('.permission-remove-all-btn') as HTMLButtonElement;
+    removeAllButton.addEventListener('click', async (event) => {
+      // A double-click's second click lands on whatever slid under the
+      // pointer: the next site's button.
+      if (event.detail > 1) return;
+      removeAllButton.disabled = true;
+      // While a search filters the list, remove only the rows it shows: the
+      // site can have other decisions that aren't on screen. (A row's × can
+      // still be at work: go by the rows as they are now.)
+      const rows = perms.slice();
+      if (isFiltered) {
+        for (const perm of rows) {
+          await window.BrowserAPI.removePermission(perm.id);
+        }
+      } else {
+        await (window as any).BrowserAPI.removeAllPermissionsForOrigin(origin);
+      }
       group.remove();
-      showToast(`Permissions removed for ${origin}`);
+      const removed = !isFiltered
+        ? 'Permissions'
+        : rows.length === 1
+          ? getPermLabel(rows[0].permissionType)
+          : `${rows.length} permissions`;
+      showToast(`${removed} removed for ${origin}`);
       if (container.children.length === 0) {
-        emptyState.style.display = '';
-        footer.style.display = 'none';
+        emptyState.hidden = false;
+        footer.hidden = true;
         createIcons({ icons });
       }
     });
@@ -1261,7 +1354,7 @@ function renderPermissions(permissions: PermissionRecord[]) {
       const isAllowed = perm.decision === 'allowed_persistent';
 
       entry.innerHTML = `
-        <i data-lucide="${iconName}" class="permission-entry-icon" width="18" height="18"></i>
+        <i data-lucide="${iconName}" class="permission-entry-icon" width="16" height="16"></i>
         <span class="permission-entry-label">${escapeHtml(label)}</span>
         <span class="permission-entry-decision">
           <select class="form-select-sm permission-decision-select">
@@ -1280,15 +1373,22 @@ function renderPermissions(permissions: PermissionRecord[]) {
         );
       });
 
-      entry.querySelector('.permission-entry-remove')!.addEventListener('click', async () => {
+      const removeButton = entry.querySelector('.permission-entry-remove') as HTMLButtonElement;
+      removeButton.addEventListener('click', async (event) => {
+        // Likewise the next row's ×.
+        if (event.detail > 1) return;
+        removeButton.disabled = true;
+        // The site's Remove All acts on (and counts) only the rows left.
+        const index = perms.indexOf(perm);
+        if (index !== -1) perms.splice(index, 1);
         await (window as any).BrowserAPI.removePermission(perm.id);
         entry.remove();
         showToast(`${label} permission removed`);
         if (group.querySelectorAll('.permission-entry').length === 0) {
           group.remove();
           if (container.children.length === 0) {
-            emptyState.style.display = '';
-            footer.style.display = 'none';
+            emptyState.hidden = false;
+            footer.hidden = true;
             createIcons({ icons });
           }
         }
@@ -1306,7 +1406,9 @@ function renderPermissions(permissions: PermissionRecord[]) {
 function escapeHtml(str: string): string {
   const div = document.createElement('div');
   div.textContent = str;
-  return div.innerHTML;
+  // innerHTML leaves quotes alone: escape them so the result is also safe
+  // inside a quoted attribute (title="…", src="…").
+  return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 createIcons({ icons });

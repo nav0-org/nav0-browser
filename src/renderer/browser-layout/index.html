@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:;"
+      content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
     />
     <title>Nav0 Browser</title>
   </head>
@@ -20,7 +20,7 @@
             <button
               class="traffic-light traffic-light-close"
               id="traffic-light-close"
-              title="Close Window"
+              title="Close window"
               aria-label="Close window"
             >
               <i data-lucide="x" width="8" height="8" stroke-width="3.5"></i>
@@ -28,15 +28,15 @@
             <button
               class="traffic-light traffic-light-minimize"
               id="traffic-light-minimize"
-              title="Minimize — unavailable in Full Screen"
-              aria-label="Minimize (unavailable in Full Screen)"
+              title="Minimize — unavailable in full screen"
+              aria-label="Minimize (unavailable in full screen)"
               disabled
             ></button>
             <button
               class="traffic-light traffic-light-zoom"
               id="traffic-light-zoom"
-              title="Exit Full Screen"
-              aria-label="Exit Full Screen"
+              title="Exit full screen"
+              aria-label="Exit full screen"
             >
               <i data-lucide="minimize-2" width="8" height="8" stroke-width="3.5"></i>
             </button>
@@ -46,8 +46,8 @@
             title="This is a private window."
             id="private-window-identifier"
           >
-            <i data-lucide="shield-check" width="14" height="14"></i>
-            <span>Private!</span>
+            <i data-lucide="eye-off" width="14" height="14"></i>
+            <span>Private</span>
           </div>
           <button class="tab-scroll-btn" id="tab-scroll-left" title="Scroll tabs left">
             <i data-lucide="chevron-left" width="18" height="18"></i>
@@ -71,7 +71,6 @@
             title="Go back"
             disabled="true"
             class="btn-icon btn-ghost rounded-circle p-0"
-            style="width: 32px; height: 32px"
           >
             <i data-lucide="arrow-left" width="18" height="18"></i>
           </button>
@@ -80,23 +79,16 @@
             title="Go forward"
             disabled="true"
             class="btn-icon btn-ghost rounded-circle p-0"
-            style="width: 32px; height: 32px"
           >
             <i data-lucide="arrow-right" width="18" height="18"></i>
           </button>
-          <button
-            id="refresh-button"
-            title="Refresh"
-            class="btn-icon btn-ghost rounded-circle p-0"
-            style="width: 32px; height: 32px"
-          >
+          <button id="refresh-button" title="Refresh" class="btn-icon btn-ghost rounded-circle p-0">
             <i data-lucide="refresh-cw" width="18" height="18"></i>
           </button>
           <button
             id="command-k-button"
             title="Super search with Command K"
             class="btn-icon btn-ghost rounded-circle p-0"
-            style="width: 32px; height: 32px"
           >
             <i data-lucide="terminal" width="18" height="18"></i>
           </button>
@@ -106,7 +98,6 @@
           <button
             class="btn-icon btn-ghost rounded-circle p-0 ssl-indicator ssl-search"
             id="ssl-indicator"
-            style="width: 32px; height: 32px"
             title="Search"
           >
             <svg
@@ -133,11 +124,14 @@
             autocomplete="off"
             spellcheck="false"
           />
+          <!-- Display-only copy of the URL, drawn over the input while it
+               isn't focused (domain emphasis). Filled by browser-manager.ts. -->
+          <div class="url-display" id="url-display" aria-hidden="true"></div>
           <button
             id="reader-mode-button"
-            title="Reader Mode"
+            title="Reader mode"
             class="btn-icon btn-ghost rounded-circle p-0 reader-mode-btn"
-            style="width: 32px; height: 32px; display: none"
+            hidden
           >
             <i data-lucide="book-open-text" width="16" height="16"></i>
           </button>
@@ -145,7 +139,7 @@
             id="pdf-download-button"
             title="Download PDF"
             class="btn-icon btn-ghost rounded-circle p-0"
-            style="width: 32px; height: 32px; display: none"
+            hidden
           >
             <i data-lucide="file-down" width="16" height="16"></i>
           </button>
@@ -153,7 +147,7 @@
             id="bookmark-button"
             title="Bookmark this page"
             class="btn-icon btn-ghost rounded-circle p-0"
-            style="width: 32px; height: 32px"
+            hidden
           >
             <i data-lucide="bookmark" width="16" height="16"></i>
           </button>
@@ -161,7 +155,7 @@
             id="unbookmark-button"
             title="Add to reading list"
             class="btn-icon btn-ghost rounded-circle p-0"
-            style="width: 32px; height: 32px"
+            hidden
           >
             <i data-lucide="bookmark-check" width="16" height="16"></i>
           </button>
@@ -169,7 +163,7 @@
             id="readinglist-button"
             title="Remove from reading list"
             class="btn-icon btn-ghost rounded-circle p-0"
-            style="width: 32px; height: 32px"
+            hidden
           >
             <i data-lucide="book-open-check" width="16" height="16"></i>
           </button>
@@ -179,7 +173,6 @@
           class="btn-icon btn-ghost rounded-circle p-0 position-relative"
           title="Downloads"
           id="downloads-button"
-          style="width: 32px; height: 32px; margin-left: var(--spacing-xs)"
         >
           <i data-lucide="download" width="18" height="18"></i>
           <svg
@@ -188,7 +181,7 @@
             width="32"
             height="32"
             viewBox="0 0 32 32"
-            style="display: none"
+            hidden
           >
             <circle
               class="download-progress-ring-bg"
@@ -213,14 +206,13 @@
           class="btn-icon btn-ghost rounded-circle p-0 position-relative"
           title="Menu options"
           id="options-button"
-          style="width: 32px; height: 32px; margin-left: var(--spacing-xs)"
         >
           <i data-lucide="ellipsis-vertical" width="18" height="18"></i>
         </button>
         <div id="options-container"></div>
       </div>
       <!-- Permission Strip (hidden by default) -->
-      <div id="permission-strip" class="permission-strip" style="display: none">
+      <div id="permission-strip" class="permission-strip" hidden>
         <div class="permission-strip-content">
           <div class="permission-strip-info">
             <i
@@ -236,14 +228,16 @@
               width="14"
               height="14"
               class="perm-icon-insecure"
-              style="display: none"
+              hidden
             ></i>
             <span class="perm-origin" id="perm-origin"></span>
             <span class="perm-separator">wants to access</span>
             <span class="perm-label" id="perm-label"></span>
           </div>
           <div class="permission-strip-actions">
-            <button id="perm-allow-once" class="perm-btn perm-btn-allow">Allow Once</button>
+            <button id="perm-allow-once" class="perm-btn perm-btn-allow btn-primary">
+              Allow Once
+            </button>
             <button id="perm-always-allow" class="perm-btn perm-btn-always-allow">
               Always Allow
             </button>
@@ -251,17 +245,15 @@
             <button id="perm-always-deny" class="perm-btn perm-btn-always-deny">Always Deny</button>
           </div>
           <div class="permission-strip-notes">
-            <span id="perm-private-note" class="perm-note" style="display: none"
-              >Private mode — not saved</span
-            >
-            <span id="perm-insecure-note" class="perm-note perm-note-danger" style="display: none"
+            <span id="perm-private-note" class="perm-note" hidden>Private mode — not saved</span>
+            <span id="perm-insecure-note" class="perm-note perm-note-danger" hidden
               >Insecure site — allow blocked</span
             >
           </div>
         </div>
       </div>
       <!-- Find in Page Bar (hidden by default) -->
-      <div id="find-in-page-bar" class="find-in-page-bar" style="display: none">
+      <div id="find-in-page-bar" class="find-in-page-bar" hidden>
         <div class="find-bar-wrapper">
           <div class="find-bar" id="find-bar" role="search" aria-label="Find in page">
             <div class="find-input-group">
@@ -281,8 +273,8 @@
               <button
                 class="find-toggle-btn"
                 id="match-case-btn"
-                title="Match Case (Alt+C)"
-                aria-label="Match Case"
+                title="Match case (Alt+C)"
+                aria-label="Match case"
                 aria-pressed="false"
               >
                 Aa
@@ -290,8 +282,8 @@
               <button
                 class="find-toggle-btn"
                 id="whole-word-btn"
-                title="Whole Word (Alt+W)"
-                aria-label="Whole Word"
+                title="Whole word (Alt+W)"
+                aria-label="Whole word"
                 aria-pressed="false"
               >
                 <span class="whole-word-icon">ab</span>
@@ -299,8 +291,8 @@
               <button
                 class="find-toggle-btn"
                 id="regex-btn"
-                title="Regular Expression (Alt+R)"
-                aria-label="Regular Expression"
+                title="Regular expression (Alt+R)"
+                aria-label="Regular expression"
                 aria-pressed="false"
               >
                 .*
@@ -309,7 +301,7 @@
               <button
                 class="find-nav-btn"
                 id="prev-btn"
-                title="Previous Match (Shift+Enter)"
+                title="Previous match (Shift+Enter)"
                 aria-label="Previous match"
               >
                 <i data-lucide="chevron-up" width="16" height="16"></i>
@@ -317,7 +309,7 @@
               <button
                 class="find-nav-btn"
                 id="next-btn"
-                title="Next Match (Enter)"
+                title="Next match (Enter)"
                 aria-label="Next match"
               >
                 <i data-lucide="chevron-down" width="16" height="16"></i>

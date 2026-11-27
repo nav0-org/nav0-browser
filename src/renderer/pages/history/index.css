@@ -1,582 +1,348 @@
 @import url('../../styles/global.css');
 
 /* ============================================================
-   History — editorial dashboard layout.
-   Page is the white canvas (browser chrome wraps it). Header
-   is a left-aligned masthead. Toolbar gathers search +
-   time-range + clear into one row. Heatmap, top sites, and
-   categories live in bordered panels. History list keeps its
-   day grouping but each row is a real table-like layout:
-   time | favicon | title+meta | tag | duration | actions.
+   History (DESIGN.md §4.2): the activity map and charts sit in
+   grey panels above the list, which is grouped by day. The page,
+   toolbar, panels and rows use the shared list-page classes in
+   global.css; only what is History's own is here.
    ============================================================ */
 
-.history-page {
-  min-height: 100vh;
-  background: var(--bg-0);
-  color: var(--fg-2);
-}
-
-.history-container {
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 48px 56px 80px;
-}
-
-/* ---- Header ---------------------------------------------- */
-.history-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 32px;
-  flex-wrap: wrap;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--nav0-red-600);
-}
-
-.history-title {
-  font-size: 48px;
-  font-weight: 200;
-  letter-spacing: -0.5px;
-  color: var(--fg-1);
-  margin: 0;
-  line-height: 1.2;
-}
-
-/* ---- Toolbar (search + segmented + clear) --------------- */
-.history-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 28px 0 24px;
-}
-
-.search-container {
+/* ---- Activity map --------------------------------------- */
+/* 16 px under the toolbar and above the charts; the positioning context
+   for the day tooltip. */
+.panel-heat {
   position: relative;
-  flex: 1;
-  display: flex;
-  align-items: center;
-  height: 36px;
-  padding: 0 12px 0 36px;
-  background: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: 3px;
-  color: var(--fg-3);
-  transition:
-    background var(--dur-fast),
-    border-color var(--dur-fast),
-    box-shadow var(--dur-fast);
+  margin: 16px 0;
 }
 
-.search-container:focus-within {
-  background: var(--bg-0);
-  border-color: var(--fg-1);
-  box-shadow: var(--shadow-focus);
+/* The map fills the panel: after the 30 px day-label column, every week
+   column takes an equal share of the width (about 12 px in the 880 px
+   column) with 3 px gaps, and cells stay square. So the grid lines up with
+   the title on the left and ends at the panel's padding on the right, where
+   the legend ends too. Cells never shrink below 11 px; a narrower column
+   scrolls the map sideways. */
+.heatmap-scroll-area {
+  overflow-x: auto;
 }
 
-.search-icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--fg-3);
-  pointer-events: none;
-}
-
-.search-input {
-  flex: 1;
-  min-width: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  font-family: inherit;
-  font-size: 14px;
-  color: var(--fg-1);
-  padding: 0;
-}
-
-.search-input::placeholder {
-  color: var(--fg-4);
-}
-
-/* Segmented "All / Week / Today" buttons */
-.time-range-group {
-  display: inline-flex;
-  background: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: 3px;
-  padding: 2px;
-  gap: 0;
-}
-
-.time-range-btn {
-  border: 0;
-  background: transparent;
-  height: 28px;
-  padding: 0 12px;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--fg-3);
-  border-radius: 2px;
-  cursor: pointer;
-  transition:
-    background var(--dur-fast),
-    color var(--dur-fast);
-}
-
-.time-range-btn:hover {
-  color: var(--fg-1);
-}
-
-.time-range-btn.active {
-  background: var(--fg-1);
-  color: var(--bg-0);
-}
-
-/* Clear-all (danger ghost button) */
-.btn-clear-all {
-  height: 36px;
-  padding: 0 12px;
-  border: 1px solid var(--border-1);
-  background: var(--bg-0);
-  border-radius: 3px;
-  color: var(--danger);
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition:
-    background var(--dur-fast),
-    border-color var(--dur-fast);
-}
-
-.btn-clear-all:hover {
-  background: var(--danger-soft, #fdecea);
-  border-color: var(--danger);
-}
-
-/* ---- Panel (shared bordered card) ----------------------- */
-.panel {
-  background: var(--bg-0);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-md);
-  padding: 20px 22px;
-}
-
-.panel-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 18px;
-}
-
-.panel-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--fg-1);
-  letter-spacing: -0.1px;
+/* Month labels: one slot per week column, sized like the cell columns under
+   them. A label sits over its month's first full week and overflows right. */
+.heatmap-months {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(11px, 1fr);
+  column-gap: 3px;
+  height: 14px;
+  margin-left: 30px;
+  font-size: 11px;
+  line-height: 14px;
+  color: var(--n-text-3);
   white-space: nowrap;
 }
 
-.panel-head .panel-meta {
-  font-size: 11px;
-  color: var(--fg-3);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* ---- Heatmap -------------------------------------------- */
-.panel-heat {
-  padding: 22px 24px 18px;
-  margin-bottom: 20px;
-  /* Establish a positioning context so the absolutely-positioned
-     .heatmap-tooltip (whose coords are calculated relative to this
-     container) anchors correctly to the hovered cell. */
-  position: relative;
-}
-
-.heatmap-header {
+.heatmap-body {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 16px;
-  margin-bottom: 18px;
+  margin-top: 4px;
 }
 
-.heatmap-summary {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--fg-1);
-  letter-spacing: -0.1px;
+.heatmap-days {
+  flex: none;
+  width: 30px;
+  display: grid;
+  grid-template-rows: repeat(7, minmax(0, 1fr));
+  row-gap: 3px;
+  align-items: center;
+  font-size: 11px;
+  line-height: 11px;
+  color: var(--n-text-3);
 }
 
-.heatmap-scroll-area {
-  position: relative;
-  overflow-x: auto;
-  overflow-y: visible;
+.heatmap-cells {
+  flex: 1;
+  display: grid;
+  grid-template-rows: repeat(7, auto);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(11px, 1fr);
+  gap: 3px;
 }
 
-.heatmap-scroll-area svg {
-  display: block;
-  width: 100%;
-  height: auto;
+.heatmap-cell {
+  aspect-ratio: 1;
+  border-radius: var(--n-r-icon);
+}
+
+/* The hovered day (the one the tooltip describes): a white gap, then a ring. */
+.heatmap-cell:hover {
+  box-shadow:
+    0 0 0 1.5px var(--n-card),
+    0 0 0 3px var(--n-text-1);
+}
+
+/* Activity steps — the --n-data ramp, for cells and legend swatches. */
+.heat-0 {
+  background: var(--n-data-0);
+}
+
+.heat-1 {
+  background: var(--n-data-1);
+}
+
+.heat-2 {
+  background: var(--n-data-2);
+}
+
+.heat-3 {
+  background: var(--n-data-3);
+}
+
+.heat-4 {
+  background: var(--n-data-4);
 }
 
 .heatmap-legend {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 6px;
-  margin-top: 8px;
-  font-size: 10px;
-  color: var(--fg-4);
+  gap: 3px;
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--n-text-3);
 }
 
-.heatmap-legend-label {
-  color: var(--fg-4);
+.heatmap-legend-label:first-child {
+  margin-right: 4px;
+}
+
+.heatmap-legend-label:last-child {
+  margin-left: 4px;
 }
 
 .heatmap-legend-cell {
-  width: 11px;
-  height: 11px;
-  border-radius: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--n-r-key);
 }
 
-/* Heatmap tooltip */
+/* Day tooltip — a small popover in the menu material (solid when the OS
+   asks to reduce transparency, via the tokens). */
 .heatmap-tooltip {
   position: absolute;
+  z-index: var(--z-dropdown);
   transform: translate(-50%, -100%);
-  background: var(--fg-1);
-  color: var(--bg-0);
-  padding: 5px 8px;
-  border-radius: var(--r-sm);
-  font-size: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 7px 10px 8px;
+  border-radius: var(--n-r-control);
+  background: var(--n-menu-bg);
+  backdrop-filter: var(--n-menu-blur);
+  box-shadow: var(--n-menu-shadow);
+  font-size: 12px;
   white-space: nowrap;
   pointer-events: none;
-  z-index: 10;
-  line-height: 1.5;
 }
 
 .heatmap-tooltip-title {
   font-weight: 600;
+  color: var(--n-text-1);
 }
 
 .heatmap-tooltip-sub {
-  opacity: 0.75;
+  color: var(--n-text-2);
 }
 
 /* ---- Analytics grid (Top sites + Categories) ----------- */
+/* No bottom margin: the first day header's 22 px top margin spaces the
+   list from it (the list is a grid, so the two no longer collapse). */
 .analytics-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  align-items: start;
-  margin-bottom: 32px;
+  gap: var(--spacing-md);
 }
 
 .analytics-card {
   min-width: 0;
 }
 
-/* Stat row — favicon | name | duration on row 1, bar on row 2 */
 .stat-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 9px;
 }
 
+/* Stat row — icon | name | value on one line (as tall as the 16 px icon),
+   the bar 5 px below it. */
 .domain-row,
 .category-row {
   display: grid;
-  grid-template-columns: 18px 1fr auto;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 10px;
+  column-gap: 10px;
+  row-gap: 5px;
 }
 
 .domain-favicon,
 .category-icon {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--fg-3);
+  color: var(--n-text-3);
 }
 
 .domain-favicon img {
   width: 16px;
   height: 16px;
-  border-radius: 2px;
+  border-radius: var(--n-r-control);
   display: block;
 }
 
 .domain-favicon svg,
 .category-icon svg {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   display: block;
 }
 
 .domain-name,
 .category-name {
-  font-size: 12px;
-  color: var(--fg-1);
-  font-weight: 500;
+  font-size: 13px;
+  color: var(--n-text-1);
+  font-weight: 400;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.domain-name .domain-suffix {
-  color: var(--fg-3);
-  font-weight: 400;
+/* Category ids are lower-case data ("news"); show them in sentence case. */
+.category-name {
+  text-transform: capitalize;
 }
 
 .domain-duration,
 .category-duration {
   font-size: 12px;
-  color: var(--fg-2);
+  color: var(--n-text-2);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-}
-
-.domain-duration .unit,
-.category-duration .unit {
-  font-size: 10.5px;
-  color: var(--fg-4);
-  margin-left: 4px;
 }
 
 .domain-bar-track,
 .category-bar-track {
   grid-column: 1 / -1;
   height: 4px;
-  background: var(--bg-2);
-  border-radius: 2px;
+  margin-left: 26px;
+  background: var(--n-track);
+  border-radius: var(--n-r-key);
   overflow: hidden;
-  margin-top: -2px;
 }
 
 .domain-bar-fill,
 .category-bar-fill {
   height: 100%;
-  background: var(--fg-1);
-  border-radius: 2px;
+  background: var(--n-data-2);
+  border-radius: var(--n-r-key);
   transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ---- History list (date groups + rows) ----------------- */
-.history-list {
-  margin-top: 4px;
-}
-
-/* Date group label — "Today · Wednesday, May 20" */
-.date-group-label {
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
-  margin: 28px 0 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border-1);
-}
-
-.date-group-label .day-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--fg-1);
-  letter-spacing: -0.1px;
+/* ---- History list (day groups + rows) ------------------ */
+/* Day labels are lower-case data ("today", "monday"). */
+.history-list .list-group-title {
   text-transform: capitalize;
 }
 
-/* History row — table-like with hover-revealed actions.
-   Six columns so the delete button never wraps when a duration
-   pill is present: time | favicon | content | badge | duration | delete. */
-.history-entry {
-  display: grid;
-  grid-template-columns: 60px 32px 1fr auto auto auto;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 4px;
-  border-bottom: 1px solid var(--border-1);
-  transition: background var(--dur-fast);
+/* time | favicon | title + domain | badge | duration; the delete button
+   hangs outside the row (global.css). The badge and duration columns are as
+   wide as their widest entry. Pills end their column, flush with the row's
+   right edge, and badges end theirs just before it, so both line up row to
+   row on their right edges. */
+.history-list {
+  grid-template-columns: 72px 28px minmax(0, 1fr) max-content max-content;
+}
+
+.history-entry .badge {
+  justify-self: end;
+}
+
+/* Only the title opens the page: it is only as wide as its text, never
+   wider than the column. */
+.history-entry .entry-title {
+  align-self: flex-start;
+  max-width: 100%;
   cursor: pointer;
 }
 
-.history-entry:hover {
-  background: var(--bg-3);
-}
-
-.entry-time {
-  font-size: 12px;
-  color: var(--fg-3);
-  font-variant-numeric: tabular-nums;
-}
-
-.entry-favicon {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-sm);
-}
-
-.entry-favicon img,
-.entry-favicon svg {
-  width: 18px;
-  height: 18px;
-  border-radius: 2px;
-  display: block;
-}
-
-.entry-content {
-  min-width: 0;
-}
-
-.entry-title-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.entry-title {
-  font-size: 14px;
-  color: var(--fg-1);
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  cursor: pointer;
-}
-
-.entry-title:hover {
+.history-entry .entry-title:hover {
   text-decoration: underline;
 }
 
-.entry-domain {
-  display: block;
-  font-size: 12px;
-  color: var(--accent);
-  margin-top: 1px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Category tag — pill on the right of the title/meta, icon + label */
-.entry-category-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  height: 22px;
-  padding: 0 8px;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--fg-2);
-  background: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-xs);
-  flex-shrink: 0;
-  white-space: nowrap;
-  letter-spacing: 0;
-  text-transform: capitalize;
-}
-
-.entry-category-badge svg {
-  width: 12px;
-  height: 12px;
-  display: block;
-  flex-shrink: 0;
-}
-
-/* Duration pill — single bordered pill with a vertical partition.
-   Active (left) sits on the page background; total (right) is muted. */
+/* Duration pill — active (primary text) | total (muted), split by a
+   12 px --n-tab-divider (DESIGN.md §3.2), which steps up under
+   prefers-contrast like every other hairline. The pill fits its text. Its
+   column starts 8 px after the badge column, not the grid's 12, so the
+   widest pill sits 8 px from its badge and shorter ones a little further. */
 .entry-duration {
-  display: inline-flex;
-  align-items: stretch;
-  height: 22px;
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-xs);
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.entry-active-dur,
-.entry-total-dur {
+  justify-self: end;
+  margin-left: calc(var(--spacing-sm) - 12px);
   display: inline-flex;
   align-items: center;
-  padding: 0 8px;
-  font-size: 11px;
+  height: 22px;
+  background: var(--n-fill);
+  border-radius: var(--n-r-badge);
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .entry-active-dur {
-  color: var(--fg-1);
-  background: var(--bg-0);
-  border-right: 1px solid var(--border-1);
+  color: var(--n-text-1);
+  padding: 0 7px 0 8px;
 }
 
 .entry-total-dur {
-  color: var(--fg-3);
-  background: var(--bg-1);
-}
-
-/* Hover-reveal delete button */
-.entry-delete-btn {
-  width: 26px;
-  height: 26px;
-  border-radius: var(--r-xs);
-  border: 0;
-  background: transparent;
-  color: var(--fg-3);
-  cursor: pointer;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity var(--dur-fast);
-  padding: 0;
+  color: var(--n-text-3);
+  padding-right: 8px;
 }
 
-.history-entry:hover .entry-delete-btn {
-  opacity: 1;
+.entry-total-dur::before {
+  content: '';
+  width: 1px;
+  height: 12px;
+  margin-right: 7px;
+  background: var(--n-tab-divider);
 }
 
-.entry-delete-btn:hover {
-  background: var(--bg-2);
-  color: var(--fg-1);
-}
-
-/* ---- Empty + loading + footer --------------------------- */
-.no-history {
-  text-align: center;
-  padding: 48px 0;
-  color: var(--fg-3);
-  font-size: 12px;
-}
-
-.no-history i {
-  margin-bottom: 12px;
-  opacity: 0.4;
-}
-
-.no-history p {
-  margin: 0;
-}
-
+/* ---- Loading + footer ---------------------------------- */
 .loading-indicator {
   text-align: center;
   padding: 8px;
-  color: var(--fg-3);
+  color: var(--n-text-3);
   font-size: 12px;
 }
 
 .history-footer {
   margin-top: 28px;
+}
+
+/* The page ends 56 px below the last row (DESIGN.md §4.2): the footer
+   placeholder adds nothing while it's empty, and the sentinel keeps the 1 px
+   box the observer needs without taking up layout space. */
+.history-footer:empty {
+  margin-top: 0;
+}
+
+.scroll-sentinel {
+  height: 1px;
+  margin-bottom: -1px;
+}
+
+/* Honour reduced motion: no hover/focus fades or bar growth. */
+@media (prefers-reduced-motion: reduce) {
+  .domain-bar-fill,
+  .category-bar-fill {
+    transition: none;
+  }
 }

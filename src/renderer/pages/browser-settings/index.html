@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:;"
+      content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
     />
     <title>Settings</title>
   </head>
@@ -18,7 +18,7 @@
             type="text"
             id="settings-search"
             class="sidebar-search-input"
-            placeholder="Search settings..."
+            placeholder="Search settings…"
           />
         </div>
 
@@ -45,7 +45,7 @@
           </li>
           <li>
             <a href="#permissions" class="sidebar-link" data-section="permissions"
-              ><i data-lucide="shield-check" width="15" height="15"></i> Permissions</a
+              ><i data-lucide="shield-check" width="15" height="15"></i> Site Permissions</a
             >
           </li>
           <li>
@@ -89,15 +89,15 @@
               </div>
               <div class="setting-group-body">
                 <div class="setting-action-row">
-                  <div style="min-width: 0; flex: 1">
+                  <div>
                     <span id="download-path-display" class="setting-path-value"></span>
                   </div>
                   <div class="setting-action-buttons">
-                    <button class="btn btn-sm btn-secondary" id="change-download-path-btn">
-                      <i data-lucide="folder" width="13" height="13"></i> Change
+                    <button class="btn btn-sm btn-raised" id="change-download-path-btn">
+                      <i data-lucide="folder" width="14" height="14"></i> Change
                     </button>
                     <button class="btn btn-sm btn-ghost" id="reset-download-path-btn">
-                      <i data-lucide="rotate-ccw" width="13" height="13"></i> Reset
+                      <i data-lucide="rotate-ccw" width="14" height="14"></i> Reset
                     </button>
                   </div>
                 </div>
@@ -153,7 +153,7 @@
             </div>
 
             <!-- Startup Pages (shown when 'specific-pages' is selected) -->
-            <div id="startup-pages-container" class="setting-group" style="display: none">
+            <div id="startup-pages-container" class="setting-group" hidden>
               <div class="setting-group-header">
                 <div>
                   <h3 class="setting-group-title">Startup Pages</h3>
@@ -170,8 +170,8 @@
                   class="form-input"
                   placeholder="e.g., https://example.com"
                 />
-                <button class="btn btn-sm btn-secondary" id="add-startup-page-btn">
-                  <i data-lucide="plus" width="13" height="13"></i> Add
+                <button class="btn btn-sm btn-raised" id="add-startup-page-btn">
+                  <i data-lucide="plus" width="14" height="14"></i> Add
                 </button>
               </div>
             </div>
@@ -259,8 +259,8 @@
                   class="form-input"
                   placeholder="https://example.com/search?q=%s"
                 />
-                <button class="btn btn-sm btn-secondary" id="add-engine-btn">
-                  <i data-lucide="plus" width="13" height="13"></i> Add Engine
+                <button class="btn btn-sm btn-raised" id="add-engine-btn">
+                  <i data-lucide="plus" width="14" height="14"></i> Add Engine
                 </button>
               </div>
             </div>
@@ -298,7 +298,7 @@
                     <span class="radio-content">
                       <span class="radio-label"
                         >Block all third-party cookies
-                        <span class="badge-recommend">Recommended</span></span
+                        <span class="badge badge-sm">Recommended</span></span
                       >
                       <span class="radio-description"
                         >No cross-site cookies are stored or sent. Strictest privacy.</span
@@ -326,7 +326,7 @@
                 </div>
 
                 <!-- Cookie Exceptions -->
-                <div id="cookie-exceptions-container" class="sub-setting" style="display: none">
+                <div id="cookie-exceptions-container" class="sub-setting" hidden>
                   <label class="setting-label">Cookie Exceptions</label>
                   <p class="setting-description">
                     Sites in this list can set cookies even when embedded on other sites.
@@ -339,8 +339,8 @@
                       class="form-input"
                       placeholder="e.g., accounts.google.com"
                     />
-                    <button class="btn btn-sm btn-secondary" id="add-cookie-exception-btn">
-                      <i data-lucide="plus" width="13" height="13"></i> Add
+                    <button class="btn btn-sm btn-raised" id="add-cookie-exception-btn">
+                      <i data-lucide="plus" width="14" height="14"></i> Add
                     </button>
                   </div>
                 </div>
@@ -386,8 +386,8 @@
                       Remove all stored cookies.
                     </p>
                   </div>
-                  <button class="btn btn-sm btn-danger" id="clear-cookies-btn">
-                    <i data-lucide="trash-2" width="13" height="13"></i> Clear Cookies
+                  <button class="btn btn-sm btn-raised" id="clear-cookies-btn">
+                    <i data-lucide="trash-2" width="14" height="14"></i> Clear Cookies
                   </button>
                 </div>
               </div>
@@ -422,8 +422,8 @@
                     class="form-input"
                     placeholder="Custom filter list URL"
                   />
-                  <button class="btn btn-sm btn-secondary" id="add-filter-btn">
-                    <i data-lucide="plus" width="13" height="13"></i> Add List
+                  <button class="btn btn-sm btn-raised" id="add-filter-btn">
+                    <i data-lucide="plus" width="14" height="14"></i> Add List
                   </button>
                 </div>
 
@@ -438,8 +438,8 @@
                     class="form-input"
                     placeholder="e.g., example.com"
                   />
-                  <button class="btn btn-sm btn-secondary" id="add-allowed-site-btn">
-                    <i data-lucide="plus" width="13" height="13"></i> Add Site
+                  <button class="btn btn-sm btn-raised" id="add-allowed-site-btn">
+                    <i data-lucide="plus" width="14" height="14"></i> Add Site
                   </button>
                 </div>
               </div>
@@ -470,7 +470,7 @@
                     <input type="radio" name="popup-policy" value="smart" checked />
                     <span class="radio-content">
                       <span class="radio-label"
-                        >Smart Allow <span class="badge-recommend">Recommended</span></span
+                        >Smart allow <span class="badge badge-sm">Recommended</span></span
                       >
                       <span class="radio-description"
                         >Allow up to 3 pop-ups per 60 seconds from a site, then block until the
@@ -489,7 +489,7 @@
                   </label>
                 </div>
 
-                <!-- Allowed Sites (shown when policy is 'block') -->
+                <!-- Allowed Sites (shown when policy is 'block' or 'smart') -->
                 <div id="popup-allowed-container" class="sub-setting">
                   <label class="setting-label">Allowed Sites</label>
                   <p class="setting-description">Sites that are always allowed to open pop-ups.</p>
@@ -501,14 +501,14 @@
                       class="form-input"
                       placeholder="e.g., accounts.google.com"
                     />
-                    <button class="btn btn-sm btn-secondary" id="add-popup-allowed-btn">
-                      <i data-lucide="plus" width="13" height="13"></i> Add
+                    <button class="btn btn-sm btn-raised" id="add-popup-allowed-btn">
+                      <i data-lucide="plus" width="14" height="14"></i> Add
                     </button>
                   </div>
                 </div>
 
                 <!-- Blocked Sites (shown when policy is 'allow') -->
-                <div id="popup-blocked-container" class="sub-setting" style="display: none">
+                <div id="popup-blocked-container" class="sub-setting" hidden>
                   <label class="setting-label">Blocked Sites</label>
                   <p class="setting-description">Sites that are never allowed to open pop-ups.</p>
                   <div id="popup-blocked-list" class="items-list"></div>
@@ -519,8 +519,8 @@
                       class="form-input"
                       placeholder="e.g., annoying-ads.com"
                     />
-                    <button class="btn btn-sm btn-secondary" id="add-popup-blocked-btn">
-                      <i data-lucide="plus" width="13" height="13"></i> Add
+                    <button class="btn btn-sm btn-raised" id="add-popup-blocked-btn">
+                      <i data-lucide="plus" width="14" height="14"></i> Add
                     </button>
                   </div>
                 </div>
@@ -544,8 +544,8 @@
                       Remove history, cookies, cache, and other data.
                     </p>
                   </div>
-                  <button class="btn btn-sm btn-danger" id="clear-data-btn">
-                    <i data-lucide="trash-2" width="13" height="13"></i> Clear Data...
+                  <button class="btn btn-sm btn-raised" id="clear-data-btn">
+                    <i data-lucide="trash-2" width="14" height="14"></i> Clear Data…
                   </button>
                 </div>
 
@@ -564,7 +564,7 @@
                 </div>
 
                 <!-- Retention Periods -->
-                <div id="retention-settings" class="sub-setting" style="display: none">
+                <div id="retention-settings" class="sub-setting" hidden>
                   <div class="retention-grid">
                     <div class="retention-row">
                       <span>Browsing history</span>
@@ -665,15 +665,15 @@
                 type="text"
                 id="permissions-search"
                 class="form-input"
-                placeholder="Search by site or permission type..."
+                placeholder="Search by site or permission type…"
               />
               <button class="btn btn-sm btn-ghost" id="refresh-permissions-btn" title="Refresh">
-                <i data-lucide="refresh-cw" width="13" height="13"></i>
+                <i data-lucide="refresh-cw" width="16" height="16"></i>
               </button>
             </div>
 
             <div id="permissions-list"></div>
-            <div id="permissions-empty" class="permissions-empty" style="display: none">
+            <div id="permissions-empty" class="permissions-empty" hidden>
               <i data-lucide="shield-check" class="permissions-empty-icon"></i>
               <p class="permissions-empty-title">No site permissions yet</p>
               <p class="permissions-empty-hint">
@@ -682,9 +682,9 @@
               </p>
             </div>
 
-            <div class="permissions-footer" id="permissions-footer" style="display: none">
-              <button class="btn btn-sm btn-danger" id="clear-all-permissions-btn">
-                <i data-lucide="trash-2" width="13" height="13"></i> Clear All Permissions
+            <div class="permissions-footer" id="permissions-footer" hidden>
+              <button class="btn btn-secondary" id="clear-all-permissions-btn">
+                <i data-lucide="trash-2" width="14" height="14"></i> Clear All Permissions
               </button>
             </div>
           </section>
@@ -722,16 +722,16 @@
                     <option value="firefox-linux">Firefox on Linux</option>
                     <option value="safari-mac">Safari on macOS</option>
                     <option value="edge-windows">Edge on Windows</option>
-                    <option value="custom">Custom...</option>
+                    <option value="custom">Custom…</option>
                   </select>
                 </div>
-                <div id="custom-ua-container" class="sub-setting" style="display: none">
-                  <label class="setting-label">Custom User Agent String</label>
+                <div id="custom-ua-container" class="sub-setting" hidden>
+                  <label class="setting-label">Custom user agent string</label>
                   <input
                     type="text"
                     id="custom-ua-input"
                     class="form-input"
-                    placeholder="Enter your custom user agent string..."
+                    placeholder="Enter your custom user agent string…"
                   />
                 </div>
               </div>
@@ -788,10 +788,10 @@
               </div>
 
               <!-- Manual Proxy Form -->
-              <div id="manual-proxy-form" class="sub-setting-panel" style="display: none">
+              <div id="manual-proxy-form" class="sub-setting-panel" hidden>
                 <div class="proxy-grid">
                   <div class="proxy-row">
-                    <label>HTTP Proxy</label>
+                    <label>HTTP proxy</label>
                     <div class="proxy-inputs">
                       <input
                         type="text"
@@ -808,7 +808,7 @@
                     </div>
                   </div>
                   <div class="proxy-row">
-                    <label>HTTPS Proxy</label>
+                    <label>HTTPS proxy</label>
                     <div class="proxy-inputs">
                       <input
                         type="text"
@@ -825,7 +825,7 @@
                     </div>
                   </div>
                   <div class="proxy-row">
-                    <label>SOCKS Proxy</label>
+                    <label>SOCKS proxy</label>
                     <div class="proxy-inputs">
                       <input
                         type="text"
@@ -858,9 +858,9 @@
               </div>
 
               <!-- PAC URL Form -->
-              <div id="pac-proxy-form" class="sub-setting-panel" style="display: none">
+              <div id="pac-proxy-form" class="sub-setting-panel" hidden>
                 <div class="form-group">
-                  <label>PAC File URL</label>
+                  <label>PAC file URL</label>
                   <input
                     type="text"
                     id="proxy-pac-url"
@@ -904,14 +904,14 @@
                 type="text"
                 id="shortcut-search"
                 class="form-input"
-                placeholder="Search shortcuts..."
+                placeholder="Search shortcuts…"
               />
             </div>
 
             <!-- Category Filter — same pill grammar as Downloads / Bookmarks -->
-            <div class="shortcuts-filter-row">
-              <span class="shortcuts-filter-label">Categories</span>
-              <div class="shortcuts-filter" id="shortcut-filters">
+            <div class="chip-row shortcuts-filter-row">
+              <span class="chip-row-label">Categories</span>
+              <div class="chip-row-chips" id="shortcut-filters">
                 <!-- Populated by JS -->
               </div>
             </div>
@@ -953,11 +953,10 @@
               <div class="setting-group-body">
                 <div class="setting-toggle-row">
                   <div>
-                    <label class="setting-label">Enable Developer Tools</label>
+                    <label class="setting-label">Enable developer tools</label>
                     <p class="setting-description">
                       Allow opening Chromium Developer Tools to inspect pages, debug JavaScript, and
-                      monitor network activity. Use <kbd>Cmd+Opt+I</kbd> (macOS) or
-                      <kbd>Ctrl+Shift+I</kbd> (Windows/Linux) to toggle.
+                      monitor network activity. Use <kbd id="devtools-shortcut">⌥⌘I</kbd> to toggle.
                     </p>
                   </div>
                   <label class="toggle">
@@ -973,7 +972,7 @@
     </div>
 
     <!-- Clear Browsing Data Dialog -->
-    <div id="clear-data-dialog" class="dialog-overlay" style="display: none">
+    <div id="clear-data-dialog" class="dialog-overlay" hidden>
       <div class="dialog-box">
         <h3 class="dialog-title">Clear Browsing Data</h3>
         <div class="dialog-body">
@@ -1014,10 +1013,14 @@
           </div>
         </div>
         <div class="dialog-actions">
-          <button class="btn btn-sm btn-ghost" id="clear-data-cancel">Cancel</button>
-          <button class="btn btn-sm btn-primary" id="clear-data-confirm">Clear Data</button>
+          <button class="btn btn-sm btn-secondary" id="clear-data-cancel">Cancel</button>
+          <button class="btn btn-sm btn-danger" id="clear-data-confirm">Clear Data</button>
         </div>
       </div>
     </div>
+
+    <!-- Holds the toast (showToast in index.ts). A live region has to be in
+         the page before its text changes for screen readers to announce it. -->
+    <div id="toast-region" role="status"></div>
   </body>
 </html>
