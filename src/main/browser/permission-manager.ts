@@ -80,6 +80,18 @@ export class PermissionManager {
     'clipboard-sanitized-write',
     'pointer-lock',
     'mediaKeySystem',
+    // Storage Access API. Third-party embeds request this to use their own
+    // storage from inside an iframe — most notably bot-challenge widgets
+    // (reCAPTCHA, hCaptcha, Cloudflare Turnstile) and SSO / embedded-login
+    // flows. Chrome grants it transparently for such embeds (no visible
+    // prompt), so leaving it to our prompt flow stalls the request: reCAPTCHA's
+    // google.com iframe awaits the storage-access promise, never gets an
+    // answer, and throws "reCAPTCHA Timeout" after ~20s. Auto-grant to match
+    // Chrome. This is plumbing, not a sensitive permission — cross-site
+    // tracking is still blocked at the network layer by the 3rd-party cookie
+    // policy and ad blocker (see SettingsEnforcer), which are untouched.
+    'storage-access',
+    'top-level-storage-access',
   ]);
 
   // Sensitive permissions that require HTTPS
