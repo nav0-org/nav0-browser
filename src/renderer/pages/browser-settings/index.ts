@@ -12,6 +12,7 @@ import {
   KeyboardShortcutAction,
 } from '../../../types/settings-types';
 import { FaviconTile } from '../../common/favicon-tile';
+import { ChipRow } from '../../common/chip-row';
 
 // ---- Globals ----
 let settings: BrowserSettings = { ...DEFAULT_BROWSER_SETTINGS };
@@ -1016,6 +1017,8 @@ function initKeyboardShortcuts() {
     currentShortcut: effectiveDefault(s),
   }));
 
+  const filters = document.getElementById('shortcut-filters');
+  if (filters) ChipRow.attach(filters);
   renderShortcutFilters();
   renderShortcutsTable();
 

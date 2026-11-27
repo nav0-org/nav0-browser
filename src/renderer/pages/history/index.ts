@@ -316,7 +316,7 @@ function renderEntry(entry: BrowsingHistoryRecord): HTMLElement {
   return row;
 }
 
-// --- Heatmap (cell grid, natural size; scrolls sideways if the page is narrow) ---
+// --- Heatmap (cell grid filling the panel; scrolls sideways if the page is narrow) ---
 function renderHeatmap(
   stats: Array<{ date: string; count: number; activeDuration: number }>
 ): void {
@@ -378,9 +378,7 @@ function renderHeatmap(
   }
   if (currentWeek.length) weeks.push(currentWeek);
 
-  // Cell size, gaps and label type live in index.css (.heatmap-*): 11 px cells,
-  // 3 px gaps. The 14 px week pitch is only needed here to space month labels.
-  const weekPitch = 14;
+  // Cell size, gaps and label type live in index.css (.heatmap-*).
   const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   function getLevel(count: number): number {
@@ -393,16 +391,17 @@ function renderHeatmap(
   }
 
   // Month labels — one slot per week column; each label sits over its month's
-  // first full week. Skip labels that are too close together.
+  // first full week. Only the first month, which the year starts part-way
+  // through, can come within three weeks of the next. Labels are placed from
+  // the right, so that one gives way rather than the next month's.
   const monthSlots: string[] = weeks.map(() => '');
-  let lastLabelX = -Infinity;
-  const minLabelGap = 30;
-  for (const m of monthLabels) {
-    const x = m.weekIndex * weekPitch;
+  const minLabelWeeks = 3;
+  let nextLabelWeek = Infinity;
+  for (const m of [...monthLabels].reverse()) {
     // A month that began in the current, partial week has no full week yet.
-    if (m.weekIndex >= weeks.length || x - lastLabelX < minLabelGap) continue;
+    if (m.weekIndex >= weeks.length || nextLabelWeek - m.weekIndex < minLabelWeeks) continue;
     monthSlots[m.weekIndex] = m.month;
-    lastLabelX = x;
+    nextLabelWeek = m.weekIndex;
   }
 
   // Cells — the grid fills column by column (Sun to Sat), one column per week.

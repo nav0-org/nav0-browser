@@ -1,6 +1,7 @@
 import { HtmlUtils } from '../../../renderer/common/html-utils';
 import { FaviconTile } from '../../../renderer/common/favicon-tile';
 import { FormatUtils } from '../../../renderer/common/format-utils';
+import { ChipRow } from '../../../renderer/common/chip-row';
 import { BookmarkWithStats } from '../../../types/bookmark-record';
 import { WEBSITE_CATEGORY_MAP } from '../../../constants/data-constants';
 import './index.css';
@@ -129,6 +130,7 @@ const referenceCountEl = document.getElementById('reference-count') as HTMLEleme
 const tabQueueBtn = document.getElementById('tab-queue') as HTMLButtonElement;
 const tabReferenceBtn = document.getElementById('tab-reference') as HTMLButtonElement;
 const categoryFilters = document.getElementById('category-filters') as HTMLElement;
+ChipRow.attach(categoryFilters);
 const staleBar = document.getElementById('stale-bar') as HTMLElement;
 const staleReviewBtn = document.getElementById('stale-review-btn') as HTMLButtonElement;
 const staleReview = document.getElementById('stale-review') as HTMLElement;

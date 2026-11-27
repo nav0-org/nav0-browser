@@ -187,11 +187,14 @@
   gap: 8px;
 }
 
-/* ---- Tab card ---- White cards on the menu material. */
+/* ---- Tab card ---- White cards on the menu material. Everything in a card
+   is centred vertically; the min-height is a two-line title's, so every card
+   is the same height. */
 #overlay-command-o .tab-card {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
+  min-height: 52px;
   padding: 10px 10px 10px 12px;
   border-radius: var(--n-r-control);
   background: var(--n-card);
@@ -217,14 +220,17 @@
   color: var(--n-text-1);
 }
 
-/* Holds the favicon, or the favicon fallback tile (global.css). */
+/* 28 px favicon well, as in ⌘K; holds a 16 px favicon, or the favicon fallback
+   tile (global.css) when there is none. */
 #overlay-command-o .tab-favicon {
-  width: 16px;
-  height: 16px;
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: var(--n-r-control);
+  background-color: var(--n-fill);
 }
 
 #overlay-command-o .tab-favicon img {
@@ -233,21 +239,15 @@
   border-radius: var(--n-r-control);
 }
 
-/* The favicon sits 1 px below the top of the first title line. */
-#overlay-command-o .tab-card > .tab-favicon {
-  margin-top: 1px;
-}
-
 /* Pin marker — signals tabs that are anchored to the left of their window.
-   4 px after the favicon (the card gap is 8) and centred on it. */
+   4 px after the favicon well (the card gap is 8). */
 #overlay-command-o .tab-pin-icon {
   flex-shrink: 0;
-  margin-top: 3px;
   margin-left: calc(var(--spacing-xs) * -1);
   color: var(--n-text-3);
 }
 
-/* A fixed two-line title box, clamped, so every card is the same height. */
+/* The title, clamped to two lines. */
 #overlay-command-o .tab-title {
   flex: 1;
   font-size: 12px;
@@ -255,18 +255,16 @@
   font-weight: 500;
   color: var(--n-text-1);
   min-width: 0;
-  height: 32px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* Marks each window's active tab, centred on the first title line. */
+/* Marks each window's active tab. */
 #overlay-command-o .tab-active-dot {
   width: 6px;
   height: 6px;
-  margin-top: 6px;
   border-radius: var(--n-r-full);
   background: var(--n-text-2);
   flex-shrink: 0;

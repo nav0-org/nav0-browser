@@ -1139,9 +1139,8 @@
 }
 
 /* ====== KEYBOARD SHORTCUTS ============================== */
-/* The shared chip row (global.css): "Categories" beside the chips, which
-   wrap inside the column. Here it sits 16 px from the search field and
-   the table. */
+/* The shared chip row (global.css): "Categories" beside one line of chips.
+   Here it sits 16 px from the search field and the table. */
 .shortcuts-filter-row {
   margin: 16px 0;
 }

@@ -1243,16 +1243,16 @@ select.form-control {
   color: var(--n-accent);
 }
 
-/* Chip row (DESIGN.md §5.3): a "Categories" label beside the chips, which
-   wrap inside their own column, 6 px apart. */
+/* Chip row (DESIGN.md §5.3): a "Categories" label beside one line of chips,
+   6 px apart. */
 .chip-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 6px;
   margin-top: 14px;
 }
 
-/* The 28 px line box centres the label on the first line of chips. */
+/* The 28 px line box matches the chips. */
 .chip-row-label {
   flex: none;
   margin-right: var(--spacing-xs);
@@ -1262,13 +1262,39 @@ select.form-control {
   line-height: 28px;
 }
 
+/* The chips never wrap: past the column they scroll sideways, with no
+   scrollbar, and ChipRow (common/chip-row.ts) fades each edge that has more
+   chips beyond it. The mask only sets opacity, so #000 there is not a
+   colour. The 3 px padding, cancelled by the margin, keeps the scroller
+   from clipping focus rings. */
 .chip-row-chips {
+  --chip-fade-start: 0px;
+  --chip-fade-end: 0px;
+
   display: flex;
   flex: 1;
-  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
   min-width: 0;
+  margin: -3px;
+  padding: 3px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--chip-fade-start),
+    #000 calc(100% - var(--chip-fade-end)),
+    transparent
+  );
+}
+
+.chip-row-chips.more-before {
+  --chip-fade-start: var(--spacing-xl);
+}
+
+.chip-row-chips.more-after {
+  --chip-fade-end: var(--spacing-xl);
 }
 
 /* Category and file-type ids are lower-case data ("dev"); a chip shows them
@@ -1558,11 +1584,12 @@ select.form-control {
 }
 
 /* The side gutters are added to the max-width, so they only show on narrow
-   windows. */
+   windows. They are 64 px so that two row actions, which hang past a row's
+   right edge (4 + 26 + 2 + 26 px), always fit. */
 .list-column {
-  max-width: calc(880px + 2 * var(--spacing-xl));
+  max-width: calc(880px + 4 * var(--spacing-xl));
   margin: 0 auto;
-  padding: 36px var(--spacing-xl) 56px;
+  padding: 36px calc(2 * var(--spacing-xl)) 56px;
 }
 
 .list-title {
@@ -1632,11 +1659,31 @@ select.form-control {
   white-space: nowrap;
 }
 
-/* A 54 px row: lead (time or date) | 28 px well | title over meta | the
-   page's trailing columns. Each page sets grid-template-columns; a second
-   grid row (a download's progress bar) takes its own height. */
-.list-row {
+/* A page's rows sit in one .list-grid, and each row is a subgrid of it, so
+   every row shares the same column tracks. A column sized to its content
+   (a badge, a duration, a size) is as wide as its widest entry in the list:
+   columns line up row to row with no slack held for longer values. Each
+   page sets grid-template-columns on its list; the first track includes the
+   row's 12 px left padding. Anything else in the list (day headers, a
+   loader) spans the full width. Grid margins don't collapse, so a day
+   header's 22 px top margin no longer merges with a margin above the list. */
+.list-grid {
   display: grid;
+  column-gap: 12px;
+}
+
+.list-grid > * {
+  grid-column: 1 / -1;
+}
+
+/* A 54 px row: lead (time or date) | 28 px well | title over meta | the
+   page's trailing columns, on its list's tracks; a second grid row (a
+   download's progress bar) takes its own height. The row actions take no
+   column: they hang outside the row's right edge. */
+.list-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: subgrid;
   grid-template-rows: 54px;
   align-items: center;
   column-gap: 12px;
@@ -1730,25 +1777,36 @@ select.form-control {
 }
 
 /* Category and file-type ids are lower-case data; a one-word id
-   capitalised is sentence case. The badge sits at the start of its fixed
-   120 px column, so badges line up row to row. */
+   capitalised is sentence case. The badge starts its column, which is as
+   wide as the list's widest badge, so badges line up row to row. */
 .list-row .badge {
   justify-self: start;
   text-transform: capitalize;
 }
 
-/* Row actions appear on hover, or while one of them has focus. */
+/* Row actions sit just outside the row's right edge, beside its first
+   54 px line, and appear on hover or while one of them has focus. The 4 px
+   gap is their own padding, so the pointer never leaves the row on its way
+   to them. While hidden they take no pointer events, so the empty margin
+   beside a row doesn't light it up. */
 .list-row-actions {
-  display: inline-flex;
-  justify-content: flex-end;
+  position: absolute;
+  top: 0;
+  left: 100%;
+  display: flex;
+  align-items: center;
   gap: 2px;
+  height: 54px;
+  padding-left: var(--spacing-xs);
   opacity: 0;
+  pointer-events: none;
   transition: opacity var(--dur-fast);
 }
 
 .list-row:hover .list-row-actions,
 .list-row:focus-within .list-row-actions {
   opacity: 1;
+  pointer-events: auto;
 }
 
 .list-row-action {
@@ -1768,7 +1826,7 @@ select.form-control {
     color var(--dur-fast);
 }
 
-/* On a hovered row (--n-hover) the hovered button steps up to --n-fill-2. */
+/* The hovered button takes --n-fill-2. */
 .list-row-action:hover {
   background-color: var(--n-fill-2);
   color: var(--n-text-1);

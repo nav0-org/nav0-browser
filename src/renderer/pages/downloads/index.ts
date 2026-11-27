@@ -3,6 +3,7 @@ import './index.css';
 
 import { createIcons, icons } from 'lucide';
 import { FormatUtils } from '../../../renderer/common/format-utils';
+import { ChipRow } from '../../../renderer/common/chip-row';
 import { DownloadRecord } from '../../../types/download-record';
 import {
   getStorageBucket,
@@ -75,6 +76,7 @@ const downloadsPage = document.getElementById('downloads-page') as HTMLElement;
 const downloadsListElement = document.getElementById('downloads-list') as HTMLElement;
 const searchInput = document.getElementById('search-input') as HTMLInputElement;
 const typeFiltersContainer = document.getElementById('type-filters') as HTMLElement;
+ChipRow.attach(typeFiltersContainer);
 const storageBar = document.getElementById('storage-bar') as HTMLElement;
 const storageLegend = document.getElementById('storage-legend') as HTMLElement;
 const storageMeta = document.getElementById('storage-meta') as HTMLElement;

@@ -142,12 +142,23 @@
 }
 
 /* ---- Download rows -------------------------------------- */
-/* time | icon well | name + meta | badge | state | actions. The badge and
-   the state (an active or paused download's status, then the size) have
-   fixed columns, so the badges line up row to row; the state column only
-   grows if a "received / total" outgrows it. */
-.download-item {
-  grid-template-columns: 60px 28px minmax(0, 1fr) 120px minmax(150px, auto) 56px;
+/* time | icon well | name + meta | badge | state; the actions hang outside
+   the row (global.css). The badge and the state (an active or paused
+   download's status, then the size) columns are as wide as their widest
+   entry, so the two sit 12 px apart. */
+.downloads-list {
+  grid-template-columns: 72px 28px minmax(0, 1fr) max-content max-content;
+}
+
+/* A row and its detail panel. The wrapper passes the list's columns on to
+   the row. */
+.download-item-wrapper {
+  display: grid;
+  grid-template-columns: subgrid;
+}
+
+.download-item-wrapper > * {
+  grid-column: 1 / -1;
 }
 
 .download-state {
@@ -209,6 +220,7 @@
 .download-item.downloading .list-row-actions,
 .download-item.paused .list-row-actions {
   opacity: 1;
+  pointer-events: auto;
 }
 
 /* ---- Progress bar under an active / paused row ---------- */

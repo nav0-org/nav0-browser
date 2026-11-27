@@ -127,16 +127,19 @@
 }
 
 /* ---- Bookmark rows -------------------------------------- */
+/* date | favicon | title + meta | badge; the two hover actions hang outside
+   the row (global.css). */
 .bookmarks-list {
+  grid-template-columns: 72px 28px minmax(0, 1fr) max-content;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-/* date | favicon | title + meta | badge (a fixed column) | two hover
-   actions (kept as reserved space while hidden) */
-.bookmark-item {
-  grid-template-columns: 60px 28px minmax(0, 1fr) 120px 54px;
+/* The badge is the row's last column, so it ends the column (and the row)
+   rather than starting it; badges still line up, on their right edges. */
+.bookmark-item .badge {
+  justify-self: end;
 }
 
 /* ---- Footer -------------------------------------------- */

@@ -15,25 +15,22 @@
   margin: 16px 0;
 }
 
-/* Drawn at its natural size (11 px cells, 3 px gaps); scrolls sideways only
-   when the column is narrower than the map. As wide as the map, so the
-   legend under it ends where the grid ends. */
+/* The map fills the panel: after the 30 px day-label column, every week
+   column takes an equal share of the width (about 12 px in the 880 px
+   column) with 3 px gaps, and cells stay square. So the grid lines up with
+   the title on the left and ends at the panel's padding on the right, where
+   the legend ends too. Cells never shrink below 11 px; a narrower column
+   scrolls the map sideways. */
 .heatmap-scroll-area {
-  width: fit-content;
-  max-width: 100%;
   overflow-x: auto;
 }
 
-.heatmap-chart {
-  width: max-content;
-}
-
-/* Month labels: one 11 px slot per week column after the 30 px day-label
-   column. A label sits over its month's first full week and overflows right. */
+/* Month labels: one slot per week column, sized like the cell columns under
+   them. A label sits over its month's first full week and overflows right. */
 .heatmap-months {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: 11px;
+  grid-auto-columns: minmax(11px, 1fr);
   column-gap: 3px;
   height: 14px;
   margin-left: 30px;
@@ -52,22 +49,25 @@
   flex: none;
   width: 30px;
   display: grid;
-  grid-template-rows: repeat(7, 11px);
+  grid-template-rows: repeat(7, minmax(0, 1fr));
   row-gap: 3px;
+  align-items: center;
   font-size: 11px;
   line-height: 11px;
   color: var(--n-text-3);
 }
 
 .heatmap-cells {
+  flex: 1;
   display: grid;
-  grid-template-rows: repeat(7, 11px);
+  grid-template-rows: repeat(7, auto);
   grid-auto-flow: column;
-  grid-auto-columns: 11px;
+  grid-auto-columns: minmax(11px, 1fr);
   gap: 3px;
 }
 
 .heatmap-cell {
+  aspect-ratio: 1;
   border-radius: var(--n-r-icon);
 }
 
@@ -152,11 +152,12 @@
 }
 
 /* ---- Analytics grid (Top sites + Categories) ----------- */
+/* No bottom margin: the first day header's 22 px top margin spaces the
+   list from it (the list is a grid, so the two no longer collapse). */
 .analytics-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
 }
 
 .analytics-card {
@@ -251,11 +252,17 @@
   text-transform: capitalize;
 }
 
-/* time | favicon | title + domain | badge | duration | delete. The badge
-   and the duration pill have fixed columns, so neither moves with the
-   other's width. */
-.history-entry {
-  grid-template-columns: 60px 28px minmax(0, 1fr) 120px 112px auto;
+/* time | favicon | title + domain | badge | duration; the delete button
+   hangs outside the row (global.css). The badge and duration columns are as
+   wide as their widest entry. Pills end their column, flush with the row's
+   right edge, and badges end theirs just before it, so both line up row to
+   row on their right edges. */
+.history-list {
+  grid-template-columns: 72px 28px minmax(0, 1fr) max-content max-content;
+}
+
+.history-entry .badge {
+  justify-self: end;
 }
 
 /* Only the title opens the page: it is only as wide as its text, never
@@ -272,9 +279,12 @@
 
 /* Duration pill — active (primary text) | total (muted), split by a
    12 px --n-tab-divider (DESIGN.md §3.2), which steps up under
-   prefers-contrast like every other hairline. It ends its column. */
+   prefers-contrast like every other hairline. The pill fits its text. Its
+   column starts 8 px after the badge column, not the grid's 12, so the
+   widest pill sits 8 px from its badge and shorter ones a little further. */
 .entry-duration {
   justify-self: end;
+  margin-left: calc(var(--spacing-sm) - 12px);
   display: inline-flex;
   align-items: center;
   height: 22px;
