@@ -547,6 +547,8 @@ export class Tab {
       WebContentsEvents.DID_NAVIGATE,
       async (event, url: string) => {
         if (this._destroyed) return;
+        // A new document: the last one's permission requests go with it.
+        PermissionManager.cancelRequestsForTab(this.id);
         const nav = this.webContentsViewInstance.webContents.navigationHistory;
         const fromIndex = this.committedIndex;
         this.committedIndex = nav.getActiveIndex();
@@ -830,6 +832,9 @@ export class Tab {
           return;
         }
         if (errorCode === -3) return;
+        // The error page has replaced the last document, and its permission
+        // requests with it (see DID_NAVIGATE).
+        PermissionManager.cancelRequestsForTab(this.id);
         // The tab is now on the URL that failed, as after a commit.
         this.committedIndex =
           this.webContentsViewInstance.webContents.navigationHistory.getActiveIndex();

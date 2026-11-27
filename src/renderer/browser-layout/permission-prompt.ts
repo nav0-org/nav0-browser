@@ -15,16 +15,13 @@ let stripContainer: HTMLElement;
 let currentRequestId: string | null = null;
 let initialized = false;
 
-function respond(decision: string): void {
-  if (currentRequestId) {
-    window.BrowserAPI.respondToPermissionPrompt(
-      window.BrowserAPI.appWindowId,
-      currentRequestId,
-      decision
-    );
-    currentRequestId = null;
-    hideStrip();
-  }
+// `requestId` answers that request only, and only while its strip is up: a
+// timer set for one prompt mustn't answer whichever is showing when it fires.
+function respond(decision: string, requestId: string | null = currentRequestId): void {
+  if (!requestId || requestId !== currentRequestId) return;
+  window.BrowserAPI.respondToPermissionPrompt(window.BrowserAPI.appWindowId, requestId, decision);
+  currentRequestId = null;
+  hideStrip();
 }
 
 function updateStrip(data: PermissionPromptData): void {
@@ -73,7 +70,8 @@ function updateStrip(data: PermissionPromptData): void {
     if (alwaysAllowBtn) alwaysAllowBtn.disabled = true;
     if (denyOnceBtn) denyOnceBtn.disabled = true;
     if (alwaysDenyBtn) alwaysDenyBtn.disabled = true;
-    setTimeout(() => respond('deny_once'), 1500);
+    const floodedRequestId = data.requestId;
+    setTimeout(() => respond('deny_once', floodedRequestId), 1500);
   } else {
     if (insecureNote) insecureNote.hidden = true;
     if (allowOnceBtn) allowOnceBtn.disabled = false;

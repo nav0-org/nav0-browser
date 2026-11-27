@@ -634,7 +634,12 @@ export class PermissionManager {
     keysToDelete.forEach((key: string) => PermissionManager.sessionPermissions.delete(key));
   }
 
-  private static cancelRequestsForTab(tabId: string): void {
+  // Deny and take down every open request of a tab: its prompt and its queue.
+  // Called when the tab closes, and when its document goes (a navigation
+  // commits, or an error page replaces it): every request belongs to the
+  // document that made it, and one left up would ask about a page that's gone,
+  // over the page the tab is on now. Chrome dismisses them the same way.
+  static cancelRequestsForTab(tabId: string): void {
     // Cancel pending queue for this tab
     const queue = PermissionManager.pendingQueues.get(tabId);
     if (queue) {
