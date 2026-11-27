@@ -38,7 +38,12 @@ jobs:
             artifact_name: macOS-arm64
 
           # Linux build
-          - os: ubuntu-latest
+          # Pinned to ubuntu-24.04 (rpm 4.18). The ubuntu-latest image rolled over to
+          # Ubuntu 26.04 with rpm 6.x, where %install runs from a per-build subdirectory
+          # (rpm >= 4.20). electron-installer-redhat's spec template copies `usr/*`
+          # relative to the old build root, so rpmbuild fails with
+          # "cp: cannot stat 'usr/*'".
+          - os: ubuntu-24.04
             platform: linux
             arch: x64
             artifact_name: Linux-x64
