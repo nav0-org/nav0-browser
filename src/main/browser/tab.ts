@@ -46,12 +46,11 @@ import { buildErrorPageScript, NavigationError } from './error-page/error-page';
 import { BuiltInPage, hoverStatusBarScript } from './hover-status-bar-script';
 import { fetchFavicon } from './favicon-fetch';
 import { FaviconCache } from './favicon-cache';
-const domainPattern = /^[^\s]+\.[^\s]+$/;
-// Protocols that should be handed off to the OS default handler.
-// Covers communication (mailto, tel, sms), calendar (webcal), and
-// common app deep-links (slack, zoom, teams, discord, vscode, etc.)
-const EXTERNAL_PROTOCOL_RE =
-  /^(mailto|tel|callto|sms|facetime|webcal|slack|zoommtg|zoomus|msteams|discord|spotify|vscode|vscode-insiders|obsidian|notion|figma|linear|raycast):/i;
+import {
+  DOMAIN_PATTERN,
+  EXTERNAL_PROTOCOL_RE,
+  looksLikeLocalhostInput,
+} from '../../common/address-input';
 
 // Rank Chromium's discovered favicons by URL size hints so the caller can try
 // the sharpest first and fall back if a fetch fails. Chromium hands us every
@@ -320,18 +319,20 @@ export class Tab {
     } else if (this.url.startsWith('http://') || this.url.startsWith('https://')) {
       urlToLoad = this.url;
       preloadScriptToLoad = WEB_CONTENT_PRELOAD_WEBPACK_ENTRY;
-    } else if (Tab.looksLikeLocalhostInput(this.url)) {
+    } else if (looksLikeLocalhostInput(this.url)) {
       // Bare localhost-style inputs (localhost:3000, 127.0.0.1, myapp.local,
       // foo.test) should load directly over HTTP — they rarely have valid
       // TLS certs, and forcing HTTPS breaks reverse-proxy and dev-server flows.
       this.url = 'http://' + this.url;
       urlToLoad = this.url;
       preloadScriptToLoad = WEB_CONTENT_PRELOAD_WEBPACK_ENTRY;
-    } else if (domainPattern.test(this.url)) {
+    } else if (DOMAIN_PATTERN.test(this.url)) {
       this.url = 'https://' + this.url;
       urlToLoad = this.url;
       preloadScriptToLoad = WEB_CONTENT_PRELOAD_WEBPACK_ENTRY;
     } else {
+      // Only input isNavigableAddressInput (src/common/address-input.ts)
+      // rejects reaches here; the suggestion lists offer "search" for it alone.
       this.url = await SearchEngine.getSearchUrl(this.url);
       urlToLoad = this.url;
       preloadScriptToLoad = WEB_CONTENT_PRELOAD_WEBPACK_ENTRY;
@@ -2136,47 +2137,6 @@ export class Tab {
     } catch {
       return false;
     }
-  }
-
-  /**
-   * Detects address-bar input that should be treated as a local URL even
-   * without an http:// scheme — e.g. `localhost:3000`, `127.0.0.1/foo`,
-   * `myapp.local`, `backend.test`. Returning true routes the input to a
-   * direct HTTP navigation instead of a search fallback + https upgrade.
-   */
-  private static looksLikeLocalhostInput(input: string): boolean {
-    if (!input) return false;
-    const raw = input.trim();
-    if (!raw || /\s/.test(raw)) return false;
-    // Split off path/query to isolate the authority portion
-    const authority = raw.split(/[/?#]/, 1)[0];
-    if (!authority) return false;
-    // Strip port
-    let host = authority;
-    const portIdx = host.lastIndexOf(':');
-    if (portIdx > -1 && /^\d+$/.test(host.slice(portIdx + 1))) {
-      host = host.slice(0, portIdx);
-    }
-    host = host.toLowerCase();
-    if (
-      host === 'localhost' ||
-      host === '127.0.0.1' ||
-      host === '0.0.0.0' ||
-      host === '[::1]' ||
-      host === '::1'
-    )
-      return true;
-    // Loopback / link-local TLDs commonly used for local dev and intranet
-    if (
-      host.endsWith('.localhost') ||
-      host.endsWith('.local') ||
-      host.endsWith('.test') ||
-      host.endsWith('.lan') ||
-      host.endsWith('.internal') ||
-      host.endsWith('.home.arpa')
-    )
-      return true;
-    return false;
   }
 
   //for handling right clicks

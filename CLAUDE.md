@@ -226,6 +226,8 @@ src/
 │   ├── download-record.ts
 │   ├── dialog-types.ts            # alert/confirm/prompt + basic-auth payloads
 │   └── settings-types.ts
+├── common/                        # Pure code shared by main and renderer
+│   └── address-input.ts           # URL-vs-search rule for address-bar input (Tab.loadURL + suggestion lists)
 └── constants/
     ├── app-constants.ts           # IPC channels, in-app URLs, partition names, data store keys, etc.
     └── data-constants.ts          # Domain → website-category map for bookmarks/history grouping

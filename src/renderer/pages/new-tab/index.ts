@@ -1,6 +1,7 @@
 import './index.css';
 
 import { createIcons, icons } from 'lucide';
+import { isNavigableAddressInput } from '../../../common/address-input';
 import { FormatUtils } from '../../common/format-utils';
 import { UrlDisplay } from '../../common/url-display';
 import { FaviconTile } from '../../common/favicon-tile';
@@ -299,6 +300,9 @@ async function performSearch(query: string): Promise<void> {
     renderSearchResults([], '');
     return;
   }
+  // Enter opens a URL-like input as an address, so offering to search it
+  // would contradict Enter: the search row is only for input Enter searches.
+  const offerSearch = !isNavigableAddressInput(trimmed);
 
   try {
     const lowerQuery = trimmed.toLowerCase();
@@ -369,15 +373,23 @@ async function performSearch(query: string): Promise<void> {
       }
     );
 
-    results.unshift({
-      type: 'search',
-      title: trimmed,
-      url: '',
-      meta: 'Search with default search engine',
-    });
+    if (offerSearch) {
+      results.unshift({
+        type: 'search',
+        title: trimmed,
+        url: '',
+        meta: 'Search with default search engine',
+      });
+    }
 
-    renderSearchResults(results, trimmed);
+    // A URL nothing matches gets no panel at all, like the address bar's
+    // dropdown, rather than a "No matches found" that reads as a dead end.
+    renderSearchResults(results, results.length > 0 ? trimmed : '');
   } catch {
+    if (!offerSearch) {
+      renderSearchResults([], '');
+      return;
+    }
     renderSearchResults(
       [
         {

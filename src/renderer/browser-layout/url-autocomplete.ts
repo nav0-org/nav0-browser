@@ -1,3 +1,4 @@
+import { isNavigableAddressInput } from '../../common/address-input';
 import { FormatUtils } from '../common/format-utils';
 
 type SuggestionType = 'tab' | 'bookmark' | 'history' | 'search';
@@ -177,6 +178,9 @@ const fetchSuggestions = async (query: string) => {
   const requestedAt = Date.now();
   lastQueryAt = requestedAt;
   const trimmed = query.trim();
+  // Enter opens a URL-like input as an address, so offering to search it
+  // would contradict Enter: the search row is only for input Enter searches.
+  const offerSearch = trimmed !== '' && !isNavigableAddressInput(trimmed);
 
   try {
     const [openTabs, bookmarks, history] = await Promise.all([
@@ -249,7 +253,7 @@ const fetchSuggestions = async (query: string) => {
         });
       });
 
-    if (trimmed) {
+    if (offerSearch) {
       results.unshift({
         type: 'search',
         title: trimmed,
@@ -266,6 +270,10 @@ const fetchSuggestions = async (query: string) => {
     else hideDropdown();
   } catch {
     if (requestedAt !== lastQueryAt || !fieldHasFocus()) return;
+    if (!offerSearch) {
+      hideDropdown();
+      return;
+    }
     currentResults = [
       {
         type: 'search',
